@@ -24,6 +24,9 @@ const EditReadingPlan = lazy(
 const BibleReader = lazy(() => import("@/pages/BibleReader"));
 const UserDashboard = lazy(() => import("@/pages/UserDashboard"));
 const UserDailyVerse = lazy(() => import("@/pages/UserDailyVerse"));
+const UserPlans = lazy(() => import("@/pages/UserPlans"));
+const BibleReadingPlan = lazy(() => import("@/pages/ReadingPlan/BibleReadingPlan"));
+const DailyReading = lazy(() => import("@/pages/ReadingPlan/DailyReading"));
 
 // Route configuration interface
 export interface RouteConfig {
@@ -179,6 +182,20 @@ export const routes = {
     isProtected: true,
     requiresLayout: true,
     title: "Daily Verse",
+  },
+  userPlans: {
+    path: "/my-reading-plans",
+    component: BibleReadingPlan,
+    isProtected: true,
+    requiresLayout: true,
+    title: "My Reading Plans",
+  },
+  dailyReading: {
+    path: "/daily-reading/:planId/:day",
+    component: DailyReading,
+    isProtected: true,
+    requiresLayout: true,
+    title: "Daily Reading",
   },
   // ==================== 404 NOT FOUND ====================
   notFound: {

@@ -22,9 +22,11 @@ import {
   Eye,
   CircleOff,
   Pencil,
+  Play,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate, useParams } from "react-router-dom";
 import { sendPostRequest } from "@/services/api";
 import { routes } from "@/components/Routes/routes";
@@ -510,6 +512,8 @@ const PlanDetail = () => {
   const { planId } = useParams<{ planId: string }>();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { userInfo } = useAuth();
+  const isAdmin = userInfo?.userRole === 1;
 
   const [plan, setPlan] = useState<ReadingPlan | null>(null);
   const [days, setDays] = useState<DayAssignment[]>([]);
@@ -669,6 +673,19 @@ const PlanDetail = () => {
               <Pencil className="w-4 h-4" />
               Edit Plan
             </button>
+
+            {plan.started && !isAdmin && (
+              <button
+                onClick={() => {
+                  const nextDay = plan.completed_days_count + 1;
+                  navigate(`/daily-reading?planId=${plan.plan_id}&day=${Math.min(nextDay, plan.total_days)}`);
+                }}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 text-white text-sm font-semibold hover:from-violet-700 hover:to-indigo-700 transition-all shadow-md shadow-violet-600/20"
+              >
+                <Play className="w-4 h-4" />
+                {plan.completed_days_count === 0 ? "Start Reading" : "Continue Reading"}
+              </button>
+            )}
           </div>
         </div>
 

@@ -19,6 +19,7 @@ import {
   X,
   AlertTriangle,
   Save,
+  Play,
 } from "lucide-react";
 import {
   Card,
@@ -214,6 +215,32 @@ const ReadingPlans = () => {
   // ── Edit ──────────────────────────────────────
   const openEdit = (plan: ReadingPlan) =>
     navigate(`/edit-reading-plan/${plan.planId}`);
+
+  const startPlan = async (plan: ReadingPlan) => {
+    try {
+      const res = await sendPostRequest("reading-plans", "start", {
+        planId: plan.planId,
+      });
+      if (res.returnCode === 200) {
+        toast({
+          title: "Plan started!",
+          description: `You've started "${plan.title}". Good luck!`,
+        });
+      } else {
+        toast({
+          title: "Failed to start plan",
+          description: res.returnMessage,
+          variant: "destructive",
+        });
+      }
+    } catch (e: any) {
+      toast({
+        title: "Error",
+        description: e.message,
+        variant: "destructive",
+      });
+    }
+  };
 
   const confirmEdit = async () => {
     if (!editTarget) return;
@@ -563,6 +590,15 @@ const ReadingPlans = () => {
                               <Trash2 className="w-4 h-4" />
                             </button>
                           </>
+                        )}
+                        {!isAdmin && (
+                          <button
+                            onClick={() => startPlan(plan)}
+                            title="Start plan"
+                            className="p-1.5 rounded-lg hover:bg-emerald-50 text-stone-400 hover:text-emerald-600 transition-colors"
+                          >
+                            <Play className="w-4 h-4" />
+                          </button>
                         )}
                         {/* View */}
                         <Link

@@ -56,7 +56,7 @@ const userNavItems = [
     url: routes.verseExplanations.path,
     icon: BookMarked,
   },
-  { title: "Reading Plans", url: routes.readingPlans.path, icon: BookOpen },
+  { title: "Reading Plans", url: routes.userPlans.path, icon: BookOpen },
 ];
 
 const manageNavItems = [

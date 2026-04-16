@@ -49,6 +49,11 @@ const AppRoutes = () => {
   const layoutRoutes = getLayoutRoutes();
   const notFoundRoute = routes.notFound;
 
+  // Get protected routes that don't require layout (like dailyReading)
+  const noLayoutRoutes = Object.values(routes).filter(
+    (route) => route.isProtected && !route.requiresLayout
+  );
+
   return (
     <AuthLoader>
       <Suspense fallback={<RouteLoader />}>
@@ -61,6 +66,7 @@ const AppRoutes = () => {
             />
           ))}
           <Route element={<ProtectedRoute />}>
+            {/* Routes that use AppLayout */}
             <Route element={<AppLayout />}>
               {layoutRoutes.map((route) => (
                 <Route
@@ -70,6 +76,14 @@ const AppRoutes = () => {
                 />
               ))}
             </Route>
+            {/* Protected routes without layout */}
+            {noLayoutRoutes.map((route) => (
+              <Route
+                key={route.path}
+                path={route.path}
+                element={<route.component />}
+              />
+            ))}
           </Route>
           <Route
             path={notFoundRoute.path}

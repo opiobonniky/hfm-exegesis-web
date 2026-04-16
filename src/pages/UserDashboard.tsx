@@ -91,7 +91,7 @@ export default function UserDashboard() {
     { id: '3', label: 'Prayer Wall', icon: HandHeart, color: '#2E7D32', onPress: () => {} },
     { id: '4', label: 'Testify', icon: Mic2, color: '#E65100', onPress: () => {} },
     { id: '5', label: 'Bible Trivia', icon: Brain, color: '#F9A825', onPress: () => {} },
-    { id: '6', label: 'Reading Plans', icon: Globe, color: '#00695C', onPress: () => navigate(routes.readingPlans.path) },
+    { id: '6', label: 'Reading Plans', icon: Globe, color: '#00695C', onPress: () => navigate(routes.userPlans.path) },
   ], [navigate]);
 
   const quickLinks = useMemo(() => [
@@ -107,7 +107,7 @@ export default function UserDashboard() {
         const [verseRes, statsRes, plansRes] = await Promise.all([
           sendPostRequest("bible", "get-todays-verse", {}),
           sendPostRequest("bible", "get-home-stats", {}),
-          sendPostRequest("readingPlan", "get-user-plans", {})
+          sendPostRequest("reading-plans", "get-user-plans", {})
         ]);
 
         if (verseRes.returnCode === 200 && verseRes.returnData) {
@@ -152,7 +152,7 @@ export default function UserDashboard() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl lg:text-3xl font-bold">{getGreeting()} {userInfo?.lastName || userInfo?.firstName || 'Friend'}!</h1>
-            <p className="text-white/80 mt-1">Your Practical Application Bible for Daily Guidance</p>
+            <p className="text-white/80 mt-1">Your Exegesis bible for Daily Guidance</p>
           </div>
           <div className="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center">
             <span className="text-2xl font-bold">
