@@ -11,6 +11,8 @@ const adminOnlyRoutes = [
   { path: routes.editReadingPlan.path, pattern: /^\/edit-reading-plan/ },
   { path: routes.readingPlanDetail.path, pattern: /^\/reading-plan-detail/ },
   { path: routes.editVerseExplanation.path, pattern: /^\/add-verse-explanation/ },
+  { path: routes.dailyVerse.path, pattern: /^\/daily-verse$/ },
+  { path: routes.dashboard.path, pattern: /^\/dashboard$/ },
 ];
 
 const userReadOnlyRoutes = [
@@ -44,6 +46,9 @@ export function ProtectedRoute() {
   );
 
   if (isAdminOnlyRoute && !isAdmin) {
+    if (currentPath === routes.dashboard.path) {
+      return <Navigate to={routes.userDashboard.path} replace />;
+    }
     return <Navigate to={routes.userDashboard.path} replace />;
   }
 

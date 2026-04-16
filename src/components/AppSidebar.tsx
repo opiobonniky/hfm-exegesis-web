@@ -50,7 +50,7 @@ const adminNavItems = [
 const userNavItems = [
   { title: "My Dashboard", url: routes.userDashboard.path, icon: Home },
   { title: "Bible Reader", url: routes.bibleReader.path, icon: BookText },
-  { title: "Daily Verse", url: routes.dailyVerse.path, icon: Sun },
+  { title: "Daily Verse", url: routes.userDailyVerse.path, icon: Sun },
   {
     title: "Verse Explanations",
     url: routes.verseExplanations.path,

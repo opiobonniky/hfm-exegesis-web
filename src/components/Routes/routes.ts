@@ -23,6 +23,7 @@ const EditReadingPlan = lazy(
 
 const BibleReader = lazy(() => import("@/pages/BibleReader"));
 const UserDashboard = lazy(() => import("@/pages/UserDashboard"));
+const UserDailyVerse = lazy(() => import("@/pages/UserDailyVerse"));
 
 // Route configuration interface
 export interface RouteConfig {
@@ -171,6 +172,13 @@ export const routes = {
     isProtected: true,
     requiresLayout: true,
     title: "My Dashboard",
+  },
+  userDailyVerse: {
+    path: "/user-daily-verse",
+    component: UserDailyVerse,
+    isProtected: true,
+    requiresLayout: true,
+    title: "Daily Verse",
   },
   // ==================== 404 NOT FOUND ====================
   notFound: {

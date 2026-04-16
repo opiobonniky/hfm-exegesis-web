@@ -87,10 +87,11 @@ export default function UserDashboard() {
 
   const contentButtons = useMemo(() => [
     { id: '1', label: 'Exegesis Bible', icon: CalendarDays, color: '#1565C0', onPress: () => navigate(routes.bibleReader.path) },
-    { id: '2', label: 'Prayer Wall', icon: HandHeart, color: '#2E7D32', onPress: () => {} },
-    { id: '3', label: 'Testify', icon: Mic2, color: '#E65100', onPress: () => {} },
-    { id: '4', label: 'Bible Trivia', icon: Brain, color: '#F9A825', onPress: () => {} },
-    { id: '5', label: 'Reading Plans', icon: Globe, color: '#00695C', onPress: () => navigate(routes.readingPlans.path) },
+    { id: '2', label: 'Daily Verse', icon: Sun, color: '#F59E0B', onPress: () => navigate(routes.userDailyVerse.path) },
+    { id: '3', label: 'Prayer Wall', icon: HandHeart, color: '#2E7D32', onPress: () => {} },
+    { id: '4', label: 'Testify', icon: Mic2, color: '#E65100', onPress: () => {} },
+    { id: '5', label: 'Bible Trivia', icon: Brain, color: '#F9A825', onPress: () => {} },
+    { id: '6', label: 'Reading Plans', icon: Globe, color: '#00695C', onPress: () => navigate(routes.readingPlans.path) },
   ], [navigate]);
 
   const quickLinks = useMemo(() => [
@@ -104,7 +105,7 @@ export default function UserDashboard() {
     const fetchData = async () => {
       try {
         const [verseRes, statsRes, plansRes] = await Promise.all([
-          sendPostRequest("bible", "get-daily-verse", {}),
+          sendPostRequest("bible", "get-todays-verse", {}),
           sendPostRequest("bible", "get-home-stats", {}),
           sendPostRequest("readingPlan", "get-user-plans", {})
         ]);
