@@ -1,4 +1,4 @@
-import { Navigate, Outlet } from 'react-router-dom';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
@@ -6,11 +6,15 @@ import { Menu } from 'lucide-react';
 import { Button } from './ui/button';
 
 export function AppLayout() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, userInfo } = useAuth();
+  const location = useLocation();
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
+
+  const isAdmin = userInfo?.userRole === 1;
+  const pageTitle = isAdmin ? "Administration Management" : "My Dashboard";
 
   return (
     <SidebarProvider>
@@ -24,7 +28,7 @@ export function AppLayout() {
               </Button>
             </SidebarTrigger>
             <h1 className="text-lg font-semibold text-foreground">
-              Administration Management
+              {pageTitle}
             </h1>
           </header>
           <div className="flex-1 overflow-auto">

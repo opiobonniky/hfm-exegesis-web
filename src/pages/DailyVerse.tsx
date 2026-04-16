@@ -36,6 +36,7 @@ import {
 import { cn } from "@/lib/utils";
 import { sendPostRequest } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   getVerseText,
   getBooksByTestament,
@@ -245,6 +246,9 @@ const buildEditState = (verse: DailyVerseItem): EditState => {
 // ─── Main component ─────────────────────────────────────────────────────────────
 
 const DailyVerse = () => {
+  const { userInfo } = useAuth();
+  const isAdmin = userInfo?.userRole === 1;
+  
   const [dailyVerses, setDailyVerses] = useState<DailyVerseItem[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -296,6 +300,46 @@ const DailyVerse = () => {
   }, [page, isFiltered, fromDate, toDate]);
 
   // ── Fetch ──────────────────────────────────────────────────────────────────
+  const fetchDailyVerses = async () => {
+    if (isAdmin) {
+      await getAllDailyVerses();
+    } else {
+      await getTodayVerse();
+    }
+  };
+
+  const getTodayVerse = async () => {
+    try {
+      setIsLoading(true);
+      const response = await sendPostRequest("bible", "get-daily-verse", {});
+      const { returnData, returnCode, returnMessage } = response;
+
+      if (returnCode === 200 && returnData) {
+        setDailyVerses([returnData]);
+        setSelectedIndex(0);
+        setTotalPages(1);
+        setHasNext(false);
+        setHasPrevious(false);
+      } else if (returnCode === 404) {
+        setDailyVerses([]);
+      } else {
+        toast({
+          title: "Error",
+          description: returnMessage || "Failed to fetch today's verse.",
+          variant: "destructive",
+        });
+      }
+    } catch {
+      toast({
+        title: "Error",
+        description: "Unable to load today's verse.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const getAllDailyVerses = async () => {
     try {
       setIsLoading(true);
@@ -334,9 +378,9 @@ const DailyVerse = () => {
   };
 
   useEffect(() => {
-    getAllDailyVerses();
+    fetchDailyVerses();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [requestPayload]);
+  }, [isAdmin, requestPayload]);
 
   // ── Filter ─────────────────────────────────────────────────────────────────
   const validateAndApply = () => {
@@ -635,25 +679,29 @@ const DailyVerse = () => {
               </div>
 
               <div className="flex items-center gap-1">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="text-muted-foreground hover:text-primary hover:bg-primary/10"
-                  onClick={() => openEdit(selectedVerse)}
-                  title="Edit verse"
-                >
-                  <Pencil className="w-4 h-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                  onClick={() => openDelete(selectedVerse)}
-                  title="Delete verse"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-                <div className="w-px h-5 bg-border mx-1" />
+                {isAdmin && (
+                  <>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-muted-foreground hover:text-primary hover:bg-primary/10"
+                      onClick={() => openEdit(selectedVerse)}
+                      title="Edit verse"
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                      onClick={() => openDelete(selectedVerse)}
+                      title="Delete verse"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                    <div className="w-px h-5 bg-border mx-1" />
+                  </>
+                )}
                 <Button variant="ghost" size="icon">
                   <Heart className="w-5 h-5" />
                 </Button>
@@ -800,26 +848,30 @@ const DailyVerse = () => {
                             : "opacity-0 group-hover:opacity-100",
                         )}
                       >
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            openEdit(verse);
-                          }}
-                          className="p-1.5 rounded hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors"
-                          title="Edit verse"
-                        >
-                          <Pencil className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            openDelete(verse);
-                          }}
-                          className="p-1.5 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
-                          title="Delete verse"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
+                        {isAdmin && (
+                          <>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openEdit(verse);
+                              }}
+                              className="p-1.5 rounded hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors"
+                              title="Edit verse"
+                            >
+                              <Pencil className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openDelete(verse);
+                              }}
+                              className="p-1.5 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
+                              title="Delete verse"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </>
+                        )}
                       </div>
                     </div>
 
@@ -943,28 +995,35 @@ const DailyVerse = () => {
 
 // ─── Sub-components ─────────────────────────────────────────────────────────────
 
-const PageHeader = ({ onAdd }: { onAdd: () => void }) => (
-  <div className="fade-up flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-    <div className="flex items-center gap-3 mb-4">
-      <div className="w-12 h-12 rounded-xl bg-accent/20 flex items-center justify-center">
-        <Sun className="w-6 h-6 text-accent" />
+const PageHeader = ({ onAdd }: { onAdd: () => void }) => {
+  const { userInfo } = useAuth();
+  const isAdmin = userInfo?.userRole === 1;
+  
+  return (
+    <div className="fade-up flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+      <div className="flex items-center gap-3 mb-4">
+        <div className="w-12 h-12 rounded-xl bg-accent/20 flex items-center justify-center">
+          <Sun className="w-6 h-6 text-accent" />
+        </div>
+        <div>
+          <h1 className="text-3xl font-bold font-[family-name:var(--font-heading)]">
+            Daily Verse
+          </h1>
+          <p className="text-muted-foreground">Start each day with God's Word</p>
+        </div>
       </div>
-      <div>
-        <h1 className="text-3xl font-bold font-[family-name:var(--font-heading)]">
-          Daily Verse
-        </h1>
-        <p className="text-muted-foreground">Start each day with God's Word</p>
-      </div>
+      {isAdmin && (
+        <Button
+          onClick={onAdd}
+          className="gap-2 bg-gradient-to-r from-primary to-primary/80 shadow-md w-fit"
+        >
+          <Plus className="w-4 h-4" />
+          Add Daily Verse
+        </Button>
+      )}
     </div>
-    <Button
-      onClick={onAdd}
-      className="gap-2 bg-gradient-to-r from-primary to-primary/80 shadow-md w-fit"
-    >
-      <Plus className="w-4 h-4" />
-      Add Daily Verse
-    </Button>
-  </div>
-);
+  );
+};
 
 interface FilterCardProps {
   fromDate: string;

@@ -12,6 +12,8 @@ export interface UserInfo {
   lastName?: string;
   profilePhotoUrl?: string;
   token: string;
+  userRole?: number;
+  roleName?: string;
 }
 
 type AuthContextType = {

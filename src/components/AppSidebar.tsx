@@ -9,6 +9,7 @@ import {
   Users,
   Activity,
   BookText,
+  Home,
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -32,7 +33,7 @@ import { Separator } from "@/components/ui/separator";
 import { routes } from "./Routes/routes";
 import logoImage from "@/assets/logos/exegesis_bg_rm.png";
 
-const mainNavItems = [
+const adminNavItems = [
   { title: "Dashboard", url: routes.dashboard.path, icon: LayoutDashboard },
   { title: "User Management", url: routes.systemUsers.path, icon: Users },
   { title: "Bible Reader", url: routes.bibleReader.path, icon: BookText },
@@ -46,6 +47,18 @@ const mainNavItems = [
   { title: "User Activity", url: routes.useractivity.path, icon: Activity },
 ];
 
+const userNavItems = [
+  { title: "My Dashboard", url: routes.userDashboard.path, icon: Home },
+  { title: "Bible Reader", url: routes.bibleReader.path, icon: BookText },
+  { title: "Daily Verse", url: routes.dailyVerse.path, icon: Sun },
+  {
+    title: "Verse Explanations",
+    url: routes.verseExplanations.path,
+    icon: BookMarked,
+  },
+  { title: "Reading Plans", url: routes.readingPlans.path, icon: BookOpen },
+];
+
 const manageNavItems = [
   { title: "Add Daily Verse", url: routes.addDailyVerse.path, icon: Plus },
   { title: "Add Explanation", url: routes.addExplanation.path, icon: Plus },
@@ -56,6 +69,9 @@ export function AppSidebar() {
   const collapsed = state === "collapsed";
   const location = useLocation();
   const { userInfo, logout } = useAuth();
+
+  const isAdmin = userInfo?.userRole === 1;
+  const mainNavItems = isAdmin ? adminNavItems : userNavItems;
 
   const isActive = (path: string) => location.pathname === path;
 

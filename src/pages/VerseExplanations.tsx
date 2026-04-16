@@ -46,6 +46,7 @@ import {
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import { sendPostRequest } from "@/services/api";
 import { generatePath, routes } from "@/components/Routes/routes";
@@ -221,6 +222,8 @@ function ExplanationPreview({ item }: { item: VerseExplanation }) {
 const VerseExplanations = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { userInfo } = useAuth();
+  const isAdmin = userInfo?.userRole === 1;
 
   const [explanations, setExplanations] = useState<VerseExplanation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -546,34 +549,38 @@ const VerseExplanations = () => {
                             <ChevronRight className="w-4 h-4" />
                           )}
                         </Button>
-                        {/* Edit */}
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-muted-foreground hover:text-primary"
-                          onClick={() =>
-                            navigate(
-                              generatePath("editVerseExplanation", {
-                                bookName: item.bookName,
-                                chapter: item.chapter,
-                                verseNumber: item.verseNumber,
-                              }),
-                            )
-                          }
-                          title="Edit explanation"
-                        >
-                          <Edit2 className="w-4 h-4" />
-                        </Button>
-                        {/* Delete */}
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                          onClick={() => setDeleteTarget(item)}
-                          title="Delete explanation"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
+                        {isAdmin && (
+                          <>
+                            {/* Edit */}
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-muted-foreground hover:text-primary"
+                              onClick={() =>
+                                navigate(
+                                  generatePath("editVerseExplanation", {
+                                    bookName: item.bookName,
+                                    chapter: item.chapter,
+                                    verseNumber: item.verseNumber,
+                                  }),
+                                )
+                              }
+                              title="Edit explanation"
+                            >
+                              <Edit2 className="w-4 h-4" />
+                            </Button>
+                            {/* Delete */}
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                              onClick={() => setDeleteTarget(item)}
+                              title="Delete explanation"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </>
+                        )}
                       </div>
                     </div>
 

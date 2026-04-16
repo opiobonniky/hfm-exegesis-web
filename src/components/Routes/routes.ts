@@ -22,6 +22,7 @@ const EditReadingPlan = lazy(
 );
 
 const BibleReader = lazy(() => import("@/pages/BibleReader"));
+const UserDashboard = lazy(() => import("@/pages/UserDashboard"));
 
 // Route configuration interface
 export interface RouteConfig {
@@ -163,6 +164,13 @@ export const routes = {
     isProtected: true,
     requiresLayout: true,
     title: "Bible Reader",
+  },
+  userDashboard: {
+    path: "/user-dashboard",
+    component: UserDashboard,
+    isProtected: true,
+    requiresLayout: true,
+    title: "My Dashboard",
   },
   // ==================== 404 NOT FOUND ====================
   notFound: {

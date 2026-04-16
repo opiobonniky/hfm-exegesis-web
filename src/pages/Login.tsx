@@ -70,11 +70,16 @@ const Login = () => {
           firstName: returnData.firstName,
           lastName: returnData.lastName,
           profilePhotoUrl: returnData.profilePhotoUrl,
-          roleName: returnData.role,
-          roleId: returnData.roleId,
+          userRole: returnData.userRole,
+          roleName: returnData.roleName,
         };
         setUserInfo(userInfo);
-        navigate(routes.dashboard.path);
+        
+        if (returnData.userRole === 1) {
+          navigate(routes.dashboard.path);
+        } else {
+          navigate(routes.userDashboard.path);
+        }
       } else if (returnCode === 405) {
         toast({
           title: "Email Verification Required",

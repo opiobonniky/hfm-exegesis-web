@@ -50,6 +50,7 @@ import {
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import { sendPostRequest } from "@/services/api";
 import { routes } from "@/components/Routes/routes";
@@ -110,6 +111,8 @@ const catLabel = (cat: string) =>
 const ReadingPlans = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { userInfo } = useAuth();
+  const isAdmin = userInfo?.userRole === 1;
 
   const [plans, setPlans] = useState<ReadingPlan[]>([]);
   const [loading, setLoading] = useState(true);
@@ -329,18 +332,20 @@ const ReadingPlans = () => {
                   Reading Plans
                 </h1>
                 <p className="text-stone-400 text-xs mt-0.5 font-medium">
-                  Admin management
+                  {isAdmin ? "Admin management" : "Your reading plans"}
                 </p>
               </div>
             </div>
           </div>
-          <button
-            onClick={() => navigate(routes.addReadingPlan.path)}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-sm font-semibold shadow-sm shadow-teal-600/20 transition-all hover:-translate-y-px"
-          >
-            <Plus className="w-4 h-4" />
-            New Reading Plan
-          </button>
+          {isAdmin && (
+            <button
+              onClick={() => navigate(routes.addReadingPlan.path)}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-sm font-semibold shadow-sm shadow-teal-600/20 transition-all hover:-translate-y-px"
+            >
+              <Plus className="w-4 h-4" />
+              New Reading Plan
+            </button>
+          )}
         </div>
 
         {/* ── Stat chips ── */}
@@ -536,25 +541,29 @@ const ReadingPlans = () => {
                             <ToggleLeft className="w-6 h-6 text-stone-300" />
                           )}
                         </button>
-                        {/* Edit */}
-                        <button
-                          onClick={() => openEdit(plan)}
-                          title="Edit plan"
-                          className="p-1.5 rounded-lg hover:bg-teal-50 text-stone-400 hover:text-teal-600 transition-colors"
-                        >
-                          <Edit2 className="w-4 h-4" />
-                        </button>
-                        {/* Delete */}
-                        <button
-                          onClick={() => {
-                            setDeleteTarget(plan);
-                            setDeleteConfirmText("");
-                          }}
-                          title="Delete plan"
-                          className="p-1.5 rounded-lg hover:bg-red-50 text-stone-400 hover:text-red-600 transition-colors"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                        {isAdmin && (
+                          <>
+                            {/* Edit */}
+                            <button
+                              onClick={() => openEdit(plan)}
+                              title="Edit plan"
+                              className="p-1.5 rounded-lg hover:bg-teal-50 text-stone-400 hover:text-teal-600 transition-colors"
+                            >
+                              <Edit2 className="w-4 h-4" />
+                            </button>
+                            {/* Delete */}
+                            <button
+                              onClick={() => {
+                                setDeleteTarget(plan);
+                                setDeleteConfirmText("");
+                              }}
+                              title="Delete plan"
+                              className="p-1.5 rounded-lg hover:bg-red-50 text-stone-400 hover:text-red-600 transition-colors"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </>
+                        )}
                         {/* View */}
                         <Link
                           to={routes.readingPlanDetail.path.replace(":planId", plan.planId)}
