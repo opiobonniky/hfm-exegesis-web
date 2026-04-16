@@ -1,0 +1,427 @@
+"use client";
+
+import { useState, useEffect, useMemo } from "react";
+import { format, isSunday, isSameDay, set } from "date-fns";
+import {
+  CalendarIcon,
+  Sun,
+  Save,
+  ArrowLeft,
+  BookOpen,
+  Lightbulb,
+} from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
+import { Link, useNavigate } from "react-router-dom";
+import {
+  getVerseText,
+  getBooksByTestament,
+  getChaptersForBook,
+  getVersesCountForChapter,
+} from "@/utilities/bibleUtils";
+import { Combobox } from "@/components/ui/combobox";
+import { send } from "vite";
+import { sendGetRequest, sendPostRequest } from "@/services/api";
+import { routes } from "@/components/Routes/routes";
+
+const TESTAMENTS = [
+  { value: "Old", label: "Old Testament" },
+  { value: "New", label: "New Testament" },
+];
+
+const AddDailyVerse = () => {
+  const { toast } = useToast();
+
+  const [testament, setTestament] = useState<string>("");
+  const [book, setBook] = useState<string>("");
+  const [chapter, setChapter] = useState<string>("");
+  const [verseNumber, setVerseNumber] = useState<string>("");
+  const [reflection, setReflection] = useState("");
+
+  // Date + Time
+  const [selectedDate, setSelectedDate] = useState<Date>(() => {
+    const now = new Date();
+    now.setHours(8, 0, 0, 0); // default: 8:00 AM
+    return now;
+  });
+
+  const [selectedTime, setSelectedTime] = useState<string>("08:00");
+
+  const [verseText, setVerseText] = useState("");
+  const [isVerseLoading, setIsVerseLoading] = useState(false);
+
+  const navigate = useNavigate();
+
+  // Derived lists
+  const books = useMemo(
+    () => getBooksByTestament(testament as "Old" | "New"),
+    [testament],
+  );
+  const chapters = useMemo(() => getChaptersForBook(book), [book]);
+  const maxVerses = useMemo(
+    () =>
+      book && chapter ? getVersesCountForChapter(book, Number(chapter)) : 0,
+    [book, chapter],
+  );
+
+  // Auto-fetch verse text
+  useEffect(() => {
+    if (!book || !chapter || !verseNumber) {
+      setVerseText("");
+      return;
+    }
+    setIsVerseLoading(true);
+    const text = getVerseText(book, Number(chapter), Number(verseNumber));
+    setVerseText(text || "Verse not found.");
+    setIsVerseLoading(false);
+  }, [book, chapter, verseNumber]);
+
+  //
+
+  // Sync time input with selectedDate
+  useEffect(() => {
+    const hours = selectedDate.getHours().toString().padStart(2, "0");
+    const minutes = selectedDate.getMinutes().toString().padStart(2, "0");
+    setSelectedTime(`${hours}:${minutes}`);
+  }, [selectedDate]);
+
+  // Update date when time changes
+  const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const time = e.target.value; // "HH:mm"
+    setSelectedTime(time);
+
+    if (!time) return;
+
+    const [hours, minutes] = time.split(":").map(Number);
+    if (isNaN(hours) || isNaN(minutes)) return;
+
+    const newDate = new Date(selectedDate);
+    newDate.setHours(hours, minutes, 0, 0);
+    setSelectedDate(newDate);
+  };
+
+  const handleAddVerse = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!book || !chapter || !verseNumber || !reflection.trim()) {
+      toast({
+        title: "Missing fields",
+        description: "Please fill all required fields.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const payload = {
+        bookName: book,
+        chapter: Number(chapter),
+        verseNumber: Number(verseNumber),
+        reflection,
+        published: true, // or make it a toggle in UI
+        displayDate: selectedDate.toISOString(), // ← ISO full datetime
+        displayTime: selectedDate.toISOString(), // ← same value is fine
+      };
+
+      const response = await sendPostRequest(
+        "admin",
+        "add-daily-verse",
+        payload,
+      );
+
+      if (response.returnCode === 200) {
+        toast({
+          title: "Success",
+          description:
+            response.returnMessage || "Daily verse added successfully.",
+        });
+
+        setTimeout(() => {
+          navigate(routes.dailyVerse.path);
+        }, 2000);
+      } else {
+        toast({
+          title: "Error",
+          description: response.returnMessage || "Failed to save verse.",
+          variant: "destructive",
+        });
+      }
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: "An error occurred while saving.",
+        variant: "destructive",
+      });
+      console.error(err);
+    }
+  };
+
+  // Calendar modifiers – highlight Sundays + special days
+  const modifiers = {
+    sunday: (date: Date) => isSunday(date),
+    special: (date: Date) => date.getDate() === 1, // example: 1st of month
+    today: (date: Date) => isSameDay(date, new Date()),
+  };
+
+  const modifiersClassNames = {
+    sunday: "text-red-600 font-medium",
+    special:
+      "after:content-['★'] after:text-yellow-500 after:absolute after:bottom-1 after:right-1 after:text-xs",
+    today: "bg-accent text-accent-foreground font-bold",
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/30 p-6 lg:p-10">
+      <div className="max-w-7xl mx-auto space-y-8">
+        {/* Header */}
+        <div className="fade-up flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Link
+              to={routes.dashboard.path}
+              className="text-muted-foreground hover:text-foreground inline-flex items-center gap-2"
+            >
+              <ArrowLeft className="h-5 w-5" />
+              Back
+            </Link>
+
+            <div className="flex items-center gap-3">
+              <div className="w-14 h-14 rounded-2xl bg-accent/10 flex items-center justify-center shadow-sm">
+                <Sun className="h-7 w-7 text-accent" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold tracking-tight font-heading text-gradient">
+                  Add Daily Verse
+                </h1>
+                <p className="text-muted-foreground">
+                  Choose a verse & reflection
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <Card className="fade-up stagger-1 border-border/40 shadow-md">
+          <CardHeader className="bg-gradient-to-r from-primary/5 to-accent/5 pb-6">
+            <CardTitle className="flex items-center gap-2">
+              <BookOpen className="h-5 w-5 text-primary" />
+              Verse Details
+            </CardTitle>
+            <CardDescription>
+              Select verse, date/time and write your thoughts
+            </CardDescription>
+          </CardHeader>
+
+          <CardContent className="pt-6 space-y-8">
+            <form onSubmit={handleAddVerse} className="space-y-7">
+              {/* Testament - Book - Chapter - Verse */}
+              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                <div className="space-y-2">
+                  <Label>Testament</Label>
+                  <Combobox
+                    options={TESTAMENTS}
+                    value={testament}
+                    onChange={setTestament}
+                    placeholder="Select testament"
+                    width="w-full"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Book</Label>
+                  <Combobox
+                    options={books.map((b) => ({ value: b, label: b }))}
+                    value={book}
+                    onChange={setBook}
+                    placeholder="Select book"
+                    disabled={!testament}
+                    width="w-full"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Chapter</Label>
+                  <Combobox
+                    options={chapters.map((c) => ({
+                      value: String(c),
+                      label: String(c),
+                    }))}
+                    value={chapter}
+                    onChange={setChapter}
+                    placeholder="Select chapter"
+                    disabled={!book}
+                    width="w-full"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Verse</Label>
+                  <Combobox
+                    options={
+                      maxVerses > 0
+                        ? Array.from(
+                            { length: maxVerses },
+                            (_, i) => i + 1,
+                          ).map((v) => ({ value: String(v), label: String(v) }))
+                        : []
+                    }
+                    value={verseNumber}
+                    onChange={setVerseNumber}
+                    placeholder="Select verse"
+                    disabled={!chapter || maxVerses === 0}
+                    width="w-full"
+                  />
+                </div>
+              </div>
+
+              {/* Verse Text */}
+              <div className="space-y-2">
+                <Label>
+                  Verse Text{" "}
+                  {isVerseLoading && (
+                    <span className="text-xs text-muted-foreground">
+                      (loading...)
+                    </span>
+                  )}
+                </Label>
+                <div className="relative">
+                  <Textarea
+                    value={verseText}
+                    readOnly
+                    className="min-h-[110px] resize-none bg-muted/40 font-serif leading-relaxed"
+                    placeholder="Verse will appear here..."
+                  />
+                  {verseText && (
+                    <div className="absolute bottom-3 right-3 text-xs text-muted-foreground">
+                      {book} {chapter}:{verseNumber}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Date & Time Picker */}
+              <div className="grid sm:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label>Date</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !selectedDate && "text-muted-foreground",
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {format(selectedDate, "PPP")}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={selectedDate}
+                        onSelect={(date: Date | undefined) => {
+                          if (date) {
+                            const newDate = new Date(date);
+                            newDate.setHours(
+                              selectedDate.getHours(),
+                              selectedDate.getMinutes(),
+                              0,
+                              0,
+                            );
+                            setSelectedDate(newDate);
+                          }
+                        }}
+                        initialFocus
+                        modifiers={modifiers}
+                        modifiersClassNames={modifiersClassNames}
+                        disabled={(date) =>
+                          date > new Date("2026-12-31") || // ← current year limit example
+                          date < new Date("2020-01-01")
+                        }
+                      />
+                    </PopoverContent>
+                  </Popover>
+
+                  {/* Small verse preview */}
+                  {verseText && (
+                    <p className="text-xs text-muted-foreground italic mt-1.5 pl-1">
+                      Selected:{" "}
+                      <strong>
+                        {book} {chapter}:{verseNumber}
+                      </strong>
+                    </p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Time (default 8:00 AM)</Label>
+                  <Input
+                    type="time"
+                    value={selectedTime}
+                    onChange={handleTimeChange}
+                    className="w-full max-w-[180px]"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    {format(selectedDate, "p")} • {format(selectedDate, "EEEE")}
+                  </p>
+                </div>
+              </div>
+
+              {/* Reflection */}
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2">
+                  <Lightbulb className="h-4 w-4 text-accent" />
+                  Daily Reflection
+                </Label>
+                <Textarea
+                  value={reflection}
+                  onChange={(e) => setReflection(e.target.value)}
+                  placeholder="What does this verse mean to you today? Any prayer or application?"
+                  rows={5}
+                  className="resize-none"
+                  required
+                />
+              </div>
+
+              {/* Actions */}
+              <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-4 pt-6 border-t">
+                <Button type="button" variant="ghost" asChild>
+                  <Link to="/daily-verse">Cancel</Link>
+                </Button>
+
+                <Button
+                  type="submit"
+                  size="lg"
+                  className="bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-md"
+                  disabled={!verseText.trim() || !reflection.trim()}
+                >
+                  <Save className="h-4 w-4 mr-2" />
+                  Save Daily Verse
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+};
+
+export default AddDailyVerse;

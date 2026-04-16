@@ -1,0 +1,846 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import {
+  ArrowLeft,
+  BookOpen,
+  Save,
+  Loader2,
+  Sparkles,
+  ScrollText,
+  Info,
+  CheckCircle2,
+  AlertCircle,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
+import {
+  Link,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from "react-router-dom";
+import { sendPostRequest } from "@/services/api";
+import { routes } from "@/components/Routes/routes";
+import { getVerseText } from "@/utilities/bibleUtils";
+
+// ─────────────────────────────────────────────
+// Constants
+// ─────────────────────────────────────────────
+const BIBLE_BOOKS = [
+  "Genesis",
+  "Exodus",
+  "Leviticus",
+  "Numbers",
+  "Deuteronomy",
+  "Joshua",
+  "Judges",
+  "Ruth",
+  "1 Samuel",
+  "2 Samuel",
+  "1 Kings",
+  "2 Kings",
+  "1 Chronicles",
+  "2 Chronicles",
+  "Ezra",
+  "Nehemiah",
+  "Esther",
+  "Job",
+  "Psalm",
+  "Proverbs",
+  "Ecclesiastes",
+  "Song of Solomon",
+  "Isaiah",
+  "Jeremiah",
+  "Lamentations",
+  "Ezekiel",
+  "Daniel",
+  "Hosea",
+  "Joel",
+  "Amos",
+  "Obadiah",
+  "Jonah",
+  "Micah",
+  "Nahum",
+  "Habakkuk",
+  "Zephaniah",
+  "Haggai",
+  "Zechariah",
+  "Malachi",
+  "Matthew",
+  "Mark",
+  "Luke",
+  "John",
+  "Acts",
+  "Romans",
+  "1 Corinthians",
+  "2 Corinthians",
+  "Galatians",
+  "Ephesians",
+  "Philippians",
+  "Colossians",
+  "1 Thessalonians",
+  "2 Thessalonians",
+  "1 Timothy",
+  "2 Timothy",
+  "Titus",
+  "Philemon",
+  "Hebrews",
+  "James",
+  "1 Peter",
+  "2 Peter",
+  "1 John",
+  "2 John",
+  "3 John",
+  "Jude",
+  "Revelation",
+];
+
+const BIBLE_VERSIONS = [
+  "KJV",
+  "NIV",
+  "ESV",
+  "NASB",
+  "NLT",
+  "NKJV",
+  "CSB",
+  "RSV",
+  "ASV",
+  "AMP",
+  "MSG",
+  "WEB",
+];
+
+// ─────────────────────────────────────────────
+// Live character counter
+// ─────────────────────────────────────────────
+function CharCount({ value, max }: { value: string; max: number }) {
+  const pct = value.length / max;
+  return (
+    <span
+      className={cn(
+        "text-xs tabular-nums",
+        pct > 0.9
+          ? "text-destructive"
+          : pct > 0.7
+            ? "text-amber-500"
+            : "text-muted-foreground",
+      )}
+    >
+      {value.length}/{max}
+    </span>
+  );
+}
+
+// ─────────────────────────────────────────────
+// Live preview panel
+// ─────────────────────────────────────────────
+function LivePreview({
+  bookName,
+  chapter,
+  verseNumber,
+  bibleVersion,
+  explanation,
+  learnMore,
+}: {
+  bookName: string;
+  chapter: number;
+  verseNumber: number;
+  bibleVersion: string;
+  explanation: string;
+  learnMore: string;
+}) {
+  const [showLearnMore, setShowLearnMore] = useState(false);
+
+  const renderContent = (text: string) => {
+    const lines = text
+      .replace(/\r/g, "")
+      .split("\n")
+      .map((s) => s.trim())
+      .filter(Boolean);
+    if (!lines.length) {
+      return (
+        <p className="text-sm text-muted-foreground/50 italic">
+          Nothing to preview yet…
+        </p>
+      );
+    }
+    return lines.map((line, i) => {
+      const isBullet = /^(\-|\*|•|\d+\.)\s+/.test(line);
+      if (isBullet) {
+        return (
+          <div key={i} className="flex gap-2.5 items-start mb-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-primary mt-[7px] shrink-0" />
+            <span className="text-sm leading-relaxed text-foreground/80">
+              {line.replace(/^(\-|\*|•|\d+\.)\s+/, "")}
+            </span>
+          </div>
+        );
+      }
+      return (
+        <p
+          key={i}
+          className="text-sm leading-relaxed text-foreground/80 mb-1.5"
+        >
+          {line}
+        </p>
+      );
+    });
+  };
+
+  return (
+    <div className="rounded-xl border border-primary/20 overflow-hidden shadow-sm">
+      {/* Preview header */}
+      <div className="bg-primary/8 border-b border-primary/15 px-4 py-3 flex items-center justify-between">
+        <span className="text-xs font-semibold text-primary uppercase tracking-wider">
+          Live Preview
+        </span>
+        {bookName && (
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-sm text-primary">
+              {bookName} {chapter}:{verseNumber}
+            </span>
+            {bibleVersion && (
+              <Badge variant="outline" className="text-xs font-mono">
+                {bibleVersion}
+              </Badge>
+            )}
+          </div>
+        )}
+      </div>
+
+      <div className="p-4 space-y-4 bg-card">
+        {/* Explanation section */}
+        <div>
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-1 h-4 rounded-full bg-primary" />
+            <span className="text-xs font-bold text-primary uppercase tracking-wider">
+              Explanation
+            </span>
+          </div>
+          <div className="pl-3">{renderContent(explanation)}</div>
+        </div>
+
+        {/* Learn more section */}
+        {learnMore && (
+          <div>
+            <button
+              onClick={() => setShowLearnMore((p) => !p)}
+              className="flex items-center gap-2 group mb-2"
+            >
+              <div className="w-1 h-4 rounded-full bg-amber-500" />
+              <span className="text-xs font-bold text-amber-600 uppercase tracking-wider group-hover:text-amber-700">
+                Learn More
+              </span>
+              {showLearnMore ? (
+                <ChevronUp className="w-3.5 h-3.5 text-amber-500" />
+              ) : (
+                <ChevronDown className="w-3.5 h-3.5 text-amber-500" />
+              )}
+            </button>
+            {showLearnMore && (
+              <div className="pl-3 rounded-lg bg-amber-50/60 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900/40 p-3">
+                {renderContent(learnMore)}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
+// Component
+// ─────────────────────────────────────────────
+const AddVerseExplanation = () => {
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  type Params = {
+    bookName?: string;
+    chapter?: string;
+    verseNumber?: string;
+  };
+
+  const params = useParams<Params>();
+
+  const qBookName = params.bookName ? decodeURIComponent(params.bookName) : "";
+  const qChapter = params.chapter ? Number(params.chapter) : 1;
+  const qVerseNumber = params.verseNumber ? Number(params.verseNumber) : 1;
+
+  console.log("Route params:", { qBookName, qChapter, qVerseNumber });
+
+  const isEditMode =
+    !!params.bookName && !!params.chapter && !!params.verseNumber;
+
+  const NONE_VALUE = "__NONE__";
+
+  // ✅ SAFE state (never undefined)
+  const [bookName, setBookName] = useState<string>(qBookName);
+  const [chapter, setChapter] = useState<number>(
+    Number.isFinite(qChapter) ? qChapter : 1,
+  );
+  const [verseNumber, setVerseNumber] = useState<number>(
+    Number.isFinite(qVerseNumber) ? qVerseNumber : 1,
+  );
+
+  const [bibleVersion, setBibleVersion] = useState<string>("");
+  const [explanation, setExplanation] = useState<string>("");
+  const [learnMore, setLearnMore] = useState<string>("");
+
+  const [loadingExisting, setLoadingExisting] = useState(false);
+  const [existingFound, setExistingFound] = useState(false);
+  const [existingId, setExistingId] = useState<number | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [verseText, setVerseText] = useState<string | null>(null);
+
+  // ── load existing on edit mode ─────────────
+  const fetchExisting = async (bn: string, ch: number, vn: number) => {
+    if (!bn || !ch || !vn) return;
+    setLoadingExisting(true);
+    setExistingFound(false);
+    setExistingId(null);
+    try {
+      const res = await sendPostRequest("bible", "get-verse-explanation", {
+        bookName: bn,
+        chapter: ch,
+        verseNumber: vn,
+      });
+      if (res.returnCode === 200 && res.returnData) {
+        const d = res.returnData;
+        setBibleVersion(d.bibleVersion ?? "");
+        setExplanation(d.explanation ?? "");
+        setLearnMore(d.learnMore ?? "");
+        setExistingFound(true);
+        setExistingId(d.id ?? null);
+      }
+    } catch {
+      // silently ignore — treat as new
+    } finally {
+      setLoadingExisting(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isEditMode) {
+      fetchExisting(qBookName, qChapter, qVerseNumber);
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isEditMode]);
+
+  useEffect(() => {
+    setVerseText(getVerseText(bookName, Number(chapter), Number(verseNumber)));
+  }, [bookName, chapter, verseNumber]);
+
+  // Also fetch when user finishes filling in verse reference fields (add mode)
+  const handleVerseBlur = () => {
+    if (!isEditMode && bookName && chapter && verseNumber) {
+      fetchExisting(bookName, chapter, verseNumber);
+    }
+  };
+
+  // ── validation ─────────────────────────────
+  const isValid =
+    (bookName ?? "").trim() !== "" &&
+    Number(chapter) >= 1 &&
+    Number(verseNumber) >= 1 &&
+    (explanation ?? "").trim().length >= 20;
+
+  // ── submit ─────────────────────────────────
+  const handleSave = async () => {
+    if (!isValid) return;
+    setSaving(true);
+    setSaved(false);
+    try {
+      const payload = {
+        bookName,
+        chapter,
+        verseNumber,
+        bibleVersion,
+        explanation,
+        learnMore,
+      };
+      
+      // Include id when updating existing record
+      if (existingFound && existingId) {
+        (payload as any).id = existingId;
+      }
+      
+      const res = await sendPostRequest("bible", "add-verse-explanation", payload);
+      if (res.returnCode === 200) {
+        setSaved(true);
+        toast({
+          title: existingFound
+            ? "Explanation updated ✓"
+            : "Explanation created ✓",
+          description: `${bookName} ${chapter}:${verseNumber} saved successfully.`,
+        });
+        setTimeout(() => navigate(routes.verseExplanations.path), 1500);
+      } else {
+        toast({
+          title: "Save failed",
+          description: res.returnMessage,
+          variant: "destructive",
+        });
+      }
+    } catch (e: any) {
+      toast({
+        title: "Network error",
+        description: e.message,
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // ─────────────────────────────────────────
+  // Render
+  // ─────────────────────────────────────────
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/30 p-6 lg:p-10">
+      <div className="mx-auto space-y-6">
+        {/* ── Page header ── */}
+        <div className="fade-up flex items-center gap-4">
+          <Link
+            to={routes.verseExplanations.path}
+            className="text-muted-foreground hover:text-foreground inline-flex items-center gap-2"
+          >
+            <ArrowLeft className="h-5 w-5" />
+            Back
+          </Link>
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center shadow-sm">
+              <ScrollText className="h-6 w-6 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight font-heading text-gradient">
+                {isEditMode
+                  ? `Edit — ${qBookName} ${qChapter}:${qVerseNumber}`
+                  : "Add Verse Explanation"}
+              </h1>
+              <p className="text-muted-foreground text-sm">
+                {isEditMode
+                  ? "Update the explanation for this verse"
+                  : "Create a new scripture explanation for users"}
+              </p>
+            </div>
+          </div>
+
+          {/* Existing indicator */}
+          {existingFound && (
+            <Badge
+              variant="outline"
+              className="ml-auto gap-1.5 border-amber-300 bg-amber-50 text-amber-700"
+            >
+              <AlertCircle className="w-3.5 h-3.5" />
+              Existing entry — will be overwritten
+            </Badge>
+          )}
+        </div>
+
+        {/* ══════════════════════════════════════
+            Two-column layout
+        ══════════════════════════════════════ */}
+        <div className="fade-up stagger-1 grid lg:grid-cols-[1fr_420px] gap-6 items-start">
+          {/* ── LEFT: Form ── */}
+          <div className="space-y-5">
+            {/* Section 1: Verse Reference */}
+            <Card className="border-border/40 shadow-sm">
+              <CardHeader className="bg-gradient-to-r from-primary/5 to-accent/5 pb-4">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <BookOpen className="w-4 h-4 text-primary" />
+                  Verse Reference
+                </CardTitle>
+                <CardDescription>
+                  Identify the exact scripture this explanation belongs to
+                </CardDescription>
+              </CardHeader>
+
+              <CardContent className="pt-5 space-y-4">
+                {/* Book */}
+                <div className="space-y-1.5">
+                  <Label>
+                    Book <span className="text-destructive">*</span>
+                  </Label>
+                  <Select
+                    value={bookName || ""}
+                    onValueChange={(v) => {
+                      setBookName(v);
+                      setExistingFound(false);
+                    }}
+                    disabled={isEditMode}
+                  >
+                    <SelectTrigger
+                      className={cn(
+                        isEditMode && "bg-muted/40 text-muted-foreground",
+                      )}
+                    >
+                      <SelectValue placeholder="Select a Bible book…" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-64">
+                      {BIBLE_BOOKS.map((b) => (
+                        <SelectItem key={b} value={b}>
+                          {b}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Chapter + Verse */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <Label>
+                      Chapter <span className="text-destructive">*</span>
+                    </Label>
+                    <Input
+                      type="number"
+                      min={1}
+                      max={150}
+                      value={chapter}
+                      readOnly={isEditMode}
+                      className={cn(
+                        isEditMode && "bg-muted/40 text-muted-foreground",
+                      )}
+                      onChange={(e) => {
+                        setChapter(Math.max(1, parseInt(e.target.value) || 1));
+                        setExistingFound(false);
+                      }}
+                      onBlur={handleVerseBlur}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>
+                      Verse <span className="text-destructive">*</span>
+                    </Label>
+                    <Input
+                      type="number"
+                      min={1}
+                      max={200}
+                      value={verseNumber}
+                      readOnly={isEditMode}
+                      className={cn(
+                        isEditMode && "bg-muted/40 text-muted-foreground",
+                      )}
+                      onChange={(e) => {
+                        setVerseNumber(
+                          Math.max(1, parseInt(e.target.value) || 1),
+                        );
+                        setExistingFound(false);
+                      }}
+                      onBlur={handleVerseBlur}
+                    />
+                  </div>
+                </div>
+
+                {verseText && (
+                  <div className="space-y-2">
+                    <Label>
+                      Verse Text{" "}
+                      <span className="text-xs text-muted-foreground font-normal">
+                        (auto-fetched for preview, read-only)
+                      </span>
+                    </Label>
+                    <div className="relative">
+                      <Textarea
+                        value={verseText}
+                        readOnly
+                        className="min-h-[110px] resize-none bg-muted/40 font-serif leading-relaxed"
+                        placeholder="Verse will appear here..."
+                      />
+                      {verseText && (
+                        <div className="absolute bottom-3 right-3 text-xs text-muted-foreground">
+                          {bookName} {chapter}:{verseNumber}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Bible Version */}
+                <div className="space-y-1.5">
+                  <Label>
+                    Bible Version{" "}
+                    <span className="text-xs text-muted-foreground font-normal">
+                      (optional)
+                    </span>
+                  </Label>
+                  <Select
+                    value={bibleVersion ? bibleVersion : NONE_VALUE}
+                    onValueChange={(v) =>
+                      setBibleVersion(v === NONE_VALUE ? "" : v)
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="e.g. KJV, NIV…" />
+                    </SelectTrigger>
+
+                    <SelectContent>
+                      <SelectItem value={NONE_VALUE}>— None —</SelectItem>
+
+                      {BIBLE_VERSIONS.map((v) => (
+                        <SelectItem key={v} value={v}>
+                          {v}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Loading indicator */}
+                {loadingExisting && (
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    Checking for existing explanation…
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Section 2: Explanation */}
+            <Card className="border-border/40 shadow-sm">
+              <CardHeader className="bg-gradient-to-r from-primary/5 to-accent/5 pb-4">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <ScrollText className="w-4 h-4 text-primary" />
+                  Explanation
+                </CardTitle>
+                <CardDescription>
+                  The main content shown to users when they tap a verse.
+                  Supports bullet points starting with{" "}
+                  <code className="text-xs bg-muted px-1 rounded">-</code>,{" "}
+                  <code className="text-xs bg-muted px-1 rounded">*</code>, or{" "}
+                  <code className="text-xs bg-muted px-1 rounded">•</code>.
+                </CardDescription>
+              </CardHeader>
+
+              <CardContent className="pt-5 space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label>
+                    Explanation text <span className="text-destructive">*</span>
+                  </Label>
+                  <CharCount value={explanation} max={5000} />
+                </div>
+                <Textarea
+                  rows={8}
+                  placeholder={`Write a clear, helpful explanation of this verse…\n\nYou can use bullet points:\n- Point one\n- Point two\n\nOr write in flowing paragraphs.`}
+                  value={explanation}
+                  onChange={(e) => setExplanation(e.target.value)}
+                  maxLength={5000}
+                  className="resize-y font-mono text-sm leading-relaxed"
+                />
+                {(explanation ?? "").trim().length > 0 &&
+                  (explanation ?? "").trim().length < 20 && (
+                    <p className="text-xs text-amber-600 flex items-center gap-1.5">
+                      <AlertCircle className="w-3.5 h-3.5" />
+                      Minimum 20 characters required
+                    </p>
+                  )}
+              </CardContent>
+            </Card>
+
+            {/* Section 3: Learn More */}
+            <Card className="border-border/40 shadow-sm">
+              <CardHeader className="bg-gradient-to-r from-amber-500/5 to-amber-400/5 pb-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="flex items-center gap-2 text-base">
+                      <Sparkles className="w-4 h-4 text-amber-500" />
+                      Learn More
+                      <Badge
+                        variant="outline"
+                        className="text-xs font-normal border-amber-200 text-amber-600"
+                      >
+                        optional
+                      </Badge>
+                    </CardTitle>
+                    <CardDescription className="mt-1">
+                      Deeper context shown when users tap the "Learn More"
+                      button in the app
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+
+              <CardContent className="pt-5 space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label>Additional content</Label>
+                  <CharCount value={learnMore} max={8000} />
+                </div>
+                <Textarea
+                  rows={6}
+                  placeholder={`Historical context, cross-references, deeper theological insights…\n\nThis content is revealed when users tap "Learn more" in the app.`}
+                  value={learnMore}
+                  onChange={(e) => setLearnMore(e.target.value)}
+                  maxLength={8000}
+                  className="resize-y font-mono text-sm leading-relaxed"
+                />
+              </CardContent>
+            </Card>
+
+            {/* Save button */}
+            <div className="flex items-center justify-between pt-2 pb-6">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <Info className="w-3.5 h-3.5" />
+                {existingFound
+                  ? "Saving will overwrite the existing entry"
+                  : "Saving will create a new entry"}
+              </div>
+              <Button
+                onClick={handleSave}
+                disabled={saving || !isValid || saved}
+                size="lg"
+                className={cn(
+                  "gap-2 min-w-36",
+                  saved
+                    ? "bg-emerald-600 hover:bg-emerald-600"
+                    : "bg-gradient-to-r from-primary to-primary/80 shadow-md",
+                )}
+              >
+                {saved ? (
+                  <>
+                    <CheckCircle2 className="w-4 h-4" /> Saved!
+                  </>
+                ) : saving ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" /> Saving…
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4" />
+                    {existingFound ? "Update Explanation" : "Save Explanation"}
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+
+          {/* ── RIGHT: Live Preview ── */}
+          <div className="space-y-4 lg:sticky lg:top-6">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+                App Preview
+              </span>
+              <div className="flex-1 h-px bg-border/50" />
+            </div>
+
+            <LivePreview
+              bookName={bookName}
+              chapter={chapter}
+              verseNumber={verseNumber}
+              bibleVersion={bibleVersion}
+              explanation={explanation}
+              learnMore={learnMore}
+            />
+
+            {/* Formatting tips */}
+            <Card className="border-border/30 bg-muted/20">
+              <CardContent className="p-4 space-y-2">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  Formatting Tips
+                </p>
+                <div className="space-y-1.5 text-xs text-muted-foreground">
+                  <div className="flex gap-2">
+                    <code className="bg-muted px-1.5 py-0.5 rounded shrink-0">
+                      - text
+                    </code>
+                    <span>Creates a bullet point</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <code className="bg-muted px-1.5 py-0.5 rounded shrink-0">
+                      1. text
+                    </code>
+                    <span>Creates a numbered bullet</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <code className="bg-muted px-1.5 py-0.5 rounded shrink-0">
+                      empty line
+                    </code>
+                    <span>Separates paragraphs</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Validation status */}
+            <Card
+              className={cn(
+                "border transition-colors",
+                isValid
+                  ? "border-emerald-200 bg-emerald-50/50 dark:bg-emerald-950/20"
+                  : "border-border/40 bg-muted/20",
+              )}
+            >
+              <CardContent className="p-4 space-y-2">
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Checklist
+                </p>
+                {[
+                  {
+                    label: "Book selected",
+                    ok: (bookName ?? "").trim() !== "",
+                  },
+                  ,
+                  { label: "Valid chapter", ok: chapter >= 1 },
+                  { label: "Valid verse", ok: verseNumber >= 1 },
+                  {
+                    label: "Explanation should be at least 20 words",
+                    ok: (explanation ?? "").trim().split(/\s+/).length >= 20,
+                  },
+                ].map((item) => (
+                  <div
+                    key={item.label}
+                    className="flex items-center gap-2 text-xs"
+                  >
+                    <div
+                      className={cn(
+                        "w-4 h-4 rounded-full flex items-center justify-center shrink-0",
+                        item.ok ? "bg-emerald-500" : "bg-muted-foreground/20",
+                      )}
+                    >
+                      {item.ok && (
+                        <CheckCircle2 className="w-3 h-3 text-white" />
+                      )}
+                    </div>
+                    <span
+                      className={
+                        item.ok ? "text-foreground" : "text-muted-foreground"
+                      }
+                    >
+                      {item.label}
+                    </span>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default AddVerseExplanation;
