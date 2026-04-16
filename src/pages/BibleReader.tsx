@@ -42,11 +42,14 @@ interface ChapterData {
 }
 
 const VERSION_FILES: Record<string, () => Promise<{ default: BibleData }>> = {
+  BSB: () => import("@/assets/bibleVersion/json/verses-bsb.json"),
   KJV: () => import("@/assets/bibleVersion/json/verses-kjv.json"),
   WEB: () => import("@/assets/bibleVersion/json/verses-web.json"),
   ASV: () => import("@/assets/bibleVersion/json/verses-asv.json"),
-  BBE: () => import("@/assets/bibleVersion/json/verses-bbe.json"),
   YLT: () => import("@/assets/bibleVersion/json/verses-ylt.json"),
+  DARBY: () => import("@/assets/bibleVersion/json/verses-darby.json"),
+  WEBSTER: () => import("@/assets/bibleVersion/json/verses-webster.json"),
+  BBE: () => import("@/assets/bibleVersion/json/verses-bbe.json"),
 };
 
 function processVerses(verses: BibleData, book: string, chapter: number) {

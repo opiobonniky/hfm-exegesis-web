@@ -527,22 +527,22 @@ const ReadingPlans = () => {
 
                       {/* Actions */}
                       <div className="flex items-center gap-1 shrink-0 self-center">
-                        {/* Toggle */}
-                        <button
-                          onClick={() => toggleActive(plan)}
-                          title={
-                            plan.isActive !== false ? "Deactivate" : "Activate"
-                          }
-                          className="p-1.5 rounded-lg hover:bg-stone-100 transition-colors"
-                        >
-                          {plan.isActive !== false ? (
-                            <ToggleRight className="w-6 h-6 text-emerald-500" />
-                          ) : (
-                            <ToggleLeft className="w-6 h-6 text-stone-300" />
-                          )}
-                        </button>
                         {isAdmin && (
                           <>
+                            {/* Toggle */}
+                            <button
+                              onClick={() => toggleActive(plan)}
+                              title={
+                                plan.isActive !== false ? "Deactivate" : "Activate"
+                              }
+                              className="p-1.5 rounded-lg hover:bg-stone-100 transition-colors"
+                            >
+                              {plan.isActive !== false ? (
+                                <ToggleRight className="w-6 h-6 text-emerald-500" />
+                              ) : (
+                                <ToggleLeft className="w-6 h-6 text-stone-300" />
+                              )}
+                            </button>
                             {/* Edit */}
                             <button
                               onClick={() => openEdit(plan)}

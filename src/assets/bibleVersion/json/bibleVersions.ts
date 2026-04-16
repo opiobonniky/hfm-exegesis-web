@@ -32,12 +32,22 @@ export interface BibleVersion {
 }
 
 /**
- * All bundled free versions.
+ * All bundled free versions, ordered by popularity.
  *
  * Lazy `require()` calls ensure React Native's Metro bundler includes each
  * JSON in the bundle but only parses/holds the selected version in JS memory.
  */
 export const BIBLE_VERSIONS: BibleVersion[] = [
+  // 1. BSB — default; fast-growing modern translation, highly accurate
+  {
+    id: 'BSB',
+    name: 'Berean Standard Bible',
+    abbreviation: 'BSB',
+    description: 'A 2022 revision combining readability with accuracy (CC BY 4.0).',
+    year: 2022,
+    load: () => require('../json/verses-bsb.json'),
+  },
+  // 2. KJV — most historically beloved and widely memorised English Bible
   {
     id: 'KJV',
     name: 'King James Version',
@@ -46,6 +56,7 @@ export const BIBLE_VERSIONS: BibleVersion[] = [
     year: 1769,
     load: () => require('../json/verses-kjv.json'),
   },
+  // 3. WEB — modern public-domain translation for contemporary readers
   {
     id: 'WEB',
     name: 'World English Bible',
@@ -54,6 +65,7 @@ export const BIBLE_VERSIONS: BibleVersion[] = [
     year: 2000,
     load: () => require('../json/verses-web.json'),
   },
+  // 4. ASV — respected scholarly revision, foundation for many later versions
   {
     id: 'ASV',
     name: 'American Standard Version',
@@ -62,14 +74,7 @@ export const BIBLE_VERSIONS: BibleVersion[] = [
     year: 1901,
     load: () => require('../json/verses-asv.json'),
   },
-  {
-    id: 'BBE',
-    name: 'Bible in Basic English',
-    abbreviation: 'BBE',
-    description: 'Uses a vocabulary of ~1 000 common words for clarity.',
-    year: 1949,
-    load: () => require('../json/verses-bbe.json'),
-  },
+  // 5. YLT — beloved by word-for-word study readers
   {
     id: 'YLT',
     name: "Young's Literal Translation",
@@ -78,12 +83,39 @@ export const BIBLE_VERSIONS: BibleVersion[] = [
     year: 1862,
     load: () => require('../json/verses-ylt.json'),
   },
+  // 6. DARBY — popular with Plymouth Brethren and prophecy/dispensation students
+  {
+    id: 'DARBY',
+    name: 'Darby Translation',
+    abbreviation: 'DBY',
+    description: "J. N. Darby's precise 1890 literal translation from Hebrew and Greek.",
+    year: 1890,
+    load: () => require('../json/verses-darby.json'),
+  },
+  // 7. WEBSTER — Noah Webster's KJV revision with modernised vocabulary
+  {
+    id: 'WEBSTER',
+    name: 'Webster Bible',
+    abbreviation: 'WBS',
+    description: "Noah Webster's 1833 revision of the KJV with modernised language.",
+    year: 1833,
+    load: () => require('../json/verses-webster.json'),
+  },
+  // 8. BBE — simple ~1 000-word vocabulary; great for new readers and ESL
+  {
+    id: 'BBE',
+    name: 'Bible in Basic English',
+    abbreviation: 'BBE',
+    description: 'Uses a vocabulary of ~1 000 common words for clarity.',
+    year: 1949,
+    load: () => require('../json/verses-bbe.json'),
+  },
 ];
 
 /** Default version id used on first launch */
-export const DEFAULT_VERSION_ID = 'KJV';
+export const DEFAULT_VERSION_ID = 'BSB';
 
-/** Look up a version by id (falls back to KJV if unknown) */
+/** Look up a version by id (falls back to BSB if unknown) */
 export const getVersionById = (id: string): BibleVersion =>
   BIBLE_VERSIONS.find(v => v.id === id) ??
   BIBLE_VERSIONS.find(v => v.id === DEFAULT_VERSION_ID)!;
