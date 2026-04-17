@@ -18,7 +18,7 @@ const getBaseURL = () => {
   if (import.meta.env.DEV) {
     return "http://localhost:5001";
   } else {
-    return "https://exegesis-ixrb.onrender.com";
+    return ""; // relative = same origin, no CORS preflight at all
   }
 };
 
@@ -64,9 +64,17 @@ api.interceptors.response.use(
   (error) => {
     const responseData = error.response?.data;
     if (responseData) {
-      responseData.returnCode = responseData.returnCode ?? responseData.status ?? error.response?.status ?? 500;
-      responseData.returnMessage = responseData.returnMessage ?? responseData.message ?? error.message;
-      if (responseData.returnData === undefined && responseData.data !== undefined) {
+      responseData.returnCode =
+        responseData.returnCode ??
+        responseData.status ??
+        error.response?.status ??
+        500;
+      responseData.returnMessage =
+        responseData.returnMessage ?? responseData.message ?? error.message;
+      if (
+        responseData.returnData === undefined &&
+        responseData.data !== undefined
+      ) {
         responseData.returnData = responseData.data;
       }
     }
@@ -118,12 +126,16 @@ export const sendPostRequest = async <T = any>(
     if (error.response) {
       const serverResponse = error.response.data;
       if (serverResponse && serverResponse.returnCode !== undefined) {
-        console.log(`⚠️ POST ${controller}/${request} returned ${serverResponse.returnCode}:`, serverResponse.returnMessage);
+        console.log(
+          `⚠️ POST ${controller}/${request} returned ${serverResponse.returnCode}:`,
+          serverResponse.returnMessage,
+        );
         return serverResponse;
       }
     }
     const serverResponse = error.response?.data;
-    const serverMessage = serverResponse?.returnMessage ?? serverResponse?.message ?? error.message;
+    const serverMessage =
+      serverResponse?.returnMessage ?? serverResponse?.message ?? error.message;
     const serverCode = serverResponse?.returnCode ?? serverResponse?.status;
     console.error(`❌ POST ${controller}/${request} failed`, serverMessage);
     throw new ApiError(serverMessage, serverCode, serverMessage);
@@ -146,7 +158,8 @@ export const sendGetRequest = async <T = any>(
     return response.data;
   } catch (error: any) {
     const serverResponse = error.response?.data;
-    const serverMessage = serverResponse?.message ?? serverResponse?.returnMessage ?? error.message;
+    const serverMessage =
+      serverResponse?.message ?? serverResponse?.returnMessage ?? error.message;
     const serverCode = serverResponse?.status ?? serverResponse?.returnCode;
     console.error(`❌ GET ${controller}/${request} failed`, serverMessage);
     throw new ApiError(serverMessage, serverCode, serverMessage);
@@ -155,7 +168,10 @@ export const sendGetRequest = async <T = any>(
 
 // Test connection function for debugging
 export const testConnection = async () => {
-  const testUrls = ["http://localhost:5001", "https://exegesis-ixrb.onrender.com"];
+  const testUrls = [
+    "http://localhost:5001",
+    "https://exegesis-ixrb.onrender.com",
+  ];
 
   console.log("🧪 Testing network connectivity...");
 
