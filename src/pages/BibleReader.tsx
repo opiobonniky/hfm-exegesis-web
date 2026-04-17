@@ -305,30 +305,7 @@ export default function BibleReader() {
     return () => observer.disconnect();
   }, [chapters, hasMore, loading, loadChapters]);
 
-  useEffect(() => {
-    const visibleChapterRefs = new Map<string, HTMLDivElement>();
-    
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const key = entry.target.getAttribute("data-chapter-key");
-            if (key) {
-              const [book, ch] = key.split("-");
-              setCurrentChapter(parseInt(ch));
-            }
-          }
-        });
-      },
-      { rootMargin: "-20% 0px -20% 0px", threshold: 0 }
-    );
-
-    Object.values(chapterRefs.current).forEach((el) => {
-      if (el) observer.observe(el);
-    });
-
-    return () => observer.disconnect();
-  }, [chapters]);
+  // Removed auto chapter detection on scroll to fix jumping to next chapter before reading
 
   const filteredBooks = useMemo(() => {
     if (!searchQuery) return BOOKS;
