@@ -305,7 +305,31 @@ export default function BibleReader() {
     return () => observer.disconnect();
   }, [chapters, hasMore, loading, loadChapters]);
 
-  // Removed auto chapter detection on scroll to fix jumping to next chapter before reading
+  // Track visible chapter for display without auto-jumping
+  const [displayChapter, setDisplayChapter] = useState(currentChapter);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+            const key = entry.target.getAttribute("data-chapter-key");
+            if (key) {
+              const [, ch] = key.split("-");
+              setDisplayChapter(parseInt(ch));
+            }
+          }
+        });
+      },
+      { rootMargin: "-40% 0px -40% 0px", threshold: 0.5 }
+    );
+
+    Object.values(chapterRefs.current).forEach((el) => {
+      if (el) observer.observe(el);
+    });
+
+    return () => observer.disconnect();
+  }, [chapters]);
 
   const filteredBooks = useMemo(() => {
     if (!searchQuery) return BOOKS;
@@ -316,6 +340,14 @@ export default function BibleReader() {
   const handleBookChange = (book: string) => {
     setSelectedBook(book);
     setCurrentChapter(1);
+    setChapters([]);
+    loadChapters(book, 1, 5);
+  };
+
+  const handleChapterChange = (ch: number) => {
+    setCurrentChapter(ch);
+    setChapters([]);
+    loadChapters(selectedBook, ch, 5);
   };
 
   const toggleVerseSelection = (verseNum: number) => {
@@ -566,7 +598,7 @@ export default function BibleReader() {
 
             <Select
               value={currentChapter.toString()}
-              onValueChange={(val) => setCurrentChapter(parseInt(val))}
+              onValueChange={(val) => handleChapterChange(parseInt(val))}
             >
               <SelectTrigger className="w-[120px]">
                 <SelectValue placeholder="Chapter" />
@@ -588,7 +620,7 @@ export default function BibleReader() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => prevChapter && setCurrentChapter(prevChapter)}
+            onClick={() => prevChapter && handleChapterChange(prevChapter)}
             disabled={!prevChapter}
             className="flex flex-col items-center h-auto py-2 px-4"
           >
@@ -607,7 +639,7 @@ export default function BibleReader() {
               <span className="font-semibold">{selectedBook}</span>
             </div>
             <div className="text-sm text-muted-foreground">
-              Chapter {currentChapter} of {maxChapter} · {currentVersion.abbreviation}
+              Chapter {displayChapter || currentChapter} of {maxChapter} · {currentVersion.abbreviation}
             </div>
             <div className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
               {nextChapter && (
@@ -619,7 +651,7 @@ export default function BibleReader() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => nextChapter && setCurrentChapter(nextChapter)}
+            onClick={() => nextChapter && handleChapterChange(nextChapter)}
             disabled={!nextChapter}
             className="flex flex-col items-center h-auto py-2 px-4"
           >

@@ -688,7 +688,7 @@ const UserActivityPage = () => {
     setDeleting(true);
     try {
       const res: any = await sendPostRequest("admin", "delete-activity", {
-        id: record.id,
+        activityId: record.id,
       });
       if (res?.returnCode === 200) {
         setRecords((prev) => prev.filter((r) => r.id !== record.id));
