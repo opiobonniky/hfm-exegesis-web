@@ -49,7 +49,7 @@ interface DailyAssignment {
 }
 
 // ─────────────────────────────────────────────
-// Helper — normalize "A"/"B"/"C"/"D" or 0/1/2/3 to a 0-based index
+// Helpers
 // ─────────────────────────────────────────────
 const normalizeCorrectAnswer = (
   val: number | string | null | undefined,
@@ -119,7 +119,7 @@ const DailyReading = () => {
     };
   }, []);
 
-  // ── State ──────────────────────────────────────
+  // ── State ──
   const [loading, setLoading] = useState(true);
   const [assignment, setAssignment] = useState<DailyAssignment | null>(null);
   const [notYetAdded, setNotYetAdded] = useState(false);
@@ -141,14 +141,13 @@ const DailyReading = () => {
   const [lastAnswerCorrect, setLastAnswerCorrect] = useState<boolean | null>(
     null,
   );
-  // Stores the normalized (0-based index) correct answer returned from the API
   const [revealedCorrectAnswer, setRevealedCorrectAnswer] = useState<
     number | null
   >(null);
 
   const optionRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
-  // ── Derived values ──
+  // ── Derived ──
   const hasQuiz =
     Array.isArray(assignment?.quizQuestions) &&
     assignment!.quizQuestions!.length > 0;
@@ -161,8 +160,10 @@ const DailyReading = () => {
   const perf = getQuizPerformance(correctCount, quizTotal);
   const canGoPrev = dayNum > 1;
   const canGoNext = totalDays > 0 && dayNum < totalDays;
+  const progressPct =
+    totalDays > 0 ? Math.round(((dayNum - 1) / totalDays) * 100) : 0;
 
-  // ── Data loading ──────────────────────────────
+  // ── Data loading ──
   const loadPlanInfo = useCallback(async () => {
     try {
       const r = await sendPostRequest("reading-plans", "get-all", {});
@@ -181,7 +182,6 @@ const DailyReading = () => {
     }
   }, [planId]);
 
-
   const loadAssignment = useCallback(async () => {
     try {
       const r = await sendPostRequest("reading-plans", "daily-assignment", {
@@ -197,7 +197,6 @@ const DailyReading = () => {
           const newSubmitted = new Set<number>();
           let firstUnansweredIdx = 0;
           let hasUnanswered = false;
-
           returnData.quizQuestions.forEach((q: QuizQuestion, idx: number) => {
             if (q.userAnswer !== null) {
               newSubmitted.add(q.questionId);
@@ -207,7 +206,6 @@ const DailyReading = () => {
             }
           });
           setSubmittedIds(newSubmitted);
-
           const total = returnData.quizQuestions.length;
           const answered = returnData.quizQuestions.filter(
             (q: QuizQuestion) => q.isCorrect !== null,
@@ -218,7 +216,6 @@ const DailyReading = () => {
             );
             setQuizDone(true);
           } else if (hasUnanswered) {
-            // Jump to first unanswered question
             setCurrentQ(firstUnansweredIdx);
           }
         }
@@ -249,13 +246,12 @@ const DailyReading = () => {
     }
   }, [loadAssignment, loadPlanInfo]);
 
-  // ── Quiz actions ─────────────────────────────
+  // ── Quiz actions ──
   const jumpToQuestion = useCallback(
     (idx: number) => {
       if (!assignment?.quizQuestions) return;
       const target = assignment.quizQuestions[idx];
       setCurrentQ(idx);
-      // Normalize the stored correctAnswer to an index
       setRevealedCorrectAnswer(normalizeCorrectAnswer(target.correctAnswer));
       if (target.userAnswer !== null && target.userAnswer !== undefined) {
         setSelected(target.userAnswer);
@@ -295,33 +291,22 @@ const DailyReading = () => {
       setShowResult(true);
       return;
     }
-
     setIsSubmitting(true);
-    const payload = {
-      planId: planId,
-      dayNumber: dayNum,
-      questionId: q.questionId,
-      userAnswer: selected,
-    };
-    console.log("🚀 Submitting answer:", JSON.stringify(q));
     try {
-      const res = await sendPostRequest(
-        "reading-plans",
-        "submit-answer",
-        payload,
-      );
-      console.log("📨 Response:", JSON.stringify(res));
+      const res = await sendPostRequest("reading-plans", "submit-answer", {
+        planId,
+        dayNumber: dayNum,
+        questionId: q.questionId,
+        userAnswer: selected,
+      });
       if (res?.returnCode === 200 && res.returnData) {
         const { isCorrect, correctAnswer, explanation, numberAttempt } =
           res.returnData;
         setLastAnswerCorrect(isCorrect);
         if (isCorrect) setCorrectCount((p) => p + 1);
-
         const normalizedCorrect = normalizeCorrectAnswer(correctAnswer);
-        if (normalizedCorrect !== null) {
+        if (normalizedCorrect !== null)
           setRevealedCorrectAnswer(normalizedCorrect);
-        }
-
         setSubmittedIds((prev) => new Set(prev).add(q.questionId));
         setAssignment((prev) => {
           if (!prev?.quizQuestions) return prev;
@@ -336,14 +321,13 @@ const DailyReading = () => {
           };
           return { ...prev, quizQuestions: qs };
         });
-
         if (isCorrect && currentQ < assignment.quizQuestions.length - 1) {
           const timer = setTimeout(() => {
             setShowResult(false);
             setSelected(null);
             setCurrentQ((q) => q + 1);
             setLastAnswerCorrect(null);
-          }, 1500);
+          }, 3500);
           setAutoNavigateTimer(timer);
         }
       } else if (res?.returnMessage) {
@@ -361,10 +345,10 @@ const DailyReading = () => {
     }
   }, [selected, assignment, isSubmitting, currentQ, planId, dayNum, toast]);
 
-  // ── Effects ───────────────────────────────────
+  // ── Effects ──
   useEffect(() => {
     loadData();
-  }, [dayNum]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [dayNum]); // eslint-disable-line
 
   useEffect(() => {
     setCurrentQ(0);
@@ -428,7 +412,7 @@ const DailyReading = () => {
     }
   }, [quizDone, hasQuiz, showConfetti]);
 
-  // ── Handlers ──────────────────────────────────
+  // ── Handlers ──
   const markComplete = async () => {
     if (isCompleted) {
       toast({
@@ -533,17 +517,12 @@ const DailyReading = () => {
     </div>
   );
 
-  // ── Progress bar width ──
-  const progressPct =
-    totalDays > 0 ? Math.round(((dayNum - 1) / totalDays) * 100) : 0;
-
   // ─────────────────────────────────────────────
   // Loading / Not yet added
   // ─────────────────────────────────────────────
   if (loading || notYetAdded || !assignment) {
     return (
       <div className="min-h-screen bg-background flex flex-col">
-        {/* Header skeleton */}
         <div className="bg-background border-b border-border/40 px-5 py-4">
           <button
             onClick={() => navigate(-1)}
@@ -598,7 +577,6 @@ const DailyReading = () => {
           ) : null}
         </div>
 
-        {/* Nav bar */}
         <div className="border-t border-border/40 bg-background px-5 py-3 flex gap-3">
           <NavButton
             dir="prev"
@@ -646,7 +624,6 @@ const DailyReading = () => {
               </div>
             </div>
 
-            {/* Mark done button */}
             <button
               onClick={canMarkComplete ? markComplete : undefined}
               disabled={!canMarkComplete}
@@ -669,7 +646,6 @@ const DailyReading = () => {
           </div>
         </div>
 
-        {/* Progress strip */}
         {totalDays > 0 && (
           <div className="px-5 pb-3 flex items-center gap-3">
             <span
@@ -692,8 +668,8 @@ const DailyReading = () => {
       </div>
 
       {/* ── Content ── */}
-      <div className="flex-1 px-5 py-6 pb-28 space-y-5 max-w-2xl mx-auto w-full">
-        {/* ── Chapters card ── */}
+      <div className="flex-1 px-5 py-6 pb-24 space-y-5 max-w-2xl mx-auto w-full">
+        {/* Chapters */}
         <div className="rounded-2xl border border-border/50 bg-card overflow-hidden">
           <div className="flex items-center gap-2 px-5 py-3.5 border-b border-border/40">
             <BookOpen className="w-3.5 h-3.5 text-primary" />
@@ -735,7 +711,7 @@ const DailyReading = () => {
           </div>
         </div>
 
-        {/* ── Reflection questions (no quiz) ── */}
+        {/* Reflection (no quiz) */}
         {!hasQuiz &&
           Array.isArray(assignment.reflectionQuestions) &&
           assignment.reflectionQuestions.length > 0 && (
@@ -786,32 +762,9 @@ const DailyReading = () => {
                   Knowledge Check
                 </span>
               </div>
-
-              {/* Progress pill */}
-              <div className="flex items-center gap-2">
-                <div className="flex gap-1">
-                  {assignment.quizQuestions!.map((q, i) => (
-                    <button
-                      key={i}
-                      onClick={() => jumpToQuestion(i)}
-                      title={`Question ${i + 1}`}
-                      className={cn(
-                        "w-2 h-2 rounded-full transition-all duration-200",
-                        i === currentQ && q.userAnswer === null
-                          ? "bg-violet-500 scale-125"
-                          : q.isCorrect === true
-                            ? "bg-emerald-500"
-                            : q.isCorrect === false
-                              ? "bg-red-500"
-                              : "bg-muted-foreground/30 hover:bg-muted-foreground/50",
-                      )}
-                    />
-                  ))}
-                </div>
-                <span className="text-xs text-muted-foreground font-medium">
-                  {submittedIds.size}/{quizTotal}
-                </span>
-              </div>
+              <span className="text-xs text-muted-foreground font-medium">
+                {currentQ + 1}/{quizTotal}
+              </span>
             </div>
 
             <div className="p-5">
@@ -854,8 +807,6 @@ const DailyReading = () => {
               <div className="space-y-2.5 mb-5">
                 {activeQ.options.map((opt, idx) => {
                   const isSel = selected === idx;
-                  // Use revealedCorrectAnswer (normalized index from API)
-                  // Fall back to normalizing the stored correctAnswer if needed
                   const correctIdx =
                     revealedCorrectAnswer ??
                     normalizeCorrectAnswer(activeQ.correctAnswer);
@@ -882,7 +833,6 @@ const DailyReading = () => {
                         showResult && !isReviewing && "cursor-default",
                       )}
                     >
-                      {/* Letter / icon badge */}
                       <span
                         className={cn(
                           "w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold shrink-0 transition-all duration-200",
@@ -917,7 +867,6 @@ const DailyReading = () => {
                         {opt}
                       </span>
 
-                      {/* Right label pill */}
                       {showResult && isCorrectOpt && (
                         <span className="px-2.5 py-1 rounded-full bg-emerald-500 text-white text-[10px] font-bold uppercase tracking-wide whitespace-nowrap">
                           ✓ Correct
@@ -1131,9 +1080,9 @@ const DailyReading = () => {
                 </div>
               </div>
 
-              {/* Question summary */}
+              {/* Question summary — single, correct block */}
               <div className="rounded-xl border border-border/40 overflow-hidden mb-5">
-                <div className="px-4 py-2.5 bg-muted/30 border-b border-border/40">
+                <div className="px-4 py-2.5 bg-muted/30 border-b border-border/40 sticky top-0 z-10">
                   <span
                     className="text-[11px] font-semibold tracking-widest uppercase text-muted-foreground"
                     style={{ fontFamily: "'Cinzel', serif" }}
@@ -1141,7 +1090,7 @@ const DailyReading = () => {
                     Question Summary
                   </span>
                 </div>
-                <div className="divide-y divide-border/30">
+                <div className="divide-y divide-border/30 max-h-[40vh] overflow-y-auto">
                   {assignment.quizQuestions!.map((q, idx) => (
                     <button
                       key={idx}
@@ -1222,6 +1171,9 @@ const DailyReading = () => {
           </div>
         )}
 
+
+       
+
         {/* Mark complete (no quiz) */}
         {canMarkComplete && !hasQuiz && (
           <button
@@ -1239,12 +1191,17 @@ const DailyReading = () => {
       </div>
 
       {/* ── Bottom nav ── */}
-      <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur border-t border-border/40 px-5 py-3 flex gap-3">
+      <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur border-t border-border/30 px-4 py-3 flex items-center justify-between gap-3 z-20">
         <NavButton
           dir="prev"
           disabled={!canGoPrev}
           onClick={() => navigateDay("prev")}
         />
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <span className="font-medium">{dayNum}</span>
+          <span className="text-border">/</span>
+          <span>{totalDays}</span>
+        </div>
         <NavButton
           dir="next"
           disabled={!canGoNext}
@@ -1255,7 +1212,7 @@ const DailyReading = () => {
   );
 };
 
-// ── Nav button helper ──
+// ── Nav button ──
 function NavButton({
   dir,
   disabled,
@@ -1265,22 +1222,22 @@ function NavButton({
   disabled: boolean;
   onClick: () => void;
 }) {
+  const isPrev = dir === "prev";
   return (
     <button
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        "flex-1 flex items-center justify-center gap-2 px-4 py-3.5 rounded-2xl text-sm font-semibold transition-all duration-200 active:scale-[0.96]",
-        dir === "next" && !disabled
-          ? "bg-violet-600 text-white hover:bg-violet-700 shadow-lg shadow-violet-500/25"
-          : dir === "prev" && !disabled
-            ? "bg-background text-foreground border-2 border-border hover:bg-muted/60 hover:border-border/80"
-            : "bg-muted/20 text-muted-foreground/30 cursor-not-allowed border-2 border-border/15",
+        "flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 active:scale-[0.95]",
+        !disabled
+          ? "bg-primary/10 text-primary hover:bg-primary/20 border border-primary/20"
+          : "bg-muted/50 text-muted-foreground/40 cursor-not-allowed border border-muted/20",
       )}
     >
-      {dir === "prev" && <ChevronLeft className="w-4 h-4 shrink-0" />}
-      <span>{dir === "prev" ? "Previous" : "Next Day"}</span>
-      {dir === "next" && <ChevronRight className="w-4 h-4 shrink-0" />}
+      {isPrev && <ChevronLeft className="w-3.5 h-3.5" />}
+      <span className="hidden sm:inline">{isPrev ? "Previous" : "Next"}</span>
+      <span className="sm:hidden">{isPrev ? "Prev" : "Next"}</span>
+      {!isPrev && <ChevronRight className="w-3.5 h-3.5" />}
     </button>
   );
 }
