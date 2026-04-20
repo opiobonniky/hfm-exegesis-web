@@ -1,13 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { 
-  BookOpen, 
-  Sun, 
-  BookMarked, 
-  Calendar, 
-  Star, 
-  History, 
-  Heart,
+import { useNavigate } from "react-router-dom";
+import {
+  Sun,
   Clock,
   ChevronRight,
   Loader2,
@@ -16,14 +10,21 @@ import {
   Brain,
   Mic2,
   HandHeart,
-  HelpCircle
+  BookMarked,
+  History,
+  Heart,
+  Star,
+  Flame,
+  BookOpen,
+  BarChart2,
+  Sparkles,
 } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { sendPostRequest } from "@/services/api";
 import { routes } from "@/components/Routes/routes";
+import { cn } from "@/lib/utils";
 
+// ─── Types ────────────────────────────────────────────────────────────────────
 interface DailyVerse {
   id: string;
   verseReference: string;
@@ -54,66 +55,228 @@ interface RecentActivity {
   updatedOn: string;
 }
 
-const getGreeting = (): string => {
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+const getGreeting = () => {
   const h = new Date().getHours();
-  if (h < 12) return 'Good Morning,';
-  if (h < 17) return 'Good Afternoon,';
-  return 'Good Evening,';
+  if (h < 5) return "Good Night";
+  if (h < 12) return "Good Morning";
+  if (h < 17) return "Good Afternoon";
+  return "Good Evening";
 };
 
-const formatTime = (dateString: string): string => {
-  const date = new Date(dateString);
-  const now = new Date();
-  const diff = now.getTime() - date.getTime();
-  const minutes = Math.floor(diff / 60000);
-  const hours = Math.floor(diff / 3600000);
-  const days = Math.floor(diff / 86400000);
-
-  if (minutes < 1) return 'Just now';
-  if (minutes < 60) return `${minutes}m ago`;
-  if (hours < 24) return `${hours}h ago`;
-  if (days < 7) return `${days}d ago`;
-  return date.toLocaleDateString();
+const formatTime = (ds: string): string => {
+  const diff = Date.now() - new Date(ds).getTime();
+  const m = Math.floor(diff / 60000);
+  const hr = Math.floor(diff / 3600000);
+  const d = Math.floor(diff / 86400000);
+  if (m < 1) return "Just now";
+  if (m < 60) return `${m}m ago`;
+  if (hr < 24) return `${hr}h ago`;
+  if (d < 7) return `${d}d ago`;
+  return new Date(ds).toLocaleDateString();
 };
 
+const getInitials = (first?: string, last?: string, username?: string) => {
+  if (first && last) return `${first[0]}${last[0]}`.toUpperCase();
+  if (first) return first[0].toUpperCase();
+  if (username) return username[0].toUpperCase();
+  return "U";
+};
+
+// ─── Sub-components ───────────────────────────────────────────────────────────
+function SectionLabel({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <p
+      className={cn(
+        "text-[11px] font-bold tracking-widest uppercase text-muted-foreground mb-3",
+        className,
+      )}
+    >
+      {children}
+    </p>
+  );
+}
+
+// ─── Dashboard ────────────────────────────────────────────────────────────────
 export default function UserDashboard() {
   const { userInfo } = useAuth();
   const navigate = useNavigate();
+
   const [dailyVerse, setDailyVerse] = useState<DailyVerse | null>(null);
   const [readingPlans, setReadingPlans] = useState<ReadingPlan[]>([]);
-  const [stats, setStats] = useState<Stats>({ chaptersRead: 0, highlights: 0, notes: 0, favorites: 0 });
+  const [stats, setStats] = useState<Stats>({
+    chaptersRead: 0,
+    highlights: 0,
+    notes: 0,
+    favorites: 0,
+  });
   const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const contentButtons = useMemo(() => [
-    { id: '1', label: 'Exegesis Bible', icon: CalendarDays, color: '#1565C0', onPress: () => navigate(routes.bibleReader.path) },
-    { id: '2', label: 'Daily Verse', icon: Sun, color: '#F59E0B', onPress: () => navigate(routes.userDailyVerse.path) },
-    { id: '3', label: 'Prayer Wall', icon: HandHeart, color: '#2E7D32', onPress: () => {} },
-    { id: '4', label: 'Testify', icon: Mic2, color: '#E65100', onPress: () => {} },
-    { id: '5', label: 'Bible Trivia', icon: Brain, color: '#F9A825', onPress: () => {} },
-    { id: '6', label: 'Reading Plans', icon: Globe, color: '#00695C', onPress: () => navigate(routes.userPlans.path) },
-  ], [navigate]);
+  const displayName =
+    userInfo?.firstName || userInfo?.lastName || userInfo?.username || "Friend";
+  const initials = getInitials(
+    userInfo?.firstName,
+    userInfo?.lastName,
+    userInfo?.username,
+  );
 
-  const quickLinks = useMemo(() => [
-    { id: '1', title: 'Notes', icon: Star, color: '#F59E0B', route: '/notes' },
-    { id: '2', title: 'History', icon: History, color: '#10B981', route: '/read-history' },
-    { id: '3', title: 'Highlights', icon: Star, color: '#F59E0B', route: '/highlights' },
-    { id: '4', title: 'Favorites', icon: Heart, color: '#8B5CF6', route: '/favorites' },
-  ], []);
+  // ── Data ──
+  const exploreItems = useMemo(
+    () => [
+      {
+        id: "1",
+        label: "Exegesis Bible",
+        sub: "Read & study",
+        icon: CalendarDays,
+        bg: "bg-blue-600",
+        iconCls: "text-blue-50",
+        glow: "shadow-blue-500/20",
+        onPress: () => navigate(routes.bibleReader.path),
+      },
+      {
+        id: "2",
+        label: "Daily Verse",
+        sub: "Today's word",
+        icon: Sun,
+        bg: "bg-amber-500",
+        iconCls: "text-amber-50",
+        glow: "shadow-amber-500/20",
+        onPress: () => navigate(routes.userDailyVerse.path),
+      },
+      {
+        id: "3",
+        label: "Reading Plans",
+        sub: "Guided journeys",
+        icon: Globe,
+        bg: "bg-teal-600",
+        iconCls: "text-teal-50",
+        glow: "shadow-teal-500/20",
+        onPress: () => navigate(routes.userPlans.path),
+      },
+      {
+        id: "4",
+        label: "Prayer Wall",
+        sub: "Lift your voice",
+        icon: HandHeart,
+        bg: "bg-emerald-600",
+        iconCls: "text-emerald-50",
+        glow: "shadow-emerald-500/20",
+        onPress: () => {},
+      },
+      {
+        id: "5",
+        label: "Testify",
+        sub: "Share your story",
+        icon: Mic2,
+        bg: "bg-rose-500",
+        iconCls: "text-rose-50",
+        glow: "shadow-rose-500/20",
+        onPress: () => {},
+      },
+      {
+        id: "6",
+        label: "Bible Trivia",
+        sub: "Test knowledge",
+        icon: Brain,
+        bg: "bg-violet-600",
+        iconCls: "text-violet-50",
+        glow: "shadow-violet-500/20",
+        onPress: () => {},
+      },
+    ],
+    [navigate],
+  );
 
+  const quickLinks = useMemo(
+    () => [
+      {
+        id: "1",
+        label: "Notes",
+        icon: BookMarked,
+        iconCls: "text-violet-500",
+        bg: "bg-violet-50 dark:bg-violet-950/40",
+      },
+      {
+        id: "2",
+        label: "History",
+        icon: History,
+        iconCls: "text-emerald-500",
+        bg: "bg-emerald-50 dark:bg-emerald-950/40",
+      },
+      {
+        id: "3",
+        label: "Highlights",
+        icon: Star,
+        iconCls: "text-amber-500",
+        bg: "bg-amber-50 dark:bg-amber-950/40",
+      },
+      {
+        id: "4",
+        label: "Favorites",
+        icon: Heart,
+        iconCls: "text-rose-500",
+        bg: "bg-rose-50 dark:bg-rose-950/40",
+      },
+    ],
+    [],
+  );
+
+  const statCards = useMemo(
+    () => [
+      {
+        label: "Chapters",
+        value: stats.chaptersRead,
+        icon: BookOpen,
+        iconCls: "text-blue-500",
+        bg: "bg-blue-50 dark:bg-blue-950/40",
+        border: "border-blue-100 dark:border-blue-900/50",
+      },
+      {
+        label: "Highlights",
+        value: stats.highlights,
+        icon: Star,
+        iconCls: "text-amber-500",
+        bg: "bg-amber-50 dark:bg-amber-950/40",
+        border: "border-amber-100 dark:border-amber-900/50",
+      },
+      {
+        label: "Notes",
+        value: stats.notes,
+        icon: BookMarked,
+        iconCls: "text-emerald-500",
+        bg: "bg-emerald-50 dark:bg-emerald-950/40",
+        border: "border-emerald-100 dark:border-emerald-900/50",
+      },
+      {
+        label: "Favorites",
+        value: stats.favorites,
+        icon: Heart,
+        iconCls: "text-rose-500",
+        bg: "bg-rose-50 dark:bg-rose-950/40",
+        border: "border-rose-100 dark:border-rose-900/50",
+      },
+    ],
+    [stats],
+  );
+
+  // ── Fetch ──
   useEffect(() => {
-    const fetchData = async () => {
+    (async () => {
       try {
         const [verseRes, statsRes, plansRes] = await Promise.all([
           sendPostRequest("bible", "get-todays-verse", {}),
           sendPostRequest("bible", "get-home-stats", {}),
-          sendPostRequest("reading-plans", "get-user-plans", {})
+          sendPostRequest("reading-plans", "get-user-plans", {}),
         ]);
-
-        if (verseRes.returnCode === 200 && verseRes.returnData) {
+        if (verseRes.returnCode === 200 && verseRes.returnData)
           setDailyVerse(verseRes.returnData);
-        }
-
         if (statsRes.returnCode === 200 && statsRes.returnData) {
           const d = statsRes.returnData;
           setStats({
@@ -124,190 +287,359 @@ export default function UserDashboard() {
           });
           setRecentActivity(d.recentActivity ?? []);
         }
-
-        if (plansRes.returnCode === 200 && plansRes.returnData) {
+        if (plansRes.returnCode === 200 && plansRes.returnData)
           setReadingPlans(plansRes.returnData.slice(0, 3));
-        }
-      } catch (error) {
-        console.error("Failed to fetch user data:", error);
+      } catch (e) {
+        console.error(e);
       } finally {
         setLoading(false);
       }
-    };
-
-    fetchData();
+    })();
   }, []);
 
+  // ── Loading ──
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      <div className="flex flex-col items-center justify-center min-h-[70vh] gap-4">
+        <div className="relative w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center">
+          <BookOpen className="w-7 h-7 text-primary" />
+          <Loader2 className="w-5 h-5 animate-spin text-primary absolute -bottom-1.5 -right-1.5 bg-background rounded-full p-0.5" />
+        </div>
+        <p className="text-sm text-muted-foreground">Loading your dashboard…</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-full">
-      <div className="bg-gradient-to-br from-primary via-primary/95 to-primary/80 text-white p-6 lg:p-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl lg:text-3xl font-bold">{getGreeting()} {userInfo?.lastName || userInfo?.firstName || 'Friend'}!</h1>
-            <p className="text-white/80 mt-1">Your Exegesis bible for Daily Guidance</p>
+    <div className="min-h-full bg-background">
+      {/* ══════════════════════════════
+          HERO
+      ══════════════════════════════ */}
+      <div className="relative bg-slate-950 overflow-hidden">
+        {/* Dot grid */}
+        <div
+          className="absolute inset-0 pointer-events-none opacity-[0.06]"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle, #ffffff 1px, transparent 1px)",
+            backgroundSize: "22px 22px",
+          }}
+        />
+        {/* Colour blobs */}
+        <div className="absolute -top-24 -right-12 w-80 h-80 rounded-full bg-primary/30 blur-[80px] pointer-events-none" />
+        <div className="absolute bottom-0 left-4 w-48 h-48 rounded-full bg-amber-500/20 blur-[60px] pointer-events-none" />
+
+        <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-7 pb-8">
+          {/* Top row */}
+          <div className="flex items-center justify-between gap-3 mb-5">
+            <div className="flex items-center gap-3.5">
+              <div className="w-11 h-11 sm:w-13 sm:h-13 rounded-2xl bg-primary flex items-center justify-center shrink-0 ring-4 ring-primary/25 shadow-xl shadow-primary/30">
+                <span className="text-lg font-bold text-white leading-none">
+                  {initials}
+                </span>
+              </div>
+              <div>
+                <p className="text-[11px] text-white/40 font-medium tracking-wide">
+                  {getGreeting()}
+                </p>
+                <h1 className="text-xl sm:text-2xl font-bold text-white leading-tight">
+                  {displayName}
+                </h1>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <div className="px-3 py-1.5 rounded-full bg-white/10 border border-white/10 text-xs text-white/60 font-medium flex items-center gap-1.5">
+                <Flame className="w-3.5 h-3.5 text-orange-400 shrink-0" />
+                {stats.chaptersRead} read
+              </div>
+            </div>
           </div>
-          <div className="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center">
-            <span className="text-2xl font-bold">
-              {userInfo?.firstName?.charAt(0) || userInfo?.username?.charAt(0) || "U"}
-            </span>
-          </div>
+
+          {/* Verse strip */}
+          {dailyVerse && (
+            <button
+              onClick={() => navigate(routes.userDailyVerse.path)}
+              className="w-full flex items-start gap-3 p-4 rounded-2xl bg-white/[0.07] hover:bg-white/[0.11] border border-white/10 transition-all text-left"
+            >
+              <div className="w-8 h-8 rounded-xl bg-amber-400/20 flex items-center justify-center shrink-0 mt-0.5">
+                <Sparkles className="w-4 h-4 text-amber-300" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[10px] font-bold tracking-widest uppercase text-amber-400/70 mb-1">
+                  Verse of the day
+                </p>
+                <p className="text-sm text-white/75 italic font-serif line-clamp-2 leading-relaxed">
+                  "{dailyVerse.verseText}"
+                </p>
+                <p className="text-[11px] text-white/35 mt-1.5 font-medium">
+                  — {dailyVerse.verseReference}
+                </p>
+              </div>
+              <ChevronRight className="w-4 h-4 text-white/25 shrink-0 mt-1" />
+            </button>
+          )}
         </div>
       </div>
 
-      <div className="p-6 lg:p-8 space-y-8 -mt-4">
-        <div className="space-y-4">
-          <h2 className="text-lg font-semibold text-foreground">Content</h2>
-          {contentButtons.map((btn) => {
-            const Icon = btn.icon;
+      {/* ══════════════════════════════
+          BODY
+      ══════════════════════════════ */}
+      <div className=" mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+        {/* Stats row */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {statCards.map((s) => {
+            const Icon = s.icon;
             return (
-              <button
-                key={btn.id}
-                onClick={btn.onPress}
-                className="w-full flex items-center gap-4 p-4 rounded-xl text-white shadow-md hover:shadow-lg transition-all"
-                style={{ backgroundColor: btn.color }}
+              <div
+                key={s.label}
+                className={cn(
+                  "rounded-2xl border p-4 flex flex-col gap-3",
+                  s.bg,
+                  s.border,
+                )}
               >
-                <div className="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
-                  <Icon size={22} color="rgba(255,255,255,0.9)" strokeWidth={1.8} />
+                <div className="w-8 h-8 rounded-xl bg-white/60 dark:bg-black/20 flex items-center justify-center">
+                  <Icon className={cn("w-4 h-4", s.iconCls)} />
                 </div>
-                <span className="flex-1 text-left font-semibold text-[15px]">{btn.label}</span>
-                <ChevronRight size={18} className="text-white/60" />
-              </button>
+                <div>
+                  <p className="text-2xl font-bold text-foreground leading-none">
+                    {s.value.toLocaleString()}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {s.label}
+                  </p>
+                </div>
+              </div>
             );
           })}
         </div>
 
-        <div>
-          <h2 className="text-lg font-semibold text-foreground mb-4">Quick Actions</h2>
-          <div className="grid grid-cols-4 gap-3">
-            {quickLinks.map((link) => {
-              const Icon = link.icon;
-              return (
-                <button
-                  key={link.id}
-                  onClick={() => {}}
-                  className="flex flex-col items-center gap-2 p-3 rounded-xl bg-card hover:bg-accent/50 transition-colors"
-                >
-                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center`} style={{ backgroundColor: link.color + '20' }}>
-                    <Icon size={20} color={link.color} />
-                  </div>
-                  <span className="text-xs font-medium text-center">{link.title}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {dailyVerse && (
-          <Card className="border-l-4 border-l-amber-500">
-            <CardHeader className="pb-3">
-              <div className="flex items-center gap-2">
-                <Sun className="w-5 h-5 text-amber-500" />
-                <CardTitle className="text-lg">Daily Verse</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-xl font-serif italic mb-2">"{dailyVerse.verseText}"</p>
-              <p className="text-sm text-muted-foreground">— {dailyVerse.verseReference}</p>
-            </CardContent>
-          </Card>
-        )}
-
-        <div>
-          <h2 className="text-lg font-semibold text-foreground mb-4">Your Stats</h2>
-          <div className="grid grid-cols-2 gap-4">
-            <Card>
-              <CardContent className="pt-6">
-                <p className="text-sm text-muted-foreground">Chapters Read</p>
-                <p className="text-3xl font-bold text-primary">{stats.chaptersRead}</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="pt-6">
-                <p className="text-sm text-muted-foreground">Highlights</p>
-                <p className="text-3xl font-bold text-amber-500">{stats.highlights}</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="pt-6">
-                <p className="text-sm text-muted-foreground">Notes</p>
-                <p className="text-3xl font-bold text-green-500">{stats.notes}</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="pt-6">
-                <p className="text-sm text-muted-foreground">Favorites</p>
-                <p className="text-3xl font-bold text-purple-500">{stats.favorites}</p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-
-        {recentActivity.length > 0 && (
-          <div>
-            <h2 className="text-lg font-semibold text-foreground mb-4">Recent Activity</h2>
-            <Card>
-              <CardContent className="p-0">
-                {recentActivity.map((act, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => navigate(`${routes.bibleReader.path}?book=${encodeURIComponent(act.bookName)}&chapter=${act.chapter}`)}
-                    className="w-full flex items-center gap-4 p-4 border-b last:border-b-0 hover:bg-accent/50 transition-colors"
-                  >
-                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                      <Clock size={16} className="text-primary" />
-                    </div>
-                    <div className="flex-1 text-left">
-                      <p className="font-medium">{act.bookName} {act.chapter}</p>
-                      <p className="text-sm text-muted-foreground">{formatTime(act.updatedOn)}</p>
-                    </div>
-                    <ChevronRight size={18} className="text-muted-foreground" />
-                  </button>
-                ))}
-              </CardContent>
-            </Card>
-          </div>
-        )}
-
-        {readingPlans.length > 0 && (
-          <div>
-            <h2 className="text-lg font-semibold text-foreground mb-4">My Reading Plans</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {readingPlans.map((plan) => (
-                <Card key={plan.id}>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-base">{plan.planName}</CardTitle>
-                    <CardDescription>{plan.description}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Progress</span>
-                        <span className="font-medium">{Math.round((plan.completedDays / plan.totalDays) * 100)}%</span>
-                      </div>
-                      <div className="h-2 bg-muted rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-primary rounded-full transition-all"
-                          style={{ width: `${(plan.completedDays / plan.totalDays) * 100}%` }}
+        {/* Two-column layout on LG */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6 items-start">
+          {/* ── LEFT ── */}
+          <div className="space-y-6">
+            {/* Explore */}
+            <section>
+              <SectionLabel>Explore</SectionLabel>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {exploreItems.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={item.onPress}
+                      className="group flex items-center gap-4 p-4 rounded-2xl bg-card border border-border/50 hover:border-border hover:shadow-md active:scale-[0.98] transition-all duration-150 text-left"
+                    >
+                      <div
+                        className={cn(
+                          "w-11 h-11 rounded-xl flex items-center justify-center shrink-0 shadow-lg",
+                          item.bg,
+                          item.glow,
+                        )}
+                      >
+                        <Icon
+                          className={cn("w-5 h-5", item.iconCls)}
+                          strokeWidth={1.8}
                         />
                       </div>
-                      <p className="text-xs text-muted-foreground">
-                        {plan.completedDays} of {plan.totalDays} days
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-sm text-foreground leading-snug">
+                          {item.label}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {item.sub}
+                        </p>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-muted-foreground/30 group-hover:text-muted-foreground group-hover:translate-x-0.5 transition-all shrink-0" />
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+
+            {/* Reading Plans */}
+            {readingPlans.length > 0 && (
+              <section>
+                <div className="flex items-center justify-between mb-3">
+                  <SectionLabel className="mb-0">Reading Plans</SectionLabel>
+                  <button
+                    onClick={() => navigate(routes.userPlans.path)}
+                    className="text-xs font-semibold text-primary hover:underline flex items-center gap-0.5"
+                  >
+                    See all <ChevronRight className="w-3 h-3" />
+                  </button>
+                </div>
+
+                <div className="space-y-3">
+                  {readingPlans.map((plan) => {
+                    const pct = Math.min(
+                      100,
+                      Math.round((plan.completedDays / plan.totalDays) * 100),
+                    );
+                    const done = pct >= 70;
+                    return (
+                      <div
+                        key={plan.id}
+                        className="rounded-2xl border border-border/50 bg-card p-4 sm:p-5 hover:shadow-sm transition-shadow"
+                      >
+                        <div className="flex items-start gap-3 mb-4">
+                          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                            <CalendarDays className="w-4.5 h-4.5 text-primary" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-semibold text-sm text-foreground line-clamp-1">
+                              {plan.planName}
+                            </p>
+                            <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2 leading-relaxed">
+                              {plan.description}
+                            </p>
+                          </div>
+                          <span
+                            className={cn(
+                              "shrink-0 text-xs font-bold px-2.5 py-1 rounded-full",
+                              done
+                                ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400"
+                                : "bg-primary/10 text-primary",
+                            )}
+                          >
+                            {pct}%
+                          </span>
+                        </div>
+                        <div className="space-y-1.5">
+                          <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                            <div
+                              className="h-full rounded-full transition-all duration-700"
+                              style={{
+                                width: `${pct}%`,
+                                backgroundColor: done
+                                  ? "#10B981"
+                                  : "hsl(var(--primary))",
+                              }}
+                            />
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            {plan.completedDays} of {plan.totalDays} days
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </section>
+            )}
           </div>
-        )}
+
+          {/* ── RIGHT ── */}
+          <div className="space-y-6">
+            {/* Quick Access */}
+            <section>
+              <SectionLabel>Quick Access</SectionLabel>
+              <div className="grid grid-cols-2 gap-3">
+                {quickLinks.map((link) => {
+                  const Icon = link.icon;
+                  return (
+                    <button
+                      key={link.id}
+                      onClick={() => {}}
+                      className="flex flex-col items-center gap-2.5 p-4 rounded-2xl border border-border/50 bg-card hover:bg-accent/40 hover:border-border active:scale-[0.97] transition-all"
+                    >
+                      <div
+                        className={cn(
+                          "w-11 h-11 rounded-xl flex items-center justify-center",
+                          link.bg,
+                        )}
+                      >
+                        <Icon className={cn("w-5 h-5", link.iconCls)} />
+                      </div>
+                      <span className="text-xs font-semibold text-foreground">
+                        {link.label}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+
+            {/* Recent Activity */}
+            {recentActivity.length > 0 && (
+              <section>
+                <SectionLabel>Recent Activity</SectionLabel>
+                <div className="rounded-2xl border border-border/50 bg-card overflow-hidden">
+                  {recentActivity.slice(0, 6).map((act, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() =>
+                        navigate(
+                          `${routes.bibleReader.path}?book=${encodeURIComponent(act.bookName)}&chapter=${act.chapter}`,
+                        )
+                      }
+                      className="w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-accent/40 active:bg-accent/60 transition-colors border-b border-border/30 last:border-b-0"
+                    >
+                      <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                        <Clock className="w-3.5 h-3.5 text-primary" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm text-foreground truncate">
+                          {act.bookName} {act.chapter}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {formatTime(act.updatedOn)}
+                        </p>
+                      </div>
+                      <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/40 shrink-0" />
+                    </button>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Stats bar chart — desktop-only */}
+            <section className="hidden lg:block">
+              <SectionLabel>Stats Overview</SectionLabel>
+              <div className="rounded-2xl border border-border/50 bg-card p-5">
+                <div className="space-y-3.5">
+                  {statCards.map((s) => {
+                    const Icon = s.icon;
+                    const maxVal = Math.max(
+                      ...statCards.map((x) => x.value),
+                      1,
+                    );
+                    const pct = Math.round((s.value / maxVal) * 100);
+                    return (
+                      <div key={s.label} className="flex items-center gap-3">
+                        <Icon
+                          className={cn("w-3.5 h-3.5 shrink-0", s.iconCls)}
+                        />
+                        <div className="flex-1">
+                          <div className="flex justify-between items-center mb-1.5">
+                            <span className="text-xs text-muted-foreground">
+                              {s.label}
+                            </span>
+                            <span className="text-xs font-bold text-foreground">
+                              {s.value}
+                            </span>
+                          </div>
+                          <div className="h-1 bg-muted rounded-full overflow-hidden">
+                            <div
+                              className="h-full rounded-full transition-all duration-700"
+                              style={{
+                                width: `${pct}%`,
+                                backgroundColor: "hsl(var(--primary))",
+                              }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+
+        <div className="h-8" />
       </div>
     </div>
   );
