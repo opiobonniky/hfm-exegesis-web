@@ -53,11 +53,7 @@ const userNavItems = [
   { title: "My Dashboard", url: routes.userDashboard.path, icon: Home },
   { title: "Bible Reader", url: routes.bibleReader.path, icon: BookText },
   { title: "Daily Verse", url: routes.userDailyVerse.path, icon: Sun },
-  {
-    title: "Verse Explanations",
-    url: routes.verseExplanations.path,
-    icon: BookMarked,
-  },
+
   { title: "Reading Plans", url: routes.userPlans.path, icon: BookOpen },
   { title: "My Activity", url: routes.myActivity.path, icon: Highlighter },
 ];
@@ -89,7 +85,11 @@ export function AppSidebar() {
       <SidebarHeader className="p-4">
         <div className="flex items-center gap-3">
           <div className="w-16 h-16 rounded-lg bg-white flex items-center justify-center shrink-0 overflow-hidden p-1.5">
-            <img src={logoImage} alt="Exegesis" className="w-full h-full object-contain" />
+            <img
+              src={logoImage}
+              alt="Exegesis"
+              className="w-full h-full object-contain"
+            />
           </div>
           {!collapsed && (
             <div className="overflow-hidden">

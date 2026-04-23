@@ -127,6 +127,8 @@ export default function MyActivity() {
   const [notes, setNotes] = useState<NoteItem[]>([]);
   const [favorites, setFavorites] = useState<FavoriteItem[]>([]);
   const [readHistory, setReadHistory] = useState<ReadHistoryItem[]>([]);
+  const [deleting, setDeleting] = useState<number | null>(null);
+  const [clearingAll, setClearingAll] = useState(false);
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -162,6 +164,7 @@ export default function MyActivity() {
   }, [loadData]);
 
   const deleteHighlight = async (id: number) => {
+    setDeleting(id);
     try {
       const res = await sendPostRequest("bible", "delete-highlight", { highlightId: id });
       if (res.returnCode === 200) {
@@ -170,10 +173,13 @@ export default function MyActivity() {
       }
     } catch (error) {
       toast({ title: "Failed to remove highlight", variant: "destructive" });
+    } finally {
+      setDeleting(null);
     }
   };
 
   const deleteNote = async (id: number) => {
+    setDeleting(id);
     try {
       const res = await sendPostRequest("bible", "delete-verse-note", { noteId: id });
       if (res.returnCode === 200) {
@@ -182,10 +188,13 @@ export default function MyActivity() {
       }
     } catch (error) {
       toast({ title: "Failed to remove note", variant: "destructive" });
+    } finally {
+      setDeleting(null);
     }
   };
 
   const deleteFavorite = async (id: number) => {
+    setDeleting(id);
     try {
       const res = await sendPostRequest("bible", "delete-favorite", { favoriteId: id });
       if (res.returnCode === 200) {
@@ -194,6 +203,40 @@ export default function MyActivity() {
       }
     } catch (error) {
       toast({ title: "Failed to remove favorite", variant: "destructive" });
+    } finally {
+      setDeleting(null);
+    }
+  };
+
+  const clearReadHistory = async () => {
+    if (readHistory.length === 0) return;
+    setClearingAll(true);
+    try {
+      const ids = readHistory.map((h) => h.id);
+      const res = await sendPostRequest("bible", "delete-read-history", { readHistoryIds: ids });
+      if (res.returnCode === 200) {
+        setReadHistory([]);
+        toast({ title: "Reading history cleared" });
+      }
+    } catch (error) {
+      toast({ title: "Failed to clear history", variant: "destructive" });
+    } finally {
+      setClearingAll(false);
+    }
+  };
+
+  const deleteReadHistoryItem = async (id: number) => {
+    setDeleting(id);
+    try {
+      const res = await sendPostRequest("bible", "delete-read-history", { readHistoryIds: [id] });
+      if (res.returnCode === 200) {
+        setReadHistory((prev) => prev.filter((h) => h.id !== id));
+        toast({ title: "History item removed" });
+      }
+    } catch (error) {
+      toast({ title: "Failed to remove history", variant: "destructive" });
+    } finally {
+      setDeleting(null);
     }
   };
 
@@ -252,8 +295,13 @@ export default function MyActivity() {
             size="icon"
             className="opacity-0 group-hover:opacity-100 h-8 w-8 shrink-0"
             onClick={() => deleteHighlight(item.id)}
+            disabled={deleting === item.id}
           >
-            <Trash2 className="w-4 h-4 text-destructive" />
+            {deleting === item.id ? (
+              <Loader2 className="w-4 h-4 animate-spin text-destructive" />
+            ) : (
+              <Trash2 className="w-4 h-4 text-destructive" />
+            )}
           </Button>
         </div>
       </div>
@@ -287,8 +335,13 @@ export default function MyActivity() {
             size="icon"
             className="opacity-0 group-hover:opacity-100 h-8 w-8 shrink-0"
             onClick={() => deleteNote(item.id)}
+            disabled={deleting === item.id}
           >
-            <Trash2 className="w-4 h-4 text-destructive" />
+            {deleting === item.id ? (
+              <Loader2 className="w-4 h-4 animate-spin text-destructive" />
+            ) : (
+              <Trash2 className="w-4 h-4 text-destructive" />
+            )}
           </Button>
         </div>
       </div>
@@ -321,8 +374,13 @@ export default function MyActivity() {
             size="icon"
             className="opacity-0 group-hover:opacity-100 h-8 w-8 shrink-0"
             onClick={() => deleteFavorite(item.id)}
+            disabled={deleting === item.id}
           >
-            <Trash2 className="w-4 h-4 text-destructive" />
+            {deleting === item.id ? (
+              <Loader2 className="w-4 h-4 animate-spin text-destructive" />
+            ) : (
+              <Trash2 className="w-4 h-4 text-destructive" />
+            )}
           </Button>
         </div>
       </div>
@@ -334,20 +392,36 @@ export default function MyActivity() {
     return (
       <div
         key={item.id}
-        className="group relative p-4 rounded-lg border bg-card hover:bg-gray-50 transition-colors cursor-pointer"
-        onClick={() => goToVerse(item.bookName, item.chapter, item.verseNumber)}
+        className="group relative p-4 rounded-lg border bg-card hover:bg-gray-50 transition-colors"
       >
-        <div className="flex items-center justify-between mb-1">
-          <Badge variant="outline" className="text-xs">
-            {item.bookName} {item.chapter}:{item.verseNumber}
-          </Badge>
-          <span className="text-xs text-muted-foreground">
-            {formatTimeAgo(item.createdOn)}
-          </span>
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex-1 cursor-pointer" onClick={() => goToVerse(item.bookName, item.chapter, item.verseNumber)}>
+            <div className="flex items-center justify-between mb-1">
+              <Badge variant="outline" className="text-xs">
+                {item.bookName} {item.chapter}:{item.verseNumber}
+              </Badge>
+              <span className="text-xs text-muted-foreground">
+                {formatTimeAgo(item.createdOn)}
+              </span>
+            </div>
+            {verseText && (
+              <p className="text-sm mt-2 line-clamp-2">{verseText}</p>
+            )}
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="opacity-0 group-hover:opacity-100 h-8 w-8 shrink-0"
+            onClick={() => deleteReadHistoryItem(item.id)}
+            disabled={deleting === item.id}
+          >
+            {deleting === item.id ? (
+              <Loader2 className="w-4 h-4 animate-spin text-destructive" />
+            ) : (
+              <Trash2 className="w-4 h-4 text-destructive" />
+            )}
+          </Button>
         </div>
-        {verseText && (
-          <p className="text-sm mt-2 line-clamp-2">{verseText}</p>
-        )}
       </div>
     );
   };
@@ -520,10 +594,28 @@ export default function MyActivity() {
         <TabsContent value="history" className="mt-6">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <History className="w-5 h-5" />
-                Reading History
-              </CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <History className="w-5 h-5" />
+                  Reading History
+                </CardTitle>
+                {readHistory.length > 0 && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={clearReadHistory}
+                    disabled={clearingAll}
+                    className="text-destructive"
+                  >
+                    {clearingAll ? (
+                      <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                    ) : (
+                      <Trash2 className="w-4 h-4 mr-1" />
+                    )}
+                    Clear All
+                  </Button>
+                )}
+              </div>
             </CardHeader>
             <CardContent>
               {loading ? (

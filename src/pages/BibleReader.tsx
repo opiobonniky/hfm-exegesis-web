@@ -42,6 +42,7 @@ import {
   HighlightPickerModal,
   SearchModal,
   NoteModal,
+  RangePickerModal,
 } from "@/components/BibleModals";
 
 const BOOKS = [
@@ -358,6 +359,9 @@ export default function BibleReader() {
   const [showSearchModal, setShowSearchModal] = useState(false);
   const [showHighlightPicker, setShowHighlightPicker] = useState(false);
   const [showNoteModal, setShowNoteModal] = useState(false);
+  const [showFavoriteModal, setShowFavoriteModal] = useState(false);
+  const [showCopyModal, setShowCopyModal] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
   const [noteText, setNoteText] = useState("");
   const [noteSaving, setNoteSaving] = useState(false);
   const [searchResults, setSearchResults] = useState<any[]>([]);
@@ -366,6 +370,13 @@ export default function BibleReader() {
 
   const currentVersion = useMemo(() => getVersionById(versionId), [versionId]);
   const maxChapterForDisplay = MAX_CHAPTERS[displayBook] ?? 1;
+  const currentChapterVerseCount = useMemo(
+    () =>
+      chapters.find(
+        (c) => c.book === displayBook && c.chapter === displayChapter,
+      )?.verses.length || 0,
+    [chapters, displayBook, displayChapter],
+  );
 
   // ── Data loading ──────────────────────────────────────────────────────────
 
@@ -772,6 +783,18 @@ export default function BibleReader() {
       });
       return;
     }
+    if (isAuthenticated) {
+      for (const v of cd.verses) {
+        const p = parseVerseKey(v.key);
+        if (p) {
+          sendPostRequest("bible", "add-read-history", {
+            bookName: p.book,
+            chapter: p.chapter,
+            verseNumber: p.verse,
+          }).catch(console.error);
+        }
+      }
+    }
     const items = buildChapterItems(cd);
     if (items.length === 0) return;
     startSpeech(items, "chapter", 0);
@@ -784,11 +807,38 @@ export default function BibleReader() {
       return;
     }
     if (isSpeaking) stopSpeaking();
+    if (isAuthenticated) {
+      for (const vk of selectedVerses) {
+        const p = parseVerseKey(vk);
+        if (p) {
+          sendPostRequest("bible", "add-read-history", {
+            bookName: p.book,
+            chapter: p.chapter,
+            verseNumber: p.verse,
+          }).catch(console.error);
+        }
+      }
+    }
     const items = buildSelectionItems(selectedVerses);
     startSpeech(items, "selected", 0);
   };
 
   // ── Selection helpers ─────────────────────────────────────────────────────
+
+  const trackReadHistory = async (verseKey: string) => {
+    if (!isAuthenticated) return;
+    const p = parseVerseKey(verseKey);
+    if (!p) return;
+    try {
+      await sendPostRequest("bible", "add-read-history", {
+        bookName: p.book,
+        chapter: p.chapter,
+        verseNumber: p.verse,
+      });
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   const toggleVerseSelection = (verseKey: string) => {
     if (selectedVerses.includes(verseKey) && expandedExplanation === verseKey) {
@@ -806,6 +856,7 @@ export default function BibleReader() {
         ? prev.filter((v) => v !== verseKey)
         : [...prev, verseKey],
     );
+    trackReadHistory(verseKey);
   };
 
   const clearSelection = useCallback(() => {
@@ -855,6 +906,13 @@ export default function BibleReader() {
     }
     if (verseExplanationMap[verseKey]) {
       setExpandedExplanation(verseKey);
+      if (isAuthenticated) {
+        sendPostRequest("bible", "add-read-history", {
+          bookName: p.book,
+          chapter: p.chapter,
+          verseNumber: p.verse,
+        }).catch(console.error);
+      }
       return;
     }
     const p = parseVerseKey(verseKey);
@@ -981,7 +1039,7 @@ export default function BibleReader() {
 
   // ── Actions ───────────────────────────────────────────────────────────────
 
-  const addFavorite = async () => {
+  const addFavorite = async (rangeStart?: number, rangeEnd?: number) => {
     if (!isAuthenticated) {
       toast({
         title: "Sign In Required",
@@ -990,17 +1048,27 @@ export default function BibleReader() {
       });
       return;
     }
-    if (selectedVerses.length === 0) return;
+    if (selectedVerses.length === 0 && (!rangeStart || !rangeEnd)) return;
     try {
-      await Promise.all(
-        getSelectionGroups().map(({ book, chapter, verses }) =>
-          sendPostRequest("bible", "add-favorite", {
-            bookName: book,
-            chapter,
-            verseNumbers: verses,
-          }),
-        ),
-      );
+      if (rangeStart && rangeEnd) {
+        const verses = [];
+        for (let v = rangeStart; v <= rangeEnd; v++) verses.push(v);
+        await sendPostRequest("bible", "add-favorite", {
+          bookName: displayBook,
+          chapter: displayChapter,
+          verseNumbers: verses,
+        });
+      } else {
+        await Promise.all(
+          getSelectionGroups().map(({ book, chapter, verses }) =>
+            sendPostRequest("bible", "add-favorite", {
+              bookName: book,
+              chapter,
+              verseNumbers: verses,
+            }),
+          ),
+        );
+      }
       toast({ title: "Added to Favorites" });
       loadFavorites();
     } catch {
@@ -1013,7 +1081,12 @@ export default function BibleReader() {
     clearSelection();
   };
 
-  const highlightVerses = async (colorId: number, color: string) => {
+  const highlightVerses = async (
+    colorId: number,
+    color: string,
+    rangeStart?: number,
+    rangeEnd?: number,
+  ) => {
     if (!isAuthenticated) {
       toast({
         title: "Sign In Required",
@@ -1022,27 +1095,51 @@ export default function BibleReader() {
       });
       return;
     }
-    const groups = getSelectionGroups();
-    if (groups.length === 0) return;
     try {
-      await Promise.all(
-        groups.map(({ book, chapter, verses }) =>
-          sendPostRequest("bible", "add-highlight", {
-            bookName: book,
-            chapter,
-            verseNumbers: verses,
-            colorId,
-            note: "",
-          }),
-        ),
-      );
-      selectedVerses.forEach((key) => {
-        setHighlights((prev) => ({
-          ...prev,
-          [key]: { verseKey: key, color, colorId },
-        }));
-      });
-      groups.forEach(({ book, chapter }) => loadHighlights(book, chapter));
+      if (rangeStart && rangeEnd) {
+        const verses = [];
+        for (let v = rangeStart; v <= rangeEnd; v++) verses.push(v);
+        await Promise.all(
+          verses.map((vn) =>
+            sendPostRequest("bible", "add-highlight", {
+              bookName: displayBook,
+              chapter: displayChapter,
+              verseNumber: vn,
+              colorId,
+              note: "",
+            }),
+          ),
+        );
+        for (let v = rangeStart; v <= rangeEnd; v++) {
+          const key = `${displayBook} ${displayChapter}:${v}`;
+          setHighlights((prev) => ({
+            ...prev,
+            [key]: { verseKey: key, color, colorId },
+          }));
+        }
+        loadHighlights(displayBook, displayChapter);
+      } else {
+        const groups = getSelectionGroups();
+        if (groups.length === 0) return;
+        await Promise.all(
+          groups.map(({ book, chapter, verses }) =>
+            sendPostRequest("bible", "add-highlight", {
+              bookName: book,
+              chapter,
+              verseNumbers: verses,
+              colorId,
+              note: "",
+            }),
+          ),
+        );
+        selectedVerses.forEach((key) => {
+          setHighlights((prev) => ({
+            ...prev,
+            [key]: { verseKey: key, color, colorId },
+          }));
+        });
+        groups.forEach(({ book, chapter }) => loadHighlights(book, chapter));
+      }
     } catch {
       toast({
         title: "Error",
@@ -1074,12 +1171,23 @@ export default function BibleReader() {
   };
 
   const copyVerses = () => {
+    if (selectedVerses.length === 0) return;
     navigator.clipboard.writeText(versesToText(selectedVerses));
     toast({ title: "Copied", description: "Verses copied to clipboard." });
     clearSelection();
   };
 
+  const copyVersesRange = (rangeStart: number, rangeEnd: number) => {
+    const verses: string[] = [];
+    for (let v = rangeStart; v <= rangeEnd; v++) {
+      verses.push(`${displayBook} ${displayChapter}:${v}`);
+    }
+    navigator.clipboard.writeText(versesToText(verses));
+    toast({ title: "Copied", description: `Verses ${rangeStart}-${rangeEnd} copied to clipboard.` });
+  };
+
   const shareVerses = async () => {
+    if (selectedVerses.length === 0) return;
     try {
       await navigator.share({ text: versesToText(selectedVerses) });
     } catch (e) {
@@ -1088,7 +1196,19 @@ export default function BibleReader() {
     clearSelection();
   };
 
-  const saveNote = async () => {
+  const shareVersesRange = async (rangeStart: number, rangeEnd: number) => {
+    const verses: string[] = [];
+    for (let v = rangeStart; v <= rangeEnd; v++) {
+      verses.push(`${displayBook} ${displayChapter}:${v}`);
+    }
+    try {
+      await navigator.share({ text: versesToText(verses) });
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const saveNote = async (rangeStart?: number, rangeEnd?: number) => {
     if (!noteText.trim()) {
       toast({
         title: "Empty Note",
@@ -1099,17 +1219,29 @@ export default function BibleReader() {
     }
     setNoteSaving(true);
     try {
-      await Promise.all(
-        getSelectionGroups().map(({ book, chapter, verses }) =>
-          sendPostRequest("bible", "add-verse-note", {
-            bookName: book,
-            chapter,
-            verseNumbers: verses,
-            note: noteText.trim(),
-          }),
-        ),
-      );
+      if (rangeStart && rangeEnd) {
+        const verses = [];
+        for (let v = rangeStart; v <= rangeEnd; v++) verses.push(v);
+        await sendPostRequest("bible", "add-verse-note", {
+          bookName: displayBook,
+          chapter: displayChapter,
+          verseNumbers: verses,
+          note: noteText.trim(),
+        });
+      } else {
+        await Promise.all(
+          getSelectionGroups().map(({ book, chapter, verses }) =>
+            sendPostRequest("bible", "add-verse-note", {
+              bookName: book,
+              chapter,
+              verseNumbers: verses,
+              note: noteText.trim(),
+            }),
+          ),
+        );
+      }
       toast({ title: "Note Saved" });
+      loadNotes(displayBook, displayChapter);
     } catch {
       toast({
         title: "Error",
@@ -1385,17 +1517,17 @@ export default function BibleReader() {
             />
             <ToolbarBtn onClick={() => setShowNoteModal(true)} label="Note" />
             <ToolbarBtn
-              onClick={addFavorite}
+              onClick={() => setShowFavoriteModal(true)}
               icon={<Star className="w-3 h-3" />}
               label="Favorite"
             />
             <ToolbarBtn
-              onClick={copyVerses}
+              onClick={() => setShowCopyModal(true)}
               icon={<Copy className="w-3 h-3" />}
               label="Copy"
             />
             <ToolbarBtn
-              onClick={shareVerses}
+              onClick={() => setShowShareModal(true)}
               icon={<Share2 className="w-3 h-3" />}
               label="Share"
             />
@@ -1649,21 +1781,64 @@ export default function BibleReader() {
       <HighlightPickerModal
         visible={showHighlightPicker}
         onClose={() => setShowHighlightPicker(false)}
-        onSelectColor={(colorId, color) => {
+        onSelectColor={(colorId, color, rangeStart, rangeEnd) => {
           setShowHighlightPicker(false);
-          highlightVerses(colorId, color);
+          highlightVerses(colorId, color, rangeStart, rangeEnd);
         }}
+        selectedVerses={selectedVerses}
+        totalVerses={chapters.find((c) => c.book === displayBook && c.chapter === displayChapter)?.verses.length || MAX_CHAPTERS[displayBook] || 1}
+        currentChapter={displayChapter}
       />
       <NoteModal
         visible={showNoteModal}
         onClose={() => setShowNoteModal(false)}
-        onSave={saveNote}
+        onSave={(rangeStart, rangeEnd) => saveNote(rangeStart, rangeEnd)}
         noteText={noteText}
         onNoteChange={setNoteText}
         saving={noteSaving}
         selectedVerses={selectedVerses}
-        currentBook={selectedBook}
-        currentChapter={selectedChapter}
+        totalVerses={currentChapterVerseCount || MAX_CHAPTERS[displayBook] || 1}
+        currentBook={displayBook}
+        currentChapter={displayChapter}
+      />
+      <RangePickerModal
+        visible={showFavoriteModal}
+        onClose={() => setShowFavoriteModal(false)}
+        title="Add to Favorites"
+        description={`${displayBook} ${displayChapter}`}
+        totalVerses={currentChapterVerseCount || MAX_CHAPTERS[displayBook] || 1}
+        selectedVerses={selectedVerses}
+        actionLabel="Add Favorite"
+        onConfirm={(rangeStart, rangeEnd) => {
+          setShowFavoriteModal(false);
+          addFavorite(rangeStart, rangeEnd);
+        }}
+      />
+      <RangePickerModal
+        visible={showCopyModal}
+        onClose={() => setShowCopyModal(false)}
+        title="Copy Verses"
+        description={`${displayBook} ${displayChapter}`}
+        totalVerses={currentChapterVerseCount || MAX_CHAPTERS[displayBook] || 1}
+        selectedVerses={selectedVerses}
+        actionLabel="Copy"
+        onConfirm={(rangeStart, rangeEnd) => {
+          setShowCopyModal(false);
+          copyVersesRange(rangeStart, rangeEnd);
+        }}
+      />
+      <RangePickerModal
+        visible={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        title="Share Verses"
+        description={`${displayBook} ${displayChapter}`}
+        totalVerses={currentChapterVerseCount || MAX_CHAPTERS[displayBook] || 1}
+        selectedVerses={selectedVerses}
+        actionLabel="Share"
+        onConfirm={(rangeStart, rangeEnd) => {
+          setShowShareModal(false);
+          shareVersesRange(rangeStart, rangeEnd);
+        }}
       />
 
       {/* ── Voice Player ── */}

@@ -3,6 +3,7 @@ import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Slider } from "@/components/ui/slider";
 import {
   Dialog,
   DialogContent,
@@ -165,7 +166,7 @@ export function NoteModal({
             className="w-full min-h-[120px] p-3 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
             autoFocus
           />
-          <div className="flex justify-end gap-2">
+<div className="flex justify-end gap-2">
             <Button variant="outline" onClick={onClose}>
               Cancel
             </Button>
@@ -173,6 +174,149 @@ export function NoteModal({
               {saving ? "Saving..." : "Save Note"}
             </Button>
           </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export interface RangePickerModalProps {
+  visible: boolean;
+  onClose: () => void;
+  title: string;
+  description?: string;
+  totalVerses: number;
+  selectedVerses?: string[];
+  actionLabel: string;
+  onConfirm: (rangeStart: number, rangeEnd: number) => void;
+}
+
+export function RangePickerModal({
+  visible,
+  onClose,
+  title,
+  description,
+  totalVerses,
+  selectedVerses = [],
+  actionLabel,
+  onConfirm,
+}: RangePickerModalProps) {
+  const [rangeStart, setRangeStart] = useState(1);
+  const [rangeEnd, setRangeEnd] = useState(totalVerses || 1);
+
+  useEffect(() => {
+    if (visible) {
+      const verseNums: number[] = [];
+      for (const v of selectedVerses) {
+        const colonIdx = v.lastIndexOf(":");
+        if (colonIdx > -1) {
+          const num = parseInt(v.substring(colonIdx + 1), 10);
+          if (!isNaN(num)) verseNums.push(num);
+        }
+      }
+      if (verseNums.length > 0) {
+        setRangeStart(Math.min(...verseNums));
+        setRangeEnd(Math.max(...verseNums));
+      } else {
+        setRangeStart(1);
+        setRangeEnd(totalVerses || 1);
+      }
+    }
+  }, [visible, totalVerses]);
+
+  const handleConfirm = () => {
+    onConfirm(rangeStart, rangeEnd);
+    onClose();
+  };
+
+  return (
+    <Dialog open={visible} onOpenChange={onClose}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+          {description && <DialogDescription>{description}</DialogDescription>}
+        </DialogHeader>
+
+        <div className="space-y-4 py-2">
+          <div className="text-center text-sm text-muted-foreground">
+            Verse range:{" "}
+            <span className="font-medium text-foreground">{rangeStart}</span>–
+            <span className="font-medium text-foreground">{rangeEnd}</span> of{" "}
+            {totalVerses}
+          </div>
+
+          <Slider
+            value={[rangeStart, rangeEnd]}
+            onValueChange={([start, end]) => {
+              setRangeStart(start);
+              setRangeEnd(end);
+            }}
+            min={1}
+            max={totalVerses || 1}
+            step={1}
+          />
+
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 flex-1">
+              <span className="text-xs text-muted-foreground whitespace-nowrap">
+                Start:
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-7 px-2 text-xs"
+                onClick={() => setRangeStart((s) => Math.max(1, s - 1))}
+                disabled={rangeStart <= 1}
+              >
+                –
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-7 px-2 text-xs"
+                onClick={() =>
+                  setRangeStart((s) => Math.min(rangeEnd - 1, s + 1))
+                }
+                disabled={rangeStart >= rangeEnd - 1}
+              >
+                +
+              </Button>
+            </div>
+            <div className="flex items-center gap-2 flex-1">
+              <span className="text-xs text-muted-foreground whitespace-nowrap">
+                End:
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-7 px-2 text-xs"
+                onClick={() =>
+                  setRangeEnd((e) => Math.max(rangeStart + 1, e - 1))
+                }
+                disabled={rangeEnd <= rangeStart + 1}
+              >
+                –
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-7 px-2 text-xs"
+                onClick={() =>
+                  setRangeEnd((e) => Math.min(totalVerses, e + 1))
+                }
+                disabled={rangeEnd >= totalVerses}
+              >
+                +
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex justify-end gap-2">
+          <Button variant="outline" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button onClick={handleConfirm}>{actionLabel}</Button>
         </div>
       </DialogContent>
     </Dialog>
