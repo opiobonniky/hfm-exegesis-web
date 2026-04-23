@@ -1,9 +1,10 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import {
   Search,
-  Book,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
+  ChevronUp,
   Loader2,
   BookOpen,
   Star,
@@ -34,7 +35,6 @@ import {
   HighlightPickerModal,
   SearchModal,
   NoteModal,
-  ExplanationModal,
 } from "@/components/BibleModals";
 
 const BOOKS = [
@@ -153,6 +153,8 @@ const VERSION_FILES: Record<string, () => Promise<{ default: BibleData }>> = {
   BBE: () => import("@/assets/bibleVersion/json/verses-bbe.json"),
 };
 
+// ── Helpers ──────────────────────────────────────────────────────────────────
+
 function processVerses(verses: BibleData, book: string, chapter: number) {
   return Object.entries(verses)
     .filter(([key]) => key.startsWith(`${book} ${chapter}:`))
@@ -173,11 +175,29 @@ function renderVerseText(text: string) {
   });
 }
 
+function truncateText(text: string, maxLength: number): string {
+  if (text.length <= maxLength) return text;
+  return text.substring(0, maxLength).trim() + "…";
+}
+
+/** Parse a full verse key like "Genesis 1:3" → { book, chapter, verse } */
+function parseVerseKey(key: string) {
+  const match = key.match(/^(.+)\s+(\d+):(\d+)$/);
+  if (!match) return null;
+  return {
+    book: match[1],
+    chapter: parseInt(match[2]),
+    verse: parseInt(match[3]),
+  };
+}
+
+// ── Component ─────────────────────────────────────────────────────────────────
+
 export default function BibleReader() {
   const { toast } = useToast();
   const isAuthenticated = !!localStorage.getItem(TOKEN_KEY);
 
-  // Inject Google Font for verse text
+  // Inject Google Fonts
   useEffect(() => {
     const link = document.createElement("link");
     link.href =
@@ -189,27 +209,40 @@ export default function BibleReader() {
     };
   }, []);
 
+  // ── Navigation state ─────────────────────────────────────────────────────
   const [selectedBook, setSelectedBook] = useState("Genesis");
   const [currentChapter, setCurrentChapter] = useState(1);
   const [versionId, setVersionId] = useState(DEFAULT_VERSION_ID);
   const [searchQuery, setSearchQuery] = useState("");
+
+  // ── Chapter / verse data ─────────────────────────────────────────────────
   const [chapters, setChapters] = useState<ChapterData[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const chapterRefs = useRef<Record<string, HTMLDivElement>>({});
+  const verseRefs = useRef<Record<string, HTMLSpanElement | null>>({});
+  const [displayChapter, setDisplayChapter] = useState(1);
 
-  const [selectedVerses, setSelectedVerses] = useState<number[]>([]);
+  // ── Selection — stored as full verse keys e.g. "Genesis 1:1" ─────────────
+  const [selectedVerses, setSelectedVerses] = useState<string[]>([]);
+
+  // ── Annotations ──────────────────────────────────────────────────────────
   const [highlights, setHighlights] = useState<Record<string, Highlight>>({});
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [verseNotes, setVerseNotes] = useState<Record<string, string>>({});
 
+  // ── Verse explanations — keyed by full verse key for inline display ─────────────
+  const [verseExplanationMap, setVerseExplanationMap] = useState<Record<string, string>>({});
+  const [expandedExplanation, setExpandedExplanation] = useState<string | null>(null);
+  const [explanationLoading, setExplanationLoading] = useState(false);
+  const [expandedFullExplanation, setExpandedFullExplanation] = useState<Set<string>>(new Set());
+
+// ── Modal / UI state ─────────────────────────────────────────────────────
   const [showSearchModal, setShowSearchModal] = useState(false);
   const [showHighlightPicker, setShowHighlightPicker] = useState(false);
-  const [showExplanation, setShowExplanation] = useState(false);
   const [showNoteModal, setShowNoteModal] = useState(false);
-  const [verseExplanation, setVerseExplanation] = useState("");
   const [noteText, setNoteText] = useState("");
   const [noteSaving, setNoteSaving] = useState(false);
   const [searchResults, setSearchResults] = useState<any[]>([]);
@@ -217,6 +250,7 @@ export default function BibleReader() {
 
   const currentVersion = useMemo(() => getVersionById(versionId), [versionId]);
 
+  // ── Chapter counts ────────────────────────────────────────────────────────
   const maxChapters: Record<string, number> = useMemo(
     () => ({
       Genesis: 50,
@@ -293,6 +327,8 @@ export default function BibleReader() {
   const prevChapter = currentChapter > 1 ? currentChapter - 1 : null;
   const nextChapter = currentChapter < maxChapter ? currentChapter + 1 : null;
 
+  // ── Data loading ──────────────────────────────────────────────────────────
+
   const loadChapters = useCallback(
     async (book: string, startChapter: number, count: number) => {
       if (loading) return;
@@ -312,10 +348,12 @@ export default function BibleReader() {
           const existingKeys = new Set(
             prev.map((c) => `${c.book}-${c.chapter}`),
           );
-          const newChapters = loadedChapters.filter(
-            (c) => !existingKeys.has(`${c.book}-${c.chapter}`),
-          );
-          return [...prev, ...newChapters];
+          return [
+            ...prev,
+            ...loadedChapters.filter(
+              (c) => !existingKeys.has(`${c.book}-${c.chapter}`),
+            ),
+          ];
         });
         setHasMore(loadedChapters.length === count);
       } catch (error) {
@@ -349,7 +387,7 @@ export default function BibleReader() {
                 note: h.note,
               };
           });
-          setHighlights(map);
+          setHighlights((prev) => ({ ...prev, ...map }));
         }
       } catch (e) {
         console.error("Error loading highlights:", e);
@@ -392,7 +430,7 @@ export default function BibleReader() {
           notes.forEach((n: any) => {
             notesMap[`${n.bookName} ${n.chapter}:${n.verseNumber}`] = n.note;
           });
-          setVerseNotes(notesMap);
+          setVerseNotes((prev) => ({ ...prev, ...notesMap }));
         }
       } catch (e) {
         console.error("Error loading notes:", e);
@@ -401,8 +439,11 @@ export default function BibleReader() {
     [isAuthenticated],
   );
 
+  // ── Effects ───────────────────────────────────────────────────────────────
+
   useEffect(() => {
     setChapters([]);
+    setDisplayChapter(1);
     loadChapters(selectedBook, 1, 5);
     if (isAuthenticated) {
       loadHighlights(selectedBook, 1);
@@ -420,6 +461,7 @@ export default function BibleReader() {
     }
   }, [currentChapter, selectedBook]);
 
+  // Infinite scroll sentinel
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -435,15 +477,17 @@ export default function BibleReader() {
     return () => observer.disconnect();
   }, [chapters, hasMore, loading, loadChapters]);
 
-  const [displayChapter, setDisplayChapter] = useState(currentChapter);
-
+  // Track which chapter is visible
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
             const key = entry.target.getAttribute("data-chapter-key");
-            if (key) setDisplayChapter(parseInt(key.split("-")[1]));
+            if (key) {
+              const parts = key.split("-");
+              setDisplayChapter(parseInt(parts[parts.length - 1]));
+            }
           }
         });
       },
@@ -455,6 +499,8 @@ export default function BibleReader() {
     return () => observer.disconnect();
   }, [chapters]);
 
+  // ── Derived / filtered ────────────────────────────────────────────────────
+
   const filteredBooks = useMemo(() => {
     if (!searchQuery) return BOOKS;
     return BOOKS.filter((book) =>
@@ -462,24 +508,157 @@ export default function BibleReader() {
     );
   }, [searchQuery]);
 
+  // ── Selection helpers ─────────────────────────────────────────────────────
+
+  const toggleVerseSelection = (verseKey: string) => {
+    // Close expanded explanation if deselecting a verse that has it
+    if (selectedVerses.includes(verseKey) && expandedExplanation === verseKey) {
+      setExpandedExplanation(null);
+      setExpandedFullExplanation((prev) => {
+        const next = new Set(prev);
+        next.delete(verseKey);
+        return next;
+      });
+    }
+    // Close explanation if selecting a different verse
+    if (expandedExplanation && expandedExplanation !== verseKey) {
+      setExpandedExplanation(null);
+    }
+    setSelectedVerses((prev) =>
+      prev.includes(verseKey)
+        ? prev.filter((v) => v !== verseKey)
+        : [...prev, verseKey],
+    );
+  };
+
+  const clearSelection = () => {
+    setSelectedVerses([]);
+    setExpandedExplanation(null);
+    setExpandedFullExplanation(new Set());
+  };
+
+  /**
+   * Groups selected verse keys by book+chapter.
+   * e.g. ["Genesis 1:1", "Genesis 1:3", "Genesis 2:5"]
+   *   → [{ book: "Genesis", chapter: 1, verses: [1, 3] },
+   *      { book: "Genesis", chapter: 2, verses: [5] }]
+   *
+   * This is the source of truth for all API calls — never relies on
+   * currentChapter state, so cross-chapter selections always work correctly.
+   */
+  const getSelectionGroups = useCallback(() => {
+    const groups = new Map<
+      string,
+      { book: string; chapter: number; verses: number[] }
+    >();
+    for (const key of selectedVerses) {
+      const parsed = parseVerseKey(key);
+      if (!parsed) continue;
+      const { book, chapter, verse } = parsed;
+      const groupKey = `${book}|${chapter}`;
+      if (!groups.has(groupKey))
+        groups.set(groupKey, { book, chapter, verses: [] });
+      groups.get(groupKey)!.verses.push(verse);
+    }
+    return [...groups.values()];
+  }, [selectedVerses]);
+
+  // ── Annotation lookup — keyed by full verse key, not verse number ─────────
+  // These work correctly across all lazily-loaded chapters.
+
+  const isHighlighted = (verseKey: string) => highlights[verseKey]?.color;
+  const isFavorite = (verseKey: string) => favorites.has(verseKey);
+  const getVerseNote = (verseKey: string) => verseNotes[verseKey] || null;
+  const getVerseExplanation = (verseKey: string) => verseExplanationMap[verseKey] || null;
+
+  // ── Toggle explanation inline ─────────────────────────────────────────────
+  const toggleExplanation = async (verseKey: string) => {
+    // If already expanded, collapse it and scroll verse back into view
+    if (expandedExplanation === verseKey) {
+      setExpandedExplanation(null);
+      setExpandedFullExplanation((prev) => {
+        const next = new Set(prev);
+        next.delete(verseKey);
+        return next;
+      });
+      requestAnimationFrame(() => {
+        const verseEl = verseRefs.current[verseKey];
+        if (verseEl) {
+          verseEl.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      });
+      return;
+    }
+
+    // Check if we already have the explanation cached
+    if (verseExplanationMap[verseKey]) {
+      setExpandedExplanation(verseKey);
+      return;
+    }
+
+    // Need to fetch from API
+    const parsed = parseVerseKey(verseKey);
+    if (!parsed) return;
+    
+    setExplanationLoading(true);
+    try {
+      const res = await sendPostRequest("bible", "get-verse-explanation", {
+        bookName: parsed.book,
+        chapter: parsed.chapter,
+        verseNumber: parsed.verse,
+      });
+      if (res?.returnCode === 200 && res.returnData?.explanation) {
+        setVerseExplanationMap((prev) => ({
+          ...prev,
+          [verseKey]: res.returnData.explanation,
+        }));
+        setExpandedExplanation(verseKey);
+      } else {
+        toast({
+          title: "No Explanation",
+          description: "No explanation found for this verse.",
+        });
+      }
+    } catch (e) {
+      toast({
+        title: "Error",
+        description: "Failed to load explanation.",
+        variant: "destructive",
+      });
+    } finally {
+      setExplanationLoading(false);
+    }
+  };
+
+  const clearExplanation = (verseKey: string) => {
+    setVerseExplanationMap((prev) => {
+      const next = { ...prev };
+      delete next[verseKey];
+      return next;
+    });
+    if (expandedExplanation === verseKey) {
+      setExpandedExplanation(null);
+    }
+  };
+
+  // ── Navigation ────────────────────────────────────────────────────────────
+
   const handleBookChange = (book: string) => {
     setSelectedBook(book);
     setCurrentChapter(1);
     setChapters([]);
+    clearSelection();
     loadChapters(book, 1, 5);
   };
+
   const handleChapterChange = (ch: number) => {
     setCurrentChapter(ch);
     setChapters([]);
+    clearSelection();
     loadChapters(selectedBook, ch, 5);
   };
-  const toggleVerseSelection = (verseNum: number) =>
-    setSelectedVerses((prev) =>
-      prev.includes(verseNum)
-        ? prev.filter((v) => v !== verseNum)
-        : [...prev, verseNum],
-    );
-  const clearSelection = () => setSelectedVerses([]);
+
+  // ── Actions ───────────────────────────────────────────────────────────────
 
   const addFavorite = async () => {
     if (!isAuthenticated) {
@@ -492,15 +671,17 @@ export default function BibleReader() {
     }
     if (selectedVerses.length === 0) return;
     try {
-      const res = await sendPostRequest("bible", "add-favorite", {
-        bookName: selectedBook,
-        chapter: currentChapter,
-        verseNumbers: selectedVerses,
-      });
-      if (res.returnCode === 200) {
-        toast({ title: "Added to Favorites" });
-        loadFavorites();
-      }
+      await Promise.all(
+        getSelectionGroups().map(({ book, chapter, verses }) =>
+          sendPostRequest("bible", "add-favorite", {
+            bookName: book,
+            chapter,
+            verseNumbers: verses,
+          }),
+        ),
+      );
+      toast({ title: "Added to Favorites" });
+      loadFavorites();
     } catch (e) {
       toast({
         title: "Error",
@@ -520,23 +701,29 @@ export default function BibleReader() {
       });
       return;
     }
+    const groups = getSelectionGroups();
+    if (groups.length === 0) return;
     try {
-      const res = await sendPostRequest("bible", "add-highlight", {
-        bookName: selectedBook,
-        chapter: currentChapter,
-        verseNumbers: selectedVerses,
-        colorId,
-        note: "",
+      await Promise.all(
+        groups.map(({ book, chapter, verses }) =>
+          sendPostRequest("bible", "add-highlight", {
+            bookName: book,
+            chapter,
+            verseNumbers: verses,
+            colorId,
+            note: "",
+          }),
+        ),
+      );
+      // Optimistic local update — verse.key is already the full verse key
+      selectedVerses.forEach((key) => {
+        setHighlights((prev) => ({
+          ...prev,
+          [key]: { verseKey: key, color, colorId },
+        }));
       });
-      if (res.returnCode === 200) {
-        selectedVerses.forEach((verseNum) => {
-          const key = `${selectedBook} ${currentChapter}:${verseNum}`;
-          setHighlights((prev) => ({
-            ...prev,
-            [key]: { verseKey: key, color, colorId },
-          }));
-        });
-      }
+      // Reload from server to get IDs (needed for delete later)
+      groups.forEach(({ book, chapter }) => loadHighlights(book, chapter));
     } catch (e) {
       toast({
         title: "Error",
@@ -547,13 +734,16 @@ export default function BibleReader() {
     clearSelection();
   };
 
-  const removeHighlight = async (verseNum: number) => {
-    const key = `${selectedBook} ${currentChapter}:${verseNum}`;
-    const h = highlights[key];
+  const removeHighlight = async (verseKey: string) => {
+    const h = highlights[verseKey];
     if (!h?.id) return;
     try {
       await sendPostRequest("bible", "delete-highlight", { highlightId: h.id });
-      loadHighlights(selectedBook, currentChapter);
+      setHighlights((prev) => {
+        const next = { ...prev };
+        delete next[verseKey];
+        return next;
+      });
     } catch (e) {
       toast({
         title: "Error",
@@ -563,41 +753,46 @@ export default function BibleReader() {
     }
   };
 
-  const getVerseExplanation = async () => {
-    if (selectedVerses.length !== 1) return;
-    try {
-      const res = await sendPostRequest("bible", "get-verse-explanation", {
-        bookName: selectedBook,
-        chapter: currentChapter,
-        verseNumber: selectedVerses[0],
-      });
-      if (res?.returnCode === 200 && res.returnData?.explanation) {
-        setVerseExplanation(res.returnData.explanation);
-        setShowExplanation(true);
-      } else
-        toast({
-          title: "No Explanation",
-          description: "No explanation found for this verse.",
-        });
-    } catch (e) {
-      toast({
-        title: "Error",
-        description: "Failed to load explanation.",
-        variant: "destructive",
-      });
-    }
+  const copyVerses = () => {
+    const text = [...selectedVerses]
+      .sort((a, b) => {
+        const aRef = a.match(/(\d+):(\d+)$/);
+        const bRef = b.match(/(\d+):(\d+)$/);
+        if (!aRef || !bRef) return 0;
+        const chDiff = parseInt(aRef[1]) - parseInt(bRef[1]);
+        return chDiff !== 0 ? chDiff : parseInt(aRef[2]) - parseInt(bRef[2]);
+      })
+      .map((key) => {
+        const parsed = parseVerseKey(key);
+        if (!parsed) return key;
+        const verse = chapters
+          .find((c) => c.book === parsed.book && c.chapter === parsed.chapter)
+          ?.verses.find((vn) => vn.num === parsed.verse);
+        return verse ? `${key}\n${verse.text}` : key;
+      })
+      .join("\n\n");
+
+    navigator.clipboard.writeText(text);
+    toast({ title: "Copied", description: "Verses copied to clipboard." });
+    clearSelection();
   };
 
   const shareVerses = async () => {
-    const text = selectedVerses
-      .sort((a, b) => a - b)
-      .map((v) => {
+    const text = [...selectedVerses]
+      .sort((a, b) => {
+        const aRef = a.match(/(\d+):(\d+)$/);
+        const bRef = b.match(/(\d+):(\d+)$/);
+        if (!aRef || !bRef) return 0;
+        const chDiff = parseInt(aRef[1]) - parseInt(bRef[1]);
+        return chDiff !== 0 ? chDiff : parseInt(aRef[2]) - parseInt(bRef[2]);
+      })
+      .map((key) => {
+        const parsed = parseVerseKey(key);
+        if (!parsed) return key;
         const verse = chapters
-          .find((c) => c.chapter === currentChapter)
-          ?.verses.find((vn) => vn.num === v);
-        return verse
-          ? `${selectedBook} ${currentChapter}:${v}\n${verse.text}`
-          : `${selectedBook} ${currentChapter}:${v}`;
+          .find((c) => c.book === parsed.book && c.chapter === parsed.chapter)
+          ?.verses.find((vn) => vn.num === parsed.verse);
+        return verse ? `${key}\n${verse.text}` : key;
       })
       .join("\n\n");
     try {
@@ -605,23 +800,6 @@ export default function BibleReader() {
     } catch (e) {
       console.error(e);
     }
-    clearSelection();
-  };
-
-  const copyVerses = () => {
-    const text = selectedVerses
-      .sort((a, b) => a - b)
-      .map((v) => {
-        const verse = chapters
-          .find((c) => c.chapter === currentChapter)
-          ?.verses.find((vn) => vn.num === v);
-        return verse
-          ? `${selectedBook} ${currentChapter}:${v}\n${verse.text}`
-          : `${selectedBook} ${currentChapter}:${v}`;
-      })
-      .join("\n\n");
-    navigator.clipboard.writeText(text);
-    toast({ title: "Copied", description: "Verses copied to clipboard." });
     clearSelection();
   };
 
@@ -636,17 +814,17 @@ export default function BibleReader() {
     }
     setNoteSaving(true);
     try {
-      const res = await sendPostRequest("bible", "add-verse-note", {
-        bookName: selectedBook,
-        chapter: currentChapter,
-        verseNumbers: selectedVerses,
-        note: noteText.trim(),
-      });
-      if (res.returnCode === 200)
-        toast({
-          title: "Note Saved",
-          description: "Your note has been saved.",
-        });
+      await Promise.all(
+        getSelectionGroups().map(({ book, chapter, verses }) =>
+          sendPostRequest("bible", "add-verse-note", {
+            bookName: book,
+            chapter,
+            verseNumbers: verses,
+            note: noteText.trim(),
+          }),
+        ),
+      );
+      toast({ title: "Note Saved", description: "Your note has been saved." });
     } catch (e) {
       toast({
         title: "Error",
@@ -659,6 +837,8 @@ export default function BibleReader() {
     clearSelection();
     setNoteSaving(false);
   };
+
+  // ── Search ────────────────────────────────────────────────────────────────
 
   const goToVerse = (book: string, chapterNum: number) => {
     setSelectedBook(book);
@@ -699,12 +879,7 @@ export default function BibleReader() {
     }
   };
 
-  const isHighlighted = (verseNum: number) =>
-    highlights[`${selectedBook} ${currentChapter}:${verseNum}`]?.color;
-  const isFavorite = (verseNum: number) =>
-    favorites.has(`${selectedBook} ${currentChapter}:${verseNum}`);
-  const getVerseNote = (verseNum: number) =>
-    verseNotes[`${selectedBook} ${currentChapter}:${verseNum}`] || null;
+  // ── Render ────────────────────────────────────────────────────────────────
 
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-background">
@@ -859,9 +1034,6 @@ export default function BibleReader() {
 
             <div className="w-px h-4 bg-border/60 mx-1" />
 
-            {selectedVerses.length === 1 && (
-              <ToolbarBtn onClick={getVerseExplanation} label="Explain" />
-            )}
             <ToolbarBtn
               onClick={() => setShowHighlightPicker(true)}
               icon={<Highlighter className="w-3 h-3" />}
@@ -952,60 +1124,142 @@ export default function BibleReader() {
                       style={{ fontFamily: "'Lora', Georgia, serif" }}
                     >
                       {chapter.verses.map((verse) => {
-                        const verseNum = verse.num;
-                        const highlightColor = isHighlighted(verseNum);
-                        const isSelected = selectedVerses.includes(verseNum);
-                        const isFav = isFavorite(verseNum);
-                        const vNote = getVerseNote(verseNum);
+                        // All lookups use the full verse key — correct across all loaded chapters
+                        const highlightColor = isHighlighted(verse.key);
+                        const isSelected = selectedVerses.includes(verse.key);
+                        const isFav = isFavorite(verse.key);
+                        const vNote = getVerseNote(verse.key);
+                        const vExplanation = getVerseExplanation(verse.key);
+                        const isExplanationExpanded = expandedExplanation === verse.key;
 
                         return (
-                          <span
-                            key={verse.key}
-                            onClick={() => toggleVerseSelection(verseNum)}
-                            className={[
-                              "inline cursor-pointer rounded transition-all duration-150",
-                              isSelected
-                                ? "bg-primary/15 ring-1 ring-primary/30 -mx-0.5 px-0.5"
-                                : "",
-                              highlightColor && !isSelected
-                                ? "-mx-0.5 px-0.5 rounded"
-                                : "",
-                            ].join(" ")}
-                            style={
-                              highlightColor && !isSelected
-                                ? {
-                                    backgroundColor: `${highlightColor}28`,
-                                    borderBottom: `2px solid ${highlightColor}60`,
-                                  }
-                                : undefined
-                            }
-                          >
-                            {/* Verse number */}
-                            <sup
-                              className="text-primary font-semibold mr-1 not-italic select-none"
-                              style={{
-                                fontFamily: "'Cinzel', serif",
-                                fontSize: "0.6rem",
-                                letterSpacing: "0.05em",
-                                verticalAlign: "super",
-                                lineHeight: 0,
+                          <span key={verse.key}>
+                            <span
+                              ref={(el) => {
+                                verseRefs.current[verse.key] = el;
                               }}
+                              onClick={() => toggleVerseSelection(verse.key)}
+                              className={[
+                                "inline cursor-pointer rounded transition-all duration-150",
+                                isSelected
+                                  ? "bg-primary/15 ring-1 ring-primary/30 -mx-0.5 px-0.5"
+                                  : "",
+                                highlightColor && !isSelected
+                                  ? "-mx-0.5 px-0.5 rounded"
+                                  : "",
+                              ].join(" ")}
+                              style={
+                                highlightColor && !isSelected
+                                  ? {
+                                      backgroundColor: `${highlightColor}28`,
+                                      borderBottom: `2px solid ${highlightColor}60`,
+                                    }
+                                  : undefined
+                              }
                             >
-                              {verseNum}
-                            </sup>
-                            {renderVerseText(verse.text)}
-                            {/* Indicators */}
-                            {isFav && (
-                              <Star
-                                className="inline w-3 h-3 ml-1 text-amber-400 fill-amber-400 align-middle"
-                                style={{ verticalAlign: "middle" }}
-                              />
+                              {/* Verse number */}
+                              <sup
+                                className="text-primary font-semibold mr-1 not-italic select-none"
+                                style={{
+                                  fontFamily: "'Cinzel', serif",
+                                  fontSize: "0.6rem",
+                                  letterSpacing: "0.05em",
+                                  verticalAlign: "super",
+                                  lineHeight: 0,
+                                }}
+                              >
+                                {verse.num}
+                              </sup>
+                              {renderVerseText(verse.text)}
+                              {/* Indicators — only show when NOT selected */}
+                              {!isSelected && (
+                                <>
+                                  {isFav && (
+                                    <Star
+                                      className="inline w-3 h-3 ml-1 text-amber-400 fill-amber-400 align-middle"
+                                      style={{ verticalAlign: "middle" }}
+                                    />
+                                  )}
+                                  {vNote && !isFav && (
+                                    <span className="text-xs text-muted-foreground ml-1 not-italic align-middle">
+                                      📝
+                                    </span>
+                                  )}
+                                </>
+                              )}{" "}
+                              {/* Small inline Explain button — only when one verse is selected */}
+                              {isSelected && selectedVerses.length === 1 && (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    toggleExplanation(verse.key);
+                                  }}
+                                  disabled={explanationLoading}
+                                  className={[
+                                    "inline-flex items-center gap-0.5 ml-1 text-[0.65rem] font-medium uppercase tracking-wider px-1.5 py-0.5 rounded transition-all duration-150",
+                                    isExplanationExpanded
+                                      ? "bg-primary/20 text-primary"
+                                      : "bg-primary/10 text-primary/70 hover:bg-primary/15 hover:text-primary",
+                                  ].join(" ")}
+                                >
+                                  {explanationLoading && expandedExplanation === verse.key ? (
+                                    <Loader2 className="w-2.5 h-2.5 animate-spin" />
+                                  ) : (
+                                    <>
+                                      {isExplanationExpanded ? "Close" : "Explain"}
+                                    </>
+                                  )}
+                                </button>
+                              )}{" "}
+                            </span>
+                            {/* Inline explanation content — right below verse when expanded */}
+                            {isExplanationExpanded && (
+                              <div className="mt-1 mb-3 ml-4 pl-3 border-l-2 border-primary/30 max-h-52 overflow-y-auto scrollbar-thin">
+                                {vExplanation ? (
+                                  <div className="text-sm leading-relaxed text-foreground/80 animate-in slide-in-from-top-2">
+                                    <p className="whitespace-pre-wrap">
+                                      {expandedFullExplanation.has(verse.key)
+                                        ? vExplanation
+                                        : truncateText(vExplanation, 200)}
+                                    </p>
+                                    {vExplanation.length > 200 && (
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setExpandedFullExplanation((prev) => {
+                                            const next = new Set(prev);
+                                            if (next.has(verse.key)) {
+                                              next.delete(verse.key);
+                                            } else {
+                                              next.add(verse.key);
+                                            }
+                                            return next;
+                                          });
+                                        }}
+                                        className="mt-2 flex items-center gap-1 text-xs font-medium text-primary hover:text-primary/80 transition-colors"
+                                      >
+                                        {expandedFullExplanation.has(verse.key) ? (
+                                          <>
+                                            <ChevronUp className="w-3 h-3" />
+                                            Show less
+                                          </>
+                                        ) : (
+                                          <>
+                                            <ChevronDown className="w-3 h-3" />
+                                            Read more
+                                          </>
+                                        )}
+                                      </button>
+                                    )}
+                                  </div>
+                                ) : (
+                                  <span className="text-xs text-muted-foreground italic flex items-center gap-2">
+                                    <Loader2 className="w-3 h-3 animate-spin" />
+                                    Loading explanation...
+                                  </span>
+                                )}
+                              </div>
                             )}
-                            {vNote && !isFav && (
-                              <span className="text-xs text-muted-foreground ml-1 not-italic align-middle">
-                                📝
-                              </span>
-                            )}{" "}
                           </span>
                         );
                       })}
@@ -1013,7 +1267,7 @@ export default function BibleReader() {
                   </div>
                 ))}
 
-                {/* Load more sentinel */}
+                {/* Load-more sentinel */}
                 <div ref={loadMoreRef} className="py-12 flex justify-center">
                   {loading && (
                     <div className="flex items-center gap-2 text-xs text-muted-foreground tracking-widest uppercase">
@@ -1030,7 +1284,7 @@ export default function BibleReader() {
         </ScrollArea>
       </div>
 
-      {/* ── Modals (unchanged) ── */}
+      {/* ── Modals ── */}
       <SearchModal
         visible={showSearchModal}
         onClose={() => setShowSearchModal(false)}
@@ -1059,18 +1313,11 @@ export default function BibleReader() {
         currentBook={selectedBook}
         currentChapter={currentChapter}
       />
-      <ExplanationModal
-        visible={showExplanation}
-        onClose={() => setShowExplanation(false)}
-        explanation={verseExplanation}
-        currentBook={selectedBook}
-        currentChapter={currentChapter}
-      />
     </div>
   );
 }
 
-// ── Tiny toolbar button helper ──
+// ── Tiny toolbar button ────────────────────────────────────────────────────────
 function ToolbarBtn({
   onClick,
   icon,

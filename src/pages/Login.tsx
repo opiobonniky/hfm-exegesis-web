@@ -11,6 +11,8 @@ import {
   Heart,
   Sun,
   BookMarked,
+  ArrowLeft,
+  LogInIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -51,7 +53,7 @@ const Login = () => {
     try {
       const deviceInfo = getDeviceInfo();
       const clientIP = await getClientIP();
-      
+
       const response = await sendPostRequest("auth", "login", {
         username: email,
         password,
@@ -74,7 +76,7 @@ const Login = () => {
           roleName: returnData.roleName,
         };
         setUserInfo(userInfo);
-        
+
         if (returnData.userRole === 1) {
           navigate(routes.dashboard.path);
         } else {
@@ -113,7 +115,7 @@ const Login = () => {
           : error instanceof Error
             ? error.message
             : "An unexpected error occurred. Please try again.";
-      
+
       const deviceInfo = getDeviceInfo();
       const clientIP = await getClientIP().catch(() => "");
       try {
@@ -125,7 +127,7 @@ const Login = () => {
           },
         });
       } catch {}
-      
+
       toast({
         title: "Login Failed",
         description: message,
@@ -406,7 +408,7 @@ const Login = () => {
                   htmlFor="remember"
                   className="text-sm text-muted-foreground cursor-pointer select-none"
                 >
-                  Remember me
+                  Remember me  next login
                 </label>
               </div>
             </div>
@@ -424,7 +426,7 @@ const Login = () => {
               ) : (
                 <>
                   Sign In
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  <LogInIcon className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </>
               )}
             </Button>
@@ -439,8 +441,8 @@ const Login = () => {
               to="/register"
               className="inline-flex items-center justify-center gap-1.5 text-sm text-muted-foreground hover:text-primary transition-colors group"
             >
-              <ArrowRight className="w-4 h-4 rotate-180 group-hover:-translate-x-1 transition-transform" />
               Create an account
+              <ArrowRight className="w-4 h-4  group-hover:-translate-x-1 transition-transform" />
             </Link>
           </div>
         </div>

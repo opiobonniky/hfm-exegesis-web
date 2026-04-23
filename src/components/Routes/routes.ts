@@ -25,8 +25,11 @@ const BibleReader = lazy(() => import("@/pages/BibleReader"));
 const UserDashboard = lazy(() => import("@/pages/UserDashboard"));
 const UserDailyVerse = lazy(() => import("@/pages/UserDailyVerse"));
 const UserPlans = lazy(() => import("@/pages/UserPlans"));
-const BibleReadingPlan = lazy(() => import("@/pages/ReadingPlan/BibleReadingPlan"));
+const BibleReadingPlan = lazy(
+  () => import("@/pages/ReadingPlan/BibleReadingPlan"),
+);
 const DailyReading = lazy(() => import("@/pages/ReadingPlan/DailyReading"));
+const MyActivity = lazy(() => import("@/pages/MyActivity"));
 
 // Route configuration interface
 export interface RouteConfig {
@@ -48,6 +51,7 @@ export const routes = {
     requiresLayout: false,
     title: "Welcome",
   },
+
   login: {
     path: "/login",
     component: Login,
@@ -196,6 +200,13 @@ export const routes = {
     isProtected: true,
     requiresLayout: true,
     title: "Daily Reading",
+  },
+  myActivity: {
+    path: "/my-activity",
+    component: MyActivity,
+    isProtected: true,
+    requiresLayout: true,
+    title: "My Activity",
   },
   // ==================== 404 NOT FOUND ====================
   notFound: {

@@ -3,6 +3,7 @@ import axios, {
   InternalAxiosRequestConfig,
   AxiosResponse,
 } from "axios";
+import { _ } from "vitest/dist/chunks/reporters.d.BFLkQcL6.js";
 
 interface GenericResponse<T = any> {
   success: boolean;
@@ -18,8 +19,9 @@ const getBaseURL = () => {
   if (import.meta.env.DEV) {
     return "http://localhost:5001";
   } else {
-    return ""; // relative = same origin, no CORS preflight at all
+    return "https://bonniky-production.up.railway.app/"; // relative = same origin, no CORS preflight at all
   }
+  // return "https://exegesisbackend-production.up.railway.app/";
 };
 
 const BASE_URL = getBaseURL();
@@ -163,26 +165,6 @@ export const sendGetRequest = async <T = any>(
     const serverCode = serverResponse?.status ?? serverResponse?.returnCode;
     console.error(`❌ GET ${controller}/${request} failed`, serverMessage);
     throw new ApiError(serverMessage, serverCode, serverMessage);
-  }
-};
-
-// Test connection function for debugging
-export const testConnection = async () => {
-  const testUrls = [
-    "http://localhost:5001",
-    "https://exegesis-ixrb.onrender.com",
-  ];
-
-  console.log("🧪 Testing network connectivity...");
-
-  for (const url of testUrls) {
-    try {
-      console.log(`Testing: ${url}`);
-      const response = await axios.get(`${url}/health`, { timeout: 5000 });
-      console.log(`✅ ${url} - SUCCESS:`, response.status);
-    } catch (error: any) {
-      console.log(`❌ ${url} - FAILED:`, error.message, error.code);
-    }
   }
 };
 

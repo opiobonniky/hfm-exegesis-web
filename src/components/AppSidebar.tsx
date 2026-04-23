@@ -10,6 +10,7 @@ import {
   Activity,
   BookText,
   Home,
+  Highlighter,
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -44,6 +45,7 @@ const adminNavItems = [
     icon: BookMarked,
   },
   { title: "Readings Plan", url: routes.readingPlans.path, icon: BookOpen },
+  { title: "My Activity", url: routes.myActivity.path, icon: Highlighter },
   { title: "User Activity", url: routes.useractivity.path, icon: Activity },
 ];
 
@@ -57,6 +59,7 @@ const userNavItems = [
     icon: BookMarked,
   },
   { title: "Reading Plans", url: routes.userPlans.path, icon: BookOpen },
+  { title: "My Activity", url: routes.myActivity.path, icon: Highlighter },
 ];
 
 const manageNavItems = [

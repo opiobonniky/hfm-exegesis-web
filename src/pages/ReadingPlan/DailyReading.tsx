@@ -193,31 +193,24 @@ const DailyReading = () => {
         setNotYetAdded(false);
         setAssignment(returnData);
         setIsCompleted(returnData.completed ?? false);
-        if (Array.isArray(returnData.quizQuestions)) {
+        
+        // Always start fresh - show first question without results
+        setCurrentQ(0);
+        setSelected(null);
+        setShowResult(false);
+        setIsReviewing(false);
+        setQuizDone(false);
+        setCorrectCount(0);
+        setSubmittedIds(new Set());
+        
+        if (Array.isArray(returnData.quizQuestions) && returnData.quizQuestions.length > 0) {
           const newSubmitted = new Set<number>();
-          let firstUnansweredIdx = 0;
-          let hasUnanswered = false;
-          returnData.quizQuestions.forEach((q: QuizQuestion, idx: number) => {
+          returnData.quizQuestions.forEach((q: QuizQuestion) => {
             if (q.userAnswer !== null) {
               newSubmitted.add(q.questionId);
-            } else if (!hasUnanswered) {
-              firstUnansweredIdx = idx;
-              hasUnanswered = true;
             }
           });
           setSubmittedIds(newSubmitted);
-          const total = returnData.quizQuestions.length;
-          const answered = returnData.quizQuestions.filter(
-            (q: QuizQuestion) => q.isCorrect !== null,
-          );
-          if (total > 0 && answered.length === total) {
-            setCorrectCount(
-              answered.filter((q: QuizQuestion) => q.isCorrect === true).length,
-            );
-            setQuizDone(true);
-          } else if (hasUnanswered) {
-            setCurrentQ(firstUnansweredIdx);
-          }
         }
       } else if (returnCode === 404) {
         setNotYetAdded(true);

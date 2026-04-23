@@ -132,7 +132,7 @@ interface NoteModalProps {
   noteText: string;
   onNoteChange: (text: string) => void;
   saving: boolean;
-  selectedVerses: number[];
+  selectedVerses: string[];
   currentBook: string;
   currentChapter: number;
 }
