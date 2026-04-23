@@ -12,6 +12,12 @@ import {
   X,
   Copy,
   Share2,
+  Volume2,
+  VolumeX,
+  Pause,
+  Play,
+  SkipBack,
+  SkipForward,
 } from "lucide-react";
 import {
   Select,
@@ -238,6 +244,15 @@ export default function BibleReader() {
   const [expandedExplanation, setExpandedExplanation] = useState<string | null>(null);
   const [explanationLoading, setExplanationLoading] = useState(false);
   const [expandedFullExplanation, setExpandedFullExplanation] = useState<Set<string>>(new Set());
+
+  // ── Voice reading state ─────────────────────────────────────────────────────────
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const [speechProgress, setSpeechProgress] = useState<number>(0);
+  const speechQueueRef = useRef<string[]>([]);
+  const currentIndexRef = useRef(0);
+  const isReadingRef = useRef(false);
+  const isPausedRef = useRef(false);
 
 // ── Modal / UI state ─────────────────────────────────────────────────────
   const [showSearchModal, setShowSearchModal] = useState(false);
@@ -535,6 +550,7 @@ export default function BibleReader() {
     setSelectedVerses([]);
     setExpandedExplanation(null);
     setExpandedFullExplanation(new Set());
+    stopSpeaking();
   };
 
   /**
@@ -639,6 +655,154 @@ export default function BibleReader() {
     if (expandedExplanation === verseKey) {
       setExpandedExplanation(null);
     }
+  };
+
+  // ── Voice reading ──────────────────────────────────────────────────────────────
+  const cleanTextForSpeech = (text: string): string => {
+    return text.replace(/\[[^\]]*\]/g, "").replace(/\s+/g, " ").trim();
+  };
+
+  const getVerseTextByKey = (verseKey: string): string => {
+    for (const chapter of chapters) {
+      const verse = chapter.verses.find((v) => v.key === verseKey);
+      if (verse) return cleanTextForSpeech(verse.text);
+    }
+    return "";
+  };
+
+  const speak = (text: string): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      if (!("speechSynthesis" in window)) {
+        reject(new Error("Speech synthesis not supported"));
+        return;
+      }
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 0.9;
+      utterance.pitch = 1;
+      utterance.onend = () => resolve();
+      utterance.onerror = (e) => reject(e);
+      window.speechSynthesis.speak(utterance);
+    });
+  };
+
+  const stopSpeaking = () => {
+    window.speechSynthesis.cancel();
+    isReadingRef.current = false;
+    isPausedRef.current = false;
+    setIsSpeaking(false);
+    setIsPaused(false);
+    setSpeechProgress(0);
+    speechQueueRef.current = [];
+    currentIndexRef.current = 0;
+  };
+
+  const pauseSpeaking = () => {
+    window.speechSynthesis.pause();
+    isPausedRef.current = true;
+    setIsPaused(true);
+  };
+
+  const resumeSpeaking = () => {
+    window.speechSynthesis.resume();
+    isPausedRef.current = false;
+    setIsPaused(false);
+  };
+
+  const readSelectedVerses = async () => {
+    if (selectedVerses.length === 0) return;
+
+    if (isSpeaking) {
+      stopSpeaking();
+      return;
+    }
+
+    const sortedVerses = [...selectedVerses].sort((a, b) => {
+      const aRef = a.match(/(\d+):(\d+)$/);
+      const bRef = b.match(/(\d+):(\d+)$/);
+      if (!aRef || !bRef) return 0;
+      const chDiff = parseInt(aRef[1]) - parseInt(bRef[1]);
+      return chDiff !== 0 ? chDiff : parseInt(aRef[2]) - parseInt(bRef[2]);
+    });
+
+    const texts = sortedVerses.map((key) => {
+      const parsed = parseVerseKey(key);
+      const verseText = getVerseTextByKey(key);
+      return verseText ? `${key} ${verseText}` : key;
+    });
+
+    speechQueueRef.current = texts;
+    currentIndexRef.current = 0;
+    isReadingRef.current = true;
+    isPausedRef.current = false;
+    setIsSpeaking(true);
+    setIsPaused(false);
+    setSpeechProgress(0);
+
+    for (let i = 0; i < texts.length; i++) {
+      if (!isReadingRef.current) break;
+
+      while (isPausedRef.current && isReadingRef.current) {
+        await new Promise((r) => setTimeout(r, 200));
+      }
+
+      if (!isReadingRef.current) break;
+
+      currentIndexRef.current = i;
+      setSpeechProgress(((i + 1) / texts.length) * 100);
+
+      try {
+        await speak(texts[i]);
+      } catch (e) {
+        console.error("Speech error:", e);
+      }
+    }
+
+    stopSpeaking();
+  };
+
+  const readChapter = async () => {
+    if (isSpeaking) {
+      stopSpeaking();
+      return;
+    }
+
+    const currentChapterData = chapters.find(
+      (c) => c.book === selectedBook && c.chapter === currentChapter
+    );
+    if (!currentChapterData) return;
+
+    const texts = currentChapterData.verses.map((v) => {
+      return `${selectedBook} ${currentChapter}:${v.num} ${cleanTextForSpeech(v.text)}`;
+    });
+
+    speechQueueRef.current = texts;
+    currentIndexRef.current = 0;
+    isReadingRef.current = true;
+    isPausedRef.current = false;
+    setIsSpeaking(true);
+    setIsPaused(false);
+    setSpeechProgress(0);
+
+    for (let i = 0; i < texts.length; i++) {
+      if (!isReadingRef.current) break;
+
+      while (isPausedRef.current && isReadingRef.current) {
+        await new Promise((r) => setTimeout(r, 200));
+      }
+
+      if (!isReadingRef.current) break;
+
+      currentIndexRef.current = i;
+      setSpeechProgress(((i + 1) / texts.length) * 100);
+
+      try {
+        await speak(texts[i]);
+      } catch (e) {
+        console.error("Speech error:", e);
+      }
+    }
+
+    stopSpeaking();
   };
 
   // ── Navigation ────────────────────────────────────────────────────────────
@@ -1034,6 +1198,31 @@ export default function BibleReader() {
 
             <div className="w-px h-4 bg-border/60 mx-1" />
 
+            {/* Voice reading — available when selected verses exist */}
+            {selectedVerses.length > 0 && (
+              <button
+                onClick={readSelectedVerses}
+                className={[
+                  "flex items-center gap-1 text-xs px-2 py-1 rounded-full transition-colors whitespace-nowrap",
+                  isSpeaking
+                    ? "bg-primary text-white"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
+                ].join(" ")}
+              >
+                {isSpeaking ? (
+                  <>
+                    <VolumeX className="w-3 h-3" />
+                    Stop
+                  </>
+                ) : (
+                  <>
+                    <Volume2 className="w-3 h-3" />
+                    Listen
+                  </>
+                )}
+              </button>
+            )}
+
             <ToolbarBtn
               onClick={() => setShowHighlightPicker(true)}
               icon={<Highlighter className="w-3 h-3" />}
@@ -1313,6 +1502,51 @@ export default function BibleReader() {
         currentBook={selectedBook}
         currentChapter={currentChapter}
       />
+
+      {/* ── Voice reading control bar ── */}
+      {isSpeaking && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-background/95 backdrop-blur border border-border/80 rounded-full px-4 py-2.5 shadow-xl">
+          {/* Progress bar */}
+          <div className="absolute -top-1 left-4 right-4 h-1 bg-muted rounded-full overflow-hidden">
+            <div
+              className="h-full bg-primary transition-all duration-300"
+              style={{ width: `${speechProgress}%` }}
+            />
+          </div>
+
+          {/* Stop button */}
+          <button
+            onClick={stopSpeaking}
+            className="w-8 h-8 flex items-center justify-center rounded-full bg-primary/10 hover:bg-primary/20 transition-colors"
+          >
+            <VolumeX className="w-4 h-4 text-primary" />
+          </button>
+
+          {/* Pause/Resume button */}
+          <button
+            onClick={isPaused ? resumeSpeaking : pauseSpeaking}
+            className="w-8 h-8 flex items-center justify-center rounded-full bg-primary/10 hover:bg-primary/20 transition-colors"
+          >
+            {isPaused ? (
+              <Play className="w-4 h-4 text-primary" />
+            ) : (
+              <Pause className="w-4 h-4 text-primary" />
+            )}
+          </button>
+
+          {/* Current position info */}
+          <div className="text-xs text-muted-foreground min-w-[60px]">
+            {currentIndexRef.current + 1} / {speechQueueRef.current.length || selectedVerses.length}
+          </div>
+
+          {/* Verse reference */}
+          {selectedVerses.length === 1 && (
+            <div className="text-xs text-muted-foreground/70 font-medium">
+              {selectedVerses[0]}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
