@@ -18,6 +18,7 @@ import {
   Play,
   SkipBack,
   SkipForward,
+  BookMarked,
 } from "lucide-react";
 import {
   Select,
@@ -112,6 +113,75 @@ const BOOKS = [
   "Revelation",
 ];
 
+const MAX_CHAPTERS: Record<string, number> = {
+  Genesis: 50,
+  Exodus: 40,
+  Leviticus: 27,
+  Numbers: 36,
+  Deuteronomy: 34,
+  Joshua: 24,
+  Judges: 21,
+  Ruth: 4,
+  "1 Samuel": 31,
+  "2 Samuel": 24,
+  "1 Kings": 22,
+  "2 Kings": 25,
+  "1 Chronicles": 29,
+  "2 Chronicles": 36,
+  Ezra: 10,
+  Nehemiah: 13,
+  Esther: 10,
+  Job: 42,
+  Psalms: 150,
+  Proverbs: 31,
+  Ecclesiastes: 12,
+  "Song of Solomon": 8,
+  Isaiah: 66,
+  Jeremiah: 52,
+  Lamentations: 5,
+  Ezekiel: 48,
+  Daniel: 12,
+  Hosea: 14,
+  Joel: 3,
+  Amos: 9,
+  Obadiah: 1,
+  Jonah: 4,
+  Micah: 7,
+  Nahum: 3,
+  Habakkuk: 3,
+  Zephaniah: 3,
+  Haggai: 2,
+  Zechariah: 14,
+  Malachi: 4,
+  Matthew: 28,
+  Mark: 16,
+  Luke: 24,
+  John: 21,
+  Acts: 28,
+  Romans: 16,
+  "1 Corinthians": 16,
+  "2 Corinthians": 13,
+  Galatians: 6,
+  Ephesians: 6,
+  Philippians: 4,
+  Colossians: 4,
+  "1 Thessalonians": 5,
+  "2 Thessalonians": 3,
+  "1 Timothy": 6,
+  "2 Timothy": 4,
+  Titus: 3,
+  Philemon: 1,
+  Hebrews: 13,
+  James: 5,
+  "1 Peter": 5,
+  "2 Peter": 3,
+  "1 John": 5,
+  "2 John": 1,
+  "3 John": 1,
+  Jude: 1,
+  Revelation: 22,
+};
+
 interface Highlight {
   id?: number;
   verseKey: string;
@@ -128,6 +198,13 @@ interface ChapterData {
   book: string;
   chapter: number;
   verses: { key: string; text: string; num: number }[];
+}
+
+/** One item in the speech queue */
+interface SpeechItem {
+  verseKey: string;
+  verseNum: number;
+  text: string; // what is spoken aloud
 }
 
 const HIGHLIGHT_COLORS = [
@@ -159,7 +236,7 @@ const VERSION_FILES: Record<string, () => Promise<{ default: BibleData }>> = {
   BBE: () => import("@/assets/bibleVersion/json/verses-bbe.json"),
 };
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
+// ── Helpers ────────────────────────────────────────────────────────────────
 
 function processVerses(verses: BibleData, book: string, chapter: number) {
   return Object.entries(verses)
@@ -171,11 +248,11 @@ function processVerses(verses: BibleData, book: string, chapter: number) {
 function renderVerseText(text: string) {
   return text.split("[").map((part, idx) => {
     if (idx === 0) return part;
-    const closeBracket = part.indexOf("]");
-    if (closeBracket === -1) return part;
+    const close = part.indexOf("]");
+    if (close === -1) return part;
     return (
       <span key={idx} className="italic text-muted-foreground">
-        {part.substring(0, closeBracket)}
+        {part.substring(0, close)}
       </span>
     );
   });
@@ -186,7 +263,6 @@ function truncateText(text: string, maxLength: number): string {
   return text.substring(0, maxLength).trim() + "…";
 }
 
-/** Parse a full verse key like "Genesis 1:3" → { book, chapter, verse } */
 function parseVerseKey(key: string) {
   const match = key.match(/^(.+)\s+(\d+):(\d+)$/);
   if (!match) return null;
@@ -197,13 +273,19 @@ function parseVerseKey(key: string) {
   };
 }
 
-// ── Component ─────────────────────────────────────────────────────────────────
+function cleanTextForSpeech(text: string): string {
+  return text
+    .replace(/\[[^\]]*\]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+// ── Component ──────────────────────────────────────────────────────────────
 
 export default function BibleReader() {
   const { toast } = useToast();
   const isAuthenticated = !!localStorage.getItem(TOKEN_KEY);
 
-  // Inject Google Fonts
   useEffect(() => {
     const link = document.createElement("link");
     link.href =
@@ -215,46 +297,64 @@ export default function BibleReader() {
     };
   }, []);
 
-  // ── Navigation state ─────────────────────────────────────────────────────
+  // ── Navigation ────────────────────────────────────────────────────────────
   const [selectedBook, setSelectedBook] = useState("Genesis");
-  const [currentChapter, setCurrentChapter] = useState(1);
+  const [selectedChapter, setSelectedChapter] = useState(1);
   const [versionId, setVersionId] = useState(DEFAULT_VERSION_ID);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [bookFilter, setBookFilter] = useState("");
+  const [displayBook, setDisplayBook] = useState("Genesis");
+  const [displayChapter, setDisplayChapter] = useState(1);
 
-  // ── Chapter / verse data ─────────────────────────────────────────────────
+  // ── Chapter data ──────────────────────────────────────────────────────────
   const [chapters, setChapters] = useState<ChapterData[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const chapterRefs = useRef<Record<string, HTMLDivElement>>({});
   const verseRefs = useRef<Record<string, HTMLSpanElement | null>>({});
-  const [displayChapter, setDisplayChapter] = useState(1);
+  const isNavigatingRef = useRef(false);
+  const loadingRef = useRef(false);
 
-  // ── Selection — stored as full verse keys e.g. "Genesis 1:1" ─────────────
+  // ── Selection ─────────────────────────────────────────────────────────────
   const [selectedVerses, setSelectedVerses] = useState<string[]>([]);
 
-  // ── Annotations ──────────────────────────────────────────────────────────
+  // ── Annotations ───────────────────────────────────────────────────────────
   const [highlights, setHighlights] = useState<Record<string, Highlight>>({});
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [verseNotes, setVerseNotes] = useState<Record<string, string>>({});
 
-  // ── Verse explanations — keyed by full verse key for inline display ─────────────
-  const [verseExplanationMap, setVerseExplanationMap] = useState<Record<string, string>>({});
-  const [expandedExplanation, setExpandedExplanation] = useState<string | null>(null);
+  // ── Explanations ──────────────────────────────────────────────────────────
+  const [verseExplanationMap, setVerseExplanationMap] = useState<
+    Record<string, string>
+  >({});
+  const [expandedExplanation, setExpandedExplanation] = useState<string | null>(
+    null,
+  );
   const [explanationLoading, setExplanationLoading] = useState(false);
-  const [expandedFullExplanation, setExpandedFullExplanation] = useState<Set<string>>(new Set());
+  const [expandedFullExplanation, setExpandedFullExplanation] = useState<
+    Set<string>
+  >(new Set());
 
-  // ── Voice reading state ─────────────────────────────────────────────────────────
+  // ── Voice reading ─────────────────────────────────────────────────────────
+  const [voiceMode, setVoiceMode] = useState<"chapter" | "selected" | null>(
+    null,
+  );
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
-  const [speechProgress, setSpeechProgress] = useState<number>(0);
-  const speechQueueRef = useRef<string[]>([]);
-  const currentIndexRef = useRef(0);
+  const [currentSpeechIdx, setCurrentSpeechIdx] = useState(0);
+  const [speechItems, setSpeechItems] = useState<SpeechItem[]>([]);
+
+  // Refs for async loop — avoids stale-closure issues entirely
+  const speechItemsRef = useRef<SpeechItem[]>([]);
+  const currentIdxRef = useRef(0);
   const isReadingRef = useRef(false);
   const isPausedRef = useRef(false);
+  // Resolving this lets the loop skip the current utterance immediately
+  const skipRef = useRef<(() => void) | null>(null);
 
-// ── Modal / UI state ─────────────────────────────────────────────────────
+  // ── Modals ────────────────────────────────────────────────────────────────
   const [showSearchModal, setShowSearchModal] = useState(false);
   const [showHighlightPicker, setShowHighlightPicker] = useState(false);
   const [showNoteModal, setShowNoteModal] = useState(false);
@@ -262,122 +362,44 @@ export default function BibleReader() {
   const [noteSaving, setNoteSaving] = useState(false);
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const currentVersion = useMemo(() => getVersionById(versionId), [versionId]);
-
-  // ── Chapter counts ────────────────────────────────────────────────────────
-  const maxChapters: Record<string, number> = useMemo(
-    () => ({
-      Genesis: 50,
-      Exodus: 40,
-      Leviticus: 27,
-      Numbers: 36,
-      Deuteronomy: 34,
-      Joshua: 24,
-      Judges: 21,
-      Ruth: 4,
-      "1 Samuel": 31,
-      "2 Samuel": 24,
-      "1 Kings": 22,
-      "2 Kings": 25,
-      "1 Chronicles": 29,
-      "2 Chronicles": 36,
-      Ezra: 10,
-      Nehemiah: 13,
-      Esther: 10,
-      Job: 42,
-      Psalms: 150,
-      Proverbs: 31,
-      Ecclesiastes: 12,
-      "Song of Solomon": 8,
-      Isaiah: 66,
-      Jeremiah: 52,
-      Lamentations: 5,
-      Ezekiel: 48,
-      Daniel: 12,
-      Hosea: 14,
-      Joel: 3,
-      Amos: 9,
-      Obadiah: 1,
-      Jonah: 4,
-      Micah: 7,
-      Nahum: 3,
-      Habakkuk: 3,
-      Zephaniah: 3,
-      Haggai: 2,
-      Zechariah: 14,
-      Malachi: 4,
-      Matthew: 28,
-      Mark: 16,
-      Luke: 24,
-      John: 21,
-      Acts: 28,
-      Romans: 16,
-      "1 Corinthians": 16,
-      "2 Corinthians": 13,
-      Galatians: 6,
-      Ephesians: 6,
-      Philippians: 4,
-      Colossians: 4,
-      "1 Thessalonians": 5,
-      "2 Thessalonians": 3,
-      "1 Timothy": 6,
-      "2 Timothy": 4,
-      Titus: 3,
-      Philemon: 1,
-      Hebrews: 13,
-      James: 5,
-      "1 Peter": 5,
-      "2 Peter": 3,
-      "1 John": 5,
-      "2 John": 1,
-      "3 John": 1,
-      Jude: 1,
-      Revelation: 22,
-    }),
-    [],
-  );
-
-  const maxChapter = maxChapters[selectedBook] || 1;
-  const prevChapter = currentChapter > 1 ? currentChapter - 1 : null;
-  const nextChapter = currentChapter < maxChapter ? currentChapter + 1 : null;
+  const maxChapterForDisplay = MAX_CHAPTERS[displayBook] ?? 1;
 
   // ── Data loading ──────────────────────────────────────────────────────────
 
   const loadChapters = useCallback(
     async (book: string, startChapter: number, count: number) => {
-      if (loading) return;
+      if (loadingRef.current) return;
+      loadingRef.current = true;
       setLoading(true);
       try {
-        const module = await VERSION_FILES[versionId]();
-        const verses = module.default;
-        const loadedChapters: ChapterData[] = [];
+        const mod = await VERSION_FILES[versionId]();
+        const verses = mod.default;
+        const loaded: ChapterData[] = [];
         for (let i = 0; i < count; i++) {
           const ch = startChapter + i;
-          if (ch > maxChapters[book]) break;
-          const chapterVerses = processVerses(verses, book, ch);
-          if (chapterVerses.length > 0)
-            loadedChapters.push({ book, chapter: ch, verses: chapterVerses });
+          if (ch > (MAX_CHAPTERS[book] ?? 1)) break;
+          const cv = processVerses(verses, book, ch);
+          if (cv.length > 0) loaded.push({ book, chapter: ch, verses: cv });
         }
         setChapters((prev) => {
-          const existingKeys = new Set(
-            prev.map((c) => `${c.book}-${c.chapter}`),
-          );
+          const ex = new Set(prev.map((c) => `${c.book}-${c.chapter}`));
           return [
             ...prev,
-            ...loadedChapters.filter(
-              (c) => !existingKeys.has(`${c.book}-${c.chapter}`),
-            ),
+            ...loaded.filter((c) => !ex.has(`${c.book}-${c.chapter}`)),
           ];
         });
-        setHasMore(loadedChapters.length === count);
-      } catch (error) {
-        console.error("Failed to load chapters:", error);
+        setHasMore(loaded.length === count);
+      } catch (err) {
+        console.error("Failed to load chapters:", err);
       } finally {
+        loadingRef.current = false;
         setLoading(false);
       }
     },
-    [loading, versionId, maxChapters],
+    [versionId],
   );
 
   const loadHighlights = useCallback(
@@ -405,7 +427,7 @@ export default function BibleReader() {
           setHighlights((prev) => ({ ...prev, ...map }));
         }
       } catch (e) {
-        console.error("Error loading highlights:", e);
+        console.error(e);
       }
     },
     [isAuthenticated],
@@ -425,7 +447,7 @@ export default function BibleReader() {
         );
       }
     } catch (e) {
-      console.error("Error loading favorites:", e);
+      console.error(e);
     }
   }, [isAuthenticated]);
 
@@ -438,17 +460,17 @@ export default function BibleReader() {
           chapter,
         });
         if (res.returnCode === 200 && res.returnData) {
-          const notesMap: Record<string, string> = {};
           const notes = Array.isArray(res.returnData)
             ? res.returnData
             : res.returnData.notes || [];
+          const map: Record<string, string> = {};
           notes.forEach((n: any) => {
-            notesMap[`${n.bookName} ${n.chapter}:${n.verseNumber}`] = n.note;
+            map[`${n.bookName} ${n.chapter}:${n.verseNumber}`] = n.note;
           });
-          setVerseNotes((prev) => ({ ...prev, ...notesMap }));
+          setVerseNotes((prev) => ({ ...prev, ...map }));
         }
       } catch (e) {
-        console.error("Error loading notes:", e);
+        console.error(e);
       }
     },
     [isAuthenticated],
@@ -457,56 +479,91 @@ export default function BibleReader() {
   // ── Effects ───────────────────────────────────────────────────────────────
 
   useEffect(() => {
+    chapterRefs.current = {};
+    verseRefs.current = {};
     setChapters([]);
-    setDisplayChapter(1);
-    loadChapters(selectedBook, 1, 5);
+    setHasMore(true);
+    setDisplayBook(selectedBook);
+    setDisplayChapter(selectedChapter);
+    loadChapters(selectedBook, selectedChapter, 5);
     if (isAuthenticated) {
-      loadHighlights(selectedBook, 1);
+      loadHighlights(selectedBook, selectedChapter);
       loadFavorites();
-      loadNotes(selectedBook, 1);
+      loadNotes(selectedBook, selectedChapter);
     }
-  }, [selectedBook, versionId, isAuthenticated]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedBook, versionId]);
 
   useEffect(() => {
-    const el = chapterRefs.current[`${selectedBook}-${currentChapter}`];
-    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-    if (isAuthenticated) {
-      loadHighlights(selectedBook, currentChapter);
-      loadNotes(selectedBook, currentChapter);
+    const key = `${selectedBook}-${selectedChapter}`;
+    const el = chapterRefs.current[key];
+    if (el) {
+      isNavigatingRef.current = true;
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+      setTimeout(() => {
+        isNavigatingRef.current = false;
+      }, 800);
     }
-  }, [currentChapter, selectedBook]);
+    if (isAuthenticated) {
+      loadHighlights(selectedBook, selectedChapter);
+      loadNotes(selectedBook, selectedChapter);
+    }
+  }, [
+    selectedChapter,
+    selectedBook,
+    isAuthenticated,
+    loadHighlights,
+    loadNotes,
+  ]);
 
-  // Infinite scroll sentinel
+  // Infinite scroll
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && hasMore && !loading) {
-          const lastChapter = chapters[chapters.length - 1];
-          if (lastChapter)
-            loadChapters(lastChapter.book, lastChapter.chapter + 1, 5);
+        if (entries[0].isIntersecting && hasMore && !loadingRef.current) {
+          setChapters((prev) => {
+            const last = prev[prev.length - 1];
+            if (last) loadChapters(last.book, last.chapter + 1, 5);
+            return prev;
+          });
         }
       },
       { threshold: 0.1 },
     );
     if (loadMoreRef.current) observer.observe(loadMoreRef.current);
     return () => observer.disconnect();
-  }, [chapters, hasMore, loading, loadChapters]);
+  }, [hasMore, loadChapters]);
 
-  // Track which chapter is visible
+  // Scroll-based chapter tracking
   useEffect(() => {
+    if (chapters.length === 0) return;
     const observer = new IntersectionObserver(
       (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
-            const key = entry.target.getAttribute("data-chapter-key");
-            if (key) {
-              const parts = key.split("-");
-              setDisplayChapter(parseInt(parts[parts.length - 1]));
-            }
-          }
-        });
+        if (isNavigatingRef.current) return;
+        let best: IntersectionObserverEntry | null = null;
+        for (const entry of entries) {
+          if (
+            entry.isIntersecting &&
+            (!best || entry.intersectionRatio > best.intersectionRatio)
+          )
+            best = entry;
+        }
+        if (best) {
+          const ck = best.target.getAttribute("data-chapter-key");
+          if (!ck) return;
+          const ld = ck.lastIndexOf("-");
+          const book = ck.substring(0, ld);
+          const ch = parseInt(ck.substring(ld + 1), 10);
+          if (!book || isNaN(ch)) return;
+          setDisplayBook(book);
+          setDisplayChapter(ch);
+          setSelectedChapter(ch);
+        }
       },
-      { rootMargin: "-40% 0px -40% 0px", threshold: 0.5 },
+      {
+        rootMargin: "-35% 0px -35% 0px",
+        threshold: [0, 0.1, 0.25, 0.5, 0.75, 1.0],
+      },
     );
     Object.values(chapterRefs.current).forEach((el) => {
       if (el) observer.observe(el);
@@ -514,31 +571,236 @@ export default function BibleReader() {
     return () => observer.disconnect();
   }, [chapters]);
 
-  // ── Derived / filtered ────────────────────────────────────────────────────
+  // Scroll currently-reading verse into view
+  useEffect(() => {
+    if (!isSpeaking || speechItems.length === 0) return;
+    const item = speechItems[currentSpeechIdx];
+    if (!item) return;
+    verseRefs.current[item.verseKey]?.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+  }, [currentSpeechIdx, isSpeaking, speechItems]);
 
+  // ── Derived ───────────────────────────────────────────────────────────────
   const filteredBooks = useMemo(() => {
-    if (!searchQuery) return BOOKS;
-    return BOOKS.filter((book) =>
-      book.toLowerCase().includes(searchQuery.toLowerCase()),
+    if (!bookFilter) return BOOKS;
+    return BOOKS.filter((b) =>
+      b.toLowerCase().includes(bookFilter.toLowerCase()),
     );
-  }, [searchQuery]);
+  }, [bookFilter]);
+
+  const isAtVeryStart = displayBook === BOOKS[0] && displayChapter === 1;
+  const isAtVeryEnd =
+    displayBook === BOOKS[BOOKS.length - 1] &&
+    displayChapter >= maxChapterForDisplay;
+
+  // ── Speech engine ─────────────────────────────────────────────────────────
+
+  /**
+   * Speak one text string. The promise resolves when the utterance ends
+   * OR when skipRef.current() is called (skip forward / back).
+   */
+  const speakOne = (text: string): Promise<void> =>
+    new Promise((resolve) => {
+      if (!("speechSynthesis" in window)) {
+        resolve();
+        return;
+      }
+      skipRef.current = resolve; // allow external skip
+      const u = new SpeechSynthesisUtterance(text);
+      u.rate = 0.92;
+      u.pitch = 1.0;
+      u.onend = () => {
+        skipRef.current = null;
+        resolve();
+      };
+      u.onerror = () => {
+        skipRef.current = null;
+        resolve();
+      };
+      window.speechSynthesis.speak(u);
+    });
+
+  /** Main loop: reads from currentIdxRef through speechItemsRef */
+  const runLoop = async () => {
+    const items = speechItemsRef.current;
+    while (currentIdxRef.current < items.length && isReadingRef.current) {
+      // Pause gate
+      while (isPausedRef.current && isReadingRef.current) {
+        await new Promise((r) => setTimeout(r, 100));
+      }
+      if (!isReadingRef.current) break;
+
+      const i = currentIdxRef.current;
+      setCurrentSpeechIdx(i);
+      await speakOne(items[i].text);
+
+      // After speaking, advance only if we weren't skipped backwards
+      // (skipBack sets currentIdxRef to a lower value before cancelling,
+      //  so we must NOT blindly increment — just let the while condition re-check)
+      if (isReadingRef.current && currentIdxRef.current === i) {
+        currentIdxRef.current = i + 1;
+      }
+    }
+
+    // Finished naturally
+    if (isReadingRef.current) {
+      isReadingRef.current = false;
+      isPausedRef.current = false;
+      setIsSpeaking(false);
+      setIsPaused(false);
+      setCurrentSpeechIdx(0);
+      setVoiceMode(null);
+    }
+  };
+
+  const buildChapterItems = (cd: ChapterData): SpeechItem[] =>
+    cd.verses.map((v) => ({
+      verseKey: v.key,
+      verseNum: v.num,
+      text: `Verse ${v.num}. ${cleanTextForSpeech(v.text)}`,
+    }));
+
+  const buildSelectionItems = (keys: string[]): SpeechItem[] => {
+    const sorted = [...keys].sort((a, b) => {
+      const am = a.match(/(\d+):(\d+)$/)!,
+        bm = b.match(/(\d+):(\d+)$/)!;
+      if (!am || !bm) return 0;
+      const cd = parseInt(am[1]) - parseInt(bm[1]);
+      return cd !== 0 ? cd : parseInt(am[2]) - parseInt(bm[2]);
+    });
+    return sorted.map((key) => {
+      const p = parseVerseKey(key);
+      let text = key;
+      if (p) {
+        const ch = chapters.find(
+          (c) => c.book === p.book && c.chapter === p.chapter,
+        );
+        const v = ch?.verses.find((vv) => vv.num === p.verse);
+        if (v) text = `Verse ${p.verse}. ${cleanTextForSpeech(v.text)}`;
+      }
+      return { verseKey: key, verseNum: p?.verse ?? 0, text };
+    });
+  };
+
+  const startSpeech = (
+    items: SpeechItem[],
+    mode: "chapter" | "selected",
+    startIdx = 0,
+  ) => {
+    window.speechSynthesis.cancel();
+    speechItemsRef.current = items;
+    currentIdxRef.current = startIdx;
+    isReadingRef.current = true;
+    isPausedRef.current = false;
+    setSpeechItems(items);
+    setCurrentSpeechIdx(startIdx);
+    setIsSpeaking(true);
+    setIsPaused(false);
+    setVoiceMode(mode);
+    runLoop();
+  };
+
+  const stopSpeaking = useCallback(() => {
+    isReadingRef.current = false;
+    isPausedRef.current = false;
+    window.speechSynthesis.cancel();
+    skipRef.current?.();
+    skipRef.current = null;
+    setIsSpeaking(false);
+    setIsPaused(false);
+    setCurrentSpeechIdx(0);
+    setSpeechItems([]);
+    setVoiceMode(null);
+  }, []);
+
+  const pauseResume = () => {
+    if (isPaused) {
+      window.speechSynthesis.resume();
+      isPausedRef.current = false;
+      setIsPaused(false);
+    } else {
+      window.speechSynthesis.pause();
+      isPausedRef.current = true;
+      setIsPaused(true);
+    }
+  };
+
+  /**
+   * Skip to next verse: cancel current utterance and advance the index.
+   * The loop checks `currentIdxRef.current === i` before incrementing,
+   * so we pre-set it to i+1 then cancel → loop sees mismatch and stays.
+   */
+  const skipForward = () => {
+    const next = currentIdxRef.current + 1;
+    if (next >= speechItemsRef.current.length) {
+      stopSpeaking();
+      return;
+    }
+    currentIdxRef.current = next;
+    window.speechSynthesis.cancel();
+    skipRef.current?.();
+    skipRef.current = null;
+  };
+
+  /**
+   * Skip to previous verse: set index back, then cancel.
+   */
+  const skipBack = () => {
+    const prev = Math.max(0, currentIdxRef.current - 1);
+    currentIdxRef.current = prev;
+    window.speechSynthesis.cancel();
+    skipRef.current?.();
+    skipRef.current = null;
+  };
+
+  const readChapter = () => {
+    if (isSpeaking && voiceMode === "chapter") {
+      stopSpeaking();
+      return;
+    }
+    if (isSpeaking) stopSpeaking();
+    const cd = chapters.find(
+      (c) => c.book === displayBook && c.chapter === displayChapter,
+    );
+    if (!cd) {
+      toast({
+        title: "Chapter not loaded",
+        description: "Scroll to the chapter first.",
+        variant: "destructive",
+      });
+      return;
+    }
+    const items = buildChapterItems(cd);
+    if (items.length === 0) return;
+    startSpeech(items, "chapter", 0);
+  };
+
+  const readSelectedVerses = () => {
+    if (selectedVerses.length === 0) return;
+    if (isSpeaking && voiceMode === "selected") {
+      stopSpeaking();
+      return;
+    }
+    if (isSpeaking) stopSpeaking();
+    const items = buildSelectionItems(selectedVerses);
+    startSpeech(items, "selected", 0);
+  };
 
   // ── Selection helpers ─────────────────────────────────────────────────────
 
   const toggleVerseSelection = (verseKey: string) => {
-    // Close expanded explanation if deselecting a verse that has it
     if (selectedVerses.includes(verseKey) && expandedExplanation === verseKey) {
       setExpandedExplanation(null);
       setExpandedFullExplanation((prev) => {
-        const next = new Set(prev);
-        next.delete(verseKey);
-        return next;
+        const n = new Set(prev);
+        n.delete(verseKey);
+        return n;
       });
     }
-    // Close explanation if selecting a different verse
-    if (expandedExplanation && expandedExplanation !== verseKey) {
+    if (expandedExplanation && expandedExplanation !== verseKey)
       setExpandedExplanation(null);
-    }
     setSelectedVerses((prev) =>
       prev.includes(verseKey)
         ? prev.filter((v) => v !== verseKey)
@@ -546,82 +808,63 @@ export default function BibleReader() {
     );
   };
 
-  const clearSelection = () => {
+  const clearSelection = useCallback(() => {
     setSelectedVerses([]);
     setExpandedExplanation(null);
     setExpandedFullExplanation(new Set());
-    stopSpeaking();
-  };
+  }, []);
 
-  /**
-   * Groups selected verse keys by book+chapter.
-   * e.g. ["Genesis 1:1", "Genesis 1:3", "Genesis 2:5"]
-   *   → [{ book: "Genesis", chapter: 1, verses: [1, 3] },
-   *      { book: "Genesis", chapter: 2, verses: [5] }]
-   *
-   * This is the source of truth for all API calls — never relies on
-   * currentChapter state, so cross-chapter selections always work correctly.
-   */
   const getSelectionGroups = useCallback(() => {
     const groups = new Map<
       string,
       { book: string; chapter: number; verses: number[] }
     >();
     for (const key of selectedVerses) {
-      const parsed = parseVerseKey(key);
-      if (!parsed) continue;
-      const { book, chapter, verse } = parsed;
-      const groupKey = `${book}|${chapter}`;
-      if (!groups.has(groupKey))
-        groups.set(groupKey, { book, chapter, verses: [] });
-      groups.get(groupKey)!.verses.push(verse);
+      const p = parseVerseKey(key);
+      if (!p) continue;
+      const gk = `${p.book}|${p.chapter}`;
+      if (!groups.has(gk))
+        groups.set(gk, { book: p.book, chapter: p.chapter, verses: [] });
+      groups.get(gk)!.verses.push(p.verse);
     }
     return [...groups.values()];
   }, [selectedVerses]);
 
-  // ── Annotation lookup — keyed by full verse key, not verse number ─────────
-  // These work correctly across all lazily-loaded chapters.
+  // ── Annotation helpers ────────────────────────────────────────────────────
+  const isHighlighted = (vk: string) => highlights[vk]?.color;
+  const isFavorite = (vk: string) => favorites.has(vk);
+  const getVerseNote = (vk: string) => verseNotes[vk] || null;
+  const getVerseExplanation = (vk: string) => verseExplanationMap[vk] || null;
 
-  const isHighlighted = (verseKey: string) => highlights[verseKey]?.color;
-  const isFavorite = (verseKey: string) => favorites.has(verseKey);
-  const getVerseNote = (verseKey: string) => verseNotes[verseKey] || null;
-  const getVerseExplanation = (verseKey: string) => verseExplanationMap[verseKey] || null;
-
-  // ── Toggle explanation inline ─────────────────────────────────────────────
+  // ── Toggle explanation ────────────────────────────────────────────────────
   const toggleExplanation = async (verseKey: string) => {
-    // If already expanded, collapse it and scroll verse back into view
     if (expandedExplanation === verseKey) {
       setExpandedExplanation(null);
       setExpandedFullExplanation((prev) => {
-        const next = new Set(prev);
-        next.delete(verseKey);
-        return next;
+        const n = new Set(prev);
+        n.delete(verseKey);
+        return n;
       });
-      requestAnimationFrame(() => {
-        const verseEl = verseRefs.current[verseKey];
-        if (verseEl) {
-          verseEl.scrollIntoView({ behavior: "smooth", block: "center" });
-        }
-      });
+      requestAnimationFrame(() =>
+        verseRefs.current[verseKey]?.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        }),
+      );
       return;
     }
-
-    // Check if we already have the explanation cached
     if (verseExplanationMap[verseKey]) {
       setExpandedExplanation(verseKey);
       return;
     }
-
-    // Need to fetch from API
-    const parsed = parseVerseKey(verseKey);
-    if (!parsed) return;
-    
+    const p = parseVerseKey(verseKey);
+    if (!p) return;
     setExplanationLoading(true);
     try {
       const res = await sendPostRequest("bible", "get-verse-explanation", {
-        bookName: parsed.book,
-        chapter: parsed.chapter,
-        verseNumber: parsed.verse,
+        bookName: p.book,
+        chapter: p.chapter,
+        verseNumber: p.verse,
       });
       if (res?.returnCode === 200 && res.returnData?.explanation) {
         setVerseExplanationMap((prev) => ({
@@ -632,10 +875,10 @@ export default function BibleReader() {
       } else {
         toast({
           title: "No Explanation",
-          description: "No explanation found for this verse.",
+          description: "No explanation found.",
         });
       }
-    } catch (e) {
+    } catch {
       toast({
         title: "Error",
         description: "Failed to load explanation.",
@@ -646,180 +889,94 @@ export default function BibleReader() {
     }
   };
 
-  const clearExplanation = (verseKey: string) => {
-    setVerseExplanationMap((prev) => {
-      const next = { ...prev };
-      delete next[verseKey];
-      return next;
-    });
-    if (expandedExplanation === verseKey) {
-      setExpandedExplanation(null);
-    }
-  };
-
-  // ── Voice reading ──────────────────────────────────────────────────────────────
-  const cleanTextForSpeech = (text: string): string => {
-    return text.replace(/\[[^\]]*\]/g, "").replace(/\s+/g, " ").trim();
-  };
-
-  const getVerseTextByKey = (verseKey: string): string => {
-    for (const chapter of chapters) {
-      const verse = chapter.verses.find((v) => v.key === verseKey);
-      if (verse) return cleanTextForSpeech(verse.text);
-    }
-    return "";
-  };
-
-  const speak = (text: string): Promise<void> => {
-    return new Promise((resolve, reject) => {
-      if (!("speechSynthesis" in window)) {
-        reject(new Error("Speech synthesis not supported"));
-        return;
-      }
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = 0.9;
-      utterance.pitch = 1;
-      utterance.onend = () => resolve();
-      utterance.onerror = (e) => reject(e);
-      window.speechSynthesis.speak(utterance);
-    });
-  };
-
-  const stopSpeaking = () => {
-    window.speechSynthesis.cancel();
-    isReadingRef.current = false;
-    isPausedRef.current = false;
-    setIsSpeaking(false);
-    setIsPaused(false);
-    setSpeechProgress(0);
-    speechQueueRef.current = [];
-    currentIndexRef.current = 0;
-  };
-
-  const pauseSpeaking = () => {
-    window.speechSynthesis.pause();
-    isPausedRef.current = true;
-    setIsPaused(true);
-  };
-
-  const resumeSpeaking = () => {
-    window.speechSynthesis.resume();
-    isPausedRef.current = false;
-    setIsPaused(false);
-  };
-
-  const readSelectedVerses = async () => {
-    if (selectedVerses.length === 0) return;
-
-    if (isSpeaking) {
-      stopSpeaking();
-      return;
-    }
-
-    const sortedVerses = [...selectedVerses].sort((a, b) => {
-      const aRef = a.match(/(\d+):(\d+)$/);
-      const bRef = b.match(/(\d+):(\d+)$/);
-      if (!aRef || !bRef) return 0;
-      const chDiff = parseInt(aRef[1]) - parseInt(bRef[1]);
-      return chDiff !== 0 ? chDiff : parseInt(aRef[2]) - parseInt(bRef[2]);
-    });
-
-    const texts = sortedVerses.map((key) => {
-      const parsed = parseVerseKey(key);
-      const verseText = getVerseTextByKey(key);
-      return verseText ? `${key} ${verseText}` : key;
-    });
-
-    speechQueueRef.current = texts;
-    currentIndexRef.current = 0;
-    isReadingRef.current = true;
-    isPausedRef.current = false;
-    setIsSpeaking(true);
-    setIsPaused(false);
-    setSpeechProgress(0);
-
-    for (let i = 0; i < texts.length; i++) {
-      if (!isReadingRef.current) break;
-
-      while (isPausedRef.current && isReadingRef.current) {
-        await new Promise((r) => setTimeout(r, 200));
-      }
-
-      if (!isReadingRef.current) break;
-
-      currentIndexRef.current = i;
-      setSpeechProgress(((i + 1) / texts.length) * 100);
-
-      try {
-        await speak(texts[i]);
-      } catch (e) {
-        console.error("Speech error:", e);
-      }
-    }
-
-    stopSpeaking();
-  };
-
-  const readChapter = async () => {
-    if (isSpeaking) {
-      stopSpeaking();
-      return;
-    }
-
-    const currentChapterData = chapters.find(
-      (c) => c.book === selectedBook && c.chapter === currentChapter
-    );
-    if (!currentChapterData) return;
-
-    const texts = currentChapterData.verses.map((v) => {
-      return `${selectedBook} ${currentChapter}:${v.num} ${cleanTextForSpeech(v.text)}`;
-    });
-
-    speechQueueRef.current = texts;
-    currentIndexRef.current = 0;
-    isReadingRef.current = true;
-    isPausedRef.current = false;
-    setIsSpeaking(true);
-    setIsPaused(false);
-    setSpeechProgress(0);
-
-    for (let i = 0; i < texts.length; i++) {
-      if (!isReadingRef.current) break;
-
-      while (isPausedRef.current && isReadingRef.current) {
-        await new Promise((r) => setTimeout(r, 200));
-      }
-
-      if (!isReadingRef.current) break;
-
-      currentIndexRef.current = i;
-      setSpeechProgress(((i + 1) / texts.length) * 100);
-
-      try {
-        await speak(texts[i]);
-      } catch (e) {
-        console.error("Speech error:", e);
-      }
-    }
-
-    stopSpeaking();
-  };
-
   // ── Navigation ────────────────────────────────────────────────────────────
 
   const handleBookChange = (book: string) => {
-    setSelectedBook(book);
-    setCurrentChapter(1);
-    setChapters([]);
+    if (book === selectedBook) return;
+    if (isSpeaking) stopSpeaking();
     clearSelection();
+    chapterRefs.current = {};
+    verseRefs.current = {};
+    setSelectedBook(book);
+    setSelectedChapter(1);
+    setDisplayBook(book);
+    setDisplayChapter(1);
+    setChapters([]);
+    setHasMore(true);
     loadChapters(book, 1, 5);
+    if (isAuthenticated) {
+      loadHighlights(book, 1);
+      loadFavorites();
+      loadNotes(book, 1);
+    }
   };
 
   const handleChapterChange = (ch: number) => {
-    setCurrentChapter(ch);
-    setChapters([]);
+    if (isSpeaking) stopSpeaking();
     clearSelection();
-    loadChapters(selectedBook, ch, 5);
+    setSelectedChapter(ch);
+    const key = `${selectedBook}-${ch}`;
+    if (chapterRefs.current[key]) {
+      isNavigatingRef.current = true;
+      chapterRefs.current[key].scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+      setDisplayBook(selectedBook);
+      setDisplayChapter(ch);
+      setTimeout(() => {
+        isNavigatingRef.current = false;
+      }, 800);
+    } else {
+      chapterRefs.current = {};
+      verseRefs.current = {};
+      setChapters([]);
+      setHasMore(true);
+      setDisplayBook(selectedBook);
+      setDisplayChapter(ch);
+      loadChapters(selectedBook, ch, 5);
+      if (isAuthenticated) {
+        loadHighlights(selectedBook, ch);
+        loadNotes(selectedBook, ch);
+      }
+    }
+  };
+
+  const goToPrevChapter = () => {
+    if (displayChapter > 1) {
+      handleChapterChange(displayChapter - 1);
+    } else {
+      const idx = BOOKS.indexOf(displayBook);
+      if (idx > 0) {
+        const prevBook = BOOKS[idx - 1];
+        const lastCh = MAX_CHAPTERS[prevBook] ?? 1;
+        if (isSpeaking) stopSpeaking();
+        clearSelection();
+        chapterRefs.current = {};
+        verseRefs.current = {};
+        setSelectedBook(prevBook);
+        setSelectedChapter(lastCh);
+        setDisplayBook(prevBook);
+        setDisplayChapter(lastCh);
+        setChapters([]);
+        setHasMore(true);
+        loadChapters(prevBook, lastCh, 5);
+        if (isAuthenticated) {
+          loadHighlights(prevBook, lastCh);
+          loadFavorites();
+          loadNotes(prevBook, lastCh);
+        }
+      }
+    }
+  };
+
+  const goToNextChapter = () => {
+    if (displayChapter < maxChapterForDisplay) {
+      handleChapterChange(displayChapter + 1);
+    } else {
+      const idx = BOOKS.indexOf(displayBook);
+      if (idx < BOOKS.length - 1) handleBookChange(BOOKS[idx + 1]);
+    }
   };
 
   // ── Actions ───────────────────────────────────────────────────────────────
@@ -846,7 +1003,7 @@ export default function BibleReader() {
       );
       toast({ title: "Added to Favorites" });
       loadFavorites();
-    } catch (e) {
+    } catch {
       toast({
         title: "Error",
         description: "Failed to add favorite.",
@@ -860,7 +1017,7 @@ export default function BibleReader() {
     if (!isAuthenticated) {
       toast({
         title: "Sign In Required",
-        description: "Sign in to highlight verses.",
+        description: "Sign in to highlight.",
         variant: "destructive",
       });
       return;
@@ -879,16 +1036,14 @@ export default function BibleReader() {
           }),
         ),
       );
-      // Optimistic local update — verse.key is already the full verse key
       selectedVerses.forEach((key) => {
         setHighlights((prev) => ({
           ...prev,
           [key]: { verseKey: key, color, colorId },
         }));
       });
-      // Reload from server to get IDs (needed for delete later)
       groups.forEach(({ book, chapter }) => loadHighlights(book, chapter));
-    } catch (e) {
+    } catch {
       toast({
         title: "Error",
         description: "Failed to highlight.",
@@ -898,69 +1053,35 @@ export default function BibleReader() {
     clearSelection();
   };
 
-  const removeHighlight = async (verseKey: string) => {
-    const h = highlights[verseKey];
-    if (!h?.id) return;
-    try {
-      await sendPostRequest("bible", "delete-highlight", { highlightId: h.id });
-      setHighlights((prev) => {
-        const next = { ...prev };
-        delete next[verseKey];
-        return next;
-      });
-    } catch (e) {
-      toast({
-        title: "Error",
-        description: "Failed to remove highlight.",
-        variant: "destructive",
-      });
-    }
+  const versesToText = (keys: string[]) => {
+    const sorted = [...keys].sort((a, b) => {
+      const am = a.match(/(\d+):(\d+)$/)!,
+        bm = b.match(/(\d+):(\d+)$/)!;
+      if (!am || !bm) return 0;
+      const cd = parseInt(am[1]) - parseInt(bm[1]);
+      return cd !== 0 ? cd : parseInt(am[2]) - parseInt(bm[2]);
+    });
+    return sorted
+      .map((key) => {
+        const p = parseVerseKey(key);
+        if (!p) return key;
+        const v = chapters
+          .find((c) => c.book === p.book && c.chapter === p.chapter)
+          ?.verses.find((vn) => vn.num === p.verse);
+        return v ? `${key}\n${v.text}` : key;
+      })
+      .join("\n\n");
   };
 
   const copyVerses = () => {
-    const text = [...selectedVerses]
-      .sort((a, b) => {
-        const aRef = a.match(/(\d+):(\d+)$/);
-        const bRef = b.match(/(\d+):(\d+)$/);
-        if (!aRef || !bRef) return 0;
-        const chDiff = parseInt(aRef[1]) - parseInt(bRef[1]);
-        return chDiff !== 0 ? chDiff : parseInt(aRef[2]) - parseInt(bRef[2]);
-      })
-      .map((key) => {
-        const parsed = parseVerseKey(key);
-        if (!parsed) return key;
-        const verse = chapters
-          .find((c) => c.book === parsed.book && c.chapter === parsed.chapter)
-          ?.verses.find((vn) => vn.num === parsed.verse);
-        return verse ? `${key}\n${verse.text}` : key;
-      })
-      .join("\n\n");
-
-    navigator.clipboard.writeText(text);
+    navigator.clipboard.writeText(versesToText(selectedVerses));
     toast({ title: "Copied", description: "Verses copied to clipboard." });
     clearSelection();
   };
 
   const shareVerses = async () => {
-    const text = [...selectedVerses]
-      .sort((a, b) => {
-        const aRef = a.match(/(\d+):(\d+)$/);
-        const bRef = b.match(/(\d+):(\d+)$/);
-        if (!aRef || !bRef) return 0;
-        const chDiff = parseInt(aRef[1]) - parseInt(bRef[1]);
-        return chDiff !== 0 ? chDiff : parseInt(aRef[2]) - parseInt(bRef[2]);
-      })
-      .map((key) => {
-        const parsed = parseVerseKey(key);
-        if (!parsed) return key;
-        const verse = chapters
-          .find((c) => c.book === parsed.book && c.chapter === parsed.chapter)
-          ?.verses.find((vn) => vn.num === parsed.verse);
-        return verse ? `${key}\n${verse.text}` : key;
-      })
-      .join("\n\n");
     try {
-      await navigator.share({ text });
+      await navigator.share({ text: versesToText(selectedVerses) });
     } catch (e) {
       console.error(e);
     }
@@ -988,8 +1109,8 @@ export default function BibleReader() {
           }),
         ),
       );
-      toast({ title: "Note Saved", description: "Your note has been saved." });
-    } catch (e) {
+      toast({ title: "Note Saved" });
+    } catch {
       toast({
         title: "Error",
         description: "Failed to save note.",
@@ -1005,8 +1126,8 @@ export default function BibleReader() {
   // ── Search ────────────────────────────────────────────────────────────────
 
   const goToVerse = (book: string, chapterNum: number) => {
-    setSelectedBook(book);
-    setCurrentChapter(chapterNum);
+    handleBookChange(book);
+    setTimeout(() => handleChapterChange(chapterNum), 100);
     setShowSearchModal(false);
     setSearchQuery("");
   };
@@ -1016,25 +1137,24 @@ export default function BibleReader() {
     if (query.trim().length > 2) {
       setSearchLoading(true);
       try {
-        const module = await VERSION_FILES[versionId]();
-        const allVerses = module.default;
+        const mod = await VERSION_FILES[versionId]();
         const results: any[] = [];
-        Object.entries(allVerses)
+        Object.entries(mod.default)
           .filter(([, text]) =>
             text.toLowerCase().includes(query.toLowerCase()),
           )
           .slice(0, 30)
           .forEach(([key]) => {
-            const match = key.match(/^(.+?)\s+(\d+):(\d+)$/);
-            if (match)
+            const m = key.match(/^(.+?)\s+(\d+):(\d+)$/);
+            if (m)
               results.push({
-                book: match[1],
-                chapter: parseInt(match[2]),
-                verse: parseInt(match[3]),
+                book: m[1],
+                chapter: parseInt(m[2]),
+                verse: parseInt(m[3]),
               });
           });
         setSearchResults(results);
-      } catch (e) {
+      } catch {
         setSearchResults([]);
       }
       setSearchLoading(false);
@@ -1043,13 +1163,22 @@ export default function BibleReader() {
     }
   };
 
+  // ── Player derived values ─────────────────────────────────────────────────
+  const currentItem = speechItems[currentSpeechIdx] ?? null;
+  const progressPct =
+    speechItems.length > 0
+      ? ((currentSpeechIdx + 1) / speechItems.length) * 100
+      : 0;
+  const canSkipBack = currentSpeechIdx > 0;
+  const canSkipForward = currentSpeechIdx < speechItems.length - 1;
+
   // ── Render ────────────────────────────────────────────────────────────────
 
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-background">
       {/* ── Header ── */}
       <header className="flex-shrink-0 border-b bg-background/95 backdrop-blur-sm sticky top-0 z-30">
-        {/* Top bar: logo + version */}
+        {/* Top bar */}
         <div className="flex items-center justify-between px-6 py-3 border-b border-border/40">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
@@ -1068,38 +1197,58 @@ export default function BibleReader() {
             </div>
           </div>
 
-          <Select value={versionId} onValueChange={setVersionId}>
-            <SelectTrigger className="w-[180px] h-8 text-xs border-border/50 bg-muted/30">
-              <SelectValue placeholder="Select version" />
-            </SelectTrigger>
-            <SelectContent>
-              {BIBLE_VERSIONS.map((version) => (
-                <SelectItem
-                  key={version.id}
-                  value={version.id}
-                  className="text-xs"
-                >
-                  {version.name} ({version.year})
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="flex items-center gap-2">
+            {/* Read Chapter button in header */}
+            <Button
+              variant={
+                isSpeaking && voiceMode === "chapter" ? "default" : "outline"
+              }
+              size="sm"
+              onClick={readChapter}
+              className="h-8 px-3 text-xs gap-1.5"
+            >
+              {isSpeaking && voiceMode === "chapter" ? (
+                <>
+                  <VolumeX className="w-3.5 h-3.5" />
+                  Stop
+                </>
+              ) : (
+                <>
+                  <Volume2 className="w-3.5 h-3.5" />
+                  Read Chapter
+                </>
+              )}
+            </Button>
+
+            <Select value={versionId} onValueChange={setVersionId}>
+              <SelectTrigger className="w-[160px] h-8 text-xs border-border/50 bg-muted/30">
+                <SelectValue placeholder="Select version" />
+              </SelectTrigger>
+              <SelectContent>
+                {BIBLE_VERSIONS.map((v) => (
+                  <SelectItem key={v.id} value={v.id} className="text-xs">
+                    {v.name} ({v.year})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         {/* Book + chapter selectors */}
         <div className="flex items-center gap-3 px-6 py-3 border-b border-border/40">
-          <div className="relative flex-1 max-w-[220px]">
+          <div className="relative flex-1 max-w-[200px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
             <Input
               placeholder="Filter books…"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              value={bookFilter}
+              onChange={(e) => setBookFilter(e.target.value)}
               className="pl-8 h-8 text-xs border-border/50 bg-muted/30"
             />
           </div>
 
           <Select value={selectedBook} onValueChange={handleBookChange}>
-            <SelectTrigger className="w-[180px] h-8 text-xs border-border/50 bg-muted/30">
+            <SelectTrigger className="w-[175px] h-8 text-xs border-border/50 bg-muted/30">
               <SelectValue placeholder="Select book" />
             </SelectTrigger>
             <SelectContent>
@@ -1114,45 +1263,48 @@ export default function BibleReader() {
           </Select>
 
           <Select
-            value={currentChapter.toString()}
-            onValueChange={(val) => handleChapterChange(parseInt(val))}
+            value={displayChapter.toString()}
+            onValueChange={(val) => handleChapterChange(parseInt(val, 10))}
           >
             <SelectTrigger className="w-[130px] h-8 text-xs border-border/50 bg-muted/30">
               <SelectValue placeholder="Chapter" />
             </SelectTrigger>
             <SelectContent>
               <ScrollArea className="h-[200px]">
-                {Array.from({ length: maxChapter }, (_, i) => i + 1).map(
-                  (ch) => (
-                    <SelectItem
-                      key={ch}
-                      value={ch.toString()}
-                      className="text-xs"
-                    >
-                      Chapter {ch}
-                    </SelectItem>
-                  ),
-                )}
+                {Array.from(
+                  { length: maxChapterForDisplay },
+                  (_, i) => i + 1,
+                ).map((ch) => (
+                  <SelectItem
+                    key={ch}
+                    value={ch.toString()}
+                    className="text-xs"
+                  >
+                    Chapter {ch}
+                  </SelectItem>
+                ))}
               </ScrollArea>
             </SelectContent>
           </Select>
         </div>
 
-        {/* Chapter navigation bar */}
+        {/* Chapter nav bar */}
         <div className="flex items-center justify-between px-6 py-2">
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => prevChapter && handleChapterChange(prevChapter)}
-            disabled={!prevChapter}
+            onClick={goToPrevChapter}
+            disabled={isAtVeryStart}
             className="flex items-center gap-1.5 h-8 px-3 text-xs text-muted-foreground hover:text-foreground disabled:opacity-30"
           >
             <ChevronLeft className="w-3.5 h-3.5" />
-            {prevChapter ? (
-              <span>Ch. {prevChapter}</span>
-            ) : (
-              <span>Previous</span>
-            )}
+            <span>
+              {displayChapter > 1
+                ? `Ch. ${displayChapter - 1}`
+                : BOOKS.indexOf(displayBook) > 0
+                  ? BOOKS[BOOKS.indexOf(displayBook) - 1]
+                  : "Prev"}
+            </span>
           </Button>
 
           <div className="text-center">
@@ -1160,10 +1312,10 @@ export default function BibleReader() {
               className="text-sm font-medium text-foreground tracking-wide leading-none"
               style={{ fontFamily: "'Cinzel', serif" }}
             >
-              {selectedBook}
+              {displayBook}
             </p>
             <p className="text-[11px] text-muted-foreground mt-0.5">
-              Chapter {displayChapter || currentChapter} of {maxChapter}
+              Chapter {displayChapter} of {maxChapterForDisplay}
               <span className="mx-1.5 opacity-40">·</span>
               <span className="text-primary/80">
                 {currentVersion?.abbreviation}
@@ -1174,11 +1326,17 @@ export default function BibleReader() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => nextChapter && handleChapterChange(nextChapter)}
-            disabled={!nextChapter}
+            onClick={goToNextChapter}
+            disabled={isAtVeryEnd}
             className="flex items-center gap-1.5 h-8 px-3 text-xs text-muted-foreground hover:text-foreground disabled:opacity-30"
           >
-            {nextChapter ? <span>Ch. {nextChapter}</span> : <span>Next</span>}
+            <span>
+              {displayChapter < maxChapterForDisplay
+                ? `Ch. ${displayChapter + 1}`
+                : BOOKS.indexOf(displayBook) < BOOKS.length - 1
+                  ? BOOKS[BOOKS.indexOf(displayBook) + 1]
+                  : "End"}
+            </span>
             <ChevronRight className="w-3.5 h-3.5" />
           </Button>
         </div>
@@ -1198,30 +1356,27 @@ export default function BibleReader() {
 
             <div className="w-px h-4 bg-border/60 mx-1" />
 
-            {/* Voice reading — available when selected verses exist */}
-            {selectedVerses.length > 0 && (
-              <button
-                onClick={readSelectedVerses}
-                className={[
-                  "flex items-center gap-1 text-xs px-2 py-1 rounded-full transition-colors whitespace-nowrap",
-                  isSpeaking
-                    ? "bg-primary text-white"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
-                ].join(" ")}
-              >
-                {isSpeaking ? (
-                  <>
-                    <VolumeX className="w-3 h-3" />
-                    Stop
-                  </>
-                ) : (
-                  <>
-                    <Volume2 className="w-3 h-3" />
-                    Listen
-                  </>
-                )}
-              </button>
-            )}
+            <button
+              onClick={readSelectedVerses}
+              className={[
+                "flex items-center gap-1 text-xs px-2 py-1 rounded-full transition-colors whitespace-nowrap",
+                isSpeaking && voiceMode === "selected"
+                  ? "bg-primary text-white"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
+              ].join(" ")}
+            >
+              {isSpeaking && voiceMode === "selected" ? (
+                <>
+                  <VolumeX className="w-3 h-3" />
+                  Stop
+                </>
+              ) : (
+                <>
+                  <Volume2 className="w-3 h-3" />
+                  Listen
+                </>
+              )}
+            </button>
 
             <ToolbarBtn
               onClick={() => setShowHighlightPicker(true)}
@@ -1254,6 +1409,7 @@ export default function BibleReader() {
           <div
             ref={contentRef}
             className="max-w-7xl mx-auto px-6 sm:px-10 py-12"
+            style={{ paddingBottom: isSpeaking ? "8rem" : "3rem" }}
           >
             {chapters.length === 0 && loading ? (
               <div className="space-y-10">
@@ -1269,194 +1425,201 @@ export default function BibleReader() {
               </div>
             ) : (
               <>
-                {chapters.map((chapter) => (
-                  <div
-                    key={`${chapter.book}-${chapter.chapter}`}
-                    data-chapter-key={`${chapter.book}-${chapter.chapter}`}
-                    ref={(el) => {
-                      if (el)
-                        chapterRefs.current[
-                          `${chapter.book}-${chapter.chapter}`
-                        ] = el;
-                    }}
-                    className="mb-20"
-                  >
-                    {/* Chapter heading */}
-                    <div className="mb-10 text-center">
-                      <div className="flex items-center justify-center gap-4 mb-3">
-                        <div className="h-px flex-1 bg-gradient-to-r from-transparent to-border/60" />
-                        <h2
-                          className="text-2xl font-medium tracking-widest text-foreground uppercase"
+                {chapters.map((chapter) => {
+                  const chapterKey = `${chapter.book}-${chapter.chapter}`;
+                  return (
+                    <div
+                      key={chapterKey}
+                      data-chapter-key={chapterKey}
+                      ref={(el) => {
+                        if (el) chapterRefs.current[chapterKey] = el;
+                      }}
+                      className="mb-20"
+                    >
+                      <div className="mb-10 text-center">
+                        <div className="flex items-center justify-center gap-4 mb-3">
+                          <div className="h-px flex-1 bg-gradient-to-r from-transparent to-border/60" />
+                          <h2
+                            className="text-2xl font-medium tracking-widest text-foreground uppercase"
+                            style={{
+                              fontFamily: "'Cinzel', serif",
+                              letterSpacing: "0.12em",
+                            }}
+                          >
+                            {chapter.book}
+                          </h2>
+                          <div className="h-px flex-1 bg-gradient-to-l from-transparent to-border/60" />
+                        </div>
+                        <p
+                          className="text-sm text-muted-foreground tracking-widest uppercase"
                           style={{
                             fontFamily: "'Cinzel', serif",
-                            letterSpacing: "0.12em",
+                            letterSpacing: "0.2em",
                           }}
                         >
-                          {chapter.book}
-                        </h2>
-                        <div className="h-px flex-1 bg-gradient-to-l from-transparent to-border/60" />
+                          Chapter {chapter.chapter}
+                        </p>
                       </div>
-                      <p
-                        className="text-sm text-muted-foreground tracking-widest uppercase"
-                        style={{
-                          fontFamily: "'Cinzel', serif",
-                          letterSpacing: "0.2em",
-                        }}
+
+                      <div
+                        className="text-[1.25rem] leading-[2.15] text-foreground/90"
+                        style={{ fontFamily: "'Lora', Georgia, serif" }}
                       >
-                        Chapter {chapter.chapter}
-                      </p>
-                    </div>
+                        {chapter.verses.map((verse) => {
+                          const highlightColor = isHighlighted(verse.key);
+                          const isSelected = selectedVerses.includes(verse.key);
+                          const isFav = isFavorite(verse.key);
+                          const vNote = getVerseNote(verse.key);
+                          const vExplanation = getVerseExplanation(verse.key);
+                          const isExplanationExpanded =
+                            expandedExplanation === verse.key;
+                          const isCurrentlyReading =
+                            isSpeaking && currentItem?.verseKey === verse.key;
 
-                    {/* Verses */}
-                    <div
-                      className="text-[1.25rem] leading-[2.15] text-foreground/90"
-                      style={{ fontFamily: "'Lora', Georgia, serif" }}
-                    >
-                      {chapter.verses.map((verse) => {
-                        // All lookups use the full verse key — correct across all loaded chapters
-                        const highlightColor = isHighlighted(verse.key);
-                        const isSelected = selectedVerses.includes(verse.key);
-                        const isFav = isFavorite(verse.key);
-                        const vNote = getVerseNote(verse.key);
-                        const vExplanation = getVerseExplanation(verse.key);
-                        const isExplanationExpanded = expandedExplanation === verse.key;
-
-                        return (
-                          <span key={verse.key}>
-                            <span
-                              ref={(el) => {
-                                verseRefs.current[verse.key] = el;
-                              }}
-                              onClick={() => toggleVerseSelection(verse.key)}
-                              className={[
-                                "inline cursor-pointer rounded transition-all duration-150",
-                                isSelected
-                                  ? "bg-primary/15 ring-1 ring-primary/30 -mx-0.5 px-0.5"
-                                  : "",
-                                highlightColor && !isSelected
-                                  ? "-mx-0.5 px-0.5 rounded"
-                                  : "",
-                              ].join(" ")}
-                              style={
-                                highlightColor && !isSelected
-                                  ? {
-                                      backgroundColor: `${highlightColor}28`,
-                                      borderBottom: `2px solid ${highlightColor}60`,
-                                    }
-                                  : undefined
-                              }
-                            >
-                              {/* Verse number */}
-                              <sup
-                                className="text-primary font-semibold mr-1 not-italic select-none"
-                                style={{
-                                  fontFamily: "'Cinzel', serif",
-                                  fontSize: "0.6rem",
-                                  letterSpacing: "0.05em",
-                                  verticalAlign: "super",
-                                  lineHeight: 0,
+                          return (
+                            <span key={verse.key}>
+                              <span
+                                ref={(el) => {
+                                  verseRefs.current[verse.key] = el;
                                 }}
+                                onClick={() => toggleVerseSelection(verse.key)}
+                                className={[
+                                  "inline cursor-pointer rounded transition-all duration-200",
+                                  isSelected
+                                    ? "bg-primary/15 ring-1 ring-primary/30 -mx-0.5 px-0.5"
+                                    : "",
+                                  isCurrentlyReading && !isSelected
+                                    ? "bg-primary/10 ring-1 ring-primary/20 -mx-0.5 px-0.5"
+                                    : "",
+                                  highlightColor &&
+                                  !isSelected &&
+                                  !isCurrentlyReading
+                                    ? "-mx-0.5 px-0.5"
+                                    : "",
+                                ].join(" ")}
+                                style={
+                                  highlightColor &&
+                                  !isSelected &&
+                                  !isCurrentlyReading
+                                    ? {
+                                        backgroundColor: `${highlightColor}28`,
+                                        borderBottom: `2px solid ${highlightColor}60`,
+                                      }
+                                    : undefined
+                                }
                               >
-                                {verse.num}
-                              </sup>
-                              {renderVerseText(verse.text)}
-                              {/* Indicators — only show when NOT selected */}
-                              {!isSelected && (
-                                <>
-                                  {isFav && (
-                                    <Star
-                                      className="inline w-3 h-3 ml-1 text-amber-400 fill-amber-400 align-middle"
-                                      style={{ verticalAlign: "middle" }}
-                                    />
-                                  )}
-                                  {vNote && !isFav && (
-                                    <span className="text-xs text-muted-foreground ml-1 not-italic align-middle">
-                                      📝
+                                <sup
+                                  className="text-primary font-semibold mr-1 not-italic select-none"
+                                  style={{
+                                    fontFamily: "'Cinzel', serif",
+                                    fontSize: "0.6rem",
+                                    letterSpacing: "0.05em",
+                                    verticalAlign: "super",
+                                    lineHeight: 0,
+                                  }}
+                                >
+                                  {verse.num}
+                                </sup>
+                                {renderVerseText(verse.text)}
+                                {!isSelected && (
+                                  <>
+                                    {isFav && (
+                                      <Star
+                                        className="inline w-3 h-3 ml-1 text-amber-400 fill-amber-400"
+                                        style={{ verticalAlign: "middle" }}
+                                      />
+                                    )}
+                                    {vNote && !isFav && (
+                                      <span className="text-xs text-muted-foreground ml-1 not-italic">
+                                        📝
+                                      </span>
+                                    )}
+                                  </>
+                                )}{" "}
+                                {isSelected && selectedVerses.length === 1 && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      toggleExplanation(verse.key);
+                                    }}
+                                    disabled={explanationLoading}
+                                    className={[
+                                      "inline-flex items-center gap-0.5 ml-1 text-[0.65rem] font-medium uppercase tracking-wider px-1.5 py-0.5 rounded transition-all duration-150",
+                                      isExplanationExpanded
+                                        ? "bg-primary/20 text-primary"
+                                        : "bg-primary/10 text-primary/70 hover:bg-primary/15 hover:text-primary",
+                                    ].join(" ")}
+                                  >
+                                    {explanationLoading &&
+                                    expandedExplanation === verse.key ? (
+                                      <Loader2 className="w-2.5 h-2.5 animate-spin" />
+                                    ) : isExplanationExpanded ? (
+                                      "Close"
+                                    ) : (
+                                      "Explain"
+                                    )}
+                                  </button>
+                                )}{" "}
+                              </span>
+
+                              {isExplanationExpanded && (
+                                <div className="mt-1 mb-3 ml-4 pl-3 border-l-2 border-primary/30 max-h-52 overflow-y-auto scrollbar-thin">
+                                  {vExplanation ? (
+                                    <div className="text-sm leading-relaxed text-foreground/80 animate-in slide-in-from-top-2">
+                                      <p className="whitespace-pre-wrap">
+                                        {expandedFullExplanation.has(verse.key)
+                                          ? vExplanation
+                                          : truncateText(vExplanation, 200)}
+                                      </p>
+                                      {vExplanation.length > 200 && (
+                                        <button
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            setExpandedFullExplanation(
+                                              (prev) => {
+                                                const n = new Set(prev);
+                                                n.has(verse.key)
+                                                  ? n.delete(verse.key)
+                                                  : n.add(verse.key);
+                                                return n;
+                                              },
+                                            );
+                                          }}
+                                          className="mt-2 flex items-center gap-1 text-xs font-medium text-primary hover:text-primary/80 transition-colors"
+                                        >
+                                          {expandedFullExplanation.has(
+                                            verse.key,
+                                          ) ? (
+                                            <>
+                                              <ChevronUp className="w-3 h-3" />
+                                              Show less
+                                            </>
+                                          ) : (
+                                            <>
+                                              <ChevronDown className="w-3 h-3" />
+                                              Read more
+                                            </>
+                                          )}
+                                        </button>
+                                      )}
+                                    </div>
+                                  ) : (
+                                    <span className="text-xs text-muted-foreground italic flex items-center gap-2">
+                                      <Loader2 className="w-3 h-3 animate-spin" />
+                                      Loading explanation...
                                     </span>
                                   )}
-                                </>
-                              )}{" "}
-                              {/* Small inline Explain button — only when one verse is selected */}
-                              {isSelected && selectedVerses.length === 1 && (
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    toggleExplanation(verse.key);
-                                  }}
-                                  disabled={explanationLoading}
-                                  className={[
-                                    "inline-flex items-center gap-0.5 ml-1 text-[0.65rem] font-medium uppercase tracking-wider px-1.5 py-0.5 rounded transition-all duration-150",
-                                    isExplanationExpanded
-                                      ? "bg-primary/20 text-primary"
-                                      : "bg-primary/10 text-primary/70 hover:bg-primary/15 hover:text-primary",
-                                  ].join(" ")}
-                                >
-                                  {explanationLoading && expandedExplanation === verse.key ? (
-                                    <Loader2 className="w-2.5 h-2.5 animate-spin" />
-                                  ) : (
-                                    <>
-                                      {isExplanationExpanded ? "Close" : "Explain"}
-                                    </>
-                                  )}
-                                </button>
-                              )}{" "}
+                                </div>
+                              )}
                             </span>
-                            {/* Inline explanation content — right below verse when expanded */}
-                            {isExplanationExpanded && (
-                              <div className="mt-1 mb-3 ml-4 pl-3 border-l-2 border-primary/30 max-h-52 overflow-y-auto scrollbar-thin">
-                                {vExplanation ? (
-                                  <div className="text-sm leading-relaxed text-foreground/80 animate-in slide-in-from-top-2">
-                                    <p className="whitespace-pre-wrap">
-                                      {expandedFullExplanation.has(verse.key)
-                                        ? vExplanation
-                                        : truncateText(vExplanation, 200)}
-                                    </p>
-                                    {vExplanation.length > 200 && (
-                                      <button
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          setExpandedFullExplanation((prev) => {
-                                            const next = new Set(prev);
-                                            if (next.has(verse.key)) {
-                                              next.delete(verse.key);
-                                            } else {
-                                              next.add(verse.key);
-                                            }
-                                            return next;
-                                          });
-                                        }}
-                                        className="mt-2 flex items-center gap-1 text-xs font-medium text-primary hover:text-primary/80 transition-colors"
-                                      >
-                                        {expandedFullExplanation.has(verse.key) ? (
-                                          <>
-                                            <ChevronUp className="w-3 h-3" />
-                                            Show less
-                                          </>
-                                        ) : (
-                                          <>
-                                            <ChevronDown className="w-3 h-3" />
-                                            Read more
-                                          </>
-                                        )}
-                                      </button>
-                                    )}
-                                  </div>
-                                ) : (
-                                  <span className="text-xs text-muted-foreground italic flex items-center gap-2">
-                                    <Loader2 className="w-3 h-3 animate-spin" />
-                                    Loading explanation...
-                                  </span>
-                                )}
-                              </div>
-                            )}
-                          </span>
-                        );
-                      })}
+                          );
+                        })}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
 
-                {/* Load-more sentinel */}
+                {/* Infinite scroll sentinel */}
                 <div ref={loadMoreRef} className="py-12 flex justify-center">
                   {loading && (
                     <div className="flex items-center gap-2 text-xs text-muted-foreground tracking-widest uppercase">
@@ -1500,58 +1663,207 @@ export default function BibleReader() {
         saving={noteSaving}
         selectedVerses={selectedVerses}
         currentBook={selectedBook}
-        currentChapter={currentChapter}
+        currentChapter={selectedChapter}
       />
 
-      {/* ── Voice reading control bar ── */}
+      {/* ── Voice Player ── */}
       {isSpeaking && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-background/95 backdrop-blur border border-border/80 rounded-full px-4 py-2.5 shadow-xl">
-          {/* Progress bar */}
-          <div className="absolute -top-1 left-4 right-4 h-1 bg-muted rounded-full overflow-hidden">
-            <div
-              className="h-full bg-primary transition-all duration-300"
-              style={{ width: `${speechProgress}%` }}
-            />
-          </div>
-
-          {/* Stop button */}
-          <button
-            onClick={stopSpeaking}
-            className="w-8 h-8 flex items-center justify-center rounded-full bg-primary/10 hover:bg-primary/20 transition-colors"
-          >
-            <VolumeX className="w-4 h-4 text-primary" />
-          </button>
-
-          {/* Pause/Resume button */}
-          <button
-            onClick={isPaused ? resumeSpeaking : pauseSpeaking}
-            className="w-8 h-8 flex items-center justify-center rounded-full bg-primary/10 hover:bg-primary/20 transition-colors"
-          >
-            {isPaused ? (
-              <Play className="w-4 h-4 text-primary" />
-            ) : (
-              <Pause className="w-4 h-4 text-primary" />
-            )}
-          </button>
-
-          {/* Current position info */}
-          <div className="text-xs text-muted-foreground min-w-[60px]">
-            {currentIndexRef.current + 1} / {speechQueueRef.current.length || selectedVerses.length}
-          </div>
-
-          {/* Verse reference */}
-          {selectedVerses.length === 1 && (
-            <div className="text-xs text-muted-foreground/70 font-medium">
-              {selectedVerses[0]}
-            </div>
-          )}
-        </div>
+        <VoicePlayerBar
+          currentItem={currentItem}
+          currentIndex={currentSpeechIdx}
+          total={speechItems.length}
+          progress={progressPct}
+          isPaused={isPaused}
+          voiceMode={voiceMode}
+          displayBook={displayBook}
+          displayChapter={displayChapter}
+          canSkipBack={canSkipBack}
+          canSkipForward={canSkipForward}
+          onPauseResume={pauseResume}
+          onStop={stopSpeaking}
+          onSkipBack={skipBack}
+          onSkipForward={skipForward}
+        />
       )}
     </div>
   );
 }
 
-// ── Tiny toolbar button ────────────────────────────────────────────────────────
+// ── Voice Player Bar ───────────────────────────────────────────────────────
+
+interface VoicePlayerBarProps {
+  currentItem: SpeechItem | null;
+  currentIndex: number;
+  total: number;
+  progress: number;
+  isPaused: boolean;
+  voiceMode: "chapter" | "selected" | null;
+  displayBook: string;
+  displayChapter: number;
+  canSkipBack: boolean;
+  canSkipForward: boolean;
+  onPauseResume: () => void;
+  onStop: () => void;
+  onSkipBack: () => void;
+  onSkipForward: () => void;
+}
+
+function VoicePlayerBar({
+  currentItem,
+  currentIndex,
+  total,
+  progress,
+  isPaused,
+  voiceMode,
+  displayBook,
+  displayChapter,
+  canSkipBack,
+  canSkipForward,
+  onPauseResume,
+  onStop,
+  onSkipBack,
+  onSkipForward,
+}: VoicePlayerBarProps) {
+  return (
+    <div className="fixed bottom-0 left-0 right-0 z-50 px-4 pb-4 pointer-events-none">
+      <div
+        className="max-w-xl mx-auto rounded-2xl border border-border/70 shadow-2xl overflow-hidden pointer-events-auto"
+        style={{
+          background: "hsl(var(--background) / 0.96)",
+          backdropFilter: "blur(20px)",
+          WebkitBackdropFilter: "blur(20px)",
+        }}
+      >
+        {/* Progress bar */}
+        <div className="h-[3px] w-full bg-muted/50">
+          <div
+            className="h-full bg-primary transition-all duration-700 ease-out"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+
+        <div className="flex items-center gap-3 px-4 py-3">
+          {/* Icon + info */}
+          <div className="flex items-center gap-2.5 flex-1 min-w-0">
+            <div
+              className={[
+                "w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors",
+                isPaused ? "bg-muted" : "bg-primary/10",
+              ].join(" ")}
+            >
+              {isPaused ? (
+                <Pause className="w-4 h-4 text-muted-foreground" />
+              ) : (
+                <Volume2 className="w-4 h-4 text-primary" />
+              )}
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider leading-none mb-0.5 truncate">
+                {voiceMode === "chapter"
+                  ? `${displayBook} · Chapter ${displayChapter}`
+                  : "Selected verses"}
+              </p>
+              <p
+                className="text-sm font-semibold text-foreground truncate leading-tight"
+                style={{ fontFamily: "'Cinzel', serif" }}
+              >
+                {currentItem ? `Verse ${currentItem.verseNum}` : "—"}
+              </p>
+            </div>
+          </div>
+
+          {/* Counter */}
+          <div className="flex-shrink-0 tabular-nums text-xs text-muted-foreground min-w-[44px] text-center">
+            <span className="font-medium text-foreground">
+              {currentIndex + 1}
+            </span>
+            <span className="opacity-40 mx-0.5">/</span>
+            {total}
+          </div>
+
+          {/* Controls */}
+          <div className="flex items-center gap-0.5 flex-shrink-0">
+            {/* Prev verse */}
+            <PlayerIconBtn
+              onClick={onSkipBack}
+              disabled={!canSkipBack}
+              title="Previous verse"
+            >
+              <SkipBack className="w-4 h-4" />
+            </PlayerIconBtn>
+
+            {/* Pause / Resume — primary accent */}
+            <button
+              onClick={onPauseResume}
+              title={isPaused ? "Resume" : "Pause"}
+              className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center hover:opacity-90 active:scale-95 transition-all mx-1"
+            >
+              {isPaused ? (
+                <Play className="w-4 h-4 ml-0.5" />
+              ) : (
+                <Pause className="w-4 h-4" />
+              )}
+            </button>
+
+            {/* Next verse */}
+            <PlayerIconBtn
+              onClick={onSkipForward}
+              disabled={!canSkipForward}
+              title="Next verse"
+            >
+              <SkipForward className="w-4 h-4" />
+            </PlayerIconBtn>
+
+            {/* Divider */}
+            <div className="w-px h-5 bg-border/50 mx-1.5" />
+
+            {/* Stop */}
+            <PlayerIconBtn
+              onClick={onStop}
+              title="Stop reading"
+              className="text-destructive/70 hover:text-destructive hover:bg-destructive/10"
+            >
+              <VolumeX className="w-4 h-4" />
+            </PlayerIconBtn>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PlayerIconBtn({
+  onClick,
+  disabled,
+  title,
+  children,
+  className = "",
+}: {
+  onClick: () => void;
+  disabled?: boolean;
+  title?: string;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      title={title}
+      className={[
+        "w-9 h-9 rounded-full flex items-center justify-center transition-all active:scale-95",
+        "text-muted-foreground hover:text-foreground hover:bg-muted/60",
+        "disabled:opacity-25 disabled:cursor-not-allowed disabled:active:scale-100",
+        className,
+      ].join(" ")}
+    >
+      {children}
+    </button>
+  );
+}
+
+// ── Toolbar button ─────────────────────────────────────────────────────────
+
 function ToolbarBtn({
   onClick,
   icon,
