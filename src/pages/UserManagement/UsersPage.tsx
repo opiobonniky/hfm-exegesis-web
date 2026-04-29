@@ -24,6 +24,8 @@ import {
   ChevronsRight,
   BadgeCheck,
   BadgeX,
+  SlidersHorizontal,
+  ChevronDown,
 } from "lucide-react";
 import {
   Card,
@@ -68,6 +70,11 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Switch } from "@/components/ui/switch";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { sendPostRequest } from "@/services/api";
@@ -91,7 +98,7 @@ interface User {
   roleName: string;
   maritalStatus: string | null;
   status: boolean;
-  isVerified: boolean; // ← email verification flag
+  isVerified: boolean;
 }
 
 interface PagedResponse {
@@ -153,7 +160,7 @@ const avatarColor = (username: string) => {
 };
 
 // ─────────────────────────────────────────────
-// Skeleton row
+// Skeleton — table row (desktop)
 // ─────────────────────────────────────────────
 const SkeletonRow = () => (
   <TableRow className="border-border/40">
@@ -194,16 +201,51 @@ const SkeletonRow = () => (
 );
 
 // ─────────────────────────────────────────────
-// Verification badge + toggle button
+// Skeleton — mobile card
+// ─────────────────────────────────────────────
+const SkeletonCard = () => (
+  <div className="p-4 border border-border/40 rounded-xl space-y-3 bg-card">
+    <div className="flex items-center gap-3">
+      <Skeleton className="w-10 h-10 rounded-full shrink-0" />
+      <div className="flex-1 space-y-1.5">
+        <Skeleton className="h-4 w-32 rounded" />
+        <Skeleton className="h-3 w-20 rounded" />
+      </div>
+      <Skeleton className="h-6 w-16 rounded-full" />
+    </div>
+    <div className="space-y-2">
+      <Skeleton className="h-3 w-full rounded" />
+      <Skeleton className="h-3 w-3/4 rounded" />
+    </div>
+    <div className="flex gap-2 pt-1">
+      <Skeleton className="h-7 w-20 rounded-full" />
+      <Skeleton className="h-7 w-20 rounded-full" />
+    </div>
+    <div className="flex justify-end gap-2 pt-1 border-t border-border/40">
+      <Skeleton className="h-8 w-8 rounded" />
+      <Skeleton className="h-8 w-8 rounded" />
+    </div>
+  </div>
+);
+
+// ─────────────────────────────────────────────
+// Verified badge + toggle
 // ─────────────────────────────────────────────
 interface VerifiedCellProps {
   user: User;
   onToggle: (user: User) => void;
   toggling: boolean;
   disabled?: boolean;
+  compact?: boolean;
 }
 
-const VerifiedCell = ({ user, onToggle, toggling, disabled }: VerifiedCellProps) => (
+const VerifiedCell = ({
+  user,
+  onToggle,
+  toggling,
+  disabled,
+  compact,
+}: VerifiedCellProps) => (
   <TooltipProvider delayDuration={200}>
     <Tooltip>
       <TooltipTrigger asChild>
@@ -226,7 +268,8 @@ const VerifiedCell = ({ user, onToggle, toggling, disabled }: VerifiedCellProps)
           ) : (
             <BadgeX className="w-3.5 h-3.5" />
           )}
-          {user.isVerified ? "Verified" : "Unverified"}
+          {!compact && (user.isVerified ? "Verified" : "Unverified")}
+          {compact && (user.isVerified ? "Verified" : "Unverified")}
         </button>
       </TooltipTrigger>
       <TooltipContent side="top" className="text-xs">
@@ -241,7 +284,148 @@ const VerifiedCell = ({ user, onToggle, toggling, disabled }: VerifiedCellProps)
 );
 
 // ─────────────────────────────────────────────
-// Pagination bar
+// Mobile user card
+// ─────────────────────────────────────────────
+interface UserCardProps {
+  user: User;
+  currentUsername: string | undefined;
+  toggling: boolean;
+  onToggleVerified: (u: User) => void;
+  onToggleStatus: (u: User) => void;
+  onEdit: (u: User) => void;
+  onDelete: (u: User) => void;
+}
+
+const UserCard = ({
+  user,
+  currentUsername,
+  toggling,
+  onToggleVerified,
+  onToggleStatus,
+  onEdit,
+  onDelete,
+}: UserCardProps) => {
+  const isSelf = user.username === currentUsername;
+  return (
+    <div className="p-4 border border-border/40 rounded-xl bg-card hover:bg-muted/10 transition-colors space-y-3">
+      {/* Top row: avatar + name + role badge */}
+      <div className="flex items-start gap-3">
+        <Avatar className="w-10 h-10 shrink-0">
+          <AvatarFallback
+            className={cn(
+              "text-white text-xs font-semibold",
+              avatarColor(user.username),
+            )}
+          >
+            {getInitials(user.firstName, user.lastName)}
+          </AvatarFallback>
+        </Avatar>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <p className="font-semibold text-sm leading-tight truncate">
+              {user.firstName} {user.middleName ? user.middleName + " " : ""}
+              {user.lastName}
+            </p>
+          </div>
+          <p className="text-[11px] text-muted-foreground font-mono mt-0.5 truncate">
+            ID→ {user.id}
+          </p>
+        </div>
+        <Badge
+          variant="outline"
+          className={cn(
+            "text-xs font-medium capitalize shrink-0",
+            roleStyle(user.roleName),
+          )}
+        >
+          {user.roleName === "admin" ? (
+            <ShieldCheck className="w-3 h-3 mr-1" />
+          ) : (
+            <Shield className="w-3 h-3 mr-1" />
+          )}
+          {user.roleName}
+        </Badge>
+      </div>
+
+      {/* Contact info */}
+      <div className="space-y-1.5 text-xs text-muted-foreground">
+        <div className="flex items-center gap-2">
+          <Mail className="w-3.5 h-3.5 shrink-0 text-muted-foreground/60" />
+          <span className="truncate">{user.email}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <Phone className="w-3.5 h-3.5 shrink-0 text-muted-foreground/60" />
+          <span>{user.phoneNumber || "—"}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <Calendar className="w-3.5 h-3.5 shrink-0 text-muted-foreground/60" />
+          <span>
+            {user.createdOn
+              ? new Date(user.createdOn).toLocaleDateString()
+              : "—"}
+          </span>
+        </div>
+      </div>
+
+      {/* Status row */}
+      <div className="flex items-center gap-2 flex-wrap">
+        <VerifiedCell
+          user={user}
+          onToggle={onToggleVerified}
+          toggling={toggling}
+          disabled={isSelf}
+        />
+        {/* Active toggle inline */}
+        <button
+          onClick={() => !isSelf && onToggleStatus(user)}
+          disabled={isSelf}
+          className={cn(
+            "inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium border transition-all",
+            user.status
+              ? "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
+              : "bg-muted text-muted-foreground border-border hover:bg-muted/70",
+            isSelf && "opacity-50 cursor-not-allowed",
+          )}
+        >
+          <span
+            className={cn(
+              "w-1.5 h-1.5 rounded-full",
+              user.status ? "bg-emerald-500" : "bg-muted-foreground",
+            )}
+          />
+          {user.status ? "Active" : "Inactive"}
+        </button>
+      </div>
+
+      {/* Actions row */}
+      <div className="flex items-center justify-end gap-2 pt-2 border-t border-border/40">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-8 gap-1.5 text-xs text-muted-foreground hover:text-primary disabled:opacity-40"
+          disabled={isSelf}
+          onClick={() => onEdit(user)}
+        >
+          <Edit2 className="w-3.5 h-3.5" />
+          Edit
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-8 gap-1.5 text-xs text-muted-foreground hover:text-destructive disabled:opacity-40"
+          disabled={isSelf}
+          onClick={() => onDelete(user)}
+        >
+          <Trash2 className="w-3.5 h-3.5" />
+          Delete
+        </Button>
+      </div>
+    </div>
+  );
+};
+
+// ─────────────────────────────────────────────
+// Pagination bar (responsive)
 // ─────────────────────────────────────────────
 interface PaginationProps {
   page: number;
@@ -277,25 +461,24 @@ const PaginationBar = ({
   }, [page, totalPages]);
 
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-4 py-3 border-t border-border/40 bg-muted/10">
-      <p className="text-sm text-muted-foreground shrink-0">
-        {totalCount === 0 ? (
-          "No results"
-        ) : (
-          <>
-            Showing{" "}
-            <span className="font-medium text-foreground">
-              {from}–{to}
-            </span>{" "}
-            of <span className="font-medium text-foreground">{totalCount}</span>{" "}
-            users
-          </>
-        )}
-      </p>
-
-      <div className="flex items-center gap-3">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <span className="hidden sm:inline shrink-0">Rows per page</span>
+    <div className="flex flex-col gap-3 px-4 py-3 border-t border-border/40 bg-muted/10 sm:flex-row sm:items-center sm:justify-between">
+      {/* Info + page size */}
+      <div className="flex items-center justify-between sm:justify-start gap-4">
+        <p className="text-xs text-muted-foreground">
+          {totalCount === 0 ? (
+            "No results"
+          ) : (
+            <>
+              <span className="font-medium text-foreground">
+                {from}–{to}
+              </span>{" "}
+              of{" "}
+              <span className="font-medium text-foreground">{totalCount}</span>
+            </>
+          )}
+        </p>
+        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+          <span className="hidden sm:inline">Rows</span>
           <Select
             value={String(pageSize)}
             onValueChange={(v) => {
@@ -303,7 +486,7 @@ const PaginationBar = ({
               onPage(1);
             }}
           >
-            <SelectTrigger className="h-8 w-16 text-xs">
+            <SelectTrigger className="h-7 w-14 text-xs">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -315,76 +498,77 @@ const PaginationBar = ({
             </SelectContent>
           </Select>
         </div>
+      </div>
 
-        <div className="flex items-center gap-1">
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-8 w-8"
-            onClick={() => onPage(1)}
-            disabled={page === 1}
-            aria-label="First page"
-          >
-            <ChevronsLeft className="w-3.5 h-3.5" />
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-8 w-8"
-            onClick={() => onPage(page - 1)}
-            disabled={page === 1}
-            aria-label="Previous page"
-          >
-            <ChevronLeft className="w-3.5 h-3.5" />
-          </Button>
+      {/* Page buttons */}
+      <div className="flex items-center justify-center gap-1">
+        <Button
+          variant="outline"
+          size="icon"
+          className="h-7 w-7"
+          onClick={() => onPage(1)}
+          disabled={page === 1}
+          aria-label="First page"
+        >
+          <ChevronsLeft className="w-3 h-3" />
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          className="h-7 w-7"
+          onClick={() => onPage(page - 1)}
+          disabled={page === 1}
+          aria-label="Previous page"
+        >
+          <ChevronLeft className="w-3 h-3" />
+        </Button>
 
-          {pageNums.map((p, i) => {
-            const prev = pageNums[i - 1];
-            const showEllipsis = prev && p - prev > 1;
-            return (
-              <div key={p} className="flex items-center gap-1">
-                {showEllipsis && (
-                  <span className="px-1 text-muted-foreground text-sm select-none">
-                    …
-                  </span>
+        {pageNums.map((p, i) => {
+          const prev = pageNums[i - 1];
+          const showEllipsis = prev && p - prev > 1;
+          return (
+            <div key={p} className="flex items-center gap-1">
+              {showEllipsis && (
+                <span className="px-1 text-muted-foreground text-xs select-none">
+                  …
+                </span>
+              )}
+              <Button
+                variant={p === page ? "default" : "outline"}
+                size="icon"
+                className={cn(
+                  "h-7 w-7 text-xs",
+                  p === page && "pointer-events-none",
                 )}
-                <Button
-                  variant={p === page ? "default" : "outline"}
-                  size="icon"
-                  className={cn(
-                    "h-8 w-8 text-xs",
-                    p === page && "pointer-events-none",
-                  )}
-                  onClick={() => onPage(p)}
-                  aria-current={p === page ? "page" : undefined}
-                >
-                  {p}
-                </Button>
-              </div>
-            );
-          })}
+                onClick={() => onPage(p)}
+                aria-current={p === page ? "page" : undefined}
+              >
+                {p}
+              </Button>
+            </div>
+          );
+        })}
 
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-8 w-8"
-            onClick={() => onPage(page + 1)}
-            disabled={page >= totalPages}
-            aria-label="Next page"
-          >
-            <ChevronRight className="w-3.5 h-3.5" />
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-8 w-8"
-            onClick={() => onPage(totalPages)}
-            disabled={page >= totalPages}
-            aria-label="Last page"
-          >
-            <ChevronsRight className="w-3.5 h-3.5" />
-          </Button>
-        </div>
+        <Button
+          variant="outline"
+          size="icon"
+          className="h-7 w-7"
+          onClick={() => onPage(page + 1)}
+          disabled={page >= totalPages}
+          aria-label="Next page"
+        >
+          <ChevronRight className="w-3 h-3" />
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          className="h-7 w-7"
+          onClick={() => onPage(totalPages)}
+          disabled={page >= totalPages}
+          aria-label="Last page"
+        >
+          <ChevronsRight className="w-3 h-3" />
+        </Button>
       </div>
     </div>
   );
@@ -409,26 +593,31 @@ const UsersPage = () => {
   const [roleFilter, setRoleFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [verifiedFilter, setVerifiedFilter] = useState("all");
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
 
-  // Delete dialog
   const [deleteTarget, setDeleteTarget] = useState<User | null>(null);
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
   const [deleting, setDeleting] = useState(false);
 
-  // Edit dialog
   const [editTarget, setEditTarget] = useState<User | null>(null);
   const [editForm, setEditForm] = useState<Partial<User>>({});
   const [saving, setSaving] = useState(false);
 
-  // Per-row verification toggle loading set (keyed by username)
   const [togglingVerified, setTogglingVerified] = useState<Set<string>>(
     new Set(),
   );
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Active filter count for badge
+  const activeFilterCount = [
+    roleFilter !== "all",
+    statusFilter !== "all",
+    verifiedFilter !== "all",
+  ].filter(Boolean).length;
 
   // ── Fetch ──────────────────────────────────────────────────────────────────
   const loadUsers = useCallback(
@@ -443,24 +632,24 @@ const UsersPage = () => {
         if (res?.returnCode === 200 && res?.returnData) {
           const data = res.returnData;
           let rawUsers: any[] = [];
-          if (Array.isArray(data)) {
-            rawUsers = data;
-          } else if (data?.users && Array.isArray(data.users)) {
+          if (Array.isArray(data)) rawUsers = data;
+          else if (data?.users && Array.isArray(data.users))
             rawUsers = data.users;
-          } else {
-            console.warn("Unexpected user data format:", data);
-            rawUsers = [];
-          }
+          else rawUsers = [];
+
           const sanitizeDate = (val: any) => {
             if (!val) return "";
             if (typeof val === "string") return val;
             if (val instanceof Date) return val.toISOString();
             if (typeof val === "object" && val.toISOString) {
-              try { return val.toISOString(); } catch { return ""; }
+              try {
+                return val.toISOString();
+              } catch {
+                return "";
+              }
             }
             return "";
           };
-
           const safeString = (val: any, fallback = "") => {
             if (val === null || val === undefined) return fallback;
             if (typeof val === "string") return val;
@@ -479,7 +668,9 @@ const UsersPage = () => {
           }));
           setUsers(usersWithVerified);
           setTotalCount(data?.totalCount ?? rawUsers.length);
-          setTotalPages(data?.totalPages ?? Math.ceil(rawUsers.length / pageSize));
+          setTotalPages(
+            data?.totalPages ?? Math.ceil(rawUsers.length / pageSize),
+          );
         } else {
           toast({
             title: "Failed to load users",
@@ -516,7 +707,7 @@ const UsersPage = () => {
     [],
   );
 
-  // ── Search & pagination handlers ───────────────────────────────────────────
+  // ── Search & pagination ────────────────────────────────────────────────────
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const v = e.target.value;
     setSearchInput(v);
@@ -534,6 +725,13 @@ const UsersPage = () => {
     setSearchQuery("");
     setPage(1);
     loadUsers("", 1, pageSize);
+  };
+
+  const clearAllFilters = () => {
+    clearSearch();
+    setRoleFilter("all");
+    setStatusFilter("all");
+    setVerifiedFilter("all");
   };
 
   const handlePageChange = (p: number) => {
@@ -699,7 +897,7 @@ const UsersPage = () => {
     }
   };
 
-  // ── Toggle active status ───────────────────────────────────────────────────
+  // ── Toggle status ──────────────────────────────────────────────────────────
   const toggleStatus = async (user: User) => {
     setUsers((prev) =>
       prev.map((u) =>
@@ -743,26 +941,20 @@ const UsersPage = () => {
     }
   };
 
-  // ── Toggle email verification ──────────────────────────────────────────────
+  // ── Toggle verified ────────────────────────────────────────────────────────
   const toggleVerified = async (user: User) => {
     setTogglingVerified((prev) => new Set(prev).add(user.username));
-
-    // Optimistic update
     const next = !user.isVerified;
     setUsers((prev) =>
       prev.map((u) =>
         u.username === user.username ? { ...u, isVerified: next } : u,
       ),
     );
-
     try {
       const res: any = await sendPostRequest(
         "admin",
         "toggle-user-verification",
-        {
-          username: user.username,
-          isVerified: next,
-        },
+        { username: user.username, isVerified: next },
       );
       if (res?.returnCode === 200) {
         toast({
@@ -772,7 +964,6 @@ const UsersPage = () => {
             : `${user.firstName} ${user.lastName}'s verification has been revoked.`,
         });
       } else {
-        // Revert on failure
         setUsers((prev) =>
           prev.map((u) =>
             u.username === user.username
@@ -812,81 +1003,87 @@ const UsersPage = () => {
   // Render
   // ─────────────────────────────────────────────
   return (
-    <div className="p-6 lg:p-8 space-y-8">
-      {/* Header */}
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6">
+      {/* ── Header ─────────────────────────────────────────────────────────── */}
       <div className="opacity-0 fade-up">
-        <div className="flex items-center gap-3 mb-1">
-          <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-            <Users className="w-6 h-6 text-primary" />
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+            <Users className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold font-[family-name:var(--font-heading)]">
+            <h1 className="text-2xl sm:text-3xl font-bold font-[family-name:var(--font-heading)]">
               User Management
             </h1>
-            <p className="text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               Manage accounts, roles, and access
             </p>
           </div>
         </div>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 opacity-0 fade-up stagger-1">
+      {/* ── Stats ──────────────────────────────────────────────────────────── */}
+      {/* 2-col on mobile, 4-col on lg+ */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 opacity-0 fade-up stagger-1">
         {stats.map((s) => (
           <Card key={s.label} className="border-border/50">
-            <CardContent className="p-5">
+            <CardContent className="p-4 sm:p-5">
               {loading ? (
-                <>
-                  {" "}
-                  <Skeleton className="w-10 h-10 rounded-lg mb-3" />{" "}
-                  <Skeleton className="h-7 w-12 rounded mb-1.5" />{" "}
-                  <Skeleton className="h-3.5 w-20 rounded" />{" "}
-                </>
+                <div className="space-y-2">
+                  <Skeleton className="w-9 h-9 rounded-lg" />
+                  <Skeleton className="h-6 w-12 rounded mt-2" />
+                  <Skeleton className="h-3 w-16 rounded" />
+                </div>
               ) : (
-                <>
+                <div className="flex flex-col gap-2 sm:gap-3">
                   <div
                     className={cn(
-                      "w-10 h-10 rounded-lg flex items-center justify-center mb-3",
+                      "w-9 h-9 rounded-lg flex items-center justify-center",
                       s.color,
                     )}
                   >
-                    <s.icon className="w-5 h-5" />
+                    <s.icon className="w-4 h-4 sm:w-5 sm:h-5" />
                   </div>
-                  <p className="text-2xl font-bold font-[family-name:var(--font-heading)]">
-                    {s.value}
-                  </p>
-                  <p className="text-sm text-muted-foreground">{s.label}</p>
-                </>
+                  <div>
+                    <p className="text-xl sm:text-2xl font-bold font-[family-name:var(--font-heading)]">
+                      {s.value}
+                    </p>
+                    <p className="text-xs sm:text-sm text-muted-foreground">
+                      {s.label}
+                    </p>
+                  </div>
+                </div>
               )}
             </CardContent>
           </Card>
         ))}
       </div>
 
-      {/* Table Card */}
+      {/* ── Table Card ─────────────────────────────────────────────────────── */}
       <Card className="opacity-0 fade-up stagger-2 border-border/50">
-        <CardHeader className="bg-gradient-to-r from-primary/5 to-accent/5">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <CardHeader className="bg-gradient-to-r from-primary/5 to-accent/5 pb-0">
+          {/* Title row */}
+          <div className="flex flex-col gap-1 pb-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="w-5 h-5 text-primary" /> All Users
+              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                <Users className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+                All Users
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-xs sm:text-sm mt-0.5">
                 {loading ? (
-                  <Skeleton className="h-3.5 w-40 rounded mt-1 inline-block" />
+                  <Skeleton className="h-3.5 w-40 rounded inline-block" />
                 ) : (
                   <>
                     <span className="font-medium text-foreground">
                       {totalCount}
                     </span>{" "}
-                    total user{totalCount !== 1 ? "s" : ""}
+                    user{totalCount !== 1 ? "s" : ""}
                     {" · "}
                     <span className="text-emerald-600 font-medium">
                       {totalVerified} verified
                     </span>
                     {searchQuery && (
-                      <span className="ml-2 text-primary font-medium">
-                        · matching "{searchQuery}"
+                      <span className="ml-1.5 text-primary font-medium">
+                        · "{searchQuery}"
                       </span>
                     )}
                   </>
@@ -895,85 +1092,256 @@ const UsersPage = () => {
             </div>
           </div>
 
-          {/* Filters row */}
-          <div className="flex flex-col sm:flex-row gap-3 pt-2">
-            {/* Search */}
-            <div className="relative flex-1">
-              {loading && searchInput ? (
-                <Loader2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary animate-spin" />
-              ) : (
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              )}
-              <Input
-                placeholder="Search by name, email or username…"
-                value={searchInput}
-                onChange={handleSearchChange}
-                className="pl-9 pr-9"
-              />
-              {searchInput && (
-                <button
-                  type="button"
-                  onClick={clearSearch}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                  aria-label="Clear search"
+          {/* ── Search + filter toggle ──────────────────────────────────────── */}
+          <div className="space-y-2 pb-3">
+            <div className="flex gap-2">
+              {/* Search input */}
+              <div className="relative flex-1">
+                {loading && searchInput ? (
+                  <Loader2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary animate-spin" />
+                ) : (
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                )}
+                <Input
+                  placeholder="Search name, email or username…"
+                  value={searchInput}
+                  onChange={handleSearchChange}
+                  className="pl-9 pr-9 h-9 text-sm"
+                />
+                {searchInput && (
+                  <button
+                    type="button"
+                    onClick={clearSearch}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    aria-label="Clear search"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+
+              {/* Filter toggle button — always visible */}
+              <Button
+                variant="outline"
+                size="sm"
+                className={cn(
+                  "h-9 gap-1.5 shrink-0 sm:hidden",
+                  filtersOpen && "bg-muted",
+                )}
+                onClick={() => setFiltersOpen((v) => !v)}
+                aria-label="Toggle filters"
+              >
+                <SlidersHorizontal className="w-4 h-4" />
+                {activeFilterCount > 0 && (
+                  <span className="bg-primary text-primary-foreground rounded-full text-[10px] w-4 h-4 flex items-center justify-center font-bold">
+                    {activeFilterCount}
+                  </span>
+                )}
+              </Button>
+
+              {/* Desktop: always-visible filter selects */}
+              <div className="hidden sm:flex gap-2">
+                <Select value={roleFilter} onValueChange={setRoleFilter}>
+                  <SelectTrigger className="h-9 w-32 text-sm">
+                    <Filter className="w-3.5 h-3.5 mr-1.5 text-muted-foreground" />
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ROLE_FILTERS.map((r) => (
+                      <SelectItem key={r.value} value={r.value}>
+                        {r.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger className="h-9 w-32 text-sm">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {STATUS_FILTERS.map((s) => (
+                      <SelectItem key={s.value} value={s.value}>
+                        {s.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select
+                  value={verifiedFilter}
+                  onValueChange={setVerifiedFilter}
                 >
-                  <X className="w-4 h-4" />
-                </button>
-              )}
+                  <SelectTrigger className="h-9 w-32 text-sm">
+                    <BadgeCheck className="w-3.5 h-3.5 mr-1.5 text-muted-foreground" />
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {VERIFIED_FILTERS.map((v) => (
+                      <SelectItem key={v.value} value={v.value}>
+                        {v.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
-            {/* Role filter */}
-            <Select value={roleFilter} onValueChange={setRoleFilter}>
-              <SelectTrigger className="w-full sm:w-36">
-                <Filter className="w-4 h-4 mr-2 text-muted-foreground" />
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {ROLE_FILTERS.map((r) => (
-                  <SelectItem key={r.value} value={r.value}>
-                    {r.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {/* Mobile collapsible filter panel */}
+            {filtersOpen && (
+              <div className="sm:hidden grid grid-cols-3 gap-2 pt-1">
+                <Select value={roleFilter} onValueChange={setRoleFilter}>
+                  <SelectTrigger className="h-8 text-xs">
+                    <SelectValue placeholder="Role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ROLE_FILTERS.map((r) => (
+                      <SelectItem
+                        key={r.value}
+                        value={r.value}
+                        className="text-xs"
+                      >
+                        {r.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger className="h-8 text-xs">
+                    <SelectValue placeholder="Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {STATUS_FILTERS.map((s) => (
+                      <SelectItem
+                        key={s.value}
+                        value={s.value}
+                        className="text-xs"
+                      >
+                        {s.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select
+                  value={verifiedFilter}
+                  onValueChange={setVerifiedFilter}
+                >
+                  <SelectTrigger className="h-8 text-xs">
+                    <SelectValue placeholder="Verified" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {VERIFIED_FILTERS.map((v) => (
+                      <SelectItem
+                        key={v.value}
+                        value={v.value}
+                        className="text-xs"
+                      >
+                        {v.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
 
-            {/* Status filter */}
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full sm:w-36">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {STATUS_FILTERS.map((s) => (
-                  <SelectItem key={s.value} value={s.value}>
-                    {s.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            {/* Verification filter */}
-            <Select value={verifiedFilter} onValueChange={setVerifiedFilter}>
-              <SelectTrigger className="w-full sm:w-36">
-                <BadgeCheck className="w-4 h-4 mr-2 text-muted-foreground" />
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {VERIFIED_FILTERS.map((v) => (
-                  <SelectItem key={v.value} value={v.value}>
-                    {v.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {/* Active filter chips */}
+            {activeFilterCount > 0 && (
+              <div className="flex items-center gap-1.5 flex-wrap">
+                {roleFilter !== "all" && (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-muted text-xs border border-border/50">
+                    Role: {roleFilter}
+                    <button
+                      onClick={() => setRoleFilter("all")}
+                      className="text-muted-foreground hover:text-foreground ml-0.5"
+                    >
+                      <X className="w-2.5 h-2.5" />
+                    </button>
+                  </span>
+                )}
+                {statusFilter !== "all" && (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-muted text-xs border border-border/50">
+                    {statusFilter}
+                    <button
+                      onClick={() => setStatusFilter("all")}
+                      className="text-muted-foreground hover:text-foreground ml-0.5"
+                    >
+                      <X className="w-2.5 h-2.5" />
+                    </button>
+                  </span>
+                )}
+                {verifiedFilter !== "all" && (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-muted text-xs border border-border/50">
+                    {verifiedFilter}
+                    <button
+                      onClick={() => setVerifiedFilter("all")}
+                      className="text-muted-foreground hover:text-foreground ml-0.5"
+                    >
+                      <X className="w-2.5 h-2.5" />
+                    </button>
+                  </span>
+                )}
+                <button
+                  onClick={clearAllFilters}
+                  className="text-xs text-primary hover:underline ml-1"
+                >
+                  Clear all
+                </button>
+              </div>
+            )}
           </div>
         </CardHeader>
 
         <CardContent className="p-0">
-          <div className="overflow-x-auto">
+          {/* ── Mobile: card list (hidden on sm+) ──────────────────────────── */}
+          <div className="sm:hidden">
+            {loading ? (
+              <div className="p-3 space-y-3">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <SkeletonCard key={i} />
+                ))}
+              </div>
+            ) : filtered.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-16 text-center px-4">
+                <UserX className="w-10 h-10 mb-3 text-muted-foreground/40" />
+                <p className="font-medium text-sm">No users found</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {searchQuery
+                    ? `No results for "${searchQuery}".`
+                    : "Try adjusting your filters."}
+                </p>
+                {(searchQuery || activeFilterCount > 0) && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="mt-3 text-primary text-xs"
+                    onClick={clearAllFilters}
+                  >
+                    Clear all filters
+                  </Button>
+                )}
+              </div>
+            ) : (
+              <div className="p-3 space-y-3">
+                {filtered.map((user) => (
+                  <UserCard
+                    key={user.username}
+                    user={user}
+                    currentUsername={currentUsername}
+                    toggling={togglingVerified.has(user.username)}
+                    onToggleVerified={toggleVerified}
+                    onToggleStatus={toggleStatus}
+                    onEdit={openEdit}
+                    onDelete={openDelete}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* ── Desktop: table (hidden below sm) ───────────────────────────── */}
+          <div className="hidden sm:block overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow className="bg-muted/30 hover:bg-muted/30">
-                  <TableHead className="w-[220px]">User</TableHead>
+                  <TableHead className="w-[200px]">User</TableHead>
                   <TableHead>Contact</TableHead>
                   <TableHead>Role</TableHead>
                   <TableHead>Joined</TableHead>
@@ -982,7 +1350,6 @@ const UsersPage = () => {
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
-
               <TableBody>
                 {loading ? (
                   Array.from({ length: pageSize }).map((_, i) => (
@@ -999,20 +1366,12 @@ const UsersPage = () => {
                             ? `No results for "${searchQuery}".`
                             : "Try adjusting your filters."}
                         </p>
-                        {(searchQuery ||
-                          roleFilter !== "all" ||
-                          statusFilter !== "all" ||
-                          verifiedFilter !== "all") && (
+                        {(searchQuery || activeFilterCount > 0) && (
                           <Button
                             variant="ghost"
                             size="sm"
                             className="mt-3 text-primary"
-                            onClick={() => {
-                              clearSearch();
-                              setRoleFilter("all");
-                              setStatusFilter("all");
-                              setVerifiedFilter("all");
-                            }}
+                            onClick={clearAllFilters}
                           >
                             Clear all filters
                           </Button>
@@ -1029,7 +1388,7 @@ const UsersPage = () => {
                       {/* User */}
                       <TableCell>
                         <div className="flex items-center gap-3">
-                          <Avatar className="w-9 h-9">
+                          <Avatar className="w-9 h-9 shrink-0">
                             <AvatarFallback
                               className={cn(
                                 "text-white text-xs font-semibold",
@@ -1041,15 +1400,15 @@ const UsersPage = () => {
                           </Avatar>
                           <div className="min-w-0">
                             <p className="font-medium text-sm truncate">
-                              {user.firstName}{" "}
-                              {user.middleName ? user.middleName + " " : ""}
+                              {user.firstName}
+                              {user.middleName
+                                ? " " + user.middleName
+                                : ""}{" "}
                               {user.lastName}
                             </p>
-                            <div className="space-y-0.5">
-                              <p className="text-[11px] text-muted-foreground/80 font-mono truncate">
-                               { `ID-> ${user.id}` }
-                              </p>
-                            </div>
+                            <p className="text-[11px] text-muted-foreground/80 font-mono truncate">
+                              ID→ {user.id}
+                            </p>
                           </div>
                         </div>
                       </TableCell>
@@ -1059,13 +1418,13 @@ const UsersPage = () => {
                         <div className="space-y-1">
                           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                             <Mail className="w-3 h-3 shrink-0" />
-                            <span className="truncate max-w-[180px]">
+                            <span className="truncate max-w-[160px]">
                               {user.email}
                             </span>
                           </div>
                           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                             <Phone className="w-3 h-3 shrink-0" />
-                            <span>{user.phoneNumber}</span>
+                            <span>{user.phoneNumber || "—"}</span>
                           </div>
                         </div>
                       </TableCell>
@@ -1090,13 +1449,15 @@ const UsersPage = () => {
 
                       {/* Joined */}
                       <TableCell>
-                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground whitespace-nowrap">
                           <Calendar className="w-3 h-3" />
-                          {user.createdOn ? new Date(user.createdOn).toLocaleDateString() : "—"}
+                          {user.createdOn
+                            ? new Date(user.createdOn).toLocaleDateString()
+                            : "—"}
                         </div>
                       </TableCell>
 
-                      {/* Email Verified — clickable toggle */}
+                      {/* Verified */}
                       <TableCell>
                         <VerifiedCell
                           user={user}
@@ -1106,7 +1467,7 @@ const UsersPage = () => {
                         />
                       </TableCell>
 
-                      {/* Active status */}
+                      {/* Status */}
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <Switch
@@ -1158,6 +1519,7 @@ const UsersPage = () => {
             </Table>
           </div>
 
+          {/* Pagination */}
           {!loading && totalCount > 0 && (
             <PaginationBar
               page={page}
@@ -1176,7 +1538,7 @@ const UsersPage = () => {
         open={!!deleteTarget}
         onOpenChange={(o) => !o && setDeleteTarget(null)}
       >
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md mx-4 sm:mx-auto rounded-xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-destructive">
               <AlertTriangle className="w-5 h-5" /> Delete User
@@ -1188,7 +1550,7 @@ const UsersPage = () => {
           {deleteTarget && (
             <div className="space-y-4 py-2">
               <div className="flex items-center gap-3 rounded-lg border border-border/40 bg-muted/30 p-3">
-                <Avatar className="w-10 h-10">
+                <Avatar className="w-10 h-10 shrink-0">
                   <AvatarFallback
                     className={cn(
                       "text-white text-sm font-semibold",
@@ -1198,14 +1560,14 @@ const UsersPage = () => {
                     {getInitials(deleteTarget.firstName, deleteTarget.lastName)}
                   </AvatarFallback>
                 </Avatar>
-                <div>
-                  <p className="font-semibold text-sm">
+                <div className="min-w-0">
+                  <p className="font-semibold text-sm truncate">
                     {deleteTarget.firstName} {deleteTarget.lastName}
                   </p>
-                  <p className="text-xs text-muted-foreground font-mono">
+                  <p className="text-xs text-muted-foreground font-mono truncate">
                     @{deleteTarget.username}
                   </p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-muted-foreground truncate">
                     {deleteTarget.email}
                   </p>
                 </div>
@@ -1232,11 +1594,12 @@ const UsersPage = () => {
               </div>
             </div>
           )}
-          <DialogFooter className="gap-2">
+          <DialogFooter className="flex-col-reverse sm:flex-row gap-2">
             <Button
               variant="outline"
               onClick={() => setDeleteTarget(null)}
               disabled={deleting}
+              className="w-full sm:w-auto"
             >
               Cancel
             </Button>
@@ -1246,7 +1609,7 @@ const UsersPage = () => {
                 deleting || deleteConfirmText !== deleteTarget?.username
               }
               onClick={confirmDelete}
-              className="gap-2"
+              className="gap-2 w-full sm:w-auto"
             >
               {deleting ? (
                 <>
@@ -1267,7 +1630,7 @@ const UsersPage = () => {
         open={!!editTarget}
         onOpenChange={(o) => !o && setEditTarget(null)}
       >
-        <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-lg mx-4 sm:mx-auto max-h-[90dvh] overflow-y-auto rounded-xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Edit2 className="w-5 h-5 text-primary" /> Edit User
@@ -1288,7 +1651,7 @@ const UsersPage = () => {
                   className="bg-muted/40 text-muted-foreground font-mono text-sm"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <Label>
                     First Name <span className="text-destructive">*</span>
@@ -1322,7 +1685,7 @@ const UsersPage = () => {
                   placeholder="Optional"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <Label className="text-xs text-muted-foreground">
                     Email (read-only)
@@ -1344,7 +1707,7 @@ const UsersPage = () => {
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <Label>Gender</Label>
                   <Select
@@ -1426,11 +1789,12 @@ const UsersPage = () => {
               </div>
             </div>
           )}
-          <DialogFooter className="gap-2 pt-2">
+          <DialogFooter className="flex-col-reverse sm:flex-row gap-2 pt-2">
             <Button
               variant="outline"
               onClick={() => setEditTarget(null)}
               disabled={saving}
+              className="w-full sm:w-auto"
             >
               Cancel
             </Button>
@@ -1441,7 +1805,7 @@ const UsersPage = () => {
                 !safeTrim(editForm.firstName) ||
                 !safeTrim(editForm.lastName)
               }
-              className="gap-2"
+              className="gap-2 w-full sm:w-auto"
             >
               {saving ? (
                 <>

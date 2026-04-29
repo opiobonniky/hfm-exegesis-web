@@ -16,20 +16,24 @@ import {
   Star,
   Flame,
   BookOpen,
-  BarChart2,
   Sparkles,
+  Settings,
+  TrendingUp,
+  ArrowRight,
+  Quote,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { sendPostRequest } from "@/services/api";
 import { routes } from "@/components/Routes/routes";
 import { cn } from "@/lib/utils";
+import { getVerseText } from "@/utilities/bibleUtils";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// ─── Types ─────────────────────────────────────────────────────────────────
 interface DailyVerse {
-  id: string;
-  verseReference: string;
-  verseText: string;
-  createdAt: string;
+  bookName: string;
+  chapter: number;
+  verseNumber: number;
+  reflection: string;
 }
 
 interface ReadingPlan {
@@ -55,7 +59,7 @@ interface RecentActivity {
   updatedOn: string;
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// ─── Helpers ──────────────────────────────────────────────────────────────
 const getGreeting = () => {
   const h = new Date().getHours();
   if (h < 5) return "Good Night";
@@ -83,27 +87,7 @@ const getInitials = (first?: string, last?: string, username?: string) => {
   return "U";
 };
 
-// ─── Sub-components ───────────────────────────────────────────────────────────
-function SectionLabel({
-  children,
-  className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return (
-    <p
-      className={cn(
-        "text-[11px] font-bold tracking-widest uppercase text-muted-foreground mb-3",
-        className,
-      )}
-    >
-      {children}
-    </p>
-  );
-}
-
-// ─── Dashboard ────────────────────────────────────────────────────────────────
+// ─── Dashboard ─────────────────────────────────────────────────────────────
 export default function UserDashboard() {
   const { userInfo } = useAuth();
   const navigate = useNavigate();
@@ -134,10 +118,11 @@ export default function UserDashboard() {
         id: "1",
         label: "Exegesis Bible",
         sub: "Read & study",
-        icon: CalendarDays,
-        bg: "bg-blue-600",
-        iconCls: "text-blue-50",
-        glow: "shadow-blue-500/20",
+        icon: BookOpen,
+        bg: "bg-indigo-600",
+        iconBg: "bg-white/15",
+        badge: "New",
+        badgeCls: "bg-white/20 text-white",
         onPress: () => navigate(routes.bibleReader.path),
       },
       {
@@ -146,18 +131,20 @@ export default function UserDashboard() {
         sub: "Today's word",
         icon: Sun,
         bg: "bg-amber-500",
-        iconCls: "text-amber-50",
-        glow: "shadow-amber-500/20",
+        iconBg: "bg-white/15",
+        badge: null,
+        badgeCls: "",
         onPress: () => navigate(routes.userDailyVerse.path),
       },
       {
         id: "3",
         label: "Reading Plans",
         sub: "Guided journeys",
-        icon: Globe,
-        bg: "bg-teal-600",
-        iconCls: "text-teal-50",
-        glow: "shadow-teal-500/20",
+        icon: CalendarDays,
+        bg: "bg-emerald-600",
+        iconBg: "bg-white/15",
+        badge: null,
+        badgeCls: "",
         onPress: () => navigate(routes.userPlans.path),
       },
       {
@@ -165,9 +152,10 @@ export default function UserDashboard() {
         label: "Prayer Wall",
         sub: "Lift your voice",
         icon: HandHeart,
-        bg: "bg-emerald-600",
-        iconCls: "text-emerald-50",
-        glow: "shadow-emerald-500/20",
+        bg: "bg-teal-600",
+        iconBg: "bg-white/15",
+        badge: null,
+        badgeCls: "",
         onPress: () => {},
       },
       {
@@ -176,8 +164,9 @@ export default function UserDashboard() {
         sub: "Share your story",
         icon: Mic2,
         bg: "bg-rose-500",
-        iconCls: "text-rose-50",
-        glow: "shadow-rose-500/20",
+        iconBg: "bg-white/15",
+        badge: null,
+        badgeCls: "",
         onPress: () => {},
       },
       {
@@ -186,84 +175,89 @@ export default function UserDashboard() {
         sub: "Test knowledge",
         icon: Brain,
         bg: "bg-violet-600",
-        iconCls: "text-violet-50",
-        glow: "shadow-violet-500/20",
+        iconBg: "bg-white/15",
+        badge: "Soon",
+        badgeCls: "bg-white/20 text-white",
         onPress: () => {},
       },
     ],
     [navigate],
   );
 
-  const quickLinks = useMemo(
-    () => [
-      {
-        id: "1",
-        label: "Notes",
-        icon: BookMarked,
-        iconCls: "text-violet-500",
-        bg: "bg-violet-50 dark:bg-violet-950/40",
-      },
-      {
-        id: "2",
-        label: "History",
-        icon: History,
-        iconCls: "text-emerald-500",
-        bg: "bg-emerald-50 dark:bg-emerald-950/40",
-      },
-      {
-        id: "3",
-        label: "Highlights",
-        icon: Star,
-        iconCls: "text-amber-500",
-        bg: "bg-amber-50 dark:bg-amber-950/40",
-      },
-      {
-        id: "4",
-        label: "Favorites",
-        icon: Heart,
-        iconCls: "text-rose-500",
-        bg: "bg-rose-50 dark:bg-rose-950/40",
-      },
-    ],
-    [],
-  );
-
   const statCards = useMemo(
     () => [
       {
-        label: "Chapters",
+        label: "Chapters Read",
         value: stats.chaptersRead,
         icon: BookOpen,
-        iconCls: "text-blue-500",
-        bg: "bg-blue-50 dark:bg-blue-950/40",
-        border: "border-blue-100 dark:border-blue-900/50",
+        accent: "#4F46E5",
+        lightBg: "#EEF2FF",
+        textColor: "#4338CA",
       },
       {
         label: "Highlights",
         value: stats.highlights,
         icon: Star,
-        iconCls: "text-amber-500",
-        bg: "bg-amber-50 dark:bg-amber-950/40",
-        border: "border-amber-100 dark:border-amber-900/50",
+        accent: "#D97706",
+        lightBg: "#FFFBEB",
+        textColor: "#B45309",
       },
       {
         label: "Notes",
         value: stats.notes,
         icon: BookMarked,
-        iconCls: "text-emerald-500",
-        bg: "bg-emerald-50 dark:bg-emerald-950/40",
-        border: "border-emerald-100 dark:border-emerald-900/50",
+        accent: "#7C3AED",
+        lightBg: "#F5F3FF",
+        textColor: "#6D28D9",
       },
       {
         label: "Favorites",
         value: stats.favorites,
         icon: Heart,
-        iconCls: "text-rose-500",
-        bg: "bg-rose-50 dark:bg-rose-950/40",
-        border: "border-rose-100 dark:border-rose-900/50",
+        accent: "#E11D48",
+        lightBg: "#FFF1F2",
+        textColor: "#BE123C",
       },
     ],
     [stats],
+  );
+
+  const quickLinks = useMemo(
+    () => [
+      {
+        id: "1",
+        label: "My Notes",
+        icon: BookMarked,
+        color: "#7C3AED",
+        lightBg: "#F5F3FF",
+        onPress: () => navigate(routes.myActivity.path),
+      },
+      {
+        id: "2",
+        label: "History",
+        icon: History,
+        color: "#059669",
+        lightBg: "#ECFDF5",
+        onPress: () => navigate(routes.myActivity.path),
+      },
+      {
+        id: "3",
+        label: "Highlights",
+        icon: Star,
+        color: "#D97706",
+        lightBg: "#FFFBEB",
+        onPress: () => navigate(routes.myActivity.path),
+      },
+      {
+        id: "4",
+        label: "Favorites",
+        icon: Heart,
+        color: "#E11D48",
+        lightBg: "#FFF1F2",
+        onPress: () => navigate(routes.myActivity.path),
+      },
+    ],
+    [navigate],
   );
 
   // ── Fetch ──
@@ -275,14 +269,21 @@ export default function UserDashboard() {
           sendPostRequest("bible", "get-home-stats", {}),
           sendPostRequest("reading-plans", "get-user-plans", {}),
         ]);
-        if (verseRes.returnCode === 200 && verseRes.returnData)
-          setDailyVerse(verseRes.returnData);
+        if (verseRes.returnCode === 200 && verseRes.returnData) {
+          const v = verseRes.returnData;
+          setDailyVerse({
+            verseNumber: v.verseNumber,
+            chapter: v.chapter,
+            bookName: v.bookName,
+            reflection: v.reflection,
+          });
+        }
         if (statsRes.returnCode === 200 && statsRes.returnData) {
           const d = statsRes.returnData;
           setStats({
             chaptersRead: d.chaptersRead ?? 0,
-            highlights: d.highlights ?? 0,
-            notes: d.notes ?? 0,
+            highlights: d.highlightCount ?? 0,
+            notes: d.noteCount ?? 0,
             favorites: d.favorites ?? 0,
           });
           setRecentActivity(d.recentActivity ?? []);
@@ -300,113 +301,130 @@ export default function UserDashboard() {
   // ── Loading ──
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[70vh] gap-4">
-        <div className="relative w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center">
-          <BookOpen className="w-7 h-7 text-primary" />
-          <Loader2 className="w-5 h-5 animate-spin text-primary absolute -bottom-1.5 -right-1.5 bg-background rounded-full p-0.5" />
+      <div className="flex flex-col items-center justify-center min-h-[70vh] gap-4 bg-slate-50">
+        <div className="w-16 h-16 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center">
+          <BookOpen className="w-7 h-7 text-indigo-600" />
         </div>
-        <p className="text-sm text-muted-foreground">Loading your dashboard…</p>
+        <p className="text-sm text-slate-400 font-medium tracking-wide">
+          Loading your dashboard…
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-full bg-background">
-      {/* ══════════════════════════════
-          HERO
-      ══════════════════════════════ */}
-      <div className="relative bg-slate-950 overflow-hidden">
-        {/* Dot grid */}
-        <div
-          className="absolute inset-0 pointer-events-none opacity-[0.06]"
-          style={{
-            backgroundImage:
-              "radial-gradient(circle, #ffffff 1px, transparent 1px)",
-            backgroundSize: "22px 22px",
-          }}
-        />
-        {/* Colour blobs */}
-        <div className="absolute -top-24 -right-12 w-80 h-80 rounded-full bg-primary/30 blur-[80px] pointer-events-none" />
-        <div className="absolute bottom-0 left-4 w-48 h-48 rounded-full bg-amber-500/20 blur-[60px] pointer-events-none" />
-
-        <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-7 pb-8">
-          {/* Top row */}
-          <div className="flex items-center justify-between gap-3 mb-5">
+    <div className="min-h-full bg-slate-50">
+      {/* ══════════════════ HERO ══════════════════ */}
+      <div className="bg-white border-b border-slate-100">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+          {/* Top bar */}
+          <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3.5">
-              <div className="w-11 h-11 sm:w-13 sm:h-13 rounded-2xl bg-primary flex items-center justify-center shrink-0 ring-4 ring-primary/25 shadow-xl shadow-primary/30">
-                <span className="text-lg font-bold text-white leading-none">
-                  {initials}
-                </span>
+              {/* Avatar */}
+              <div className="relative shrink-0">
+                <div
+                  className="w-11 h-11 rounded-2xl flex items-center justify-center ring-4 ring-indigo-50"
+                  style={{
+                    background: "linear-gradient(135deg, #4F46E5, #7C3AED)",
+                  }}
+                >
+                  <span className="text-sm font-bold text-white leading-none">
+                    {initials}
+                  </span>
+                </div>
+                <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-400 border-2 border-white" />
               </div>
               <div>
-                <p className="text-[11px] text-white/40 font-medium tracking-wide">
+                <p className="text-[10px] font-semibold tracking-widest uppercase text-slate-400">
                   {getGreeting()}
                 </p>
-                <h1 className="text-xl sm:text-2xl font-bold text-white leading-tight">
+                <h1 className="text-lg font-bold text-slate-800 leading-tight truncate max-w-[180px] sm:max-w-xs">
                   {displayName}
                 </h1>
               </div>
             </div>
 
             <div className="flex items-center gap-2">
-              <div className="px-3 py-1.5 rounded-full bg-white/10 border border-white/10 text-xs text-white/60 font-medium flex items-center gap-1.5">
-                <Flame className="w-3.5 h-3.5 text-orange-400 shrink-0" />
-                {stats.chaptersRead} read
+              <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-indigo-50 border border-indigo-100">
+                <TrendingUp className="w-3.5 h-3.5 text-indigo-500" />
+                <span className="text-xs text-indigo-600 font-semibold">
+                  {stats.chaptersRead} chapters
+                </span>
               </div>
+              <button
+                onClick={() => navigate(routes.settings.path)}
+                className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 transition-all active:scale-95"
+              >
+                <Settings className="w-4 h-4 text-slate-500" />
+              </button>
             </div>
           </div>
 
-          {/* Verse strip */}
+          {/* Daily verse card */}
           {dailyVerse && (
             <button
               onClick={() => navigate(routes.userDailyVerse.path)}
-              className="w-full flex items-start gap-3 p-4 rounded-2xl bg-white/[0.07] hover:bg-white/[0.11] border border-white/10 transition-all text-left"
+              className="group w-full flex items-start gap-4 p-5 rounded-2xl text-left transition-all active:scale-[0.99]"
+              style={{
+                background: "linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)",
+              }}
             >
-              <div className="w-8 h-8 rounded-xl bg-amber-400/20 flex items-center justify-center shrink-0 mt-0.5">
-                <Sparkles className="w-4 h-4 text-amber-300" />
+              {/* Quote mark */}
+              <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center shrink-0 mt-0.5">
+                <Quote className="w-5 h-5 text-white/80" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[10px] font-bold tracking-widest uppercase text-amber-400/70 mb-1">
+                <p className="text-[9px] font-bold tracking-[0.18em] uppercase text-white/50 mb-1.5">
                   Verse of the day
                 </p>
-                <p className="text-sm text-white/75 italic font-serif line-clamp-2 leading-relaxed">
-                  "{dailyVerse.verseText}"
+                <p
+                  className="text-sm text-white/90 italic leading-relaxed line-clamp-2"
+                  style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}
+                >
+                  "
+                  {getVerseText(
+                    dailyVerse.bookName,
+                    dailyVerse.chapter,
+                    dailyVerse.verseNumber,
+                  )}
+                  "
                 </p>
-                <p className="text-[11px] text-white/35 mt-1.5 font-medium">
-                  — {dailyVerse.verseReference}
+                <p className="text-[10px] text-white/40 mt-2 font-semibold tracking-wide">
+                  — {dailyVerse.bookName} {dailyVerse.chapter}:
+                  {dailyVerse.verseNumber}
                 </p>
               </div>
-              <ChevronRight className="w-4 h-4 text-white/25 shrink-0 mt-1" />
+              <ChevronRight className="w-4 h-4 text-white/30 group-hover:text-white/60 group-hover:translate-x-0.5 transition-all shrink-0 mt-2" />
             </button>
           )}
         </div>
       </div>
 
-      {/* ══════════════════════════════
-          BODY
-      ══════════════════════════════ */}
-      <div className=" mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6 ">
-        {/* Stats row */}
+      {/* ══════════════════ BODY ══════════════════ */}
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-7 space-y-8">
+        {/* ── Stats ── */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {statCards.map((s) => {
             const Icon = s.icon;
             return (
               <div
                 key={s.label}
-                className={cn(
-                  "rounded-2xl border p-4 flex flex-col gap-3",
-                  s.bg,
-                  s.border,
-                )}
+                className="rounded-2xl bg-white border border-slate-100 p-4 flex flex-col gap-3 hover:shadow-sm hover:border-slate-200 transition-all"
               >
-                <div className="w-8 h-8 rounded-xl bg-white/60 dark:bg-black/20 flex items-center justify-center">
-                  <Icon className={cn("w-4 h-4", s.iconCls)} />
+                <div
+                  className="w-9 h-9 rounded-xl flex items-center justify-center"
+                  style={{ backgroundColor: s.lightBg }}
+                >
+                  <Icon className="w-4 h-4" style={{ color: s.accent }} />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-foreground leading-none">
+                  <p
+                    className="text-2xl font-bold leading-none"
+                    style={{ color: s.textColor }}
+                  >
                     {s.value.toLocaleString()}
                   </p>
-                  <p className="text-xs text-muted-foreground mt-1">
+                  <p className="text-xs text-slate-400 mt-1 font-medium">
                     {s.label}
                   </p>
                 </div>
@@ -415,43 +433,64 @@ export default function UserDashboard() {
           })}
         </div>
 
-        {/* Two-column layout on LG */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6 items-start">
-          {/* ── LEFT ── */}
-          <div className="space-y-6">
+        {/* ── Main grid ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_272px] gap-8">
+          {/* LEFT */}
+          <div className="space-y-8">
             {/* Explore */}
             <section>
-              <SectionLabel>Explore</SectionLabel>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-[11px] font-bold tracking-widest uppercase text-slate-400">
+                  Explore
+                </h2>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {exploreItems.map((item) => {
                   const Icon = item.icon;
                   return (
                     <button
                       key={item.id}
                       onClick={item.onPress}
-                      className="group flex items-center gap-4 p-4 rounded-2xl bg-card border border-border/50 hover:border-border hover:shadow-md active:scale-[0.98] transition-all duration-150 text-left"
+                      className={cn(
+                        "group relative overflow-hidden rounded-2xl p-4 text-left transition-all duration-150",
+                        "active:scale-[0.97] hover:-translate-y-0.5 hover:shadow-md",
+                        item.bg,
+                      )}
                     >
+                      {/* Subtle inner highlight */}
+                      <div className="absolute inset-0 bg-gradient-to-b from-white/10 to-transparent pointer-events-none" />
+
+                      {item.badge && (
+                        <span
+                          className={cn(
+                            "absolute top-2.5 right-2.5 text-[9px] font-bold tracking-wider uppercase px-1.5 py-0.5 rounded-full",
+                            item.badgeCls,
+                          )}
+                        >
+                          {item.badge}
+                        </span>
+                      )}
+
                       <div
                         className={cn(
-                          "w-11 h-11 rounded-xl flex items-center justify-center shrink-0 shadow-lg",
-                          item.bg,
-                          item.glow,
+                          "w-9 h-9 rounded-xl flex items-center justify-center mb-3",
+                          item.iconBg,
                         )}
                       >
                         <Icon
-                          className={cn("w-5 h-5", item.iconCls)}
+                          className="w-5 h-5 text-white"
                           strokeWidth={1.8}
                         />
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-sm text-foreground leading-snug">
-                          {item.label}
-                        </p>
-                        <p className="text-xs text-muted-foreground mt-0.5">
-                          {item.sub}
-                        </p>
-                      </div>
-                      <ChevronRight className="w-4 h-4 text-muted-foreground/30 group-hover:text-muted-foreground group-hover:translate-x-0.5 transition-all shrink-0" />
+
+                      <p className="font-bold text-sm text-white leading-tight">
+                        {item.label}
+                      </p>
+                      <p className="text-[11px] text-white/60 mt-0.5 hidden sm:block">
+                        {item.sub}
+                      </p>
+
+                      <ChevronRight className="absolute bottom-3 right-3 w-3.5 h-3.5 text-white/30 group-hover:text-white/70 group-hover:translate-x-0.5 transition-all" />
                     </button>
                   );
                 })}
@@ -461,16 +500,18 @@ export default function UserDashboard() {
             {/* Reading Plans */}
             {readingPlans.length > 0 && (
               <section>
-                <div className="flex items-center justify-between mb-3">
-                  <SectionLabel className="mb-0">Reading Plans</SectionLabel>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-[11px] font-bold tracking-widest uppercase text-slate-400">
+                    Reading Plans
+                  </h2>
                   <button
                     onClick={() => navigate(routes.userPlans.path)}
-                    className="text-xs font-semibold text-primary hover:underline flex items-center gap-0.5"
+                    className="flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-700 transition-colors"
                   >
-                    See all <ChevronRight className="w-3 h-3" />
+                    See all
+                    <ArrowRight className="w-3 h-3" />
                   </button>
                 </div>
-
                 <div className="space-y-3">
                   {readingPlans.map((plan) => {
                     const pct = Math.min(
@@ -481,17 +522,17 @@ export default function UserDashboard() {
                     return (
                       <div
                         key={plan.id}
-                        className="rounded-2xl border border-border/50 bg-card p-4 sm:p-5 hover:shadow-sm transition-shadow"
+                        className="rounded-2xl border border-slate-100 bg-white p-4 sm:p-5 hover:border-slate-200 hover:shadow-sm transition-all"
                       >
                         <div className="flex items-start gap-3 mb-4">
-                          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                            <CalendarDays className="w-4.5 h-4.5 text-primary" />
+                          <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center shrink-0">
+                            <CalendarDays className="w-5 h-5 text-indigo-600" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="font-semibold text-sm text-foreground line-clamp-1">
+                            <p className="font-semibold text-sm text-slate-800 line-clamp-1">
                               {plan.planName}
                             </p>
-                            <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2 leading-relaxed">
+                            <p className="text-xs text-slate-400 mt-0.5 line-clamp-1">
                               {plan.description}
                             </p>
                           </div>
@@ -499,28 +540,34 @@ export default function UserDashboard() {
                             className={cn(
                               "shrink-0 text-xs font-bold px-2.5 py-1 rounded-full",
                               done
-                                ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400"
-                                : "bg-primary/10 text-primary",
+                                ? "bg-emerald-50 text-emerald-700"
+                                : "bg-indigo-50 text-indigo-700",
                             )}
                           >
                             {pct}%
                           </span>
                         </div>
+
                         <div className="space-y-1.5">
-                          <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                          <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
                             <div
                               className="h-full rounded-full transition-all duration-700"
                               style={{
                                 width: `${pct}%`,
-                                backgroundColor: done
-                                  ? "#10B981"
-                                  : "hsl(var(--primary))",
+                                background: done
+                                  ? "linear-gradient(90deg, #10B981, #34D399)"
+                                  : "linear-gradient(90deg, #4F46E5, #7C3AED)",
                               }}
                             />
                           </div>
-                          <p className="text-xs text-muted-foreground">
-                            {plan.completedDays} of {plan.totalDays} days
-                          </p>
+                          <div className="flex items-center justify-between">
+                            <p className="text-xs text-slate-400">
+                              {plan.completedDays} of {plan.totalDays} days
+                            </p>
+                            <p className="text-xs text-slate-400">
+                              {plan.totalDays - plan.completedDays} left
+                            </p>
+                          </div>
                         </div>
                       </div>
                     );
@@ -530,29 +577,34 @@ export default function UserDashboard() {
             )}
           </div>
 
-          {/* ── RIGHT ── */}
+          {/* RIGHT */}
           <div className="space-y-6">
             {/* Quick Access */}
             <section>
-              <SectionLabel>Quick Access</SectionLabel>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-[11px] font-bold tracking-widest uppercase text-slate-400">
+                  Quick Access
+                </h2>
+              </div>
               <div className="grid grid-cols-2 gap-3">
                 {quickLinks.map((link) => {
                   const Icon = link.icon;
                   return (
                     <button
                       key={link.id}
-                      onClick={() => {}}
-                      className="flex flex-col items-center gap-2.5 p-4 rounded-2xl border border-border/50 bg-card hover:bg-accent/40 hover:border-border active:scale-[0.97] transition-all"
+                      onClick={link.onPress}
+                      className="group flex flex-col items-center gap-2.5 p-4 rounded-2xl bg-white border border-slate-100 hover:border-slate-200 hover:shadow-sm transition-all active:scale-[0.97]"
                     >
                       <div
-                        className={cn(
-                          "w-11 h-11 rounded-xl flex items-center justify-center",
-                          link.bg,
-                        )}
+                        className="w-10 h-10 rounded-xl flex items-center justify-center"
+                        style={{ backgroundColor: link.lightBg }}
                       >
-                        <Icon className={cn("w-5 h-5", link.iconCls)} />
+                        <Icon
+                          className="w-5 h-5"
+                          style={{ color: link.color }}
+                        />
                       </div>
-                      <span className="text-xs font-semibold text-foreground">
+                      <span className="text-xs font-semibold text-slate-700">
                         {link.label}
                       </span>
                     </button>
@@ -564,9 +616,20 @@ export default function UserDashboard() {
             {/* Recent Activity */}
             {recentActivity.length > 0 && (
               <section>
-                <SectionLabel>Recent Activity</SectionLabel>
-                <div className="rounded-2xl border border-border/50 bg-card overflow-hidden">
-                  {recentActivity.slice(0, 6).map((act, idx) => (
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-[11px] font-bold tracking-widest uppercase text-slate-400">
+                    Recent Activity
+                  </h2>
+                  <button
+                    onClick={() => navigate(routes.myActivity.path)}
+                    className="flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-700 transition-colors"
+                  >
+                    All history
+                    <ArrowRight className="w-3 h-3" />
+                  </button>
+                </div>
+                <div className="rounded-2xl border border-slate-100 bg-white overflow-hidden divide-y divide-slate-50">
+                  {recentActivity.slice(0, 5).map((act, idx) => (
                     <button
                       key={idx}
                       onClick={() =>
@@ -574,72 +637,74 @@ export default function UserDashboard() {
                           `${routes.bibleReader.path}?book=${encodeURIComponent(act.bookName)}&chapter=${act.chapter}`,
                         )
                       }
-                      className="w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-accent/40 active:bg-accent/60 transition-colors border-b border-border/30 last:border-b-0"
+                      className="group w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-slate-50 active:bg-slate-100 transition-colors"
                     >
-                      <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                        <Clock className="w-3.5 h-3.5 text-primary" />
+                      <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center shrink-0">
+                        <Clock className="w-3.5 h-3.5 text-indigo-500" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm text-foreground truncate">
+                        <p className="font-semibold text-sm text-slate-700 truncate">
                           {act.bookName} {act.chapter}
                         </p>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-[11px] text-slate-400">
                           {formatTime(act.updatedOn)}
                         </p>
                       </div>
-                      <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/40 shrink-0" />
+                      <ChevronRight className="w-3.5 h-3.5 text-slate-300 group-hover:text-slate-400 group-hover:translate-x-0.5 transition-all shrink-0" />
                     </button>
                   ))}
                 </div>
               </section>
             )}
 
-            {/* Stats bar chart — desktop-only */}
-            <section className="hidden lg:block">
-              <SectionLabel>Stats Overview</SectionLabel>
-              <div className="rounded-2xl border border-border/50 bg-card p-5">
-                <div className="space-y-3.5">
-                  {statCards.map((s) => {
-                    const Icon = s.icon;
-                    const maxVal = Math.max(
-                      ...statCards.map((x) => x.value),
-                      1,
-                    );
-                    const pct = Math.round((s.value / maxVal) * 100);
-                    return (
-                      <div key={s.label} className="flex items-center gap-3">
-                        <Icon
-                          className={cn("w-3.5 h-3.5 shrink-0", s.iconCls)}
-                        />
-                        <div className="flex-1">
-                          <div className="flex justify-between items-center mb-1.5">
-                            <span className="text-xs text-muted-foreground">
-                              {s.label}
-                            </span>
-                            <span className="text-xs font-bold text-foreground">
-                              {s.value}
-                            </span>
-                          </div>
-                          <div className="h-1 bg-muted rounded-full overflow-hidden">
-                            <div
-                              className="h-full rounded-full transition-all duration-700"
-                              style={{
-                                width: `${pct}%`,
-                                backgroundColor: "hsl(var(--primary))",
-                              }}
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
+            {/* Motivation nudge */}
+            <section>
+              <div
+                className="rounded-2xl p-5 relative overflow-hidden"
+                style={{
+                  background:
+                    "linear-gradient(135deg, #F0F4FF 0%, #FAF5FF 100%)",
+                }}
+              >
+                {/* Decorative circle */}
+                <div className="absolute -top-6 -right-6 w-24 h-24 rounded-full bg-indigo-100/60 pointer-events-none" />
+                <div className="absolute -bottom-4 -left-4 w-16 h-16 rounded-full bg-violet-100/40 pointer-events-none" />
+
+                <div className="relative">
+                  <div className="flex items-center gap-2.5 mb-3">
+                    <div className="w-9 h-9 rounded-xl bg-white shadow-sm flex items-center justify-center">
+                      <Flame className="w-4 h-4 text-orange-500" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-sm text-slate-800">
+                        Keep it up!
+                      </p>
+                      <p className="text-xs text-slate-500">
+                        {stats.chaptersRead} chapters total
+                      </p>
+                    </div>
+                  </div>
+                  <p className="text-xs text-slate-500 leading-relaxed mb-4">
+                    You're doing great. Read a chapter today to continue your
+                    journey in Scripture.
+                  </p>
+                  <button
+                    onClick={() => navigate(routes.bibleReader.path)}
+                    className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold text-white transition-all active:scale-[0.98] hover:opacity-90"
+                    style={{
+                      background: "linear-gradient(135deg, #4F46E5, #7C3AED)",
+                    }}
+                  >
+                    Continue Reading
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
                 </div>
               </div>
             </section>
           </div>
         </div>
 
-        <div className="h-8" />
+        <div className="h-6" />
       </div>
     </div>
   );

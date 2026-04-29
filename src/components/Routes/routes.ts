@@ -6,6 +6,7 @@ import { ComponentType, lazy } from "react";
 // Lazy load components for code splitting
 const Landing = lazy(() => import("@/pages/Landing"));
 const Login = lazy(() => import("@/pages/Login"));
+const GoogleRegister = lazy(() => import("@/pages/GoogleRegister"));
 const Register = lazy(() => import("@/pages/Register"));
 const VerifyAccount = lazy(() => import("@/pages/VerifyAccount"));
 const ForgotPassword = lazy(() => import("@/pages/ForgotPassword"));
@@ -30,6 +31,7 @@ const BibleReadingPlan = lazy(
 );
 const DailyReading = lazy(() => import("@/pages/ReadingPlan/DailyReading"));
 const MyActivity = lazy(() => import("@/pages/MyActivity"));
+const Settings = lazy(() => import("@/pages/Settings"));
 
 // Route configuration interface
 export interface RouteConfig {
@@ -58,6 +60,13 @@ export const routes = {
     isProtected: false,
     requiresLayout: false,
     title: "Login",
+  },
+  googleRegister: {
+    path: "/google-register",
+    component: GoogleRegister,
+    isProtected: false,
+    requiresLayout: false,
+    title: "Google Register",
   },
   register: {
     path: "/register",
@@ -207,6 +216,13 @@ export const routes = {
     isProtected: true,
     requiresLayout: true,
     title: "My Activity",
+  },
+  settings: {
+    path: "/settings",
+    component: Settings,
+    isProtected: true,
+    requiresLayout: true,
+    title: "Settings",
   },
   // ==================== 404 NOT FOUND ====================
   notFound: {

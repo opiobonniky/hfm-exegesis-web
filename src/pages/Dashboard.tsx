@@ -164,7 +164,7 @@ const avatarColor = (u: string) => {
 };
 const Av = ({ f, l, u }: { f: string; l: string; u: string }) => (
   <div
-    className="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold text-white shrink-0"
+    className="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-[10px] sm:text-[11px] font-bold text-white shrink-0"
     style={{ backgroundColor: avatarColor(u) }}
   >
     {(f?.[0] ?? "?").toUpperCase()}
@@ -186,6 +186,7 @@ const DeviceIcon = ({
   return <Monitor className={className} />;
 };
 
+// ── KPI card — compact on mobile, normal on sm+ ──
 const KPI = ({
   label,
   value,
@@ -209,38 +210,55 @@ const KPI = ({
   return (
     <div
       className={cn(
-        "relative bg-white rounded-2xl overflow-hidden border border-stone-100 shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] hover:-translate-y-0.5 transition-all duration-200",
+        "relative bg-white rounded-xl sm:rounded-2xl overflow-hidden border border-stone-100 shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] hover:-translate-y-0.5 transition-all duration-200",
       )}
     >
       <div
-        className={cn("absolute top-0 inset-x-0 h-[3px] rounded-t-2xl", accent)}
+        className={cn(
+          "absolute top-0 inset-x-0 h-[3px] rounded-t-xl sm:rounded-t-2xl",
+          accent,
+        )}
       />
-      <div className="p-5 pt-6">
+      {/* Mobile layout: icon left, text right in a row */}
+      <div className="p-3 pt-4 sm:p-5 sm:pt-6">
         {loading ? (
-          <>
-            <Shimmer className="w-9 h-9 rounded-xl mb-4" />
-            <Shimmer className="h-7 w-16 mb-2" />
-            <Shimmer className="h-3 w-24" />
-          </>
+          <div className="flex items-center gap-2.5 sm:block">
+            <Shimmer className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl shrink-0 sm:mb-4" />
+            <div className="flex-1 sm:block space-y-1.5 sm:space-y-0">
+              <Shimmer className="h-5 sm:h-7 w-14 sm:w-16 sm:mb-2" />
+              <Shimmer className="h-2.5 sm:h-3 w-20 sm:w-24" />
+            </div>
+          </div>
         ) : (
-          <>
+          // Mobile: horizontal pill layout
+          <div className="flex items-center gap-2.5 sm:block">
             <div
               className={cn(
-                "w-9 h-9 rounded-xl flex items-center justify-center mb-4",
+                "w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center shrink-0 sm:mb-4",
                 iconBg,
               )}
             >
-              <Icon className={cn("w-[18px] h-[18px]", iconColor)} />
+              <Icon
+                className={cn("w-4 h-4 sm:w-[18px] sm:h-[18px]", iconColor)}
+              />
             </div>
-            <p
-              className="text-[26px] font-bold text-stone-800 tracking-tight leading-none"
-              style={{ fontFamily: "'Fraunces', Georgia, serif" }}
-            >
-              {n.toLocaleString()}
-            </p>
-            <p className="text-sm text-stone-500 mt-1.5 font-medium">{label}</p>
-            {sub && <p className="text-xs text-stone-400 mt-0.5">{sub}</p>}
-          </>
+            <div className="flex-1 min-w-0">
+              <p
+                className="text-xl sm:text-[26px] font-bold text-stone-800 tracking-tight leading-none"
+                style={{ fontFamily: "'Fraunces', Georgia, serif" }}
+              >
+                {n.toLocaleString()}
+              </p>
+              <p className="text-[11px] sm:text-sm text-stone-500 mt-0.5 sm:mt-1.5 font-medium leading-tight truncate">
+                {label}
+              </p>
+              {sub && (
+                <p className="text-[10px] sm:text-xs text-stone-400 mt-0.5 truncate hidden sm:block">
+                  {sub}
+                </p>
+              )}
+            </div>
+          </div>
         )}
       </div>
     </div>
@@ -259,15 +277,15 @@ const RateBar = ({
   loading?: boolean;
 }) => (
   <div className="space-y-1.5">
-    <div className="flex items-center justify-between text-sm">
+    <div className="flex items-center justify-between text-xs sm:text-sm">
       <span className="text-stone-500 font-medium">{label}</span>
       {loading ? (
-        <Shimmer className="w-10 h-3.5" />
+        <Shimmer className="w-8 sm:w-10 h-3 sm:h-3.5" />
       ) : (
         <span className="font-bold text-stone-700">{value}%</span>
       )}
     </div>
-    <div className="h-2 rounded-full bg-stone-100 overflow-hidden">
+    <div className="h-1.5 sm:h-2 rounded-full bg-stone-100 overflow-hidden">
       {!loading && (
         <div
           className={cn(
@@ -355,7 +373,11 @@ const Dashboard = () => {
       });
       if (r?.returnCode === 200) {
         const activityData = r.returnData;
-        setActivity(Array.isArray(activityData) ? activityData : (activityData?.sessions ?? []));
+        setActivity(
+          Array.isArray(activityData)
+            ? activityData
+            : (activityData?.sessions ?? []),
+        );
       }
     } catch {
     } finally {
@@ -381,13 +403,17 @@ const Dashboard = () => {
         setStats((sR.value as any).returnData);
       if (uR.status === "fulfilled" && (uR.value as any)?.returnCode === 200) {
         const usersData = (uR.value as any).returnData;
-        const usersArray = Array.isArray(usersData) ? usersData : (usersData?.users ?? []);
+        const usersArray = Array.isArray(usersData)
+          ? usersData
+          : (usersData?.users ?? []);
         setRecentUsers(usersArray.slice(0, 6));
       }
       if (pR.status === "fulfilled" && (pR.value as any)?.returnCode === 200) {
         const plansData = (pR.value as any).returnData;
         const plansArray = plansData?.plans ?? plansData ?? [];
-        const plansWithDefaults = (Array.isArray(plansArray) ? plansArray : []).map((p: any) => ({
+        const plansWithDefaults = (
+          Array.isArray(plansArray) ? plansArray : []
+        ).map((p: any) => ({
           ...p,
           totalDays: p.totalDays ?? p.total_days ?? 0,
           isActive: p.isActive ?? p.is_active ?? true,
@@ -414,7 +440,7 @@ const Dashboard = () => {
     fetchActivity();
   }, [fetchAll, fetchActivity]);
 
-  // ── Device breakdown bar component ──────────
+  // ── Device breakdown bar ─────────────────────
   const DeviceBar = () => {
     const total = Object.values(actStats.deviceCounts).reduce(
       (a, b) => a + b,
@@ -442,7 +468,7 @@ const Dashboard = () => {
     ];
     return (
       <div className="space-y-3">
-        <div className="flex h-3 rounded-full overflow-hidden gap-px">
+        <div className="flex h-2.5 sm:h-3 rounded-full overflow-hidden gap-px">
           {items.map(({ key, color }) => {
             const pct = Math.round(
               ((actStats.deviceCounts[key] ?? 0) / total) * 100,
@@ -456,7 +482,7 @@ const Dashboard = () => {
             ) : null;
           })}
         </div>
-        <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+        <div className="grid grid-cols-2 gap-x-3 gap-y-1.5">
           {items.map(({ key, label, color, Icon }) => {
             const count = actStats.deviceCounts[key] ?? 0;
             const pct = Math.round((count / total) * 100);
@@ -464,10 +490,10 @@ const Dashboard = () => {
               <div key={key} className="flex items-center gap-1.5">
                 <div className={cn("w-2 h-2 rounded-full shrink-0", color)} />
                 <Icon className="w-3 h-3 text-stone-400 shrink-0" />
-                <span className="text-xs text-stone-500 font-medium">
+                <span className="text-[11px] text-stone-500 font-medium">
                   {label}
                 </span>
-                <span className="ml-auto text-xs font-bold text-stone-700">
+                <span className="ml-auto text-[11px] font-bold text-stone-700">
                   {pct}%
                 </span>
               </div>
@@ -486,23 +512,34 @@ const Dashboard = () => {
       className="min-h-screen bg-[#f7f5f2]"
       style={{ fontFamily: "'DM Sans', 'Inter', system-ui, sans-serif" }}
     >
+      {/* top accent bar */}
       <div className="h-1 bg-gradient-to-r from-amber-400 via-orange-400 to-rose-400" />
-      <div className="max-w-[1440px] mx-auto px-5 sm:px-8 py-8 space-y-8">
-        {/* Header */}
-        <div className="flex items-start justify-between gap-4">
+
+      <div className="max-w-[1440px] mx-auto px-3 sm:px-5 lg:px-8 py-4 sm:py-6 lg:py-8 space-y-4 sm:space-y-6 lg:space-y-8">
+        {/* ── Header ───────────────────────────── */}
+        <div className="flex items-start justify-between gap-3">
           <div>
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-100 border border-amber-200 text-amber-700 text-[11px] font-bold tracking-widest uppercase mb-2">
-              <ShieldCheck className="w-3 h-3" /> Admin Console
+            <div className="inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-amber-100 border border-amber-200 text-amber-700 text-[10px] sm:text-[11px] font-bold tracking-widest uppercase mb-1.5 sm:mb-2">
+              <ShieldCheck className="w-2.5 h-2.5 sm:w-3 sm:h-3" /> Admin
+              Console
             </div>
             <h1
-              className="text-3xl font-bold text-stone-800 tracking-tight leading-none"
+              className="text-xl sm:text-2xl lg:text-3xl font-bold text-stone-800 tracking-tight leading-none"
               style={{ fontFamily: "'Fraunces', Georgia, serif" }}
             >
               Platform Overview
             </h1>
-            <p className="text-stone-400 text-sm mt-1.5 flex items-center gap-1.5 font-medium">
-              <Calendar className="w-3.5 h-3.5" />
-              {today}
+            {/* date hidden on smallest screens to save space */}
+            <p className="text-stone-400 text-xs sm:text-sm mt-1 sm:mt-1.5 items-center gap-1.5 font-medium hidden xs:flex sm:flex">
+              <Calendar className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+              <span className="hidden sm:inline">{today}</span>
+              <span className="sm:hidden">
+                {new Date().toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                })}
+              </span>
             </p>
           </div>
           <button
@@ -511,7 +548,7 @@ const Dashboard = () => {
               fetchActivity();
             }}
             disabled={refreshing}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 text-stone-500 hover:text-stone-700 text-sm shadow-sm transition-all shrink-0 font-medium"
+            className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 text-stone-500 hover:text-stone-700 text-xs sm:text-sm shadow-sm transition-all shrink-0 font-medium"
           >
             <RefreshCw
               className={cn("w-3.5 h-3.5", refreshing && "animate-spin")}
@@ -521,13 +558,13 @@ const Dashboard = () => {
         </div>
 
         {error && (
-          <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 font-medium">
+          <div className="rounded-xl border border-red-200 bg-red-50 px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm text-red-700 font-medium">
             ⚠ {error}
           </div>
         )}
 
-        {/* Primary KPIs */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {/* ── Primary KPIs — 2 col mobile, 4 col lg ── */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
           <KPI
             label="Total Users"
             value={stats?.totalUsers ?? 0}
@@ -559,7 +596,7 @@ const Dashboard = () => {
             loading={loading}
           />
           <KPI
-            label="Plan Enrollments"
+            label="Enrollments"
             value={stats?.totalEnrollments ?? 0}
             icon={BookOpenCheck}
             accent="bg-violet-500"
@@ -570,8 +607,8 @@ const Dashboard = () => {
           />
         </div>
 
-        {/* Secondary KPIs */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {/* ── Secondary KPIs — 2 col mobile, 4 col lg ── */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
           <KPI
             label="Admins"
             value={stats?.adminCount ?? 0}
@@ -613,20 +650,21 @@ const Dashboard = () => {
 
         {/* ── Activity KPIs ─────────────────────── */}
         <div>
-          <div className="flex items-center gap-2 mb-3">
-            <Activity className="w-4 h-4 text-stone-400" />
-            <h2 className="text-sm font-bold text-stone-600 uppercase tracking-widest">
+          <div className="flex items-center gap-2 mb-2.5 sm:mb-3">
+            <Activity className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-stone-400" />
+            <h2 className="text-xs sm:text-sm font-bold text-stone-600 uppercase tracking-widest">
               Login Activity
             </h2>
             <div className="flex-1 h-px bg-stone-200" />
             <a
               href="/admin/activity"
-              className="text-xs text-stone-400 hover:text-indigo-600 flex items-center gap-1 font-medium transition-colors"
+              className="text-[11px] sm:text-xs text-stone-400 hover:text-indigo-600 flex items-center gap-1 font-medium transition-colors"
             >
-              Full report <ChevronRight className="w-3.5 h-3.5" />
+              Full report <ChevronRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
             </a>
           </div>
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+          {/* 3 cols on sm+, 1 col (horizontal scroll row) on mobile */}
+          <div className="grid grid-cols-3 gap-2 sm:gap-3">
             <KPI
               label="Logins Today"
               value={actStats.todayLogins}
@@ -634,11 +672,11 @@ const Dashboard = () => {
               accent="bg-indigo-500"
               iconBg="bg-indigo-50"
               iconColor="text-indigo-600"
-              sub="Successful authentications"
+              sub="Successful"
               loading={actLoad}
             />
             <KPI
-              label="Failed Attempts Today"
+              label="Failed Today"
               value={actStats.failedToday}
               icon={AlertTriangle}
               accent="bg-rose-400"
@@ -654,24 +692,25 @@ const Dashboard = () => {
               accent="bg-teal-500"
               iconBg="bg-teal-50"
               iconColor="text-teal-600"
-              sub="Currently logged in"
+              sub="Currently online"
               loading={actLoad}
             />
           </div>
         </div>
 
-        {/* Health + Verse */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <div className="bg-white rounded-2xl border border-stone-100 shadow-[0_1px_3px_rgba(0,0,0,0.05)] overflow-hidden">
-            <div className="flex items-center gap-2 px-5 py-4 border-b border-stone-100">
-              <div className="w-7 h-7 rounded-lg bg-indigo-50 flex items-center justify-center">
-                <Activity className="w-4 h-4 text-indigo-500" />
+        {/* ── Health + Verse — stacked on mobile ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4">
+          {/* Platform Health */}
+          <div className="bg-white rounded-xl sm:rounded-2xl border border-stone-100 shadow-[0_1px_3px_rgba(0,0,0,0.05)] overflow-hidden">
+            <div className="flex items-center gap-2 px-3.5 sm:px-5 py-3 sm:py-4 border-b border-stone-100">
+              <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-indigo-50 flex items-center justify-center">
+                <Activity className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-indigo-500" />
               </div>
-              <h3 className="text-sm font-bold text-stone-700">
+              <h3 className="text-xs sm:text-sm font-bold text-stone-700">
                 Platform Health
               </h3>
             </div>
-            <div className="p-5 space-y-5">
+            <div className="p-3.5 sm:p-5 space-y-3.5 sm:space-y-5">
               <RateBar
                 label="Active user rate"
                 value={stats?.activeRate ?? 0}
@@ -679,19 +718,19 @@ const Dashboard = () => {
                 loading={loading}
               />
               <RateBar
-                label="Email verification rate"
+                label="Email verification"
                 value={stats?.verificationRate ?? 0}
                 fill="bg-sky-500"
                 loading={loading}
               />
               <RateBar
-                label="Plan completion rate"
+                label="Plan completion"
                 value={stats?.completionRate ?? 0}
                 fill="bg-violet-500"
                 loading={loading}
               />
               {!loading && (
-                <div className="pt-4 border-t border-stone-100 grid grid-cols-3 gap-2 text-center">
+                <div className="pt-3 sm:pt-4 border-t border-stone-100 grid grid-cols-3 gap-2 text-center">
                   {[
                     {
                       pct: stats?.activeRate ?? 0,
@@ -711,12 +750,12 @@ const Dashboard = () => {
                   ].map(({ pct, label, color }) => (
                     <div key={label}>
                       <p
-                        className={cn("text-2xl font-bold", color)}
+                        className={cn("text-lg sm:text-2xl font-bold", color)}
                         style={{ fontFamily: "'Fraunces', Georgia, serif" }}
                       >
                         {pct}%
                       </p>
-                      <p className="text-[10px] text-stone-400 uppercase tracking-widest mt-0.5 font-semibold">
+                      <p className="text-[9px] sm:text-[10px] text-stone-400 uppercase tracking-widest mt-0.5 font-semibold">
                         {label}
                       </p>
                     </div>
@@ -726,26 +765,27 @@ const Dashboard = () => {
             </div>
           </div>
 
-          <div className="lg:col-span-2 relative bg-white rounded-2xl border border-amber-100 shadow-[0_1px_3px_rgba(0,0,0,0.05)] overflow-hidden">
+          {/* Daily Verse */}
+          <div className="lg:col-span-2 relative bg-white rounded-xl sm:rounded-2xl border border-amber-100 shadow-[0_1px_3px_rgba(0,0,0,0.05)] overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-amber-50/60 via-orange-50/20 to-white pointer-events-none" />
             <div
-              className="absolute top-2 right-4 text-[90px] leading-none text-amber-100 select-none pointer-events-none"
+              className="absolute top-1 right-3 sm:top-2 sm:right-4 text-[60px] sm:text-[90px] leading-none text-amber-100 select-none pointer-events-none"
               style={{ fontFamily: "Georgia, serif" }}
             >
               "
             </div>
             <div className="relative">
-              <div className="flex items-center gap-2 px-5 py-4 border-b border-amber-100/70">
-                <div className="w-7 h-7 rounded-lg bg-amber-100 flex items-center justify-center">
-                  <Sparkles className="w-4 h-4 text-amber-600" />
+              <div className="flex items-center gap-2 px-3.5 sm:px-5 py-3 sm:py-4 border-b border-amber-100/70">
+                <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-amber-100 flex items-center justify-center">
+                  <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-600" />
                 </div>
-                <h3 className="text-sm font-bold text-stone-700">
+                <h3 className="text-xs sm:text-sm font-bold text-stone-700">
                   Today's Daily Verse
                 </h3>
                 {verse && (
                   <span
                     className={cn(
-                      "ml-auto px-2 py-0.5 rounded-full text-[10px] font-bold border",
+                      "ml-auto px-1.5 sm:px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-bold border",
                       verse.published
                         ? "bg-emerald-50 text-emerald-700 border-emerald-200"
                         : "bg-amber-50 text-amber-700 border-amber-200",
@@ -755,22 +795,22 @@ const Dashboard = () => {
                   </span>
                 )}
               </div>
-              <div className="p-5">
+              <div className="p-3.5 sm:p-5">
                 {loading ? (
-                  <div className="space-y-3">
-                    <Shimmer className="h-4 w-36" />
-                    <Shimmer className="h-4 w-full" />
-                    <Shimmer className="h-4 w-5/6" />
-                    <Shimmer className="h-3 w-2/3 mt-3" />
+                  <div className="space-y-2.5 sm:space-y-3">
+                    <Shimmer className="h-3.5 sm:h-4 w-28 sm:w-36" />
+                    <Shimmer className="h-3.5 sm:h-4 w-full" />
+                    <Shimmer className="h-3.5 sm:h-4 w-5/6" />
+                    <Shimmer className="h-3 w-2/3 mt-2 sm:mt-3" />
                   </div>
                 ) : verse ? (
                   <>
-                    <p className="text-amber-600 font-bold text-sm mb-3">
+                    <p className="text-amber-600 font-bold text-xs sm:text-sm mb-2 sm:mb-3">
                       {verse.verseReference ??
                         `${verse.bookName ?? ""} ${verse.chapter ?? ""}:${verse.verseNumber ?? ""}`}
                     </p>
                     <blockquote
-                      className="text-stone-700 text-base leading-relaxed italic mb-3 border-l-2 border-amber-300 pl-4"
+                      className="text-stone-700 text-sm sm:text-base leading-relaxed italic mb-2 sm:mb-3 border-l-2 border-amber-300 pl-3 sm:pl-4"
                       style={{ fontFamily: "'Fraunces', Georgia, serif" }}
                     >
                       {getVerseText(
@@ -780,15 +820,15 @@ const Dashboard = () => {
                       )}
                     </blockquote>
                     {verse.reflection && (
-                      <p className="text-stone-400 text-xs leading-relaxed line-clamp-2">
+                      <p className="text-stone-400 text-[11px] sm:text-xs leading-relaxed line-clamp-2">
                         {verse.reflection}
                       </p>
                     )}
                   </>
                 ) : (
-                  <div className="flex flex-col items-center py-8 text-center">
-                    <ScrollText className="w-10 h-10 text-amber-200 mb-2" />
-                    <p className="text-stone-400 text-sm font-medium">
+                  <div className="flex flex-col items-center py-6 sm:py-8 text-center">
+                    <ScrollText className="w-8 h-8 sm:w-10 sm:h-10 text-amber-200 mb-2" />
+                    <p className="text-stone-400 text-xs sm:text-sm font-medium">
                       No verse scheduled for today
                     </p>
                   </div>
@@ -798,14 +838,15 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Reading Plans + Recent Users */}
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-          <div className="lg:col-span-3 bg-white rounded-2xl border border-stone-100 shadow-[0_1px_3px_rgba(0,0,0,0.05)] overflow-hidden">
-            <div className="flex items-center gap-2 px-5 py-4 border-b border-stone-100">
-              <div className="w-7 h-7 rounded-lg bg-teal-50 flex items-center justify-center">
-                <BookOpen className="w-4 h-4 text-teal-600" />
+        {/* ── Reading Plans + Recent Users — stacked on mobile ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-3 sm:gap-4">
+          {/* Reading Plans */}
+          <div className="lg:col-span-3 bg-white rounded-xl sm:rounded-2xl border border-stone-100 shadow-[0_1px_3px_rgba(0,0,0,0.05)] overflow-hidden">
+            <div className="flex items-center gap-2 px-3.5 sm:px-5 py-3 sm:py-4 border-b border-stone-100">
+              <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-teal-50 flex items-center justify-center">
+                <BookOpen className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-teal-600" />
               </div>
-              <h3 className="text-sm font-bold text-stone-700">
+              <h3 className="text-xs sm:text-sm font-bold text-stone-700">
                 Reading Plans
               </h3>
               {!loading && (
@@ -815,27 +856,30 @@ const Dashboard = () => {
               )}
               <a
                 href={routes.readingPlans.path}
-                className="ml-auto text-xs text-stone-400 hover:text-teal-600 flex items-center gap-1 font-medium transition-colors"
+                className="ml-auto text-[11px] sm:text-xs text-stone-400 hover:text-teal-600 flex items-center gap-0.5 sm:gap-1 font-medium transition-colors"
               >
-                View all <ChevronRight className="w-3.5 h-3.5" />
+                View all <ChevronRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
               </a>
             </div>
             <div className="divide-y divide-stone-50">
               {loading ? (
                 Array.from({ length: 4 }).map((_, i) => (
-                  <div key={i} className="flex items-center gap-3 px-5 py-4">
-                    <Shimmer className="w-9 h-9 rounded-xl shrink-0" />
-                    <div className="flex-1 space-y-2">
-                      <Shimmer className="h-3.5 w-32" />
-                      <Shimmer className="h-2.5 w-20" />
+                  <div
+                    key={i}
+                    className="flex items-center gap-2.5 sm:gap-3 px-3.5 sm:px-5 py-3 sm:py-4"
+                  >
+                    <Shimmer className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl shrink-0" />
+                    <div className="flex-1 space-y-1.5 sm:space-y-2">
+                      <Shimmer className="h-3 sm:h-3.5 w-28 sm:w-32" />
+                      <Shimmer className="h-2.5 w-16 sm:w-20" />
                     </div>
-                    <Shimmer className="h-5 w-14 rounded-full" />
+                    <Shimmer className="h-4 sm:h-5 w-12 sm:w-14 rounded-full" />
                   </div>
                 ))
               ) : plans.length === 0 ? (
-                <div className="flex flex-col items-center py-12 text-stone-300">
-                  <BookOpen className="w-8 h-8 mb-2" />
-                  <p className="text-sm">No reading plans yet</p>
+                <div className="flex flex-col items-center py-10 sm:py-12 text-stone-300">
+                  <BookOpen className="w-7 h-7 sm:w-8 sm:h-8 mb-2" />
+                  <p className="text-xs sm:text-sm">No reading plans yet</p>
                 </div>
               ) : (
                 plans.slice(0, 6).map((plan) => {
@@ -849,40 +893,40 @@ const Dashboard = () => {
                   return (
                     <div
                       key={plan.planId}
-                      className="flex items-center gap-3 px-5 py-3.5 hover:bg-stone-50/70 transition-colors"
+                      className="flex items-center gap-2.5 sm:gap-3 px-3.5 sm:px-5 py-3 hover:bg-stone-50/70 transition-colors"
                     >
                       <div
                         className={cn(
-                          "w-9 h-9 rounded-xl flex items-center justify-center shrink-0",
+                          "w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center shrink-0",
                           plan.isActive ? "bg-teal-50" : "bg-stone-100",
                         )}
                       >
                         <BookOpen
                           className={cn(
-                            "w-4 h-4",
+                            "w-3.5 h-3.5 sm:w-4 sm:h-4",
                             plan.isActive ? "text-teal-600" : "text-stone-400",
                           )}
                         />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-stone-700 truncate">
+                        <p className="text-xs sm:text-sm font-semibold text-stone-700 truncate">
                           {plan.title}
                         </p>
-                        <div className="flex items-center gap-1.5 mt-0.5">
-                          <span className="text-[11px] text-stone-400 flex items-center gap-0.5">
+                        <div className="flex items-center gap-1 sm:gap-1.5 mt-0.5 flex-wrap">
+                          <span className="text-[10px] sm:text-[11px] text-stone-400 flex items-center gap-0.5">
                             <Clock className="w-2.5 h-2.5" />
                             {plan.totalDays}d
                           </span>
                           <span
                             className={cn(
-                              "text-[10px] px-1.5 py-0.5 rounded border font-bold uppercase tracking-wide",
+                              "text-[9px] sm:text-[10px] px-1 sm:px-1.5 py-0.5 rounded border font-bold uppercase tracking-wide",
                               diffStyle,
                             )}
                           >
                             {plan.difficulty}
                           </span>
                           {plan.questionsEnabled && (
-                            <span className="text-[10px] text-violet-600 font-bold">
+                            <span className="text-[9px] sm:text-[10px] text-violet-600 font-bold">
                               Quiz
                             </span>
                           )}
@@ -891,31 +935,33 @@ const Dashboard = () => {
                       <div className="text-right shrink-0">
                         {plan.started ? (
                           plan.completed ? (
-                            <div className="flex items-center gap-1 text-emerald-600">
-                              <CheckCircle2 className="w-3.5 h-3.5" />
-                              <span className="text-xs font-bold">Done</span>
+                            <div className="flex items-center gap-0.5 sm:gap-1 text-emerald-600">
+                              <CheckCircle2 className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                              <span className="text-[11px] sm:text-xs font-bold">
+                                Done
+                              </span>
                             </div>
                           ) : (
                             <div className="space-y-1">
-                              <p className="text-xs text-stone-500 font-bold">
+                              <p className="text-[11px] sm:text-xs text-stone-500 font-bold">
                                 {pct}%
                               </p>
-                              <div className="w-16 h-1.5 rounded-full bg-stone-100 overflow-hidden">
+                              <div className="w-12 sm:w-16 h-1.5 rounded-full bg-stone-100 overflow-hidden">
                                 <div
                                   className="h-full bg-teal-500 rounded-full"
                                   style={{ width: `${pct}%` }}
                                 />
                               </div>
                               {plan.streak > 0 && (
-                                <p className="text-[10px] text-amber-600 flex items-center gap-0.5 justify-end font-bold">
-                                  <Flame className="w-2.5 h-2.5" />
+                                <p className="text-[9px] sm:text-[10px] text-amber-600 flex items-center gap-0.5 justify-end font-bold">
+                                  <Flame className="w-2 h-2 sm:w-2.5 sm:h-2.5" />
                                   {plan.streak}
                                 </p>
                               )}
                             </div>
                           )
                         ) : (
-                          <span className="text-[11px] text-stone-300 font-medium">
+                          <span className="text-[10px] sm:text-[11px] text-stone-300 font-medium">
                             Not started
                           </span>
                         )}
@@ -927,46 +973,49 @@ const Dashboard = () => {
             </div>
           </div>
 
-          <div className="lg:col-span-2 bg-white rounded-2xl border border-stone-100 shadow-[0_1px_3px_rgba(0,0,0,0.05)] overflow-hidden flex flex-col">
-            <div className="flex items-center gap-2 px-5 py-4 border-b border-stone-100">
-              <div className="w-7 h-7 rounded-lg bg-indigo-50 flex items-center justify-center">
-                <Users className="w-4 h-4 text-indigo-500" />
+          {/* Recent Users */}
+          <div className="lg:col-span-2 bg-white rounded-xl sm:rounded-2xl border border-stone-100 shadow-[0_1px_3px_rgba(0,0,0,0.05)] overflow-hidden flex flex-col">
+            <div className="flex items-center gap-2 px-3.5 sm:px-5 py-3 sm:py-4 border-b border-stone-100">
+              <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-indigo-50 flex items-center justify-center">
+                <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-indigo-500" />
               </div>
-              <h3 className="text-sm font-bold text-stone-700">Recent Users</h3>
+              <h3 className="text-xs sm:text-sm font-bold text-stone-700">
+                Recent Users
+              </h3>
             </div>
             <div className="divide-y divide-stone-50 flex-1">
               {loading
                 ? Array.from({ length: 5 }).map((_, i) => (
                     <div
                       key={i}
-                      className="flex items-center gap-3 px-5 py-3.5"
+                      className="flex items-center gap-2.5 sm:gap-3 px-3.5 sm:px-5 py-3"
                     >
-                      <Shimmer className="w-8 h-8 rounded-full shrink-0" />
+                      <Shimmer className="w-7 h-7 sm:w-8 sm:h-8 rounded-full shrink-0" />
                       <div className="flex-1 space-y-1.5">
-                        <Shimmer className="h-3 w-24" />
-                        <Shimmer className="h-2.5 w-16" />
+                        <Shimmer className="h-3 w-20 sm:w-24" />
+                        <Shimmer className="h-2.5 w-14 sm:w-16" />
                       </div>
-                      <Shimmer className="w-12 h-5 rounded-md" />
+                      <Shimmer className="w-10 sm:w-12 h-4 sm:h-5 rounded-md" />
                     </div>
                   ))
                 : recentUsers.map((u) => (
                     <div
                       key={u.username}
-                      className="flex items-center gap-3 px-5 py-3 hover:bg-stone-50/70 transition-colors"
+                      className="flex items-center gap-2.5 sm:gap-3 px-3.5 sm:px-5 py-2.5 sm:py-3 hover:bg-stone-50/70 transition-colors"
                     >
                       <Av f={u.firstName} l={u.lastName} u={u.username} />
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-stone-700 truncate">
+                        <p className="text-xs sm:text-sm font-semibold text-stone-700 truncate">
                           {u.firstName} {u.lastName}
                         </p>
-                        <p className="text-[11px] text-stone-400 font-mono truncate">
+                        <p className="text-[10px] sm:text-[11px] text-stone-400 font-mono truncate">
                           @{u.username}
                         </p>
                       </div>
                       <div className="flex flex-col items-end gap-1 shrink-0">
                         <span
                           className={cn(
-                            "text-[10px] font-bold px-1.5 py-0.5 rounded border",
+                            "text-[9px] sm:text-[10px] font-bold px-1 sm:px-1.5 py-0.5 rounded border",
                             u.roleName === "admin"
                               ? "text-violet-700 border-violet-200 bg-violet-50"
                               : "text-sky-700 border-sky-200 bg-sky-50",
@@ -974,11 +1023,11 @@ const Dashboard = () => {
                         >
                           {u.roleName}
                         </span>
-                        <div className="flex items-center gap-1.5">
+                        <div className="flex items-center gap-1 sm:gap-1.5">
                           {u.isVerified ? (
-                            <BadgeCheck className="w-3 h-3 text-emerald-500" />
+                            <BadgeCheck className="w-3 h-3 sm:w-3 sm:h-3 text-emerald-500" />
                           ) : (
-                            <BadgeX className="w-3 h-3 text-amber-400" />
+                            <BadgeX className="w-3 h-3 sm:w-3 sm:h-3 text-amber-400" />
                           )}
                           <span
                             className={cn(
@@ -994,45 +1043,46 @@ const Dashboard = () => {
             {!loading && recentUsers.length > 0 && (
               <a
                 href={routes.systemUsers.path}
-                className="flex items-center justify-center gap-1.5 px-5 py-3 border-t border-stone-100 text-xs text-stone-400 hover:text-indigo-600 hover:bg-stone-50 transition-colors font-semibold"
+                className="flex items-center justify-center gap-1.5 px-3.5 sm:px-5 py-2.5 sm:py-3 border-t border-stone-100 text-[11px] sm:text-xs text-stone-400 hover:text-indigo-600 hover:bg-stone-50 transition-colors font-semibold"
               >
-                View all users <ChevronRight className="w-3.5 h-3.5" />
+                View all users{" "}
+                <ChevronRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
               </a>
             )}
           </div>
         </div>
 
-        {/* ══ Activity Section ═══════════════════════ */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* ── Activity Section — stacked on mobile ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4">
           {/* Device + Browser breakdown */}
-          <div className="bg-white rounded-2xl border border-stone-100 shadow-[0_1px_3px_rgba(0,0,0,0.05)] overflow-hidden">
-            <div className="flex items-center gap-2 px-5 py-4 border-b border-stone-100">
-              <div className="w-7 h-7 rounded-lg bg-indigo-50 flex items-center justify-center">
-                <Monitor className="w-4 h-4 text-indigo-500" />
+          <div className="bg-white rounded-xl sm:rounded-2xl border border-stone-100 shadow-[0_1px_3px_rgba(0,0,0,0.05)] overflow-hidden">
+            <div className="flex items-center gap-2 px-3.5 sm:px-5 py-3 sm:py-4 border-b border-stone-100">
+              <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-indigo-50 flex items-center justify-center">
+                <Monitor className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-indigo-500" />
               </div>
-              <h3 className="text-sm font-bold text-stone-700">
+              <h3 className="text-xs sm:text-sm font-bold text-stone-700">
                 Device Breakdown
               </h3>
             </div>
-            <div className="p-5">
+            <div className="p-3.5 sm:p-5">
               {actLoad ? (
-                <div className="space-y-3">
-                  <Shimmer className="h-3 w-full rounded-full" />
+                <div className="space-y-2.5 sm:space-y-3">
+                  <Shimmer className="h-2.5 w-full rounded-full" />
                   {Array.from({ length: 4 }).map((_, i) => (
-                    <Shimmer key={i} className="h-4 w-full" />
+                    <Shimmer key={i} className="h-3.5 sm:h-4 w-full" />
                   ))}
                 </div>
               ) : (
                 <DeviceBar />
               )}
               {!actLoad && (
-                <div className="mt-5 pt-4 border-t border-stone-100 space-y-1.5">
-                  <p className="text-[10px] text-stone-400 uppercase tracking-widest font-bold">
+                <div className="mt-4 sm:mt-5 pt-3.5 sm:pt-4 border-t border-stone-100 space-y-1 sm:space-y-1.5">
+                  <p className="text-[9px] sm:text-[10px] text-stone-400 uppercase tracking-widest font-bold">
                     Top Browser
                   </p>
-                  <div className="flex items-center gap-2">
-                    <Globe className="w-4 h-4 text-stone-400" />
-                    <span className="text-sm font-semibold text-stone-700">
+                  <div className="flex items-center gap-1.5 sm:gap-2">
+                    <Globe className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-stone-400" />
+                    <span className="text-xs sm:text-sm font-semibold text-stone-700">
                       {actStats.topBrowser}
                     </span>
                   </div>
@@ -1042,47 +1092,50 @@ const Dashboard = () => {
           </div>
 
           {/* Recent login feed */}
-          <div className="lg:col-span-2 bg-white rounded-2xl border border-stone-100 shadow-[0_1px_3px_rgba(0,0,0,0.05)] overflow-hidden">
-            <div className="flex items-center gap-2 px-5 py-4 border-b border-stone-100">
-              <div className="w-7 h-7 rounded-lg bg-emerald-50 flex items-center justify-center">
-                <Activity className="w-4 h-4 text-emerald-600" />
+          <div className="lg:col-span-2 bg-white rounded-xl sm:rounded-2xl border border-stone-100 shadow-[0_1px_3px_rgba(0,0,0,0.05)] overflow-hidden">
+            <div className="flex items-center gap-2 px-3.5 sm:px-5 py-3 sm:py-4 border-b border-stone-100">
+              <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-emerald-50 flex items-center justify-center">
+                <Activity className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-600" />
               </div>
-              <h3 className="text-sm font-bold text-stone-700">
+              <h3 className="text-xs sm:text-sm font-bold text-stone-700">
                 Recent Login Activity
               </h3>
               <a
                 href={routes.useractivity.path}
-                className="ml-auto text-xs text-stone-400 hover:text-emerald-600 flex items-center gap-1 font-medium transition-colors"
+                className="ml-auto text-[11px] sm:text-xs text-stone-400 hover:text-emerald-600 flex items-center gap-0.5 sm:gap-1 font-medium transition-colors"
               >
-                View all <ChevronRight className="w-3.5 h-3.5" />
+                View all <ChevronRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
               </a>
             </div>
             <div className="divide-y divide-stone-50">
               {actLoad ? (
                 Array.from({ length: 6 }).map((_, i) => (
-                  <div key={i} className="flex items-center gap-3 px-5 py-3.5">
-                    <Shimmer className="w-8 h-8 rounded-full shrink-0" />
+                  <div
+                    key={i}
+                    className="flex items-center gap-2.5 sm:gap-3 px-3.5 sm:px-5 py-3"
+                  >
+                    <Shimmer className="w-7 h-7 sm:w-8 sm:h-8 rounded-full shrink-0" />
                     <div className="flex-1 space-y-1.5">
-                      <Shimmer className="h-3 w-32" />
-                      <Shimmer className="h-2.5 w-48" />
+                      <Shimmer className="h-3 w-24 sm:w-32" />
+                      <Shimmer className="h-2.5 w-36 sm:w-48" />
                     </div>
-                    <Shimmer className="h-4 w-16" />
+                    <Shimmer className="h-3.5 sm:h-4 w-12 sm:w-16" />
                   </div>
                 ))
               ) : activity.length === 0 ? (
-                <div className="flex flex-col items-center py-12 text-stone-300">
-                  <Activity className="w-8 h-8 mb-2" />
-                  <p className="text-sm">No activity recorded yet</p>
+                <div className="flex flex-col items-center py-10 sm:py-12 text-stone-300">
+                  <Activity className="w-7 h-7 sm:w-8 sm:h-8 mb-2" />
+                  <p className="text-xs sm:text-sm">No activity recorded yet</p>
                 </div>
               ) : (
                 activity.slice(0, 4).map((a) => (
                   <div
                     key={a.id}
-                    className="flex items-center gap-3 px-5 py-3 hover:bg-stone-50/70 transition-colors"
+                    className="flex items-center gap-2.5 sm:gap-3 px-3.5 sm:px-5 py-2.5 sm:py-3 hover:bg-stone-50/70 transition-colors"
                   >
                     <div
                       className={cn(
-                        "w-8 h-8 rounded-full flex items-center justify-center shrink-0 border-2",
+                        "w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center shrink-0 border-2",
                         a.success
                           ? "bg-emerald-50 border-emerald-200"
                           : "bg-rose-50 border-rose-200",
@@ -1091,42 +1144,44 @@ const Dashboard = () => {
                       <DeviceIcon
                         type={a.deviceType}
                         className={cn(
-                          "w-3.5 h-3.5",
+                          "w-3 h-3 sm:w-3.5 sm:h-3.5",
                           a.success ? "text-emerald-500" : "text-rose-400",
                         )}
                       />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-1.5">
-                        <p className="text-sm font-semibold text-stone-700 truncate">
+                      <div className="flex items-center gap-1 sm:gap-1.5">
+                        <p className="text-xs sm:text-sm font-semibold text-stone-700 truncate">
                           {a.username ?? "Unknown"}
                         </p>
                         {!a.success && (
-                          <span className="shrink-0 text-[9px] font-bold text-rose-600 bg-rose-50 border border-rose-200 px-1 rounded">
+                          <span className="shrink-0 text-[8px] sm:text-[9px] font-bold text-rose-600 bg-rose-50 border border-rose-200 px-1 rounded">
                             FAILED
                           </span>
                         )}
                       </div>
-                      <p className="text-[11px] text-stone-400 truncate">
+                      <p className="text-[10px] sm:text-[11px] text-stone-400 truncate">
                         <span className="font-medium text-stone-500">
                           {a.browserName || "Unknown"}
                         </span>
                         {" · "}
-                        {a.os || "Unknown"}
-                        {" · "}
+                        {/* hide OS on very small screens */}
+                        <span className="hidden xs:inline sm:inline">
+                          {a.os || "Unknown"} ·{" "}
+                        </span>
                         <span className="font-mono">{a.ip}</span>
                       </p>
                     </div>
                     <div className="text-right shrink-0">
-                      <p className="text-[11px] text-stone-400 font-medium">
+                      <p className="text-[10px] sm:text-[11px] text-stone-400 font-medium whitespace-nowrap">
                         {timeAgo(a.loggedInAt)}
                       </p>
                       {a.loggedOutAt ? (
-                        <p className="text-[10px] text-stone-300 flex items-center gap-0.5 justify-end mt-0.5">
-                          <LogOut className="w-2.5 h-2.5" /> out
+                        <p className="text-[9px] sm:text-[10px] text-stone-300 flex items-center gap-0.5 justify-end mt-0.5">
+                          <LogOut className="w-2 h-2 sm:w-2.5 sm:h-2.5" /> out
                         </p>
                       ) : a.success ? (
-                        <span className="inline-flex items-center gap-0.5 text-[10px] text-emerald-600 font-bold mt-0.5">
+                        <span className="inline-flex items-center gap-0.5 text-[9px] sm:text-[10px] text-emerald-600 font-bold mt-0.5">
                           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />{" "}
                           online
                         </span>

@@ -2,7 +2,6 @@ import { Suspense, useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { AppLayout } from "@/components/AppLayout";
@@ -13,8 +12,6 @@ import {
   getPublicRoutes,
   routes,
 } from "./components/Routes/routes";
-
-const queryClient = new QueryClient();
 
 const RouteLoader = () => (
   <div className="flex items-center justify-center min-h-screen">
@@ -51,7 +48,7 @@ const AppRoutes = () => {
 
   // Get protected routes that don't require layout (like dailyReading)
   const noLayoutRoutes = Object.values(routes).filter(
-    (route) => route.isProtected && !route.requiresLayout
+    (route) => route.isProtected && !route.requiresLayout,
   );
 
   return (
@@ -97,17 +94,15 @@ const AppRoutes = () => {
 
 const App = () => {
   return (
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <AuthProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <AppRoutes />
-          </TooltipProvider>
-        </AuthProvider>
-      </BrowserRouter>
-    </QueryClientProvider>
+    <BrowserRouter>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <AppRoutes />
+        </TooltipProvider>
+      </AuthProvider>
+    </BrowserRouter>
   );
 };
 

@@ -59,8 +59,7 @@ const userNavItems = [
 ];
 
 const manageNavItems = [
-  { title: "Add Daily Verse", url: routes.addDailyVerse.path, icon: Plus },
-  { title: "Add Explanation", url: routes.addExplanation.path, icon: Plus },
+  { title: "Settings", url: routes.settings.path, icon: Plus },
 ];
 
 export function AppSidebar() {
@@ -153,7 +152,7 @@ export function AppSidebar() {
           >
             Manage
           </SidebarGroupLabel>
-          {/* <SidebarGroupContent>
+          <SidebarGroupContent>
             <SidebarMenu>
               {manageNavItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
@@ -180,7 +179,7 @@ export function AppSidebar() {
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
-          </SidebarGroupContent> */}
+          </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
 

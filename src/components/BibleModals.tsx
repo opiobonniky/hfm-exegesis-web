@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { X } from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
+import { Highlighter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -10,51 +10,420 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
+  DialogFooter,
 } from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { HIGHLIGHT_COLORS } from "@/hooks/useBible";
+import { cn } from "@/lib/utils";
+
+// ── Shared Verse Range Slider ─────────────────────────────────────────────────
+
+function VerseRangeSlider({
+  totalVerses,
+  rangeStart,
+  rangeEnd,
+  onRangeChange,
+  currentBook,
+  currentChapter,
+}: {
+  totalVerses: number;
+  rangeStart: number;
+  rangeEnd: number;
+  onRangeChange: (start: number, end: number) => void;
+  currentBook: string;
+  currentChapter: number | string;
+}) {
+  return (
+    <div className="space-y-4 p-4 rounded-xl bg-muted/40 border border-border/40">
+      {/* Reference label */}
+      <div className="flex items-center justify-between">
+        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+          Verse Range
+        </span>
+        <span className="text-xs font-semibold text-foreground">
+          {currentBook} {currentChapter}:{rangeStart}
+          {rangeStart !== rangeEnd ? `–${rangeEnd}` : ""}
+        </span>
+      </div>
+
+      {/* Slider */}
+      <Slider
+        value={[rangeStart, rangeEnd]}
+        onValueChange={([start, end]) => onRangeChange(start, end)}
+        min={1}
+        max={totalVerses || 1}
+        step={1}
+        className="w-full"
+      />
+
+      {/* Start / End counters */}
+      <div className="flex items-center gap-3">
+        {/* Start */}
+        <div className="flex-1 flex items-center gap-2 justify-center">
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-7 w-7 p-0 text-base rounded-lg"
+            onClick={() => onRangeChange(Math.max(1, rangeStart - 1), rangeEnd)}
+            disabled={rangeStart <= 1}
+          >
+            –
+          </Button>
+          <div className="text-center min-w-[52px]">
+            <p className="text-[10px] text-muted-foreground leading-none mb-0.5">
+              From
+            </p>
+            <p className="text-sm font-bold text-foreground tabular-nums">
+              {rangeStart}
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-7 w-7 p-0 text-base rounded-lg"
+            onClick={() =>
+              onRangeChange(Math.min(rangeEnd, rangeStart + 1), rangeEnd)
+            }
+            disabled={rangeStart >= rangeEnd}
+          >
+            +
+          </Button>
+        </div>
+
+        <div className="w-px h-8 bg-border/60" />
+
+        {/* End */}
+        <div className="flex-1 flex items-center gap-2 justify-center">
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-7 w-7 p-0 text-base rounded-lg"
+            onClick={() =>
+              onRangeChange(rangeStart, Math.max(rangeStart, rangeEnd - 1))
+            }
+            disabled={rangeEnd <= rangeStart}
+          >
+            –
+          </Button>
+          <div className="text-center min-w-[52px]">
+            <p className="text-[10px] text-muted-foreground leading-none mb-0.5">
+              To
+            </p>
+            <p className="text-sm font-bold text-foreground tabular-nums">
+              {rangeEnd}
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-7 w-7 p-0 text-base rounded-lg"
+            onClick={() =>
+              onRangeChange(rangeStart, Math.min(totalVerses, rangeEnd + 1))
+            }
+            disabled={rangeEnd >= totalVerses}
+          >
+            +
+          </Button>
+        </div>
+      </div>
+
+      {/* Verse count pill */}
+      <div className="flex justify-center">
+        <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold">
+          {rangeEnd - rangeStart + 1} verse
+          {rangeEnd - rangeStart + 1 !== 1 ? "s" : ""} selected
+        </span>
+      </div>
+    </div>
+  );
+}
+
+// ── Helper: derive range from selectedVerses keys ─────────────────────────────
+
+function deriveRange(
+  selectedVerses: string[],
+  totalVerses: number,
+): { start: number; end: number } {
+  const nums = selectedVerses
+    .map((k) => {
+      const m = k.match(/:(\d+)$/);
+      return m ? parseInt(m[1]) : null;
+    })
+    .filter((n): n is number => n !== null);
+
+  return {
+    start: nums.length > 0 ? Math.min(...nums) : 1,
+    end: nums.length > 0 ? Math.max(...nums) : totalVerses || 1,
+  };
+}
+
+// ── HighlightPickerModal ──────────────────────────────────────────────────────
 
 interface HighlightPickerModalProps {
   visible: boolean;
   onClose: () => void;
-  onSelectColor: (colorId: number, color: string) => void;
+  onSelectColor: (
+    colorId: number,
+    color: string,
+    rangeStart?: number,
+    rangeEnd?: number,
+  ) => void;
+  totalVerses: number;
+  currentBook: string;
+  currentChapter: number;
+  selectedVerses?: string[];
 }
 
 export function HighlightPickerModal({
   visible,
   onClose,
   onSelectColor,
+  totalVerses,
+  currentBook,
+  currentChapter,
+  selectedVerses = [],
 }: HighlightPickerModalProps) {
+  const derived = useMemo(
+    () => deriveRange(selectedVerses, totalVerses),
+    [selectedVerses, totalVerses],
+  );
+
+  const [rangeStart, setRangeStart] = useState(derived.start);
+  const [rangeEnd, setRangeEnd] = useState(derived.end);
+
+  useEffect(() => {
+    if (visible) {
+      setRangeStart(derived.start);
+      setRangeEnd(derived.end);
+    }
+  }, [visible, derived.start, derived.end]);
+
+  if (!visible) return null;
+
   return (
     <Dialog open={visible} onOpenChange={onClose}>
-      <DialogContent>
+      <DialogContent className="max-w-sm w-full">
         <DialogHeader>
-          <DialogTitle>Highlight Color</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            <Highlighter className="w-4 h-4 text-primary" />
+            Highlight Verses
+          </DialogTitle>
           <DialogDescription>
-            Choose a color to highlight the selected verse(s)
+            {currentBook} {currentChapter}
           </DialogDescription>
         </DialogHeader>
-        <div className="grid grid-cols-5 gap-3 py-4">
-          {HIGHLIGHT_COLORS.map((col) => (
+
+        <VerseRangeSlider
+          totalVerses={totalVerses}
+          rangeStart={rangeStart}
+          rangeEnd={rangeEnd}
+          onRangeChange={(s, e) => {
+            setRangeStart(s);
+            setRangeEnd(e);
+          }}
+          currentBook={currentBook}
+          currentChapter={currentChapter}
+        />
+
+        {/* Color grid */}
+        <div className="grid grid-cols-5 gap-2 pt-1">
+          {HIGHLIGHT_COLORS.map((c) => (
             <button
-              key={col.id}
-              onClick={() => onSelectColor(col.id, col.color)}
-              className="w-12 h-12 rounded-full border-2 border-border hover:scale-110 transition-transform"
-              style={{ backgroundColor: col.color }}
-              title={col.name}
+              key={c.id}
+              onClick={() => onSelectColor(c.id, c.color, rangeStart, rangeEnd)}
+              title={c.name}
+              className="aspect-square rounded-xl border-2 border-transparent hover:border-foreground/30 hover:scale-110 active:scale-95 transition-all shadow-sm"
+              style={{ backgroundColor: c.color }}
             />
           ))}
+        </div>
+
+        <DialogFooter>
+          <Button variant="ghost" onClick={onClose} className="text-sm">
+            Cancel
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ── NoteModal ─────────────────────────────────────────────────────────────────
+
+interface NoteModalProps {
+  visible: boolean;
+  onClose: () => void;
+  onSave: (rangeStart?: number, rangeEnd?: number) => void;
+  noteText: string;
+  onNoteChange: (text: string) => void;
+  saving: boolean;
+  currentBook: string;
+  currentChapter: number;
+  totalVerses?: number;
+  selectedVerses?: string[];
+}
+
+export function NoteModal({
+  visible,
+  onClose,
+  onSave,
+  noteText,
+  onNoteChange,
+  saving,
+  currentBook,
+  currentChapter,
+  totalVerses = 1,
+  selectedVerses = [],
+}: NoteModalProps) {
+  const derived = useMemo(
+    () => deriveRange(selectedVerses, totalVerses),
+    [selectedVerses, totalVerses],
+  );
+
+  const [rangeStart, setRangeStart] = useState(derived.start);
+  const [rangeEnd, setRangeEnd] = useState(derived.end);
+
+  useEffect(() => {
+    if (visible) {
+      setRangeStart(derived.start);
+      setRangeEnd(derived.end);
+    }
+  }, [visible, derived.start, derived.end]);
+
+  return (
+    <Dialog open={visible} onOpenChange={onClose}>
+      <DialogContent className="max-w-sm w-full">
+        <DialogHeader>
+          <DialogTitle>Add Note</DialogTitle>
+          <DialogDescription>
+            {currentBook} {currentChapter}
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          <VerseRangeSlider
+            totalVerses={totalVerses}
+            rangeStart={rangeStart}
+            rangeEnd={rangeEnd}
+            onRangeChange={(s, e) => {
+              setRangeStart(s);
+              setRangeEnd(e);
+            }}
+            currentBook={currentBook}
+            currentChapter={currentChapter}
+          />
+
+          <textarea
+            value={noteText}
+            onChange={(e) => onNoteChange(e.target.value)}
+            placeholder="Enter your note..."
+            className="w-full min-h-[120px] p-3 rounded-md border border-input bg-background text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-none"
+            autoFocus
+          />
+
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button
+              onClick={() => onSave(rangeStart, rangeEnd)}
+              disabled={saving || !noteText.trim()}
+            >
+              {saving ? "Saving..." : "Save Note"}
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
   );
 }
+
+// ── RangePickerModal (Favorites / Copy / Share) ───────────────────────────────
+
+export interface RangePickerModalProps {
+  visible: boolean;
+  onClose: () => void;
+  title: string;
+  description?: string;
+  totalVerses: number;
+  selectedVerses?: string[];
+  actionLabel: string;
+  onConfirm: (rangeStart: number, rangeEnd: number) => void;
+}
+
+export function RangePickerModal({
+  visible,
+  onClose,
+  title,
+  description,
+  totalVerses,
+  selectedVerses = [],
+  actionLabel,
+  onConfirm,
+}: RangePickerModalProps) {
+  const derived = useMemo(
+    () => deriveRange(selectedVerses, totalVerses),
+    [selectedVerses, totalVerses],
+  );
+
+  const [rangeStart, setRangeStart] = useState(derived.start);
+  const [rangeEnd, setRangeEnd] = useState(derived.end);
+
+  useEffect(() => {
+    if (visible) {
+      setRangeStart(derived.start);
+      setRangeEnd(derived.end);
+    }
+  }, [visible, derived.start, derived.end]);
+
+  // Parse "Genesis 1" → book="Genesis", chapter="1"
+  const { book, chapter } = useMemo(() => {
+    if (!description) return { book: "", chapter: "" };
+    const parts = description.trim().split(/\s+/);
+    return {
+      book: parts.slice(0, -1).join(" "),
+      chapter: parts[parts.length - 1],
+    };
+  }, [description]);
+
+  return (
+    <Dialog open={visible} onOpenChange={onClose}>
+      <DialogContent className="max-w-sm w-full">
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+          {description && <DialogDescription>{description}</DialogDescription>}
+        </DialogHeader>
+
+        <VerseRangeSlider
+          totalVerses={totalVerses}
+          rangeStart={rangeStart}
+          rangeEnd={rangeEnd}
+          onRangeChange={(s, e) => {
+            setRangeStart(s);
+            setRangeEnd(e);
+          }}
+          currentBook={book || description || ""}
+          currentChapter={chapter || ""}
+        />
+
+        <div className="flex justify-end gap-2 pt-1">
+          <Button variant="outline" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button
+            onClick={() => {
+              onConfirm(rangeStart, rangeEnd);
+              onClose();
+            }}
+          >
+            {actionLabel}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ── SearchModal ───────────────────────────────────────────────────────────────
 
 interface SearchModalProps {
   visible: boolean;
@@ -126,202 +495,7 @@ export function SearchModal({
   );
 }
 
-interface NoteModalProps {
-  visible: boolean;
-  onClose: () => void;
-  onSave: () => void;
-  noteText: string;
-  onNoteChange: (text: string) => void;
-  saving: boolean;
-  selectedVerses: string[];
-  currentBook: string;
-  currentChapter: number;
-}
-
-export function NoteModal({
-  visible,
-  onClose,
-  onSave,
-  noteText,
-  onNoteChange,
-  saving,
-  selectedVerses,
-  currentBook,
-  currentChapter,
-}: NoteModalProps) {
-  return (
-    <Dialog open={visible} onOpenChange={onClose}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Add Note</DialogTitle>
-          <DialogDescription>
-            {currentBook} {currentChapter}:{selectedVerses.join(", ")}
-          </DialogDescription>
-        </DialogHeader>
-        <div className="space-y-4">
-          <textarea
-            value={noteText}
-            onChange={(e) => onNoteChange(e.target.value)}
-            placeholder="Enter your note..."
-            className="w-full min-h-[120px] p-3 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-            autoFocus
-          />
-<div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={onClose}>
-              Cancel
-            </Button>
-            <Button onClick={onSave} disabled={saving}>
-              {saving ? "Saving..." : "Save Note"}
-            </Button>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-export interface RangePickerModalProps {
-  visible: boolean;
-  onClose: () => void;
-  title: string;
-  description?: string;
-  totalVerses: number;
-  selectedVerses?: string[];
-  actionLabel: string;
-  onConfirm: (rangeStart: number, rangeEnd: number) => void;
-}
-
-export function RangePickerModal({
-  visible,
-  onClose,
-  title,
-  description,
-  totalVerses,
-  selectedVerses = [],
-  actionLabel,
-  onConfirm,
-}: RangePickerModalProps) {
-  const [rangeStart, setRangeStart] = useState(1);
-  const [rangeEnd, setRangeEnd] = useState(totalVerses || 1);
-
-  useEffect(() => {
-    if (visible) {
-      const verseNums: number[] = [];
-      for (const v of selectedVerses) {
-        const colonIdx = v.lastIndexOf(":");
-        if (colonIdx > -1) {
-          const num = parseInt(v.substring(colonIdx + 1), 10);
-          if (!isNaN(num)) verseNums.push(num);
-        }
-      }
-      if (verseNums.length > 0) {
-        setRangeStart(Math.min(...verseNums));
-        setRangeEnd(Math.max(...verseNums));
-      } else {
-        setRangeStart(1);
-        setRangeEnd(totalVerses || 1);
-      }
-    }
-  }, [visible, totalVerses]);
-
-  const handleConfirm = () => {
-    onConfirm(rangeStart, rangeEnd);
-    onClose();
-  };
-
-  return (
-    <Dialog open={visible} onOpenChange={onClose}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-          {description && <DialogDescription>{description}</DialogDescription>}
-        </DialogHeader>
-
-        <div className="space-y-4 py-2">
-          <div className="text-center text-sm text-muted-foreground">
-            Verse range:{" "}
-            <span className="font-medium text-foreground">{rangeStart}</span>–
-            <span className="font-medium text-foreground">{rangeEnd}</span> of{" "}
-            {totalVerses}
-          </div>
-
-          <Slider
-            value={[rangeStart, rangeEnd]}
-            onValueChange={([start, end]) => {
-              setRangeStart(start);
-              setRangeEnd(end);
-            }}
-            min={1}
-            max={totalVerses || 1}
-            step={1}
-          />
-
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 flex-1">
-              <span className="text-xs text-muted-foreground whitespace-nowrap">
-                Start:
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-7 px-2 text-xs"
-                onClick={() => setRangeStart((s) => Math.max(1, s - 1))}
-                disabled={rangeStart <= 1}
-              >
-                –
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-7 px-2 text-xs"
-                onClick={() =>
-                  setRangeStart((s) => Math.min(rangeEnd - 1, s + 1))
-                }
-                disabled={rangeStart >= rangeEnd - 1}
-              >
-                +
-              </Button>
-            </div>
-            <div className="flex items-center gap-2 flex-1">
-              <span className="text-xs text-muted-foreground whitespace-nowrap">
-                End:
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-7 px-2 text-xs"
-                onClick={() =>
-                  setRangeEnd((e) => Math.max(rangeStart + 1, e - 1))
-                }
-                disabled={rangeEnd <= rangeStart + 1}
-              >
-                –
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-7 px-2 text-xs"
-                onClick={() =>
-                  setRangeEnd((e) => Math.min(totalVerses, e + 1))
-                }
-                disabled={rangeEnd >= totalVerses}
-              >
-                +
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex justify-end gap-2">
-          <Button variant="outline" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button onClick={handleConfirm}>{actionLabel}</Button>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-}
+// ── ExplanationModal ──────────────────────────────────────────────────────────
 
 interface ExplanationModalProps {
   visible: boolean;
@@ -359,6 +533,8 @@ export function ExplanationModal({
     </Dialog>
   );
 }
+
+// ── BookSelectorModal ─────────────────────────────────────────────────────────
 
 interface BookSelectorModalProps {
   visible: boolean;
@@ -456,9 +632,10 @@ export function BookSelectorModal({
               <button
                 key={book}
                 onClick={() => onSelectBook(book)}
-                className={`w-full text-left px-3 py-2 rounded-md hover:bg-muted transition-colors ${
-                  book === currentBook ? "bg-muted font-medium" : ""
-                }`}
+                className={cn(
+                  "w-full text-left px-3 py-2 rounded-md hover:bg-muted transition-colors text-sm",
+                  book === currentBook ? "bg-muted font-medium" : "",
+                )}
               >
                 {book}
               </button>
@@ -469,6 +646,8 @@ export function BookSelectorModal({
     </Dialog>
   );
 }
+
+// ── ChapterSelectorModal ──────────────────────────────────────────────────────
 
 interface ChapterSelectorModalProps {
   visible: boolean;
@@ -497,9 +676,12 @@ export function ChapterSelectorModal({
               <button
                 key={ch}
                 onClick={() => onSelectChapter(ch)}
-                className={`p-2 rounded-md text-center hover:bg-muted transition-colors ${
-                  ch === currentChapter ? "bg-primary text-primary-foreground" : ""
-                }`}
+                className={cn(
+                  "p-2 rounded-md text-center hover:bg-muted transition-colors text-sm",
+                  ch === currentChapter
+                    ? "bg-primary text-primary-foreground font-semibold"
+                    : "",
+                )}
               >
                 {ch}
               </button>

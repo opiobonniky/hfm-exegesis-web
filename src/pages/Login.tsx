@@ -11,7 +11,6 @@ import {
   Heart,
   Sun,
   BookMarked,
-  ArrowLeft,
   LogInIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -23,12 +22,16 @@ import { useAuth } from "@/contexts/AuthContext";
 import { sendPostRequest, ApiError } from "@/services/api";
 import { routes } from "@/components/Routes/routes";
 import { getDeviceInfo, getClientIP } from "@/lib/utils";
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { auth, googleProvider } from "@/firebaseConfiguration/config";
+import googleIcon from "@/assets/icons/google-icon.svg";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { setUserInfo, userInfo, loading } = useAuth();
@@ -46,6 +49,102 @@ const Login = () => {
       </div>
     );
   }
+
+  const handleGoogleLogin = async () => {
+    setIsGoogleLoading(true);
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+
+      const credential = GoogleAuthProvider.credentialFromResult(result);
+      const idToken = credential?.idToken;
+
+      if (!idToken) throw new Error("Could not get Google ID token");
+
+      const { user } = result;
+      const deviceInfo = getDeviceInfo();
+      const clientIP = await getClientIP();
+
+      const responseBackend = await sendPostRequest("auth", "google-login", {
+        idToken,
+        email: user.email || "",
+        firstName: user.displayName?.split(" ")[0] || "",
+        lastName: user.displayName?.split(" ").slice(1).join(" ") || "",
+        photoUrl: user.photoURL || "",
+        deviceInfo: { ...deviceInfo, ip: clientIP },
+      });
+
+      const { returnCode, returnData, returnMessage } = responseBackend;
+
+      if (returnCode === 200 && returnData) {
+        const userInfo: any = {
+          token: returnData.token,
+          tokenType: returnData.tokenType,
+          username: returnData.username,
+          email: returnData.email,
+          firstName: returnData.firstName,
+          lastName: returnData.lastName,
+          profilePhotoUrl: returnData.profilePhotoUrl,
+          userRole: returnData.userRole,
+          roleName: returnData.roleName,
+        };
+        setUserInfo(userInfo);
+        navigate(
+          returnData.userRole === 1
+            ? routes.dashboard.path
+            : routes.userDashboard.path,
+        );
+      } else if (returnCode === 201 && returnData?.needsRegistration) {
+        navigate(routes.googleRegister.path, {
+          state: {
+            googleId: returnData.googleId,
+            email: returnData.email,
+            firstName: returnData.firstName,
+            lastName: returnData.lastName,
+            photoUrl: returnData.photoUrl,
+          },
+        });
+      } else {
+        toast({
+          title: "Google Login Failed",
+          description:
+            returnMessage || "Unable to sign in with Google. Please try again.",
+          variant: "destructive",
+        });
+      }
+    } catch (error: any) {
+      console.error("Google login error:", error);
+
+      // ✅ User just closed the popup — NOT an error
+      if (error.code === "auth/popup-closed-by-user") {
+        toast({
+          title: "Login cancelled",
+          description: "You closed the Google sign-in window.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Optional: handle popup blocked
+      if (error.code === "auth/popup-blocked") {
+        toast({
+          title: "Popup blocked",
+          description: "Please allow popups and try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Real errors
+      toast({
+        title: "Google Login Failed",
+        description:
+          error.message || "Unable to sign in with Google. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGoogleLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,6 +174,12 @@ const Login = () => {
           userRole: returnData.userRole,
           roleName: returnData.roleName,
         };
+
+        console.log(
+          "Login successful, user info:",
+          JSON.stringify(userInfo, null, 2),
+        );
+
         setUserInfo(userInfo);
 
         if (returnData.userRole === 1) {
@@ -408,7 +513,7 @@ const Login = () => {
                   htmlFor="remember"
                   className="text-sm text-muted-foreground cursor-pointer select-none"
                 >
-                  Remember me  next login
+                  Remember me next login
                 </label>
               </div>
             </div>
@@ -427,6 +532,38 @@ const Login = () => {
                 <>
                   Sign In
                   <LogInIcon className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </>
+              )}
+            </Button>
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background text-muted-foreground px-2">
+                  Or continue with
+                </span>
+              </div>
+            </div>
+
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full h-12 flex items-center justify-center gap-2 hover:bg-muted/50 transition-colors"
+              onClick={() => handleGoogleLogin()}
+              disabled={isGoogleLoading}
+            >
+              {isGoogleLoading ? (
+                <div className="w-4 h-4 border-2 border-muted-foreground/30 border-t-muted-foreground rounded-full animate-spin" />
+              ) : (
+                <>
+                  <img
+                    src={googleIcon}
+                    alt="Google"
+                    className="w-5 h-5"
+                  />
+                  Sign in with Google
                 </>
               )}
             </Button>
