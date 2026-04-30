@@ -1,4 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import {
   BookOpen,
   Sparkles,
@@ -19,6 +20,9 @@ import {
   Mic2,
   Trophy,
   Users,
+  ShieldCheck,
+  Zap,
+  Globe,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
@@ -290,17 +294,15 @@ const Landing = () => {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#1a1a2e]">
-        <Loader2 className="w-10 h-10 animate-spin text-[#f4a620]" />
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <Loader2 className="w-10 h-10 animate-spin text-brand-primary" />
       </div>
     );
   }
 
   const handleMenuClick = (href: string) => {
-    // close mobile menu if open
     setMobileMenuOpen(false);
 
-    // if it's an anchor, scroll smoothly to the section
     if (href.startsWith("#")) {
       const id = href.slice(1);
       const el = document.getElementById(id);
@@ -310,7 +312,6 @@ const Landing = () => {
       }
     }
 
-    // otherwise navigate normally
     navigate(href);
   };
 
@@ -326,7 +327,6 @@ const Landing = () => {
     } else {
       setResultAnim("incorrect");
     }
-    // clear animation state after a short delay so repeated answers animate
     setTimeout(() => setResultAnim(null), 900);
   };
 
@@ -338,7 +338,7 @@ const Landing = () => {
   const currentQ = triviaQuestions[triviaIndex];
 
   return (
-    <div className="w-full bg-[#1a1a2e] text-white">
+    <div className="w-full bg-brand-bg text-slate-900 overflow-x-hidden">
       <style>{`
         @keyframes shake {
           10%, 90% { transform: translateX(-1px); }
@@ -350,51 +350,39 @@ const Landing = () => {
         .fade-in-up { animation: fadeUp 280ms ease forwards; }
         @keyframes scorePop { 0% { transform: translateY(0) scale(1); opacity: 1 } 50% { transform: translateY(-12px) scale(1.1); opacity: 1 } 100% { transform: translateY(-20px) scale(1); opacity: 0 } }
         .score-pulse { animation: scorePop 800ms ease forwards; }
+        
+        .mobile-menu-overlay {
+          background: rgba(0, 0, 0, 0.4);
+          backdrop-blur: 2px;
+        }
       `}</style>
-      {/* Background video */}
-      <div className="fixed inset-0 z-0">
-        <video
-          autoPlay
-          muted
-          loop
-          playsInline
-          className="w-full h-full object-cover"
-          poster="https://images.unsplash.com/photo-1504052434569-70ad5836ab65?w=1920&q=80"
-        >
-          <source
-            src="https://cdn.coverr.co/videos/coverr-clouds-and-blue-sky-1567/1080p.mp4"
-            type="video/mp4"
-          />
-        </video>
-        <div className="absolute inset-0 bg-gradient-to-b from-[#1a1a2e]/90 via-[#1a1a2e]/80 to-[#1a1a2e]/95" />
-      </div>
 
       <div className="relative z-10">
         {/* ── NAV ── */}
-        <nav className="fixed top-0 left-0 right-0 z-50 bg-[#1a1a2e]/95 backdrop-blur-sm border-b border-white/10">
-          <div className=" mx-auto px-4 sm:px-6 lg:px-12">
-            <div className="flex items-center justify-between h-16 md:h-20">
+        <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200">
+          <div className="w-full px-6 lg:px-12">
+            <div className="flex items-center justify-between h-24">
               {/* Logo */}
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 md:w-16 md:h-16 rounded-lg bg-white flex items-center justify-center shrink-0 overflow-hidden p-1">
+                <div className="w-12 h-12 rounded-xl bg-brand-bg border border-slate-200 flex items-center justify-center shrink-0 overflow-hidden p-1">
                   <img
                     src={logoImage}
                     alt="Exegesis"
                     className="w-full h-full object-contain"
                   />
                 </div>
-                <span className="text-lg md:text-xl font-bold text-white font-[family-name:var(--font-heading)]">
-                  Exegesis
+                <span className="text-xl font-black text-brand-primary font-[family-name:var(--font-heading)] tracking-tighter">
+                  EXEGESIS
                 </span>
               </div>
 
               {/* Desktop nav */}
-              <div className="hidden lg:flex items-center gap-0.5">
+              <div className="hidden lg:flex items-center gap-4 absolute left-1/2 -translate-x-1/2">
                 {menuItems.map((item) => (
                   <button
                     key={item.label}
                     onClick={() => handleMenuClick(item.href)}
-                    className="px-3 py-2 text-sm text-white/90 hover:text-white hover:bg-white/10 rounded-lg transition-colors whitespace-nowrap"
+                    className="px-4 py-2 text-[11px] font-black text-slate-500 hover:text-brand-primary hover:bg-brand-bg rounded-xl transition-all whitespace-nowrap uppercase tracking-widest active:scale-95"
                   >
                     {item.label}
                   </button>
@@ -402,17 +390,17 @@ const Landing = () => {
               </div>
 
               {/* Desktop CTA */}
-              <div className="hidden lg:flex items-center gap-3">
+              <div className="hidden lg:flex items-center gap-6">
                 <Link to="/login">
                   <Button
                     variant="ghost"
-                    className="text-white hover:bg-white/10"
+                    className="text-slate-500 hover:text-brand-primary font-black uppercase tracking-widest text-[10px]"
                   >
                     Sign In
                   </Button>
                 </Link>
                 <Link to="/login">
-                  <Button className="bg-[#f4a620] text-[#1a1a2e] hover:bg-[#f4a620]/90 font-semibold">
+                  <Button className="bg-brand-primary text-white hover:bg-brand-primary-dark font-black px-8 py-6 rounded-2xl shadow-xl shadow-brand-primary/20 uppercase tracking-widest text-xs">
                     Get Started
                   </Button>
                 </Link>
@@ -420,168 +408,204 @@ const Landing = () => {
 
               {/* Mobile hamburger */}
               <button
-                className="lg:hidden p-2 text-white hover:bg-white/10 rounded-lg"
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="lg:hidden p-3 text-brand-primary hover:bg-slate-50 rounded-xl transition-colors"
+                onClick={() => setMobileMenuOpen(true)}
               >
-                {mobileMenuOpen ? (
-                  <X className="w-6 h-6" />
-                ) : (
-                  <Menu className="w-6 h-6" />
-                )}
+                <Menu className="w-7 h-7" />
               </button>
             </div>
           </div>
+        </nav>
 
-          {/* Mobile menu */}
-          {mobileMenuOpen && (
-            <div
-              className="lg:hidden fixed inset-x-0 top-16 bottom-0 z-40 bg-[#1a1a2e]/95 backdrop-blur-sm"
-              onClick={() => setMobileMenuOpen(false)}
+        {/* Mobile menu - side drawer style like the image */}
+        {mobileMenuOpen && (
+          <div className="lg:hidden fixed inset-0 z-[100] mobile-menu-overlay overflow-hidden">
+            <motion.div
+              initial={{ x: "-100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "-100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              ref={menuPanelRef}
+              className="absolute top-0 left-0 bottom-0 w-[85%] max-w-sm bg-white shadow-2xl flex flex-col h-full"
             >
-              <div
-                ref={menuPanelRef}
-                className="absolute top-0 left-0 right-0 z-41 bg-[#1a1a2e] border-t border-white/10 max-h-[calc(100vh-4rem)] overflow-y-auto"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <div className="px-4 py-4 space-y-2">
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="font-bold text-white">Menu</span>
-                    <button
-                      className="p-2 text-white hover:bg-white/10 rounded-lg"
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      <X className="w-5 h-5" />
-                    </button>
-                  </div>
+              {/* Menu Header */}
+              <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-brand-bg">
+                <div className="flex items-center gap-2">
+                  <div className="w-1.5 h-6 bg-brand-primary rounded-full" />
+                  <span className="font-black text-brand-primary uppercase tracking-widest">
+                    Page Menu
+                  </span>
+                </div>
+                <button
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="p-2 text-slate-400 hover:text-slate-900 transition-colors"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
 
+              {/* Menu Items */}
+              <div className="flex-1 overflow-y-auto py-6 px-4">
+                <div className="grid gap-2">
                   {menuItems.map((item) => (
                     <button
                       key={item.label}
                       onClick={() => handleMenuClick(item.href)}
-                      className="flex items-center gap-3 w-full py-3 px-4 rounded-lg transition-colors text-left hover:scale-[1.01]"
-                      style={{
-                        background: hexToRgba(
-                          item.mobileColor || "#f4a620",
-                          0.04,
-                        ),
-                      }}
+                      className="w-full flex items-center gap-4 p-4 rounded-2xl hover:bg-brand-bg transition-all group text-left"
                     >
                       <div
-                        className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
+                        className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 transition-transform group-active:scale-95"
                         style={{
-                          background: hexToRgba(
-                            item.mobileColor || "#f4a620",
-                            0.12,
+                          backgroundColor: hexToRgba(
+                            item.mobileColor || "#396284",
+                            0.15,
                           ),
+                          color: item.mobileColor || "#396284",
                         }}
                       >
-                        <item.icon
-                          className="w-5 h-5"
-                          style={{ color: item.mobileColor }}
-                        />
+                        <item.icon className="w-6 h-6" />
                       </div>
-
-                      <div className="flex-1">
-                        <div className="font-medium">{item.label}</div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-black text-slate-900 uppercase tracking-widest mb-0.5">
+                          {item.label}
+                        </div>
                         {item.description && (
-                          <div className="text-xs text-white/40 mt-0.5">
+                          <div className="text-xs font-medium text-slate-400 truncate">
                             {item.description}
                           </div>
                         )}
                       </div>
-
-                      <ChevronRight className="w-4 h-4 text-white/40" />
+                      <ChevronRight className="w-5 h-5 text-slate-200 group-hover:text-brand-primary transition-colors" />
                     </button>
                   ))}
-
-                  <div className="pt-4 space-y-2 border-t border-white/10 mt-2">
-                    <Link
-                      to="/login"
-                      className="block w-full text-center py-3 bg-[#f4a620] text-[#1a1a2e] rounded-lg font-semibold mt-2"
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      Get Started
-                    </Link>
-                  </div>
                 </div>
               </div>
-            </div>
-          )}
-        </nav>
+
+              {/* Menu Footer */}
+              <div className="p-8 border-t border-slate-100 space-y-4 bg-brand-bg/50">
+                <Link
+                  to="/login"
+                  className="block"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <Button className="w-full bg-brand-primary text-white font-black py-7 rounded-2xl shadow-xl shadow-brand-primary/20 text-lg uppercase tracking-widest">
+                    Get Started
+                  </Button>
+                </Link>
+                <Link
+                  to="/login"
+                  className="block text-center"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <span className="text-sm font-bold text-slate-400 uppercase tracking-widest hover:text-brand-primary transition-colors">
+                    Sign In to Account
+                  </span>
+                </Link>
+              </div>
+            </motion.div>
+            {/* Click outside to close */}
+            <div
+              className="absolute inset-0 -z-10"
+              onClick={() => setMobileMenuOpen(false)}
+            />
+          </div>
+        )}
 
         {/* ── HERO ── */}
         <section
           id="home"
-          className="pt-24 md:pt-32 pb-16 md:pb-24 px-4 sm:px-6 lg:px-12"
+          className="pt-32 md:pt-48 pb-20 md:pb-32 px-6 lg:px-12 bg-brand-bg overflow-hidden"
         >
-          <div className="px-10 mx-auto">
-            <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-              <div className="flex flex-col justify-center space-y-6 md:space-y-8">
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 w-fit">
-                  <Sparkles className="w-4 h-4 text-[#f4a620]" />
-                  <span className="text-sm text-white/90">
-                    Discover deeper meaning
+          <div className="w-full">
+            <div className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8 }}
+                className="flex flex-col space-y-8 text-center lg:text-left"
+              >
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-accent/10 border border-brand-accent/20 w-fit mx-auto lg:mx-0">
+                  <Sparkles className="w-4 h-4 text-brand-accent" />
+                  <span className="text-xs font-black text-brand-accent uppercase tracking-widest">
+                    Excellence in Ministry
                   </span>
                 </div>
 
-                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white leading-tight">
+                <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black text-brand-primary leading-[0.9] font-[family-name:var(--font-heading)] tracking-tighter">
                   Search The
-                  <span className="block text-[#f4a620]">Scriptures Daily</span>
+                  <span className="block text-brand-accent">
+                    Scriptures Daily
+                  </span>
                 </h1>
 
-                <p className="text-lg md:text-xl text-white/80 max-w-xl">
+                <p className="text-lg md:text-2xl text-slate-500 max-w-2xl leading-relaxed font-medium">
                   Exegesis is the process of carefully studying Scripture to
                   discover the original meaning in its historical and literary
                   context.
                 </p>
 
-                <div className="flex items-center gap-6 md:gap-8 pt-2">
-                  <div className="text-center">
-                    <div className="text-2xl md:text-3xl font-bold text-white">
+                <div className="pt-6 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                  <Link to="/login" className="w-full sm:w-auto">
+                    <Button className="w-full bg-brand-accent text-white text-lg px-10 py-8 rounded-[2rem] font-black shadow-2xl shadow-brand-accent/30 hover:bg-brand-accent-dark hover:scale-105 transition-all uppercase tracking-widest">
+                      Start Your Journey
+                      <ArrowRight className="ml-3 w-6 h-6" />
+                    </Button>
+                  </Link>
+                </div>
+
+                <div className="flex flex-wrap items-center justify-center lg:justify-start gap-10 pt-10">
+                  <div className="text-center lg:text-left">
+                    <div className="text-3xl md:text-4xl font-black text-brand-primary tracking-tighter">
                       31K+
                     </div>
-                    <div className="text-xs md:text-sm text-white/60">
-                      Verses
+                    <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">
+                      Holy Verses
                     </div>
                   </div>
-                  <div className="h-8 md:h-12 w-px bg-white/20" />
-                  <div className="text-center">
-                    <div className="text-2xl md:text-3xl font-bold text-white">
+                  <div className="w-px h-12 bg-slate-200 hidden sm:block" />
+                  <div className="text-center lg:text-left">
+                    <div className="text-3xl md:text-4xl font-black text-brand-primary tracking-tighter">
                       66
                     </div>
-                    <div className="text-xs md:text-sm text-white/60">
-                      Books
+                    <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">
+                      Sacred Books
                     </div>
                   </div>
-                  <div className="h-8 md:h-12 w-px bg-white/20" />
-                  <div className="text-center">
-                    <div className="text-2xl md:text-3xl font-bold text-white">
+                  <div className="w-px h-12 bg-slate-200 hidden sm:block" />
+                  <div className="text-center lg:text-left">
+                    <div className="text-3xl md:text-4xl font-black text-brand-primary tracking-tighter">
                       150+
                     </div>
-                    <div className="text-xs md:text-sm text-white/60">
+                    <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">
                       Explanations
                     </div>
                   </div>
                 </div>
+              </motion.div>
 
-                {/* CTA moved below so it sits centered at the bottom of the hero */}
-              </div>
-
-              {/* Desktop: Today's verse card */}
-              <div className="hidden lg:flex justify-center">
-                <div className="bg-white/10 backdrop-blur-md rounded-3xl p-8 w-full max-w-md border border-white/20">
-                  <div className="flex items-center gap-2 mb-4">
-                    <div className="w-2 h-2 rounded-full bg-[#f4a620] animate-pulse" />
-                    <span className="text-sm text-white/70">Today's Verse</span>
+              {/* Hero Image / Card */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+                className="relative"
+              >
+                <div className="bg-white rounded-[3rem] p-8 md:p-12 shadow-[0_32px_64px_-16px_rgba(57,98,132,0.15)] border border-slate-100 relative z-10">
+                  <div className="flex items-center gap-3 mb-8">
+                    <div className="w-3 h-3 rounded-full bg-brand-accent animate-pulse" />
+                    <span className="text-sm font-black text-slate-400 uppercase tracking-widest">
+                      Today's Word
+                    </span>
                   </div>
                   {verseLoading ? (
-                    <div className="space-y-3">
-                      <div className="h-6 bg-white/10 rounded animate-pulse" />
-                      <div className="h-4 bg-white/10 rounded w-4/5 animate-pulse" />
+                    <div className="space-y-6">
+                      <div className="h-10 bg-brand-bg rounded-2xl animate-pulse" />
+                      <div className="h-10 bg-brand-bg rounded-2xl animate-pulse w-4/5" />
+                      <div className="h-6 bg-brand-bg rounded-2xl animate-pulse w-1/3" />
                     </div>
                   ) : dailyVerse ? (
                     <>
-                      <blockquote className="text-xl lg:text-2xl text-white leading-relaxed mb-6">
+                      <blockquote className="text-3xl md:text-4xl font-black text-brand-primary leading-tight mb-10 font-[family-name:var(--font-heading)] italic tracking-tight">
                         "
                         {getVerseText(
                           dailyVerse.bookName,
@@ -590,116 +614,159 @@ const Landing = () => {
                         )}
                         "
                       </blockquote>
-                      <div className="flex justify-between items-center">
-                        <span className="text-[#f4a620] font-medium">
-                          {dailyVerse.bookName} {dailyVerse.chapter}:
-                          {dailyVerse.verseNumber}
-                        </span>
-                        <Heart className="w-5 h-5 text-white/50 hover:text-[#f4a620] cursor-pointer" />
+                      <div className="flex items-center justify-between pt-8 border-t border-slate-100">
+                        <div className="flex flex-col">
+                          <span className="text-brand-accent text-xl font-black tracking-tighter">
+                            {dailyVerse.bookName} {dailyVerse.chapter}:
+                            {dailyVerse.verseNumber}
+                          </span>
+                          <span className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">
+                            Holy Bible
+                          </span>
+                        </div>
+                        <button className="w-14 h-14 rounded-2xl bg-brand-bg flex items-center justify-center text-slate-300 hover:text-brand-accent hover:bg-brand-accent/10 transition-all group">
+                          <Heart className="w-7 h-7 group-hover:fill-brand-accent" />
+                        </button>
                       </div>
                     </>
                   ) : (
-                    <p className="text-white/60 text-sm">No verse scheduled</p>
+                    <p className="text-slate-400 text-xl font-bold">
+                      Seeking inspiration...
+                    </p>
                   )}
                 </div>
-              </div>
-            </div>
-
-            <div className="mt-8 flex justify-center">
-              <Link to="/login" className="w-full sm:w-auto">
-                <Button className="bg-[#f4a620] text-[#1a1a2e] text-base md:text-lg px-8 md:px-10 py-4 md:py-5 font-semibold shadow-lg">
-                  Start Your Journey
-                  <ArrowRight className="ml-2 w-5 h-5" />
-                </Button>
-              </Link>
+                {/* Decorative elements */}
+                <div className="absolute -top-10 -right-10 w-40 h-40 bg-brand-accent/10 rounded-full blur-[80px] -z-10" />
+                <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-brand-primary/10 rounded-full blur-[100px] -z-10" />
+              </motion.div>
             </div>
           </div>
         </section>
 
-        {/* Mobile: Today's verse */}
-        <section className="lg:hidden px-4 pb-8">
-          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-2 h-2 rounded-full bg-[#f4a620] animate-pulse" />
-              <span className="text-sm text-white/70">Today's Verse</span>
-            </div>
-            {verseLoading ? (
-              <div className="space-y-3">
-                <div className="h-5 bg-white/10 rounded animate-pulse" />
-                <div className="h-4 bg-white/10 rounded w-3/5 animate-pulse" />
-              </div>
-            ) : dailyVerse ? (
-              <>
-                <blockquote className="text-lg text-white leading-relaxed mb-4">
-                  "
-                  {getVerseText(
-                    dailyVerse.bookName,
-                    dailyVerse.chapter,
-                    dailyVerse.verseNumber,
-                  )}
-                  "
-                </blockquote>
-                <div className="flex justify-between items-center">
-                  <span className="text-[#f4a620] font-medium text-sm">
-                    {dailyVerse.bookName} {dailyVerse.chapter}:
-                    {dailyVerse.verseNumber}
-                  </span>
-                  <Heart className="w-5 h-5 text-white/50" />
+        {/* ── MOTTO BAR ── */}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: false, margin: "-100px" }}
+          transition={{ duration: 0.6 }}
+          className="bg-white py-12 md:py-16 border-y border-slate-100"
+        >
+          <div className="w-full px-6 lg:px-12">
+            <div className="flex flex-col md:flex-row items-center justify-center gap-12 md:gap-24">
+              <div className="flex items-center gap-4 group">
+                <div className="w-12 h-12 rounded-2xl bg-brand-bg flex items-center justify-center group-hover:bg-brand-primary/10 transition-colors">
+                  <ShieldCheck className="w-6 h-6 text-brand-primary" />
                 </div>
-              </>
-            ) : (
-              <p className="text-white/60 text-sm">No verse scheduled</p>
-            )}
+                <span className="text-brand-primary font-black text-2xl md:text-3xl uppercase tracking-tighter">
+                  Quality
+                </span>
+              </div>
+              <div className="flex items-center gap-4 group">
+                <div className="w-12 h-12 rounded-2xl bg-brand-bg flex items-center justify-center group-hover:bg-brand-primary/10 transition-colors">
+                  <Zap className="w-6 h-6 text-brand-primary" />
+                </div>
+                <span className="text-brand-primary font-black text-2xl md:text-3xl uppercase tracking-tighter">
+                  Service
+                </span>
+              </div>
+              <div className="flex items-center gap-4 group">
+                <div className="w-12 h-12 rounded-2xl bg-brand-bg flex items-center justify-center group-hover:bg-brand-primary/10 transition-colors">
+                  <Globe className="w-6 h-6 text-brand-primary" />
+                </div>
+                <span className="text-brand-primary font-black text-2xl md:text-3xl uppercase tracking-tighter">
+                  Integrity
+                </span>
+              </div>
+            </div>
           </div>
-        </section>
+        </motion.section>
 
-        {/* ── FEATURES ── */}
+        {/* ── SPIRIT-LED FEATURES ── */}
         <section
           id="features"
-          className="px-4 sm:px-6 lg:px-12 py-12 md:py-16 bg-[#1a1a2e]/80 backdrop-blur-sm"
+          className="py-20 md:py-28 px-6 lg:px-12 bg-white relative"
         >
-          <div className="mx-auto">
-            <div className="text-center mb-10 md:mb-16">
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold font-[family-name:var(--font-heading)] mb-4">
-                Everything You Need for{" "}
-                <span className="text-[#f4a620]">Deeper Study</span>
-              </h2>
-              <p className="text-white/70 text-base md:text-lg max-w-2xl mx-auto">
-                Our comprehensive tools help you understand, apply, and live out
-                Scripture every day.
-              </p>
+          <div className="w-full">
+            <div className="text-center mb-16 md:mb-24">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: false, margin: "-100px" }}
+                transition={{ duration: 0.6 }}
+              >
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-bg border border-slate-200 mb-6">
+                  <div className="w-2 h-2 rounded-full bg-brand-primary" />
+                  <span className="text-xs font-black text-slate-400 uppercase tracking-widest">
+                    Our Services
+                  </span>
+                </div>
+                <h2 className="text-4xl md:text-6xl lg:text-7xl font-black text-slate-900 mb-8 font-[family-name:var(--font-heading)] tracking-tighter leading-none">
+                  Our <span className="text-brand-primary">Spirit-Led</span>{" "}
+                  Features
+                </h2>
+                <p className="text-xl md:text-2xl text-slate-500 max-w-3xl mx-auto leading-relaxed font-medium">
+                  We are passionate Jesus followers dedicated to helping you
+                  shine with excellence and integrity in everything you do.
+                </p>
+              </motion.div>
             </div>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {[
                 {
-                  title: "Verse Explanations",
-                  emoji: "📚",
-                  desc: "In-depth analysis including historical context, word studies, and cross-references for deeper understanding.",
+                  title: "Deep Biblical Exegesis",
+                  icon: BookOpen,
+                  desc: "Reach a deeper understanding of the Word. Discover original meanings through historical and literary context.",
                 },
                 {
-                  title: "Exegesis Insights",
-                  emoji: "✨",
-                  desc: "Discover how to apply ancient wisdom to modern life with actionable insights and reflections.",
+                  title: "Daily Kingdom Insights",
+                  icon: Sparkles,
+                  desc: "Start each day with purpose-driven devotionals that reflect your mission and message in Christ.",
                 },
                 {
-                  title: "Daily Inspiration",
-                  emoji: "✝️",
-                  desc: "Start each day with a carefully selected verse and reflection to guide your spiritual journey.",
+                  title: "Community Prayer Wall",
+                  icon: HandHeart,
+                  desc: "Build strong engagement and spread the Gospel through our dedicated community prayer platform.",
                 },
-              ].map((f) => (
-                <div key={f.title} className="group">
-                  <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 md:p-8 h-full border border-white/10 hover:border-[#f4a620]/50 transition-all duration-300">
-                    <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl bg-[#f4a620]/20 flex items-center justify-center mb-4 md:mb-6 group-hover:bg-[#f4a620]/30 transition-colors">
-                      <span className="text-2xl">{f.emoji}</span>
+                {
+                  title: "Bible Knowledge Trivia",
+                  icon: Trophy,
+                  desc: "Engage with the Word right where you are. Be found searching for truth, hope, and deeper wisdom.",
+                },
+                {
+                  title: "Spirit-Filled Growth",
+                  icon: FlameKindling,
+                  desc: "We walk with you every step of the way, providing tools for your calling and Kingdom impact.",
+                },
+                {
+                  title: "Kingdom Mobile App",
+                  icon: Globe,
+                  desc: "Take the Word with you everywhere. Reach your community right where they are—on their phones.",
+                },
+              ].map((f, i) => (
+                <motion.div
+                  key={f.title}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: false, margin: "-100px" }}
+                  transition={{ delay: i * 0.1, duration: 0.6 }}
+                  className="group"
+                >
+                  <div className="p-10 rounded-[2.5rem] bg-brand-bg border border-slate-100 hover:border-brand-primary/30 hover:shadow-[0_32px_64px_-16px_rgba(57,98,132,0.1)] transition-all duration-500 h-full flex flex-col">
+                    <div className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center mb-8 group-hover:bg-brand-primary group-hover:text-white transition-all duration-500 shadow-sm">
+                      <f.icon className="w-8 h-8" />
                     </div>
-                    <h3 className="text-lg md:text-xl font-bold mb-3 font-[family-name:var(--font-heading)]">
+                    <h3 className="text-2xl font-black text-brand-primary mb-4 font-[family-name:var(--font-heading)] tracking-tight">
                       {f.title}
                     </h3>
-                    <p className="text-white/70 leading-relaxed text-sm md:text-base">
+                    <p className="text-lg text-slate-500 leading-relaxed font-medium">
                       {f.desc}
                     </p>
+                    <div className="mt-auto pt-8">
+                      <div className="w-10 h-1 bg-slate-200 group-hover:w-20 group-hover:bg-brand-accent transition-all duration-500" />
+                    </div>
                   </div>
-                </div>
+                </motion.div>
               ))}
             </div>
           </div>
@@ -708,67 +775,71 @@ const Landing = () => {
         {/* ── EXEGESIS DAILY ── */}
         <section
           id="exegesis-daily"
-          className="px-4 sm:px-6 lg:px-12 py-14 md:py-20"
+          className="py-20 md:py-28 px-6 lg:px-12 bg-brand-card"
         >
-          <div className=" mx-auto">
-            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
-              <div>
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#f4a620]/20 border border-[#f4a620]/30 mb-3">
-                  <CalendarDays className="w-4 h-4 text-[#f4a620]" />
-                  <span className="text-xs text-[#f4a620] font-medium">
-                    Daily Devotionals
+          <div className="w-full">
+            <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-10 mb-16 md:mb-24">
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: false, margin: "-100px" }}
+                transition={{ duration: 0.6 }}
+              >
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-slate-200 mb-6 shadow-sm">
+                  <CalendarDays className="w-4 h-4 text-brand-primary" />
+                  <span className="text-xs font-black text-slate-400 uppercase tracking-widest">
+                    Inspiration
                   </span>
                 </div>
-                <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold font-[family-name:var(--font-heading)]">
-                  Exegesis <span className="text-[#f4a620]">Daily</span>
+                <h2 className="text-4xl md:text-6xl font-black text-slate-900 font-[family-name:var(--font-heading)] tracking-tighter leading-none">
+                  Exegesis <span className="text-brand-primary">Daily</span>
                 </h2>
-                <p className="text-white/60 mt-2 max-w-lg">
+                <p className="text-xl text-slate-500 mt-6 max-w-xl font-medium">
                   Fresh devotional content every morning rooted in careful
                   Scripture study.
                 </p>
-              </div>
+              </motion.div>
               <Link to="/login">
                 <Button
                   variant="outline"
-                  className="border-white/20 text-primary hover:bg-white/10 whitespace-nowrap"
+                  className="border-slate-300 text-slate-600 hover:bg-white px-10 py-7 rounded-2xl font-black text-lg shadow-sm"
                 >
-                  View All <ChevronRight className="w-4 h-4 ml-1" />
+                  Explore All <ChevronRight className="w-6 h-6 ml-2" />
                 </Button>
               </Link>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-6">
-              {devotionals.map((d) => (
-                <div
+            <div className="grid md:grid-cols-3 gap-10">
+              {devotionals.map((d, i) => (
+                <motion.div
                   key={d.title}
-                  className="bg-white/5 border border-white/10 hover:border-[#f4a620]/40 rounded-2xl p-6 flex flex-col gap-4 transition-all duration-300 group cursor-pointer"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-100px" }}
+                  transition={{ delay: i * 0.1, duration: 0.6 }}
+                  className="bg-white rounded-[2.5rem] p-10 border border-slate-100 hover:shadow-2xl hover:shadow-brand-primary/10 transition-all duration-500 flex flex-col group cursor-pointer"
                 >
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-white/40">{d.date}</span>
-                    <span className="text-xs px-2 py-1 rounded-full bg-[#f4a620]/20 text-[#f4a620] font-medium">
+                  <div className="flex items-center justify-between mb-8">
+                    <span className="text-sm font-black text-slate-300 uppercase tracking-widest">
+                      {d.date}
+                    </span>
+                    <span className="px-4 py-1.5 rounded-full bg-brand-bg text-slate-400 text-xs font-black uppercase tracking-widest group-hover:bg-brand-accent/10 group-hover:text-brand-accent transition-colors">
                       {d.tag}
                     </span>
                   </div>
-                  <div>
-                    <h3 className="text-lg font-bold mb-1 group-hover:text-[#f4a620] transition-colors">
-                      {d.title}
-                    </h3>
-                    <p className="text-[#f4a620] text-sm font-medium mb-3">
-                      {d.book}
-                    </p>
-                    <p className="text-white/60 text-sm leading-relaxed line-clamp-3">
-                      {d.excerpt}
-                    </p>
+                  <h3 className="text-2xl font-black text-brand-primary mb-2 group-hover:text-brand-accent transition-colors font-[family-name:var(--font-heading)] tracking-tight">
+                    {d.title}
+                  </h3>
+                  <p className="text-brand-accent font-black text-lg tracking-tighter mb-6">
+                    {d.book}
+                  </p>
+                  <p className="text-lg text-slate-500 leading-relaxed font-medium line-clamp-4 italic mb-8">
+                    "{d.excerpt}"
+                  </p>
+                  <div className="mt-auto pt-6 border-t border-slate-100 flex items-center text-brand-primary font-black uppercase tracking-widest text-xs gap-2 group-hover:gap-4 transition-all">
+                    Read Devotional <ArrowRight className="w-5 h-5" />
                   </div>
-                  <div className="mt-auto pt-2">
-                    <Link
-                      to="/login"
-                      className="text-sm text-[#f4a620] hover:underline inline-flex items-center gap-1"
-                    >
-                      Read full devotional <ArrowRight className="w-3 h-3" />
-                    </Link>
-                  </div>
-                </div>
+                </motion.div>
               ))}
             </div>
           </div>
@@ -777,133 +848,155 @@ const Landing = () => {
         {/* ── PRAYER WALL ── */}
         <section
           id="prayer-wall"
-          className="px-4 sm:px-6 lg:px-12 py-14 md:py-20 bg-[#1a1a2e]/80 backdrop-blur-sm"
+          className="py-20 md:py-28 px-6 lg:px-12 bg-white"
         >
-          <div className=" mx-auto">
-            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
-              <div>
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#f4a620]/20 border border-[#f4a620]/30 mb-3">
-                  <HandHeart className="w-4 h-4 text-[#f4a620]" />
-                  <span className="text-xs text-[#f4a620] font-medium">
+          <div className="w-full">
+            <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-10 mb-16 md:mb-24">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ duration: 0.6 }}
+              >
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-bg border border-slate-200 mb-6">
+                  <HandHeart className="w-4 h-4 text-brand-accent" />
+                  <span className="text-xs font-black text-slate-400 uppercase tracking-widest">
                     Community
                   </span>
                 </div>
-                <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold font-[family-name:var(--font-heading)]">
-                  Prayer <span className="text-[#f4a620]">Wall</span>
+                <h2 className="text-4xl md:text-6xl font-black text-slate-900 font-[family-name:var(--font-heading)] tracking-tighter leading-none">
+                  Prayer <span className="text-brand-accent">Wall</span>
                 </h2>
-                <p className="text-white/60 mt-2 max-w-lg">
-                  Lift each other up. Submit a request or pray for someone right
-                  now.
+                <p className="text-xl text-slate-500 mt-6 max-w-xl font-medium">
+                  Lift each other up in faith. Submit a request or stand in the
+                  gap.
                 </p>
-              </div>
+              </motion.div>
               <Link to="/login">
-                <Button className="bg-[#f4a620] text-[#1a1a2e] font-semibold hover:bg-[#f4a620]/90 whitespace-nowrap">
-                  Add Prayer Request
+                <Button className="bg-brand-primary text-white px-10 py-8 rounded-[2rem] font-black text-lg shadow-2xl shadow-brand-primary/30 hover:bg-brand-primary-dark transition-all uppercase tracking-widest">
+                  Add Request
                 </Button>
               </Link>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-6">
-              {prayers.map((p) => (
-                <div
+            <div className="grid md:grid-cols-3 gap-8">
+              {prayers.map((p, i) => (
+                <motion.div
                   key={p.name}
-                  className="bg-white/5 border border-white/10 rounded-2xl p-6 flex flex-col gap-4"
+                  initial={{ opacity: 0, x: 20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true, margin: "-100px" }}
+                  transition={{ delay: i * 0.1, duration: 0.6 }}
+                  className="bg-brand-bg rounded-[2rem] p-8 border border-slate-100 hover:bg-white hover:shadow-xl transition-all duration-500 group"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-[#f4a620]/20 flex items-center justify-center text-[#f4a620] font-bold text-sm shrink-0">
+                  <div className="flex items-center gap-4 mb-8">
+                    <div className="w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center text-brand-primary font-black text-xl border border-slate-100">
                       {p.name
                         .split(" ")
                         .map((n) => n[0])
                         .join("")}
                     </div>
                     <div>
-                      <p className="font-medium text-sm">{p.name}</p>
-                      <p className="text-white/40 text-xs">
+                      <p className="font-black text-slate-900 text-lg tracking-tight">
+                        {p.name}
+                      </p>
+                      <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">
                         {p.location} · {p.time}
                       </p>
                     </div>
                   </div>
-                  <p className="text-white/70 text-sm leading-relaxed">
-                    {p.request}
+                  <p className="text-xl text-slate-700 leading-relaxed font-bold italic mb-8">
+                    "{p.request}"
                   </p>
-                  <div className="flex items-center justify-between pt-2 border-t border-white/10">
-                    <button className="flex items-center gap-2 text-xs text-white/50 hover:text-[#f4a620] transition-colors">
-                      <HandHeart className="w-4 h-4" />
-                      <span>Praying ({p.likes})</span>
+                  <div className="flex items-center justify-between pt-6 border-t border-slate-100">
+                    <button className="flex items-center gap-3 text-xs font-black text-slate-400 hover:text-brand-primary transition-colors uppercase tracking-widest">
+                      <HandHeart className="w-5 h-5" />
+                      Praying ({p.likes})
                     </button>
                     <Link
                       to="/login"
-                      className="text-xs text-[#f4a620] hover:underline"
+                      className="text-xs font-black text-brand-accent uppercase tracking-widest hover:underline"
                     >
-                      Pray with them →
+                      PRAY NOW →
                     </Link>
                   </div>
-                </div>
+                </motion.div>
               ))}
             </div>
-
-            <p className="text-center text-white/40 text-sm mt-8">
-              "Bear one another's burdens, and so fulfill the law of Christ." —
-              Galatians 6:2
-            </p>
           </div>
         </section>
 
         {/* ── TESTIFY ── */}
-        <section id="testify" className="px-4 sm:px-6 lg:px-12 py-14 md:py-20">
-          <div className=" mx-auto">
-            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
-              <div>
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#f4a620]/20 border border-[#f4a620]/30 mb-3">
-                  <Mic2 className="w-4 h-4 text-[#f4a620]" />
-                  <span className="text-xs text-[#f4a620] font-medium">
+        <section
+          id="testify"
+          className="py-20 md:py-28 px-6 lg:px-12 bg-brand-bg"
+        >
+          <div className="w-full">
+            <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-10 mb-16 md:mb-24">
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ duration: 0.6 }}
+              >
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-slate-200 mb-6">
+                  <Mic2 className="w-4 h-4 text-brand-primary" />
+                  <span className="text-xs font-black text-slate-400 uppercase tracking-widest">
                     Testimonies
                   </span>
                 </div>
-                <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold font-[family-name:var(--font-heading)]">
-                  Testify
+                <h2 className="text-4xl md:text-6xl font-black text-slate-900 font-[family-name:var(--font-heading)] tracking-tighter leading-none">
+                  Testify & <span className="text-brand-primary">Inspire</span>
                 </h2>
-                <p className="text-white/60 mt-2 max-w-lg">
-                  God is still writing stories. Share yours and inspire
-                  thousands.
+                <p className="text-xl text-slate-500 mt-6 max-w-xl font-medium">
+                  God is still writing amazing stories. Share your journey and
+                  help others see His power.
                 </p>
-              </div>
+              </motion.div>
               <Link to="/login">
                 <Button
                   variant="outline"
-                  className="border-white/20 text-primary hover:bg-white/10 whitespace-nowrap"
+                  className="border-slate-300 text-slate-600 hover:bg-white px-10 py-7 rounded-2xl font-black text-lg shadow-sm"
                 >
-                  Share Your Story <ChevronRight className="w-4 h-4 ml-1" />
+                  Share Your Story <ArrowRight className="ml-3 w-6 h-6" />
                 </Button>
               </Link>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-6">
-              {testimonies.map((t) => (
-                <div
+            <div className="grid md:grid-cols-3 gap-10">
+              {testimonies.map((t, i) => (
+                <motion.div
                   key={t.name}
-                  className="bg-white/5 border border-white/10 hover:border-[#f4a620]/40 rounded-2xl p-6 flex flex-col gap-5 transition-all duration-300"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true, margin: "-100px" }}
+                  transition={{ delay: i * 0.1, duration: 0.6 }}
+                  className="bg-white rounded-[2.5rem] p-10 border border-slate-100 hover:shadow-2xl hover:shadow-brand-primary/10 transition-all duration-500 flex flex-col group relative"
                 >
-                  <Quote className="w-8 h-8 text-[#f4a620]/40" />
-                  <div>
-                    <h3 className="font-bold text-lg mb-2">{t.title}</h3>
-                    <p className="text-white/60 text-sm leading-relaxed">
-                      {t.story}
-                    </p>
-                  </div>
-                  <div className="mt-auto pt-4 border-t border-white/10 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-full bg-[#f4a620]/20 flex items-center justify-center text-[#f4a620] font-bold text-xs">
+                  <Quote className="w-12 h-12 text-brand-primary/10 absolute top-10 right-10" />
+                  <h3 className="text-2xl font-black text-brand-primary mb-4 font-[family-name:var(--font-heading)] tracking-tight group-hover:text-brand-accent transition-colors">
+                    {t.title}
+                  </h3>
+                  <p className="text-lg text-slate-500 leading-relaxed font-medium italic mb-10">
+                    "{t.story}"
+                  </p>
+                  <div className="mt-auto pt-8 border-t border-slate-100 flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-full bg-brand-bg flex items-center justify-center text-brand-primary font-black text-sm border border-slate-100">
                         {t.avatar}
                       </div>
                       <div>
-                        <p className="text-sm font-medium">{t.name}</p>
-                        <p className="text-xs text-[#f4a620]">{t.verse}</p>
+                        <p className="text-lg font-black text-slate-900 tracking-tight">
+                          {t.name}
+                        </p>
+                        <p className="text-xs font-black text-brand-accent uppercase tracking-widest">
+                          {t.verse}
+                        </p>
                       </div>
                     </div>
-                    <Heart className="w-4 h-4 text-white/30 hover:text-[#f4a620] cursor-pointer" />
+                    <Heart className="w-6 h-6 text-slate-200 hover:text-brand-accent transition-colors cursor-pointer" />
                   </div>
-                </div>
+                </motion.div>
               ))}
             </div>
           </div>
@@ -912,59 +1005,94 @@ const Landing = () => {
         {/* ── BIBLE TRIVIA ── */}
         <section
           id="bible-trivia"
-          className="px-4 sm:px-6 lg:px-12 py-14 md:py-20 bg-[#1a1a2e]/80 backdrop-blur-sm"
+          className="px-6 lg:px-12 py-20 md:py-28 bg-white relative overflow-hidden"
         >
-          <div className="max-w-3xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#f4a620]/20 border border-[#f4a620]/30 mb-4">
-              <Trophy className="w-4 h-4 text-[#f4a620]" />
-              <span className="text-xs text-[#f4a620] font-medium">
-                Bible Trivia
-              </span>
-            </div>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold font-[family-name:var(--font-heading)] mb-3">
-              Test Your <span className="text-[#f4a620]">Knowledge</span>
-            </h2>
-            <p className="text-white/60 mb-10">
-              A quick taste of what awaits inside. How well do you know the
-              Word?
-            </p>
+          <div className="absolute top-0 right-0 w-[40rem] h-[40rem] bg-brand-primary/5 rounded-full blur-[120px] -z-10" />
+          <div className="absolute bottom-0 left-0 w-[30rem] h-[30rem] bg-brand-bg rounded-full blur-[100px] -z-10" />
 
-            <div className="bg-white/5 border border-white/10 rounded-3xl p-8 md:p-10">
-              <div className="flex items-center justify-between mb-6">
-                <span className="text-xs text-white/40">
-                  Question {triviaIndex + 1} of {triviaQuestions.length}
+          <div className="w-full text-center">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.6 }}
+            >
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-bg border border-slate-200 mb-6">
+                <Trophy className="w-4 h-4 text-brand-accent" />
+                <span className="text-xs text-slate-400 font-black uppercase tracking-widest">
+                  Bible Challenge
                 </span>
-                <span className="relative text-xs px-3 py-1 rounded-full bg-[#f4a620]/20 text-[#f4a620] font-medium inline-flex items-center">
-                  Score: {triviaScore}
+              </div>
+              <h2 className="text-4xl md:text-6xl font-black text-slate-900 font-[family-name:var(--font-heading)] mb-8 leading-tight tracking-tighter">
+                Test Your <span className="text-brand-primary">Knowledge</span>
+              </h2>
+              <p className="text-xl md:text-2xl text-slate-500 mb-16 max-w-2xl mx-auto leading-relaxed font-medium">
+                Grow in the Word through our interactive challenges. Hide His
+                Word in your heart while having fun!
+              </p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.6 }}
+              className="max-w-4xl mx-auto bg-white border border-slate-100 rounded-[3rem] p-8 md:p-16 shadow-[0_32px_64px_-16px_rgba(57,98,132,0.1)] relative z-10"
+            >
+              <div className="flex items-center justify-between mb-12">
+                <div className="flex flex-col items-start">
+                  <span className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">
+                    Question {triviaIndex + 1} of {triviaQuestions.length}
+                  </span>
+                  <div className="flex gap-1">
+                    {triviaQuestions.map((_, idx) => (
+                      <div
+                        key={idx}
+                        className={`h-1.5 rounded-full transition-all duration-300 ${
+                          idx === triviaIndex
+                            ? "w-8 bg-brand-primary"
+                            : idx < triviaIndex
+                              ? "w-4 bg-brand-primary/30"
+                              : "w-4 bg-slate-100"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </div>
+                <div className="relative">
+                  <span className="text-sm px-6 py-3 rounded-2xl bg-brand-accent text-white font-black inline-flex items-center shadow-lg shadow-brand-accent/20 uppercase tracking-widest">
+                    Score: {triviaScore}
+                  </span>
                   {showScorePulse && (
-                    <span className="absolute -top-3 right-0 text-xs text-green-200 score-pulse">
+                    <span className="absolute -top-8 right-0 text-2xl text-green-500 font-black score-pulse">
                       +1
                     </span>
                   )}
-                </span>
+                </div>
               </div>
 
-              <h3 className="text-xl md:text-2xl font-bold mb-8 text-white">
+              <h3 className="text-2xl md:text-4xl font-black mb-12 text-brand-primary leading-tight font-[family-name:var(--font-heading)] tracking-tight">
                 {currentQ.question}
               </h3>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid sm:grid-cols-2 gap-6">
                 {currentQ.options.map((opt) => {
                   const isSelected = triviaSelected === opt;
                   const isCorrect = opt === currentQ.answer;
                   let cls =
-                    "py-4 px-5 rounded-xl border text-sm font-medium transition-all duration-300 text-left transform ";
+                    "py-6 px-8 rounded-[1.5rem] border-2 text-lg font-black transition-all duration-300 text-left relative overflow-hidden ";
                   if (!triviaSelected) {
                     cls +=
-                      "border-white/20 text-white hover:border-[#f4a620] hover:bg-[#f4a620]/10 cursor-pointer hover:scale-105";
+                      "border-slate-100 bg-brand-bg/50 text-slate-600 hover:border-brand-primary hover:bg-white hover:text-brand-primary cursor-pointer hover:scale-[1.02] hover:shadow-xl";
                   } else if (isCorrect) {
                     cls +=
-                      "border-green-400/60 bg-green-400/20 text-green-300 scale-105 shadow-lg";
+                      "border-green-500 bg-green-50 text-green-600 scale-[1.05] shadow-xl shadow-green-500/10";
                   } else if (isSelected) {
                     cls +=
-                      "border-red-400/60 bg-red-400/20 text-red-300 animate-shake";
+                      "border-red-500 bg-red-50 text-red-600 animate-shake";
                   } else {
-                    cls += "border-white/10 text-white/30 opacity-70";
+                    cls +=
+                      "border-slate-50 bg-slate-50/30 text-slate-300 opacity-50";
                   }
 
                   return (
@@ -974,360 +1102,301 @@ const Landing = () => {
                       onClick={() => handleTriviaAnswer(opt)}
                       aria-pressed={isSelected}
                     >
-                      <span className="inline-block align-middle">{opt}</span>
-                      {isCorrect && triviaSelected && (
-                        <span className="ml-2 inline-block text-green-300 fade-in-up">
-                          ✓
-                        </span>
-                      )}
-                      {isSelected && !isCorrect && (
-                        <span className="ml-2 inline-block text-red-300 fade-in-up">
-                          ✕
-                        </span>
-                      )}
+                      <span className="relative z-10 flex items-center justify-between w-full">
+                        <span>{opt}</span>
+                        {isCorrect && triviaSelected && (
+                          <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-white text-sm fade-in-up">
+                            ✓
+                          </div>
+                        )}
+                        {isSelected && !isCorrect && (
+                          <div className="w-8 h-8 rounded-full bg-red-500 flex items-center justify-center text-white text-sm fade-in-up">
+                            ✕
+                          </div>
+                        )}
+                      </span>
                     </button>
                   );
                 })}
               </div>
 
               {triviaSelected && (
-                <div className="mt-8 flex flex-col sm:flex-row items-center gap-4">
-                  <p className="text-white/60 text-sm flex-1 text-left fade-in-up">
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mt-16 flex flex-col sm:flex-row items-center justify-between gap-8 pt-10 border-t border-slate-100"
+                >
+                  <p className="text-brand-primary text-xl font-bold italic font-[family-name:var(--font-heading)] tracking-tight">
                     {triviaSelected === currentQ.answer ? (
-                      <>
-                        <span className="mr-2">🎉</span>
-                        <span className="font-semibold text-white">
-                          Correct!
-                        </span>
-                        <span className="ml-2 text-white/60">Well done.</span>
-                      </>
+                      <span className="flex items-center gap-3">
+                        <Sparkles className="text-brand-accent w-6 h-6" />
+                        Well done! You're growing in wisdom.
+                      </span>
                     ) : (
-                      <>
-                        <span className="font-semibold text-white">
-                          Incorrect.
-                        </span>
-                        <span className="ml-2 text-white/60">
-                          The correct answer is "{currentQ.answer}".
-                        </span>
-                      </>
+                      <span className="flex items-center gap-3">
+                        <Zap className="text-red-500 w-6 h-6" />
+                        Keep studying! The Word is a lamp to your feet.
+                      </span>
                     )}
                   </p>
-                  <button
+                  <Button
                     onClick={nextTrivia}
-                    className="text-sm font-semibold text-[#f4a620] hover:underline whitespace-nowrap"
+                    className="w-full sm:w-auto bg-brand-primary text-white hover:bg-brand-primary-dark px-10 py-7 rounded-2xl font-black text-lg shadow-xl shadow-brand-primary/20 uppercase tracking-widest"
                   >
-                    Next Question →
-                  </button>
-                </div>
+                    Next Challenge
+                  </Button>
+                </motion.div>
               )}
-            </div>
-
-            <p className="text-white/40 text-sm mt-6">
-              Hundreds more questions await inside the full app.
-            </p>
-            <Link to="/login" className="inline-block mt-4">
-              <Button className="bg-[#f4a620] text-[#1a1a2e] font-semibold hover:bg-[#f4a620]/90">
-                Play Full Trivia
-              </Button>
-            </Link>
+            </motion.div>
           </div>
         </section>
 
-        {/* ── ABOUT US ── */}
-        <section id="about" className="px-4 sm:px-6 lg:px-12 py-14 md:py-20">
-          <div className=" mx-auto">
-            <div className="grid lg:grid-cols-2 gap-12 items-center">
-              <div>
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#f4a620]/20 border border-[#f4a620]/30 mb-4">
-                  <Users className="w-4 h-4 text-[#f4a620]" />
-                  <span className="text-xs text-[#f4a620] font-medium">
-                    About Us
+        {/* ── OUR CALLING ── */}
+        <section
+          id="about"
+          className="px-6 lg:px-12 py-20 md:py-28 bg-brand-card"
+        >
+          <div className="w-full">
+            <div className="grid lg:grid-cols-2 gap-20 items-center">
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ duration: 0.6 }}
+              >
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-slate-200 mb-6">
+                  <Users className="w-4 h-4 text-brand-primary" />
+                  <span className="text-xs text-slate-400 font-black uppercase tracking-widest">
+                    Our Calling
                   </span>
                 </div>
-                <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold font-[family-name:var(--font-heading)] mb-6">
-                  Built for Those Who{" "}
-                  <span className="text-[#f4a620]">Hunger for the Word</span>
+                <h2 className="text-4xl md:text-6xl font-black text-slate-900 font-[family-name:var(--font-heading)] mb-8 leading-tight tracking-tighter">
+                  Built for Kingdom{" "}
+                  <span className="text-brand-primary">Impact</span>
                 </h2>
-                <div className="space-y-4 text-white/70 leading-relaxed">
+                <div className="space-y-6 text-slate-500 text-lg md:text-xl leading-relaxed font-medium">
                   <p>
-                    Exegesis was born out of a simple conviction: every believer
-                    deserves more than a surface-level reading of Scripture. We
-                    believe the Bible is living, active, and inexhaustibly deep.
+                    At Exegesis, we believe your spiritual journey deserves more
+                    than just a casual reading—it deserves a powerful,
+                    purpose-driven digital footprint rooted in faith and fueled
+                    by the Gospel.
                   </p>
                   <p>
-                    Our team of theologians, developers, and creatives built
-                    this platform to make rigorous biblical scholarship
-                    accessible to everyone—whether you're a new believer or a
-                    seminary graduate.
+                    We’re not just another app—we’re passionate Jesus followers,
+                    tech experts, and creative visionaries who live to serve the
+                    Lord in everything we do. Our goal is simple: to help you
+                    reach deeper, understand more, and glorify God through the
+                    power of study.
                   </p>
-                  <p>
-                    Rooted in faith, driven by community, and guided by the
-                    Spirit. That's who we are.
+                  <p className="font-black text-brand-accent italic text-2xl tracking-tight">
+                    Quality, Service, & Integrity — Built for His Glory.
                   </p>
                 </div>
-                <div className="grid grid-cols-3 gap-6 mt-8">
+                <div className="grid grid-cols-3 gap-8 mt-12">
                   {[
-                    { stat: "50K+", label: "Community members" },
-                    { stat: "150+", label: "Devotionals written" },
-                    { stat: "12+", label: "Countries reached" },
+                    { stat: "31K+", label: "Verses Explored" },
+                    { stat: "150+", label: "Daily Insights" },
+                    { stat: "Global", label: "Kingdom Reach" },
                   ].map((s) => (
                     <div key={s.label}>
-                      <p className="text-2xl font-bold text-[#f4a620]">
+                      <p className="text-3xl md:text-4xl font-black text-brand-primary tracking-tighter">
                         {s.stat}
                       </p>
-                      <p className="text-xs text-white/50 mt-1">{s.label}</p>
+                      <p className="text-xs md:text-sm text-slate-400 mt-2 font-bold uppercase tracking-widest">
+                        {s.label}
+                      </p>
                     </div>
                   ))}
                 </div>
-              </div>
+              </motion.div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 {[
                   {
-                    icon: BookOpen,
+                    icon: ShieldCheck,
                     title: "Rooted in Truth",
-                    desc: "Every devotional and explanation is grounded in sound biblical scholarship.",
+                    desc: "Every insight and explanation is grounded in sound biblical scholarship and prayer.",
                   },
                   {
-                    icon: HandHeart,
-                    title: "Community First",
-                    desc: "Pray, testify, and grow alongside thousands of believers worldwide.",
+                    icon: Globe,
+                    title: "Global Community",
+                    desc: "Pray, testify, and grow alongside believers from every corner of the world.",
                   },
                   {
                     icon: Sparkles,
-                    title: "Spirit-Led",
-                    desc: "We believe the Holy Spirit illuminates Scripture for every sincere seeker.",
+                    title: "Spirit-Led Tech",
+                    desc: "We use modern technology to illuminate ancient wisdom for today's generation.",
                   },
                   {
-                    icon: FlameKindling,
+                    icon: Zap,
                     title: "Always Growing",
-                    desc: "New content, trivia, and features released weekly by our dedicated team.",
+                    desc: "Constant updates and fresh content to keep your spiritual journey vibrant and active.",
                   },
-                ].map((v) => (
-                  <div
+                ].map((v, i) => (
+                  <motion.div
                     key={v.title}
-                    className="bg-white/5 border border-white/10 rounded-2xl p-5"
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: "-100px" }}
+                    transition={{ delay: i * 0.1, duration: 0.6 }}
+                    className="bg-white border border-slate-100 rounded-[2.5rem] p-8 hover:shadow-xl transition-all duration-500 group"
                   >
-                    <v.icon className="w-6 h-6 text-[#f4a620] mb-3" />
-                    <h4 className="font-bold text-sm mb-1">{v.title}</h4>
-                    <p className="text-white/50 text-xs leading-relaxed">
+                    <div className="w-14 h-14 rounded-2xl bg-brand-bg flex items-center justify-center mb-6 group-hover:bg-brand-primary/10 transition-colors">
+                      <v.icon className="w-7 h-7 text-brand-primary" />
+                    </div>
+                    <h4 className="font-black text-xl text-brand-primary mb-3 font-[family-name:var(--font-heading)] tracking-tight">
+                      {v.title}
+                    </h4>
+                    <p className="text-slate-500 text-base leading-relaxed font-medium">
                       {v.desc}
                     </p>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
             </div>
           </div>
         </section>
 
-        {/* ── CTA ── */}
-        <section className="px-4 sm:px-6 lg:px-12 py-12 md:py-16 bg-[#1a1a2e]/80 backdrop-blur-sm">
-          <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold font-[family-name:var(--font-heading)] mb-4 md:mb-6">
-              Ready to Go <span className="text-[#f4a620]">Deeper?</span>
+        {/* ── FINAL CTA ── */}
+        <section className="py-20 md:py-28 px-6 lg:px-12 text-center relative overflow-hidden bg-white">
+          <div className="absolute inset-0 bg-brand-card/50 -z-10" />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6 }}
+            className="w-full"
+          >
+            <h2 className="text-4xl md:text-7xl font-black font-[family-name:var(--font-heading)] mb-8 leading-tight text-brand-primary tracking-tighter">
+              Ready to Deepen Your <br />
+              <span className="text-brand-accent">Kingdom Impact?</span>
             </h2>
-            <p className="text-white/70 text-base md:text-lg mb-6 md:mb-8 max-w-2xl mx-auto">
-              Join thousands of believers who are transforming their Bible study
-              experience. Start your journey today.
+            <p className="text-slate-500 text-xl md:text-2xl mb-12 max-w-2xl mx-auto leading-relaxed font-medium">
+              Join thousands of believers who are searching the Scriptures and
+              living out their calling with excellence.
             </p>
-            <Link to="/login">
-              <Button
-                size="lg"
-                className="bg-[#f4a620] hover:bg-[#f4a620]/90 text-[#1a1a2e] text-base md:text-lg px-8 md:px-12 py-4 md:py-6 font-semibold w-full sm:w-auto"
-              >
-                Get Started Free
-                <ArrowRight className="ml-2 w-5 h-5" />
-              </Button>
-            </Link>
-          </div>
-        </section>
-
-        {/* ── BLOG / ARTICLES ── */}
-        <section className="px-4 sm:px-6 lg:px-12 py-14 md:py-20">
-          <div className=" mx-auto">
-            <div className="text-center mb-10">
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold font-[family-name:var(--font-heading)] mb-3">
-                From Our <span className="text-[#f4a620]">Blog</span>
-              </h2>
-              <p className="text-white/60 max-w-xl mx-auto">
-                Articles, reflections, and theology written to challenge and
-                encourage you.
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-6">
-              {[
-                {
-                  tag: "Theology",
-                  title: "What Does It Really Mean to Fear God?",
-                  excerpt:
-                    "The Hebrew concept of yirat Adonai is far richer than simple terror. It's an awe that draws you closer—not drives you away.",
-                  readTime: "5 min read",
-                  date: "Apr 10, 2026",
-                },
-                {
-                  tag: "Discipleship",
-                  title: "How to Build a Bible Study Habit That Sticks",
-                  excerpt:
-                    "Most people quit within 21 days. Here are five scripture-anchored practices that have helped thousands remain consistent.",
-                  readTime: "4 min read",
-                  date: "Apr 7, 2026",
-                },
-                {
-                  tag: "History",
-                  title: "The Dead Sea Scrolls and Why They Matter",
-                  excerpt:
-                    "Discovered in 1947, these ancient manuscripts confirmed the remarkable accuracy of the Old Testament text across millennia.",
-                  readTime: "7 min read",
-                  date: "Apr 3, 2026",
-                },
-              ].map((post) => (
-                <article
-                  key={post.title}
-                  className="bg-white/5 border border-white/10 hover:border-[#f4a620]/40 rounded-2xl overflow-hidden flex flex-col transition-all duration-300 group"
-                >
-                  <div className="h-40 bg-gradient-to-br from-[#f4a620]/20 to-white/5 flex items-center justify-center">
-                    <BookOpen className="w-10 h-10 text-[#f4a620]/40" />
-                  </div>
-                  <div className="p-6 flex flex-col gap-3 flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs px-2 py-1 rounded-full bg-[#f4a620]/20 text-[#f4a620] font-medium">
-                        {post.tag}
-                      </span>
-                      <span className="text-xs text-white/30">{post.date}</span>
-                    </div>
-                    <h3 className="font-bold text-base group-hover:text-[#f4a620] transition-colors leading-snug">
-                      {post.title}
-                    </h3>
-                    <p className="text-white/60 text-sm leading-relaxed flex-1">
-                      {post.excerpt}
-                    </p>
-                    <div className="flex items-center justify-between pt-2 border-t border-white/10 mt-auto">
-                      <span className="text-xs text-white/30">
-                        {post.readTime}
-                      </span>
-                      <Link
-                        to="/login"
-                        className="text-xs text-[#f4a620] hover:underline inline-flex items-center gap-1"
-                      >
-                        Read more <ArrowRight className="w-3 h-3" />
-                      </Link>
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </div>
-
-            <div className="text-center mt-10">
-              <Link to="/login">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+              <Link to="/login" className="w-full sm:w-auto">
+                <Button className="w-full bg-brand-primary text-white px-12 py-8 rounded-[2rem] font-black text-xl hover:bg-brand-primary-dark hover:scale-105 transition-all shadow-2xl shadow-brand-primary/20 uppercase tracking-widest">
+                  Start Your Journey Today
+                  <ArrowRight className="ml-3 w-6 h-6" />
+                </Button>
+              </Link>
+              <Link to="/login" className="w-full sm:w-auto">
                 <Button
                   variant="outline"
-                  className="border-white/20 text-primary hover:bg-white/10"
+                  className="w-full border-slate-300 text-slate-600 px-12 py-8 rounded-[2rem] font-black text-xl hover:bg-white hover:border-brand-primary hover:text-brand-primary transition-all uppercase tracking-widest"
                 >
-                  Browse All Articles <ChevronRight className="w-4 h-4 ml-1" />
+                  Sign In
                 </Button>
               </Link>
             </div>
-          </div>
+          </motion.div>
         </section>
 
         {/* ── FOOTER ── */}
         <footer
           id="contact"
-          className="px-4 sm:px-6 lg:px-12 py-8 md:py-12 border-t border-white/10 bg-[#1a1a2e]/95"
+          className="bg-brand-dark pt-20 pb-10 px-6 lg:px-12 border-t border-white/5"
         >
-          <div className=" mx-auto">
-            {/* Top grid */}
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-10">
-              <div>
-                <div className="flex items-center gap-2 mb-3">
-                  <BookOpen className="w-5 h-5 text-[#f4a620]" />
-                  <span className="font-bold text-white">Exegesis</span>
+          <div className="w-full">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+              <div className="space-y-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-2xl bg-white/5 p-2 flex items-center justify-center border border-white/10 shadow-sm backdrop-blur-sm">
+                    <img
+                      src={logoImage}
+                      alt="Exegesis"
+                      className="w-full h-full object-contain brightness-0 invert"
+                    />
+                  </div>
+                  <span className="text-xl font-black text-white font-[family-name:var(--font-heading)] tracking-tighter">
+                    EXEGESIS
+                  </span>
                 </div>
-                <p className="text-white/50 text-sm leading-relaxed">
-                  Helping believers go deeper into Scripture since 2024.
+                <p className="text-slate-400 text-base leading-relaxed font-medium">
+                  Helping you shine with excellence and integrity through the
+                  power of the Word.
                 </p>
-              </div>
-              <div>
-                <h4 className="font-semibold text-sm mb-3 text-white">
-                  Explore
-                </h4>
-                <ul className="space-y-2">
-                  {menuItems.slice(0, 4).map((m) => (
-                    <li key={m.label}>
-                      <button
-                        onClick={() => handleMenuClick(m.href)}
-                        className="text-sm text-white/50 hover:text-white transition-colors"
-                      >
-                        {m.label}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div>
-                <h4 className="font-semibold text-sm mb-3 text-white">More</h4>
-                <ul className="space-y-2">
-                  {menuItems.slice(4).map((m) => (
-                    <li key={m.label}>
-                      <button
-                        onClick={() => handleMenuClick(m.href)}
-                        className="text-sm text-white/50 hover:text-white transition-colors"
-                      >
-                        {m.label}
-                      </button>
-                    </li>
-                  ))}
-                  {footerLinks.map((l) => (
-                    <li key={l.label}>
-                      <a
-                        href={l.href}
-                        className="text-sm text-white/50 hover:text-white transition-colors"
-                      >
-                        {l.label}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div>
-                <h4 className="font-semibold text-sm mb-3 text-white">
-                  Contact
-                </h4>
-                <div className="flex items-center gap-2 text-white/50 text-sm mb-2">
-                  <MailIcon className="w-4 h-4 text-[#f4a620] shrink-0" />
-                  <span>contact@exegesis.com</span>
-                </div>
-                <div className="flex items-center gap-3 mt-4">
+                <div className="flex gap-3">
                   {socialLinks.map((s) => (
                     <a
                       key={s.name}
                       href={s.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      title={s.name}
-                      className="inline-flex items-center gap-2 px-3 py-2 rounded-full bg-white/10 text-sm text-white/70 hover:bg-[#f4a620] hover:text-[#1a1a2e] transition-colors font-medium"
+                      className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-slate-400 hover:bg-brand-accent hover:text-white transition-all duration-300 shadow-sm border border-white/5"
                     >
-                      <s.icon className="w-4 h-4" />
-                      <span>{s.name}</span>
+                      <s.icon className="w-5 h-5" />
                     </a>
                   ))}
                 </div>
               </div>
+
+              <div>
+                <h4 className="text-brand-accent font-black text-xs mb-8 uppercase tracking-widest opacity-80">
+                  Navigation
+                </h4>
+                <ul className="space-y-4">
+                  {menuItems.map((item) => (
+                    <li key={item.label}>
+                      <button
+                        onClick={() => handleMenuClick(item.href)}
+                        className="text-slate-400 hover:text-white transition-colors font-bold uppercase tracking-wider text-[11px]"
+                      >
+                        {item.label}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div>
+                <h4 className="text-brand-accent font-black text-xs mb-8 uppercase tracking-widest opacity-80">
+                  Resources
+                </h4>
+                <ul className="space-y-4">
+                  {footerLinks.map((link) => (
+                    <li key={link.label}>
+                      <a
+                        href={link.href}
+                        className="text-slate-400 hover:text-white transition-colors font-bold uppercase tracking-wider text-[11px]"
+                      >
+                        {link.label}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div>
+                <h4 className="text-brand-accent font-black text-xs mb-8 uppercase tracking-widest opacity-80">
+                  Our Motto
+                </h4>
+                <div className="bg-white/5 border border-white/10 rounded-3xl p-8 space-y-4 backdrop-blur-sm">
+                  <p className="text-white font-black text-2xl tracking-tighter uppercase italic leading-none">
+                    Quality, <br />
+                    Service, & <br />
+                    Integrity!
+                  </p>
+                  <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest">
+                    Built for His Glory
+                  </p>
+                </div>
+              </div>
             </div>
 
-            <div className="text-center pt-6 border-t border-white/10">
-              <p className="text-xs text-white/30 mb-2">
-                © 2026 All rights reserved. Built with faith for deeper study.
+            <div className="pt-10 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6 text-center md:text-left">
+              <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest">
+                © {new Date().getFullYear()} Exegesis. Built for Kingdom Impact.
               </p>
-              <a
-                href="https://himfirstmedia.com/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs text-white/30 hover:text-[#f4a620] transition-colors"
-              >
-                Powered by Him First Media Group
-              </a>
+              <div className="flex items-center gap-6">
+                <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
+                  Made with{" "}
+                  <Heart className="w-4 h-4 text-brand-accent fill-brand-accent" />{" "}
+                  for the Glory of God
+                </p>
+              </div>
             </div>
           </div>
         </footer>

@@ -7,23 +7,17 @@ import {
   Phone,
   Eye,
   EyeOff,
-  ArrowLeft,
-  ArrowRight,
-  Calendar,
-  Sparkles,
-  BookOpen,
-  Heart,
-  Sun,
-  BookMarked,
+  ChevronRight,
+  ChevronLeft,
+  CheckCircle2,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import logoImage from "@/assets/logos/exegesis_bg_rm.png";
 import { sendPostRequest, ApiError } from "@/services/api";
+import { motion, AnimatePresence } from "framer-motion";
 
 const Register = () => {
+  const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -37,36 +31,119 @@ const Register = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [focusedField, setFocusedField] = useState<string | null>(null);
+  const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>(
+    {},
+  );
+  const [dirtyFields, setDirtyFields] = useState<Record<string, boolean>>({});
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  const STEP1_FIELDS = ["firstName", "lastName", "email", "phoneNumber"];
+  const STEP2_FIELDS = ["username", "password", "confirmPassword"];
+
+  const getFieldError = (name: string) => {
+    const value = formData[name as keyof typeof formData] || "";
+    switch (name) {
+      case "firstName":
+        return !value.trim() ? "First name is required" : "";
+      case "lastName":
+        return !value.trim() ? "Last name is required" : "";
+      case "email":
+        if (!value.trim()) return "Email is required";
+        if (!/\S+@\S+\.\S+/.test(value)) return "Invalid email address";
+        return "";
+      case "phoneNumber":
+        return !value.trim() ? "Phone number is required" : "";
+      case "username":
+        if (!value.trim()) return "Username is required";
+        if (value.length < 3) return "Username too short";
+        return "";
+      case "password":
+        if (!value) return "Password is required";
+        if (value.length < 8) return "Minimum 8 characters";
+        return "";
+      case "confirmPassword":
+        if (!value) return "Confirm your password";
+        if (value !== formData.password) return "Passwords do not match";
+        return "";
+      default:
+        return "";
+    }
+  };
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    setDirtyFields((prev) => ({ ...prev, [name]: true }));
+  };
+
+  const handleBlur = (name: string) => {
+    setFocusedField(null);
+    if (dirtyFields[name]) {
+      setTouchedFields((prev) => ({ ...prev, [name]: true }));
+    }
+  };
+
+  // Clears touched+dirty state for the given fields
+  const clearFieldStates = (fields: string[]) => {
+    setTouchedFields((prev) => {
+      const next = { ...prev };
+      fields.forEach((f) => delete next[f]);
+      return next;
+    });
+    setDirtyFields((prev) => {
+      const next = { ...prev };
+      fields.forEach((f) => delete next[f]);
+      return next;
+    });
+  };
+
+  const goToStep2 = () => {
+    clearFieldStates(STEP2_FIELDS);
+    setStep(2);
+  };
+
+  const nextStep = () => {
+    let hasErrors = false;
+    STEP1_FIELDS.forEach((field) => {
+      if (getFieldError(field)) hasErrors = true;
+      setTouchedFields((prev) => ({ ...prev, [field]: true }));
+    });
+
+    if (hasErrors) {
+      toast({
+        title: "Check details",
+        description: "Please correct the errors before continuing.",
+        variant: "destructive",
+      });
+      return;
+    }
+    goToStep2();
+  };
+
+  const prevStep = () => {
+    clearFieldStates(STEP1_FIELDS);
+    setStep(1);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (formData.password !== formData.confirmPassword) {
-      toast({
-        title: "Registration Failed",
-        description: "Passwords do not match.",
-        variant: "destructive",
-      });
+    if (step === 1) {
+      nextStep();
       return;
     }
 
-    if (formData.password.length < 8) {
-      toast({
-        title: "Registration Failed",
-        description: "Password must be at least 8 characters.",
-        variant: "destructive",
-      });
-      return;
-    }
+    let hasErrors = false;
+    STEP2_FIELDS.forEach((field) => {
+      if (getFieldError(field)) hasErrors = true;
+      setTouchedFields((prev) => ({ ...prev, [field]: true }));
+    });
+
+    if (hasErrors) return;
 
     setIsLoading(true);
     try {
@@ -82,13 +159,12 @@ const Register = () => {
       });
 
       const { returnCode, returnMessage } = response;
-      
+
       if (returnCode === 200) {
         toast({
           title: "Registration Successful",
           description: "Please check your email to verify your account.",
         });
-
         setTimeout(() => {
           navigate(
             `/verify-account?email=${encodeURIComponent(formData.email)}`,
@@ -97,7 +173,9 @@ const Register = () => {
       } else if (returnCode === 401) {
         toast({
           title: "Registration Failed",
-          description: returnMessage || "Email already exists. Please use a different email or login.",
+          description:
+            returnMessage ||
+            "Email already exists. Please use a different email or login.",
           variant: "destructive",
         });
       } else {
@@ -124,394 +202,491 @@ const Register = () => {
     }
   };
 
-  const features = [
-    { icon: Sun, text: "Daily Bible reading plans" },
-    { icon: BookMarked, text: "Verse explanations" },
-    { icon: Heart, text: "Track your spiritual journey" },
-    { icon: BookOpen, text: "Reading progress tracking" },
-  ];
-
   return (
-    <div className="min-h-screen flex bg-background">
-      {/* Left Panel */}
-      <div className="hidden lg:flex lg:w-[52%] relative overflow-hidden bg-gradient-to-br from-primary via-primary/95 to-primary/80">
+    <div className="min-h-screen flex bg-slate-50 overflow-hidden">
+      {/* ── Left Panel (Desktop Only) ── */}
+      <div className="hidden lg:flex lg:w-[45%] relative overflow-hidden bg-slate-900">
         <div className="absolute inset-0 pointer-events-none">
-          <div
-            className="absolute -top-32 -left-32 w-[480px] h-[480px] bg-accent/20 rounded-full blur-3xl animate-pulse"
-            style={{ animationDuration: "5s" }}
+          <motion.div
+            animate={{
+              scale: [1, 1.2, 1],
+              rotate: [0, 90, 0],
+              opacity: [0.3, 0.5, 0.3],
+            }}
+            transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+            className="absolute -top-1/4 -right-1/4 w-[150%] h-[150%] bg-gradient-to-br from-primary/30 via-transparent to-transparent opacity-50 blur-[120px]"
+          />
+          <motion.div
+            animate={{
+              y: [0, -100, 0],
+              opacity: [0.1, 0.2, 0.1],
+            }}
+            transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute bottom-0 left-0 w-full h-full bg-gradient-to-t from-accent/20 via-transparent to-transparent opacity-50 blur-[80px]"
           />
           <div
-            className="absolute top-1/2 -right-24 w-[360px] h-[360px] bg-white/10 rounded-full blur-3xl animate-pulse"
-            style={{ animationDuration: "7s", animationDelay: "1s" }}
-          />
-          <div
-            className="absolute -bottom-24 left-1/4 w-[400px] h-[400px] bg-accent/15 rounded-full blur-3xl animate-pulse"
-            style={{ animationDuration: "6s", animationDelay: "2s" }}
-          />
-          <div
-            className="absolute inset-0 opacity-[0.04]"
+            className="absolute inset-0 opacity-[0.05]"
             style={{
-              backgroundImage:
-                "linear-gradient(white 1px, transparent 1px), linear-gradient(90deg, white 1px, transparent 1px)",
-              backgroundSize: "48px 48px",
+              backgroundImage: `radial-gradient(circle at 2px 2px, white 1px, transparent 0)`,
+              backgroundSize: "40px 40px",
             }}
           />
         </div>
 
-        <div className="relative z-10 flex flex-col justify-between px-14 py-14 w-full">
-          <div className="anim-fade" style={{ animationDelay: "0s" }}>
-            <div className="flex items-center gap-3">
-              <div className="w-16 h-16 rounded-lg bg-white flex items-center justify-center shrink-0 overflow-hidden p-1.5">
-                <img
-                  src={logoImage}
-                  alt="Exegesis"
-                  className="w-full h-full object-contain"
-                />
-              </div>
-              <span className="text-white/80 font-medium tracking-widest text-3xl uppercase">
-                Bible
-              </span>
-            </div>
-          </div>
-
-          <div
-            className="flex flex-col items-center text-center gap-8 anim-fade"
-            style={{ animationDelay: "0.15s" }}
+        <div className="relative z-10 flex flex-col items-center justify-center w-full px-20 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="space-y-16"
           >
-            <div className="relative">
-              <div className="relative w-[28rem] h-[28rem] rounded-full bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-xl shadow-[0_0_60px_rgba(255,255,255,0.15)] flex items-center justify-center p-8">
+            <div className="relative inline-block group">
+              <div className="absolute inset-0 bg-primary/20 blur-[80px] rounded-full group-hover:bg-primary/30 transition-colors duration-500" />
+              <motion.div
+                whileHover={{ rotate: 0, scale: 1.05 }}
+                className="relative w-56 h-56 rounded-[3.5rem] bg-white/5 backdrop-blur-3xl border border-white/10 flex items-center justify-center p-10 shadow-2xl rotate-3 transition-all duration-700"
+              >
                 <img
                   src={logoImage}
                   alt="Exegesis Logo"
-                  className="w-full h-full object-contain drop-shadow-[0_0_30px_rgba(255,255,255,0.4)]"
+                  className="w-full h-full object-contain filter drop-shadow-2xl"
                 />
-              </div>
-              <div className="absolute -top-4 -right-4 w-12 h-12 rounded-full bg-amber-400/90 flex items-center justify-center shadow-lg animate-pulse">
-                <Sparkles className="w-6 h-6 text-white" />
-              </div>
-              <div className="absolute -bottom-3 -left-3 w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
-                <Sparkles className="w-4 h-4 text-white/70" />
-              </div>
+              </motion.div>
             </div>
 
-            <div>
-              <blockquote className="text-lg lg:text-xl text-white/85 font-[family-name:var(--font-heading)] leading-relaxed max-w-sm mx-auto italic">
-                "Your word is a lamp for my feet,
-                <br />a light on my path."
+            <div className="space-y-8 max-w-lg">
+              <div className="space-y-4">
+                <h2 className="text-5xl font-black text-white font-[family-name:var(--font-heading)] tracking-tighter leading-none">
+                  Join the <span className="text-primary italic">Exegesis</span>{" "}
+                  Family.
+                </h2>
+                <div className="h-2 w-24 bg-primary mx-auto rounded-full shadow-[0_0_20px_rgba(57,98,132,0.5)]" />
+              </div>
+
+              <blockquote className="text-2xl text-slate-300 font-medium italic leading-relaxed px-4">
+                "Your word is a lamp for my feet, a light on my path."
               </blockquote>
-              <p className="text-white/55 text-sm mt-2 tracking-wider">
-                — Psalm 119:105
-              </p>
-            </div>
-          </div>
 
-          <div
-            className="space-y-6 anim-fade"
-            style={{ animationDelay: "0.3s" }}
-          >
-            <div className="grid grid-cols-2 gap-3">
-              {features.map((feature, i) => (
-                <div
-                  key={i}
-                  className="flex items-center gap-3 bg-white/8 backdrop-blur-sm rounded-xl px-4 py-3.5 border border-white/10 anim-slide"
-                  style={{ animationDelay: `${0.4 + i * 0.08}s` }}
-                >
-                  <div className="w-9 h-9 rounded-lg bg-white/10 flex items-center justify-center shrink-0">
-                    <feature.icon className="w-4 h-4 text-accent" />
-                  </div>
-                  <span className="text-white/85 text-sm font-medium leading-tight">
-                    {feature.text}
-                  </span>
+              <div className="flex flex-col items-center gap-2">
+                <p className="text-slate-500 font-black uppercase tracking-[0.3em] text-xs">
+                  Psalm 119:105
+                </p>
+                <div className="flex gap-1.5">
+                  {[1, 2].map((i) => (
+                    <div
+                      key={i}
+                      className={`h-1.5 rounded-full transition-all duration-500 ${step === i ? "w-8 bg-primary" : "w-2 bg-slate-700"}`}
+                    />
+                  ))}
                 </div>
-              ))}
-            </div>
-
-            <div className="flex items-center gap-4 pt-2">
-              <div className="flex -space-x-2.5">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <div
-                    key={i}
-                    className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400/30 to-amber-600/20 border-2 border-white/30 flex items-center justify-center shadow-md"
-                  >
-                    <span className="text-white text-xs font-bold">
-                      {String.fromCharCode(64 + i)}
-                    </span>
-                  </div>
-                ))}
-              </div>
-              <div>
-                <p className="text-white font-semibold text-sm">
-                  <span className="text-accent">10,000+</span> believers
-                </p>
-                <p className="text-white/50 text-xs">
-                  Growing in Scripture daily
-                </p>
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
 
-        <div className="absolute top-[45%] right-8 -translate-y-1/2 bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-2xl rounded-2xl p-5 border border-white/20 shadow-2xl max-w-[200px] card-float">
-          <div className="flex items-center gap-2 mb-2">
-            <Sparkles className="w-4 h-4 text-amber-400" />
-            <p className="text-amber-400/80 text-xs font-medium uppercase tracking-wider">
-              Today's Reflection
-            </p>
-          </div>
-          <p className="text-white font-[family-name:var(--font-heading)] text-base leading-snug">
-            "Trust in the Lord with all your heart and lean not on your own
-            understanding."
-          </p>
-          <p className="text-white/40 text-xs mt-2">— Proverbs 3:5</p>
-        </div>
-      </div>
-
-      {/* Right Panel - Registration Form */}
-      <div className="flex-1 flex items-center justify-center p-6 lg:p-12">
-        <div className="w-full max-w-[400px] space-y-8">
-          <div className="lg:hidden flex flex-col items-center gap-4 mb-2 anim-fade">
-            <div className="w-28 h-28 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 flex items-center justify-center p-3 shadow-lg">
-              <img
-                src={logoImage}
-                alt="Exegesis Logo"
-                className="w-full h-full object-contain"
-              />
-            </div>
-            <div className="text-center">
-              <h2 className="text-2xl font-bold font-[family-name:var(--font-heading)]">
-                EXEGESIS
-              </h2>
-              <p className="text-xs text-muted-foreground tracking-widest uppercase">
-                Exegesis Bible
-              </p>
-            </div>
-          </div>
-
-          <div className="anim-fade" style={{ animationDelay: "0.1s" }}>
-            <h1 className="text-3xl font-bold font-[family-name:var(--font-heading)] tracking-tight">
-              Create Account
-            </h1>
-            <p className="text-muted-foreground mt-1.5">
-              Join your spiritual journey today
-            </p>
-          </div>
-
-          <form
-            onSubmit={handleSubmit}
-            className="space-y-4 anim-fade"
-            style={{ animationDelay: "0.2s" }}
-          >
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <Label htmlFor="firstName" className="text-sm font-medium">
-                  First Name
-                </Label>
-                <div className="relative group">
-                  <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                  <Input
-                    id="firstName"
-                    name="firstName"
-                    type="text"
-                    placeholder="First name"
-                    value={formData.firstName}
-                    onChange={handleChange}
-                    className="pl-10 h-12 border-border/60 bg-muted/30 focus:bg-background focus:border-primary focus:ring-2 focus:ring-primary/15 transition-all"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="lastName" className="text-sm font-medium">
-                  Last Name
-                </Label>
-                <div className="relative group">
-                  <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                  <Input
-                    id="lastName"
-                    name="lastName"
-                    type="text"
-                    placeholder="Last name"
-                    value={formData.lastName}
-                    onChange={handleChange}
-                    className="pl-10 h-12 border-border/60 bg-muted/30 focus:bg-background focus:border-primary focus:ring-2 focus:ring-primary/15 transition-all"
-                    required
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-medium">
-                Email
-              </Label>
-              <div className="relative group">
-                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  value={formData.email}
-                  onChange={handleChange}
-                  className="pl-10 h-12 border-border/60 bg-muted/30 focus:bg-background focus:border-primary focus:ring-2 focus:ring-primary/15 transition-all"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="phoneNumber" className="text-sm font-medium">
-                Phone Number
-              </Label>
-              <div className="relative group">
-                <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                <Input
-                  id="phoneNumber"
-                  name="phoneNumber"
-                  type="tel"
-                  placeholder="+1 (555) 000-0000"
-                  value={formData.phoneNumber}
-                  onChange={handleChange}
-                  className="pl-10 h-12 border-border/60 bg-muted/30 focus:bg-background focus:border-primary focus:ring-2 focus:ring-primary/15 transition-all"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="username" className="text-sm font-medium">
-                Username
-              </Label>
-              <div className="relative group">
-                <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                <Input
-                  id="username"
-                  name="username"
-                  type="text"
-                  placeholder="Choose a username"
-                  value={formData.username}
-                  onChange={handleChange}
-                  className="pl-10 h-12 border-border/60 bg-muted/30 focus:bg-background focus:border-primary focus:ring-2 focus:ring-primary/15 transition-all"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-sm font-medium">
-                Password
-              </Label>
-              <div className="relative group">
-                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                <Input
-                  id="password"
-                  name="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Create a password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  className="pl-10 pr-11 h-12 border-border/60 bg-muted/30 focus:bg-background focus:border-primary focus:ring-2 focus:ring-primary/15 transition-all"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-0.5"
-                  aria-label={showPassword ? "Hide password" : "Show password"}
-                >
-                  {showPassword ? (
-                    <EyeOff className="w-4 h-4" />
-                  ) : (
-                    <Eye className="w-4 h-4" />
-                  )}
-                </button>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword" className="text-sm font-medium">
-                Confirm Password
-              </Label>
-              <div className="relative group">
-                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                <Input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Confirm your password"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  className="pl-10 h-12 border-border/60 bg-muted/30 focus:bg-background focus:border-primary focus:ring-2 focus:ring-primary/15 transition-all"
-                  required
-                />
-              </div>
-            </div>
-
-            <Button
-              type="submit"
-              className="w-full h-12 text-base font-semibold shadow-md hover:shadow-lg hover:shadow-primary/20 transition-all group gap-2"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Creating account...
-                </>
-              ) : (
-                <>
-                  Create Account
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </>
-              )}
-            </Button>
-          </form>
-
-          <div
-            className="text-center anim-fade"
-            style={{ animationDelay: "0.3s" }}
-          >
-            <p className="text-sm text-muted-foreground">
-              Already have an account?{" "}
-              <Link
-                to="/login"
-                className="text-primary hover:underline font-medium"
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 1 }}
+          className="absolute bottom-12 left-12 bg-white/5 backdrop-blur-xl rounded-2xl p-4 border border-white/10 flex items-center gap-4"
+        >
+          <div className="flex -space-x-2">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="w-8 h-8 rounded-full border-2 border-slate-900 bg-slate-800 flex items-center justify-center text-[10px] text-white font-bold"
               >
-                Sign in
-              </Link>
-            </p>
+                {String.fromCharCode(64 + i)}
+              </div>
+            ))}
+          </div>
+          <p className="text-slate-300 text-xs font-bold">
+            10,000+ Believers Joined
+          </p>
+        </motion.div>
+      </div>
+
+      {/* ── Right Panel — Registration Form ── */}
+      <div className="flex-1 flex items-center justify-center p-6 lg:p-12 relative">
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-[100px]" />
+          <div className="absolute bottom-0 left-0 w-96 h-96 bg-accent/5 rounded-full blur-[100px]" />
+        </div>
+
+        <div className="w-full max-w-[440px] z-10">
+          <div className="bg-white rounded-[2.5rem] shadow-[0_40px_100px_-20px_rgba(0,0,0,0.08)] border border-slate-100 p-8 lg:p-10 space-y-8 relative overflow-hidden">
+            {/* Tab Navigation */}
+            <div className="flex bg-slate-50 p-1.5 rounded-2xl border border-slate-100 mb-2">
+              <button
+                type="button"
+                onClick={prevStep}
+                className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-[14px] text-xs font-black uppercase tracking-widest transition-all duration-500 ${step === 1 ? "bg-white text-primary shadow-sm border border-slate-100" : "text-slate-400 hover:text-slate-600"}`}
+              >
+                <User className="w-3.5 h-3.5" />
+                Personal
+              </button>
+              <button
+                type="button"
+                onClick={goToStep2}
+                className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-[14px] text-xs font-black uppercase tracking-widest transition-all duration-500 ${step === 2 ? "bg-white text-primary shadow-sm border border-slate-100" : "text-slate-400 hover:text-slate-600"}`}
+              >
+                <Lock className="w-3.5 h-3.5" />
+                Security
+              </button>
+            </div>
+
+            {/* Header */}
+            <div className="space-y-2 text-center">
+              <h1 className="text-2xl font-black tracking-tight text-slate-900 font-[family-name:var(--font-heading)] leading-none">
+                {step === 1 ? "Your Profile" : "Secure Account"}
+              </h1>
+              <p className="text-slate-500 text-sm font-medium">
+                {step === 1 ? "Tell us who you are." : "Protect your journey."}
+              </p>
+            </div>
+
+            {/* Multi-step Form Content */}
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="min-h-[300px] relative">
+                <AnimatePresence mode="wait">
+                  {step === 1 && (
+                    <motion.div
+                      key="step1"
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      transition={{ duration: 0.3 }}
+                      className="space-y-4"
+                    >
+                      <div className="grid grid-cols-2 gap-3">
+                        <FloatingInput
+                          id="firstName"
+                          label="First Name"
+                          icon={User}
+                          value={formData.firstName}
+                          onChange={handleChange}
+                          focused={focusedField === "firstName"}
+                          setFocused={setFocusedField}
+                          handleBlur={() => handleBlur("firstName")}
+                          error={getFieldError("firstName")}
+                          touched={touchedFields.firstName}
+                          autoComplete="none"
+                        />
+                        <FloatingInput
+                          id="lastName"
+                          label="Last Name"
+                          icon={User}
+                          value={formData.lastName}
+                          onChange={handleChange}
+                          focused={focusedField === "lastName"}
+                          setFocused={setFocusedField}
+                          handleBlur={() => handleBlur("lastName")}
+                          error={getFieldError("lastName")}
+                          touched={touchedFields.lastName}
+                          autoComplete="none"
+                        />
+                      </div>
+
+                      <FloatingInput
+                        id="email"
+                        label="Email Address"
+                        icon={Mail}
+                        type="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        focused={focusedField === "email"}
+                        setFocused={setFocusedField}
+                        handleBlur={() => handleBlur("email")}
+                        error={getFieldError("email")}
+                        touched={touchedFields.email}
+                      />
+                      <FloatingInput
+                        id="phoneNumber"
+                        label="Phone Number"
+                        icon={Phone}
+                        type="tel"
+                        value={formData.phoneNumber}
+                        onChange={handleChange}
+                        focused={focusedField === "phoneNumber"}
+                        setFocused={setFocusedField}
+                        handleBlur={() => handleBlur("phoneNumber")}
+                        error={getFieldError("phoneNumber")}
+                        touched={touchedFields.phoneNumber}
+                      />
+                    </motion.div>
+                  )}
+
+                  {step === 2 && (
+                    <motion.div
+                      key="step2"
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      transition={{ duration: 0.3 }}
+                      className="space-y-4"
+                    >
+                      <FloatingInput
+                        id="username"
+                        label="Username"
+                        icon={User}
+                        value={formData.username}
+                        onChange={handleChange}
+                        focused={focusedField === "username"}
+                        setFocused={setFocusedField}
+                        handleBlur={() => handleBlur("username")}
+                        error={getFieldError("username")}
+                        touched={touchedFields.username}
+                        autoComplete="none"
+                      />
+                      <FloatingInput
+                        id="password"
+                        label="Password"
+                        icon={Lock}
+                        type={showPassword ? "text" : "password"}
+                        value={formData.password}
+                        onChange={handleChange}
+                        focused={focusedField === "password"}
+                        setFocused={setFocusedField}
+                        handleBlur={() => handleBlur("password")}
+                        error={getFieldError("password")}
+                        touched={touchedFields.password}
+                        isPassword
+                        showPassword={showPassword}
+                        setShowPassword={setShowPassword}
+                        autoComplete="new-password"
+                      />
+
+                      {/* Password Strength Indicator */}
+                      {formData.password && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          className="space-y-1.5 px-1"
+                        >
+                          <div className="flex justify-between items-center">
+                            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                              Security Strength
+                            </span>
+                            <span
+                              className={`text-[10px] font-black uppercase tracking-widest ${
+                                formData.password.length < 6
+                                  ? "text-red-500"
+                                  : formData.password.length < 10
+                                    ? "text-amber-500"
+                                    : "text-emerald-500"
+                              }`}
+                            >
+                              {formData.password.length < 6
+                                ? "Weak"
+                                : formData.password.length < 10
+                                  ? "Good"
+                                  : "Strong"}
+                            </span>
+                          </div>
+                          <div className="h-1 w-full bg-slate-100 rounded-full overflow-hidden flex gap-0.5">
+                            <div
+                              className={`h-full transition-all duration-500 ${
+                                formData.password.length >= 1
+                                  ? formData.password.length < 6
+                                    ? "bg-red-500 w-1/3"
+                                    : formData.password.length < 10
+                                      ? "bg-amber-500 w-2/3"
+                                      : "bg-emerald-500 w-full"
+                                  : "w-0"
+                              }`}
+                            />
+                          </div>
+                        </motion.div>
+                      )}
+
+                      <FloatingInput
+                        id="confirmPassword"
+                        label="Confirm Password"
+                        icon={Lock}
+                        type={showPassword ? "text" : "password"}
+                        value={formData.confirmPassword}
+                        onChange={handleChange}
+                        focused={focusedField === "confirmPassword"}
+                        setFocused={setFocusedField}
+                        handleBlur={() => handleBlur("confirmPassword")}
+                        error={getFieldError("confirmPassword")}
+                        touched={touchedFields.confirmPassword}
+                        autoComplete="new-password"
+                      />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* Navigation Buttons */}
+              <div className="flex gap-3 pt-2">
+                {step > 1 && (
+                  <button
+                    type="button"
+                    onClick={prevStep}
+                    className="flex-1 h-14 bg-slate-50 text-slate-600 rounded-2xl font-bold text-[15px] border border-slate-100 hover:bg-slate-100 transition-all flex items-center justify-center gap-2"
+                  >
+                    <ChevronLeft className="w-5 h-5" />
+                    Back
+                  </button>
+                )}
+
+                {step < 2 ? (
+                  <button
+                    type="submit"
+                    className="flex-[2] h-14 bg-primary text-white rounded-2xl font-bold text-[15px] shadow-lg shadow-primary/20 hover:shadow-xl hover:translate-y-[-2px] active:translate-y-[0px] transition-all flex items-center justify-center gap-2"
+                  >
+                    Continue
+                    <ChevronRight className="w-5 h-5" />
+                  </button>
+                ) : (
+                  <button
+                    type="submit"
+                    className="flex-[2] h-14 bg-primary text-white rounded-2xl font-bold text-[15px] shadow-lg shadow-primary/20 hover:shadow-xl hover:translate-y-[-2px] active:translate-y-[0px] transition-all flex items-center justify-center gap-2"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    ) : (
+                      "Create Account"
+                    )}
+                  </button>
+                )}
+              </div>
+            </form>
+
+            {/* Footer */}
+            <div className="text-center space-y-6">
+              <p className="text-slate-500 text-sm font-medium">
+                Already have an account?{" "}
+                <Link
+                  to="/login"
+                  className="text-primary font-black hover:underline transition-all"
+                >
+                  Sign in
+                </Link>
+              </p>
+
+              <div className="pt-6 border-t border-slate-50">
+                <p className="text-[10px] text-slate-400 leading-relaxed font-medium">
+                  By joining, you agree to the{" "}
+                  <Link
+                    to="/terms"
+                    className="text-slate-600 underline font-bold"
+                  >
+                    Terms
+                  </Link>{" "}
+                  &{" "}
+                  <Link
+                    to="/privacy"
+                    className="text-slate-600 underline font-bold"
+                  >
+                    Privacy Policy
+                  </Link>
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-
-      <style>{`
-        @keyframes anim-fade-kf {
-          from { opacity: 0; transform: translateY(16px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes anim-slide-kf {
-          from { opacity: 0; transform: translateX(-12px); }
-          to   { opacity: 1; transform: translateX(0); }
-        }
-        @keyframes card-float-kf {
-          0%, 100% { transform: translateY(0) rotate(1.5deg); }
-          50%       { transform: translateY(-8px) rotate(1.5deg); }
-        }
-
-        .anim-fade {
-          opacity: 0;
-          animation: anim-fade-kf 0.55s ease-out forwards;
-        }
-        .anim-slide {
-          opacity: 0;
-          animation: anim-slide-kf 0.5s ease-out forwards;
-        }
-        .card-float {
-          animation: card-float-kf 4s ease-in-out infinite;
-        }
-      `}</style>
     </div>
   );
 };
+
+// ── Reusable Floating Input Component ──
+const FloatingInput = ({
+  id,
+  label,
+  icon: Icon,
+  value,
+  onChange,
+  focused,
+  setFocused,
+  handleBlur,
+  error,
+  touched,
+  type = "text",
+  autoComplete = "off",
+  isPassword,
+  showPassword,
+  setShowPassword,
+}: any) => (
+  <div className="space-y-1 w-full">
+    <div className="flex group h-14 relative">
+      <div
+        className={`w-12 flex items-center justify-center bg-white border border-r-0 rounded-l-2xl transition-all duration-300 shadow-sm ${
+          error && touched
+            ? "border-red-500 bg-red-50/10"
+            : focused
+              ? "border-primary"
+              : "border-slate-200"
+        }`}
+      >
+        <Icon
+          className={`w-[18px] h-[18px] transition-all duration-300 ${
+            error && touched
+              ? "text-red-500"
+              : focused
+                ? "text-primary scale-110"
+                : "text-slate-400"
+          }`}
+        />
+      </div>
+      <div className="flex-1 relative">
+        <input
+          type={type}
+          name={id}
+          id={id}
+          value={value}
+          onChange={onChange}
+          onFocus={() => setFocused(id)}
+          onBlur={handleBlur}
+          autoComplete={autoComplete}
+          className={`w-full h-full px-4 pt-4 bg-white border rounded-r-2xl focus:outline-none transition-all duration-300 text-[15px] font-medium shadow-sm ${
+            error && touched
+              ? "border-red-500 ring-4 ring-red-500/5"
+              : focused
+                ? "border-primary ring-4 ring-primary/5"
+                : "border-slate-200"
+          }`}
+        />
+        <label
+          htmlFor={id}
+          className={`absolute left-4 transition-all duration-300 pointer-events-none font-bold ${
+            focused || value
+              ? `top-2 text-[10px] uppercase tracking-widest ${error && touched ? "text-red-500" : "text-primary"}`
+              : "top-4 text-[15px] text-slate-400"
+          }`}
+        >
+          {label}
+        </label>
+        {isPassword && (
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors p-1.5"
+          >
+            {showPassword ? (
+              <EyeOff className="w-5 h-5" />
+            ) : (
+              <Eye className="w-5 h-5" />
+            )}
+          </button>
+        )}
+      </div>
+    </div>
+    <AnimatePresence>
+      {error && touched && (
+        <motion.p
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          className="text-[10px] font-black text-red-500 uppercase tracking-widest pl-1"
+        >
+          {error}
+        </motion.p>
+      )}
+    </AnimatePresence>
+  </div>
+);
 
 export default Register;

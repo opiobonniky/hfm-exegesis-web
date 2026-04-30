@@ -277,7 +277,7 @@ export default function Settings() {
 
   return (
     <div className="min-h-full bg-background">
-      <div className="relative bg-slate-950 overflow-hidden">
+      <div className="relative bg-slate-450 overflow-hidden">
         <div
           className="absolute inset-0 pointer-events-none opacity-[0.06]"
           style={{
@@ -285,30 +285,28 @@ export default function Settings() {
             backgroundSize: "22px 22px",
           }}
         />
-        <div className="absolute -top-24 -right-12 w-80 h-80 rounded-full bg-primary/30 blur-[80px] pointer-events-none" />
-        <div className="absolute bottom-0 left-4 w-48 h-48 rounded-full bg-teal-500/20 blur-[60px] pointer-events-none" />
 
-        <div className="relative max-w-4xl mx-auto px-3 sm:px-4 lg:px-6 pt-5 pb-6">
+        <div className="relative  mx-auto px-3 sm:px-4 lg:px-6 pt-5 pb-6">
           <div className="flex items-center gap-3 mb-1">
             <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
               <Shield className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <p className="text-[10px] font-bold tracking-widest uppercase text-white/40">
+              <p className="text-[10px] font-bold tracking-widest uppercase text-primary/40">
                 Account Settings
               </p>
-              <h1 className="text-xl sm:text-2xl font-bold text-white">
+              <h1 className="text-xl sm:text-2xl font-bold text-primary">
                 Your Profile
               </h1>
             </div>
           </div>
-          <p className="text-sm text-white/50 ml-[52px]">
+          <p className="text-sm text-primary/50 ml-[52px]">
             Manage your personal information and preferences
           </p>
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-3 sm:px-4 lg:px-6 py-6">
+      <div className="max-w-6xl mx-auto px-3 sm:px-4 lg:px-6 py-6">
         <Tabs defaultValue="profile" className="w-full">
           <TabsList className="grid grid-cols-3 w-full max-w-md mb-6 bg-muted/50 p-1 rounded-xl">
             <TabsTrigger 

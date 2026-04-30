@@ -1,21 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import {
-  Mail,
-  Lock,
-  Eye,
-  EyeOff,
-  ArrowRight,
-  Sparkles,
-  BookOpen,
-  Heart,
-  Sun,
-  BookMarked,
-  LogInIcon,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Mail, Lock, Eye, EyeOff, ArrowRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import logoImage from "@/assets/logos/exegesis_bg_rm.png";
 import { useAuth } from "@/contexts/AuthContext";
@@ -32,6 +17,8 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [emailFocused, setEmailFocused] = useState(false);
+  const [passwordFocused, setPasswordFocused] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { setUserInfo, userInfo, loading } = useAuth();
@@ -243,344 +230,267 @@ const Login = () => {
     }
   };
 
-  const features = [
-    { icon: Sun, text: "Daily Bible reading plans" },
-    { icon: BookMarked, text: "Verse explanations" },
-    { icon: Heart, text: "Track your spiritual journey" },
-    { icon: BookOpen, text: "Reading progress tracking" },
-  ];
-
   return (
-    <div className="min-h-screen flex bg-background">
-      {/* ── Left Panel ── */}
-      <div className="hidden lg:flex lg:w-[52%] relative overflow-hidden bg-gradient-to-br from-primary via-primary/95 to-primary/80">
-        {/* Mesh background blobs */}
+    <div className="min-h-screen flex bg-background overflow-hidden">
+      {/* ── Left Panel (Desktop Only) ── */}
+      <div className="hidden lg:flex lg:w-[50%] relative overflow-hidden bg-slate-900">
+        {/* Modern background elements */}
         <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-br from-primary/20 via-transparent to-transparent opacity-50" />
           <div
-            className="absolute -top-32 -left-32 w-[480px] h-[480px] bg-accent/20 rounded-full blur-3xl animate-pulse"
-            style={{ animationDuration: "5s" }}
+            className="absolute -top-24 -right-24 w-96 h-96 bg-primary/10 rounded-full blur-[100px] animate-pulse"
+            style={{ animationDuration: "8s" }}
           />
           <div
-            className="absolute top-1/2 -right-24 w-[360px] h-[360px] bg-white/10 rounded-full blur-3xl animate-pulse"
-            style={{ animationDuration: "7s", animationDelay: "1s" }}
-          />
-          <div
-            className="absolute -bottom-24 left-1/4 w-[400px] h-[400px] bg-accent/15 rounded-full blur-3xl animate-pulse"
-            style={{ animationDuration: "6s", animationDelay: "2s" }}
+            className="absolute bottom-1/4 -left-24 w-72 h-72 bg-accent/10 rounded-full blur-[80px] animate-pulse"
+            style={{ animationDuration: "10s", animationDelay: "2s" }}
           />
 
-          {/* Subtle grid overlay */}
+          {/* Subtle pattern */}
           <div
-            className="absolute inset-0 opacity-[0.04]"
+            className="absolute inset-0 opacity-[0.03]"
             style={{
-              backgroundImage:
-                "linear-gradient(white 1px, transparent 1px), linear-gradient(90deg, white 1px, transparent 1px)",
-              backgroundSize: "48px 48px",
+              backgroundImage: `radial-gradient(circle at 2px 2px, white 1px, transparent 0)`,
+              backgroundSize: "32px 32px",
             }}
           />
         </div>
 
-        <div className="relative z-10 flex flex-col justify-between px-14 py-14 w-full">
-          {/* TOP — Brand */}
-          <div className="anim-fade" style={{ animationDelay: "0s" }}>
-            <div className="flex items-center gap-3">
-              <div className="w-16 h-16 rounded-lg bg-white flex items-center justify-center shrink-0 overflow-hidden p-1.5">
-                <img
-                  src={logoImage}
-                  alt="Exegesis"
-                  className="w-full h-full object-contain"
-                />
-              </div>
-              <span className="text-white/80 font-medium tracking-widest text-3xl uppercase">
-                Bible
-              </span>
-            </div>
-          </div>
-
-          {/* MIDDLE — Logo + Headline */}
+        <div className="relative z-10 flex flex-col items-center justify-center w-full px-16 text-center">
           <div
-            className="flex flex-col items-center text-center gap-8 anim-fade"
-            style={{ animationDelay: "0.15s" }}
+            className="anim-fade space-y-12"
+            style={{ animationDelay: "0.1s" }}
           >
-            {/* Large logo - improved design */}
-            <div className="relative">
-              {/* Glow effect */}
-
-              {/* Logo container */}
-              <div className="relative w-[28rem] h-[28rem] rounded-full bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-xl  shadow-[0_0_60px_rgba(255,255,255,0.15)] flex items-center justify-center p-8">
+            {/* Logo Section */}
+            <div className="relative inline-block">
+              <div className="absolute inset-0 bg-primary/20 blur-[60px] rounded-full" />
+              <div className="relative w-48 h-48 md:w-64 md:h-64 rounded-[3rem] bg-white/5 backdrop-blur-2xl border border-white/10 flex items-center justify-center p-8 shadow-2xl rotate-3 hover:rotate-0 transition-transform duration-500">
                 <img
                   src={logoImage}
                   alt="Exegesis Logo"
-                  className="w-full h-full object-contain drop-shadow-[0_0_30px_rgba(255,255,255,0.4)]"
+                  className="w-full h-full object-contain filter drop-shadow-2xl"
                 />
               </div>
-
-              {/* Decorative ring
-              <div
-                className="w-[30rem] h-[30rem] absolute inset-0 rounded-full border-4 border-primary animate-[spin_5s_linear_infinite]"
-                style={{
-                  borderTopColor: "transparent",
-                  borderLeftColor: "transparent",
-                }}
-              /> */}
-
-              {/* Sparkle decorations */}
-              <div className="absolute -top-4 -right-4 w-12 h-12 rounded-full bg-amber-400/90 flex items-center justify-center shadow-lg animate-pulse">
-                <Sparkles className="w-6 h-6 text-white" />
-              </div>
-              <div className="absolute -bottom-3 -left-3 w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
-                <Sparkles className="w-4 h-4 text-white/70" />
-              </div>
             </div>
 
-            <div>
-              <blockquote className="text-lg lg:text-xl text-white/85 font-[family-name:var(--font-heading)] leading-relaxed max-w-sm mx-auto italic">
-                "Your word is a lamp for my feet,
-                <br />a light on my path."
+            {/* Content Section */}
+            <div className="space-y-6 max-w-lg">
+              <h2 className="text-4xl md:text-5xl font-black text-white font-[family-name:var(--font-heading)] tracking-tighter leading-tight">
+                Experience the <span className="text-primary">Word</span> like
+                never before.
+              </h2>
+              <div className="h-1.5 w-20 bg-primary mx-auto rounded-full" />
+              <blockquote className="text-xl md:text-2xl text-slate-300 font-medium italic leading-relaxed">
+                "Your word is a lamp for my feet, a light on my path."
               </blockquote>
-              <p className="text-white/55 text-sm mt-2 tracking-wider">
-                — Psalm 119:105
+              <p className="text-slate-500 font-bold uppercase tracking-[0.2em] text-sm">
+                Psalm 119:105
               </p>
-            </div>
-          </div>
-
-          {/* BOTTOM — Features + Social proof */}
-          <div
-            className="space-y-6 anim-fade"
-            style={{ animationDelay: "0.3s" }}
-          >
-            <div className="grid grid-cols-2 gap-3">
-              {features.map((feature, i) => (
-                <div
-                  key={i}
-                  className="flex items-center gap-3 bg-white/8 backdrop-blur-sm rounded-xl px-4 py-3.5 border border-white/10 anim-slide"
-                  style={{ animationDelay: `${0.4 + i * 0.08}s` }}
-                >
-                  <div className="w-9 h-9 rounded-lg bg-white/10 flex items-center justify-center shrink-0">
-                    <feature.icon className="w-4 h-4 text-accent" />
-                  </div>
-                  <span className="text-white/85 text-sm font-medium leading-tight">
-                    {feature.text}
-                  </span>
-                </div>
-              ))}
-            </div>
-
-            {/* Social proof row */}
-            <div className="flex items-center gap-4 pt-2">
-              <div className="flex -space-x-2.5">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <div
-                    key={i}
-                    className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400/30 to-amber-600/20 border-2 border-white/30 flex items-center justify-center shadow-md"
-                  >
-                    <span className="text-white text-xs font-bold">
-                      {String.fromCharCode(64 + i)}
-                    </span>
-                  </div>
-                ))}
-              </div>
-              <div>
-                <p className="text-white font-semibold text-sm">
-                  <span className="text-accent">10,000+</span> believers
-                </p>
-                <p className="text-white/50 text-xs">
-                  Growing in Scripture daily
-                </p>
-              </div>
             </div>
           </div>
         </div>
 
-        {/* Floating reflection card */}
-        <div className="absolute top-[45%] right-8 -translate-y-1/2 bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-2xl rounded-2xl p-5 border border-white/20 shadow-2xl max-w-[200px] card-float">
-          <div className="flex items-center gap-2 mb-2">
-            <Sparkles className="w-4 h-4 text-amber-400" />
-            <p className="text-amber-400/80 text-xs font-medium uppercase tracking-wider">
-              Today's Reflection
-            </p>
+        {/* Bottom bar */}
+        <div
+          className="absolute bottom-10 left-0 w-full px-16 flex justify-between items-center text-slate-500 text-xs font-bold uppercase tracking-widest anim-fade"
+          style={{ animationDelay: "0.5s" }}
+        >
+          <span>© 2024 Exegesis Bible</span>
+          <div className="flex gap-6">
+            <span className="hover:text-white cursor-pointer transition-colors">
+              Instagram
+            </span>
+            <span className="hover:text-white cursor-pointer transition-colors">
+              Twitter
+            </span>
           </div>
-          <p className="text-white font-[family-name:var(--font-heading)] text-base leading-snug">
-            "Trust in the Lord with all your heart and lean not on your own
-            understanding."
-          </p>
-          <p className="text-white/40 text-xs mt-2">— Proverbs 3:5</p>
         </div>
       </div>
 
       {/* ── Right Panel — Login Form ── */}
-      <div className="flex-1 flex items-center justify-center p-6 lg:p-12">
-        <div className="w-full max-w-[400px] space-y-8">
-          {/* Mobile logo */}
-          <div className="lg:hidden flex flex-col items-center gap-4 mb-2 anim-fade">
-            <div className="w-28 h-28 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 flex items-center justify-center p-3 shadow-lg">
+      <div className="flex-1 flex items-center justify-center p-6 lg:p-12 overflow-y-auto">
+        <div className="w-full max-w-[420px] space-y-8 py-8 lg:py-0">
+          {/* Logo - shown on both mobile and desktop now for consistency with app */}
+          <div className="flex flex-col items-center gap-3 mb-2 anim-fade">
+            <div className="w-32 h-32 flex items-center justify-center p-2">
               <img
                 src={logoImage}
                 alt="Exegesis Logo"
                 className="w-full h-full object-contain"
               />
             </div>
-            <div className="text-center">
-              <h2 className="text-2xl font-bold font-[family-name:var(--font-heading)]">
-                EXEGESIS
-              </h2>
-              <p className="text-xs text-muted-foreground tracking-widest uppercase">
-                Exegesis Bible
-              </p>
-            </div>
           </div>
 
           {/* Heading */}
-          <div className="anim-fade" style={{ animationDelay: "0.1s" }}>
-            <h1 className="text-3xl font-bold font-[family-name:var(--font-heading)] tracking-tight">
-              Welcome back
+          <div
+            className="anim-fade text-center"
+            style={{ animationDelay: "0.1s" }}
+          >
+            <h1 className="text-[26px] font-bold tracking-tight text-slate-900 leading-tight">
+              Welcome Back!
             </h1>
-            <p className="text-muted-foreground mt-1.5">
-              Sign in to continue your journey
+            <p className="text-slate-500 mt-2 text-sm">
+              Sign in to continue your journey.
             </p>
           </div>
 
           {/* Form */}
           <form
             onSubmit={handleSubmit}
-            className="space-y-5 anim-fade"
+            className="space-y-4 anim-fade"
             style={{ animationDelay: "0.2s" }}
           >
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-medium">
-                Email or Username
-              </Label>
-              <div className="relative group">
-                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                <Input
-                  id="email"
-                  type="text"
-                  placeholder="you@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10 h-12 border-border/60 bg-muted/30 focus:bg-background focus:border-primary focus:ring-2 focus:ring-primary/15 transition-all"
-                  required
-                />
+            {/* Email input */}
+            <div className="space-y-1">
+              <div className="flex group h-14">
+                <div className="w-12 flex items-center justify-center bg-white border border-r-0 border-slate-200 rounded-l-xl group-focus-within:border-primary transition-colors shadow-sm">
+                  <Mail className="w-[18px] h-[18px] text-slate-400 group-focus-within:text-primary" />
+                </div>
+                <div className="flex-1 relative">
+                  <input
+                    type="text"
+                    id="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    onFocus={() => setEmailFocused(true)}
+                    onBlur={() => setEmailFocused(false)}
+                    className="w-full h-full px-4 pt-4 bg-white border border-slate-200 rounded-r-xl focus:outline-none focus:border-primary transition-all text-[15px] shadow-sm"
+                    required
+                  />
+                  <label
+                    htmlFor="email"
+                    className={`absolute left-4 transition-all pointer-events-none ${
+                      emailFocused || email
+                        ? "top-1.5 text-[12px] text-primary"
+                        : "top-4 text-[15px] text-slate-400"
+                    }`}
+                  >
+                    Email Address
+                  </label>
+                </div>
               </div>
             </div>
 
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password" className="text-sm font-medium">
-                  Password
-                </Label>
-                <Link
-                  to="/forgot-password"
-                  className="text-xs text-primary hover:underline"
-                >
-                  Forgot password?
-                </Link>
-              </div>
-              <div className="relative group">
-                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Enter your password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10 pr-11 h-12 border-border/60 bg-muted/30 focus:bg-background focus:border-primary focus:ring-2 focus:ring-primary/15 transition-all"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-0.5"
-                  aria-label={showPassword ? "Hide password" : "Show password"}
-                >
-                  {showPassword ? (
-                    <EyeOff className="w-4 h-4" />
-                  ) : (
-                    <Eye className="w-4 h-4" />
-                  )}
-                </button>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id="remember"
-                  className="w-4 h-4 rounded border-border text-primary focus:ring-primary focus:ring-offset-0 cursor-pointer accent-primary"
-                />
-                <label
-                  htmlFor="remember"
-                  className="text-sm text-muted-foreground cursor-pointer select-none"
-                >
-                  Remember me next login
-                </label>
+            {/* Password input */}
+            <div className="space-y-1">
+              <div className="flex group h-14">
+                <div className="w-12 flex items-center justify-center bg-white border border-r-0 border-slate-200 rounded-l-xl group-focus-within:border-primary transition-colors shadow-sm">
+                  <Lock className="w-[18px] h-[18px] text-slate-400 group-focus-within:text-primary" />
+                </div>
+                <div className="flex-1 relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    id="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    onFocus={() => setPasswordFocused(true)}
+                    onBlur={() => setPasswordFocused(false)}
+                    className="w-full h-full px-4 pt-4 pr-12 bg-white border border-slate-200 rounded-r-xl focus:outline-none focus:border-primary transition-all text-[15px] shadow-sm"
+                    required
+                  />
+                  <label
+                    htmlFor="password"
+                    className={`absolute left-4 transition-all pointer-events-none ${
+                      passwordFocused || password
+                        ? "top-1.5 text-[12px] text-primary"
+                        : "top-4 text-[15px] text-slate-400"
+                    }`}
+                  >
+                    Password
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors p-1"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="w-5 h-5" />
+                    ) : (
+                      <Eye className="w-5 h-5" />
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
 
-            <Button
+            {/* Forgot password */}
+            <div className="flex justify-end">
+              <Link
+                to="/forgot-password"
+                className="text-sm text-primary hover:underline font-medium"
+              >
+                Forgot password?
+              </Link>
+            </div>
+
+            {/* Sign In button */}
+            <button
               type="submit"
-              className="w-full h-12 text-base font-semibold shadow-md hover:shadow-lg hover:shadow-primary/20 transition-all group gap-2"
+              className="w-full h-14 bg-primary text-white rounded-2xl font-semibold text-[15px] shadow-lg shadow-primary/20 hover:shadow-xl hover:translate-y-[-1px] active:translate-y-[0px] transition-all flex items-center justify-center gap-2"
               disabled={isLoading}
             >
               {isLoading ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Signing in...
-                </>
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               ) : (
-                <>
-                  Sign In
-                  <LogInIcon className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </>
+                "SIGN IN"
               )}
-            </Button>
+            </button>
 
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background text-muted-foreground px-2">
-                  Or continue with
-                </span>
-              </div>
+            {/* Create Account button */}
+            <button
+              type="button"
+              className="w-full h-14 bg-white border-2 border-slate-100 rounded-2xl font-semibold text-[15px] text-slate-900 hover:bg-slate-50 hover:border-slate-200 transition-all"
+              onClick={() => navigate("/register")}
+            >
+              Create New Account
+            </button>
+
+            {/* Divider */}
+            <div className="flex items-center gap-4 py-1">
+              <div className="flex-1 h-[1px] bg-slate-100" />
+              <span className="text-xs text-slate-400 font-medium">
+                or continue with
+              </span>
+              <div className="flex-1 h-[1px] bg-slate-100" />
             </div>
 
-            <Button
+            {/* Google button */}
+            <button
               type="button"
-              variant="outline"
-              className="w-full h-12 flex items-center justify-center gap-2 hover:bg-muted/50 transition-colors"
+              className="w-full h-14 bg-white border-2 border-slate-100 rounded-2xl flex items-center justify-center gap-3 hover:bg-slate-50 hover:border-slate-200 transition-all font-semibold text-slate-900 relative"
               onClick={() => handleGoogleLogin()}
               disabled={isGoogleLoading}
             >
               {isGoogleLoading ? (
-                <div className="w-4 h-4 border-2 border-muted-foreground/30 border-t-muted-foreground rounded-full animate-spin" />
+                <div className="w-5 h-5 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin" />
               ) : (
                 <>
                   <img
                     src={googleIcon}
                     alt="Google"
-                    className="w-5 h-5"
+                    className="w-5 h-5 absolute left-6"
                   />
-                  Sign in with Google
+                  <span>Continue with Google</span>
                 </>
               )}
-            </Button>
+            </button>
           </form>
 
-          {/* Footer link */}
-          <div
-            className="text-center anim-fade"
-            style={{ animationDelay: "0.3s" }}
-          >
-            <Link
-              to="/register"
-              className="inline-flex items-center justify-center gap-1.5 text-sm text-muted-foreground hover:text-primary transition-colors group"
-            >
-              Create an account
-              <ArrowRight className="w-4 h-4  group-hover:-translate-x-1 transition-transform" />
-            </Link>
+          {/* Terms */}
+          <div className="space-y-3">
+            <p className="text-[11px] text-center text-slate-400 leading-relaxed max-w-[300px] mx-auto">
+              By continuing, you agree to our{" "}
+              <Link to="/terms" className="text-primary font-bold underline">
+                Terms of Service
+              </Link>{" "}
+              and{" "}
+              <Link to="/privacy" className="text-primary font-bold underline">
+                Privacy Policy
+              </Link>
+            </p>
+            <p className="text-[11px] text-center text-slate-400 font-medium">
+              Full version arriving with public launch.
+            </p>
           </div>
         </div>
       </div>

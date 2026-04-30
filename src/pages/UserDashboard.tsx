@@ -316,7 +316,7 @@ export default function UserDashboard() {
     <div className="min-h-full bg-slate-50">
       {/* ══════════════════ HERO ══════════════════ */}
       <div className="bg-white border-b border-slate-100">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        <div className=" mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
           {/* Top bar */}
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3.5">
@@ -401,7 +401,7 @@ export default function UserDashboard() {
       </div>
 
       {/* ══════════════════ BODY ══════════════════ */}
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-7 space-y-8">
+      <div className="mx-auto px-8 sm:px-6 lg:px-8 py-7 space-y-8">
         {/* ── Stats ── */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {statCards.map((s) => {
