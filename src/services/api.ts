@@ -16,12 +16,12 @@ interface GenericResponse<T = any> {
 }
 
 const getBaseURL = () => {
-  // if (import.meta.env.DEV) {
-  //   return "http://localhost:5001";
-  // } else {
-  //   return "https://exegesisbackend-production.up.railway.app/"; // relative = same origin, no CORS preflight at all
-  // }
-  return "https://exegesisbackend-production.up.railway.app/";
+  if (import.meta.env.DEV) {
+    return "http://localhost:5001";
+  } else {
+    return "https://exegesisbackend-production.up.railway.app/";
+  }
+  // return "https://exegesisbackend-production.up.railway.app/";
 };
 
 const BASE_URL = getBaseURL();

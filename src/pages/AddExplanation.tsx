@@ -13,6 +13,8 @@ import {
   AlertCircle,
   ChevronDown,
   ChevronUp,
+  Lightbulb,
+  Check,
 } from "lucide-react";
 import {
   Card,
@@ -316,6 +318,32 @@ const AddVerseExplanation = () => {
   const [saved, setSaved] = useState(false);
   const [verseText, setVerseText] = useState<string | null>(null);
 
+  const [prompts, setPrompts] = useState<{ id: number; prompt: string; category: string }[]>([]);
+  const [promptsLoading, setPromptsLoading] = useState(false);
+  const [selectedPromptIds, setSelectedPromptIds] = useState<number[]>([]);
+
+  const fetchPrompts = async (bn: string, ch: number, vn?: number) => {
+    if (!bn || !ch) return;
+    setPromptsLoading(true);
+    try {
+      const res = await sendPostRequest("journal", "prompts/get-all", {
+        bookName: bn,
+        chapter: ch,
+        isActive: true,
+      });
+      if (res.returnCode === 200 && res.returnData) {
+        const filtered = vn 
+          ? res.returnData.filter((p: any) => !p.verseNumber || p.verseNumber === vn)
+          : res.returnData;
+        setPrompts(filtered);
+      }
+    } catch (e) {
+      console.error("Error fetching prompts:", e);
+    } finally {
+      setPromptsLoading(false);
+    }
+  };
+
   // ── load existing on edit mode ─────────────
   const fetchExisting = async (bn: string, ch: number, vn: number) => {
     if (!bn || !ch || !vn) return;
@@ -335,6 +363,16 @@ const AddVerseExplanation = () => {
         setLearnMore(d.learnMore ?? "");
         setExistingFound(true);
         setExistingId(d.id ?? null);
+        if (d.promptIds) {
+          try {
+            const parsed = JSON.parse(d.promptIds);
+            if (Array.isArray(parsed)) {
+              setSelectedPromptIds(parsed.map(Number));
+            }
+          } catch (e) {
+            console.error("Error parsing promptIds:", e);
+          }
+        }
       }
     } catch {
       // silently ignore — treat as new
@@ -353,6 +391,12 @@ const AddVerseExplanation = () => {
 
   useEffect(() => {
     setVerseText(getVerseText(bookName, Number(chapter), Number(verseNumber)));
+  }, [bookName, chapter, verseNumber]);
+
+  useEffect(() => {
+    if (bookName && chapter) {
+      fetchPrompts(bookName, chapter, verseNumber);
+    }
   }, [bookName, chapter, verseNumber]);
 
   // Also fetch when user finishes filling in verse reference fields (add mode)
@@ -382,6 +426,7 @@ const AddVerseExplanation = () => {
         bibleVersion,
         explanation,
         learnMore,
+        promptIds: selectedPromptIds,
       };
       
       // Include id when updating existing record
@@ -700,6 +745,83 @@ const AddVerseExplanation = () => {
                 />
               </CardContent>
             </Card>
+
+            {/* Journal Prompts for this verse */}
+            {(promptsLoading || prompts.length > 0) && (
+              <Card className="border-amber-200/50 bg-amber-50/30 dark:bg-amber-950/20">
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2 text-base">
+                    <Lightbulb className="w-4 h-4 text-amber-500" />
+                    Related Journal Prompts
+                  </CardTitle>
+                  <CardDescription className="text-xs">
+                    Select prompts to associate with this verse explanation
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {promptsLoading ? (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Loading prompts...
+                    </div>
+                  ) : prompts.length > 0 ? (
+                    <>
+                      {prompts.map((prompt) => {
+                        const isSelected = selectedPromptIds.includes(prompt.id);
+                        return (
+                          <div
+                            key={prompt.id}
+                            onClick={() => {
+                              setSelectedPromptIds((prev) =>
+                                isSelected
+                                  ? prev.filter((id) => id !== prompt.id)
+                                  : [...prev, prompt.id]
+                              );
+                            }}
+                            className={cn(
+                              "bg-white dark:bg-background rounded-lg p-3 border text-sm cursor-pointer transition-all",
+                              isSelected
+                                ? "border-amber-500 bg-amber-50/50 dark:bg-amber-950/30"
+                                : "border-amber-100/50 dark:border-amber-900/30 hover:border-amber-300"
+                            )}
+                          >
+                            <div className="flex items-start gap-2">
+                              <div
+                                className={cn(
+                                  "w-5 h-5 rounded border flex items-center justify-center flex-shrink-0 mt-0.5",
+                                  isSelected
+                                    ? "bg-amber-500 border-amber-500"
+                                    : "border-amber-300"
+                                )}
+                              >
+                                {isSelected && (
+                                  <Check className="w-3 h-3 text-white" />
+                                )}
+                              </div>
+                              <span className="text-foreground/80">{prompt.prompt}</span>
+                            </div>
+                            <div className="ml-7 mt-2">
+                              <Badge variant="outline" className="text-xs">
+                                {prompt.category}
+                              </Badge>
+                            </div>
+                          </div>
+                        );
+                      })}
+                      {selectedPromptIds.length > 0 && (
+                        <div className="text-xs text-muted-foreground pt-2">
+                          {selectedPromptIds.length} prompt(s) selected
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      No prompts available for this verse
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            )}
 
             {/* Save button */}
             <div className="flex items-center justify-between pt-2 pb-6">

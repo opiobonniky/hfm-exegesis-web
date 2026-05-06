@@ -11,6 +11,9 @@ import {
   BookText,
   Home,
   Highlighter,
+  PenLine,
+  Lightbulb,
+  LayoutTemplate,
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -47,6 +50,9 @@ const adminNavItems = [
   { title: "Readings Plan", url: routes.readingPlans.path, icon: BookOpen },
   { title: "My Activity", url: routes.myActivity.path, icon: Highlighter },
   { title: "User Activity", url: routes.useractivity.path, icon: Activity },
+  { title: "Journal", url: routes.journal.path, icon: PenLine },
+  { title: "Journal Prompts", url: routes.journalPrompts.path, icon: Lightbulb },
+  { title: "Journal Templates", url: routes.journalTemplates.path, icon: LayoutTemplate },
 ];
 
 const userNavItems = [
@@ -56,6 +62,7 @@ const userNavItems = [
 
   { title: "Reading Plans", url: routes.userPlans.path, icon: BookOpen },
   { title: "My Activity", url: routes.myActivity.path, icon: Highlighter },
+  { title: "Journal", url: routes.journal.path, icon: PenLine },
 ];
 
 const manageNavItems = [

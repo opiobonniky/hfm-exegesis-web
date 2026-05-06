@@ -516,11 +516,27 @@ const PlanDetail = () => {
   const isAdmin = userInfo?.userRole === 1;
 
   const [plan, setPlan] = useState<ReadingPlan | null>(null);
+  const [adminStats, setAdminStats] = useState<any>(null);
   const [days, setDays] = useState<DayAssignment[]>([]);
   const [loadingPlan, setLoadingPlan] = useState(true);
-  const [activeTab, setActiveTab] = useState<"overview" | "schedule" | "quiz">(
-    "overview",
-  );
+  const [loadingAdminStats, setLoadingAdminStats] = useState(false);
+  const [userSearchTerm, setUserSearchFilter] = useState("");
+  const [activeTab, setActiveTab] = useState<
+    "overview" | "schedule" | "quiz" | "admin"
+  >("overview");
+
+  const filteredUsers = useMemo(() => {
+    if (!adminStats?.users) return [];
+    if (!userSearchTerm.trim()) return adminStats.users;
+
+    const term = userSearchTerm.toLowerCase().trim();
+    return adminStats.users.filter(
+      (u: any) =>
+        u.name?.toLowerCase().includes(term) ||
+        u.email?.toLowerCase().includes(term) ||
+        u.username?.toLowerCase().includes(term),
+    );
+  }, [adminStats?.users, userSearchTerm]);
 
   const completedDayNums: Set<number> = useMemo(() => {
     try {
@@ -531,6 +547,23 @@ const PlanDetail = () => {
     return new Set();
   }, [plan?.completed_days_json]);
 
+  const loadAdminStats = useCallback(async () => {
+    if (!isAdmin) return;
+    setLoadingAdminStats(true);
+    try {
+      const resp = await sendPostRequest("reading-plans", "admin-stats", {
+        planId: planId ?? "",
+      });
+      if (resp.returnCode === 200) {
+        setAdminStats(resp.returnData);
+      }
+    } catch (e) {
+      console.error("Admin stats error:", e);
+    } finally {
+      setLoadingAdminStats(false);
+    }
+  }, [planId, isAdmin]);
+
   const loadPlan = useCallback(async () => {
     setLoadingPlan(true);
     try {
@@ -540,9 +573,14 @@ const PlanDetail = () => {
       if (resp.returnCode === 200 && resp.returnData) {
         const data = resp.returnData;
         setPlan(data);
-        
+
         if (data.days && Array.isArray(data.days)) {
           setDays(data.days);
+        }
+
+        // If admin, also load aggregate stats
+        if (isAdmin) {
+          loadAdminStats();
         }
       } else {
         toast({
@@ -611,8 +649,34 @@ const PlanDetail = () => {
 
   const diff = DIFFICULTY_CONFIG[plan.difficulty] ?? DIFFICULTY_CONFIG.medium;
   const pct = Math.round(plan.completion_percentage ?? 0);
-  const quizPct = Math.round(plan.quiz_accuracy_percentage ?? 0);
   const catLabel = CATEGORY_LABELS[plan.category] ?? plan.category;
+
+  // ── Stats Logic ──────────────────────────────
+  // For admins, we often prefer showing global stats in summary areas
+  const displayQuizAccuracy =
+    isAdmin && adminStats
+      ? adminStats.globalQuizAccuracy
+      : Math.round(plan.quiz_accuracy_percentage ?? 0);
+
+  const displayAnsweredQuestions =
+    isAdmin && adminStats
+      ? adminStats.totalQuizAnswers
+      : (plan.user_answered_questions ?? 0);
+
+  const displayCorrectAnswers =
+    isAdmin && adminStats
+      ? adminStats.totalQuizCorrect
+      : (plan.user_correct_answers ?? 0);
+
+  const displayWrongAnswers =
+    isAdmin && adminStats
+      ? adminStats.totalQuizWrong
+      : (plan.user_answered_questions ?? 0) - (plan.user_correct_answers ?? 0);
+
+  const displayQuizTotal =
+    isAdmin && adminStats
+      ? adminStats.totalQuizAnswers
+      : plan.total_quiz_questions;
 
   return (
     <div
@@ -678,12 +742,16 @@ const PlanDetail = () => {
               <button
                 onClick={() => {
                   const nextDay = plan.completed_days_count + 1;
-                  navigate(`/daily-reading?planId=${plan.plan_id}&day=${Math.min(nextDay, plan.total_days)}`);
+                  navigate(
+                    `/daily-reading?planId=${plan.plan_id}&day=${Math.min(nextDay, plan.total_days)}`,
+                  );
                 }}
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 text-white text-sm font-semibold hover:from-violet-700 hover:to-indigo-700 transition-all shadow-md shadow-violet-600/20"
               >
                 <Play className="w-4 h-4" />
-                {plan.completed_days_count === 0 ? "Start Reading" : "Continue Reading"}
+                {plan.completed_days_count === 0
+                  ? "Start Reading"
+                  : "Continue Reading"}
               </button>
             )}
           </div>
@@ -723,53 +791,85 @@ const PlanDetail = () => {
 
           <GlassCard className="p-6">
             <SectionLabel>Progress Snapshot</SectionLabel>
-            <div className="flex items-center gap-5">
-              <div className="relative shrink-0">
-                <Ring pct={pct} size={92} stroke={6} />
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-lg font-bold text-slate-900">
-                    {pct}%
-                  </span>
-                  <span className="text-[8px] uppercase tracking-widest text-slate-500">
-                    complete
-                  </span>
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center gap-5">
+                <div className="relative shrink-0">
+                  <Ring pct={pct} size={92} stroke={6} />
+                  <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <span className="text-lg font-bold text-slate-900">
+                      {pct}%
+                    </span>
+                    <span className="text-[8px] uppercase tracking-widest text-slate-500">
+                      complete
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex-1 space-y-2">
+                  <div className="flex justify-between text-xs">
+                    <span className="text-slate-500">Days completed</span>
+                    <span className="font-semibold text-slate-800">
+                      {plan.completed_days_count} / {plan.total_days}
+                    </span>
+                  </div>
+                  <div className="h-2 rounded-full bg-slate-200 overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-gradient-to-r from-violet-500 to-indigo-500"
+                      style={{ width: `${pct}%` }}
+                    />
+                  </div>
+                  <div className="text-xs text-slate-500 space-y-1">
+                    <p>
+                      Status:{" "}
+                      <span
+                        className={cn(
+                          "font-bold",
+                          plan.is_completed
+                            ? "text-emerald-600"
+                            : plan.started
+                              ? "text-sky-600"
+                              : "text-slate-500",
+                        )}
+                      >
+                        {plan.is_completed
+                          ? "Completed"
+                          : plan.started
+                            ? "In Progress"
+                            : "Not Started"}
+                      </span>
+                    </p>
+                    {plan.started && (
+                      <p>
+                        Started:{" "}
+                        <span className="text-slate-700 font-medium">
+                          {formatDate(plan.start_date)}
+                        </span>
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
 
-              <div className="flex-1 space-y-2">
-                <div className="flex justify-between text-xs">
-                  <span className="text-slate-500">Days completed</span>
-                  <span className="font-semibold text-slate-800">
-                    {plan.completed_days_count} / {plan.total_days}
-                  </span>
+              {isAdmin && adminStats && (
+                <div className="pt-4 border-t border-slate-100 grid grid-cols-2 gap-3">
+                  <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-100">
+                    <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider mb-1">
+                      Global Completed
+                    </p>
+                    <p className="text-lg font-bold text-emerald-900">
+                      {adminStats.completedEnrollments}
+                    </p>
+                  </div>
+                  <div className="p-3 rounded-xl bg-amber-50 border border-amber-100">
+                    <p className="text-[10px] font-bold text-amber-600 uppercase tracking-wider mb-1">
+                      Global In-Progress
+                    </p>
+                    <p className="text-lg font-bold text-amber-900">
+                      {adminStats.inProgressEnrollments}
+                    </p>
+                  </div>
                 </div>
-                <div className="h-2 rounded-full bg-slate-200 overflow-hidden">
-                  <div
-                    className="h-full rounded-full bg-gradient-to-r from-violet-500 to-indigo-500"
-                    style={{ width: `${pct}%` }}
-                  />
-                </div>
-                <div className="text-xs text-slate-500 space-y-1">
-                  <p>
-                    Started:{" "}
-                    <span className="text-slate-700 font-medium">
-                      {plan.started ? "Yes" : "No"}
-                    </span>
-                  </p>
-                  <p>
-                    Completed:{" "}
-                    <span className="text-slate-700 font-medium">
-                      {plan.is_completed ? "Yes" : "No"}
-                    </span>
-                  </p>
-                  <p>
-                    Completion Date:{" "}
-                    <span className="text-slate-700 font-medium">
-                      {formatDate(plan.completed_date)}
-                    </span>
-                  </p>
-                </div>
-              </div>
+              )}
             </div>
           </GlassCard>
         </div>
@@ -823,7 +923,9 @@ const PlanDetail = () => {
           </GlassCard>
 
           <GlassCard className="p-5">
-            <SectionLabel>Engagement Stats</SectionLabel>
+            <SectionLabel>
+              {isAdmin ? "Global Engagement" : "Engagement Stats"}
+            </SectionLabel>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <span className="text-slate-500">Reflections</span>
@@ -832,13 +934,19 @@ const PlanDetail = () => {
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">Quiz Accuracy</span>
-                <span className="font-semibold text-slate-900">{quizPct}%</span>
+                <span className="text-slate-500">
+                  {isAdmin ? "Global Accuracy" : "Quiz Accuracy"}
+                </span>
+                <span className="font-semibold text-slate-900">
+                  {displayQuizAccuracy}%
+                </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">Answered Questions</span>
+                <span className="text-slate-500">
+                  {isAdmin ? "Total Answers" : "Answered Questions"}
+                </span>
                 <span className="font-semibold text-slate-900">
-                  {plan.user_answered_questions}
+                  {displayAnsweredQuestions}
                 </span>
               </div>
             </div>
@@ -847,24 +955,29 @@ const PlanDetail = () => {
 
         {/* Tabs */}
         <div className="flex items-center gap-1 p-1 rounded-2xl border border-slate-200 bg-white w-fit shadow-sm">
-          {(["overview", "schedule", "quiz"] as const).map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={cn(
-                "px-4 py-2 rounded-xl text-sm font-semibold capitalize transition-all duration-150",
-                activeTab === tab
-                  ? "bg-violet-600 text-white shadow-sm"
-                  : "text-slate-500 hover:text-slate-800",
-              )}
-            >
-              {tab === "quiz"
-                ? `Quiz (${totalQuizCount})`
-                : tab === "schedule"
-                  ? `Schedule (${configuredDays}d)`
-                  : "Overview"}
-            </button>
-          ))}
+          {(["overview", "schedule", "quiz", "admin"] as const).map((tab) => {
+            if (tab === "admin" && !isAdmin) return null;
+            return (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={cn(
+                  "px-4 py-2 rounded-xl text-sm font-semibold capitalize transition-all duration-150",
+                  activeTab === tab
+                    ? "bg-violet-600 text-white shadow-sm"
+                    : "text-slate-500 hover:text-slate-800",
+                )}
+              >
+                {tab === "quiz"
+                  ? `Quiz (${totalQuizCount})`
+                  : tab === "schedule"
+                    ? `Schedule (${configuredDays}d)`
+                    : tab === "admin"
+                      ? "Admin Insights"
+                      : "Overview"}
+              </button>
+            );
+          })}
         </div>
 
         {/* Overview */}
@@ -911,13 +1024,15 @@ const PlanDetail = () => {
             </GlassCard>
 
             <GlassCard className="p-5">
-              <SectionLabel>User Performance</SectionLabel>
+              <SectionLabel>
+                {isAdmin ? "Aggregate Performance" : "User Performance"}
+              </SectionLabel>
               <div className="flex items-center gap-4 mb-4">
                 <div className="relative shrink-0">
-                  <Ring pct={quizPct} size={72} stroke={5} />
+                  <Ring pct={displayQuizAccuracy} size={72} stroke={5} />
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
                     <span className="text-sm font-bold text-slate-900">
-                      {quizPct}%
+                      {displayQuizAccuracy}%
                     </span>
                     <span className="text-[7px] text-slate-500 uppercase">
                       acc
@@ -927,20 +1042,20 @@ const PlanDetail = () => {
                 <div className="flex-1 space-y-2">
                   {[
                     {
-                      label: "Answered",
-                      value: `${plan.user_answered_questions} / ${plan.total_quiz_questions}`,
+                      label: isAdmin ? "Total Answers" : "Answered",
+                      value: isAdmin
+                        ? displayAnsweredQuestions
+                        : `${displayAnsweredQuestions} / ${plan.total_quiz_questions}`,
                       color: "text-slate-800",
                     },
                     {
                       label: "Correct",
-                      value: plan.user_correct_answers,
+                      value: displayCorrectAnswers,
                       color: "text-emerald-700",
                     },
                     {
                       label: "Wrong",
-                      value:
-                        plan.user_answered_questions -
-                        plan.user_correct_answers,
+                      value: displayWrongAnswers,
                       color: "text-rose-700",
                     },
                   ].map(({ label, value, color }) => (
@@ -1041,6 +1156,306 @@ const PlanDetail = () => {
                 </div>
               </div>
             </GlassCard>
+          </div>
+        )}
+
+        {/* Admin Insights */}
+        {activeTab === "admin" && isAdmin && (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <StatCard
+                icon={<BarChart3 className="w-4 h-4 text-violet-600" />}
+                label="Total Enrollments"
+                value={adminStats?.totalEnrollments ?? "—"}
+                accent="bg-violet-50"
+              />
+              <StatCard
+                icon={<HelpCircle className="w-4 h-4 text-sky-600" />}
+                label="Quiz Answers (C/W)"
+                value={
+                  adminStats?.totalQuizAnswers > 0
+                    ? `${adminStats.totalQuizCorrect} / ${adminStats.totalQuizWrong}`
+                    : "0 / 0"
+                }
+                accent="bg-sky-50"
+              />
+              <StatCard
+                icon={<Clock className="w-4 h-4 text-amber-600" />}
+                label="In Progress"
+                value={adminStats?.inProgressEnrollments ?? "—"}
+                accent="bg-amber-50"
+              />
+              <StatCard
+                icon={<Sparkles className="w-4 h-4 text-indigo-600" />}
+                label="Global Accuracy"
+                value={`${adminStats?.globalQuizAccuracy ?? 0}%`}
+                accent="bg-indigo-50"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+              <GlassCard className="p-5 lg:col-span-2">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+                  <SectionLabel>User Progress Details</SectionLabel>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder="Search users..."
+                      value={userSearchTerm}
+                      onChange={(e) => setUserSearchFilter(e.target.value)}
+                      className="text-xs px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-violet-500/20 w-full sm:w-48 transition-all"
+                    />
+                  </div>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left">
+                    <thead>
+                      <tr className="border-b border-slate-100">
+                        <th className="pb-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                          User
+                        </th>
+                        <th className="pb-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider text-center">
+                          Progress
+                        </th>
+                        <th className="pb-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider text-center">
+                          Streak
+                        </th>
+                        <th className="pb-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider text-center">
+                          Quiz (C/W)
+                        </th>
+                        <th className="pb-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider text-center">
+                          Last Activity
+                        </th>
+                        <th className="pb-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider text-right">
+                          Status
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-50">
+                      {filteredUsers.length > 0 ? (
+                        filteredUsers.map((u: any, i: number) => (
+                          <tr
+                            key={i}
+                            className="hover:bg-slate-50/50 transition-colors"
+                          >
+                            <td className="py-3 pr-4">
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-full bg-slate-100 overflow-hidden flex-shrink-0">
+                                  {u.photo && u.photo.replace(/[`\s]/g, "") ? (
+                                    <img
+                                      src={u.photo.replace(/[`\s]/g, "")}
+                                      alt={u.name}
+                                      className="w-full h-full object-cover"
+                                    />
+                                  ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-xs font-bold text-slate-400 bg-slate-200">
+                                      {u.name?.charAt(0) || "?"}
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="min-w-0">
+                                  <p className="text-xs font-semibold text-slate-800 truncate">
+                                    {u.name}
+                                  </p>
+                                  <p className="text-[10px] text-slate-500 truncate">
+                                    {u.email}
+                                  </p>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="py-3 px-4">
+                              <div className="flex flex-col items-center gap-1.5 min-w-[100px]">
+                                <div className="w-full h-1.5 rounded-full bg-slate-100 overflow-hidden">
+                                  <div
+                                    className="h-full bg-violet-500 rounded-full"
+                                    style={{
+                                      width: `${u.completionPercentage}%`,
+                                    }}
+                                  />
+                                </div>
+                                <span className="text-[10px] font-medium text-slate-600">
+                                  {u.completedDaysCount} / {plan.total_days}{" "}
+                                  days
+                                </span>
+                              </div>
+                            </td>
+                            <td className="py-3 px-4 text-center">
+                              <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-orange-50 text-orange-700 text-[10px] font-bold">
+                                <Flame className="w-3 h-3" />
+                                {u.streak}d
+                              </div>
+                            </td>
+                            <td className="py-3 px-4 text-center">
+                              <div className="flex flex-col items-center">
+                                <div className="flex items-center gap-1.5 text-[10px] font-bold">
+                                  <span className="text-emerald-600">
+                                    {u.quizStats?.correct || 0}
+                                  </span>
+                                  <span className="text-slate-300">/</span>
+                                  <span className="text-rose-600">
+                                    {u.quizStats?.wrong || 0}
+                                  </span>
+                                </div>
+                                <span className="text-[9px] text-slate-400">
+                                  {u.quizStats?.accuracy || 0}% acc.
+                                </span>
+                              </div>
+                            </td>
+                            <td className="py-3 px-4 text-center">
+                              <span className="text-[10px] text-slate-500 whitespace-nowrap">
+                                {u.lastActivity
+                                  ? new Date(
+                                      u.lastActivity,
+                                    ).toLocaleDateString()
+                                  : "Never"}
+                              </span>
+                            </td>
+                            <td className="py-3 pl-4 text-right">
+                              <span
+                                className={cn(
+                                  "inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border",
+                                  u.status === "completed"
+                                    ? "bg-emerald-50 border-emerald-100 text-emerald-700"
+                                    : u.status === "inprogress"
+                                      ? "bg-sky-50 border-sky-100 text-sky-700"
+                                      : "bg-slate-50 border-slate-100 text-slate-600",
+                                )}
+                              >
+                                {u.status === "completed"
+                                  ? "Done"
+                                  : u.status === "inprogress"
+                                    ? "In Progress"
+                                    : "Started"}
+                              </span>
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td
+                            colSpan={5}
+                            className="py-8 text-center text-xs text-slate-400 italic"
+                          >
+                            {userSearchTerm.trim()
+                              ? `No users matching "${userSearchTerm}"`
+                              : "No users enrolled in this plan yet."}
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </GlassCard>
+
+              <div className="space-y-5">
+                <GlassCard className="p-5">
+                  <SectionLabel>Engagement Trends</SectionLabel>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100">
+                      <div>
+                        <p className="text-xs text-slate-500 font-medium">
+                          Global Quiz Accuracy
+                        </p>
+                        <p className="text-2xl font-bold text-slate-900">
+                          {adminStats?.globalQuizAccuracy ?? 0}%
+                        </p>
+                      </div>
+                      <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center">
+                        <BarChart3 className="w-5 h-5 text-emerald-600" />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <p className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
+                        Most Difficult Questions
+                      </p>
+                      {adminStats?.difficultQuestions?.length > 0 ? (
+                        adminStats.difficultQuestions.map(
+                          (q: any, i: number) => (
+                            <div
+                              key={i}
+                              className="flex items-center justify-between p-2.5 rounded-lg border border-slate-200 bg-white"
+                            >
+                              <div className="flex-1 min-w-0 pr-4">
+                                <p className="text-xs font-medium text-slate-800 truncate">
+                                  {q.question}
+                                </p>
+                                <p className="text-[10px] text-slate-500">
+                                  Day {q.dayNumber} · {q.totalAnswers} attempts
+                                </p>
+                              </div>
+                              <span
+                                className={cn(
+                                  "text-xs font-bold px-2 py-1 rounded-md",
+                                  q.accuracy < 30
+                                    ? "bg-rose-100 text-rose-700"
+                                    : "bg-amber-100 text-amber-700",
+                                )}
+                              >
+                                {q.accuracy}%
+                              </span>
+                            </div>
+                          ),
+                        )
+                      ) : (
+                        <p className="text-xs text-slate-500 italic">
+                          No quiz data available yet.
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </GlassCard>
+
+                <GlassCard className="p-5">
+                  <SectionLabel>Plan Structure Summary</SectionLabel>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center py-2 border-b border-slate-100">
+                      <span className="text-xs text-slate-500">
+                        Daily Assignments
+                      </span>
+                      <span className="text-xs font-bold text-slate-900">
+                        {adminStats?.assignmentsCount ?? 0}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center py-2 border-b border-slate-100">
+                      <span className="text-xs text-slate-500">
+                        Quiz Questions
+                      </span>
+                      <span className="text-xs font-bold text-slate-900">
+                        {adminStats?.questionsCount ?? 0}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center py-2 border-b border-slate-100">
+                      <span className="text-xs text-slate-500">
+                        Avg Qs per Day
+                      </span>
+                      <span className="text-xs font-bold text-slate-900">
+                        {adminStats?.assignmentsCount > 0
+                          ? (
+                              adminStats.questionsCount /
+                              adminStats.assignmentsCount
+                            ).toFixed(1)
+                          : 0}
+                      </span>
+                    </div>
+
+                    <div className="mt-4 p-4 rounded-xl bg-indigo-50 border border-indigo-100">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Zap className="w-4 h-4 text-indigo-600" />
+                        <p className="text-sm font-bold text-indigo-900">
+                          Pro-tip
+                        </p>
+                      </div>
+                      <p className="text-xs text-indigo-700 leading-relaxed">
+                        Plans with at least 1 quiz question per day have 40%
+                        higher engagement. Consider adding more questions to
+                        days with low completion.
+                      </p>
+                    </div>
+                  </div>
+                </GlassCard>
+              </div>
+            </div>
           </div>
         )}
 

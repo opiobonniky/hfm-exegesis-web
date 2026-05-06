@@ -18,6 +18,7 @@ import {
   Lightbulb,
   Save,
   AlertTriangle,
+  PenLine,
 } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -738,6 +739,17 @@ const DailyVerse = () => {
                 <p className="text-lg leading-relaxed whitespace-pre-line">
                   {selectedVerse.reflection}
                 </p>
+                <Button
+                  variant="outline"
+                  className="mt-4 gap-2"
+                  onClick={() => {
+                    const journalUrl = `/journal/new?book=${selectedVerse.bookName}&chapter=${selectedVerse.chapter}&verse=${selectedVerse.verseNumber}`;
+                    window.open(journalUrl, "_blank");
+                  }}
+                >
+                  <PenLine className="w-4 h-4" />
+                  Write in Journal
+                </Button>
               </div>
             </div>
 

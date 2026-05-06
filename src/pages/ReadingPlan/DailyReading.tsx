@@ -14,8 +14,10 @@ import {
   SkipForward,
   Star,
   XCircle,
+  PenLine,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate, useParams } from "react-router-dom";
 import { sendPostRequest } from "@/services/api";
@@ -126,6 +128,9 @@ const DailyReading = () => {
   const [isCompleted, setIsCompleted] = useState(false);
   const [planTitle, setPlanTitle] = useState("Reading Plan");
   const [totalDays, setTotalDays] = useState(0);
+  const [ponderedReflections, setPonderedReflections] = useState<Set<number>>(
+    new Set(),
+  );
 
   const [currentQ, setCurrentQ] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
@@ -193,7 +198,7 @@ const DailyReading = () => {
         setNotYetAdded(false);
         setAssignment(returnData);
         setIsCompleted(returnData.completed ?? false);
-        
+
         // Always start fresh - show first question without results
         setCurrentQ(0);
         setSelected(null);
@@ -202,8 +207,11 @@ const DailyReading = () => {
         setQuizDone(false);
         setCorrectCount(0);
         setSubmittedIds(new Set());
-        
-        if (Array.isArray(returnData.quizQuestions) && returnData.quizQuestions.length > 0) {
+
+        if (
+          Array.isArray(returnData.quizQuestions) &&
+          returnData.quizQuestions.length > 0
+        ) {
           const newSubmitted = new Set<number>();
           returnData.quizQuestions.forEach((q: QuizQuestion) => {
             if (q.userAnswer !== null) {
@@ -426,6 +434,13 @@ const DailyReading = () => {
           description: `Day ${dayNum} marked as done!`,
         });
         loadData();
+
+        // Automatically move to the next day if available
+        if (dayNum < totalDays) {
+          setTimeout(() => {
+            navigate(`/daily-reading/${planId}/${dayNum + 1}`);
+          }, 2000);
+        }
       } else if (r.returnMessage?.includes("already completed")) {
         setIsCompleted(true);
         toast({
@@ -677,11 +692,18 @@ const DailyReading = () => {
             {assignment.chapters.map((ch, idx) => (
               <button
                 key={idx}
-                onClick={() =>
+                onClick={() => {
+                  // Add to read history before navigating
+                  sendPostRequest("bible", "add-read-history", {
+                    bookName: ch.book,
+                    chapter: ch.chapter,
+                    verseNumber: 1,
+                  }).catch(console.error);
+
                   navigate(
                     `/bible-reader?book=${encodeURIComponent(ch.book)}&chapter=${ch.chapter}`,
-                  )
-                }
+                  );
+                }}
                 className="w-full flex items-center gap-4 p-3.5 rounded-xl border border-border/40 hover:border-primary/40 hover:bg-primary/5 transition-all text-left group"
               >
                 <div className="w-10 h-10 rounded-xl bg-primary/8 flex items-center justify-center shrink-0 group-hover:bg-primary/15 transition-colors">
@@ -708,33 +730,74 @@ const DailyReading = () => {
         {!hasQuiz &&
           Array.isArray(assignment.reflectionQuestions) &&
           assignment.reflectionQuestions.length > 0 && (
-            <div className="rounded-2xl border border-border/50 bg-card overflow-hidden">
-              <div className="flex items-center gap-2 px-5 py-3.5 border-b border-border/40">
-                <Lightbulb className="w-3.5 h-3.5 text-amber-500" />
+            <div className="rounded-2xl border border-border/50 bg-card overflow-hidden shadow-sm">
+              <div className="flex items-center gap-2 px-5 py-3.5 border-b border-border/40 bg-muted/20">
+                <Lightbulb className="w-4 h-4 text-amber-500" />
                 <span
-                  className="text-[11px] font-semibold tracking-widest uppercase text-muted-foreground"
+                  className="text-[11px] font-bold tracking-widest uppercase text-muted-foreground"
                   style={{ fontFamily: "'Cinzel', serif" }}
                 >
-                  Reflection
+                  Personal Reflection
                 </span>
               </div>
               <div className="p-4 space-y-3">
-                {assignment.reflectionQuestions.map((q, idx) => (
-                  <div
-                    key={idx}
-                    className="flex gap-3 p-4 rounded-xl bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-800/30"
-                  >
-                    <span className="w-6 h-6 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 text-xs font-bold flex items-center justify-center shrink-0">
-                      {idx + 1}
-                    </span>
-                    <p
-                      className="text-sm text-foreground/80 leading-relaxed"
-                      style={{ fontFamily: "'Lora', serif" }}
+                <p className="text-xs text-muted-foreground mb-3 px-1">
+                  Take a moment to meditate on these questions as you read
+                  today's scripture.
+                </p>
+                {assignment.reflectionQuestions.map((q, idx) => {
+                  const isPondered = ponderedReflections.has(idx);
+                  return (
+                    <button
+                      key={idx}
+                      onClick={() => {
+                        const next = new Set(ponderedReflections);
+                        if (isPondered) next.delete(idx);
+                        else next.add(idx);
+                        setPonderedReflections(next);
+                      }}
+                      className={cn(
+                        "w-full flex items-start gap-4 p-4 rounded-xl transition-all duration-200 text-left border group",
+                        isPondered
+                          ? "bg-amber-50/30 dark:bg-amber-950/10 border-amber-200/40 dark:border-amber-800/20 opacity-70"
+                          : "bg-amber-50/60 dark:bg-amber-950/20 border-amber-200/50 dark:border-amber-800/30 hover:border-amber-300 dark:hover:border-amber-700",
+                      )}
                     >
-                      {q}
-                    </p>
-                  </div>
-                ))}
+                      <div
+                        className={cn(
+                          "w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-colors",
+                          isPondered
+                            ? "bg-amber-500 text-white"
+                            : "bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 group-hover:bg-amber-200 dark:group-hover:bg-amber-900/60",
+                        )}
+                      >
+                        {isPondered ? (
+                          <CheckCircle className="w-4.5 h-4.5" />
+                        ) : (
+                          <span className="text-xs font-bold">{idx + 1}</span>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p
+                          className={cn(
+                            "text-sm leading-relaxed transition-all",
+                            isPondered
+                              ? "text-muted-foreground line-through decoration-amber-500/50"
+                              : "text-foreground/90",
+                          )}
+                          style={{ fontFamily: "'Lora', serif" }}
+                        >
+                          {q}
+                        </p>
+                      </div>
+                      {!isPondered && (
+                        <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider px-2 py-1 rounded-md bg-amber-100 dark:bg-amber-900/30 opacity-0 group-hover:opacity-100 transition-opacity">
+                          Ponder
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -1164,9 +1227,6 @@ const DailyReading = () => {
           </div>
         )}
 
-
-       
-
         {/* Mark complete (no quiz) */}
         {canMarkComplete && !hasQuiz && (
           <button
@@ -1179,6 +1239,27 @@ const DailyReading = () => {
         {isCompleted && !hasQuiz && (
           <div className="flex items-center justify-center gap-2 text-emerald-700 dark:text-emerald-400 text-sm font-medium p-3 bg-emerald-50 dark:bg-emerald-950/30 rounded-xl border border-emerald-200/50 dark:border-emerald-800/40">
             <CheckCircle className="w-4 h-4" /> Day {dayNum} completed
+          </div>
+        )}
+
+        {isCompleted && (
+          <div className="mt-4">
+            <Button
+              variant="outline"
+              className="w-full gap-2"
+              onClick={() => {
+                const firstChapter = assignment?.chapters?.[0];
+                if (firstChapter) {
+                  const journalUrl = `/journal/new?book=${firstChapter.book}&chapter=${firstChapter.chapter}`;
+                  window.open(journalUrl, "_blank");
+                } else {
+                  window.open("/journal/new", "_blank");
+                }
+              }}
+            >
+              <PenLine className="w-4 h-4" />
+              Reflect in Journal
+            </Button>
           </div>
         )}
       </div>

@@ -32,6 +32,11 @@ const BibleReadingPlan = lazy(
 const DailyReading = lazy(() => import("@/pages/ReadingPlan/DailyReading"));
 const MyActivity = lazy(() => import("@/pages/MyActivity"));
 const Settings = lazy(() => import("@/pages/Settings"));
+const Journal = lazy(() => import("@/pages/Journal"));
+const JournalEntry = lazy(() => import("@/pages/JournalEntry"));
+const JournalDetail = lazy(() => import("@/pages/JournalDetail"));
+const JournalPrompts = lazy(() => import("@/pages/JournalPrompts"));
+const JournalTemplates = lazy(() => import("@/pages/JournalTemplates"));
 
 // Route configuration interface
 export interface RouteConfig {
@@ -223,6 +228,48 @@ export const routes = {
     isProtected: true,
     requiresLayout: true,
     title: "Settings",
+  },
+  journal: {
+    path: "/journal",
+    component: Journal,
+    isProtected: true,
+    requiresLayout: true,
+    title: "Journal",
+  },
+  journalEntry: {
+    path: "/journal/entry/:entryId",
+    component: JournalEntry,
+    isProtected: true,
+    requiresLayout: true,
+    title: "Journal Entry",
+  },
+  journalDetail: {
+    path: "/journal/view/:entryId",
+    component: JournalDetail,
+    isProtected: true,
+    requiresLayout: true,
+    title: "Journal Entry",
+  },
+  newJournalEntry: {
+    path: "/journal/new",
+    component: JournalEntry,
+    isProtected: true,
+    requiresLayout: true,
+    title: "New Journal Entry",
+  },
+  journalPrompts: {
+    path: "/journal-prompts",
+    component: JournalPrompts,
+    isProtected: true,
+    requiresLayout: true,
+    title: "Journal Prompts",
+  },
+  journalTemplates: {
+    path: "/journal-templates",
+    component: JournalTemplates,
+    isProtected: true,
+    requiresLayout: true,
+    title: "Journal Templates",
   },
   // ==================== 404 NOT FOUND ====================
   notFound: {

@@ -21,6 +21,7 @@ import {
   TrendingUp,
   ArrowRight,
   Quote,
+  PenLine,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { sendPostRequest } from "@/services/api";
@@ -51,6 +52,7 @@ interface Stats {
   highlights: number;
   notes: number;
   favorites: number;
+  journalEntries: number;
 }
 
 interface RecentActivity {
@@ -99,6 +101,7 @@ export default function UserDashboard() {
     highlights: 0,
     notes: 0,
     favorites: 0,
+    journalEntries: 0,
   });
   const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
   const [loading, setLoading] = useState(true);
@@ -171,6 +174,17 @@ export default function UserDashboard() {
       },
       {
         id: "6",
+        label: "My Journal",
+        sub: "Reflect & write",
+        icon: PenLine,
+        bg: "bg-green-600",
+        iconBg: "bg-white/15",
+        badge: null,
+        badgeCls: "",
+        onPress: () => navigate(routes.journal.path),
+      },
+      {
+        id: "6",
         label: "Bible Trivia",
         sub: "Test knowledge",
         icon: Brain,
@@ -211,6 +225,14 @@ export default function UserDashboard() {
         textColor: "#6D28D9",
       },
       {
+        label: "Journal Entries",
+        value: stats.journalEntries,
+        icon: PenLine,
+        accent: "#059669",
+        lightBg: "#ECFDF5",
+        textColor: "#047857",
+      },
+      {
         label: "Favorites",
         value: stats.favorites,
         icon: Heart,
@@ -234,6 +256,14 @@ export default function UserDashboard() {
       },
       {
         id: "2",
+        label: "Journal",
+        icon: PenLine,
+        color: "#059669",
+        lightBg: "#ECFDF5",
+        onPress: () => navigate(routes.journal.path),
+      },
+      {
+        id: "3",
         label: "History",
         icon: History,
         color: "#059669",
@@ -241,7 +271,7 @@ export default function UserDashboard() {
         onPress: () => navigate(routes.myActivity.path),
       },
       {
-        id: "3",
+        id: "4",
         label: "Highlights",
         icon: Star,
         color: "#D97706",
@@ -249,7 +279,7 @@ export default function UserDashboard() {
         onPress: () => navigate(routes.myActivity.path),
       },
       {
-        id: "4",
+        id: "5",
         label: "Favorites",
         icon: Heart,
         color: "#E11D48",
@@ -264,10 +294,11 @@ export default function UserDashboard() {
   useEffect(() => {
     (async () => {
       try {
-        const [verseRes, statsRes, plansRes] = await Promise.all([
+        const [verseRes, statsRes, plansRes, journalRes] = await Promise.all([
           sendPostRequest("bible", "get-todays-verse", {}),
           sendPostRequest("bible", "get-home-stats", {}),
           sendPostRequest("reading-plans", "get-user-plans", {}),
+          sendPostRequest("journal", "stats", {}),
         ]);
         if (verseRes.returnCode === 200 && verseRes.returnData) {
           const v = verseRes.returnData;
@@ -285,6 +316,7 @@ export default function UserDashboard() {
             highlights: d.highlightCount ?? 0,
             notes: d.noteCount ?? 0,
             favorites: d.favorites ?? 0,
+            journalEntries: journalRes.returnData?.totalEntries ?? 0,
           });
           setRecentActivity(d.recentActivity ?? []);
         }
