@@ -1,6 +1,40 @@
 // src/utilities/bibleUtils.ts
 
-import KJV_VERSES from "../assets/bibleBooks/JKV/verses.json";
+import {
+  getVersionById,
+  DEFAULT_VERSION_ID,
+  type BibleVersion,
+} from '../assets/bibleVersion/json/bibleVersions';
+
+/* ------------------------------------------------------------------ */
+/*  Active-version cache                                               */
+/* ------------------------------------------------------------------ */
+
+let _activeVersionId: string = DEFAULT_VERSION_ID;
+let _activeData: Record<string, string> =
+  getVersionById(DEFAULT_VERSION_ID).data;
+
+/**
+ * Switch the active Bible version.
+ * Call this whenever the user picks a different translation.
+ * The search index is invalidated automatically.
+ */
+export const setActiveVersion = (versionId: string): void => {
+  if (versionId === _activeVersionId) return; // nothing to do
+  const version = getVersionById(versionId);
+  _activeVersionId = version.id;
+  _activeData = version.data;
+  // invalidate the search index so it gets rebuilt for the new version
+  indexBuilt = false;
+  Object.keys(verseIndex).forEach(k => delete verseIndex[k]);
+};
+
+/** Returns the currently active version id */
+export const getActiveVersionId = (): string => _activeVersionId;
+
+/** Helper – resolves the verse dataset to use */
+const data = (override?: Record<string, string>): Record<string, string> =>
+  override ?? _activeData;
 
 /* ---------------- TESTAMENT LISTS ---------------- */
 
@@ -97,10 +131,10 @@ export interface VerseSearchResult {
 /**
  * Builds metadata for all books by scanning the verses.json keys
  */
-export const getBibleBooks = (): Book[] => {
+export const getBibleBooks = (versionData?: Record<string, string>): Book[] => {
   const bookMap: Record<string, { chapters: Set<number>; verses: number }> = {};
 
-  Object.keys(KJV_VERSES).forEach((key) => {
+  Object.keys(data(versionData)).forEach((key) => {
     const lastSpace = key.lastIndexOf(" ");
     const book = key.substring(0, lastSpace);
     const [chapterStr] = key.substring(lastSpace + 1).split(":");
@@ -119,7 +153,7 @@ export const getBibleBooks = (): Book[] => {
       name,
       chapters: data.chapters.size,
       verses: data.verses,
-      testament: NEW_TESTAMENT_BOOKS.includes(name as any) ? "New" : "Old",
+      testament: NEW_TESTAMENT_BOOKS.includes(name as typeof NEW_TESTAMENT_BOOKS[number]) ? "New" : "Old",
     }))
     .sort((a, b) => a.name.localeCompare(b.name));
 };
@@ -129,16 +163,17 @@ export const getBibleBooks = (): Book[] => {
 export const getVersesForChapter = (
   book: string,
   chapter: number,
+  versionData?: Record<string, string>,
 ): Record<number, string> => {
   const verses: Record<number, string> = {};
 
-  Object.keys(KJV_VERSES).forEach((key) => {
+  Object.keys(data(versionData)).forEach((key) => {
     const lastSpace = key.lastIndexOf(" ");
     const bookName = key.substring(0, lastSpace);
     const [chStr, vsStr] = key.substring(lastSpace + 1).split(":");
 
     if (bookName === book && Number(chStr) === chapter) {
-      verses[Number(vsStr)] = KJV_VERSES[key as keyof typeof KJV_VERSES];
+      verses[Number(vsStr)] = data(versionData)[key];
     }
   });
 
@@ -149,9 +184,10 @@ export const getVerseText = (
   book: string,
   chapter: number,
   verse: number,
+  versionData?: Record<string, string>,
 ): string | null => {
   const key = `${book} ${chapter}:${verse}`;
-  return KJV_VERSES[key as keyof typeof KJV_VERSES] ?? null;
+  return data(versionData)[key] ?? null;
 };
 
 export const getVerseRange = (
@@ -159,12 +195,13 @@ export const getVerseRange = (
   chapter: number,
   startVerse: number,
   endVerse: number,
+  versionData?: Record<string, string>,
 ): Record<number, string> => {
   const verses: Record<number, string> = {};
 
   for (let v = startVerse; v <= endVerse; v++) {
     const key = `${book} ${chapter}:${v}`;
-    const text = KJV_VERSES[key as keyof typeof KJV_VERSES];
+    const text = data(versionData)[key];
     if (text) verses[v] = text;
   }
 
@@ -195,13 +232,14 @@ export const getChaptersForBook = (book: string): number[] => {
 export const getVersesCountForChapter = (
   book: string,
   chapter: number,
+  versionData?: Record<string, string>,
 ): number => {
   if (!book || chapter < 1) return 0;
 
   let count = 0;
   const prefix = `${book} ${chapter}:`;
 
-  Object.keys(KJV_VERSES).forEach((key) => {
+  Object.keys(data(versionData)).forEach((key) => {
     if (key.startsWith(prefix)) count++;
   });
 
@@ -213,14 +251,15 @@ export const getVersesCountForChapter = (
 export const searchVerses = (
   query: string,
   limit = 100,
+  versionData?: Record<string, string>,
 ): VerseSearchResult[] => {
   if (!query.trim()) return [];
 
   const results: VerseSearchResult[] = [];
   const q = query.toLowerCase();
 
-  Object.keys(KJV_VERSES).some((key) => {
-    const text = KJV_VERSES[key as keyof typeof KJV_VERSES];
+  Object.keys(data(versionData)).some((key) => {
+    const text = data(versionData)[key];
 
     if (text.toLowerCase().includes(q)) {
       const lastSpace = key.lastIndexOf(" ");
@@ -241,7 +280,7 @@ export const searchVerses = (
 
 /* ---------------- PRE-INDEXED SEARCH (optional) ---------------- */
 
-interface IndexedVerse extends VerseSearchResult {}
+type IndexedVerse = VerseSearchResult;
 
 const verseIndex: Record<string, IndexedVerse[]> = {};
 let indexBuilt = false;
@@ -253,19 +292,20 @@ const tokenize = (text: string): string[] =>
     .split(/\s+/)
     .filter((w) => w.length > 2);
 
-export const buildVerseIndex = () => {
+export const buildVerseIndex = (): void => {
   if (indexBuilt) return;
 
-  Object.keys(KJV_VERSES).forEach((key) => {
-    const text = KJV_VERSES[key as keyof typeof KJV_VERSES];
-    const lastSpace = key.lastIndexOf(" ");
+  const src = _activeData; // always index active version
+  Object.keys(src).forEach(key => {
+    const text = src[key];
+    const lastSpace = key.lastIndexOf(' ');
     const book = key.substring(0, lastSpace);
     const [chapter, verse] = key
       .substring(lastSpace + 1)
-      .split(":")
+      .split(':')
       .map(Number);
 
-    tokenize(text).forEach((token) => {
+    tokenize(text).forEach(token => {
       if (!verseIndex[token]) verseIndex[token] = [];
       verseIndex[token].push({ book, chapter, verse, text });
     });

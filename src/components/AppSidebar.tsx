@@ -14,6 +14,7 @@ import {
   PenLine,
   Lightbulb,
   LayoutTemplate,
+  SproutIcon,
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -43,6 +44,11 @@ const adminNavItems = [
   { title: "Bible Reader", url: routes.bibleReader.path, icon: BookText },
   { title: "Daily Verse", url: routes.dailyVerse.path, icon: Sun },
   {
+    title: "daily Devotions",
+    url: routes.dailyDevotions.path,
+    icon: SproutIcon,
+  },
+  {
     title: "Verse Explanations",
     url: routes.verseExplanations.path,
     icon: BookMarked,
@@ -51,8 +57,16 @@ const adminNavItems = [
   { title: "My Activity", url: routes.myActivity.path, icon: Highlighter },
   { title: "User Activity", url: routes.useractivity.path, icon: Activity },
   { title: "Journal", url: routes.journal.path, icon: PenLine },
-  { title: "Journal Prompts", url: routes.journalPrompts.path, icon: Lightbulb },
-  { title: "Journal Templates", url: routes.journalTemplates.path, icon: LayoutTemplate },
+  {
+    title: "Journal Prompts",
+    url: routes.journalPrompts.path,
+    icon: Lightbulb,
+  },
+  {
+    title: "Journal Templates",
+    url: routes.journalTemplates.path,
+    icon: LayoutTemplate,
+  },
 ];
 
 const userNavItems = [

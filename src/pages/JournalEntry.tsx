@@ -132,7 +132,9 @@ const JournalEntryPage = () => {
   const [chapters, setChapters] = useState<number[]>([]);
   const [verses, setVerses] = useState<number[]>([]);
   const [verseText, setVerseText] = useState("");
-  const [templates, setTemplates] = useState<{ id: number; name: string; prompts: string[] }[]>([]);
+  const [templates, setTemplates] = useState<
+    { id: number; name: string; prompts: string[] }[]
+  >([]);
 
   useEffect(() => {
     if (isEditing) {
@@ -155,14 +157,21 @@ const JournalEntryPage = () => {
 
   useEffect(() => {
     if (entry.bookName && entry.chapter) {
-      const v = getVersesCountForChapter(entry.bookName, parseInt(entry.chapter));
+      const v = getVersesCountForChapter(
+        entry.bookName,
+        parseInt(entry.chapter),
+      );
       setVerses(Array.from({ length: v }, (_, i) => i + 1));
     }
   }, [entry.bookName, entry.chapter]);
 
   useEffect(() => {
     if (entry.bookName && entry.chapter && entry.verseNumber) {
-      const text = getVerseText(entry.bookName, parseInt(entry.chapter), parseInt(entry.verseNumber));
+      const text = getVerseText(
+        entry.bookName,
+        parseInt(entry.chapter),
+        parseInt(entry.verseNumber),
+      );
       setVerseText(text || "");
     } else {
       setVerseText("");
@@ -177,7 +186,9 @@ const JournalEntryPage = () => {
 
   const fetchTemplates = async () => {
     try {
-      const res = await sendPostRequest("journal", "templates/get-all", { isActive: true });
+      const res = await sendPostRequest("journal", "templates/get-all", {
+        isActive: true,
+      });
       if (res.returnCode === 200 && res.returnData) {
         setTemplates(res.returnData);
       }
@@ -189,12 +200,11 @@ const JournalEntryPage = () => {
   const handleApplyTemplate = (templateId: number) => {
     const template = templates.find((t) => t.id === templateId);
     if (template && template.prompts.length > 0) {
-      const promptsText = template.prompts.map((p, i) => `${i + 1}. ${p}`).join("\n\n");
+      const promptsText = template.prompts
+        .map((p, i) => `${i + 1}. ${p}`)
+        .join("\n\n");
       setEntry((prev) => ({
         ...prev,
-        content: prev.content
-          ? `${prev.content}\n\n---\n\n${template.name}:\n${promptsText}`
-          : `${template.name}:\n${promptsText}`,
       }));
       setShowTemplates(true);
     }
@@ -222,7 +232,11 @@ const JournalEntryPage = () => {
         });
       }
     } catch (error) {
-      toast({ title: "Error", description: "Failed to load entry", variant: "destructive" });
+      toast({
+        title: "Error",
+        description: "Failed to load entry",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -230,7 +244,11 @@ const JournalEntryPage = () => {
 
   const handleSave = async () => {
     if (!entry.content.trim()) {
-      toast({ title: "Error", description: "Content is required", variant: "destructive" });
+      toast({
+        title: "Error",
+        description: "Content is required",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -256,7 +274,11 @@ const JournalEntryPage = () => {
         navigate(routes.journal.path);
       }
     } catch (error) {
-      toast({ title: "Error", description: "Failed to save", variant: "destructive" });
+      toast({
+        title: "Error",
+        description: "Failed to save",
+        variant: "destructive",
+      });
     } finally {
       setSaving(false);
     }
@@ -320,7 +342,10 @@ const JournalEntryPage = () => {
       <div className="bg-gradient-to-r from-primary/5 via-accent/5 to-secondary/5 border-b">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
-            <Button variant="ghost" onClick={() => navigate(routes.journal.path)}>
+            <Button
+              variant="ghost"
+              onClick={() => navigate(routes.journal.path)}
+            >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Journal
             </Button>
@@ -390,7 +415,10 @@ const JournalEntryPage = () => {
                   </div>
                   <div className="space-y-2">
                     <Label>How are you feeling?</Label>
-                    <Select value={entry.mood} onValueChange={(v) => updateField("mood", v)}>
+                    <Select
+                      value={entry.mood}
+                      onValueChange={(v) => updateField("mood", v)}
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Select mood" />
                       </SelectTrigger>
@@ -471,7 +499,13 @@ const JournalEntryPage = () => {
                 <div className="space-y-2">
                   <Label>Testament</Label>
                   <Select
-                    value={entry.bookName ? (getBooksByTestament("Old").includes(entry.bookName) ? "Old" : "New") : ""}
+                    value={
+                      entry.bookName
+                        ? getBooksByTestament("Old").includes(entry.bookName)
+                          ? "Old"
+                          : "New"
+                        : ""
+                    }
                     onValueChange={(v) => {
                       setEntry((prev) => ({
                         ...prev,
@@ -554,7 +588,9 @@ const JournalEntryPage = () => {
                             <Label>Verse</Label>
                             <Select
                               value={entry.verseNumber}
-                              onValueChange={(v) => updateField("verseNumber", v)}
+                              onValueChange={(v) =>
+                                updateField("verseNumber", v)
+                              }
                             >
                               <SelectTrigger>
                                 <SelectValue placeholder="Select verse" />
@@ -576,7 +612,8 @@ const JournalEntryPage = () => {
                             <div className="bg-muted/50 rounded-lg p-3 text-sm font-serif leading-relaxed border border-border/50">
                               <p className="italic">"{verseText}"</p>
                               <p className="text-xs text-muted-foreground mt-2">
-                                — {entry.bookName} {entry.chapter}:{entry.verseNumber}
+                                — {entry.bookName} {entry.chapter}:
+                                {entry.verseNumber}
                               </p>
                             </div>
                           </div>
@@ -591,7 +628,11 @@ const JournalEntryPage = () => {
                     variant="outline"
                     className="w-full"
                     onClick={() => {
-                      if (entry.bookName && entry.chapter && entry.verseNumber) {
+                      if (
+                        entry.bookName &&
+                        entry.chapter &&
+                        entry.verseNumber
+                      ) {
                         navigate(
                           `/bible-reader?book=${entry.bookName}&chapter=${entry.chapter}`,
                         );

@@ -16,6 +16,16 @@
  * --------------------------------------------------------------------
  */
 
+// Static imports for all Bible versions (web version)
+import versesBsb from '../json/verses-bsb.json';
+import versesKjv from '../json/verses-kjv.json';
+import versesWeb from '../json/verses-web.json';
+import versesAsv from '../json/verses-asv.json';
+import versesYlt from '../json/verses-ylt.json';
+import versesDarby from '../json/verses-darby.json';
+import versesWebster from '../json/verses-webster.json';
+import versesBbe from '../json/verses-bbe.json';
+
 export interface BibleVersion {
   /** Short identifier stored in AsyncStorage / state */
   id: string;
@@ -27,15 +37,15 @@ export interface BibleVersion {
   description: string;
   /** Year of publication / translation */
   year: number;
-  /** Lazy-require function – keeps only the active version in memory */
-  load: () => Record<string, string>;
+  /** Data accessor – returns the verse data for this version */
+  data: Record<string, string>|any;
 }
 
 /**
  * All bundled free versions, ordered by popularity.
  *
- * Lazy `require()` calls ensure React Native's Metro bundler includes each
- * JSON in the bundle but only parses/holds the selected version in JS memory.
+ * Static imports ensure all versions are available in the bundle.
+ * The active version system in bibleUtils.ts manages memory usage.
  */
 export const BIBLE_VERSIONS: BibleVersion[] = [
   // 1. BSB — default; fast-growing modern translation, highly accurate
@@ -45,7 +55,7 @@ export const BIBLE_VERSIONS: BibleVersion[] = [
     abbreviation: 'BSB',
     description: 'A 2022 revision combining readability with accuracy (CC BY 4.0).',
     year: 2022,
-    load: () => require('../json/verses-bsb.json'),
+    data: versesBsb,
   },
   // 2. KJV — most historically beloved and widely memorised English Bible
   {
@@ -54,7 +64,7 @@ export const BIBLE_VERSIONS: BibleVersion[] = [
     abbreviation: 'KJV',
     description: 'The classic 1769 authorised English translation.',
     year: 1769,
-    load: () => require('../json/verses-kjv.json'),
+    data: versesKjv,
   },
   // 3. WEB — modern public-domain translation for contemporary readers
   {
@@ -63,7 +73,7 @@ export const BIBLE_VERSIONS: BibleVersion[] = [
     abbreviation: 'WEB',
     description: 'A modern public-domain translation in contemporary English.',
     year: 2000,
-    load: () => require('../json/verses-web.json'),
+    data: versesWeb,
   },
   // 4. ASV — respected scholarly revision, foundation for many later versions
   {
@@ -72,7 +82,7 @@ export const BIBLE_VERSIONS: BibleVersion[] = [
     abbreviation: 'ASV',
     description: 'The 1901 American revision of the KJV.',
     year: 1901,
-    load: () => require('../json/verses-asv.json'),
+    data: versesAsv,
   },
   // 5. YLT — beloved by word-for-word study readers
   {
@@ -81,7 +91,7 @@ export const BIBLE_VERSIONS: BibleVersion[] = [
     abbreviation: 'YLT',
     description: "Robert Young's highly literal 1862 word-for-word translation.",
     year: 1862,
-    load: () => require('../json/verses-ylt.json'),
+    data: versesYlt,
   },
   // 6. DARBY — popular with Plymouth Brethren and prophecy/dispensation students
   {
@@ -90,7 +100,7 @@ export const BIBLE_VERSIONS: BibleVersion[] = [
     abbreviation: 'DBY',
     description: "J. N. Darby's precise 1890 literal translation from Hebrew and Greek.",
     year: 1890,
-    load: () => require('../json/verses-darby.json'),
+    data: versesDarby,
   },
   // 7. WEBSTER — Noah Webster's KJV revision with modernised vocabulary
   {
@@ -99,7 +109,7 @@ export const BIBLE_VERSIONS: BibleVersion[] = [
     abbreviation: 'WBS',
     description: "Noah Webster's 1833 revision of the KJV with modernised language.",
     year: 1833,
-    load: () => require('../json/verses-webster.json'),
+    data: versesWebster,
   },
   // 8. BBE — simple ~1 000-word vocabulary; great for new readers and ESL
   {
@@ -108,7 +118,7 @@ export const BIBLE_VERSIONS: BibleVersion[] = [
     abbreviation: 'BBE',
     description: 'Uses a vocabulary of ~1 000 common words for clarity.',
     year: 1949,
-    load: () => require('../json/verses-bbe.json'),
+    data: versesBbe,
   },
 ];
 

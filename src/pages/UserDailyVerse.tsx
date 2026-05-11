@@ -1,41 +1,189 @@
 import { useEffect, useState } from "react";
-import { Sun, Heart, Share2, Loader2, BookOpen, Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import {
+  Sun,
+  Loader2,
+  BookOpen,
+  ChevronLeft,
+  Calendar,
+  Lightbulb,
+  GraduationCap,
+  BookMarked,
+  ChevronDown,
+  ChevronUp,
+  Copy,
+} from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { sendPostRequest } from "@/services/api";
-import { getVerseText } from "@/utilities/bibleUtils";
+import { getVerseText, setActiveVersion } from "@/utilities/bibleUtils";
+import { BIBLE_VERSIONS } from "@/assets/bibleVersion/json/bibleVersions";
 
 interface DailyVerse {
   id: number;
   bookName: string;
   chapter: number;
   verseNumber: number;
-  displayDate: string;
-  reflection: string;
+  bibleVersion?: string;
+  displayDate: string | object;
+  displayTime?: string | null;
+  reflection?: string | null;
+  explanation?: string | null;
+  learnMore?: string | null;
+  createdBy: string;
+  createdOn: string | object;
+  updatedBy?: string;
+  updatedOn?: string | object;
+  isPublished: boolean;
   verseText?: string;
 }
 
-const getFormattedDate = () => {
-  const today = new Date();
-  return today.toLocaleDateString('en-US', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
+function parseDisplayDate(displayDate: string | object): string {
+  if (!displayDate) return new Date().toISOString();
+  if (typeof displayDate === 'string') return displayDate;
+  try {
+    const obj = displayDate as { seconds?: number; _seconds?: number };
+    if (obj.seconds) return new Date(obj.seconds * 1000).toISOString();
+    if (obj._seconds) return new Date(obj._seconds * 1000).toISOString();
+  } catch {
+    return new Date().toISOString();
+  }
+  return new Date().toISOString();
+}
+
+function ExpandableContent({
+  content,
+  label,
+  icon: Icon,
+  accentColor,
+}: {
+  content: string;
+  label: string;
+  icon: React.ElementType;
+  accentColor: string;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const lines = content.split('\n').filter(p => p.trim());
+  const shouldTruncate = lines.length > 4;
+  const visibleLines = expanded ? lines : lines.slice(0, 4);
+  
+  const handleCopy = () => {
+    navigator.clipboard.writeText(content);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <Icon size={18} style={{ color: accentColor }} />
+          <span className="text-xs font-bold tracking-wide uppercase opacity-85" style={{ color: accentColor }}>
+            {label}
+          </span>
+        </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleCopy}
+          className="h-7 px-2 text-xs hover:bg-muted/50"
+        >
+          <Copy size={12} className="mr-1" />
+          {copied ? 'Copied!' : 'Copy'}
+        </Button>
+      </div>
+      <div className="space-y-2 pl-6">
+        {visibleLines.map((line, idx) => (
+          <p key={idx} className="text-sm leading-relaxed text-muted-foreground">
+            {line}
+          </p>
+        ))}
+        {shouldTruncate && (
+          <button
+            onClick={() => setExpanded(e => !e)}
+            className="flex items-center gap-1.5 mt-2 px-2 py-1 text-xs font-semibold hover:opacity-80 transition-opacity"
+            style={{ color: accentColor }}
+          >
+            {expanded ? (
+              <>
+                <ChevronUp size={12} />
+                Show less
+              </>
+            ) : (
+              <>
+                <ChevronDown size={12} />
+                Continue reading
+              </>
+            )}
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+const getGreetingHeader = () => {
+  const hour = new Date().getHours();
+  let greeting: string;
+  let icon: string;
+
+  if (hour < 5) {
+    greeting = 'Good evening';
+    icon = '🌙';
+  } else if (hour < 12) {
+    greeting = 'Good morning';
+    icon = '☀️';
+  } else if (hour < 17) {
+    greeting = 'Good afternoon';
+    icon = '🌤️';
+  } else {
+    greeting = 'Good evening';
+    icon = '🌅';
+  }
+
+  const time = new Date().toLocaleTimeString(undefined, {
+    hour: '2-digit',
+    minute: '2-digit',
   });
+
+  return `${greeting} ${icon} · ${time}`;
 };
 
-const isToday = (dateString: string): boolean => {
+const getFormattedDate = (dateVal: string | object): string => {
+  try {
+    const d = new Date(parseDisplayDate(dateVal));
+    return d.toLocaleDateString('en-US', {
+      weekday: 'long',
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric',
+    });
+  } catch {
+    return new Date().toLocaleDateString('en-US', {
+      weekday: 'long',
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric',
+    });
+  }
+};
+
+const isToday = (dateString: string | object): boolean => {
   if (!dateString) return false;
-  const date = new Date(dateString);
-  const today = new Date();
-  return date.toDateString() === today.toDateString();
+  try {
+    const date = new Date(parseDisplayDate(dateString));
+    const today = new Date();
+    return date.toDateString() === today.toDateString();
+  } catch {
+    return false;
+  }
 };
 
 export default function UserDailyVerse() {
   const [dailyVerse, setDailyVerse] = useState<DailyVerse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [scrollOffset, setScrollOffset] = useState(0);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -46,6 +194,10 @@ export default function UserDailyVerse() {
         const { returnData, returnCode, returnMessage } = response;
 
         if (returnCode === 200 && returnData) {
+          // Set the active version to match the verse's Bible version
+          if (returnData.bibleVersion) {
+            setActiveVersion(returnData.bibleVersion);
+          }
           const verseText = getVerseText(
             returnData.bookName,
             returnData.chapter,
@@ -79,12 +231,24 @@ export default function UserDailyVerse() {
     fetchDailyVerse();
   }, [toast]);
 
+  const verseText = dailyVerse ? getVerseText(
+    dailyVerse.bookName,
+    dailyVerse.chapter,
+    dailyVerse.verseNumber
+  ) || '' : '';
+
+  const verseReference = dailyVerse ? `${dailyVerse.bookName} ${dailyVerse.chapter}:${dailyVerse.verseNumber}` : '';
+  const headerTitle = scrollOffset > 50 ? verseReference : getGreetingHeader();
+
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-background to-muted/30">
         <div className="flex flex-col items-center gap-4">
-          <Loader2 className="w-12 h-12 animate-spin text-primary" />
-          <p className="text-muted-foreground">Loading today's verse...</p>
+          <div className="relative">
+            <div className="absolute inset-0 rounded-full bg-primary/20 animate-pulse" />
+            <Loader2 className="w-12 h-12 animate-spin text-primary" />
+          </div>
+          <p className="text-sm text-muted-foreground">Preparing today's verse...</p>
         </div>
       </div>
     );
@@ -92,26 +256,31 @@ export default function UserDailyVerse() {
 
   if (!dailyVerse) {
     return (
-      <div className="p-6 lg:p-8">
-        <div className="max-w-3xl mx-auto">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center">
-              <Sun className="w-6 h-6 text-amber-600" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold font-[family-name:var(--font-heading)]">
-                Daily Verse
-              </h1>
-              <p className="text-muted-foreground">Start each day with God's Word</p>
+      <div className="min-h-screen bg-gradient-to-b from-background to-muted/30 p-6 lg:p-8">
+        <div className="max-w-2xl mx-auto">
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center">
+                <Sun className="w-6 h-6 text-amber-600" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold">Daily Verse</h1>
+                <p className="text-sm text-muted-foreground">Start each day with God's Word</p>
+              </div>
             </div>
           </div>
 
-          <Card className="border-amber-200 bg-amber-50/50">
-            <CardContent className="py-12 text-center">
-              <Sun className="w-16 h-16 mx-auto mb-4 text-amber-400" />
-              <h3 className="text-xl font-semibold mb-2">No verse available today</h3>
-              <p className="text-muted-foreground">
+          <Card className="border-amber-200 bg-amber-50/50 shadow-lg">
+            <CardContent className="py-16 text-center">
+              <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-amber-100 flex items-center justify-center">
+                <BookOpen className="w-10 h-10 text-amber-400" />
+              </div>
+              <h3 className="text-xl font-semibold mb-2">No verse available yet</h3>
+              <p className="text-muted-foreground mb-4">
                 Check back later for today's inspirational verse.
+              </p>
+              <p className="text-xs text-amber-600">
+                New verses are added daily • Refresh to check again
               </p>
             </CardContent>
           </Card>
@@ -121,81 +290,160 @@ export default function UserDailyVerse() {
   }
 
   return (
-    <div className="p-6 lg:p-8 min-h-screen bg-gradient-to-b from-amber-50/30 to-background">
-      <div className="max-w-3xl mx-auto space-y-8">
-        <div className="flex items-center gap-3 mb-8">
-          <div className="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center">
-            <Sun className="w-6 h-6 text-amber-600" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-bold font-[family-name:var(--font-heading)]">
-              Daily Verse
-            </h1>
-            <p className="text-muted-foreground">{getFormattedDate()}</p>
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
+      {/* Header */}
+      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm border-b">
+        <div className="max-w-2xl mx-auto px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between">
+            <h1 className="text-lg font-semibold text-foreground">{headerTitle}</h1>
+            <Button variant="ghost" size="icon" onClick={() => window.history.back()}>
+              <ChevronLeft className="w-5 h-5" />
+            </Button>
           </div>
         </div>
+      </div>
 
-        {isToday(dailyVerse.displayDate) && (
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-amber-100 text-amber-800 rounded-full w-fit">
-            <Sparkles className="w-4 h-4" />
-            <span className="text-sm font-medium">Today's Verse</span>
+      {/* Content */}
+      <div
+        className="flex-1 overflow-y-auto"
+        onScroll={(e) => setScrollOffset((e.target as HTMLElement).scrollTop)}
+      >
+        <div className="max-w-2xl mx-auto px-6 lg:px-8 py-6 space-y-6">
+
+          {/* Date Badge */}
+          <div className="flex items-center gap-2">
+            <Calendar className="w-4 h-4 text-primary" />
+            <span className="text-sm font-medium text-primary">
+              {isToday(dailyVerse.displayDate) ? 'Today' : getFormattedDate(dailyVerse.displayDate)}
+            </span>
           </div>
-        )}
 
-        <Card className="border-0 shadow-xl bg-gradient-to-br from-primary/5 via-white to-amber-50/30">
-          <CardHeader className="pb-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <BookOpen className="w-5 h-5 text-primary" />
-                <span className="text-sm text-muted-foreground">
-                  {dailyVerse.bookName} {dailyVerse.chapter}:{dailyVerse.verseNumber}
-                </span>
+          {/* Main Verse Card */}
+          <Card className="border-0 shadow-xl bg-white dark:bg-card overflow-hidden">
+            <div className="h-1 bg-gradient-to-r from-primary to-primary/80" />
+            <CardContent className="p-8 pb-6">
+              <div className="text-xs font-bold uppercase tracking-wider text-primary opacity-80 mb-4">
+                Verse of the Day
               </div>
-              <div className="flex items-center gap-1">
-                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-rose-500 hover:bg-rose-50">
-                  <Heart className="w-5 h-5" />
-                </Button>
-                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary hover:bg-primary/10">
-                  <Share2 className="w-5 h-5" />
-                </Button>
+
+              <div className="relative">
+                <div className="text-6xl text-primary/10 leading-none mb-2 font-serif">"</div>
+                <blockquote className="text-xl lg:text-2xl font-serif leading-relaxed text-foreground/90 italic -mt-8 mb-4 px-4">
+                  {verseText || dailyVerse.reflection || 'The Lord is my shepherd, I shall not want.'}
+                </blockquote>
+                <div className="text-6xl text-primary/10 leading-none text-right -mt-4 mb-4 font-serif">"</div>
               </div>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <blockquote className="text-2xl lg:text-3xl font-serif leading-relaxed text-foreground/90 italic pl-4 border-l-4 border-primary/30">
-              "{dailyVerse.verseText || dailyVerse.reflection}"
-            </blockquote>
 
-            {dailyVerse.reflection && (
-              <div className="bg-amber-50/60 dark:bg-amber-950/20 rounded-xl p-5 border border-amber-100 dark:border-amber-900/40">
-                <h4 className="font-semibold text-amber-800 dark:text-amber-200 mb-2 flex items-center gap-2">
-                  <Sparkles className="w-4 h-4" />
-                  Reflection
-                </h4>
-                <p className="text-foreground/80 leading-relaxed">
-                  {dailyVerse.reflection}
-                </p>
+              <div className="border-t border-border/50 pt-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 rounded-full bg-primary" />
+                    <span className="text-lg font-semibold text-primary">
+                      {verseReference}
+                    </span>
+                    {dailyVerse.bibleVersion && (
+                      <div className="px-3 py-1 bg-primary/10 rounded-full">
+                        <span className="text-xs font-medium text-primary">
+                          {BIBLE_VERSIONS.find(v => v.id === dailyVerse.bibleVersion)?.abbreviation || dailyVerse.bibleVersion}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      navigator.clipboard.writeText(`${verseText} — ${verseReference}`);
+                      toast({ title: "Copied to clipboard", description: "Verse copied successfully." });
+                    }}
+                    className="h-8 px-3 text-xs hover:bg-muted/50"
+                  >
+                    <Copy size={14} className="mr-1" />
+                    Copy
+                  </Button>
+                </div>
               </div>
-            )}
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        <div className="flex items-center justify-center gap-4 pt-4">
-          <Button variant="outline" size="sm" disabled>
-            <ChevronLeft className="w-4 h-4 mr-1" />
-            Previous
-          </Button>
-          <span className="text-sm text-muted-foreground px-4">
-            Today's Verse
-          </span>
-          <Button variant="outline" size="sm" disabled>
-            Next
-            <ChevronRight className="w-4 h-4 ml-1" />
-          </Button>
-        </div>
+          {/* Reflection Card */}
+          {dailyVerse.reflection && (
+            <Card className="border-0 shadow-lg bg-white dark:bg-card overflow-hidden">
+              <div className="h-1 bg-gradient-to-r from-purple-500 to-purple-600" />
+              <CardContent className="p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <BookMarked className="w-5 h-5 text-purple-500" />
+                  <span className="text-sm font-bold uppercase tracking-wide text-purple-600">
+                    Reflection
+                  </span>
+                </div>
+                <div className="border-l-2 border-purple-200 pl-4">
+                  <ExpandableContent
+                    content={dailyVerse.reflection}
+                    label="REFLECTION"
+                    icon={BookMarked}
+                    accentColor="#8B5CF6"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
-        <div className="text-center text-sm text-muted-foreground pt-4">
-          <p>Come back tomorrow for a new verse!</p>
+          {/* Explanation Card */}
+          {dailyVerse.explanation && (
+            <Card className="border-0 shadow-lg bg-white dark:bg-card overflow-hidden">
+              <div className="h-1 bg-gradient-to-r from-blue-500 to-blue-600" />
+              <CardContent className="p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <Lightbulb className="w-5 h-5 text-blue-500" />
+                  <span className="text-sm font-bold uppercase tracking-wide text-blue-600">
+                    Explanation
+                  </span>
+                </div>
+                <div className="border-l-2 border-blue-200 pl-4">
+                  <ExpandableContent
+                    content={dailyVerse.explanation}
+                    label="EXPLANATION"
+                    icon={Lightbulb}
+                    accentColor="#3B82F6"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Learn More Card */}
+          {dailyVerse.learnMore && (
+            <Card className="border-0 shadow-lg bg-white dark:bg-card overflow-hidden">
+              <div className="h-1 bg-gradient-to-r from-emerald-500 to-emerald-600" />
+              <CardContent className="p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <GraduationCap className="w-5 h-5 text-emerald-500" />
+                  <span className="text-sm font-bold uppercase tracking-wide text-emerald-600">
+                    Learn More
+                  </span>
+                </div>
+                <div className="border-l-2 border-emerald-200 pl-4">
+                  <ExpandableContent
+                    content={dailyVerse.learnMore}
+                    label="LEARN MORE"
+                    icon={GraduationCap}
+                    accentColor="#10B981"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Footer */}
+          <div className="text-center py-8 space-y-2">
+            <p className="text-sm text-muted-foreground italic">
+              "Let God's word guide your thoughts and actions."
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Meditate on this verse today
+            </p>
+          </div>
         </div>
       </div>
     </div>

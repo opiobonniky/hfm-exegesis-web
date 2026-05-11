@@ -4,6 +4,7 @@ import { routes } from "./Routes/routes";
 
 const adminOnlyRoutes = [
   { path: routes.addDailyVerse.path, pattern: /^\/add-daily-verse/ },
+  { path: routes.addDailyDevotion.path, pattern: /^\/add-daily-devotion/ },
   { path: routes.addExplanation.path, pattern: /^\/add-explanation/ },
   { path: routes.systemUsers.path, pattern: /^\/system-users/ },
   { path: routes.useractivity.path, pattern: /^\/user-activity/ },
@@ -12,6 +13,7 @@ const adminOnlyRoutes = [
   { path: routes.readingPlanDetail.path, pattern: /^\/reading-plan-detail/ },
   { path: routes.editVerseExplanation.path, pattern: /^\/add-verse-explanation/ },
   { path: routes.dailyVerse.path, pattern: /^\/daily-verse$/ },
+  { path: routes.dailyDevotions.path, pattern: /^\/daily-devotions$/ },
   { path: routes.dashboard.path, pattern: /^\/dashboard$/ },
 ];
 
@@ -19,6 +21,7 @@ const userReadOnlyRoutes = [
   routes.verseExplanations.path,
   routes.readingPlans.path,
   routes.dailyVerse.path,
+  routes.dailyDevotions.path,
   routes.bibleReader.path,
 ];
 
@@ -29,7 +32,7 @@ export function ProtectedRoute() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+        <div className="animate-accordion-down rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
       </div>
     );
   }

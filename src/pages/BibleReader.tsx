@@ -525,12 +525,16 @@ function VoicePlayerBar({
   canSkipForward,
   repeatMode,
   afterPlay,
+  speechRate,
+  sleepTimerRemaining,
   onPauseResume,
   onStop,
   onSkipBack,
   onSkipForward,
   onToggleRepeat,
   onToggleAfterPlay,
+  onSpeechRateChange,
+  onSleepTimerChange,
 }: {
   currentItem: SpeechItem | null;
   currentIndex: number;
@@ -544,12 +548,16 @@ function VoicePlayerBar({
   canSkipForward: boolean;
   repeatMode: "none" | "one" | "all";
   afterPlay: "continue" | "stop";
+  speechRate: number;
+  sleepTimerRemaining: number;
   onPauseResume: () => void;
   onStop: () => void;
   onSkipBack: () => void;
   onSkipForward: () => void;
   onToggleRepeat: () => void;
   onToggleAfterPlay: () => void;
+  onSpeechRateChange: (rate: number) => void;
+  onSleepTimerChange: (minutes: number | null) => void;
 }) {
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 px-3 pb-3 sm:px-4 sm:pb-4 pointer-events-none">
@@ -644,6 +652,45 @@ function VoicePlayerBar({
                   <span className="absolute text-[8px] font-bold mt-3">
                     ALL
                   </span>
+                )}
+              </button>
+
+              {/* Speed Control */}
+              <button
+                onClick={() => {
+                  const speeds = [0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0];
+                  const currentIdx = speeds.indexOf(speechRate);
+                  const nextIdx = (currentIdx + 1) % speeds.length;
+                  onSpeechRateChange(speeds[nextIdx]);
+                }}
+                title={`Speed: ${speechRate}x`}
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/60 active:scale-95 transition-all font-bold text-xs"
+              >
+                {speechRate}x
+              </button>
+
+              {/* Sleep Timer */}
+              <button
+                onClick={() => {
+                  const options: (number | null)[] = [null, 5, 15, 30, 60];
+                  const currentIdx = sleepTimerRemaining > 0 
+                    ? options.findIndex(o => o !== null && o * 60 === sleepTimerRemaining)
+                    : 0;
+                  const nextIdx = currentIdx === -1 ? 1 : (currentIdx + 1) % options.length;
+                  onSleepTimerChange(options[nextIdx]);
+                }}
+                title={sleepTimerRemaining > 0 ? `Sleep timer: ${Math.floor(sleepTimerRemaining / 60)}m ${sleepTimerRemaining % 60}s` : "Set sleep timer"}
+                className={cn(
+                  "w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center active:scale-95 transition-all font-bold text-xs",
+                  sleepTimerRemaining > 0
+                    ? "text-amber-500 bg-amber-500/10"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                )}
+              >
+                {sleepTimerRemaining > 0 ? (
+                  <span>{Math.ceil(sleepTimerRemaining / 60)}m</span>
+                ) : (
+                  <span>💤</span>
                 )}
               </button>
 
@@ -750,10 +797,21 @@ export default function BibleReader() {
     Record<string, { id: number; prompt: string; category: string }[]>
   >({});
 
-  const [chapterPrompts, setChapterPrompts] = useState<Record<string, { id: number; prompt: string; category: string }[]>>({});
-  
+  const [chapterPrompts, setChapterPrompts] = useState<
+    Record<string, { id: number; prompt: string; category: string }[]>
+  >({});
+
   const [allPromptsLoaded, setAllPromptsLoaded] = useState(false);
-  const [allPrompts, setAllPrompts] = useState<{ id: number; prompt: string; category: string; bookName: string | null; chapter: number | null; verseNumber: number | null }[]>([]);
+  const [allPrompts, setAllPrompts] = useState<
+    {
+      id: number;
+      prompt: string;
+      category: string;
+      bookName: string | null;
+      chapter: number | null;
+      verseNumber: number | null;
+    }[]
+  >([]);
 
   const [voiceMode, setVoiceMode] = useState<"chapter" | "selected" | null>(
     null,
@@ -764,6 +822,9 @@ export default function BibleReader() {
   const [speechItems, setSpeechItems] = useState<SpeechItem[]>([]);
   const [repeatMode, setRepeatMode] = useState<"none" | "one" | "all">("none");
   const [afterPlay, setAfterPlay] = useState<"continue" | "stop">("continue");
+  const [speechRate, setSpeechRate] = useState<number>(0.92);
+  const [sleepTimer, setSleepTimer] = useState<number | null>(null);
+  const [sleepTimerRemaining, setSleepTimerRemaining] = useState<number>(0);
 
   const speechItemsRef = useRef<SpeechItem[]>([]);
   const currentIdxRef = useRef(0);
@@ -773,10 +834,11 @@ export default function BibleReader() {
   const repeatModeRef = useRef<"none" | "one" | "all">("none");
   const afterPlayRef = useRef<"continue" | "stop">("continue");
   const voiceModeRef = useRef<"chapter" | "selected" | null>(null);
+  const speechRateRef = useRef(0.92);
   const displayBookRef = useRef(displayBook);
   const displayChapterRef = useRef(displayChapter);
-  const lastCharIndexRef = useRef(0);
-  const isResumingRef = useRef(false);
+  const isSpeedChangingRef = useRef(false);
+  const sleepTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     repeatModeRef.current = repeatMode;
@@ -797,6 +859,32 @@ export default function BibleReader() {
   useEffect(() => {
     displayChapterRef.current = displayChapter;
   }, [displayChapter]);
+
+  useEffect(() => {
+    speechRateRef.current = speechRate;
+  }, [speechRate]);
+
+  // Sleep timer countdown effect
+  useEffect(() => {
+    if (sleepTimer && sleepTimer > 0) {
+      const interval = setInterval(() => {
+        setSleepTimerRemaining(prev => {
+          if (prev <= 1) {
+            // Timer expired - stop speaking
+            window.speechSynthesis.cancel();
+            isReadingRef.current = false;
+            setIsSpeaking(false);
+            setIsPaused(false);
+            setSleepTimer(null);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+
+      return () => clearInterval(interval);
+    }
+  }, [sleepTimer]);
 
   const [showSearchModal, setShowSearchModal] = useState(false);
   const [showHighlightPicker, setShowHighlightPicker] = useState(false);
@@ -938,35 +1026,40 @@ export default function BibleReader() {
     [isAuthenticated],
   );
 
-  const loadChapterPrompts = useCallback(async (book: string, chapter: number) => {
-    const key = `${book}-${chapter}`;
-    if (chapterPrompts[key]) return;
-    
-    let promptsToUse = allPrompts;
-    
-    if (!allPromptsLoaded) {
-      try {
-        const res = await sendPostRequest("journal", "prompts/get-all", {
-          isActive: true,
-        });
-        if (res.returnCode === 200 && res.returnData) {
-          promptsToUse = res.returnData;
-          setAllPrompts(res.returnData);
-          setAllPromptsLoaded(true);
+  const loadChapterPrompts = useCallback(
+    async (book: string, chapter: number) => {
+      const key = `${book}-${chapter}`;
+      if (chapterPrompts[key]) return;
+
+      let promptsToUse = allPrompts;
+
+      if (!allPromptsLoaded) {
+        try {
+          const res = await sendPostRequest("journal", "prompts/get-all", {
+            isActive: true,
+          });
+          if (res.returnCode === 200 && res.returnData) {
+            promptsToUse = res.returnData;
+            setAllPrompts(res.returnData);
+            setAllPromptsLoaded(true);
+          }
+        } catch (e) {
+          console.error(e);
+          return;
         }
-      } catch (e) {
-        console.error(e);
-        return;
       }
-    }
-    
-    const chapterPromptsForChapter = promptsToUse.filter((p: any) => 
-      p.bookName === book && 
-      p.chapter === chapter && 
-      !p.verseNumber
-    );
-    setChapterPrompts((prev) => ({ ...prev, [key]: chapterPromptsForChapter }));
-  }, [allPrompts, allPromptsLoaded, chapterPrompts]);
+
+      const chapterPromptsForChapter = promptsToUse.filter(
+        (p: any) =>
+          p.bookName === book && p.chapter === chapter && !p.verseNumber,
+      );
+      setChapterPrompts((prev) => ({
+        ...prev,
+        [key]: chapterPromptsForChapter,
+      }));
+    },
+    [allPrompts, allPromptsLoaded, chapterPrompts],
+  );
 
   // ── Effects ──
   useEffect(() => {
@@ -1079,34 +1172,40 @@ export default function BibleReader() {
     displayChapter >= maxChapterForDisplay;
 
   // ── Speech ──
-  const speakOne = (text: string, startOffset = 0): Promise<void> =>
+  // activeUtteranceRef holds the in-flight utterance so skip/stop can cancel it.
+  const activeUtteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+
+  const speakOne = (text: string): Promise<void> =>
     new Promise((resolve) => {
       if (!("speechSynthesis" in window)) {
         resolve();
         return;
       }
-      skipRef.current = resolve;
-      // If we're resuming, we only speak from the offset
-      const u = new SpeechSynthesisUtterance(text.slice(startOffset));
-      u.rate = 0.92;
+
+      const u = new SpeechSynthesisUtterance(text);
+      u.rate = speechRateRef.current;
       u.pitch = 1.0;
-      u.onboundary = (event) => {
-        if (event.name === "word") {
-          // Track the character index within the original full text
-          lastCharIndexRef.current = startOffset + event.charIndex;
-        }
+      activeUtteranceRef.current = u;
+
+      skipRef.current = () => {
+        activeUtteranceRef.current = null;
+        resolve();
       };
+
       u.onend = () => {
-        skipRef.current = null;
-        if (!isPausedRef.current) {
-          lastCharIndexRef.current = 0;
-        }
-        resolve();
-      };
-      u.onerror = () => {
+        activeUtteranceRef.current = null;
         skipRef.current = null;
         resolve();
       };
+
+      u.onerror = (e) => {
+        // "interrupted" fires when we cancel() for skip/stop — already resolved via skipRef.
+        if (e.error === "interrupted") return;
+        activeUtteranceRef.current = null;
+        skipRef.current = null;
+        resolve();
+      };
+
       window.speechSynthesis.speak(u);
     });
 
@@ -1158,87 +1257,32 @@ export default function BibleReader() {
 
   const runLoop = async () => {
     while (isReadingRef.current) {
-      const items = speechItemsRef.current;
-      if (currentIdxRef.current >= items.length) {
-        // We reached the end of current playlist
-        if (repeatModeRef.current === "all") {
-          currentIdxRef.current = 0;
-          lastCharIndexRef.current = 0;
-        } else if (afterPlayRef.current === "continue") {
-          lastCharIndexRef.current = 0;
-          if (voiceModeRef.current === "selected") {
-            // Transition from selection to the rest of the current chapter
-            const lastItem = items[items.length - 1];
-            if (!lastItem) break;
+      const i = currentIdxRef.current;
 
-            const p = parseVerseKey(lastItem.verseKey);
-            if (p) {
-              // We need the verses of the CURRENT book and chapter
-              const mod = await VERSION_FILES[versionId]();
-              const verses = mod.default;
-              const allChapterVerses = processVerses(verses, p.book, p.chapter);
-              const remainingVerses = allChapterVerses.filter(
-                (v) => v.num > p.verse,
-              );
-
-              if (remainingVerses.length > 0) {
-                const nextItems = remainingVerses.map((v) => ({
-                  verseKey: v.key,
-                  verseNum: v.num,
-                  text: `Verse ${v.num}. ${cleanTextForSpeech(v.text)}`,
-                }));
-                speechItemsRef.current = nextItems;
-                setSpeechItems(nextItems);
-                currentIdxRef.current = 0;
-                setVoiceMode("chapter");
-                continue;
-              } else {
-                // No more verses in this chapter, move to next chapter
-                const success = await advanceToNextChapter();
-                if (!success) break;
-                setVoiceMode("chapter");
-                continue;
-              }
-            } else {
-              break;
-            }
-          } else {
-            // Auto-advance to next chapter
-            const success = await advanceToNextChapter();
-            if (!success) break;
-            setVoiceMode("chapter");
-            continue;
-          }
-        } else {
-          // Stop at the end
-          break;
+      if (i >= speechItemsRef.current.length) {
+        if (
+          afterPlayRef.current === "continue" &&
+          voiceModeRef.current === "chapter"
+        ) {
+          const advanced = await advanceToNextChapter();
+          if (!advanced) break;
+          continue;
         }
+        break;
       }
 
-      while (isPausedRef.current && isReadingRef.current)
-        await new Promise((r) => setTimeout(r, 100));
-
-      if (!isReadingRef.current) break;
-
-      const i = currentIdxRef.current;
       setCurrentSpeechIdx(i);
+      await speakOne(speechItemsRef.current[i].text);
 
-      await speakOne(speechItemsRef.current[i].text, lastCharIndexRef.current);
-
-      // If we are paused, don't increment and don't skip.
-      // Just continue to the top of the loop where it will wait.
-      if (isPausedRef.current || !isReadingRef.current) {
+      // Speed change: re-speak same verse from the beginning at the new rate.
+      if (isSpeedChangingRef.current) {
+        isSpeedChangingRef.current = false;
         continue;
       }
 
-      // If we reached here, the verse finished naturally
-      lastCharIndexRef.current = 0;
-
-      // Only increment if the index hasn't been changed by a skip button
+      // Advance to next verse (unless a skip already changed the index).
       if (currentIdxRef.current === i) {
-        if (repeatModeRef.current === "one") {
-          // Keep current index
-        } else {
+        if (repeatModeRef.current !== "one") {
           currentIdxRef.current = i + 1;
         }
       }
@@ -1304,6 +1348,8 @@ export default function BibleReader() {
   const stopSpeaking = useCallback(() => {
     isReadingRef.current = false;
     isPausedRef.current = false;
+    // Must resume before cancel — browser ignores cancel() while paused.
+    if (window.speechSynthesis.paused) window.speechSynthesis.resume();
     window.speechSynthesis.cancel();
     skipRef.current?.();
     skipRef.current = null;
@@ -1316,15 +1362,15 @@ export default function BibleReader() {
 
   const pauseResume = () => {
     if (isPausedRef.current) {
-      // Resume
+      // Resume — native browser resumes exactly where audio was suspended.
       isPausedRef.current = false;
       setIsPaused(false);
+      window.speechSynthesis.resume();
     } else {
-      // Pause
-      // Set the ref immediately before calling cancel to prevent race conditions in the loop
+      // Pause — native browser suspends audio mid-word; no position tracking needed.
       isPausedRef.current = true;
       setIsPaused(true);
-      window.speechSynthesis.cancel();
+      window.speechSynthesis.pause();
     }
   };
 
@@ -1340,8 +1386,46 @@ export default function BibleReader() {
     setAfterPlay((prev) => (prev === "continue" ? "stop" : "continue"));
   };
 
+  const setSleepTimerMinutes = (minutes: number | null) => {
+    if (minutes === null) {
+      // Cancel timer
+      setSleepTimer(null);
+      setSleepTimerRemaining(0);
+    } else {
+      const seconds = minutes * 60;
+      setSleepTimer(seconds);
+      setSleepTimerRemaining(seconds);
+    }
+  };
+
+  const handleSpeedChange = (newRate: number) => {
+    setSpeechRate(newRate);
+    speechRateRef.current = newRate;
+    if (!isReadingRef.current) return;
+
+    // Signal the loop to re-speak the current verse at the new rate.
+    isSpeedChangingRef.current = true;
+
+    if (isPausedRef.current) {
+      // Must resume before cancel — browser ignores cancel() while paused.
+      isPausedRef.current = false;
+      setIsPaused(false);
+      window.speechSynthesis.resume();
+    }
+
+    // Cancel current utterance — onerror("interrupted") is swallowed in speakOne,
+    // and skipRef resolves the promise so the runLoop re-speaks immediately.
+    window.speechSynthesis.cancel();
+    skipRef.current?.();
+    skipRef.current = null;
+  };
+
   const skipForward = () => {
-    lastCharIndexRef.current = 0;
+    if (isPausedRef.current) {
+      isPausedRef.current = false;
+      setIsPaused(false);
+      window.speechSynthesis.resume();
+    }
     const next = currentIdxRef.current + 1;
     if (next >= speechItemsRef.current.length) {
       if (afterPlay === "continue" && voiceMode === "chapter") {
@@ -1362,7 +1446,11 @@ export default function BibleReader() {
   };
 
   const skipBack = () => {
-    lastCharIndexRef.current = 0;
+    if (isPausedRef.current) {
+      isPausedRef.current = false;
+      setIsPaused(false);
+      window.speechSynthesis.resume();
+    }
     const prev = Math.max(0, currentIdxRef.current - 1);
     currentIdxRef.current = prev;
     window.speechSynthesis.cancel();
@@ -1486,8 +1574,10 @@ export default function BibleReader() {
   const isHighlighted = (vk: string) => highlights[vk]?.color;
   const isFavorite = (vk: string) => favorites.has(vk);
   const getVerseNote = (vk: string) => verseNotes[vk] || null;
-  const getVerseExplanation = (vk: string) => verseExplanationMap[vk]?.explanation || null;
-  const getVerseExplanationPrompts = (vk: string) => verseExplanationPrompts[vk] || [];
+  const getVerseExplanation = (vk: string) =>
+    verseExplanationMap[vk]?.explanation || null;
+  const getVerseExplanationPrompts = (vk: string) =>
+    verseExplanationPrompts[vk] || [];
 
   const toggleExplanation = async (verseKey: string) => {
     if (expandedExplanation === verseKey) {
@@ -1512,7 +1602,7 @@ export default function BibleReader() {
     const p = parseVerseKey(verseKey);
     if (!p) return;
     setExplanationLoading(true);
-    
+
     let promptsToUse = allPrompts;
     if (!allPromptsLoaded) {
       try {
@@ -1528,20 +1618,21 @@ export default function BibleReader() {
         console.error("Error loading prompts:", e);
       }
     }
-    
+
     try {
-      const versePrompts = promptsToUse.filter((prompt: any) => 
-        prompt.bookName === p.book && 
-        prompt.chapter === p.chapter && 
-        prompt.verseNumber === p.verse
+      const versePrompts = promptsToUse.filter(
+        (prompt: any) =>
+          prompt.bookName === p.book &&
+          prompt.chapter === p.chapter &&
+          prompt.verseNumber === p.verse,
       );
-      
+
       const res = await sendPostRequest("bible", "get-verse-explanation", {
         bookName: p.book,
         chapter: p.chapter,
         verseNumber: p.verse,
       });
-      
+
       if (res?.returnCode === 404) {
         setExplanationLoading(false);
         toast({
@@ -1550,7 +1641,7 @@ export default function BibleReader() {
         });
         return;
       }
-      
+
       if (res?.returnCode === 200 && res.returnData?.explanation) {
         const data = res.returnData;
         let promptIds: number[] = [];
@@ -1564,20 +1655,20 @@ export default function BibleReader() {
             console.error("Error parsing promptIds:", e);
           }
         }
-        
+
         let allVersePrompts = [...versePrompts];
         if (promptIds.length > 0) {
-          const additionalPrompts = promptsToUse.filter((prompt: any) => 
-            promptIds.includes(prompt.id)
+          const additionalPrompts = promptsToUse.filter((prompt: any) =>
+            promptIds.includes(prompt.id),
           );
           allVersePrompts = [...allVersePrompts, ...additionalPrompts];
         }
-        
+
         setVerseExplanationMap((prev) => ({
           ...prev,
           [verseKey]: { explanation: data.explanation, promptIds },
         }));
-        
+
         if (allVersePrompts.length > 0) {
           setVerseExplanationPrompts((prev) => ({
             ...prev,
@@ -2240,7 +2331,10 @@ export default function BibleReader() {
                   const parts = selectedVerses[0].split(":");
                   if (parts.length > 1) verseNum = parts[1];
                 }
-                window.open(`/journal/new?book=${selectedBook}&chapter=${selectedChapter}&verse=${verseNum}`, "_blank");
+                window.open(
+                  `/journal/new?book=${selectedBook}&chapter=${selectedChapter}&verse=${verseNum}`,
+                  "_blank",
+                );
               }}
               icon={<PenLine className="w-3 h-3" />}
               label="Journal"
@@ -2326,7 +2420,8 @@ export default function BibleReader() {
                           const isFav = isFavorite(verse.key);
                           const vNote = getVerseNote(verse.key);
                           const vExplanation = getVerseExplanation(verse.key);
-                          const vExplanationPrompts = getVerseExplanationPrompts(verse.key);
+                          const vExplanationPrompts =
+                            getVerseExplanationPrompts(verse.key);
                           const isExplanationExpanded =
                             expandedExplanation === verse.key;
                           const isCurrentlyReading =
@@ -2400,92 +2495,118 @@ export default function BibleReader() {
                                     }}
                                     disabled={explanationLoading}
                                     className={cn(
-                                      "inline-flex items-center gap-0.5 ml-1 text-[0.6rem] font-medium uppercase tracking-wider px-1.5 py-0.5 rounded transition-all duration-150",
+                                      "inline-flex items-center gap-1 ml-1.5 text-[0.65rem] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-md transition-all duration-150",
                                       isExplanationExpanded
-                                        ? "bg-primary/20 text-primary"
-                                        : "bg-primary/10 text-primary/70 hover:bg-primary/15 hover:text-primary",
+                                        ? "bg-primary text-primary-foreground shadow-sm"
+                                        : "bg-primary/10 text-primary/80 hover:bg-primary/20 hover:text-primary",
                                     )}
                                   >
                                     {explanationLoading &&
                                     expandedExplanation === verse.key ? (
                                       <Loader2 className="w-2.5 h-2.5 animate-spin" />
                                     ) : isExplanationExpanded ? (
-                                      "Close"
+                                      <>
+                                        <ChevronUp className="w-2.5 h-2.5" />
+                                        Close
+                                      </>
                                     ) : (
-                                      "Explain"
+                                      <>
+                                        <Lightbulb className="w-2.5 h-2.5" />
+                                        Explain
+                                      </>
                                     )}
                                   </button>
                                 )}{" "}
                               </span>
 
                               {isExplanationExpanded && (
-                                <div className="mt-1 mb-3 ml-3 sm:ml-4 pl-3 border-l-2 border-primary/30 max-h-48 overflow-y-auto scrollbar-thin">
-                                  {vExplanation ? (
-                                    <div className="text-xs sm:text-sm leading-relaxed text-foreground/80 animate-in slide-in-from-top-2">
-                                      <p className="whitespace-pre-wrap">
-                                        {expandedFullExplanation.has(verse.key)
-                                          ? vExplanation
-                                          : truncateText(vExplanation, 200)}
-                                      </p>
-                                      {vExplanation.length > 200 && (
-                                        <button
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            setExpandedFullExplanation(
-                                              (prev) => {
-                                                const n = new Set(prev);
-                                                n.has(verse.key)
-                                                  ? n.delete(verse.key)
-                                                  : n.add(verse.key);
-                                                return n;
-                                              },
-                                            );
-                                          }}
-                                          className="mt-2 flex items-center gap-1 text-xs font-medium text-primary hover:text-primary/80 transition-colors"
-                                        >
-                                          {expandedFullExplanation.has(
-                                            verse.key,
-                                          ) ? (
-                                            <>
-                                              <ChevronUp className="w-3 h-3" />
-                                              Show less
-                                            </>
-) : (
-                                      <>
-                                        <ChevronDown className="w-3 h-3" />
-                                        Read more
-                                      </>
-                                    )}
-                                  </button>
-                                )}
-                                {vExplanationPrompts.length > 0 && (
-                                  <div className="mt-3 pt-3 border-t border-amber-200/30">
-                                    <div className="flex items-center gap-1.5 mb-2">
-                                      <Lightbulb className="w-3 h-3 text-amber-500" />
-                                      <span className="text-[10px] font-medium text-amber-600 uppercase tracking-wider">
-                                        Journal Prompt
-                                      </span>
-                                    </div>
-                                    {vExplanationPrompts.map((prompt) => (
-                                      <div
-                                        key={prompt.id}
-                                        className="text-xs text-foreground/70 bg-amber-50/50 dark:bg-amber-950/20 rounded p-2 border border-amber-100/30 dark:border-amber-900/30"
-                                      >
-                                        {prompt.prompt}
+                                <div className="mt-2 mb-3 ml-2 sm:ml-3 rounded-lg border border-primary/20 bg-primary/5 dark:bg-primary/10">
+                                  <div className="p-3 sm:p-4">
+                                    {vExplanation ? (
+                                      <div className="animate-in slide-in-from-top-2">
+                                        <div className="flex items-center gap-2 mb-2">
+                                          <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+                                          <span className="text-[10px] font-semibold text-primary uppercase tracking-wider">
+                                            Explanation
+                                          </span>
+                                        </div>
+                                        <div className="text-xs sm:text-sm leading-relaxed text-foreground/80">
+                                          <p className="whitespace-pre-wrap">
+                                            {expandedFullExplanation.has(
+                                              verse.key,
+                                            )
+                                              ? vExplanation
+                                              : truncateText(vExplanation, 200)}
+                                          </p>
+                                          {vExplanation.length > 200 && (
+                                            <button
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                setExpandedFullExplanation(
+                                                  (prev) => {
+                                                    const n = new Set(prev);
+                                                    n.has(verse.key)
+                                                      ? n.delete(verse.key)
+                                                      : n.add(verse.key);
+                                                    return n;
+                                                  },
+                                                );
+                                              }}
+                                              className="mt-2 flex items-center gap-1 text-xs font-medium text-primary hover:text-primary/80 transition-colors"
+                                            >
+                                              {expandedFullExplanation.has(
+                                                verse.key,
+                                              ) ? (
+                                                <>
+                                                  <ChevronUp className="w-3 h-3" />
+                                                  Show less
+                                                </>
+                                              ) : (
+                                                <>
+                                                  <ChevronDown className="w-3 h-3" />
+                                                  Read more
+                                                </>
+                                              )}
+                                            </button>
+                                          )}
+                                        </div>
                                       </div>
-                                    ))}
+                                    ) : (
+                                      <span className="text-xs text-muted-foreground italic flex items-center gap-2">
+                                        <Loader2 className="w-3 h-3 animate-spin" />
+                                        Loading explanation...
+                                      </span>
+                                    )}
                                   </div>
-                                )}
-                              </div>
-                            ) : (
-                              <span className="text-xs text-muted-foreground italic flex items-center gap-2">
-                                <Loader2 className="w-3 h-3 animate-spin" />
-                                Loading explanation...
-                              </span>
-                            )}
-                          </div>
-                        )}
-                      </span>
+                                  {vExplanationPrompts.length > 0 && (
+                                    <div className="px-3 sm:px-4 pb-3 sm:pb-4 pt-2 border-t border-amber-200/30">
+                                      <div className="flex items-center gap-2 mb-2 sm:mb-3">
+                                        <Lightbulb className="w-3.5 h-3.5 text-amber-500" />
+                                        <span className="text-[10px] font-semibold text-amber-600 uppercase tracking-wider">
+                                          Journal Prompts
+                                        </span>
+                                      </div>
+                                      <div className="space-y-2">
+                                        {vExplanationPrompts.map((prompt) => (
+                                          <div
+                                            key={prompt.id}
+                                            className="text-xs leading-relaxed text-foreground/70 bg-amber-50/70 dark:bg-amber-950/30 rounded-md p-2.5 border border-amber-100/40 dark:border-amber-900/40"
+                                          >
+                                            <span className="text-amber-600/80 mr-1">
+                                              "
+                                            </span>
+                                            {prompt.prompt}
+                                            <span className="text-amber-600/80 ml-1">
+                                              "
+                                            </span>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </span>
                           );
                         })}
                       </div>
@@ -2521,23 +2642,44 @@ export default function BibleReader() {
                       </div>
 
                       {/* Chapter Prompts */}
-                      {chapterPrompts[`${chapter.book}-${chapter.chapter}`]?.length > 0 && (
+                      {chapterPrompts[`${chapter.book}-${chapter.chapter}`]
+                        ?.length > 0 && (
                         <div className="mt-6 pt-6 border-t border-border/20">
-                          <div className="flex items-center gap-2 mb-3">
-                            <Lightbulb className="w-4 h-4 text-amber-500" />
-                            <span className="text-sm font-medium text-amber-600" style={{ fontFamily: "'Cinzel', serif" }}>
-                              Journal Prompts
-                            </span>
-                          </div>
-                          <div className="space-y-2">
-                            {chapterPrompts[`${chapter.book}-${chapter.chapter}`].map((prompt) => (
-                              <div
-                                key={prompt.id}
-                                className="bg-amber-50/50 dark:bg-amber-950/20 rounded-lg p-3 text-sm text-foreground/80 border border-amber-100/50 dark:border-amber-900/30"
+                          <div className="rounded-lg border border-amber-200/40 bg-amber-50/30 dark:bg-amber-950/20 p-4 sm:p-5">
+                            <div className="flex items-center gap-2 mb-4">
+                              <Lightbulb className="w-4 h-4 text-amber-500" />
+                              <span
+                                className="text-sm font-semibold text-amber-600 uppercase tracking-wider"
+                                style={{ fontFamily: "'Cinzel', serif" }}
                               >
-                                {prompt.prompt}
-                              </div>
-                            ))}
+                                Chapter Reflections
+                              </span>
+                            </div>
+                            <div className="space-y-3">
+                              {chapterPrompts[
+                                `${chapter.book}-${chapter.chapter}`
+                              ].map((prompt, idx) => (
+                                <div
+                                  key={prompt.id}
+                                  className="flex items-start gap-3"
+                                >
+                                  <div className="w-5 h-5 rounded-full bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                    <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400">
+                                      {idx + 1}
+                                    </span>
+                                  </div>
+                                  <div className="text-sm leading-relaxed text-foreground/80 bg-white/50 dark:bg-black/20 rounded-md p-2.5 flex-1 border border-amber-100/30 dark:border-amber-900/30">
+                                    <span className="text-amber-500 mr-1">
+                                      "
+                                    </span>
+                                    {prompt.prompt}
+                                    <span className="text-amber-500 ml-1">
+                                      "
+                                    </span>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
                           </div>
                         </div>
                       )}
@@ -2659,6 +2801,10 @@ export default function BibleReader() {
           onSkipForward={skipForward}
           onToggleRepeat={toggleRepeatMode}
           onToggleAfterPlay={toggleAfterPlay}
+          speechRate={speechRate}
+          onSpeechRateChange={handleSpeedChange}
+          sleepTimerRemaining={sleepTimerRemaining}
+          onSleepTimerChange={setSleepTimerMinutes}
         />
       )}
     </div>

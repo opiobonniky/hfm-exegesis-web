@@ -29,17 +29,18 @@ import {
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
   getVerseText,
   getBooksByTestament,
   getChaptersForBook,
   getVersesCountForChapter,
+  setActiveVersion,
 } from "@/utilities/bibleUtils";
 import { Combobox } from "@/components/ui/combobox";
-import { send } from "vite";
 import { sendGetRequest, sendPostRequest } from "@/services/api";
 import { routes } from "@/components/Routes/routes";
+import { BIBLE_VERSIONS, getVersionById } from "@/assets/bibleVersion/json/bibleVersions";
 
 const TESTAMENTS = [
   { value: "Old", label: "Old Testament" },
@@ -48,26 +49,55 @@ const TESTAMENTS = [
 
 const AddDailyVerse = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  const [testament, setTestament] = useState<string>("");
-  const [book, setBook] = useState<string>("");
-  const [chapter, setChapter] = useState<string>("");
-  const [verseNumber, setVerseNumber] = useState<string>("");
-  const [reflection, setReflection] = useState("");
+  // Check if we're editing an existing verse
+  const editingVerse = location.state?.verse as {
+    testament?: string;
+    bookName?: string;
+    chapter?: number;
+    verseNumber?: number;
+    explanation?: string;
+    learnMore?: string;
+    bibleVersion?: string;
+    displayDate?: string;
+    verseText?: string;
+    published?: boolean;
+  } | undefined;
+  const isEditing = !!editingVerse;
+
+  const [testament, setTestament] = useState<string>(editingVerse?.testament || "");
+  const [book, setBook] = useState<string>(editingVerse?.bookName || "");
+  const [chapter, setChapter] = useState<string>(editingVerse?.chapter?.toString() || "");
+  const [verseNumber, setVerseNumber] = useState<string>(editingVerse?.verseNumber?.toString() || "");
+  const [explanation, setExplanation] = useState(editingVerse?.explanation || "");
+  const [learnMore, setLearnMore] = useState(editingVerse?.learnMore || "");
+  const [bibleVersion, setBibleVersion] = useState<string>(editingVerse?.bibleVersion || "BSB");
+  const [published, setPublished] = useState(editingVerse?.published ?? true);
 
   // Date + Time
   const [selectedDate, setSelectedDate] = useState<Date>(() => {
-    const now = new Date();
+    const now = editingVerse?.displayDate 
+      ? new Date(editingVerse.displayDate) 
+      : new Date();
     now.setHours(8, 0, 0, 0); // default: 8:00 AM
     return now;
   });
 
-  const [selectedTime, setSelectedTime] = useState<string>("08:00");
+  const [selectedTime, setSelectedTime] = useState<string>(() => {
+    if (editingVerse?.displayDate) {
+      const date = new Date(editingVerse.displayDate);
+      const hours = date.getHours().toString().padStart(2, "0");
+      const minutes = date.getMinutes().toString().padStart(2, "0");
+      return `${hours}:${minutes}`;
+    }
+    return "08:00";
+  });
 
-  const [verseText, setVerseText] = useState("");
+  const [verseText, setVerseText] = useState(editingVerse?.verseText || "");
+  const [isVerseEditing, setIsVerseEditing] = useState(false);
   const [isVerseLoading, setIsVerseLoading] = useState(false);
-
-  const navigate = useNavigate();
 
   // Derived lists
   const books = useMemo(
@@ -83,15 +113,18 @@ const AddDailyVerse = () => {
 
   // Auto-fetch verse text
   useEffect(() => {
-    if (!book || !chapter || !verseNumber) {
-      setVerseText("");
+    if (!book || !chapter || !verseNumber || isVerseEditing) {
+      if (!isVerseEditing) {
+        setVerseText("");
+      }
       return;
     }
     setIsVerseLoading(true);
+    setActiveVersion(bibleVersion);
     const text = getVerseText(book, Number(chapter), Number(verseNumber));
     setVerseText(text || "Verse not found.");
     setIsVerseLoading(false);
-  }, [book, chapter, verseNumber]);
+  }, [book, chapter, verseNumber, bibleVersion, isVerseEditing]);
 
   //
 
@@ -117,10 +150,10 @@ const AddDailyVerse = () => {
     setSelectedDate(newDate);
   };
 
-  const handleAddVerse = async (e: React.FormEvent) => {
+    const handleAddVerse = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!book || !chapter || !verseNumber || !reflection.trim()) {
+    if (!book || !chapter || !verseNumber || !explanation.trim()) {
       toast({
         title: "Missing fields",
         description: "Please fill all required fields.",
@@ -134,11 +167,13 @@ const AddDailyVerse = () => {
         bookName: book,
         chapter: Number(chapter),
         verseNumber: Number(verseNumber),
-        reflection,
-        published: true, // or make it a toggle in UI
-        displayDate: selectedDate.toISOString(), // ← ISO full datetime
-        displayTime: selectedDate.toISOString(), // ← same value is fine
-      };
+        bibleVersion,
+        verseText: verseText || null,
+        explanation,
+        learnMore: learnMore || null,
+        published, // Add published field
+        displayDate: selectedDate.toISOString().split('T')[0], // Just date part like mobile app
+  };
 
       const response = await sendPostRequest(
         "admin",
@@ -230,175 +265,228 @@ const AddDailyVerse = () => {
 
           <CardContent className="pt-6 space-y-8">
             <form onSubmit={handleAddVerse} className="space-y-7">
-              {/* Testament - Book - Chapter - Verse */}
-              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                <div className="space-y-2">
-                  <Label>Testament</Label>
-                  <Combobox
-                    options={TESTAMENTS}
-                    value={testament}
-                    onChange={setTestament}
-                    placeholder="Select testament"
-                    width="w-full"
-                  />
-                </div>
+               {/* Testament - Book - Chapter - Verse - Version */}
+               <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-5">
+                 <div className="space-y-2">
+                   <Label>Testament</Label>
+                   <Combobox
+                     options={TESTAMENTS}
+                     value={testament}
+                     onChange={setTestament}
+                     placeholder="Select testament"
+                     width="w-full"
+                   />
+                 </div>
 
-                <div className="space-y-2">
-                  <Label>Book</Label>
-                  <Combobox
-                    options={books.map((b) => ({ value: b, label: b }))}
-                    value={book}
-                    onChange={setBook}
-                    placeholder="Select book"
-                    disabled={!testament}
-                    width="w-full"
-                  />
-                </div>
+                 <div className="space-y-2">
+                   <Label>Book</Label>
+                   <Combobox
+                     options={books.map((b) => ({ value: b, label: b }))}
+                     value={book}
+                     onChange={setBook}
+                     placeholder="Select book"
+                     disabled={!testament}
+                     width="w-full"
+                   />
+                 </div>
 
-                <div className="space-y-2">
-                  <Label>Chapter</Label>
-                  <Combobox
-                    options={chapters.map((c) => ({
-                      value: String(c),
-                      label: String(c),
-                    }))}
-                    value={chapter}
-                    onChange={setChapter}
-                    placeholder="Select chapter"
-                    disabled={!book}
-                    width="w-full"
-                  />
-                </div>
+                 <div className="space-y-2">
+                   <Label>Chapter</Label>
+                   <Combobox
+                     options={chapters.map((c) => ({
+                       value: String(c),
+                       label: String(c),
+                     }))}
+                     value={chapter}
+                     onChange={setChapter}
+                     placeholder="Select chapter"
+                     disabled={!book}
+                     width="w-full"
+                   />
+                 </div>
 
-                <div className="space-y-2">
-                  <Label>Verse</Label>
-                  <Combobox
-                    options={
-                      maxVerses > 0
-                        ? Array.from(
-                            { length: maxVerses },
-                            (_, i) => i + 1,
-                          ).map((v) => ({ value: String(v), label: String(v) }))
-                        : []
-                    }
-                    value={verseNumber}
-                    onChange={setVerseNumber}
-                    placeholder="Select verse"
-                    disabled={!chapter || maxVerses === 0}
-                    width="w-full"
-                  />
-                </div>
-              </div>
+                 <div className="space-y-2">
+                   <Label>Verse</Label>
+                   <Combobox
+                     options={
+                       maxVerses > 0
+                         ? Array.from(
+                             { length: maxVerses },
+                             (_, i) => i + 1,
+                           ).map((v) => ({ value: String(v), label: String(v) }))
+                         : []
+                     }
+                     value={verseNumber}
+                     onChange={setVerseNumber}
+                     placeholder="Select verse"
+                     disabled={!chapter || maxVerses === 0}
+                     width="w-full"
+                   />
+                 </div>
 
-              {/* Verse Text */}
-              <div className="space-y-2">
-                <Label>
-                  Verse Text{" "}
-                  {isVerseLoading && (
-                    <span className="text-xs text-muted-foreground">
-                      (loading...)
+                 <div className="space-y-2">
+                   <Label>Version</Label>
+                   <Combobox
+                     options={BIBLE_VERSIONS.map(v => ({
+                       value: v.id,
+                       label: `${v.name} (${v.abbreviation})`,
+                     }))}
+                     value={bibleVersion}
+                     onChange={setBibleVersion}
+                     placeholder="Select version"
+                     width="w-full"
+                   />
+                 </div>
+               </div>
+
+                {/* Verse Text */}
+                <div className="space-y-2">
+                  <Label className="flex items-center justify-between">
+                    <span>
+                      Verse Text{" "}
+                      <span className="text-xs text-muted-foreground ml-2">
+                        {isVerseEditing ? '(editable)' : '(read only)'}
+                      </span>
+                      {bibleVersion && (
+                        <span className="text-xs text-primary font-medium ml-2">
+                          • {BIBLE_VERSIONS.find(v => v.id === bibleVersion)?.abbreviation || bibleVersion}
+                        </span>
+                      )}
                     </span>
-                  )}
-                </Label>
-                <div className="relative">
-                  <Textarea
-                    value={verseText}
-                    readOnly
-                    className="min-h-[110px] resize-none bg-muted/40 font-serif leading-relaxed"
-                    placeholder="Verse will appear here..."
-                  />
-                  {verseText && (
-                    <div className="absolute bottom-3 right-3 text-xs text-muted-foreground">
-                      {book} {chapter}:{verseNumber}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Date & Time Picker */}
-              <div className="grid sm:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label>Date</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
+                    {/* {!isVerseLoading && book && chapter && verseNumber && (
                       <Button
-                        variant="outline"
-                        className={cn(
-                          "w-full justify-start text-left font-normal",
-                          !selectedDate && "text-muted-foreground",
-                        )}
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setIsVerseEditing(!isVerseEditing)}
                       >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {format(selectedDate, "PPP")}
+                        {isVerseEditing ? 'Cancel' : 'Edit'}
                       </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                      <Calendar
-                        mode="single"
-                        selected={selectedDate}
-                        onSelect={(date: Date | undefined) => {
-                          if (date) {
-                            const newDate = new Date(date);
-                            newDate.setHours(
-                              selectedDate.getHours(),
-                              selectedDate.getMinutes(),
-                              0,
-                              0,
-                            );
-                            setSelectedDate(newDate);
-                          }
-                        }}
-                        initialFocus
-                        modifiers={modifiers}
-                        modifiersClassNames={modifiersClassNames}
-                        disabled={(date) =>
-                          date > new Date("2026-12-31") || // ← current year limit example
-                          date < new Date("2020-01-01")
-                        }
+                    )} */}
+                  </Label>
+                  <div className="relative">
+                    {isVerseEditing ? (
+                      <Textarea
+                        value={verseText}
+                        onChange={(e) => setVerseText(e.target.value)}
+                        className="min-h-[110px] resize-none font-serif leading-relaxed"
+                        placeholder="Verse text (you can edit this)"
                       />
-                    </PopoverContent>
-                  </Popover>
-
-                  {/* Small verse preview */}
-                  {verseText && (
-                    <p className="text-xs text-muted-foreground italic mt-1.5 pl-1">
-                      Selected:{" "}
-                      <strong>
-                        {book} {chapter}:{verseNumber}
-                      </strong>
-                    </p>
-                  )}
+                    ) : (
+                      <Textarea
+                        value={verseText}
+                        readOnly
+                        className="min-h-[110px] resize-none font-serif leading-relaxed"
+                        placeholder="Verse text (read only)"
+                      />
+                    )}
+                    {book && chapter && verseNumber && (
+                      <div className="absolute bottom-3 right-3 text-xs text-muted-foreground">
+                        Ref: {book} {chapter}:{verseNumber} ({BIBLE_VERSIONS.find(v => v.id === bibleVersion)?.abbreviation || bibleVersion})
+                      </div>
+                    )}
+                  </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label>Time (default 8:00 AM)</Label>
-                  <Input
-                    type="time"
-                    value={selectedTime}
-                    onChange={handleTimeChange}
-                    className="w-full max-w-[180px]"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    {format(selectedDate, "p")} • {format(selectedDate, "EEEE")}
-                  </p>
-                </div>
-              </div>
+               {/* Date Picker */}
+               <div className="space-y-2">
+                 <Label>Date</Label>
+                 <Popover>
+                   <PopoverTrigger asChild>
+                     <Button
+                       variant="outline"
+                       className={cn(
+                         "w-full justify-start text-left font-normal",
+                         !selectedDate && "text-muted-foreground",
+                       )}
+                     >
+                       <CalendarIcon className="mr-2 h-4 w-4" />
+                       {format(selectedDate, "PPP")}
+                     </Button>
+                   </PopoverTrigger>
+                   <PopoverContent className="w-auto p-0">
+                     <Calendar
+                       mode="single"
+                       selected={selectedDate}
+                       onSelect={(date: Date | undefined) => {
+                         if (date) {
+                           const newDate = new Date(date);
+                           newDate.setHours(
+                             selectedDate.getHours(),
+                             selectedDate.getMinutes(),
+                             0,
+                             0,
+                           );
+                           setSelectedDate(newDate);
+                         }
+                       }}
+                       initialFocus
+                       modifiers={modifiers}
+                       modifiersClassNames={modifiersClassNames}
+                       disabled={(date) =>
+                         date > new Date("2026-12-31") || // ← current year limit example
+                         date < new Date("2020-01-01")
+                       }
+                     />
+                   </PopoverContent>
+                 </Popover>
 
-              {/* Reflection */}
+                 {/* Small verse preview */}
+                 {verseText && (
+                   <p className="text-xs text-muted-foreground italic mt-1.5 pl-1">
+                     Selected:{" "}
+                     <strong>
+                       {book} {chapter}:{verseNumber}
+                     </strong>
+                   </p>
+                 )}
+               </div>
+
+              {/* Explanation */}
               <div className="space-y-2">
                 <Label className="flex items-center gap-2">
                   <Lightbulb className="h-4 w-4 text-accent" />
-                  Daily Reflection
+                  Explanation <span className="text-destructive">*</span>
                 </Label>
                 <Textarea
-                  value={reflection}
-                  onChange={(e) => setReflection(e.target.value)}
-                  placeholder="What does this verse mean to you today? Any prayer or application?"
+                  value={explanation}
+                  onChange={(e) => setExplanation(e.target.value)}
+                  placeholder="Explain what this verse means and its significance..."
                   rows={5}
                   className="resize-none"
                   required
                 />
               </div>
+
+               {/* Learn More */}
+               <div className="space-y-2">
+                 <Label className="flex items-center gap-2">
+                   <Lightbulb className="h-4 w-4 text-muted-foreground" />
+                   Learn More <span className="text-muted-foreground text-xs">(optional)</span>
+                 </Label>
+                 <Textarea
+                   value={learnMore}
+                   onChange={(e) => setLearnMore(e.target.value)}
+                   placeholder="Additional resources, related verses, or deeper insights..."
+                   rows={4}
+                   className="resize-none"
+                 />
+               </div>
+
+               {/* Published Toggle */}
+               <div className="space-y-2">
+                 <Label className="flex items-center gap-2">
+                   <Save className="h-4 w-4 text-muted-foreground" />
+                   Published <span className="text-muted-foreground text-xs">Show to all users</span>
+                 </Label>
+                 <div className="flex items-center gap-2">
+                   <input
+                     type="checkbox"
+                     checked={published}
+                     onChange={(e) => setPublished(e.target.checked)}
+                     className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                   />
+                 </div>
+               </div>
 
               {/* Actions */}
               <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-4 pt-6 border-t">
@@ -410,7 +498,7 @@ const AddDailyVerse = () => {
                   type="submit"
                   size="lg"
                   className="bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-md"
-                  disabled={!verseText.trim() || !reflection.trim()}
+                  disabled={!verseText.trim() || !explanation.trim()}
                 >
                   <Save className="h-4 w-4 mr-2" />
                   Save Daily Verse

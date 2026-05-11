@@ -43,7 +43,9 @@ import {
   getBooksByTestament,
   getChaptersForBook,
   getVersesCountForChapter,
+  setActiveVersion,
 } from "@/utilities/bibleUtils";
+import { BIBLE_VERSIONS } from "@/assets/bibleVersion/json/bibleVersions";
 import { Combobox } from "@/components/ui/combobox";
 import { routes } from "@/components/Routes/routes";
 import { useNavigate } from "react-router-dom";
@@ -57,9 +59,13 @@ interface DailyVerseItem {
   bookName: string;
   chapter: number;
   verseNumber: number;
+  bibleVersion?: string;
+  verseText?: string | null;
   displayDate: string | Record<string, never>; // API may return {} when unset
   displayTime: string | Record<string, never>;
-  reflection: string;
+  reflection?: string | null;
+  explanation?: string | null;
+  learnMore?: string | null;
   createdBy: string; // UUID string from API
   createdOn: string | Record<string, never>;
   updatedBy: string | null;
@@ -224,7 +230,10 @@ interface EditState {
   book: string;
   chapter: string;
   verseNumber: string;
-  reflection: string;
+  bibleVersion: string;
+  verseText: string;
+  explanation: string;
+  learnMore: string;
   selectedDate: Date;
   selectedTime: string;
 }
@@ -232,13 +241,22 @@ interface EditState {
 const buildEditState = (verse: DailyVerseItem): EditState => {
   // safeDate guards against displayDate being {} or null from the API
   const date = safeDate(verse.displayDate);
+
+  // Set active version for verse text fetching
+  if (verse.bibleVersion) {
+    setActiveVersion(verse.bibleVersion);
+  }
+
   return {
     id: verse.id,
     testament: OLD_TESTAMENT_BOOKS.includes(verse.bookName) ? "Old" : "New",
     book: verse.bookName,
     chapter: String(verse.chapter),
     verseNumber: String(verse.verseNumber),
-    reflection: verse.reflection,
+    bibleVersion: verse.bibleVersion || "BSB",
+    verseText: verse.verseText || getVerseText(verse.bookName, verse.chapter, verse.verseNumber) || "",
+    explanation: verse.explanation || "",
+    learnMore: verse.learnMore || "",
     selectedDate: date,
     selectedTime: `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`,
   };
@@ -419,6 +437,9 @@ const DailyVerse = () => {
   // ── Edit ───────────────────────────────────────────────────────────────────
   const openEdit = (verse: DailyVerseItem) => {
     setEditState(buildEditState(verse));
+    if (verse.bibleVersion) {
+      setActiveVersion(verse.bibleVersion);
+    }
     setEditVerseText(
       getVerseText(verse.bookName, verse.chapter, verse.verseNumber) || "",
     );
@@ -431,7 +452,7 @@ const DailyVerse = () => {
       !editState.book ||
       !editState.chapter ||
       !editState.verseNumber ||
-      !editState.reflection.trim()
+      !editState.explanation.trim()
     ) {
       toast({
         title: "Missing fields",
@@ -447,7 +468,10 @@ const DailyVerse = () => {
         bookName: editState.book,
         chapter: Number(editState.chapter),
         verseNumber: Number(editState.verseNumber),
-        reflection: editState.reflection,
+        bibleVersion: editState.bibleVersion,
+        verseText: editState.verseText || null,
+        explanation: editState.explanation,
+        learnMore: editState.learnMore || null,
         published: true,
         displayDate: editState.selectedDate.toISOString(),
         displayTime: editState.selectedDate.toISOString(),
@@ -717,7 +741,7 @@ const DailyVerse = () => {
             <div className="max-w-3xl mx-auto text-center">
               <blockquote className="text-2xl lg:text-4xl font-[family-name:var(--font-heading)] leading-relaxed mb-6">
                 "
-                {getVerseText(
+                {selectedVerse.verseText || getVerseText(
                   selectedVerse.bookName,
                   selectedVerse.chapter,
                   selectedVerse.verseNumber,
@@ -731,14 +755,22 @@ const DailyVerse = () => {
               <div className="bg-secondary/50 rounded-xl p-6 text-left">
                 <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-2">
                   {isToday(selectedVerse.displayDate)
-                    ? "Today's Reflection"
+                    ? "Today's Explanation"
                     : isFuture(selectedVerse.displayDate)
-                      ? "Upcoming Reflection"
-                      : "Reflection"}
+                      ? "Upcoming Explanation"
+                      : "Explanation"}
                 </h3>
                 <p className="text-lg leading-relaxed whitespace-pre-line">
-                  {selectedVerse.reflection}
+                  {selectedVerse.explanation || selectedVerse.reflection || "No explanation available."}
                 </p>
+                {selectedVerse.learnMore && (
+                  <div className="mt-4 pt-4 border-t border-border/50">
+                    <h4 className="text-sm font-medium text-accent mb-2">Learn More</h4>
+                    <p className="text-sm leading-relaxed text-muted-foreground whitespace-pre-line">
+                      {selectedVerse.learnMore}
+                    </p>
+                  </div>
+                )}
                 <Button
                   variant="outline"
                   className="mt-4 gap-2"
@@ -889,15 +921,25 @@ const DailyVerse = () => {
 
                     <p className="font-medium text-sm line-clamp-2 mb-2">
                       "
-                      {getVerseText(
-                        verse.bookName,
-                        verse.chapter,
-                        verse.verseNumber,
-                      )}
+                      {verse.verseText || (() => {
+                        if (verse.bibleVersion) {
+                          setActiveVersion(verse.bibleVersion);
+                        }
+                        return getVerseText(
+                          verse.bookName,
+                          verse.chapter,
+                          verse.verseNumber,
+                        );
+                      })()}
                       "
                     </p>
                     <p className="text-sm text-primary font-medium">
                       {verse.bookName} {verse.chapter}:{verse.verseNumber}
+                      {verse.bibleVersion && (
+                        <span className="text-xs text-muted-foreground ml-1">
+                          ({BIBLE_VERSIONS.find(v => v.id === verse.bibleVersion)?.abbreviation || verse.bibleVersion})
+                        </span>
+                      )}
                     </p>
                   </CardContent>
                 </Card>
@@ -1174,6 +1216,12 @@ const EditVerseDialog = ({
   const verseTextValue = useMemo(() => {
     if (!localState.book || !localState.chapter || !localState.verseNumber)
       return "";
+
+    // Set active version before getting verse text
+    if (localState.bibleVersion) {
+      setActiveVersion(localState.bibleVersion);
+    }
+
     return (
       getVerseText(
         localState.book,
@@ -1181,7 +1229,7 @@ const EditVerseDialog = ({
         Number(localState.verseNumber),
       ) || ""
     );
-  }, [localState.book, localState.chapter, localState.verseNumber]);
+  }, [localState.book, localState.chapter, localState.verseNumber, localState.bibleVersion]);
 
   // Keep parent verse text in sync
   useEffect(() => {
@@ -1246,7 +1294,7 @@ const EditVerseDialog = ({
         </DialogHeader>
 
         <div className="space-y-5 py-2">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             <div className="space-y-1.5">
               <Label>Testament</Label>
               <Combobox
@@ -1299,20 +1347,38 @@ const EditVerseDialog = ({
                 width="w-full"
               />
             </div>
+            <div className="space-y-1.5">
+              <Label>Version</Label>
+              <Combobox
+                options={BIBLE_VERSIONS.map(v => ({
+                  value: v.id,
+                  label: `${v.name} (${v.abbreviation})`,
+                }))}
+                value={localState.bibleVersion}
+                onChange={(v) => set("bibleVersion", v)}
+                placeholder="Select version"
+                width="w-full"
+              />
+            </div>
           </div>
 
           {verseTextValue && (
             <div className="space-y-1.5">
-              <Label>Verse Text</Label>
+              <Label>
+                Verse Text{" "}
+                <span className="text-xs text-muted-foreground font-normal">
+                  (edit to override)
+                </span>
+              </Label>
               <div className="relative">
                 <Textarea
                   value={verseTextValue}
-                  readOnly
-                  className="resize-none bg-muted/40 font-serif leading-relaxed min-h-[80px]"
+                  onChange={(e) => set("verseText", e.target.value)}
+                  className="resize-none font-serif leading-relaxed min-h-[80px]"
+                  placeholder="Verse text..."
                 />
                 <span className="absolute bottom-2.5 right-3 text-xs text-muted-foreground">
-                  {localState.book} {localState.chapter}:
-                  {localState.verseNumber}
+                  Ref: {localState.book} {localState.chapter}:{localState.verseNumber} ({BIBLE_VERSIONS.find(v => v.id === localState.bibleVersion)?.abbreviation || localState.bibleVersion})
                 </span>
               </div>
             </div>
@@ -1340,17 +1406,32 @@ const EditVerseDialog = ({
             </div>
           </div>
 
-          <div className="space-y-1.5">
+<div className="space-y-1.5">
             <Label className="flex items-center gap-2">
               <Lightbulb className="w-4 h-4 text-accent" />
-              Reflection
+              Explanation <span className="text-destructive">*</span>
             </Label>
             <Textarea
-              value={localState.reflection}
-              onChange={(e) => set("reflection", e.target.value)}
+              value={localState.explanation}
+              onChange={(e) => set("explanation", e.target.value)}
               rows={5}
               className="resize-none"
-              placeholder="Write your reflection..."
+              placeholder="Explain what this verse means..."
+              required
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label className="flex items-center gap-2">
+              <Lightbulb className="w-4 h-4 text-muted-foreground" />
+              Learn More <span className="text-muted-foreground text-xs">(optional)</span>
+            </Label>
+            <Textarea
+              value={localState.learnMore}
+              onChange={(e) => set("learnMore", e.target.value)}
+              rows={3}
+              className="resize-none"
+              placeholder="Additional resources or related verses..."
             />
           </div>
         </div>
@@ -1368,7 +1449,7 @@ const EditVerseDialog = ({
             disabled={
               isSaving ||
               !verseTextValue.trim() ||
-              !localState.reflection.trim()
+              !localState.explanation.trim()
             }
             className="gap-2 bg-gradient-to-r from-primary to-primary/90 shadow-md"
           >

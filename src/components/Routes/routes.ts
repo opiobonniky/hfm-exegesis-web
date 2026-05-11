@@ -1,6 +1,9 @@
 import PlanDetail from "@/pages/ReadingPlan/Plandetail";
 import UserActivityPage from "@/pages/UserActivityPage";
 import UsersPage from "@/pages/UserManagement/UsersPage";
+import { Component } from "lucide-react";
+import path from "path";
+import { title } from "process";
 import { ComponentType, lazy } from "react";
 
 // Lazy load components for code splitting
@@ -14,6 +17,8 @@ const Dashboard = lazy(() => import("@/pages/Dashboard"));
 const DailyVerse = lazy(() => import("@/pages/DailyVerse"));
 const VerseExplanations = lazy(() => import("@/pages/VerseExplanations"));
 const AddDailyVerse = lazy(() => import("@/pages/AddDailyVerse"));
+const DailyDevotions = lazy(() => import("@/pages/DailyDevotions"));
+const AddDailyDevotion = lazy(() => import("@/pages/AddDailyDevotion"));
 const AddExplanation = lazy(() => import("@/pages/AddExplanation"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
 const AddReadingPlan = lazy(() => import("@/pages/ReadingPlan/Addreadingplan"));
@@ -109,6 +114,20 @@ export const routes = {
     isProtected: true,
     requiresLayout: true,
     title: "Daily Verse",
+  },
+  dailyDevotions: {
+    path: "/daily-devotions",
+    component: DailyDevotions,
+    isProtected: true,
+    requiresLayout: true,
+    title: "Daily Devotions",
+  },
+  addDailyDevotion: {
+    path: "/add-daily-devotion",
+    component: AddDailyDevotion,
+    isProtected: true,
+    requiresLayout: true,
+    title: "Add Daily Devotion",
   },
   verseExplanations: {
     path: "/verse-explanations",
@@ -271,6 +290,7 @@ export const routes = {
     requiresLayout: true,
     title: "Journal Templates",
   },
+
   // ==================== 404 NOT FOUND ====================
   notFound: {
     path: "*",
