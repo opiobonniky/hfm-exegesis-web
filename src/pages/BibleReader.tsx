@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import { useSearchParams } from "react-router-dom";
 import {
   Search,
   ChevronLeft,
@@ -33,18 +34,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useToast } from "@/hooks/use-toast";
-import {
-  BIBLE_VERSIONS,
-  DEFAULT_VERSION_ID,
-  getVersionById,
-} from "@/assets/bibleVersion/json/bibleVersions";
 import { sendPostRequest, TOKEN_KEY } from "@/services/api";
+import { bibleApi, mapTranslationId, mapFrontendId } from "@/services/bibleApi";
 import {
   HighlightPickerModal,
   SearchModal,
@@ -53,144 +55,6 @@ import {
 } from "@/components/BibleModals";
 import { cn } from "@/lib/utils";
 
-const BOOKS = [
-  "Genesis",
-  "Exodus",
-  "Leviticus",
-  "Numbers",
-  "Deuteronomy",
-  "Joshua",
-  "Judges",
-  "Ruth",
-  "1 Samuel",
-  "2 Samuel",
-  "1 Kings",
-  "2 Kings",
-  "1 Chronicles",
-  "2 Chronicles",
-  "Ezra",
-  "Nehemiah",
-  "Esther",
-  "Job",
-  "Psalms",
-  "Proverbs",
-  "Ecclesiastes",
-  "Song of Solomon",
-  "Isaiah",
-  "Jeremiah",
-  "Lamentations",
-  "Ezekiel",
-  "Daniel",
-  "Hosea",
-  "Joel",
-  "Amos",
-  "Obadiah",
-  "Jonah",
-  "Micah",
-  "Nahum",
-  "Habakkuk",
-  "Zephaniah",
-  "Haggai",
-  "Zechariah",
-  "Malachi",
-  "Matthew",
-  "Mark",
-  "Luke",
-  "John",
-  "Acts",
-  "Romans",
-  "1 Corinthians",
-  "2 Corinthians",
-  "Galatians",
-  "Ephesians",
-  "Philippians",
-  "Colossians",
-  "1 Thessalonians",
-  "2 Thessalonians",
-  "1 Timothy",
-  "2 Timothy",
-  "Titus",
-  "Philemon",
-  "Hebrews",
-  "James",
-  "1 Peter",
-  "2 Peter",
-  "1 John",
-  "2 John",
-  "3 John",
-  "Jude",
-  "Revelation",
-];
-
-const MAX_CHAPTERS: Record<string, number> = {
-  Genesis: 50,
-  Exodus: 40,
-  Leviticus: 27,
-  Numbers: 36,
-  Deuteronomy: 34,
-  Joshua: 24,
-  Judges: 21,
-  Ruth: 4,
-  "1 Samuel": 31,
-  "2 Samuel": 24,
-  "1 Kings": 22,
-  "2 Kings": 25,
-  "1 Chronicles": 29,
-  "2 Chronicles": 36,
-  Ezra: 10,
-  Nehemiah: 13,
-  Esther: 10,
-  Job: 42,
-  Psalms: 150,
-  Proverbs: 31,
-  Ecclesiastes: 12,
-  "Song of Solomon": 8,
-  Isaiah: 66,
-  Jeremiah: 52,
-  Lamentations: 5,
-  Ezekiel: 48,
-  Daniel: 12,
-  Hosea: 14,
-  Joel: 3,
-  Amos: 9,
-  Obadiah: 1,
-  Jonah: 4,
-  Micah: 7,
-  Nahum: 3,
-  Habakkuk: 3,
-  Zephaniah: 3,
-  Haggai: 2,
-  Zechariah: 14,
-  Malachi: 4,
-  Matthew: 28,
-  Mark: 16,
-  Luke: 24,
-  John: 21,
-  Acts: 28,
-  Romans: 16,
-  "1 Corinthians": 16,
-  "2 Corinthians": 13,
-  Galatians: 6,
-  Ephesians: 6,
-  Philippians: 4,
-  Colossians: 4,
-  "1 Thessalonians": 5,
-  "2 Thessalonians": 3,
-  "1 Timothy": 6,
-  "2 Timothy": 4,
-  Titus: 3,
-  Philemon: 1,
-  Hebrews: 13,
-  James: 5,
-  "1 Peter": 5,
-  "2 Peter": 3,
-  "1 John": 5,
-  "2 John": 1,
-  "3 John": 1,
-  Jude: 1,
-  Revelation: 22,
-};
-
 interface Highlight {
   id?: number;
   verseKey: string;
@@ -198,18 +62,29 @@ interface Highlight {
   colorId: number;
   note?: string;
 }
-interface BibleData {
-  [key: string]: string;
+
+interface VerseData {
+  verseNumber: number;
+  text: string;
 }
+
 interface ChapterData {
   book: string;
   chapter: number;
   verses: { key: string; text: string; num: number }[];
 }
+
 interface SpeechItem {
   verseKey: string;
   verseNum: number;
   text: string;
+}
+
+interface TranslationOption {
+  id: string;
+  name: string;
+  shortName: string;
+  year?: string | null;
 }
 
 const HIGHLIGHT_COLORS = [
@@ -230,49 +105,7 @@ const HIGHLIGHT_COLORS = [
   { id: 12, name: "Mint", color: "#2DD4BF" },
 ];
 
-const VERSION_FILES: Record<string, () => Promise<{ default: BibleData }>> = {
-  BSB: () =>
-    import("@/assets/bibleVersion/json/verses-bsb.json") as unknown as Promise<{
-      default: BibleData;
-    }>,
-  KJV: () =>
-    import("@/assets/bibleVersion/json/verses-kjv.json") as unknown as Promise<{
-      default: BibleData;
-    }>,
-  WEB: () =>
-    import("@/assets/bibleVersion/json/verses-web.json") as unknown as Promise<{
-      default: BibleData;
-    }>,
-  ASV: () =>
-    import("@/assets/bibleVersion/json/verses-asv.json") as unknown as Promise<{
-      default: BibleData;
-    }>,
-  YLT: () =>
-    import("@/assets/bibleVersion/json/verses-ylt.json") as unknown as Promise<{
-      default: BibleData;
-    }>,
-  DARBY: () =>
-    import("@/assets/bibleVersion/json/verses-darby.json") as unknown as Promise<{
-      default: BibleData;
-    }>,
-  WEBSTER: () =>
-    import("@/assets/bibleVersion/json/verses-webster.json") as unknown as Promise<{
-      default: BibleData;
-    }>,
-  BBE: () =>
-    import("@/assets/bibleVersion/json/verses-bbe.json") as unknown as Promise<{
-      default: BibleData;
-    }>,
-};
-
 // ── Helpers ──────────────────────────────────────────────────────────────────
-
-function processVerses(verses: BibleData, book: string, chapter: number) {
-  return Object.entries(verses)
-    .filter(([key]) => key.startsWith(`${book} ${chapter}:`))
-    .sort((a, b) => parseInt(a[0].split(":")[1]) - parseInt(b[0].split(":")[1]))
-    .map(([key, text]) => ({ key, text, num: parseInt(key.split(":")[1]) }));
-}
 
 function renderVerseText(text: string) {
   return text.split("[").map((part, idx) => {
@@ -319,6 +152,8 @@ function MobileNavDrawer({
   onBookChange,
   onChapterChange,
   onVersionChange,
+  books,
+  availableTranslations,
 }: {
   selectedBook: string;
   selectedChapter: number;
@@ -327,6 +162,8 @@ function MobileNavDrawer({
   onBookChange: (b: string) => void;
   onChapterChange: (c: number) => void;
   onVersionChange: (v: string) => void;
+  books: string[];
+  availableTranslations: { id: string; name: string; shortName: string }[];
 }) {
   const [open, setOpen] = useState(false);
   const [bookFilter, setBookFilter] = useState("");
@@ -335,11 +172,11 @@ function MobileNavDrawer({
   const filtered = useMemo(
     () =>
       bookFilter
-        ? BOOKS.filter((b) =>
+        ? books.filter((b) =>
             b.toLowerCase().includes(bookFilter.toLowerCase()),
           )
-        : BOOKS,
-    [bookFilter],
+        : books,
+    [bookFilter, books],
   );
 
   return (
@@ -448,7 +285,7 @@ function MobileNavDrawer({
 
           {tab === "version" && (
             <div className="pt-3 space-y-2">
-              {BIBLE_VERSIONS.map((v) => (
+              {availableTranslations.map((v) => (
                 <button
                   key={v.id}
                   onClick={() => {
@@ -462,9 +299,7 @@ function MobileNavDrawer({
                       : "bg-muted/50 hover:bg-muted text-foreground",
                   )}
                 >
-                  <span className="font-semibold">
-                    {v.abbreviation || v.id}
-                  </span>
+                  <span className="font-semibold">{v.shortName}</span>
                   <span
                     className={cn(
                       "text-xs",
@@ -473,7 +308,7 @@ function MobileNavDrawer({
                         : "text-muted-foreground",
                     )}
                   >
-                    {v.name} · {v.year}
+                    {v.name}
                   </span>
                 </button>
               ))}
@@ -673,18 +508,26 @@ function VoicePlayerBar({
               <button
                 onClick={() => {
                   const options: (number | null)[] = [null, 5, 15, 30, 60];
-                  const currentIdx = sleepTimerRemaining > 0 
-                    ? options.findIndex(o => o !== null && o * 60 === sleepTimerRemaining)
-                    : 0;
-                  const nextIdx = currentIdx === -1 ? 1 : (currentIdx + 1) % options.length;
+                  const currentIdx =
+                    sleepTimerRemaining > 0
+                      ? options.findIndex(
+                          (o) => o !== null && o * 60 === sleepTimerRemaining,
+                        )
+                      : 0;
+                  const nextIdx =
+                    currentIdx === -1 ? 1 : (currentIdx + 1) % options.length;
                   onSleepTimerChange(options[nextIdx]);
                 }}
-                title={sleepTimerRemaining > 0 ? `Sleep timer: ${Math.floor(sleepTimerRemaining / 60)}m ${sleepTimerRemaining % 60}s` : "Set sleep timer"}
+                title={
+                  sleepTimerRemaining > 0
+                    ? `Sleep timer: ${Math.floor(sleepTimerRemaining / 60)}m ${sleepTimerRemaining % 60}s`
+                    : "Set sleep timer"
+                }
                 className={cn(
                   "w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center active:scale-95 transition-all font-bold text-xs",
                   sleepTimerRemaining > 0
                     ? "text-amber-500 bg-amber-500/10"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/60",
                 )}
               >
                 {sleepTimerRemaining > 0 ? (
@@ -746,6 +589,10 @@ function VoicePlayerBar({
 export default function BibleReader() {
   const { toast } = useToast();
   const isAuthenticated = !!localStorage.getItem(TOKEN_KEY);
+  const [searchParams] = useSearchParams();
+
+  const urlBook = searchParams.get("book");
+  const urlChapter = searchParams.get("chapter");
 
   useEffect(() => {
     const link = document.createElement("link");
@@ -759,12 +606,23 @@ export default function BibleReader() {
   }, []);
 
   // ── State ──
-  const [selectedBook, setSelectedBook] = useState("Genesis");
-  const [selectedChapter, setSelectedChapter] = useState(1);
-  const [versionId, setVersionId] = useState(DEFAULT_VERSION_ID);
+  const [selectedBook, setSelectedBook] = useState(urlBook || "Genesis");
+  const [selectedChapter, setSelectedChapter] = useState(
+    urlChapter ? parseInt(urlChapter, 10) : 1,
+  );
+  const [versionId, setVersionId] = useState("Berean");
   const [bookFilter, setBookFilter] = useState("");
-  const [displayBook, setDisplayBook] = useState("Genesis");
-  const [displayChapter, setDisplayChapter] = useState(1);
+  const [displayBook, setDisplayBook] = useState(urlBook || "Genesis");
+  const [displayChapter, setDisplayChapter] = useState(
+    urlChapter ? parseInt(urlChapter, 10) : 1,
+  );
+  const [availableTranslations, setAvailableTranslations] = useState<
+    TranslationOption[]
+  >([]);
+  const [backendBooks, setBackendBooks] = useState<
+    { bookNumber: number; bookName: string; maxChapter: number }[]
+  >([]);
+  const [booksLoading, setBooksLoading] = useState(false);
 
   const [chapters, setChapters] = useState<ChapterData[]>([]);
   const [loading, setLoading] = useState(false);
@@ -868,7 +726,7 @@ export default function BibleReader() {
   useEffect(() => {
     if (sleepTimer && sleepTimer > 0) {
       const interval = setInterval(() => {
-        setSleepTimerRemaining(prev => {
+        setSleepTimerRemaining((prev) => {
           if (prev <= 1) {
             // Timer expired - stop speaking
             window.speechSynthesis.cancel();
@@ -901,8 +759,33 @@ export default function BibleReader() {
   // Desktop-only book filter
   const [desktopBookFilter, setDesktopBookFilter] = useState("");
 
-  const currentVersion = useMemo(() => getVersionById(versionId), [versionId]);
-  const maxChapterForDisplay = MAX_CHAPTERS[displayBook] ?? 1;
+  // Translation search
+  const [translationSearch, setTranslationSearch] = useState("");
+  const [translationOpen, setTranslationOpen] = useState(false);
+
+  const filteredTranslations = useMemo(() => {
+    if (!translationSearch.trim()) return availableTranslations;
+    const search = translationSearch.toLowerCase();
+    return availableTranslations.filter(
+      (t) =>
+        t.name.toLowerCase().includes(search) ||
+        t.shortName.toLowerCase().includes(search),
+    );
+  }, [translationSearch, availableTranslations]);
+
+  const currentVersion = useMemo(() => {
+    const trans = availableTranslations.find((t) => t.id === versionId);
+    return trans
+      ? { abbreviation: trans.shortName, name: trans.name }
+      : { abbreviation: versionId, name: versionId };
+  }, [versionId, availableTranslations]);
+
+  const getMaxChapter = (bookName: string): number => {
+    const book = backendBooks.find((b) => b.bookName === bookName);
+    return book?.maxChapter ?? 1;
+  };
+
+  const maxChapterForDisplay = getMaxChapter(displayBook);
   const currentChapterVerseCount = useMemo(
     () =>
       chapters.find(
@@ -912,27 +795,97 @@ export default function BibleReader() {
   );
 
   const filteredBooks = useMemo(() => {
-    if (!desktopBookFilter) return BOOKS;
-    return BOOKS.filter((b) =>
-      b.toLowerCase().includes(desktopBookFilter.toLowerCase()),
-    );
-  }, [desktopBookFilter]);
+    if (backendBooks.length === 0) return [];
+    if (!desktopBookFilter) return backendBooks.map((b) => b.bookName);
+    return backendBooks
+      .map((b) => b.bookName)
+      .filter((b) => b.toLowerCase().includes(desktopBookFilter.toLowerCase()));
+  }, [desktopBookFilter, backendBooks]);
+
+  // Load available translations and books on mount
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        // Load translations
+        const translations = await bibleApi.getTranslations();
+        const sorted = [...translations].sort((a, b) => {
+          const popular = [
+            "Berean",
+            "KJV",
+            "NIV",
+            "ESV",
+            "NASB",
+            "NLT",
+            "BSB",
+            "CSB",
+          ];
+          const aIdx = popular.indexOf(a.id);
+          const bIdx = popular.indexOf(b.id);
+          if (aIdx !== -1 && bIdx !== -1) return aIdx - bIdx;
+          if (aIdx !== -1) return -1;
+          if (bIdx !== -1) return 1;
+          return a.name.localeCompare(b.name);
+        });
+        const options = sorted.map((t) => ({
+          id: t.id,
+          name: t.year ? `${t.name} (${t.year})` : t.name,
+          shortName: t.shortName,
+          year: t.year,
+        }));
+        setAvailableTranslations(options);
+
+        // Load books from Berean translation
+        setBooksLoading(true);
+        try {
+          const backendId = mapTranslationId("Berean");
+          const books = await bibleApi.getBooksWithMaxChapters(backendId);
+          setBackendBooks(
+            books.map((b) => ({
+              bookNumber: b.bookNumber,
+              bookName: b.bookName,
+              maxChapter: b.maxChapter,
+            })),
+          );
+        } catch (err) {
+          console.error("Failed to load books:", err);
+        } finally {
+          setBooksLoading(false);
+        }
+      } catch (err) {
+        console.error("Failed to load translations:", err);
+      }
+    };
+    loadData();
+  }, []);
 
   // ── Data loading ──
   const loadChapters = useCallback(
     async (book: string, startChapter: number, count: number) => {
       if (loadingRef.current) return;
+      if (backendBooks.length === 0) return; // Wait for books to load first
+
       loadingRef.current = true;
       setLoading(true);
       try {
-        const mod = await VERSION_FILES[versionId]();
-        const verses = mod.default;
+        const translationId = mapTranslationId(versionId);
         const loaded: ChapterData[] = [];
+        const maxChapter = getMaxChapter(book);
+
         for (let i = 0; i < count; i++) {
           const ch = startChapter + i;
-          if (ch > (MAX_CHAPTERS[book] ?? 1)) break;
-          const cv = processVerses(verses, book, ch);
-          if (cv.length > 0) loaded.push({ book, chapter: ch, verses: cv });
+          if (ch > maxChapter) break;
+          try {
+            const verseData = await bibleApi.getVerses(translationId, book, ch);
+            const verses = verseData.verses.map((v) => ({
+              key: `${book} ${ch}:${v.verseNumber}`,
+              text: v.text,
+              num: v.verseNumber,
+            }));
+            loaded.push({ book, chapter: ch, verses });
+          } catch (err) {
+            console.error(`Failed to load ${book} chapter ${ch}:`, err);
+            break;
+          }
         }
         setChapters((prev) => {
           const ex = new Set(prev.map((c) => `${c.book}-${c.chapter}`));
@@ -949,7 +902,7 @@ export default function BibleReader() {
         setLoading(false);
       }
     },
-    [versionId],
+    [versionId, backendBooks],
   );
 
   const loadHighlights = useCallback(
@@ -1069,7 +1022,7 @@ export default function BibleReader() {
     setHasMore(true);
     setDisplayBook(selectedBook);
     setDisplayChapter(selectedChapter);
-    loadChapters(selectedBook, selectedChapter, 5);
+    loadChapters(selectedBook, selectedChapter, 4);
     if (isAuthenticated) {
       loadHighlights(selectedBook, selectedChapter);
       loadFavorites();
@@ -1078,6 +1031,14 @@ export default function BibleReader() {
     loadChapterPrompts(selectedBook, selectedChapter);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedBook, versionId]);
+
+  // Load chapters when backendBooks becomes available (after initial load)
+  useEffect(() => {
+    if (backendBooks.length > 0 && chapters.length === 0) {
+      loadChapters(selectedBook, selectedChapter, 4);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [backendBooks.length]);
 
   useEffect(() => {
     const key = `${selectedBook}-${selectedChapter}`;
@@ -1105,19 +1066,28 @@ export default function BibleReader() {
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && hasMore && !loadingRef.current) {
-          setChapters((prev) => {
-            const last = prev[prev.length - 1];
-            if (last) loadChapters(last.book, last.chapter + 1, 5);
-            return prev;
-          });
+        // Infinite scroll: load more chapters when last chapter is visible
+        for (const entry of entries) {
+          if (
+            entry.isIntersecting &&
+            hasMore &&
+            !loadingRef.current &&
+            chapters.length > 0
+          ) {
+            const lastChapter = chapters[chapters.length - 1];
+            const nextChapter = lastChapter.chapter + 1;
+            const maxChapter = getMaxChapter(lastChapter.book);
+            if (nextChapter <= maxChapter) {
+              loadChapters(lastChapter.book, nextChapter, 1);
+            }
+          }
         }
       },
       { threshold: 0.1 },
     );
     if (loadMoreRef.current) observer.observe(loadMoreRef.current);
     return () => observer.disconnect();
-  }, [hasMore, loadChapters]);
+  }, [hasMore, loadChapters, chapters]);
 
   useEffect(() => {
     if (chapters.length === 0) return;
@@ -1166,9 +1136,14 @@ export default function BibleReader() {
   }, [currentSpeechIdx, isSpeaking, speechItems]);
 
   // ── Derived ──
-  const isAtVeryStart = displayBook === BOOKS[0] && displayChapter === 1;
+  const bookNames = backendBooks.map((b) => b.bookName);
+  const isAtVeryStart =
+    bookNames.length > 0 &&
+    bookNames[0] === displayBook &&
+    displayChapter === 1;
   const isAtVeryEnd =
-    displayBook === BOOKS[BOOKS.length - 1] &&
+    bookNames.length > 0 &&
+    bookNames[bookNames.length - 1] === displayBook &&
     displayChapter >= maxChapterForDisplay;
 
   // ── Speech ──
@@ -1210,45 +1185,47 @@ export default function BibleReader() {
     });
 
   const advanceToNextChapter = async (): Promise<boolean> => {
-    const currentBookIdx = BOOKS.indexOf(displayBookRef.current);
+    const bookNames = backendBooks.map((b) => b.bookName);
+    const currentBookIdx = bookNames.indexOf(displayBookRef.current);
     let nextBook = displayBookRef.current;
     let nextChapter = displayChapterRef.current + 1;
 
-    if (nextChapter > (MAX_CHAPTERS[displayBookRef.current] ?? 1)) {
-      if (currentBookIdx < BOOKS.length - 1) {
-        nextBook = BOOKS[currentBookIdx + 1];
+    if (nextChapter > getMaxChapter(displayBookRef.current)) {
+      if (currentBookIdx >= 0 && currentBookIdx < bookNames.length - 1) {
+        nextBook = bookNames[currentBookIdx + 1];
         nextChapter = 1;
       } else {
-        return false; // End of Bible
+        return false;
       }
     }
 
     try {
-      const mod = await VERSION_FILES[versionId]();
-      const verses = mod.default;
-      const cv = processVerses(verses, nextBook, nextChapter);
-      if (cv.length > 0) {
-        const nextChapterData = {
-          book: nextBook,
-          chapter: nextChapter,
-          verses: cv,
-        };
-        const nextItems = buildChapterItems(nextChapterData);
-        speechItemsRef.current = nextItems;
-        setSpeechItems(nextItems);
-        currentIdxRef.current = 0;
-        setDisplayBook(nextBook);
-        setDisplayChapter(nextChapter);
-        setSelectedBook(nextBook);
-        setSelectedChapter(nextChapter);
-        setChapters((prev) => {
-          const ex = new Set(prev.map((c) => `${c.book}-${c.chapter}`));
-          if (ex.has(`${nextBook}-${nextChapter}`)) return prev;
-          return [...prev, nextChapterData];
-        });
-        return true;
-      }
-      return false;
+      const translationId = mapTranslationId(versionId);
+      const verseData = await bibleApi.getVerses(
+        translationId,
+        nextBook,
+        nextChapter,
+      );
+      const verses = verseData.verses.map((v) => ({
+        key: `${nextBook} ${nextChapter}:${v.verseNumber}`,
+        text: v.text,
+        num: v.verseNumber,
+      }));
+      const nextChapterData = { book: nextBook, chapter: nextChapter, verses };
+      const nextItems = buildChapterItems(nextChapterData);
+      speechItemsRef.current = nextItems;
+      setSpeechItems(nextItems);
+      currentIdxRef.current = 0;
+      setDisplayBook(nextBook);
+      setDisplayChapter(nextChapter);
+      setSelectedBook(nextBook);
+      setSelectedChapter(nextChapter);
+      setChapters((prev) => {
+        const ex = new Set(prev.map((c) => `${c.book}-${c.chapter}`));
+        if (ex.has(`${nextBook}-${nextChapter}`)) return prev;
+        return [...prev, nextChapterData];
+      });
+      return true;
     } catch (err) {
       console.error("Failed to load next chapter for audio:", err);
       return false;
@@ -1570,6 +1547,11 @@ export default function BibleReader() {
     return [...groups.values()];
   }, [selectedVerses]);
 
+  const isSingleChapterSelection = useCallback(() => {
+    if (selectedVerses.length === 0) return true;
+    return getSelectionGroups().length === 1;
+  }, [selectedVerses, getSelectionGroups]);
+
   // ── Annotation helpers ──
   const isHighlighted = (vk: string) => highlights[vk]?.color;
   const isFavorite = (vk: string) => favorites.has(vk);
@@ -1712,7 +1694,7 @@ export default function BibleReader() {
     setDisplayChapter(1);
     setChapters([]);
     setHasMore(true);
-    loadChapters(book, 1, 5);
+    loadChapters(book, 1, 4);
     if (isAuthenticated) {
       loadHighlights(book, 1);
       loadFavorites();
@@ -1743,7 +1725,7 @@ export default function BibleReader() {
       setHasMore(true);
       setDisplayBook(selectedBook);
       setDisplayChapter(ch);
-      loadChapters(selectedBook, ch, 5);
+      loadChapters(selectedBook, ch, 4);
       if (isAuthenticated) {
         loadHighlights(selectedBook, ch);
         loadNotes(selectedBook, ch);
@@ -1755,10 +1737,11 @@ export default function BibleReader() {
     if (displayChapter > 1) {
       handleChapterChange(displayChapter - 1);
     } else {
-      const idx = BOOKS.indexOf(displayBook);
+      const bookNames = backendBooks.map((b) => b.bookName);
+      const idx = bookNames.indexOf(displayBook);
       if (idx > 0) {
-        const prevBook = BOOKS[idx - 1];
-        const lastCh = MAX_CHAPTERS[prevBook] ?? 1;
+        const prevBook = bookNames[idx - 1];
+        const lastCh = getMaxChapter(prevBook);
         if (isSpeaking) stopSpeaking();
         clearSelection();
         chapterRefs.current = {};
@@ -1769,7 +1752,7 @@ export default function BibleReader() {
         setDisplayChapter(lastCh);
         setChapters([]);
         setHasMore(true);
-        loadChapters(prevBook, lastCh, 5);
+        loadChapters(prevBook, lastCh, 4);
         if (isAuthenticated) {
           loadHighlights(prevBook, lastCh);
           loadFavorites();
@@ -1783,8 +1766,11 @@ export default function BibleReader() {
     if (displayChapter < maxChapterForDisplay) {
       handleChapterChange(displayChapter + 1);
     } else {
-      const idx = BOOKS.indexOf(displayBook);
-      if (idx < BOOKS.length - 1) handleBookChange(BOOKS[idx + 1]);
+      const bookNames = backendBooks.map((b) => b.bookName);
+      const idx = bookNames.indexOf(displayBook);
+      if (idx >= 0 && idx < bookNames.length - 1) {
+        handleBookChange(bookNames[idx + 1]);
+      }
     }
   };
 
@@ -1927,15 +1913,32 @@ export default function BibleReader() {
     clearSelection();
   };
 
-  const copyVersesRange = (rangeStart: number, rangeEnd: number) => {
-    const verses: string[] = [];
-    for (let v = rangeStart; v <= rangeEnd; v++)
-      verses.push(`${displayBook} ${displayChapter}:${v}`);
-    navigator.clipboard.writeText(versesToText(verses));
-    toast({
-      title: "Copied",
-      description: `Verses ${rangeStart}-${rangeEnd} copied.`,
-    });
+  const copyVersesRange = (rangeStart?: number, rangeEnd?: number) => {
+    if (rangeStart !== undefined && rangeEnd !== undefined) {
+      const verses: string[] = [];
+      for (let v = rangeStart; v <= rangeEnd; v++)
+        verses.push(`${displayBook} ${displayChapter}:${v}`);
+      navigator.clipboard.writeText(versesToText(verses));
+      toast({
+        title: "Copied",
+        description: `Verses ${rangeStart}-${rangeEnd} copied.`,
+      });
+    } else {
+      navigator.clipboard.writeText(versesToText(selectedVerses));
+      const groups = getSelectionGroups();
+      if (groups.length === 1) {
+        const g = groups[0];
+        toast({
+          title: "Copied",
+          description: `${g.book} ${g.chapter}:${Math.min(...g.verses)}-${Math.max(...g.verses)}`,
+        });
+      } else {
+        toast({
+          title: "Copied",
+          description: `${selectedVerses.length} verses copied.`,
+        });
+      }
+    }
   };
 
   const shareVerses = async () => {
@@ -1948,14 +1951,22 @@ export default function BibleReader() {
     clearSelection();
   };
 
-  const shareVersesRange = async (rangeStart: number, rangeEnd: number) => {
-    const verses: string[] = [];
-    for (let v = rangeStart; v <= rangeEnd; v++)
-      verses.push(`${displayBook} ${displayChapter}:${v}`);
-    try {
-      await navigator.share({ text: versesToText(verses) });
-    } catch (e) {
-      console.error(e);
+  const shareVersesRange = async (rangeStart?: number, rangeEnd?: number) => {
+    if (rangeStart !== undefined && rangeEnd !== undefined) {
+      const verses: string[] = [];
+      for (let v = rangeStart; v <= rangeEnd; v++)
+        verses.push(`${displayBook} ${displayChapter}:${v}`);
+      try {
+        await navigator.share({ text: versesToText(verses) });
+      } catch (e) {
+        console.error(e);
+      }
+    } else {
+      try {
+        await navigator.share({ text: versesToText(selectedVerses) });
+      } catch (e) {
+        console.error(e);
+      }
     }
   };
 
@@ -2019,22 +2030,13 @@ export default function BibleReader() {
     if (query.trim().length > 2) {
       setSearchLoading(true);
       try {
-        const mod = await VERSION_FILES[versionId]();
-        const results: any[] = [];
-        Object.entries(mod.default)
-          .filter(([, text]) =>
-            text.toLowerCase().includes(query.toLowerCase()),
-          )
-          .slice(0, 30)
-          .forEach(([key]) => {
-            const m = key.match(/^(.+?)\s+(\d+):(\d+)$/);
-            if (m)
-              results.push({
-                book: m[1],
-                chapter: parseInt(m[2]),
-                verse: parseInt(m[3]),
-              });
-          });
+        const translationId = mapTranslationId(versionId);
+        const result = await bibleApi.search(translationId, query, 50);
+        const results = result.data.map((r) => ({
+          book: r.bookName,
+          chapter: r.chapter,
+          verse: r.verse,
+        }));
         setSearchResults(results);
       } catch {
         setSearchResults([]);
@@ -2100,18 +2102,62 @@ export default function BibleReader() {
               )}
             </Button>
 
-            <Select value={versionId} onValueChange={setVersionId}>
-              <SelectTrigger className="w-[150px] h-8 text-xs border-border/50 bg-muted/30">
-                <SelectValue placeholder="Select version" />
-              </SelectTrigger>
-              <SelectContent>
-                {BIBLE_VERSIONS.map((v) => (
-                  <SelectItem key={v.id} value={v.id} className="text-xs">
-                    {v.name} ({v.year})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Popover open={translationOpen} onOpenChange={setTranslationOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="w-[200px] h-8 text-xs border-border/50 bg-muted/30 justify-between font-normal"
+                >
+                  <span className="truncate">
+                    {availableTranslations.find((t) => t.id === versionId)
+                      ?.name || "Select version"}
+                  </span>
+                  <ChevronDown className="w-3 h-3 ml-2 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent
+                className="w-[220px] max-h-[560px] p-0"
+                align="start"
+              >
+                <div className="p-2 border-b border-border/40">
+                  <Input
+                    placeholder="Search translations..."
+                    value={translationSearch}
+                    onChange={(e) => setTranslationSearch(e.target.value)}
+                    className="h-7 text-xs"
+                    autoFocus
+                  />
+                </div>
+                <ScrollArea className="h-[500px]">
+                  <div className="py-1">
+                    {filteredTranslations.length === 0 ? (
+                      <div className="p-2 text-xs text-muted-foreground text-center">
+                        No translations found
+                      </div>
+                    ) : (
+                      filteredTranslations.map((v) => (
+                        <button
+                          key={v.id}
+                          onClick={() => {
+                            setVersionId(v.id);
+                            setTranslationSearch("");
+                            setTranslationOpen(false);
+                          }}
+                          className={cn(
+                            "w-full px-3 py-2 text-xs text-left hover:bg-muted transition-colors",
+                            versionId === v.id
+                              ? "bg-primary/10 text-primary font-medium"
+                              : "text-foreground",
+                          )}
+                        >
+                          {v.name}
+                        </button>
+                      ))
+                    )}
+                  </div>
+                </ScrollArea>
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
 
@@ -2126,9 +2172,15 @@ export default function BibleReader() {
               className="pl-8 h-8 text-xs border-border/50 bg-muted/30"
             />
           </div>
-          <Select value={selectedBook} onValueChange={handleBookChange}>
+          <Select
+            value={selectedBook}
+            onValueChange={handleBookChange}
+            disabled={booksLoading || backendBooks.length === 0}
+          >
             <SelectTrigger className="w-[175px] h-8 text-xs border-border/50 bg-muted/30">
-              <SelectValue placeholder="Select book" />
+              <SelectValue
+                placeholder={booksLoading ? "Loading..." : "Select book"}
+              />
             </SelectTrigger>
             <SelectContent>
               <ScrollArea className="h-[300px]">
@@ -2143,24 +2195,33 @@ export default function BibleReader() {
           <Select
             value={displayChapter.toString()}
             onValueChange={(val) => handleChapterChange(parseInt(val, 10))}
+            disabled={booksLoading || backendBooks.length === 0}
           >
             <SelectTrigger className="w-[130px] h-8 text-xs border-border/50 bg-muted/30">
-              <SelectValue placeholder="Chapter" />
+              <SelectValue
+                placeholder={booksLoading ? "Loading..." : "Chapter"}
+              />
             </SelectTrigger>
             <SelectContent>
               <ScrollArea className="h-[200px]">
-                {Array.from(
-                  { length: maxChapterForDisplay },
-                  (_, i) => i + 1,
-                ).map((ch) => (
-                  <SelectItem
-                    key={ch}
-                    value={ch.toString()}
-                    className="text-xs"
-                  >
-                    Chapter {ch}
+                {backendBooks.length > 0 ? (
+                  Array.from(
+                    { length: maxChapterForDisplay },
+                    (_, i) => i + 1,
+                  ).map((ch) => (
+                    <SelectItem
+                      key={ch}
+                      value={ch.toString()}
+                      className="text-xs"
+                    >
+                      Chapter {ch}
+                    </SelectItem>
+                  ))
+                ) : (
+                  <SelectItem value="1" disabled>
+                    Loading...
                   </SelectItem>
-                ))}
+                )}
               </ScrollArea>
             </SelectContent>
           </Select>
@@ -2183,6 +2244,8 @@ export default function BibleReader() {
               onBookChange={handleBookChange}
               onChapterChange={handleChapterChange}
               onVersionChange={setVersionId}
+              books={backendBooks.map((b) => b.bookName)}
+              availableTranslations={availableTranslations}
             />
           </div>
 
@@ -2221,11 +2284,15 @@ export default function BibleReader() {
           >
             <ChevronLeft className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">
-              {displayChapter > 1
-                ? `Ch. ${displayChapter - 1}`
-                : BOOKS.indexOf(displayBook) > 0
-                  ? BOOKS[BOOKS.indexOf(displayBook) - 1]
-                  : "Prev"}
+              {(() => {
+                const bookNames = backendBooks.map((b) => b.bookName);
+                const idx = bookNames.indexOf(displayBook);
+                return displayChapter > 1
+                  ? `Ch. ${displayChapter - 1}`
+                  : idx > 0
+                    ? bookNames[idx - 1]
+                    : "Prev";
+              })()}
             </span>
             <span className="sm:hidden text-[11px]">Prev</span>
           </button>
@@ -2241,7 +2308,7 @@ export default function BibleReader() {
               Ch. {displayChapter} of {maxChapterForDisplay}
               <span className="mx-1 opacity-40">·</span>
               <span className="text-primary/80">
-                {currentVersion?.abbreviation}
+                {currentVersion?.abbreviation || versionId}
               </span>
             </p>
           </div>
@@ -2252,11 +2319,15 @@ export default function BibleReader() {
             className="flex items-center gap-1 sm:gap-1.5 h-8 px-2 sm:px-3 text-xs text-muted-foreground hover:text-foreground disabled:opacity-30 rounded-lg hover:bg-muted/50 transition-all active:scale-95"
           >
             <span className="hidden sm:inline">
-              {displayChapter < maxChapterForDisplay
-                ? `Ch. ${displayChapter + 1}`
-                : BOOKS.indexOf(displayBook) < BOOKS.length - 1
-                  ? BOOKS[BOOKS.indexOf(displayBook) + 1]
-                  : "End"}
+              {(() => {
+                const bookNames = backendBooks.map((b) => b.bookName);
+                const idx = bookNames.indexOf(displayBook);
+                return displayChapter < maxChapterForDisplay
+                  ? `Ch. ${displayChapter + 1}`
+                  : idx >= 0 && idx < bookNames.length - 1
+                    ? bookNames[idx + 1]
+                    : "End";
+              })()}
             </span>
             <span className="sm:hidden text-[11px]">Next</span>
             <ChevronRight className="w-3.5 h-3.5" />
@@ -2313,13 +2384,25 @@ export default function BibleReader() {
               label="Note"
             />
             <ToolbarBtn
-              onClick={() => setShowFavoriteModal(true)}
+              onClick={() => {
+                if (selectedVerses.length > 0 && !isSingleChapterSelection()) {
+                  addFavorite();
+                } else {
+                  setShowFavoriteModal(true);
+                }
+              }}
               icon={<Star className="w-3 h-3" />}
               label="Fav"
               compact
             />
             <ToolbarBtn
-              onClick={() => setShowCopyModal(true)}
+              onClick={() => {
+                if (selectedVerses.length > 0 && !isSingleChapterSelection()) {
+                  copyVersesRange();
+                } else {
+                  setShowCopyModal(true);
+                }
+              }}
               icon={<Copy className="w-3 h-3" />}
               label="Copy"
               compact
@@ -2724,7 +2807,9 @@ export default function BibleReader() {
           setShowHighlightPicker(false);
           highlightVerses(colorId, color, rangeStart, rangeEnd);
         }}
-        totalVerses={currentChapterVerseCount || MAX_CHAPTERS[displayBook] || 1}
+        totalVerses={
+          currentChapterVerseCount || getMaxChapter(displayBook) || 1
+        }
         currentBook={displayBook}
         currentChapter={displayChapter}
         selectedVerses={selectedVerses}
@@ -2736,16 +2821,21 @@ export default function BibleReader() {
         noteText={noteText}
         onNoteChange={setNoteText}
         saving={noteSaving}
-        totalVerses={currentChapterVerseCount || MAX_CHAPTERS[displayBook] || 1}
+        totalVerses={
+          currentChapterVerseCount || getMaxChapter(displayBook) || 1
+        }
         currentBook={displayBook}
         currentChapter={displayChapter}
+        selectedVerses={selectedVerses}
       />
       <RangePickerModal
         visible={showFavoriteModal}
         onClose={() => setShowFavoriteModal(false)}
         title="Add to Favorites"
         description={`${displayBook} ${displayChapter}`}
-        totalVerses={currentChapterVerseCount || MAX_CHAPTERS[displayBook] || 1}
+        totalVerses={
+          currentChapterVerseCount || getMaxChapter(displayBook) || 1
+        }
         selectedVerses={selectedVerses}
         actionLabel="Add Favorite"
         onConfirm={(rangeStart, rangeEnd) => {
@@ -2758,7 +2848,9 @@ export default function BibleReader() {
         onClose={() => setShowCopyModal(false)}
         title="Copy Verses"
         description={`${displayBook} ${displayChapter}`}
-        totalVerses={currentChapterVerseCount || MAX_CHAPTERS[displayBook] || 1}
+        totalVerses={
+          currentChapterVerseCount || getMaxChapter(displayBook) || 1
+        }
         selectedVerses={selectedVerses}
         actionLabel="Copy"
         onConfirm={(rangeStart, rangeEnd) => {
@@ -2771,7 +2863,9 @@ export default function BibleReader() {
         onClose={() => setShowShareModal(false)}
         title="Share Verses"
         description={`${displayBook} ${displayChapter}`}
-        totalVerses={currentChapterVerseCount || MAX_CHAPTERS[displayBook] || 1}
+        totalVerses={
+          currentChapterVerseCount || getMaxChapter(displayBook) || 1
+        }
         selectedVerses={selectedVerses}
         actionLabel="Share"
         onConfirm={(rangeStart, rangeEnd) => {

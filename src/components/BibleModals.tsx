@@ -150,10 +150,14 @@ function deriveRange(
     })
     .filter((n): n is number => n !== null);
 
-  return {
-    start: nums.length > 0 ? Math.min(...nums) : 1,
-    end: nums.length > 0 ? Math.max(...nums) : totalVerses || 1,
-  };
+  if (nums.length > 0) {
+    return {
+      start: Math.min(...nums),
+      end: Math.max(...nums),
+    };
+  }
+  
+  return { start: 1, end: 1 };
 }
 
 // ── HighlightPickerModal ──────────────────────────────────────────────────────
