@@ -156,8 +156,45 @@ function deriveRange(
       end: Math.max(...nums),
     };
   }
-  
+
   return { start: 1, end: 1 };
+}
+
+// ── Selected Verses Display (used when allowRange=false) ─────────────────────
+
+function SelectedVersesDisplay({
+  selectedVerses,
+}: {
+  selectedVerses: string[];
+}) {
+  const verseNums = selectedVerses
+    .map((k) => {
+      const m = k.match(/:(\d+)$/);
+      return m ? parseInt(m[1]) : null;
+    })
+    .filter((n): n is number => n !== null)
+    .sort((a, b) => a - b);
+
+  return (
+    <div className="p-4 rounded-xl bg-muted/40 border border-border/40 space-y-2">
+      <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+        Selected Verses
+      </span>
+      <div className="flex flex-wrap gap-1.5">
+        {verseNums.map((n) => (
+          <span
+            key={n}
+            className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-semibold"
+          >
+            {n}
+          </span>
+        ))}
+      </div>
+      <p className="text-xs text-muted-foreground">
+        {verseNums.length} verse{verseNums.length !== 1 ? "s" : ""} selected
+      </p>
+    </div>
+  );
 }
 
 // ── HighlightPickerModal ──────────────────────────────────────────────────────
@@ -175,6 +212,7 @@ interface HighlightPickerModalProps {
   currentBook: string;
   currentChapter: number;
   selectedVerses?: string[];
+  allowRange?: boolean;
 }
 
 export function HighlightPickerModal({
@@ -185,6 +223,7 @@ export function HighlightPickerModal({
   currentBook,
   currentChapter,
   selectedVerses = [],
+  allowRange = true,
 }: HighlightPickerModalProps) {
   const derived = useMemo(
     () => deriveRange(selectedVerses, totalVerses),
@@ -216,24 +255,32 @@ export function HighlightPickerModal({
           </DialogDescription>
         </DialogHeader>
 
-        <VerseRangeSlider
-          totalVerses={totalVerses}
-          rangeStart={rangeStart}
-          rangeEnd={rangeEnd}
-          onRangeChange={(s, e) => {
-            setRangeStart(s);
-            setRangeEnd(e);
-          }}
-          currentBook={currentBook}
-          currentChapter={currentChapter}
-        />
+        {allowRange ? (
+          <VerseRangeSlider
+            totalVerses={totalVerses}
+            rangeStart={rangeStart}
+            rangeEnd={rangeEnd}
+            onRangeChange={(s, e) => {
+              setRangeStart(s);
+              setRangeEnd(e);
+            }}
+            currentBook={currentBook}
+            currentChapter={currentChapter}
+          />
+        ) : (
+          <SelectedVersesDisplay selectedVerses={selectedVerses} />
+        )}
 
         {/* Color grid */}
         <div className="grid grid-cols-5 gap-2 pt-1">
           {HIGHLIGHT_COLORS.map((c) => (
             <button
               key={c.id}
-              onClick={() => onSelectColor(c.id, c.color, rangeStart, rangeEnd)}
+              onClick={() =>
+                allowRange
+                  ? onSelectColor(c.id, c.color, rangeStart, rangeEnd)
+                  : onSelectColor(c.id, c.color)
+              }
               title={c.name}
               className="aspect-square rounded-xl border-2 border-transparent hover:border-foreground/30 hover:scale-110 active:scale-95 transition-all shadow-sm"
               style={{ backgroundColor: c.color }}
@@ -264,6 +311,7 @@ interface NoteModalProps {
   currentChapter: number;
   totalVerses?: number;
   selectedVerses?: string[];
+  allowRange?: boolean;
 }
 
 export function NoteModal({
@@ -277,6 +325,7 @@ export function NoteModal({
   currentChapter,
   totalVerses = 1,
   selectedVerses = [],
+  allowRange = true,
 }: NoteModalProps) {
   const derived = useMemo(
     () => deriveRange(selectedVerses, totalVerses),
@@ -304,17 +353,21 @@ export function NoteModal({
         </DialogHeader>
 
         <div className="space-y-4">
-          <VerseRangeSlider
-            totalVerses={totalVerses}
-            rangeStart={rangeStart}
-            rangeEnd={rangeEnd}
-            onRangeChange={(s, e) => {
-              setRangeStart(s);
-              setRangeEnd(e);
-            }}
-            currentBook={currentBook}
-            currentChapter={currentChapter}
-          />
+          {allowRange ? (
+            <VerseRangeSlider
+              totalVerses={totalVerses}
+              rangeStart={rangeStart}
+              rangeEnd={rangeEnd}
+              onRangeChange={(s, e) => {
+                setRangeStart(s);
+                setRangeEnd(e);
+              }}
+              currentBook={currentBook}
+              currentChapter={currentChapter}
+            />
+          ) : (
+            <SelectedVersesDisplay selectedVerses={selectedVerses} />
+          )}
 
           <textarea
             value={noteText}
@@ -329,7 +382,9 @@ export function NoteModal({
               Cancel
             </Button>
             <Button
-              onClick={() => onSave(rangeStart, rangeEnd)}
+              onClick={() =>
+                allowRange ? onSave(rangeStart, rangeEnd) : onSave()
+              }
               disabled={saving || !noteText.trim()}
             >
               {saving ? "Saving..." : "Save Note"}
@@ -350,8 +405,9 @@ export interface RangePickerModalProps {
   description?: string;
   totalVerses: number;
   selectedVerses?: string[];
+  allowRange?: boolean;
   actionLabel: string;
-  onConfirm: (rangeStart: number, rangeEnd: number) => void;
+  onConfirm: (rangeStart?: number, rangeEnd?: number) => void;
 }
 
 export function RangePickerModal({
@@ -361,6 +417,7 @@ export function RangePickerModal({
   description,
   totalVerses,
   selectedVerses = [],
+  allowRange = true,
   actionLabel,
   onConfirm,
 }: RangePickerModalProps) {
@@ -397,17 +454,21 @@ export function RangePickerModal({
           {description && <DialogDescription>{description}</DialogDescription>}
         </DialogHeader>
 
-        <VerseRangeSlider
-          totalVerses={totalVerses}
-          rangeStart={rangeStart}
-          rangeEnd={rangeEnd}
-          onRangeChange={(s, e) => {
-            setRangeStart(s);
-            setRangeEnd(e);
-          }}
-          currentBook={book || description || ""}
-          currentChapter={chapter || ""}
-        />
+        {allowRange ? (
+          <VerseRangeSlider
+            totalVerses={totalVerses}
+            rangeStart={rangeStart}
+            rangeEnd={rangeEnd}
+            onRangeChange={(s, e) => {
+              setRangeStart(s);
+              setRangeEnd(e);
+            }}
+            currentBook={book || description || ""}
+            currentChapter={chapter || ""}
+          />
+        ) : (
+          <SelectedVersesDisplay selectedVerses={selectedVerses} />
+        )}
 
         <div className="flex justify-end gap-2 pt-1">
           <Button variant="outline" onClick={onClose}>
@@ -415,7 +476,7 @@ export function RangePickerModal({
           </Button>
           <Button
             onClick={() => {
-              onConfirm(rangeStart, rangeEnd);
+              allowRange ? onConfirm(rangeStart, rangeEnd) : onConfirm();
               onClose();
             }}
           >

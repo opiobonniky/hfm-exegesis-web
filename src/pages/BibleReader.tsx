@@ -1552,6 +1552,16 @@ export default function BibleReader() {
     return getSelectionGroups().length === 1;
   }, [selectedVerses, getSelectionGroups]);
 
+  const isConsecutiveSelection = useCallback(() => {
+    const groups = getSelectionGroups();
+    if (groups.length !== 1) return false;
+    const verses = [...groups[0].verses].sort((a, b) => a - b);
+    for (let i = 1; i < verses.length; i++) {
+      if (verses[i] !== verses[i - 1] + 1) return false;
+    }
+    return true;
+  }, [selectedVerses, getSelectionGroups]);
+
   // ── Annotation helpers ──
   const isHighlighted = (vk: string) => highlights[vk]?.color;
   const isFavorite = (vk: string) => favorites.has(vk);
@@ -2385,7 +2395,7 @@ export default function BibleReader() {
             />
             <ToolbarBtn
               onClick={() => {
-                if (selectedVerses.length > 0 && !isSingleChapterSelection()) {
+                if (selectedVerses.length > 0 && !isConsecutiveSelection()) {
                   addFavorite();
                 } else {
                   setShowFavoriteModal(true);
@@ -2397,7 +2407,7 @@ export default function BibleReader() {
             />
             <ToolbarBtn
               onClick={() => {
-                if (selectedVerses.length > 0 && !isSingleChapterSelection()) {
+                if (selectedVerses.length > 0 && !isConsecutiveSelection()) {
                   copyVersesRange();
                 } else {
                   setShowCopyModal(true);
@@ -2424,7 +2434,13 @@ export default function BibleReader() {
               compact
             />
             <ToolbarBtn
-              onClick={() => setShowShareModal(true)}
+              onClick={() => {
+                if (selectedVerses.length > 0 && !isConsecutiveSelection()) {
+                  shareVersesRange();
+                } else {
+                  setShowShareModal(true);
+                }
+              }}
               icon={<Share2 className="w-3 h-3" />}
               label="Share"
               compact
@@ -2813,6 +2829,7 @@ export default function BibleReader() {
         currentBook={displayBook}
         currentChapter={displayChapter}
         selectedVerses={selectedVerses}
+        allowRange={isConsecutiveSelection()}
       />
       <NoteModal
         visible={showNoteModal}
@@ -2827,6 +2844,7 @@ export default function BibleReader() {
         currentBook={displayBook}
         currentChapter={displayChapter}
         selectedVerses={selectedVerses}
+        allowRange={isConsecutiveSelection()}
       />
       <RangePickerModal
         visible={showFavoriteModal}
@@ -2837,6 +2855,7 @@ export default function BibleReader() {
           currentChapterVerseCount || getMaxChapter(displayBook) || 1
         }
         selectedVerses={selectedVerses}
+        allowRange={isConsecutiveSelection()}
         actionLabel="Add Favorite"
         onConfirm={(rangeStart, rangeEnd) => {
           setShowFavoriteModal(false);
@@ -2852,6 +2871,7 @@ export default function BibleReader() {
           currentChapterVerseCount || getMaxChapter(displayBook) || 1
         }
         selectedVerses={selectedVerses}
+        allowRange={isConsecutiveSelection()}
         actionLabel="Copy"
         onConfirm={(rangeStart, rangeEnd) => {
           setShowCopyModal(false);
@@ -2867,6 +2887,7 @@ export default function BibleReader() {
           currentChapterVerseCount || getMaxChapter(displayBook) || 1
         }
         selectedVerses={selectedVerses}
+        allowRange={isConsecutiveSelection()}
         actionLabel="Share"
         onConfirm={(rangeStart, rangeEnd) => {
           setShowShareModal(false);
