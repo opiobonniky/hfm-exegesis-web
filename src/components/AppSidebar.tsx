@@ -73,6 +73,11 @@ const userNavItems = [
   { title: "My Dashboard", url: routes.userDashboard.path, icon: Home },
   { title: "Bible Reader", url: routes.bibleReader.path, icon: BookText },
   { title: "Daily Verse", url: routes.userDailyVerse.path, icon: Sun },
+  {
+    title: "Daily Devotions",
+    url: routes.userDevotions.path,
+    icon: SproutIcon,
+  },
 
   { title: "Reading Plans", url: routes.userPlans.path, icon: BookOpen },
   { title: "My Activity", url: routes.myActivity.path, icon: Highlighter },

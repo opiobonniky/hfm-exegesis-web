@@ -42,6 +42,7 @@ const JournalEntry = lazy(() => import("@/pages/JournalEntry"));
 const JournalDetail = lazy(() => import("@/pages/JournalDetail"));
 const JournalPrompts = lazy(() => import("@/pages/JournalPrompts"));
 const JournalTemplates = lazy(() => import("@/pages/JournalTemplates"));
+const UserDevotions = lazy(() => import("@/pages/UserDevotions"));
 
 // Route configuration interface
 export interface RouteConfig {
@@ -219,6 +220,13 @@ export const routes = {
     isProtected: true,
     requiresLayout: true,
     title: "Daily Verse",
+  },
+  userDevotions: {
+    path: "/user-devotions",
+    component: UserDevotions,
+    isProtected: true,
+    requiresLayout: true,
+    title: "Daily Devotion",
   },
   userPlans: {
     path: "/my-reading-plans",
