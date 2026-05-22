@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 interface SelectionActionBarProps {
   selectedCount: number;
   onListen?: () => void;
+  onJournal?: () => void;
   onExplain?: () => void;
   onHighlight?: () => void;
   onNote?: () => void;
@@ -56,6 +57,18 @@ export default function SelectionActionBar({
             >
               <Volume2 className="w-4 h-4" />
               <span className="hidden sm:inline">Listen</span>
+            </Button>
+          )}
+
+          {onJournal && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onJournal}
+              className="gap-1"
+            >
+              <BookOpen className="w-4 h-4" />
+              <span className="hidden sm:inline">Journal</span>
             </Button>
           )}
 

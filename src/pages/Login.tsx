@@ -264,13 +264,13 @@ const Login = () => {
             {/* Logo Section */}
             <div className="relative inline-block">
               <div className="absolute inset-0 bg-primary/20 blur-[60px] rounded-full" />
-              <div className="relative w-48 h-48 md:w-64 md:h-64 rounded-[3rem] bg-white/5 backdrop-blur-2xl border border-white/10 flex items-center justify-center p-8 shadow-2xl rotate-3 hover:rotate-0 transition-transform duration-500">
+              <Link to="/" className="relative w-48 h-48 md:w-64 md:h-64 rounded-[3rem] bg-white/5 backdrop-blur-2xl border border-white/10 flex items-center justify-center p-8 shadow-2xl hover:border-white/20 transition-colors">
                 <img
                   src={logoImage}
                   alt="Exegesis Logo"
                   className="w-full h-full object-contain filter drop-shadow-2xl"
                 />
-              </div>
+              </Link>
             </div>
 
             {/* Content Section */}
@@ -311,7 +311,7 @@ const Login = () => {
       <div className="flex-1 flex items-center justify-center p-6 lg:p-12 overflow-y-auto">
         <div className="w-full max-w-[420px] space-y-8 py-8 lg:py-0">
           {/* Logo - shown on both mobile and desktop now for consistency with app */}
-          <div className="flex flex-col items-center gap-3 mb-2 anim-fade">
+          <Link to="/" className="flex flex-col items-center gap-3 mb-2 anim-fade">
             <div className="w-32 h-32 flex items-center justify-center p-2">
               <img
                 src={logoImage}
@@ -319,7 +319,7 @@ const Login = () => {
                 className="w-full h-full object-contain"
               />
             </div>
-          </div>
+          </Link>
 
           {/* Heading */}
           <div
@@ -426,7 +426,7 @@ const Login = () => {
             {/* Sign In button */}
             <button
               type="submit"
-              className="w-full h-14 bg-primary text-white rounded-2xl font-semibold text-[15px] shadow-lg shadow-primary/20 hover:shadow-xl hover:translate-y-[-1px] active:translate-y-[0px] transition-all flex items-center justify-center gap-2"
+              className="w-full h-14 bg-primary text-white rounded-2xl font-semibold text-[15px] shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 flex items-center justify-center gap-2"
               disabled={isLoading}
             >
               {isLoading ? (
@@ -439,7 +439,7 @@ const Login = () => {
             {/* Create Account button */}
             <button
               type="button"
-              className="w-full h-14 bg-white border-2 border-slate-100 rounded-2xl font-semibold text-[15px] text-slate-900 hover:bg-slate-50 hover:border-slate-200 transition-all"
+              className="w-full h-14 bg-white border-2 border-slate-100 rounded-2xl font-semibold text-[15px] text-slate-900 hover:bg-slate-50 hover:border-slate-300 hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 transition-all duration-200"
               onClick={() => navigate("/register")}
             >
               Create New Account
@@ -457,7 +457,7 @@ const Login = () => {
             {/* Google button */}
             <button
               type="button"
-              className="w-full h-14 bg-white border-2 border-slate-100 rounded-2xl flex items-center justify-center gap-3 hover:bg-slate-50 hover:border-slate-200 transition-all font-semibold text-slate-900 relative"
+              className="w-full h-14 bg-white border-2 border-slate-100 rounded-2xl flex items-center justify-center gap-3 hover:bg-slate-50 hover:border-slate-300 hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 transition-all duration-200 font-semibold text-slate-900 relative"
               onClick={() => handleGoogleLogin()}
               disabled={isGoogleLoading}
             >
