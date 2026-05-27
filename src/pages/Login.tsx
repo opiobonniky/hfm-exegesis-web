@@ -1,9 +1,21 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { Mail, Lock, Eye, EyeOff, ArrowRight } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, ArrowRight, Globe, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import logoImage from "@/assets/logos/exegesis_bg_rm.png";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/components/languages/languageProvider";
+import { LANGUAGE_NAMES, type Language } from "@/components/languages/type";
+import { getLanguageName } from "@/components/languages/localeUtils";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectGroup,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { sendPostRequest, ApiError } from "@/services/api";
 import { routes } from "@/components/Routes/routes";
 import { getDeviceInfo, getClientIP } from "@/lib/utils";
@@ -12,6 +24,7 @@ import { auth, googleProvider } from "@/firebaseConfiguration/config";
 import googleIcon from "@/assets/icons/google-icon.svg";
 
 const Login = () => {
+  const { t, isRtl, setLanguage, lang: currentLang, isLoading: langLoading } = useLanguage();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -230,19 +243,18 @@ const Login = () => {
     }
   };
 
-  return (
-    <div className="min-h-screen flex bg-background overflow-hidden">
+  return (      <div className="min-h-screen flex bg-background overflow-hidden" dir={isRtl ? 'rtl' : 'ltr'}>
       {/* ── Left Panel (Desktop Only) ── */}
       <div className="hidden lg:flex lg:w-[50%] relative overflow-hidden bg-slate-800">
         {/* Modern background elements */}
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-br from-primary/20 via-transparent to-transparent opacity-50" />
           <div
-            className="absolute -top-24 -right-24 w-96 h-96 bg-primary/10 rounded-full blur-[100px] animate-pulse"
+            className={`absolute -top-24 ${isRtl ? '-left-24' : '-right-24'} w-96 h-96 bg-primary/10 rounded-full blur-[100px] animate-pulse`}
             style={{ animationDuration: "8s" }}
           />
           <div
-            className="absolute bottom-1/4 -left-24 w-72 h-72 bg-accent/10 rounded-full blur-[80px] animate-pulse"
+            className={`absolute bottom-1/4 ${isRtl ? '-right-24' : '-left-24'} w-72 h-72 bg-accent/10 rounded-full blur-[80px] animate-pulse`}
             style={{ animationDuration: "10s", animationDelay: "2s" }}
           />
 
@@ -276,15 +288,17 @@ const Login = () => {
             {/* Content Section */}
             <div className="space-y-6 max-w-lg">
               <h2 className="text-4xl md:text-5xl font-black text-white font-[family-name:var(--font-heading)] tracking-tighter leading-tight">
-                Experience the <span className="text-primary">Word</span> like
-                never before.
+                {(() => {
+                  const parts = (t.auth?.experienceTheWord || 'Experience the {word} like never before.').split('{word}');
+                  return (<>{parts[0]}<span className="text-primary">{t.auth?.word || 'Word'}</span>{parts[1]}</>);
+                })()}
               </h2>
               <div className="h-1.5 w-20 bg-primary mx-auto rounded-full" />
               <blockquote className="text-xl md:text-2xl text-slate-300 font-medium italic leading-relaxed">
-                "Your word is a lamp for my feet, a light on my path."
+                "{t.auth?.lampToMyFeet || 'Your word is a lamp for my feet, a light on my path.'}"
               </blockquote>
               <p className="text-slate-500 font-bold uppercase tracking-[0.2em] text-sm">
-                Psalm 119:105
+                {t.auth?.psalmReference || 'Psalm 119:105'}
               </p>
             </div>
           </div>
@@ -292,16 +306,16 @@ const Login = () => {
 
         {/* Bottom bar */}
         <div
-          className="absolute bottom-10 left-0 w-full px-16 flex justify-between items-center text-slate-500 text-xs font-bold uppercase tracking-widest anim-fade"
+          className="absolute bottom-10 start-0 w-full px-16 flex justify-between items-center text-slate-500 text-xs font-bold uppercase tracking-widest anim-fade"
           style={{ animationDelay: "0.5s" }}
         >
-          <span>© 2024 Exegesis Bible</span>
+          <span>{t.auth?.loginCopyright || '© 2024 Exegesis Bible'}</span>
           <div className="flex gap-6">
             <span className="hover:text-white cursor-pointer transition-colors">
-              Instagram
+              {t.auth?.instagram || 'Instagram'}
             </span>
             <span className="hover:text-white cursor-pointer transition-colors">
-              Twitter
+              {t.auth?.twitter || 'Twitter'}
             </span>
           </div>
         </div>
@@ -327,11 +341,60 @@ const Login = () => {
             style={{ animationDelay: "0.1s" }}
           >
             <h1 className="text-[26px] font-bold tracking-tight text-slate-900 leading-tight">
-              Welcome Back!
+              {t.auth?.signIn || 'Welcome Back!'}
             </h1>
             <p className="text-slate-500 mt-2 text-sm">
-              Sign in to continue your journey.
+              {t.auth?.dontHaveAccount || 'Sign in to continue your journey.'}
             </p>
+          </div>
+
+          {/* Language Selector */}
+          <div className="flex justify-center anim-fade" style={{ animationDelay: "0.15s" }}>
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-slate-50 rounded-full border border-slate-100">
+              <Globe className="w-3.5 h-3.5 text-slate-400" />
+              <Select
+                value={currentLang}
+                onValueChange={(value) => setLanguage(value as Language)}
+                disabled={langLoading}
+              >
+                <SelectTrigger className="h-7 text-xs border-0 bg-transparent shadow-none p-0 gap-1 text-slate-500 hover:text-slate-700 focus:ring-0 [&>svg]:hidden">
+                  <SelectValue>
+                    <span>{LANGUAGE_NAMES[currentLang]}</span>
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent className="min-w-[140px]">
+                  {[
+                    { label: "Primary", languages: ["en"] as Language[] },
+                    { label: "European", languages: ["de", "fr", "es", "pt", "it", "el", "ru"] as Language[] },
+                    { label: "Indian", languages: ["hi", "bn", "ta", "te", "mr", "gu", "kn", "ml", "pa", "ur"] as Language[] },
+                    { label: "Other", languages: ["ar", "sw", "ne", "fil"] as Language[] },
+                  ].map((group) => (
+                    <SelectGroup key={group.label}>
+                      <SelectLabel className="text-[10px] font-bold tracking-widest uppercase text-muted-foreground/50">
+                        {group.label}
+                      </SelectLabel>
+                      {group.languages.map((code) => (
+                        <SelectItem key={code} value={code} className="py-1.5 text-xs">
+                          <div className="flex items-center justify-between w-full gap-2">
+                            <div className="flex items-center gap-1.5 min-w-0">
+                              <span>{LANGUAGE_NAMES[code]}</span>
+                              {code !== 'en' && (
+                                <span className="text-muted-foreground/60 text-[10px]">
+                                  ({getLanguageName(code, 'en')})
+                                </span>
+                              )}
+                            </div>
+                            {code === currentLang && (
+                              <Check className="w-3 h-3 text-primary shrink-0" />
+                            )}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           {/* Form */}
@@ -343,7 +406,7 @@ const Login = () => {
             {/* Email input */}
             <div className="space-y-1">
               <div className="flex group h-14">
-                <div className="w-12 flex items-center justify-center bg-white border border-r-0 border-slate-200 rounded-l-xl group-focus-within:border-primary transition-colors shadow-sm">
+                <div className={`w-12 flex items-center justify-center bg-white border ${isRtl ? 'border-l-0 border-slate-200 rounded-r-xl' : 'border-r-0 border-slate-200 rounded-l-xl'} group-focus-within:border-primary transition-colors shadow-sm`}>
                   <Mail className="w-[18px] h-[18px] text-slate-400 group-focus-within:text-primary" />
                 </div>
                 <div className="flex-1 relative">
@@ -354,18 +417,18 @@ const Login = () => {
                     onChange={(e) => setEmail(e.target.value)}
                     onFocus={() => setEmailFocused(true)}
                     onBlur={() => setEmailFocused(false)}
-                    className="w-full h-full px-4 pt-4 bg-white border border-slate-200 rounded-r-xl focus:outline-none focus:border-primary transition-all text-[15px] shadow-sm"
+                    className={`w-full h-full px-4 pt-4 bg-white border border-slate-200 ${isRtl ? 'rounded-l-xl' : 'rounded-r-xl'} focus:outline-none focus:border-primary transition-all text-[15px] shadow-sm`}
                     required
                   />
                   <label
                     htmlFor="email"
-                    className={`absolute left-4 transition-all pointer-events-none ${
+                    className={`absolute ${isRtl ? 'right-4' : 'left-4'} transition-all pointer-events-none ${
                       emailFocused || email
                         ? "top-1.5 text-[12px] text-primary"
                         : "top-4 text-[15px] text-slate-400"
                     }`}
                   >
-                    Email Address
+                    {t.common?.email || 'Email Address'}
                   </label>
                 </div>
               </div>
@@ -374,7 +437,7 @@ const Login = () => {
             {/* Password input */}
             <div className="space-y-1">
               <div className="flex group h-14">
-                <div className="w-12 flex items-center justify-center bg-white border border-r-0 border-slate-200 rounded-l-xl group-focus-within:border-primary transition-colors shadow-sm">
+                <div className={`w-12 flex items-center justify-center bg-white border ${isRtl ? 'border-l-0 border-slate-200 rounded-r-xl' : 'border-r-0 border-slate-200 rounded-l-xl'} group-focus-within:border-primary transition-colors shadow-sm`}>
                   <Lock className="w-[18px] h-[18px] text-slate-400 group-focus-within:text-primary" />
                 </div>
                 <div className="flex-1 relative">
@@ -385,23 +448,23 @@ const Login = () => {
                     onChange={(e) => setPassword(e.target.value)}
                     onFocus={() => setPasswordFocused(true)}
                     onBlur={() => setPasswordFocused(false)}
-                    className="w-full h-full px-4 pt-4 pr-12 bg-white border border-slate-200 rounded-r-xl focus:outline-none focus:border-primary transition-all text-[15px] shadow-sm"
+                    className={`w-full h-full px-4 pt-4 ${isRtl ? 'pe-12' : 'pr-12'} bg-white border border-slate-200 ${isRtl ? 'rounded-l-xl' : 'rounded-r-xl'} focus:outline-none focus:border-primary transition-all text-[15px] shadow-sm`}
                     required
                   />
                   <label
                     htmlFor="password"
-                    className={`absolute left-4 transition-all pointer-events-none ${
+                    className={`absolute ${isRtl ? 'right-4' : 'left-4'} transition-all pointer-events-none ${
                       passwordFocused || password
                         ? "top-1.5 text-[12px] text-primary"
                         : "top-4 text-[15px] text-slate-400"
                     }`}
                   >
-                    Password
+                    {t.common?.password || 'Password'}
                   </label>
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors p-1"
+                    className={`absolute ${isRtl ? 'left-3' : 'right-3'} top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors p-1`}
                   >
                     {showPassword ? (
                       <EyeOff className="w-5 h-5" />
@@ -419,7 +482,7 @@ const Login = () => {
                 to="/forgot-password"
                 className="text-sm text-primary hover:underline font-medium"
               >
-                Forgot password?
+                {t.auth?.forgotPassword || 'Forgot password?'}
               </Link>
             </div>
 
@@ -432,7 +495,7 @@ const Login = () => {
               {isLoading ? (
                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               ) : (
-                "SIGN IN"
+                (t.auth?.signIn || 'SIGN IN').toUpperCase()
               )}
             </button>
 
@@ -442,14 +505,14 @@ const Login = () => {
               className="w-full h-14 bg-white border-2 border-slate-100 rounded-2xl font-semibold text-[15px] text-slate-900 hover:bg-slate-50 hover:border-slate-300 hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 transition-all duration-200"
               onClick={() => navigate("/register")}
             >
-              Create New Account
+              {t.auth?.createAccount || 'Create New Account'}
             </button>
 
             {/* Divider */}
             <div className="flex items-center gap-4 py-1">
               <div className="flex-1 h-[1px] bg-slate-100" />
               <span className="text-xs text-slate-400 font-medium">
-                or continue with
+                {t.common?.orContinueWith || 'or continue with'}
               </span>
               <div className="flex-1 h-[1px] bg-slate-100" />
             </div>
@@ -468,9 +531,9 @@ const Login = () => {
                   <img
                     src={googleIcon}
                     alt="Google"
-                    className="w-5 h-5 absolute left-6"
+                    className={`w-5 h-5 absolute ${isRtl ? 'right-6' : 'left-6'}`}
                   />
-                  <span>Continue with Google</span>
+                  <span>{t.auth?.signInWithGoogle || 'Continue with Google'}</span>
                 </>
               )}
             </button>
@@ -479,17 +542,17 @@ const Login = () => {
           {/* Terms */}
           <div className="space-y-3">
             <p className="text-[11px] text-center text-slate-400 leading-relaxed max-w-[300px] mx-auto">
-              By continuing, you agree to our{" "}
+              {t.auth?.agreeToTerms || 'By continuing, you agree to our'}{" "}
               <Link to="/terms" className="text-primary font-bold underline">
-                Terms of Service
+                {t.auth?.terms || 'Terms of Service'}
               </Link>{" "}
               and{" "}
               <Link to="/privacy" className="text-primary font-bold underline">
-                Privacy Policy
+                {t.auth?.privacyPolicy || 'Privacy Policy'}
               </Link>
             </p>
             <p className="text-[11px] text-center text-slate-400 font-medium">
-              Full version arriving with public launch.
+              {t.auth?.fullVersionComing || 'Full version arriving with public launch.'}
             </p>
           </div>
         </div>

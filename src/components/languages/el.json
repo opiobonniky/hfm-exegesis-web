@@ -1,0 +1,23 @@
+{
+  "sidebar": {
+    "home": "Αρχική",
+    "bible": "Ανάγνωση Βίβλου",
+    "dailyVerse": "Καθημερινό Εδάφιο",
+    "devotions": "Αφιερώσεις",
+    "journal": "Ημερολόγιο",
+    "readingPlans": "Σχέδια Ανάγνωσης",
+    "settings": "Ρυθμίσεις",
+    "dashboard": "Πίνακας Ελέγχου",
+    "activity": "Δραστηριότητα",
+    "logout": "Αποσύνδεση",
+    "profile": "Προφίλ",
+    "mainMenu": "Κεντρικό Μενού",
+    "manage": "Διαχείριση",
+    "explanations": "Επεξηγήσεις Εδαφίων",
+    "myActivity": "Η Δραστηριότητά Μου",
+    "userActivity": "Δραστηριότητα Χρηστών",
+    "journalPrompts": "Προτροπές Ημερολογίου",
+    "journalTemplates": "Πρότυπα Ημερολογίου",
+    "myDashboard": "Ο Πίνακάς Μου"
+  }
+}

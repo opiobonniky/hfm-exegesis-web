@@ -1,0 +1,23 @@
+{
+  "sidebar": {
+    "home": "Início",
+    "bible": "Leitor Bíblico",
+    "dailyVerse": "Versículo do Dia",
+    "devotions": "Devocionais",
+    "journal": "Diário",
+    "readingPlans": "Planos de Leitura",
+    "settings": "Configurações",
+    "dashboard": "Painel",
+    "activity": "Atividade",
+    "logout": "Sair",
+    "profile": "Perfil",
+    "mainMenu": "Menu Principal",
+    "manage": "Gerenciar",
+    "explanations": "Explicações de Versículos",
+    "myActivity": "Minha Atividade",
+    "userActivity": "Atividade de Usuários",
+    "journalPrompts": "Sugestões do Diário",
+    "journalTemplates": "Modelos do Diário",
+    "myDashboard": "Meu Painel"
+  }
+}

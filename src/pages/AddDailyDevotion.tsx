@@ -33,13 +33,10 @@ import { Link, useNavigate } from "react-router-dom";
 import { Combobox } from "@/components/ui/combobox";
 import { sendPostRequest } from "@/services/api";
 import { routes } from "@/components/Routes/routes";
-
-const TESTAMENTS = [
-  { value: "Old", label: "Old Testament" },
-  { value: "New", label: "New Testament" },
-];
+import { useLanguage } from "@/components/languages/languageProvider";
 
 const AddDailyDevotion = () => {
+  const { t, isRtl } = useLanguage();
   const { toast } = useToast();
 
   const [title, setTitle] = useState("");
@@ -102,8 +99,8 @@ const AddDailyDevotion = () => {
 
     if (!title.trim() || !content.trim()) {
       toast({
-        title: "Missing fields",
-        description: "Please fill in the title and content.",
+        title: t.devotions.missingFields,
+        description: t.devotions.fillRequiredFields,
         variant: "destructive",
       });
       return;
@@ -129,35 +126,35 @@ const AddDailyDevotion = () => {
 
       if (response.returnCode === 200) {
         toast({
-          title: "Success",
-          description: "Daily devotion added successfully!",
+          title: t.devotions.success,
+          description: t.devotions.devotionSaved,
         });
         navigate(routes.dailyDevotions.path);
       } else {
         toast({
-          title: "Error",
-          description: response.returnMessage || "Failed to add devotion.",
+          title: t.common.error,
+          description: response.returnMessage || t.devotions.failedToAdd,
           variant: "destructive",
         });
       }
     } catch (error) {
       toast({
-        title: "Error",
-        description: "An error occurred. Please try again.",
+        title: t.common.error,
+        description: t.common.error,
         variant: "destructive",
       });
     }
   };
 
   return (
-    <div className="min-h-screen bg-background p-6 lg:p-8">
+    <div className="min-h-screen bg-background p-6 lg:p-8" dir={isRtl ? 'rtl' : 'ltr'}>
       <div className="max-w-4xl mx-auto space-y-8">
         {/* Header */}
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" asChild>
             <Link to={routes.dailyDevotions.path} className="flex items-center gap-2">
-              <ArrowLeft className="h-5 w-5" />
-              Back
+              <ArrowLeft className={cn("h-5 w-5", isRtl ? "ml-2" : "mr-2")} />
+              {t.common.back}
             </Link>
           </Button>
 
@@ -167,10 +164,10 @@ const AddDailyDevotion = () => {
             </div>
             <div>
               <h1 className="text-3xl font-bold tracking-tight font-heading text-gradient">
-                Add Daily Devotion
+                {t.devotions.addDevotion}
               </h1>
               <p className="text-muted-foreground">
-                Write a devotional message for your users
+                {t.devotions.addPageSubtitle}
               </p>
             </div>
           </div>
@@ -180,10 +177,10 @@ const AddDailyDevotion = () => {
           <CardHeader className="bg-gradient-to-r from-primary/5 to-accent/5 pb-6">
             <CardTitle className="flex items-center gap-2">
               <Lightbulb className="h-5 w-5 text-primary" />
-              Devotion Details
+              {t.devotions.devotionDetails}
             </CardTitle>
             <CardDescription>
-              Write a title, content, and optionally link to a Bible verse
+              {t.devotions.devotionDetailsDesc}
             </CardDescription>
           </CardHeader>
 
@@ -191,55 +188,58 @@ const AddDailyDevotion = () => {
             <form onSubmit={handleAddDevotion} className="space-y-7">
               {/* Title */}
               <div className="space-y-2">
-                <Label>Title *</Label>
+                <Label>{t.common.title} *</Label>
                 <Input
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="Enter devotion title..."
+                  placeholder={t.devotions.titlePlaceholder}
                   className="text-lg"
                 />
               </div>
 
               {/* Content */}
               <div className="space-y-2">
-                <Label>Content *</Label>
+                <Label>{t.common.content} *</Label>
                 <Textarea
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
-                  placeholder="Write your devotional message here..."
+                  placeholder={t.devotions.contentPlaceholder}
                   className="min-h-[300px] leading-relaxed"
                 />
               </div>
 
               {/* Optional Bible Reference */}
               <div className="space-y-3">
-                <Label className="text-muted-foreground">Optional Bible Reference</Label>
+                <Label className="text-muted-foreground">{t.devotions.optionalBibleReference}</Label>
                 <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
                   <div className="space-y-2">
-                    <Label>Testament</Label>
+                    <Label>{t.devotions.testament}</Label>
                     <Combobox
-                      options={TESTAMENTS}
+                      options={[
+                        { value: "Old", label: t.dailyVerse.oldTestament },
+                        { value: "New", label: t.dailyVerse.newTestament },
+                      ]}
                       value={testament}
                       onChange={setTestament}
-                      placeholder="Select testament"
+                      placeholder={t.devotions.selectTestament}
                       width="w-full"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Book</Label>
+                    <Label>{t.dailyVerse.book}</Label>
                     <Combobox
                       options={books.map((b) => ({ value: b, label: b }))}
                       value={book}
                       onChange={setBook}
-                      placeholder="Select book"
+                      placeholder={t.dailyVerse.selectBook}
                       disabled={!testament}
                       width="w-full"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Chapter</Label>
+                    <Label>{t.dailyVerse.chapter}</Label>
                     <Combobox
                       options={chapters.map((c) => ({
                         value: String(c),
@@ -247,19 +247,19 @@ const AddDailyDevotion = () => {
                       }))}
                       value={chapter}
                       onChange={setChapter}
-                      placeholder="Select chapter"
+                      placeholder={t.dailyVerse.selectChapter}
                       disabled={!book}
                       width="w-full"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Verse</Label>
+                    <Label>{t.dailyVerse.verse}</Label>
                     <Input
                       type="number"
                       value={verseNumber}
                       onChange={(e) => setVerseNumber(e.target.value)}
-                      placeholder="Verse #"
+                      placeholder={t.devotions.verseNumber}
                       disabled={!chapter}
                       min={1}
                     />
@@ -267,7 +267,7 @@ const AddDailyDevotion = () => {
                 </div>
                 {book && chapter && verseNumber && (
                   <p className="text-sm text-muted-foreground">
-                    Reference: {book} {chapter}:{verseNumber}
+                    {t.devotions.referenceFormat.replace('{book}', book).replace('{chapter}', String(chapter)).replace('{verse}', String(verseNumber))}
                   </p>
                 )}
               </div>
@@ -275,7 +275,7 @@ const AddDailyDevotion = () => {
               {/* Date & Time Picker */}
               <div className="grid sm:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label>Display Date *</Label>
+                  <Label>{t.devotions.displayDate} *</Label>
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button
@@ -289,7 +289,7 @@ const AddDailyDevotion = () => {
                         {selectedDate ? (
                           format(selectedDate, "PPP")
                         ) : (
-                          <span>Pick a date</span>
+                          <span>{t.devotions.pickDate}</span>
                         )}
                       </Button>
                     </PopoverTrigger>
@@ -305,7 +305,7 @@ const AddDailyDevotion = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Display Time</Label>
+                  <Label>{t.devotions.displayTime}</Label>
                   <Input
                     type="time"
                     value={selectedTime}
@@ -317,11 +317,11 @@ const AddDailyDevotion = () => {
               {/* Submit */}
               <div className="flex justify-end gap-4 pt-4">
                 <Button variant="outline" asChild>
-                  <Link to={routes.dailyDevotions.path}>Cancel</Link>
+                  <Link to={routes.dailyDevotions.path}>{t.common.cancel}</Link>
                 </Button>
                 <Button type="submit" className="gap-2">
                   <Save className="w-4 h-4" />
-                  Save Devotion
+                  {t.devotions.saveDevotion}
                 </Button>
               </div>
             </form>

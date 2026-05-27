@@ -31,6 +31,7 @@ import {
   MapPin,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/components/languages/languageProvider";
 import { sendPostRequest } from "@/services/api";
 import { getVerseText } from "@/utilities/bibleUtils";
 import { routes } from "@/components/Routes/routes";
@@ -131,14 +132,14 @@ const useCountUp = (target: number, duration = 1000, active = true) => {
   return val;
 };
 
-const timeAgo = (ts: string) => {
+const timeAgo = (ts: string, t?: any) => {
   if (!ts) return "—";
   const m = Math.floor((Date.now() - new Date(ts).getTime()) / 60000);
-  if (m < 1) return "just now";
-  if (m < 60) return `${m}m ago`;
+  if (m < 1) return t?.dashboard?.justNow || "just now";
+  if (m < 60) return (t?.dashboard?.minutesAgo || "{m}m ago").replace('{m}', String(m));
   const h = Math.floor(m / 60);
-  if (h < 24) return `${h}h ago`;
-  return `${Math.floor(h / 24)}d ago`;
+  if (h < 24) return (t?.dashboard?.hoursAgo || "{h}h ago").replace('{h}', String(h));
+  return (t?.dashboard?.daysAgo || "{d}d ago").replace('{d}', String(Math.floor(h / 24)));
 };
 
 // ─────────────────────────────────────────────
@@ -309,6 +310,7 @@ const DIFF: Record<string, string> = {
 // Dashboard
 // ─────────────────────────────────────────────
 const Dashboard = () => {
+  const { t, isRtl } = useLanguage();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [recentUsers, setRecentUsers] = useState<RecentUser[]>([]);
   const [plans, setPlans] = useState<ReadingPlan[]>([]);
@@ -428,7 +430,7 @@ const Dashboard = () => {
       if (vR.status === "fulfilled" && (vR.value as any)?.returnCode === 200)
         setVerse((vR.value as any).returnData);
     } catch (e: any) {
-      setError(e?.message ?? "Failed to load");
+      setError(e?.message ?? (t.dashboard?.failedToLoad || 'Failed to load'));
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -448,23 +450,23 @@ const Dashboard = () => {
     );
     if (total === 0)
       return (
-        <p className="text-xs text-stone-400 text-center py-2">No data yet</p>
+        <p className="text-xs text-stone-400 text-center py-2">{t.dashboard?.noDataYet || 'No data yet'}</p>
       );
     const items = [
       {
         key: "DESKTOP",
-        label: "Desktop",
+        label: t.dashboard?.desktop || 'Desktop',
         color: "bg-indigo-500",
         Icon: Monitor,
       },
       {
         key: "MOBILE",
-        label: "Mobile",
+        label: t.dashboard?.mobile || 'Mobile',
         color: "bg-emerald-500",
         Icon: Smartphone,
       },
-      { key: "TABLET", label: "Tablet", color: "bg-amber-500", Icon: Tablet },
-      { key: "BOT", label: "Bot", color: "bg-rose-400", Icon: Globe },
+      { key: "TABLET", label: t.dashboard?.tablet || 'Tablet', color: "bg-amber-500", Icon: Tablet },
+      { key: "BOT", label: t.dashboard?.bot || 'Bot', color: "bg-rose-400", Icon: Globe },
     ];
     return (
       <div className="space-y-3">
@@ -493,7 +495,7 @@ const Dashboard = () => {
                 <span className="text-[11px] text-stone-500 font-medium">
                   {label}
                 </span>
-                <span className="ml-auto text-[11px] font-bold text-stone-700">
+                <span className="ms-auto text-[11px] font-bold text-stone-700">
                   {pct}%
                 </span>
               </div>
@@ -509,6 +511,7 @@ const Dashboard = () => {
   // ─────────────────────────────────────────────
   return (
     <div
+      dir={isRtl ? 'rtl' : 'ltr'}
       className="min-h-screen bg-[#f7f5f2]"
       style={{ fontFamily: "'DM Sans', 'Inter', system-ui, sans-serif" }}
     >
@@ -520,14 +523,13 @@ const Dashboard = () => {
         <div className="flex items-start justify-between gap-3">
           <div>
             <div className="inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-amber-100 border border-amber-200 text-amber-700 text-[10px] sm:text-[11px] font-bold tracking-widest uppercase mb-1.5 sm:mb-2">
-              <ShieldCheck className="w-2.5 h-2.5 sm:w-3 sm:h-3" /> Admin
-              Console
+              <ShieldCheck className="w-2.5 h-2.5 sm:w-3 sm:h-3" /> {t.dashboard?.adminConsole || 'Admin Console'}
             </div>
             <h1
               className="text-xl sm:text-2xl lg:text-3xl font-bold text-stone-800 tracking-tight leading-none"
               style={{ fontFamily: "'Fraunces', Georgia, serif" }}
             >
-              Platform Overview
+              {t.dashboard?.myDashboard || 'Platform Overview'}
             </h1>
             {/* date hidden on smallest screens to save space */}
             <p className="text-stone-400 text-xs sm:text-sm mt-1 sm:mt-1.5 items-center gap-1.5 font-medium hidden xs:flex sm:flex">
@@ -553,7 +555,7 @@ const Dashboard = () => {
             <RefreshCw
               className={cn("w-3.5 h-3.5", refreshing && "animate-spin")}
             />
-            <span className="hidden sm:inline">Refresh</span>
+            <span className="hidden sm:inline">{t.dashboard?.refresh || 'Refresh'}</span>
           </button>
         </div>
 
@@ -566,43 +568,43 @@ const Dashboard = () => {
         {/* ── Primary KPIs — 2 col mobile, 4 col lg ── */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
           <KPI
-            label="Total Users"
+            label={t.dashboard?.totalUsers || 'Total Users'}
             value={stats?.totalUsers ?? 0}
             icon={Users}
             accent="bg-blue-500"
             iconBg="bg-blue-50"
             iconColor="text-blue-600"
-            sub={`${stats?.newUsersThisMonth ?? 0} new this month`}
+            sub={`${stats?.newUsersThisMonth ?? 0} ${t.dashboard?.newThisMonthSub || 'new this month'}`}
             loading={loading}
           />
           <KPI
-            label="Active Accounts"
+            label={t.dashboard?.activeAccounts || 'Active Accounts'}
             value={stats?.activeUsers ?? 0}
             icon={UserCheck}
             accent="bg-emerald-500"
             iconBg="bg-emerald-50"
             iconColor="text-emerald-600"
-            sub={`${stats?.inactiveUsers ?? 0} inactive`}
+            sub={`${stats?.inactiveUsers ?? 0} ${t.dashboard?.inactiveSub || 'inactive'}`}
             loading={loading}
           />
           <KPI
-            label="Verified Emails"
+            label={t.dashboard?.verifiedEmails || 'Verified Emails'}
             value={stats?.verifiedUsers ?? 0}
             icon={BadgeCheck}
             accent="bg-sky-500"
             iconBg="bg-sky-50"
             iconColor="text-sky-600"
-            sub={`${stats?.unverifiedUsers ?? 0} pending`}
+            sub={`${stats?.unverifiedUsers ?? 0} ${t.dashboard?.pendingSub || 'pending'}`}
             loading={loading}
           />
           <KPI
-            label="Enrollments"
+            label={t.dashboard?.enrollments || 'Enrollments'}
             value={stats?.totalEnrollments ?? 0}
             icon={BookOpenCheck}
             accent="bg-violet-500"
             iconBg="bg-violet-50"
             iconColor="text-violet-600"
-            sub={`${stats?.completedEnrollments ?? 0} completed`}
+            sub={`${stats?.completedEnrollments ?? 0} ${t.dashboard?.completedSub || 'completed'}`}
             loading={loading}
           />
         </div>
@@ -610,7 +612,7 @@ const Dashboard = () => {
         {/* ── Secondary KPIs — 2 col mobile, 4 col lg ── */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
           <KPI
-            label="Admins"
+            label={t.dashboard?.admins || 'Admins'}
             value={stats?.adminCount ?? 0}
             icon={ShieldCheck}
             accent="bg-violet-400"
@@ -619,7 +621,7 @@ const Dashboard = () => {
             loading={loading}
           />
           <KPI
-            label="Members"
+            label={t.dashboard?.members || 'Members'}
             value={stats?.memberCount ?? 0}
             icon={Shield}
             accent="bg-stone-400"
@@ -628,17 +630,17 @@ const Dashboard = () => {
             loading={loading}
           />
           <KPI
-            label="Reading Plans"
+            label={t.dashboard?.readingPlans || 'Reading Plans'}
             value={stats?.totalPlans ?? 0}
             icon={BookOpen}
             accent="bg-teal-500"
             iconBg="bg-teal-50"
             iconColor="text-teal-600"
-            sub={`${stats?.activePlans ?? 0} active`}
+            sub={`${stats?.activePlans ?? 0} ${t.dashboard?.activeSub || 'active'}`}
             loading={loading}
           />
           <KPI
-            label="New This Month"
+            label={t.dashboard?.newThisMonth || 'New This Month'}
             value={stats?.newUsersThisMonth ?? 0}
             icon={TrendingUp}
             accent="bg-amber-400"
@@ -653,46 +655,46 @@ const Dashboard = () => {
           <div className="flex items-center gap-2 mb-2.5 sm:mb-3">
             <Activity className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-stone-400" />
             <h2 className="text-xs sm:text-sm font-bold text-stone-600 uppercase tracking-widest">
-              Login Activity
+              {t.common?.activity || 'Login Activity'}
             </h2>
             <div className="flex-1 h-px bg-stone-200" />
             <a
               href="/admin/activity"
               className="text-[11px] sm:text-xs text-stone-400 hover:text-indigo-600 flex items-center gap-1 font-medium transition-colors"
             >
-              Full report <ChevronRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+              {t.dashboard?.fullReport || 'Full report'} <ChevronRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
             </a>
           </div>
           {/* 3 cols on sm+, 1 col (horizontal scroll row) on mobile */}
           <div className="grid grid-cols-3 gap-2 sm:gap-3">
             <KPI
-              label="Logins Today"
+              label={t.dashboard?.loginsToday || 'Logins Today'}
               value={actStats.todayLogins}
               icon={LogIn}
               accent="bg-indigo-500"
               iconBg="bg-indigo-50"
               iconColor="text-indigo-600"
-              sub="Successful"
+              sub={t.dashboard?.successful || 'Successful'}
               loading={actLoad}
             />
             <KPI
-              label="Failed Today"
+              label={t.dashboard?.failedToday || 'Failed Today'}
               value={actStats.failedToday}
               icon={AlertTriangle}
               accent="bg-rose-400"
               iconBg="bg-rose-50"
               iconColor="text-rose-500"
-              sub="Bad credentials"
+              sub={t.dashboard?.badCredentials || 'Bad credentials'}
               loading={actLoad}
             />
             <KPI
-              label="Active Sessions"
+              label={t.dashboard?.activeSessions || 'Active Sessions'}
               value={actStats.activeSessions}
               icon={Wifi}
               accent="bg-teal-500"
               iconBg="bg-teal-50"
               iconColor="text-teal-600"
-              sub="Currently online"
+              sub={t.dashboard?.currentlyOnline || 'Currently online'}
               loading={actLoad}
             />
           </div>
@@ -707,24 +709,24 @@ const Dashboard = () => {
                 <Activity className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-indigo-500" />
               </div>
               <h3 className="text-xs sm:text-sm font-bold text-stone-700">
-                Platform Health
+                {t.dashboard?.platformHealth || 'Platform Health'}
               </h3>
             </div>
             <div className="p-3.5 sm:p-5 space-y-3.5 sm:space-y-5">
               <RateBar
-                label="Active user rate"
+                label={t.dashboard?.activeUserRate || 'Active user rate'}
                 value={stats?.activeRate ?? 0}
                 fill="bg-emerald-500"
                 loading={loading}
               />
               <RateBar
-                label="Email verification"
+                label={t.dashboard?.emailVerification || 'Email verification'}
                 value={stats?.verificationRate ?? 0}
                 fill="bg-sky-500"
                 loading={loading}
               />
               <RateBar
-                label="Plan completion"
+                label={t.dashboard?.planCompletion || 'Plan completion'}
                 value={stats?.completionRate ?? 0}
                 fill="bg-violet-500"
                 loading={loading}
@@ -734,17 +736,17 @@ const Dashboard = () => {
                   {[
                     {
                       pct: stats?.activeRate ?? 0,
-                      label: "Active",
+                      label: t.dashboard?.activeLabel || 'Active',
                       color: "text-emerald-600",
                     },
                     {
                       pct: stats?.verificationRate ?? 0,
-                      label: "Verified",
+                      label: t.dashboard?.verifiedLabel || 'Verified',
                       color: "text-sky-600",
                     },
                     {
                       pct: stats?.completionRate ?? 0,
-                      label: "Complete",
+                      label: t.dashboard?.completeLabel || 'Complete',
                       color: "text-violet-600",
                     },
                   ].map(({ pct, label, color }) => (
@@ -769,7 +771,7 @@ const Dashboard = () => {
           <div className="lg:col-span-2 relative bg-white rounded-xl sm:rounded-2xl border border-amber-100 shadow-[0_1px_3px_rgba(0,0,0,0.05)] overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-amber-50/60 via-orange-50/20 to-white pointer-events-none" />
             <div
-              className="absolute top-1 right-3 sm:top-2 sm:right-4 text-[60px] sm:text-[90px] leading-none text-amber-100 select-none pointer-events-none"
+              className="absolute top-1 end-3 sm:top-2 sm:end-4 text-[60px] sm:text-[90px] leading-none text-amber-100 select-none pointer-events-none"
               style={{ fontFamily: "Georgia, serif" }}
             >
               "
@@ -780,18 +782,18 @@ const Dashboard = () => {
                   <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-600" />
                 </div>
                 <h3 className="text-xs sm:text-sm font-bold text-stone-700">
-                  Today's Daily Verse
+                  {t.dailyVerse?.verseOfDay || t.dashboard?.todaysDailyVerse || "Today's Daily Verse"}
                 </h3>
                 {verse && (
                   <span
                     className={cn(
-                      "ml-auto px-1.5 sm:px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-bold border",
+                      "ms-auto px-1.5 sm:px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-bold border",
                       verse.published
                         ? "bg-emerald-50 text-emerald-700 border-emerald-200"
                         : "bg-amber-50 text-amber-700 border-amber-200",
                     )}
                   >
-                    {verse.published ? "Published" : "Draft"}
+                    {verse.published ? (t.dashboard?.published || 'Published') : (t.dashboard?.draft || 'Draft')}
                   </span>
                 )}
               </div>
@@ -810,7 +812,7 @@ const Dashboard = () => {
                         `${verse.bookName ?? ""} ${verse.chapter ?? ""}:${verse.verseNumber ?? ""}`}
                     </p>
                     <blockquote
-                      className="text-stone-700 text-sm sm:text-base leading-relaxed italic mb-2 sm:mb-3 border-l-2 border-amber-300 pl-3 sm:pl-4"
+                      className="text-stone-700 text-sm sm:text-base leading-relaxed italic mb-2 sm:mb-3 border-s-2 border-amber-300 ps-3 sm:ps-4"
                       style={{ fontFamily: "'Fraunces', Georgia, serif" }}
                     >
                       {getVerseText(
@@ -829,7 +831,7 @@ const Dashboard = () => {
                   <div className="flex flex-col items-center py-6 sm:py-8 text-center">
                     <ScrollText className="w-8 h-8 sm:w-10 sm:h-10 text-amber-200 mb-2" />
                     <p className="text-stone-400 text-xs sm:text-sm font-medium">
-                      No verse scheduled for today
+                      {t.dailyVerse?.noVersesYet || t.dashboard?.todaysDailyVerse || 'No verse scheduled for today'}
                     </p>
                   </div>
                 )}
@@ -847,18 +849,18 @@ const Dashboard = () => {
                 <BookOpen className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-teal-600" />
               </div>
               <h3 className="text-xs sm:text-sm font-bold text-stone-700">
-                Reading Plans
+                {t.dashboard?.readingPlans || 'Reading Plans'}
               </h3>
               {!loading && (
-                <span className="ml-1 px-1.5 py-0.5 rounded-md bg-stone-100 text-stone-500 text-[10px] font-bold">
+                <span className="ms-1 px-1.5 py-0.5 rounded-md bg-stone-100 text-stone-500 text-[10px] font-bold">
                   {plans.length}
                 </span>
               )}
               <a
                 href={routes.readingPlans.path}
-                className="ml-auto text-[11px] sm:text-xs text-stone-400 hover:text-teal-600 flex items-center gap-0.5 sm:gap-1 font-medium transition-colors"
+                className="ms-auto text-[11px] sm:text-xs text-stone-400 hover:text-teal-600 flex items-center gap-0.5 sm:gap-1 font-medium transition-colors"
               >
-                View all <ChevronRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                {t.dashboard?.viewAll || 'View all'} <ChevronRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
               </a>
             </div>
             <div className="divide-y divide-stone-50">
@@ -879,7 +881,7 @@ const Dashboard = () => {
               ) : plans.length === 0 ? (
                 <div className="flex flex-col items-center py-10 sm:py-12 text-stone-300">
                   <BookOpen className="w-7 h-7 sm:w-8 sm:h-8 mb-2" />
-                  <p className="text-xs sm:text-sm">No reading plans yet</p>
+                  <p className="text-xs sm:text-sm">{t.dashboard?.noReadingPlans || 'No reading plans yet'}</p>
                 </div>
               ) : (
                 plans.slice(0, 6).map((plan) => {
@@ -915,7 +917,7 @@ const Dashboard = () => {
                         <div className="flex items-center gap-1 sm:gap-1.5 mt-0.5 flex-wrap">
                           <span className="text-[10px] sm:text-[11px] text-stone-400 flex items-center gap-0.5">
                             <Clock className="w-2.5 h-2.5" />
-                            {plan.totalDays}d
+                            {(t.dashboard?.daysShort || '{n}d').replace('{n}', String(plan.totalDays))}
                           </span>
                           <span
                             className={cn(
@@ -927,18 +929,18 @@ const Dashboard = () => {
                           </span>
                           {plan.questionsEnabled && (
                             <span className="text-[9px] sm:text-[10px] text-violet-600 font-bold">
-                              Quiz
+                              {t.dashboard?.quiz || 'Quiz'}
                             </span>
                           )}
                         </div>
                       </div>
-                      <div className="text-right shrink-0">
+                      <div className="text-end shrink-0">
                         {plan.started ? (
                           plan.completed ? (
                             <div className="flex items-center gap-0.5 sm:gap-1 text-emerald-600">
                               <CheckCircle2 className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                               <span className="text-[11px] sm:text-xs font-bold">
-                                Done
+                                {t.dashboard?.done || 'Done'}
                               </span>
                             </div>
                           ) : (
@@ -962,7 +964,7 @@ const Dashboard = () => {
                           )
                         ) : (
                           <span className="text-[10px] sm:text-[11px] text-stone-300 font-medium">
-                            Not started
+                            {t.dashboard?.notStarted || 'Not started'}
                           </span>
                         )}
                       </div>
@@ -980,7 +982,7 @@ const Dashboard = () => {
                 <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-indigo-500" />
               </div>
               <h3 className="text-xs sm:text-sm font-bold text-stone-700">
-                Recent Users
+                {t.dashboard?.recentUsers || 'Recent Users'}
               </h3>
             </div>
             <div className="divide-y divide-stone-50 flex-1">
@@ -1045,7 +1047,7 @@ const Dashboard = () => {
                 href={routes.systemUsers.path}
                 className="flex items-center justify-center gap-1.5 px-3.5 sm:px-5 py-2.5 sm:py-3 border-t border-stone-100 text-[11px] sm:text-xs text-stone-400 hover:text-indigo-600 hover:bg-stone-50 transition-colors font-semibold"
               >
-                View all users{" "}
+                {t.dashboard?.viewAllUsers || 'View all users'}{" "}
                 <ChevronRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
               </a>
             )}
@@ -1059,10 +1061,9 @@ const Dashboard = () => {
             <div className="flex items-center gap-2 px-3.5 sm:px-5 py-3 sm:py-4 border-b border-stone-100">
               <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-indigo-50 flex items-center justify-center">
                 <Monitor className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-indigo-500" />
-              </div>
-              <h3 className="text-xs sm:text-sm font-bold text-stone-700">
-                Device Breakdown
-              </h3>
+              </div>                <h3 className="text-xs sm:text-sm font-bold text-stone-700">
+                  {t.dashboard?.deviceBreakdown || 'Device Breakdown'}
+                </h3>
             </div>
             <div className="p-3.5 sm:p-5">
               {actLoad ? (
@@ -1078,7 +1079,7 @@ const Dashboard = () => {
               {!actLoad && (
                 <div className="mt-4 sm:mt-5 pt-3.5 sm:pt-4 border-t border-stone-100 space-y-1 sm:space-y-1.5">
                   <p className="text-[9px] sm:text-[10px] text-stone-400 uppercase tracking-widest font-bold">
-                    Top Browser
+                    {t.dashboard?.topBrowser || 'Top Browser'}
                   </p>
                   <div className="flex items-center gap-1.5 sm:gap-2">
                     <Globe className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-stone-400" />
@@ -1098,13 +1099,13 @@ const Dashboard = () => {
                 <Activity className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-600" />
               </div>
               <h3 className="text-xs sm:text-sm font-bold text-stone-700">
-                Recent Login Activity
+                {t.dashboard?.recentLoginActivity || 'Recent Login Activity'}
               </h3>
               <a
                 href={routes.useractivity.path}
-                className="ml-auto text-[11px] sm:text-xs text-stone-400 hover:text-emerald-600 flex items-center gap-0.5 sm:gap-1 font-medium transition-colors"
+                className="ms-auto text-[11px] sm:text-xs text-stone-400 hover:text-emerald-600 flex items-center gap-0.5 sm:gap-1 font-medium transition-colors"
               >
-                View all <ChevronRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                {t.dashboard?.viewAll || 'View all'} <ChevronRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
               </a>
             </div>
             <div className="divide-y divide-stone-50">
@@ -1125,7 +1126,7 @@ const Dashboard = () => {
               ) : activity.length === 0 ? (
                 <div className="flex flex-col items-center py-10 sm:py-12 text-stone-300">
                   <Activity className="w-7 h-7 sm:w-8 sm:h-8 mb-2" />
-                  <p className="text-xs sm:text-sm">No activity recorded yet</p>
+                  <p className="text-xs sm:text-sm">{t.dashboard?.noActivityYet || 'No activity recorded yet'}</p>
                 </div>
               ) : (
                 activity.slice(0, 4).map((a) => (
@@ -1152,38 +1153,38 @@ const Dashboard = () => {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1 sm:gap-1.5">
                         <p className="text-xs sm:text-sm font-semibold text-stone-700 truncate">
-                          {a.username ?? "Unknown"}
+                          {a.username ?? (t.dashboard?.unknown || 'Unknown')}
                         </p>
                         {!a.success && (
                           <span className="shrink-0 text-[8px] sm:text-[9px] font-bold text-rose-600 bg-rose-50 border border-rose-200 px-1 rounded">
-                            FAILED
+                            {t.dashboard?.failedLabel || 'FAILED'}
                           </span>
                         )}
                       </div>
                       <p className="text-[10px] sm:text-[11px] text-stone-400 truncate">
                         <span className="font-medium text-stone-500">
-                          {a.browserName || "Unknown"}
+                          {a.browserName || (t.dashboard?.unknown || 'Unknown')}
                         </span>
                         {" · "}
                         {/* hide OS on very small screens */}
                         <span className="hidden xs:inline sm:inline">
-                          {a.os || "Unknown"} ·{" "}
+                          {a.os || (t.dashboard?.unknown || 'Unknown')} ·{" "}
                         </span>
                         <span className="font-mono">{a.ip}</span>
                       </p>
                     </div>
-                    <div className="text-right shrink-0">
+                    <div className="text-end shrink-0">
                       <p className="text-[10px] sm:text-[11px] text-stone-400 font-medium whitespace-nowrap">
-                        {timeAgo(a.loggedInAt)}
+                        {timeAgo(a.loggedInAt, t)}
                       </p>
                       {a.loggedOutAt ? (
                         <p className="text-[9px] sm:text-[10px] text-stone-300 flex items-center gap-0.5 justify-end mt-0.5">
-                          <LogOut className="w-2 h-2 sm:w-2.5 sm:h-2.5" /> out
+                          <LogOut className="w-2 h-2 sm:w-2.5 sm:h-2.5" /> {t.dashboard?.out || 'out'}
                         </p>
                       ) : a.success ? (
                         <span className="inline-flex items-center gap-0.5 text-[9px] sm:text-[10px] text-emerald-600 font-bold mt-0.5">
                           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />{" "}
-                          online
+                          {t.dashboard?.online || 'online'}
                         </span>
                       ) : null}
                     </div>

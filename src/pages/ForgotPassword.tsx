@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import logoImage from "@/assets/logos/exegesis_bg_rm.png";
 import { sendPostRequest, ApiError } from "@/services/api";
 import { motion, AnimatePresence } from "framer-motion";
+import { useLanguage } from "@/components/languages/languageProvider";
 
 const ForgotPassword = () => {
   const [searchParams] = useSearchParams();
@@ -32,6 +33,7 @@ const ForgotPassword = () => {
   );
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t, isRtl } = useLanguage();
 
   const getFieldError = (name: string) => {
     const value =
@@ -87,20 +89,20 @@ const ForgotPassword = () => {
       if (returnCode === 200) {
         setStep("reset");
         toast({
-          title: "Code Sent",
-          description: "Please check your email for the reset code.",
+          title: t.auth?.codeSent || 'Code Sent',
+          description: t.auth?.codeSentDesc || 'Please check your email for the reset code.',
         });
       } else if (returnCode === 404) {
         toast({
-          title: "Account Not Found",
+          title: t.common?.error || 'Error',
           description:
-            returnMessage || "No account found with this email address.",
+            returnMessage || (t.auth?.accountNotFoundDesc || 'No account found with this email address.'),
           variant: "destructive",
         });
       } else {
         toast({
-          title: "Request Failed",
-          description: returnMessage || "Please try again.",
+          title: t.common?.error || 'Error',
+          description: returnMessage || (t.auth?.tryAgainMessage || 'Please try again.'),
           variant: "destructive",
         });
       }
@@ -110,9 +112,9 @@ const ForgotPassword = () => {
           ? error.returnMessage
           : error instanceof Error
             ? error.message
-            : "An unexpected error occurred.";
+            : (t.common?.error || 'An unexpected error occurred.');
       toast({
-        title: "Request Failed",
+        title: t.common?.error || 'Error',
         description: message,
         variant: "destructive",
       });
@@ -144,16 +146,16 @@ const ForgotPassword = () => {
       const { returnCode, returnMessage } = response;
       if (returnCode === 200) {
         toast({
-          title: "Password Reset",
-          description: "Your password has been reset successfully.",
+          title: t.auth?.resetPassword || 'Password Reset',
+          description: t.auth?.passwordResetDesc || 'Your password has been reset successfully.',
         });
         setTimeout(() => {
           navigate("/login");
         }, 2000);
       } else {
         toast({
-          title: "Reset Failed",
-          description: returnMessage || "Please try again.",
+          title: t.common?.error || 'Error',
+          description: returnMessage || (t.auth?.tryAgainMessage || 'Please try again.'),
           variant: "destructive",
         });
       }
@@ -163,9 +165,9 @@ const ForgotPassword = () => {
           ? error.returnMessage
           : error instanceof Error
             ? error.message
-            : "An unexpected error occurred.";
+            : (t.common?.error || 'An unexpected error occurred.');
       toast({
-        title: "Reset Failed",
+        title: t.common?.error || 'Error',
         description: message,
         variant: "destructive",
       });
@@ -175,7 +177,7 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="min-h-screen flex bg-slate-50 overflow-hidden relative">
+    <div className="min-h-screen flex bg-slate-50 overflow-hidden relative" dir={isRtl ? 'rtl' : 'ltr'}>
       {/* ── Entrance Overlay (Unified Background) ── */}
       <motion.div
         initial={{ opacity: 1 }}
@@ -245,15 +247,19 @@ const ForgotPassword = () => {
               className="space-y-3 text-center"
             >
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/5 text-primary text-[10px] font-black uppercase tracking-widest border border-primary/10 mb-2">
-                {step === "email" ? "Account Recovery" : "Security Update"}
+                {step === "email"
+                  ? (t.auth?.accountRecovery || 'Account Recovery')
+                  : (t.auth?.securityUpdate || 'Security Update')}
               </div>
               <h1 className="text-3xl font-black tracking-tight text-slate-900 font-[family-name:var(--font-heading)] leading-none">
-                {step === "email" ? "Forgot Password?" : "Reset Password"}
+                {step === "email"
+                  ? (t.auth?.forgotPassword || 'Forgot Password?')
+                  : (t.auth?.resetPassword || 'Reset Password')}
               </h1>
               <p className="text-slate-500 text-[15px] font-medium leading-relaxed">
                 {step === "email"
-                  ? "Enter your email to receive a recovery code."
-                  : "Enter the 6-digit code and your new password."}
+                  ? (t.auth?.enterEmailForRecovery || 'Enter your email to receive a recovery code.')
+                  : (t.auth?.enterCodeAndPassword || 'Enter the 6-digit code and your new password.')}
               </p>
             </motion.div>
 
@@ -269,7 +275,7 @@ const ForgotPassword = () => {
                 >
                   <FloatingInput
                     id="email"
-                    label="Email Address"
+                    label={t.common?.email || 'Email Address'}
                     icon={Mail}
                     type="email"
                     value={email}
@@ -292,7 +298,7 @@ const ForgotPassword = () => {
                       <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                     ) : (
                       <>
-                        Send Reset Code
+                        {t.auth?.sendResetCode || 'Send Reset Code'}
                         <ArrowRight className="w-5 h-5" />
                       </>
                     )}
@@ -310,7 +316,7 @@ const ForgotPassword = () => {
                   <div className="space-y-5">
                     <FloatingInput
                       id="code"
-                      label="Reset Code"
+                      label={t.auth?.resetCode || 'Reset Code'}
                       icon={KeyRound}
                       value={code}
                       onChange={(e: any) =>
@@ -326,7 +332,7 @@ const ForgotPassword = () => {
 
                     <FloatingInput
                       id="newPassword"
-                      label="New Password"
+                      label={t.common?.password || 'New Password'}
                       icon={Lock}
                       type={showPassword ? "text" : "password"}
                       value={newPassword}
@@ -344,7 +350,7 @@ const ForgotPassword = () => {
 
                     <FloatingInput
                       id="confirmPassword"
-                      label="Confirm Password"
+                      label={t.common?.confirmPassword || 'Confirm Password'}
                       icon={Lock}
                       type={showPassword ? "text" : "password"}
                       value={confirmPassword}
@@ -369,7 +375,7 @@ const ForgotPassword = () => {
                       <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                     ) : (
                       <>
-                        Reset Password
+                        {t.auth?.resetPassword || 'Reset Password'}
                         <CheckCircle2 className="w-5 h-5" />
                       </>
                     )}
@@ -386,12 +392,12 @@ const ForgotPassword = () => {
               className="text-center space-y-6"
             >
               <p className="text-slate-500 text-sm font-medium">
-                Remember your password?{" "}
+                {t.auth?.rememberPassword || 'Remember your password?'}{" "}
                 <Link
                   to="/login"
                   className="text-primary font-black hover:underline transition-all"
                 >
-                  Sign in
+                  {t.auth?.signIn || 'Sign in'}
                 </Link>
               </p>
 
@@ -401,7 +407,7 @@ const ForgotPassword = () => {
                   className="inline-flex items-center gap-2 text-[10px] text-slate-400 font-black uppercase tracking-widest hover:text-primary transition-colors group"
                 >
                   <ArrowLeft className="w-3 h-3 group-hover:-translate-x-1 transition-transform" />
-                  Back to Login
+                  {t.auth?.backToLogin || 'Back to Login'}
                 </Link>
               </div>
             </motion.div>
@@ -482,7 +488,7 @@ const ForgotPassword = () => {
             >
               <div className="space-y-4">
                 <h2 className="text-5xl font-black text-white font-[family-name:var(--font-heading)] tracking-tighter leading-none">
-                  Reset your <span className="text-primary italic">Path</span>.
+                  {t.auth?.resetYourPath || 'Reset your Path.'}
                 </h2>
                 <motion.div
                   initial={{ width: 0 }}
@@ -493,12 +499,12 @@ const ForgotPassword = () => {
               </div>
 
               <blockquote className="text-2xl text-slate-300 font-medium italic leading-relaxed px-4">
-                "Your word is a lamp for my feet, a light on my path."
+                "{t.auth?.lampToMyFeet || 'Your word is a lamp for my feet, a light on my path.'}"
               </blockquote>
 
               <div className="flex flex-col items-center gap-2">
                 <p className="text-slate-500 font-black uppercase tracking-[0.3em] text-xs">
-                  Psalm 119:105
+                  {t.auth?.psalmReference || 'Psalm 119:105'}
                 </p>
                 <div className="flex gap-1.5">
                   {[1, 2].map((i) => (

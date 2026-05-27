@@ -1,0 +1,23 @@
+{
+  "sidebar": {
+    "home": "હોમ",
+    "bible": "બાઇબલ વાચક",
+    "dailyVerse": "આજની કલમ",
+    "devotions": "ભક્તિ",
+    "journal": "જર્નલ",
+    "readingPlans": "વાંચન યોજનાઓ",
+    "settings": "સેટિંગ્સ",
+    "dashboard": "ડેશબોર્ડ",
+    "activity": "પ્રવૃત્તિ",
+    "logout": "સાઇન આઉટ",
+    "profile": "પ્રોફાઇલ",
+    "mainMenu": "મુખ્ય મેનુ",
+    "manage": "સંચાલિત કરો",
+    "explanations": "કલમ સમજૂતીઓ",
+    "myActivity": "મારી પ્રવૃત્તિ",
+    "userActivity": "વપરાશકર્તા પ્રવૃત્તિ",
+    "journalPrompts": "જર્નલ પ્રોમ્પ્ટ",
+    "journalTemplates": "જર્નલ ટેમ્પલેટ",
+    "myDashboard": "મારું ડેશબોર્ડ"
+  }
+}

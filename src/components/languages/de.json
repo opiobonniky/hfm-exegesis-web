@@ -1,0 +1,23 @@
+{
+  "sidebar": {
+    "home": "Startseite",
+    "bible": "Bibelleser",
+    "dailyVerse": "Täglicher Vers",
+    "devotions": "Andachten",
+    "journal": "Tagebuch",
+    "readingPlans": "Lesepläne",
+    "settings": "Einstellungen",
+    "dashboard": "Dashboard",
+    "activity": "Aktivität",
+    "logout": "Abmelden",
+    "profile": "Profil",
+    "mainMenu": "Hauptmenü",
+    "manage": "Verwalten",
+    "explanations": "Verserklärungen",
+    "myActivity": "Meine Aktivität",
+    "userActivity": "Benutzeraktivität",
+    "journalPrompts": "Tagebuch-Anregungen",
+    "journalTemplates": "Tagebuch-Vorlagen",
+    "myDashboard": "Mein Dashboard"
+  }
+}

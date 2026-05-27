@@ -2,9 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import {
-  ArrowLeft,
   BookOpen,
-  Calendar,
   ChevronRight,
   Play,
   Eye,
@@ -14,17 +12,15 @@ import {
   Trash2,
   Trophy,
   Loader2,
-  RefreshCw,
   Shield,
   Flame,
-  HelpCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/contexts/AuthContext";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { sendPostRequest } from "@/services/api";
 import { routes } from "@/components/Routes/routes";
+import { useLanguage } from "@/components/languages/languageProvider";
 
 // ─────────────────────────────────────────────
 // Types
@@ -68,20 +64,20 @@ interface UserProgress {
 // ─────────────────────────────────────────────
 // Constants
 // ─────────────────────────────────────────────
-const CATEGORIES = [
-  { value: "all", label: "All Categories" },
-  { value: "intro", label: "Introduction" },
-  { value: "whole-bible", label: "Whole Bible" },
-  { value: "nt", label: "New Testament" },
-  { value: "ot", label: "Old Testament" },
-  { value: "book", label: "Single Book" },
-  { value: "topical", label: "Topical" },
-];
+const CATEGORY_KEYS: Record<string, string> = {
+  all: "catAll",
+  intro: "catIntro",
+  "whole-bible": "catWholeBible",
+  nt: "catNT",
+  ot: "catOT",
+  book: "catBookByBook",
+  topical: "catTopical",
+};
 
-const DIFFICULTY_LABEL: Record<string, string> = {
-  easy: "Beginner",
-  medium: "Intermediate",
-  hard: "Advanced",
+const DIFFICULTY_KEYS: Record<string, string> = {
+  easy: "diffBeginner",
+  medium: "diffIntermediate",
+  hard: "diffAdvanced",
 };
 
 const DIFFICULTY_COLOR: Record<string, { bar: string; badge: string }> = {
@@ -96,9 +92,6 @@ const DIFFICULTY_COLOR: Record<string, { bar: string; badge: string }> = {
   hard: { bar: "bg-red-500", badge: "bg-red-50 text-red-700 border-red-200" },
 };
 
-const catLabel = (cat: string) =>
-  CATEGORIES.find((c) => c.value === cat)?.label ?? cat;
-
 type Tab = "progress" | "browse";
 
 // ─────────────────────────────────────────────
@@ -109,11 +102,13 @@ const ProgressCircle = ({
   color = "#14b8a6",
   backgroundColor = "#e5e7eb",
   size = 68,
+  isRtl,
 }: {
   percent: number;
   color?: string;
   backgroundColor?: string;
   size?: number;
+  isRtl?: boolean;
 }) => {
   const strokeWidth = 4;
   const radius = (size - strokeWidth) / 2;
@@ -122,7 +117,7 @@ const ProgressCircle = ({
 
   return (
     <div className="relative" style={{ width: size, height: size }}>
-      <svg width={size} height={size} className="-rotate-90">
+      <svg width={size} height={size} className={isRtl ? "rotate-90" : "-rotate-90"}>
         <circle
           cx={size / 2}
           cy={size / 2}
@@ -159,8 +154,7 @@ const ProgressCircle = ({
 const BibleReadingPlan = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { userInfo } = useAuth();
-  const isAdmin = userInfo?.userRole === 1;
+  const { t, isRtl } = useLanguage();
 
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<Tab>("progress");
@@ -277,14 +271,14 @@ const BibleReadingPlan = () => {
       const { returnCode, returnMessage } = response;
       if (returnCode === 200) {
         toast({
-          title: "Reading plan started!",
-          description: `You've started "${plan.title}". Good luck!`,
+          title: t.readingPlan?.toastStarted || 'Plan started!',
+          description: (t.readingPlan?.toastStartedDesc || 'You\'ve started "{title}". Let\'s build that habit!').replace('{title}', plan.title),
         });
         await loadData();
         setActiveTab("progress");
       } else {
         toast({
-          title: "Failed to start plan",
+          title: t.readingPlan?.toastFailedStart || 'Failed to start plan',
           description: returnMessage,
           variant: "destructive",
         });
@@ -292,8 +286,8 @@ const BibleReadingPlan = () => {
     } catch (error) {
       console.error("Error starting plan:", error);
       toast({
-        title: "Error",
-        description: "Failed to start reading plan",
+        title: t.common?.error || 'Error',
+        description: t.readingPlan?.toastUnableStart || 'Failed to start reading plan',
         variant: "destructive",
       });
     }
@@ -307,13 +301,13 @@ const BibleReadingPlan = () => {
       const { returnCode, returnMessage } = response;
       if (returnCode === 200) {
         toast({
-          title: "Reading plan removed",
-          description: "Your progress has been lost.",
+          title: t.readingPlan?.toastRemoved || 'Plan removed',
+          description: t.readingPlan?.toastRemovedDesc || 'Your progress has been lost.',
         });
         await loadData(false);
       } else {
         toast({
-          title: "Failed to remove plan",
+          title: t.readingPlan?.toastFailedRemove || 'Failed to remove plan',
           description: returnMessage,
           variant: "destructive",
         });
@@ -321,8 +315,8 @@ const BibleReadingPlan = () => {
     } catch (error) {
       console.error("Error removing plan:", error);
       toast({
-        title: "Error",
-        description: "Failed to remove reading plan",
+        title: t.common?.error || 'Error',
+        description: t.readingPlan?.toastUnableRemove || 'Failed to remove reading plan',
         variant: "destructive",
       });
     }
@@ -345,16 +339,16 @@ const BibleReadingPlan = () => {
             <BookOpen className="w-8 h-8 text-teal-500" />
           </div>
           <h3 className="text-xl font-bold text-stone-800 mb-2">
-            No active plan yet
+            {t.readingPlan?.noActivePlan || 'No active plan yet'}
           </h3>
           <p className="text-sm text-stone-500 text-center mb-6 max-w-xs">
-            Head over to Browse Plans and start your first reading plan.
+            {t.readingPlan?.startPlanDesc || 'Head over to Browse Plans and start your first reading plan.'}
           </p>
           <button
             onClick={() => setActiveTab("browse")}
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-sm font-semibold transition-all"
           >
-            Browse Plans
+            {t.readingPlan?.browsePlans || 'Browse Plans'}
             <ChevronRight className="w-4 h-4" />
           </button>
         </div>
@@ -414,7 +408,7 @@ const BibleReadingPlan = () => {
             <div className="flex items-center gap-2 pt-4">
               <Trophy className="w-4 h-4 text-emerald-500" />
               <span className="text-sm font-semibold text-stone-600">
-                Completed Plans
+                {t.readingPlan?.completedPlans || 'Completed Plans'}
               </span>
             </div>
 
@@ -460,7 +454,7 @@ const BibleReadingPlan = () => {
   const renderBrowseTab = () => (
     <div className="space-y-3">
       <p className="text-sm text-stone-500 mb-4">
-        Choose a plan that fits your spiritual journey
+        {t.readingPlan?.choosePlan || 'Choose a plan that fits your spiritual journey'}
       </p>
 
       {plans.map((plan) => {
@@ -507,6 +501,7 @@ const BibleReadingPlan = () => {
   return (
     <div
       className="min-h-screen bg-[#f7f5f2]"
+      dir={isRtl ? 'rtl' : 'ltr'}
       style={{ fontFamily: "'DM Sans', 'Inter', system-ui, sans-serif" }}
     >
       <div className="h-1 bg-gradient-to-r from-teal-400 via-emerald-400 to-cyan-400" />
@@ -523,10 +518,10 @@ const BibleReadingPlan = () => {
                 className="text-2xl font-bold text-stone-800 tracking-tight leading-none"
                 style={{ fontFamily: "'Fraunces', Georgia, serif" }}
               >
-                Reading Plans
+                {t.readingPlan?.readingPlans || 'Reading Plans'}
               </h1>
               <p className="text-stone-400 text-xs mt-0.5 font-medium">
-                Build a daily Bible habit
+                {t.readingPlan?.buildHabit || 'Build a daily Bible habit'}
               </p>
             </div>
           </div>
@@ -536,19 +531,19 @@ const BibleReadingPlan = () => {
         <div className="grid grid-cols-3 gap-3">
           {[
             {
-              label: "Total Plans",
+              label: t.readingPlan?.totalPlans || 'Total Plans',
               value: stats.total,
               color: "text-teal-700",
               bg: "bg-teal-50 border-teal-100",
             },
             {
-              label: "Active",
+              label: t.readingPlan?.activeLabel || 'Active',
               value: stats.active,
               color: "text-emerald-700",
               bg: "bg-emerald-50 border-emerald-100",
             },
             {
-              label: "Quiz Enabled",
+              label: t.readingPlan?.quizEnabled || 'Quiz Enabled',
               value: stats.withQuiz,
               color: "text-violet-700",
               bg: "bg-violet-50 border-violet-100",
@@ -583,7 +578,7 @@ const BibleReadingPlan = () => {
             )}
           >
             <TrendingUp className="w-4 h-4" />
-            My Progress
+            {t.readingPlan?.tabProgress || 'My Progress'}
             {activePlans.length > 0 && (
               <span className="ml-1 bg-teal-100 text-teal-700 text-xs rounded-full px-1.5 py-0.5">
                 {activePlans.length}
@@ -600,7 +595,7 @@ const BibleReadingPlan = () => {
             )}
           >
             <LayoutList className="w-4 h-4" />
-            Browse Plans
+            {t.readingPlan?.browsePlans || 'Browse Plans'}
           </button>
         </div>
 
@@ -621,11 +616,10 @@ const BibleReadingPlan = () => {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl">
             <h3 className="text-lg font-bold text-stone-800 mb-2">
-              Start Reading Plan
+              {t.readingPlan?.startReadingPlan || 'Start Reading Plan'}
             </h3>
             <p className="text-sm text-stone-500 mb-6">
-              Do you want to start "{pendingPlan.title}"? This will set your
-              daily reading schedule and track your progress.
+              {(t.readingPlan?.startPlanConfirm || 'Do you want to start "{title}"? This will set your daily reading schedule and track your progress.').replace('{title}', pendingPlan.title)}
             </p>
             <div className="flex gap-3">
               <button
@@ -635,7 +629,7 @@ const BibleReadingPlan = () => {
                 }}
                 className="flex-1 px-4 py-2.5 rounded-xl border border-stone-200 text-stone-600 font-semibold hover:bg-stone-50 transition-colors"
               >
-                Cancel
+                {t.common?.cancel || 'Cancel'}
               </button>
               <button
                 onClick={() => {
@@ -646,7 +640,7 @@ const BibleReadingPlan = () => {
                 }}
                 className="flex-1 px-4 py-2.5 rounded-xl bg-teal-600 text-white font-semibold hover:bg-teal-700 transition-colors"
               >
-                Start Plan
+                {t.readingPlan?.actionStart || 'Start Plan'}
               </button>
             </div>
           </div>
@@ -659,11 +653,10 @@ const BibleReadingPlan = () => {
           <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl">
             <h3 className="text-lg font-bold text-red-600 mb-2 flex items-center gap-2">
               <Trash2 className="w-5 h-5" />
-              Remove Plan
+              {t.readingPlan?.removeTitle || 'Remove Plan'}
             </h3>
             <p className="text-sm text-stone-500 mb-6">
-              Are you sure you want to remove "{planToRemove.title}"? Your
-              progress will be lost.
+              {(t.readingPlan?.removeConfirmDesc || 'Are you sure you want to remove "{title}"? Your progress will be lost.').replace('{title}', planToRemove.title)}
             </p>
             <div className="flex gap-3">
               <button
@@ -673,7 +666,7 @@ const BibleReadingPlan = () => {
                 }}
                 className="flex-1 px-4 py-2.5 rounded-xl border border-stone-200 text-stone-600 font-semibold hover:bg-stone-50 transition-colors"
               >
-                Keep It
+                {t.readingPlan?.keepIt || 'Keep It'}
               </button>
               <button
                 onClick={() => {
@@ -684,7 +677,7 @@ const BibleReadingPlan = () => {
                 }}
                 className="flex-1 px-4 py-2.5 rounded-xl bg-red-600 text-white font-semibold hover:bg-red-700 transition-colors"
               >
-                Remove
+                {t.readingPlan?.remove || 'Remove'}
               </button>
             </div>
           </div>
@@ -720,6 +713,7 @@ function ActivePlanCard({
   onSummary: () => void;
   onRemove: () => void;
 }) {
+  const { t, isRtl } = useLanguage();
   const totalDays = plan.totalDays || plan.total_days || 1;
   const accentColor = isCompleted ? "#10B981" : "#14b8a6";
 
@@ -735,7 +729,7 @@ function ActivePlanCard({
       {/* Colored left stripe */}
       <div className="flex">
         <div
-          className="w-1 rounded-l-2xl shrink-0"
+          className={cn("w-1 shrink-0", isRtl ? "rounded-r-2xl" : "rounded-l-2xl")}
           style={{ backgroundColor: accentColor }}
         />
 
@@ -749,22 +743,22 @@ function ActivePlanCard({
                 {isCompleted && (
                   <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700">
                     <Trophy className="w-3 h-3" />
-                    Done
+                    {t.readingPlan?.badgeDone || 'Done'}
                   </span>
                 )}
               </div>
               <p className="text-sm text-stone-500">
-                {done} of {totalDays} days done
+                {(t.readingPlan?.daysDone || '{completed} of {total} days done').replace('{completed}', String(done)).replace('{total}', String(totalDays))}
               </p>
               <button
                 onClick={onRemove}
                 className="mt-3 text-xs text-stone-400 hover:text-red-500 transition-colors"
               >
-                Remove plan
+                {t.readingPlan?.removePlanLink || 'Remove plan'}
               </button>
             </div>
 
-            <ProgressCircle percent={pct} color={accentColor} size={72} />
+            <ProgressCircle percent={pct} color={accentColor} size={72} isRtl={isRtl} />
           </div>
 
           {/* Progress bar */}
@@ -774,7 +768,7 @@ function ActivePlanCard({
               style={{ width: `${pct}%`, backgroundColor: accentColor }}
             />
           </div>
-          <p className="text-xs text-stone-400 mb-4">{pct}% complete</p>
+          <p className="text-xs text-stone-400 mb-4">{(t.readingPlan?.pctComplete || '{pct}% complete').replace('{pct}', String(pct))}</p>
 
           {/* Stats row */}
           <div className="grid grid-cols-3 gap-4 bg-stone-50 rounded-xl p-3 mb-4">
@@ -783,23 +777,23 @@ function ActivePlanCard({
                 <Flame className="w-4 h-4" />
                 <span className="font-bold text-stone-800">{streak}d</span>
               </div>
-              <p className="text-xs text-stone-500">Streak</p>
+              <p className="text-xs text-stone-500">{t.readingPlan?.streak || 'Streak'}</p>
             </div>
-            <div className="text-center border-l border-stone-200">
+            <div className={cn("text-center", isRtl ? "border-r border-stone-200" : "border-l border-stone-200")}>
               <div className="flex items-center justify-center gap-1 text-emerald-500 mb-1">
                 <CheckCircle className="w-4 h-4" />
                 <span className="font-bold text-stone-800">{done}</span>
               </div>
-              <p className="text-xs text-stone-500">Done</p>
+              <p className="text-xs text-stone-500">{t.readingPlan?.done || 'Done'}</p>
             </div>
-            <div className="text-center border-l border-stone-200">
+            <div className={cn("text-center", isRtl ? "border-r border-stone-200" : "border-l border-stone-200")}>
               <div className="flex items-center justify-center gap-1 text-stone-500 mb-1">
                 <BookOpen className="w-4 h-4" />
                 <span className="font-bold text-stone-800">
-                  {lastDay ? `Day ${lastDay}` : "—"}
+                  {lastDay ? (t.readingPlan?.dayLabel || 'Day {day}').replace('{day}', String(lastDay)) : "—"}
                 </span>
               </div>
-              <p className="text-xs text-stone-500">Last read</p>
+              <p className="text-xs text-stone-500">{t.readingPlan?.lastRead || 'Last read'}</p>
             </div>
           </div>
 
@@ -811,14 +805,14 @@ function ActivePlanCard({
                 className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-stone-200 text-stone-700 font-semibold hover:bg-stone-50 transition-colors"
               >
                 <Eye className="w-4 h-4" />
-                Summary
+                {t.readingPlan?.summary || 'Summary'}
               </button>
               <button
                 onClick={onRead}
                 className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-stone-100 text-stone-700 font-semibold hover:bg-stone-200 transition-colors"
               >
                 <Play className="w-4 h-4" />
-                Revisit
+                {t.readingPlan?.revisit || 'Revisit'}
               </button>
             </div>
           ) : (
@@ -827,7 +821,9 @@ function ActivePlanCard({
               className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-stone-100 text-stone-700 font-semibold hover:bg-stone-200 transition-colors"
             >
               <Play className="w-4 h-4" />
-              {done === 0 ? "Begin Day 1" : `Continue · Day ${nextDay}`}
+              {done === 0
+                ? (t.readingPlan?.beginDay || 'Begin Day {day}').replace('{day}', '1')
+                : (t.readingPlan?.continueDay || 'Continue · Day {day}').replace('{day}', String(nextDay))}
             </button>
           )}
         </div>
@@ -856,6 +852,7 @@ function BrowsePlanCard({
   pct: number;
   onPress: () => void;
 }) {
+  const { t } = useLanguage();
   const totalDays = plan.totalDays || plan.total_days || 1;
   const diffColor =
     DIFFICULTY_COLOR[plan.difficulty]?.badge || "bg-stone-100 text-stone-600";
@@ -889,12 +886,12 @@ function BrowsePlanCard({
             <h3 className="font-bold text-stone-800">{plan.title}</h3>
             {isCompleted && (
               <span className="text-xs px-2 py-1 rounded-full bg-emerald-100 text-emerald-700 font-semibold">
-                Done
+                {t.readingPlan?.badgeDone || 'Done'}
               </span>
             )}
             {isActive && !isCompleted && (
               <span className="text-xs px-2 py-1 rounded-full bg-teal-100 text-teal-700 font-semibold">
-                Active
+                {t.readingPlan?.badgeActive || 'Active'}
               </span>
             )}
           </div>
@@ -910,17 +907,17 @@ function BrowsePlanCard({
                 diffColor
               )}
             >
-              {DIFFICULTY_LABEL[plan.difficulty] || plan.difficulty}
+              {t.readingPlan?.[DIFFICULTY_KEYS[plan.difficulty]] || plan.difficulty}
             </span>
             <span className="text-xs px-2 py-1 rounded-lg font-medium bg-stone-100 text-stone-600">
-              {catLabel(plan.category)}
+              {t.readingPlan?.[CATEGORY_KEYS[plan.category]] || plan.category}
             </span>
             <span className="text-xs px-2 py-1 rounded-lg font-medium bg-stone-100 text-stone-600">
-              {totalDays} days
+              {totalDays} {t.readingPlan?.days || 'days'}
             </span>
             {plan.questionsEnabled && (
               <span className="text-xs px-2 py-1 rounded-lg font-medium bg-violet-100 text-violet-700">
-                Q&A
+                {t.readingPlan?.badgeQA || 'Q&A'}
               </span>
             )}
           </div>

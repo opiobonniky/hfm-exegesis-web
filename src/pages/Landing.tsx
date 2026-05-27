@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/components/languages/languageProvider";
 import { useEffect, useState, useRef } from "react";
 import { sendPostRequest } from "@/services/api";
 import { getVerseText } from "@/utilities/bibleUtils";
@@ -212,6 +213,7 @@ const triviaQuestions = [
 ];
 
 const Landing = () => {
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const { userInfo, loading: authLoading } = useAuth();
   const [dailyVerse, setDailyVerse] = useState<DailyVerse | null>(null);
@@ -362,11 +364,9 @@ const Landing = () => {
               className="w-32 h-auto object-contain mb-3"
             />
 
-            {/* Bible Text */}
-            
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black text-brand-primary leading-[0.95] tracking-tighter break-words mt-1 border-1 border-t">
-              Search The
-              <span className="block text-brand-accent">Scriptures Daily</span>
+            {/* Bible Text */}              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black text-brand-primary leading-[0.95] tracking-tighter break-words mt-1 border-1 border-t">
+              {t.landing?.heroTitle || 'Search The'}
+              <span className="block text-brand-accent">{t.landing?.heroSubtitle || 'Scriptures Daily'}</span>
             </h1>
           </div>
         </div>
@@ -545,16 +545,14 @@ const Landing = () => {
 
                 {/* Paragraph */}
                 <p className="text-base sm:text-lg md:text-xl text-slate-600 max-w-lg leading-relaxed font-medium mx-auto lg:mx-0 text-center lg:text-left break-words">
-                  Exegesis is the process of carefully studying Scripture to
-                  discover the original meaning in its historical and literary
-                  context.
+                  {t.landing?.welcome || 'Exegesis is the process of carefully studying Scripture to discover the original meaning in its historical and literary context.'}
                 </p>
 
                 {/* CTA */}
                 <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start pt-2 w-full">
                   <Link to="/login" className="w-full sm:w-auto">
                     <Button className="w-full bg-brand-accent text-white text-sm sm:text-base px-6 sm:px-8 py-5 sm:py-6 rounded-[2rem] font-black shadow-2xl shadow-brand-accent/30 hover:bg-brand-accent-dark hover:scale-105 transition-all uppercase tracking-widest">
-                      Start Your Journey
+                      {t.landing?.getStarted || 'Start Your Journey'}
                       <ArrowRight className="ml-2 w-4 h-4 sm:w-5 sm:h-5" />
                     </Button>
                   </Link>
@@ -606,7 +604,7 @@ const Landing = () => {
                   <div className="flex items-center gap-3 mb-5 sm:mb-8">
                     <div className="w-2.5 h-2.5 sm:w-3 rounded-full bg-brand-accent animate-pulse" />
                     <span className="text-xs font-black text-slate-400 uppercase tracking-widest">
-                      Today's Word
+                      {t.dailyVerse?.verseOfDay || "Today's Word"}
                     </span>
                   </div>
 
@@ -703,12 +701,12 @@ const Landing = () => {
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-bg border border-slate-200 mb-5">
                   <div className="w-1.5 h-1.5 rounded-full bg-brand-primary" />
                   <span className="text-[10px] sm:text-xs font-black text-slate-400 uppercase tracking-widest">
-                    Our Services
+                    {t.landing?.features || 'Our Services'}
                   </span>
                 </div>
                 <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-slate-900 mb-5 sm:mb-8 font-[family-name:var(--font-heading)] tracking-tighter leading-none">
-                  Our <span className="text-brand-primary">Spirit-Led</span>{" "}
-                  Features
+                  {t.landing?.features || 'Our'} <span className="text-brand-primary">{t.landing?.features || 'Spirit-Led'}</span>{" "}
+                  {t.landing?.features || 'Features'}
                 </h2>
                 <p className="text-base sm:text-lg md:text-xl text-slate-500 max-w-2xl mx-auto leading-relaxed font-medium">
                   We are passionate Jesus followers dedicated to helping you

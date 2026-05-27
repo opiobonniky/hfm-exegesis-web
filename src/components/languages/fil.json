@@ -1,0 +1,23 @@
+{
+  "sidebar": {
+    "home": "Tahanan",
+    "bible": "Mambabasa ng Bibliya",
+    "dailyVerse": "Taludtod ng Araw",
+    "devotions": "Debosyon",
+    "journal": "Talaarawan",
+    "readingPlans": "Mga Plano sa Pagbasa",
+    "settings": "Mga Setting",
+    "dashboard": "Dashboard",
+    "activity": "Aktibidad",
+    "logout": "Mag-sign Out",
+    "profile": "Profile",
+    "mainMenu": "Pangunahing Menu",
+    "manage": "Pamahalaan",
+    "explanations": "Mga Paliwanag sa Taludtod",
+    "myActivity": "Aking Aktibidad",
+    "userActivity": "Aktibidad ng Gumagamit",
+    "journalPrompts": "Mga Mungkahi sa Talaarawan",
+    "journalTemplates": "Mga Template ng Talaarawan",
+    "myDashboard": "Aking Dashboard"
+  }
+}

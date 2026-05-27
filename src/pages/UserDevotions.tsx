@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/components/languages/languageProvider";
 import { sendPostRequest } from "@/services/api";
 import { cn } from "@/lib/utils";
 
@@ -124,6 +125,7 @@ const ActionChip = ({
 );
 
 export default function UserDevotions() {
+  const { t, isRtl } = useLanguage();
   const [devotion, setDevotion] = useState<DailyDevotion | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -181,7 +183,7 @@ export default function UserDevotions() {
 
   if (loading && !devotion) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-background to-muted/30 flex items-center justify-center p-6">
+      <div className="min-h-screen bg-gradient-to-b from-background to-muted/30 flex items-center justify-center p-6" dir={isRtl ? 'rtl' : 'ltr'}>
         <div className="w-full max-w-lg space-y-6">
           <div className="flex items-center justify-center gap-2">
             <Skeleton className="h-10 w-10 rounded-full bg-primary/10" />
@@ -207,18 +209,18 @@ export default function UserDevotions() {
 
   if (!devotion) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 p-6 lg:p-8">
+      <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 p-6 lg:p-8" dir={isRtl ? 'rtl' : 'ltr'}>
         <div className="max-w-xl mx-auto text-center">
           <div className="mb-8">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-muted text-muted-foreground text-xs font-medium mb-4">
               <Calendar className="w-3 h-3" />
-              Daily Devotion
+              {t.devotions?.dailyDevotions || 'Daily Devotion'}
             </div>
             <h1 className="text-3xl font-bold font-[family-name:var(--font-heading)] text-foreground mb-2">
-              No devotion today
+              {t.devotions?.noDevotionsYet || 'No devotion today'}
             </h1>
             <p className="text-muted-foreground text-sm max-w-md mx-auto">
-              Check back later for today's inspiration.
+              {t.devotions?.pageSubtitle || 'Check back later for today\'s inspiration.'}
             </p>
           </div>
 
@@ -239,7 +241,7 @@ export default function UserDevotions() {
           <div className="mt-8">
             <Button onClick={handleRefresh} disabled={refreshing} className="gap-2">
               <RefreshCw className={cn("w-4 h-4", refreshing && "animate-spin")} />
-              {refreshing ? "Loading..." : "Refresh"}
+              {refreshing ? t.common?.loading || "Loading..." : (t.common?.refresh || "Refresh")}
             </Button>
           </div>
         </div>
@@ -248,7 +250,7 @@ export default function UserDevotions() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20" dir={isRtl ? 'rtl' : 'ltr'}>
       <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b border-border/40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
           <div className="flex items-center justify-between">
@@ -276,7 +278,7 @@ export default function UserDevotions() {
                 className="h-8 w-8"
                 onClick={() => window.history.back()}
               >
-                <ChevronLeft className="w-4 h-4" />
+                <ChevronLeft className={cn("w-4 h-4", isRtl && "rotate-180")} />
               </Button>
             </div>
           </div>
@@ -335,7 +337,7 @@ export default function UserDevotions() {
                   <div className="flex items-center gap-1">
                     <ActionChip
                       icon={Heart}
-                      label={liked ? "Liked" : "Like"}
+                      label={liked ? t.common?.like || "Liked" : t.common?.like || "Like"}
                       onClick={() => {
                         setLiked(!liked);
                         toast({
@@ -346,7 +348,7 @@ export default function UserDevotions() {
                     />
                     <ActionChip
                       icon={Share2}
-                      label="Share"
+                      label={t.common?.share || "Share"}
                       onClick={() => {
                         const text = `${devotion.title}\n\n${devotion.content}\n\n— Daily Devotion`;
                         if (navigator.share) {
@@ -362,7 +364,7 @@ export default function UserDevotions() {
                     />
                     <ActionChip
                       icon={Copy}
-                      label="Copy"
+                      label={t.common?.copy || "Copy"}
                       onClick={() => {
                         navigator.clipboard.writeText(
                           `${devotion.title}\n\n${devotion.content}`,
@@ -385,7 +387,7 @@ export default function UserDevotions() {
                 <div className="flex items-center gap-2 mb-4">
                   <BookOpen className="w-5 h-5 text-amber-500" />
                   <span className="text-sm font-bold uppercase tracking-wide text-amber-600 dark:text-amber-400">
-                    Bible Reference
+                    {t.devotions?.bibleReference || 'Bible Reference'}
                   </span>
                 </div>
                 <div className="border-l-2 border-amber-200 pl-4">

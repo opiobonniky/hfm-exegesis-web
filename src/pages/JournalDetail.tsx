@@ -38,6 +38,7 @@ import { sendPostRequest } from "@/services/api";
 import { routes } from "@/components/Routes/routes";
 import { getVerseText } from "@/utilities/bibleUtils";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/components/languages/languageProvider";
 
 const CATEGORIES: Record<string, { label: string; color: string }> = {
   general: { label: "General", color: "bg-gray-100 text-gray-700" },
@@ -106,6 +107,7 @@ const JournalDetailPage = () => {
   const { entryId } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t, isRtl } = useLanguage();
 
   const [entry, setEntry] = useState<JournalEntryData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -126,11 +128,11 @@ const JournalDetailPage = () => {
       if (res.returnCode === 200 && res.returnData) {
         setEntry(res.returnData);
       } else {
-        toast({ title: "Error", description: "Entry not found", variant: "destructive" });
+        toast({ title: t.common?.error || "Error", description: t.journal?.entryNotFound || "Entry not found", variant: "destructive" });
         navigate(routes.journal.path);
       }
     } catch (error) {
-      toast({ title: "Error", description: "Failed to load entry", variant: "destructive" });
+      toast({ title: t.common?.error || "Error", description: t.journal?.failedToLoadEntry || "Failed to load entry", variant: "destructive" });
       navigate(routes.journal.path);
     } finally {
       setLoading(false);
@@ -143,11 +145,11 @@ const JournalDetailPage = () => {
     try {
       const res = await sendPostRequest("journal", "delete", { id: entry.id });
       if (res.returnCode === 200) {
-        toast({ title: "Deleted", description: "Journal entry deleted" });
+        toast({ title: t.common?.delete || "Deleted", description: t.journal?.entryDeleted || "Journal entry deleted" });
         navigate(routes.journal.path);
       }
     } catch (error) {
-      toast({ title: "Error", description: "Failed to delete", variant: "destructive" });
+      toast({ title: t.common?.error || "Error", description: t.journal?.failedToDelete || "Failed to delete", variant: "destructive" });
     } finally {
       setDeleting(false);
       setShowDeleteDialog(false);
@@ -161,12 +163,16 @@ const JournalDetailPage = () => {
       if (res.returnCode === 200) {
         setEntry((prev) => prev ? { ...prev, isFavorite: !prev.isFavorite } : null);
         toast({
-          title: entry.isFavorite ? "Removed from favorites" : "Added to favorites",
-          description: entry.isFavorite ? "Entry unfavorited" : "Entry favorited",
+          title: entry.isFavorite
+            ? (t.journal?.removedFromFavorites || "Removed from favorites")
+            : (t.journal?.addedToFavorites || "Added to favorites"),
+          description: entry.isFavorite
+            ? (t.journal?.entryUnfavorited || "Entry unfavorited")
+            : (t.journal?.entryFavorited || "Entry favorited"),
         });
       }
     } catch (error) {
-      toast({ title: "Error", description: "Failed to update", variant: "destructive" });
+      toast({ title: t.common?.error || "Error", description: t.journal?.failedToUpdate || "Failed to update", variant: "destructive" });
     }
   };
 
@@ -175,20 +181,20 @@ const JournalDetailPage = () => {
     try {
       let text = entry.title ? `${entry.title}\n\n` : "";
       text += entry.content;
-      if (entry.learnings) text += `\n\nWhat I learned:\n${entry.learnings}`;
-      if (entry.application) text += `\n\nHow I'll apply this:\n${entry.application}`;
-      if (entry.gratitude) text += `\n\nGratitude:\n${entry.gratitude}`;
-      if (entry.prayers) text += `\n\nPrayers:\n${entry.prayers}`;
+      if (entry.learnings) text += `\n\n${t.journal?.whatILearned || 'What I learned'}:\n${entry.learnings}`;
+      if (entry.application) text += `\n\n${t.journal?.howIllApply || "How I'll apply this"}:\n${entry.application}`;
+      if (entry.gratitude) text += `\n\n${t.journal?.gratitude || 'Gratitude'}:\n${entry.gratitude}`;
+      if (entry.prayers) text += `\n\n${t.journal?.prayers || 'Prayers'}:\n${entry.prayers}`;
       if (entry.bookName) text += `\n\n— ${entry.bookName} ${entry.chapter}:${entry.verseNumber}`;
 
       await navigator.clipboard.writeText(text);
       setCopied(true);
-      toast({ title: "Copied", description: "Entry copied to clipboard" });
+      toast({ title: t.common?.copy || "Copied", description: t.journal?.copiedToClipboard || "Entry copied to clipboard" });
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      toast({ title: "Error", description: "Failed to copy", variant: "destructive" });
+      toast({ title: t.common?.error || "Error", description: t.journal?.failedToCopy || "Failed to copy", variant: "destructive" });
     }
-  }, [entry, toast]);
+  }, [entry, toast, t]);
 
   const handleShare = useCallback(async () => {
     if (!entry) return;
@@ -199,7 +205,7 @@ const JournalDetailPage = () => {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: entry.title || "Journal Entry",
+          title: entry.title || (t.journal?.journalEntry || "Journal Entry"),
           text: shareText,
         });
       } catch {
@@ -208,7 +214,7 @@ const JournalDetailPage = () => {
     } else {
       await handleCopy();
     }
-  }, [entry, handleCopy]);
+  }, [entry, handleCopy, t]);
 
   const formatDate = (dateStr: string) => {
     if (!dateStr) return "";
@@ -238,15 +244,15 @@ const JournalDetailPage = () => {
 
   if (!entry) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" dir={isRtl ? 'rtl' : 'ltr'}>
         <div className="text-center">
           <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-4">
             <BookOpen className="w-8 h-8 text-muted-foreground" />
           </div>
-          <h2 className="text-xl font-semibold mb-2">Entry not found</h2>
-          <p className="text-muted-foreground mb-4">This journal entry may have been deleted.</p>
+          <h2 className="text-xl font-semibold mb-2">{t.journal?.entryNotFound || "Entry not found"}</h2>
+          <p className="text-muted-foreground mb-4">{t.journal?.entryNotFoundDesc || "This journal entry may have been deleted."}</p>
           <Button onClick={() => navigate(routes.journal.path)}>
-            Back to Journal
+            {t.journal?.backToJournal || "Back to Journal"}
           </Button>
         </div>
       </div>
@@ -261,27 +267,27 @@ const JournalDetailPage = () => {
   const moodInfo = entry.mood ? MOODS[entry.mood] : null;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background" dir={isRtl ? 'rtl' : 'ltr'}>
       {/* ── Top bar ──────────────────────────────────────────────────────── */}
       <div className="bg-gradient-to-r from-primary/5 via-accent/5 to-secondary/5 border-b">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <Button variant="ghost" onClick={() => navigate(routes.journal.path)}>
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Journal
+              <ArrowLeft className={cn("w-4 h-4", isRtl ? "ml-2" : "mr-2")} />
+              {t.journal?.backToJournal || "Back to Journal"}
             </Button>
             <div className="flex items-center gap-1">
-              <Button variant="ghost" size="icon" onClick={handleToggleFavorite} title="Toggle favorite">
+              <Button variant="ghost" size="icon" onClick={handleToggleFavorite} title={t.journal?.toggleFavorite || "Toggle favorite"}>
                 {entry.isFavorite ? (
                   <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
                 ) : (
                   <Star className="w-4 h-4" />
                 )}
               </Button>
-              <Button variant="ghost" size="icon" onClick={handleShare} title="Share">
+              <Button variant="ghost" size="icon" onClick={handleShare} title={t.common?.share || "Share"}>
                 <Share2 className="w-4 h-4" />
               </Button>
-              <Button variant="ghost" size="icon" onClick={handleCopy} title="Copy to clipboard">
+              <Button variant="ghost" size="icon" onClick={handleCopy} title={t.journal?.copyToClipboard || "Copy to clipboard"}>
                 {copied ? (
                   <CheckCircle2 className="w-4 h-4 text-green-500" />
                 ) : (
@@ -294,17 +300,17 @@ const JournalDetailPage = () => {
                     <MoreHorizontal className="w-4 h-4" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
+                <DropdownMenuContent align={isRtl ? "start" : "end"}>
                   <DropdownMenuItem onClick={() => navigate(`/journal/entry/${entry.id}`)}>
-                    <Pencil className="w-4 h-4 mr-2" />
-                    Edit
+                    <Pencil className={cn("w-4 h-4", isRtl ? "ml-2" : "mr-2")} />
+                    {t.common?.edit || "Edit"}
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={() => setShowDeleteDialog(true)}
                     className="text-destructive"
                   >
-                    <Trash2 className="w-4 h-4 mr-2" />
-                    Delete
+                    <Trash2 className={cn("w-4 h-4", isRtl ? "ml-2" : "mr-2")} />
+                    {t.common?.delete || "Delete"}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -322,7 +328,17 @@ const JournalDetailPage = () => {
             )}
             <div className="flex items-center gap-3 flex-wrap">
               <Badge className={CATEGORIES[entry.category]?.color || "bg-gray-100"}>
-                {CATEGORIES[entry.category]?.label || entry.category}
+                {(() => {
+                  const catMap: Record<string, string> = {
+                    general: t.journal?.categoryGeneral || "General",
+                    study: t.journal?.categoryStudy || "Bible Study",
+                    prayer: t.journal?.categoryPrayer || "Prayer",
+                    gratitude: t.journal?.categoryGratitude || "Gratitude",
+                    reflection: t.journal?.categoryReflection || "Reflection",
+                    application: t.journal?.categoryApplication || "Application",
+                  };
+                  return catMap[entry.category] || entry.category;
+                })()}
               </Badge>
               {moodInfo && (
                 <span className="inline-flex items-center gap-1 text-sm" title={moodInfo.label}>
@@ -353,7 +369,7 @@ const JournalDetailPage = () => {
                 <BookOpen className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
                 <div className="flex-1 min-w-0">
                   <p className="font-serif text-lg leading-relaxed italic">
-                    "{verseText}"
+                    &ldquo;{verseText}&rdquo;
                   </p>
                   <div className="flex items-center gap-2 mt-2">
                     <p className="text-sm text-muted-foreground">
@@ -373,7 +389,7 @@ const JournalDetailPage = () => {
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-lg">
                 <BookOpen className="w-5 h-5" />
-                Journal Entry
+                {t.journal?.journalEntry || "Journal Entry"}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -392,7 +408,7 @@ const JournalDetailPage = () => {
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm flex items-center gap-2">
                     <Lightbulb className="w-4 h-4 text-amber-500" />
-                    What I Learned
+                    {t.journal?.whatILearned || "What I Learned"}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -406,7 +422,7 @@ const JournalDetailPage = () => {
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm flex items-center gap-2">
                     <Pencil className="w-4 h-4 text-indigo-500" />
-                    How I'll Apply This
+                    {t.journal?.howIllApply || "How I'll Apply This"}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -420,7 +436,7 @@ const JournalDetailPage = () => {
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm flex items-center gap-2">
                     <Heart className="w-4 h-4 text-rose-500" />
-                    Gratitude
+                    {t.journal?.gratitude || "Gratitude"}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -434,7 +450,7 @@ const JournalDetailPage = () => {
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm flex items-center gap-2">
                     <Star className="w-4 h-4 text-purple-500" />
-                    Prayers
+                    {t.journal?.prayers || "Prayers"}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -451,7 +467,7 @@ const JournalDetailPage = () => {
             <CardHeader className="pb-3">
               <CardTitle className="text-sm flex items-center gap-2">
                 <Tag className="w-4 h-4" />
-                Tags
+                {t.journal?.tags || "Tags"}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -468,8 +484,8 @@ const JournalDetailPage = () => {
 
         {/* ── Footer metadata ─────────────────────────────────────────────── */}
         <div className="text-sm text-muted-foreground text-center pt-4 border-t">
-          <p>Created: {formatDateShort(entry.createdOn)}</p>
-          <p>Last updated: {formatDateShort(entry.updatedOn)}</p>
+          <p>{t.journal?.created || "Created:"} {formatDateShort(entry.createdOn)}</p>
+          <p>{t.journal?.lastUpdated || "Last updated:"} {formatDateShort(entry.updatedOn)}</p>
         </div>
       </div>
 
@@ -477,26 +493,26 @@ const JournalDetailPage = () => {
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete Journal Entry</DialogTitle>
+            <DialogTitle>{t.journal?.deleteDialogTitle || "Delete Journal Entry"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
-            <p>Are you sure you want to delete this entry?</p>
+            <p>{t.journal?.deleteDialogDesc2 || "Are you sure you want to delete this entry?"}</p>
             {entry.title && (
               <p className="text-sm text-muted-foreground">
-                "<span className="font-medium">{entry.title}</span>"
+                &ldquo;<span className="font-medium">{entry.title}</span>&rdquo;
               </p>
             )}
             <p className="text-sm text-destructive font-medium">
-              This action cannot be undone.
+              {t.journal?.cannotUndo || "This action cannot be undone."}
             </p>
           </div>
           <DialogFooter className="gap-2">
             <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
-              Cancel
+              {t.common?.cancel || "Cancel"}
             </Button>
             <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
               {deleting && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
-              {deleting ? "Deleting..." : "Delete Entry"}
+              {deleting ? (t.journal?.deleting || "Deleting...") : (t.journal?.deleteEntry || "Delete Entry")}
             </Button>
           </DialogFooter>
         </DialogContent>

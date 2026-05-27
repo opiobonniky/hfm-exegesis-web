@@ -18,7 +18,10 @@ import {
   Heart,
   Users,
   Star,
-  AlertTriangle
+  AlertTriangle,
+  Globe,
+  Check,
+  Languages
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -28,6 +31,8 @@ import {
   Select,
   SelectContent,
   SelectItem,
+  SelectGroup,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -35,6 +40,29 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { sendPostRequest, TOKEN_KEY } from "@/services/api";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/components/languages/languageProvider";
+import { LANGUAGE_NAMES, type Language } from "@/components/languages/type";
+import { getLanguageName } from "@/components/languages/localeUtils";
+
+/** Language grouped by region for the picker */
+const LANGUAGE_GROUPS: { label: string; languages: Language[] }[] = [
+  {
+    label: "Primary",
+    languages: ["en"],
+  },
+  {
+    label: "European",
+    languages: ["de", "fr", "es", "pt", "it", "el", "ru"],
+  },
+  {
+    label: "Indian",
+    languages: ["hi", "bn", "ta", "te", "mr", "gu", "kn", "ml", "pa", "ur"],
+  },
+  {
+    label: "Other",
+    languages: ["ar", "sw", "ne", "fil"],
+  },
+];
 
 interface UserProfile {
   id: string;
@@ -276,6 +304,8 @@ export default function Settings() {
   }
 
   return (
+    const { lang: currentLang, setLanguage, isLoading: langLoading } = useLanguage();
+
     <div className="min-h-full bg-background">
       <div className="relative bg-slate-450 overflow-hidden">
         <div
@@ -308,7 +338,7 @@ export default function Settings() {
 
       <div className="max-w-6xl mx-auto px-3 sm:px-4 lg:px-6 py-6">
         <Tabs defaultValue="profile" className="w-full">
-          <TabsList className="grid grid-cols-3 w-full max-w-md mb-6 bg-muted/50 p-1 rounded-xl">
+          <TabsList className="grid grid-cols-4 w-full max-w-lg mb-6 bg-muted/50 p-1 rounded-xl">
             <TabsTrigger 
               value="profile" 
               className="rounded-lg gap-1.5 sm:gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm"
@@ -332,6 +362,14 @@ export default function Settings() {
               <Lock className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Password</span>
               <span className="sm:hidden text-[10px]">PASS</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="preferences" 
+              className="rounded-lg gap-1.5 sm:gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm"
+            >
+              <Globe className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Language</span>
+              <span className="sm:hidden text-[10px]">LANG</span>
             </TabsTrigger>
           </TabsList>
 
@@ -607,6 +645,90 @@ export default function Settings() {
                     )}
                     Save Changes
                   </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="preferences">
+            <Card className="border-none shadow-none bg-transparent">
+              <CardContent className="p-0 space-y-4">
+                <div className="rounded-2xl bg-card border border-border/50 p-4 sm:p-6 space-y-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center">
+                      <Languages className="w-5 h-5 text-violet-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold">Language & Region</h3>
+                      <p className="text-xs text-muted-foreground">Choose your preferred language for the app interface</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-xs font-medium text-muted-foreground">Interface Language</Label>
+                    <div className="relative">
+                      <Select
+                        value={currentLang}
+                        onValueChange={(value) => setLanguage(value as Language)}
+                        disabled={langLoading}
+                      >
+                        <SelectTrigger className="h-12">
+                          <div className="flex items-center gap-3">
+                            <Globe className="w-4 h-4 text-muted-foreground/60 shrink-0" />
+                            <SelectValue>
+                              <span className="font-medium">{LANGUAGE_NAMES[currentLang]}</span>
+                              {currentLang !== 'en' && (
+                                <span className="text-muted-foreground text-xs ml-2">({getLanguageName(currentLang, 'en')})</span>
+                              )}
+                            </SelectValue>
+                          </div>
+                        </SelectTrigger>
+                        <SelectContent className="max-h-[320px]">
+                          {LANGUAGE_GROUPS.map((group) => (
+                            <SelectGroup key={group.label}>
+                              <SelectLabel className="px-2 py-1.5 text-[10px] font-bold tracking-widest uppercase text-muted-foreground/50">
+                                {group.label}
+                              </SelectLabel>
+                              {group.languages.map((code) => (
+                                <SelectItem key={code} value={code} className="py-2.5">
+                                  <div className="flex items-center justify-between w-full gap-4">
+                                    <div className="flex items-center gap-2 min-w-0">
+                                      <span className="font-medium truncate">{LANGUAGE_NAMES[code]}</span>
+                                      {code !== 'en' && (
+                                        <span className="text-muted-foreground/60 text-xs shrink-0">
+                                          ({getLanguageName(code, 'en')})
+                                        </span>
+                                      )}
+                                    </div>
+                                    {code === currentLang && (
+                                      <Check className="w-3.5 h-3.5 text-primary shrink-0" />
+                                    )}
+                                  </div>
+                                </SelectItem>
+                              ))}
+                            </SelectGroup>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {langLoading && (
+                        <div className="absolute right-12 top-1/2 -translate-y-1/2">
+                          <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-[11px] text-muted-foreground/60 mt-1.5">
+                      {currentLang !== 'en'
+                        ? "Some translations may be incomplete. Missing text will appear in English."
+                        : "Switch to any supported language. The interface will update immediately."}
+                    </p>
+                  </div>
+
+                  {currentLang !== 'en' && (
+                    <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400 text-sm">
+                      <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />
+                      <p>Translations are in progress. Parts of the interface may still display in English.</p>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>

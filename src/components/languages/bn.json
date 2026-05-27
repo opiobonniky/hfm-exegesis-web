@@ -1,0 +1,23 @@
+{
+  "sidebar": {
+    "home": "হোম",
+    "bible": "বাইবেল পাঠক",
+    "dailyVerse": "আজকের পদ",
+    "devotions": "ভক্তি",
+    "journal": "জার্নাল",
+    "readingPlans": "পাঠ পরিকল্পনা",
+    "settings": "সেটিংস",
+    "dashboard": "ড্যাশবোর্ড",
+    "activity": "কার্যকলাপ",
+    "logout": "সাইন আউট",
+    "profile": "প্রোফাইল",
+    "mainMenu": "প্রধান মেনু",
+    "manage": "পরিচালনা করুন",
+    "explanations": "পদ ব্যাখ্যা",
+    "myActivity": "আমার কার্যকলাপ",
+    "userActivity": "ব্যবহারকারী কার্যকলাপ",
+    "journalPrompts": "জার্নাল প্রম্পট",
+    "journalTemplates": "জার্নাল টেমপ্লেট",
+    "myDashboard": "আমার ড্যাশবোর্ড"
+  }
+}

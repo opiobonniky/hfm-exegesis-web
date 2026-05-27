@@ -1,0 +1,23 @@
+{
+  "sidebar": {
+    "home": "ਹੋਮ",
+    "bible": "ਬਾਈਬਲ ਪਾਠਕ",
+    "dailyVerse": "ਅੱਜ ਦੀ ਆਇਤ",
+    "devotions": "ਭਗਤੀ",
+    "journal": "ਜਰਨਲ",
+    "readingPlans": "ਪੜ੍ਹਨ ਦੀਆਂ ਯੋਜਨਾਵਾਂ",
+    "settings": "ਸੈਟਿੰਗਾਂ",
+    "dashboard": "ਡੈਸ਼ਬੋਰਡ",
+    "activity": "ਸਰਗਰਮੀ",
+    "logout": "ਸਾਈਨ ਆਊਟ",
+    "profile": "ਪ੍ਰੋਫਾਈਲ",
+    "mainMenu": "ਮੁੱਖ ਮੀਨੂ",
+    "manage": "ਪ੍ਰਬੰਧਨ ਕਰੋ",
+    "explanations": "ਆਇਤ ਵਿਆਖਿਆਵਾਂ",
+    "myActivity": "ਮੇਰੀ ਸਰਗਰਮੀ",
+    "userActivity": "ਉਪਭੋਗਤਾ ਸਰਗਰਮੀ",
+    "journalPrompts": "ਜਰਨਲ ਪ੍ਰੋਂਪਟ",
+    "journalTemplates": "ਜਰਨਲ ਟੈਂਪਲੇਟ",
+    "myDashboard": "ਮੇਰਾ ਡੈਸ਼ਬੋਰਡ"
+  }
+}

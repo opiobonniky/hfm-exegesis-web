@@ -49,6 +49,7 @@ import { BIBLE_VERSIONS } from "@/assets/bibleVersion/json/bibleVersions";
 import { Combobox } from "@/components/ui/combobox";
 import { routes } from "@/components/Routes/routes";
 import { useNavigate } from "react-router-dom";
+import { useLanguage } from "@/components/languages/languageProvider";
 import { format } from "date-fns";
 import React from "react";
 
@@ -91,17 +92,17 @@ const SMART_PAGE_SIZE = 6;
 const SMART_FUTURE_DAYS = 2;
 const FILTERED_PAGE_SIZE = 12;
 
-const PRESETS = [
-  { label: "Last 7 days", value: "last_7" },
-  { label: "Last 30 days", value: "last_30" },
-  { label: "This week", value: "this_week" },
-  { label: "This month", value: "this_month" },
-  { label: "Last month", value: "last_month" },
+const PRESETS = (t?: any) => [
+  { label: t?.dailyVerse?.presetLast7 || 'Last 7 days', value: 'last_7' },
+  { label: t?.dailyVerse?.presetLast30 || 'Last 30 days', value: 'last_30' },
+  { label: t?.dailyVerse?.presetThisWeek || 'This week', value: 'this_week' },
+  { label: t?.dailyVerse?.presetThisMonth || 'This month', value: 'this_month' },
+  { label: t?.dailyVerse?.presetLastMonth || 'Last month', value: 'last_month' },
 ];
 
-const TESTAMENTS = [
-  { value: "Old", label: "Old Testament" },
-  { value: "New", label: "New Testament" },
+const TESTAMENTS = (t?: any) => [
+  { value: 'Old', label: t?.dailyVerse?.oldTestament || 'Old Testament' },
+  { value: 'New', label: t?.dailyVerse?.newTestament || 'New Testament' },
 ];
 
 const OLD_TESTAMENT_BOOKS = [
@@ -187,12 +188,17 @@ const formatShortDate = (utcDateString: unknown): string =>
     day: "numeric",
   });
 
-const getConflictMessage = (conflict: any): string => {
+const getConflictMessage = (conflict: any, t?: any): string => {
   if (!conflict) return '';
   const ref = conflict.existing?.bookName + ' ' + conflict.existing?.chapter + ':' + conflict.existing?.verseNumber;
-  return conflict.type === 'date'
-    ? 'A verse already exists for this date (' + ref + ').'
-    : 'This verse (' + ref + ') already exists for ' + (conflict.existing?.displayDate || '') + '.';
+  const date = conflict.existing?.displayDate || '';
+  const dv = t?.dailyVerse;
+  if (conflict.type === 'date') {
+    const msg = dv?.verseConflictForDate || 'A verse already exists for this date ({ref}).';
+    return msg.replace('{ref}', ref);
+  }
+  const msg = dv?.verseConflictForVerse || 'This verse ({ref}) already exists for {date}.';
+  return msg.replace('{ref}', ref).replace('{date}', date);
 };
 
 const addDays = (d: Date, days: number): Date => {
@@ -274,6 +280,7 @@ const buildEditState = (verse: DailyVerseItem): EditState => {
 
 const DailyVerse = () => {
   const { userInfo } = useAuth();
+  const { t, isRtl } = useLanguage();
   const isAdmin = userInfo?.userRole === 1;
   
   const [dailyVerses, setDailyVerses] = useState<DailyVerseItem[]>([]);
@@ -351,15 +358,15 @@ const DailyVerse = () => {
         setDailyVerses([]);
       } else {
         toast({
-          title: "Error",
-          description: returnMessage || "Failed to fetch today's verse.",
+          title: t.common?.error || 'Error',
+          description: returnMessage || (t.dailyVerse?.failedToFetch || "Failed to fetch today's verse."),
           variant: "destructive",
         });
       }
     } catch {
       toast({
-        title: "Error",
-        description: "Unable to load today's verse.",
+        title: t.common?.error || 'Error',
+        description: t.dailyVerse?.failedToFetch || "Unable to load today's verse.",
         variant: "destructive",
       });
     } finally {
@@ -388,15 +395,15 @@ const DailyVerse = () => {
         setSelectedIndex(todayIdx !== -1 ? todayIdx : 0);
       } else {
         toast({
-          title: "Error",
-          description: returnMessage || "Failed to fetch verses.",
+          title: t.common?.error || 'Error',
+          description: returnMessage || (t.dailyVerse?.failedToFetchVerses || "Failed to fetch verses."),
           variant: "destructive",
         });
       }
     } catch {
       toast({
-        title: "Error",
-        description: "Unable to load daily verses.",
+        title: t.common?.error || 'Error',
+        description: t.dailyVerse?.unableToLoadVerses || "Unable to load daily verses.",
         variant: "destructive",
       });
     } finally {
@@ -412,7 +419,7 @@ const DailyVerse = () => {
   // ── Filter ─────────────────────────────────────────────────────────────────
   const validateAndApply = () => {
     if (fromDate && toDate && fromDate > toDate) {
-      setFilterError("'From' date must be before or equal to 'To' date.");
+      setFilterError(t.dailyVerse?.dateRangeError || "'From' date must be before or equal to 'To' date.");
       return;
     }
     setFilterError("");
@@ -461,16 +468,14 @@ const DailyVerse = () => {
   };
 
   const handleSaveEdit = async () => {
-    if (!editState) return;
-    if (
-      !editState.book ||
+    if (!editState) return;      if (!editState.book ||
       !editState.chapter ||
       !editState.verseNumber ||
       !editState.explanation.trim()
     ) {
       toast({
-        title: "Missing fields",
-        description: "Please fill all required fields.",
+        title: t.dailyVerse?.missingFields || 'Missing fields',
+        description: t.dailyVerse?.fillAllRequired || 'Please fill all required fields.',
         variant: "destructive",
       });
       return;
@@ -492,8 +497,8 @@ const DailyVerse = () => {
       });
       if (res.returnCode === 200) {
         toast({
-          title: "Updated",
-          description: "Daily verse updated successfully.",
+          title: t.dailyVerse?.dailyVerse || 'Updated',
+          description: t.dailyVerse?.verseSaved || 'Daily verse updated successfully.',
         });
         setEditOpen(false);
         getAllDailyVerses();
@@ -517,15 +522,15 @@ const DailyVerse = () => {
         });
       } else {
         toast({
-          title: "Error",
-          description: res.returnMessage || "Failed to update.",
+          title: t.common?.error || 'Error',
+          description: res.returnMessage || (t.dailyVerse?.fillAllRequired || 'Failed to update.'),
           variant: "destructive",
         });
       }
     } catch {
       toast({
-        title: "Error",
-        description: "An error occurred.",
+        title: t.common?.error || 'Error',
+        description: t.common?.error || 'An error occurred.',
         variant: "destructive",
       });
     } finally {
@@ -540,14 +545,14 @@ const DailyVerse = () => {
     try {
       const res = await sendPostRequest("admin", "add-daily-verse", conflictDialog.payload);
       if (res.returnCode === 200) {
-        toast({ title: "Updated", description: "Conflicting verse updated." });
+        toast({ title: t.dailyVerse?.dailyVerse || 'Updated', description: t.dailyVerse?.verseSaved || 'Verse updated.' });
         setEditOpen(false);
         getAllDailyVerses();
       } else {
-        toast({ title: "Error", description: res.returnMessage, variant: "destructive" });
+        toast({ title: t.common?.error || 'Error', description: res.returnMessage, variant: "destructive" });
       }
     } catch {
-      toast({ title: "Error", description: "An error occurred.", variant: "destructive" });
+      toast({ title: t.common?.error || 'Error', description: t.common?.error || 'An error occurred.', variant: "destructive" });
     }
   };
 
@@ -566,8 +571,8 @@ const DailyVerse = () => {
       });
       if (res.returnCode === 200) {
         toast({
-          title: "Deleted",
-          description: "Daily verse deleted successfully.",
+          title: t.common?.delete || 'Deleted',
+          description: t.dailyVerse?.verseDeleted || 'Daily verse deleted successfully.',
         });
         setDeleteOpen(false);
         setDeleteTarget(null);
@@ -575,15 +580,15 @@ const DailyVerse = () => {
         getAllDailyVerses();
       } else {
         toast({
-          title: "Error",
-          description: res.returnMessage || "Failed to delete.",
+          title: t.common?.error || 'Error',
+          description: res.returnMessage || (t.dailyVerse?.deleteVerse || 'Failed to delete.'),
           variant: "destructive",
         });
       }
     } catch {
       toast({
-        title: "Error",
-        description: "An error occurred.",
+        title: t.common?.error || 'Error',
+        description: t.common?.error || 'An error occurred.',
         variant: "destructive",
       });
     } finally {
@@ -597,7 +602,7 @@ const DailyVerse = () => {
       <div className="p-6 lg:p-8 flex items-center justify-center min-h-[60vh]">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="w-12 h-12 animate-spin text-primary" />
-          <p className="text-muted-foreground">Loading daily verses...</p>
+          <p className="text-muted-foreground">{t.dailyVerse?.loading || 'Loading daily verses...'}</p>
         </div>
       </div>
     );
@@ -606,7 +611,7 @@ const DailyVerse = () => {
   // ── Empty ──────────────────────────────────────────────────────────────────
   if (!dailyVerses.length) {
     return (
-      <div className="p-6 lg:p-8 space-y-6">
+      <div className="p-6 lg:p-8 space-y-6" dir={isRtl ? 'rtl' : 'ltr'}>
         <PageHeader onAdd={() => navigate(routes.addDailyVerse.path)} />
         <FilterCard
           fromDate={fromDate}
@@ -623,18 +628,18 @@ const DailyVerse = () => {
         <div className="flex items-center justify-center min-h-[40vh]">
           <div className="text-center">
             <Sun className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-            <h3 className="text-xl font-semibold mb-2">No verses found</h3>
+            <h3 className="text-xl font-semibold mb-2">{t.dailyVerse?.noVersesYet || 'No verses found'}</h3>
             <p className="text-muted-foreground mb-4">
               {isFiltered
-                ? "No verses match the selected date range."
-                : "No daily verses have been added yet."}
+                ? (t.dailyVerse?.noVersesMatch || 'No verses match the selected date range.')
+                : (t.dailyVerse?.noVersesAdded || 'No daily verses have been added yet.')}
             </p>
             <div className="flex gap-2 justify-center">
               {isFiltered && (
-                <Button onClick={clearFilter}>Clear Filter</Button>
+                <Button onClick={clearFilter}>{t.dailyVerse?.clearFilter || 'Clear Filter'}</Button>
               )}
               <Button variant="outline" onClick={getAllDailyVerses}>
-                Refresh
+                {t.dailyVerse?.refresh || 'Refresh'}
               </Button>
             </div>
           </div>
@@ -649,7 +654,7 @@ const DailyVerse = () => {
 
   // ── Main render ────────────────────────────────────────────────────────────
   return (
-    <div className="p-6 lg:p-8 space-y-8">
+    <div className="p-6 lg:p-8 space-y-8" dir={isRtl ? 'rtl' : 'ltr'}>
       <PageHeader onAdd={() => navigate(routes.addDailyVerse.path)} />
 
       <FilterCard
@@ -671,11 +676,11 @@ const DailyVerse = () => {
           <>
             <CalendarRange className="w-4 h-4 text-primary shrink-0" />
             <span>
-              Showing verses
+              {t.dailyVerse?.verse_other || 'verses'}
               {fromDate && (
                 <>
                   {" "}
-                  from{" "}
+                  {t.common?.from || 'from'}{" "}
                   <strong className="text-foreground">
                     {formatDisplayDate(fromDate)}
                   </strong>
@@ -684,7 +689,7 @@ const DailyVerse = () => {
               {toDate && (
                 <>
                   {" "}
-                  to{" "}
+                  {t.common?.to || 'to'}{" "}
                   <strong className="text-foreground">
                     {formatDisplayDate(toDate)}
                   </strong>
@@ -693,8 +698,8 @@ const DailyVerse = () => {
             </span>
             <button
               onClick={clearFilter}
-              className="ml-1 rounded-full hover:text-destructive transition-colors"
-              aria-label="Clear filter"
+              className="ms-1 rounded-full hover:text-destructive transition-colors"
+              aria-label={t.dailyVerse?.clearFilter || 'Clear filter'}
             >
               <X className="w-3.5 h-3.5" />
             </button>
@@ -703,18 +708,18 @@ const DailyVerse = () => {
           <>
             <Sparkles className="w-4 h-4 text-accent shrink-0" />
             <span>
-              Showing today
+              {t.dailyVerse?.showingToday || 'Showing today'}
               {futureCount > 0 && (
                 <>
                   {" "}
                   +{" "}
                   <strong className="text-foreground">
-                    {futureCount} upcoming
+                    {futureCount} {t.dailyVerse?.upcoming || 'upcoming'}
                   </strong>{" "}
-                  {futureCount === 1 ? "verse" : "verses"}
+                  {futureCount === 1 ? (t.dailyVerse?.verse_one || 'verse') : (t.dailyVerse?.verse_other || 'verses')}
                 </>
               )}{" "}
-              + recent history
+              + {t.dailyVerse?.recentHistory || 'recent history'}
             </span>
           </>
         )}
@@ -724,7 +729,7 @@ const DailyVerse = () => {
       {selectedVerse && (
         <Card className="opacity-0 fade-up stagger-1 relative overflow-hidden border-border/50">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10" />
-          <div className="absolute top-4 right-4 pointer-events-none">
+          <div className="absolute top-4 end-4 pointer-events-none">
             <Sparkles className="w-8 h-8 text-accent/50" />
           </div>
 
@@ -735,12 +740,12 @@ const DailyVerse = () => {
                   variant="secondary"
                   className="bg-accent/20 text-accent-foreground"
                 >
-                  <Calendar className="w-3 h-3 mr-1" />
+                  <Calendar className="w-3 h-3 me-1" />
                   {formatDisplayDate(selectedVerse.displayDate)}
                 </Badge>
                 {isToday(selectedVerse.displayDate) && (
                   <Badge className="bg-primary text-primary-foreground">
-                    Today
+                    {t.dailyVerse?.todayBadge || 'Today'}
                   </Badge>
                 )}
                 {isFuture(selectedVerse.displayDate) && (
@@ -748,7 +753,7 @@ const DailyVerse = () => {
                     variant="outline"
                     className="border-accent text-accent"
                   >
-                    Upcoming
+                    {t.dailyVerse?.upcoming || 'Upcoming'}
                   </Badge>
                 )}
               </div>
@@ -761,7 +766,7 @@ const DailyVerse = () => {
                       size="icon"
                       className="text-muted-foreground hover:text-primary hover:bg-primary/10"
                       onClick={() => openEdit(selectedVerse)}
-                      title="Edit verse"
+                      title={t.dailyVerse?.editVerse || 'Edit verse'}
                     >
                       <Pencil className="w-4 h-4" />
                     </Button>
@@ -770,7 +775,7 @@ const DailyVerse = () => {
                       size="icon"
                       className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                       onClick={() => openDelete(selectedVerse)}
-                      title="Delete verse"
+                      title={t.dailyVerse?.deleteVerse || 'Delete verse'}
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>
@@ -802,20 +807,20 @@ const DailyVerse = () => {
                 — {selectedVerse.bookName} {selectedVerse.chapter}:
                 {selectedVerse.verseNumber}
               </p>
-              <div className="bg-secondary/50 rounded-xl p-6 text-left">
+              <div className="bg-secondary/50 rounded-xl p-6 text-start">
                 <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-2">
                   {isToday(selectedVerse.displayDate)
-                    ? "Today's Explanation"
+                    ? (t.dailyVerse?.todaysExplanation || "Today's Explanation")
                     : isFuture(selectedVerse.displayDate)
-                      ? "Upcoming Explanation"
-                      : "Explanation"}
+                      ? (t.dailyVerse?.upcomingExplanation || "Upcoming Explanation")
+                      : (t.dailyVerse?.explanation || "Explanation")}
                 </h3>
                 <p className="text-lg leading-relaxed whitespace-pre-line">
-                  {selectedVerse.explanation || selectedVerse.reflection || "No explanation available."}
+                  {selectedVerse.explanation || selectedVerse.reflection || (t.dailyVerse?.noExplanation || "No explanation available.")}
                 </p>
                 {selectedVerse.learnMore && (
                   <div className="mt-4 pt-4 border-t border-border/50">
-                    <h4 className="text-sm font-medium text-accent mb-2">Learn More</h4>
+                    <h4 className="text-sm font-medium text-accent mb-2">{t.dailyVerse?.learnMore || 'Learn More'}</h4>
                     <p className="text-sm leading-relaxed text-muted-foreground whitespace-pre-line">
                       {selectedVerse.learnMore}
                     </p>
@@ -830,7 +835,7 @@ const DailyVerse = () => {
                   }}
                 >
                   <PenLine className="w-4 h-4" />
-                  Write in Journal
+                  {t.dailyVerse?.writeInJournal || 'Write in Journal'}
                 </Button>
               </div>
             </div>
@@ -843,13 +848,13 @@ const DailyVerse = () => {
                 className="gap-2"
               >
                 <ChevronLeft className="w-4 h-4" />
-                Previous Day
+                {t.dailyVerse?.previousDay || 'Previous Day'}
               </Button>
 
               <span className="text-sm text-muted-foreground">
                 {isToday(selectedVerse.displayDate)
-                  ? "Today's Verse"
-                  : `Verse ${selectedIndex + 1} of ${dailyVerses.length}`}
+                  ? (t.dailyVerse?.todaysVerse || "Today's Verse")
+                  : (t.dailyVerse?.verseOf || 'Verse {n} of {total}').replace('{n}', String(selectedIndex + 1)).replace('{total}', String(dailyVerses.length))}
               </span>
 
               <Button
@@ -858,7 +863,7 @@ const DailyVerse = () => {
                 disabled={selectedIndex <= 0}
                 className="gap-2"
               >
-                Next Day
+                {t.dailyVerse?.nextDay || 'Next Day'}
                 <ChevronRight className="w-4 h-4" />
               </Button>
             </div>
@@ -869,13 +874,13 @@ const DailyVerse = () => {
       {/* ── Verse History ──────────────────────────────────────────────────── */}
       <div className="opacity-0 fade-up stagger-2">
         <h2 className="text-xl font-bold font-[family-name:var(--font-heading)] mb-4">
-          {isFiltered ? "Filtered Verses" : "Verse Window"}
+          {isFiltered ? (t.dailyVerse?.filteredVerses || 'Filtered Verses') : (t.dailyVerse?.verseWindow || 'Verse Window')}
         </h2>
 
         {!isFiltered && futureCount > 0 && (
           <div className="flex items-center gap-3 mb-3">
             <span className="text-xs font-medium text-accent uppercase tracking-wider">
-              Upcoming
+              {t.dailyVerse?.upcoming || 'Upcoming'}
             </span>
             <div className="flex-1 h-px bg-accent/20" />
           </div>
@@ -895,7 +900,7 @@ const DailyVerse = () => {
                 {insertDivider && (
                   <div className="md:col-span-2 lg:col-span-3 flex items-center gap-3 py-1">
                     <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                      Today &amp; Past
+                      {t.dailyVerse?.todayAndPast || 'Today & Past'}
                     </span>
                     <div className="flex-1 h-px bg-border/60" />
                   </div>
@@ -929,7 +934,7 @@ const DailyVerse = () => {
                         </Badge>
                         {isFuture(verse.displayDate) && (
                           <span className="text-[10px] font-semibold text-accent uppercase tracking-wide">
-                            Upcoming
+                            {t.dailyVerse?.upcoming || 'Upcoming'}
                           </span>
                         )}
                       </div>
@@ -950,7 +955,7 @@ const DailyVerse = () => {
                                 openEdit(verse);
                               }}
                               className="p-1.5 rounded hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors"
-                              title="Edit verse"
+                              title={t.dailyVerse?.editVerse || 'Edit verse'}
                             >
                               <Pencil className="w-3.5 h-3.5" />
                             </button>
@@ -960,7 +965,7 @@ const DailyVerse = () => {
                                 openDelete(verse);
                               }}
                               className="p-1.5 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
-                              title="Delete verse"
+                              title={t.dailyVerse?.deleteVerse || 'Delete verse'}
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
@@ -1005,17 +1010,19 @@ const DailyVerse = () => {
             disabled={!hasPrevious}
             onClick={() => setPage((p) => Math.max(p - 1, 0))}
           >
-            Previous Page
+            {t.common?.previous || 'Previous Page'}
           </Button>
           <span className="text-sm text-muted-foreground">
-            Page {page + 1} of {Math.max(totalPages, 1)}
+            {(t.dailyVerse?.verseOf || 'Page {n} of {total}')
+              .replace('{n}', String(page + 1))
+              .replace('{total}', String(Math.max(totalPages, 1)))}
           </span>
           <Button
             variant="outline"
             disabled={!hasNext}
             onClick={() => setPage((p) => p + 1)}
           >
-            Next Page
+            {t.common?.next || 'Next Page'}
           </Button>
         </div>
       </div>
@@ -1040,11 +1047,10 @@ const DailyVerse = () => {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-destructive">
               <AlertTriangle className="w-5 h-5" />
-              Delete Daily Verse
+              {t.dailyVerse?.deleteVerseTitle || 'Delete Daily Verse'}
             </DialogTitle>
             <DialogDescription>
-              This will permanently remove the verse. This action cannot be
-              undone.
+              {t.dailyVerse?.deleteVerseDesc || 'This will permanently remove the verse. This action cannot be undone.'}
             </DialogDescription>
           </DialogHeader>
 
@@ -1075,7 +1081,7 @@ const DailyVerse = () => {
               onClick={() => setDeleteOpen(false)}
               disabled={isDeleting}
             >
-              Cancel
+              {t.common?.cancel || 'Cancel'}
             </Button>
             <Button
               variant="destructive"
@@ -1088,7 +1094,7 @@ const DailyVerse = () => {
               ) : (
                 <Trash2 className="w-4 h-4" />
               )}
-              Delete Verse
+              {t.dailyVerse?.deleteVerse || 'Delete Verse'}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1100,23 +1106,23 @@ const DailyVerse = () => {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-amber-500">
               <AlertTriangle className="w-5 h-5" />
-              Verse Already Exists
-            </DialogTitle>
-            <DialogDescription>
-              {getConflictMessage(conflictDialog.conflict)} Update the existing entry instead?
+              {t.dailyVerse?.verseAlreadyExists || 'Verse Already Exists'}
+            </DialogTitle>        
+          <DialogDescription>
+              {getConflictMessage(conflictDialog.conflict, t)} {t.dailyVerse?.updateExisting || 'Update the existing entry instead?'}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setConflictDialog({ open: false, conflict: null, payload: null })}>
-              Cancel
+              {t.common?.cancel || 'Cancel'}
             </Button>
             <Button variant="outline" onClick={() => { setConflictDialog({ open: false, conflict: null, payload: null }); }}>
-              <BookOpen className="w-4 h-4 mr-2" />
-              View Existing
+              <BookOpen className="w-4 h-4 me-2" />
+              {t.dailyVerse?.viewExisting || 'View Existing'}
             </Button>
             <Button onClick={handleConflictUpdate}>
-              <Save className="w-4 h-4 mr-2" />
-              Update Existing
+              <Save className="w-4 h-4 me-2" />
+              {t.dailyVerse?.updateExisting || 'Update Existing'}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1129,6 +1135,7 @@ const DailyVerse = () => {
 
 const PageHeader = ({ onAdd }: { onAdd: () => void }) => {
   const { userInfo } = useAuth();
+  const { t } = useLanguage();
   const isAdmin = userInfo?.userRole === 1;
   
   return (
@@ -1139,9 +1146,9 @@ const PageHeader = ({ onAdd }: { onAdd: () => void }) => {
         </div>
         <div>
           <h1 className="text-3xl font-bold font-[family-name:var(--font-heading)]">
-            Daily Verse
+            {t.dailyVerse?.dailyVerse || 'Daily Verse'}
           </h1>
-          <p className="text-muted-foreground">Start each day with God's Word</p>
+          <p className="text-muted-foreground">{t.dailyVerse?.pageSubtitle || "Start each day with God's Word"}</p>
         </div>
       </div>
       {isAdmin && (
@@ -1150,7 +1157,7 @@ const PageHeader = ({ onAdd }: { onAdd: () => void }) => {
           className="gap-2 bg-gradient-to-r from-primary to-primary/80 shadow-md w-fit"
         >
           <Plus className="w-4 h-4" />
-          Add Daily Verse
+          {t.dailyVerse?.addVerse || 'Add Daily Verse'}
         </Button>
       )}
     </div>
@@ -1181,69 +1188,72 @@ const FilterCard = ({
   onApply,
   onClear,
   onPreset,
-}: FilterCardProps) => (
-  <Card className="border-border/50">
-    <CardContent className="p-5 space-y-4">
-      <div>
-        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
-          Quick Range
-        </p>
-        <div className="flex flex-wrap gap-2">
-          {PRESETS.map((p) => (
-            <button
-              key={p.value}
-              onClick={() => onPreset(p.value)}
-              className={cn(
-                "px-3 py-1 rounded-full text-sm border transition-colors",
-                activePreset === p.value
-                  ? "bg-primary text-primary-foreground border-primary"
-                  : "border-border hover:bg-secondary",
-              )}
-            >
-              {p.label}
-            </button>
-          ))}
+}: FilterCardProps) => {
+  const { t } = useLanguage();
+  return (
+    <Card className="border-border/50">
+      <CardContent className="p-5 space-y-4">
+        <div>
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
+            {t.dailyVerse?.quickRange || 'Quick Range'}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {PRESETS(t).map((p) => (
+              <button
+                key={p.value}
+                onClick={() => onPreset(p.value)}
+                className={cn(
+                  "px-3 py-1 rounded-full text-sm border transition-colors",
+                  activePreset === p.value
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "border-border hover:bg-secondary",
+                )}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
-      <div className="border-t border-border/40" />
-      <div className="flex flex-col md:flex-row gap-4 md:items-end">
-        <div className="flex-1 space-y-1">
-          <Label htmlFor="from-date">From</Label>
-          <Input
-            id="from-date"
-            type="date"
-            value={fromDate}
-            max={toDate || undefined}
-            onChange={(e) => onFromChange(e.target.value)}
-          />
-        </div>
-        <div className="flex-1 space-y-1">
-          <Label htmlFor="to-date">To</Label>
-          <Input
-            id="to-date"
-            type="date"
-            value={toDate}
-            min={fromDate || undefined}
-            onChange={(e) => onToChange(e.target.value)}
-          />
-        </div>
-        <div className="flex gap-2 shrink-0">
-          <Button onClick={onApply} className="gap-2">
-            <Search className="w-4 h-4" />
-            Apply
-          </Button>
-          {isFiltered && (
-            <Button variant="outline" onClick={onClear} className="gap-1">
-              <X className="w-4 h-4" />
-              Clear
+        <div className="border-t border-border/40" />
+        <div className="flex flex-col md:flex-row gap-4 md:items-end">
+          <div className="flex-1 space-y-1">
+            <Label htmlFor="from-date">{t.common?.from || 'From'}</Label>
+            <Input
+              id="from-date"
+              type="date"
+              value={fromDate}
+              max={toDate || undefined}
+              onChange={(e) => onFromChange(e.target.value)}
+            />
+          </div>
+          <div className="flex-1 space-y-1">
+            <Label htmlFor="to-date">{t.common?.to || 'To'}</Label>
+            <Input
+              id="to-date"
+              type="date"
+              value={toDate}
+              min={fromDate || undefined}
+              onChange={(e) => onToChange(e.target.value)}
+            />
+          </div>
+          <div className="flex gap-2 shrink-0">
+            <Button onClick={onApply} className="gap-2">
+              <Search className="w-4 h-4" />
+              {t.dailyVerse?.apply || 'Apply'}
             </Button>
-          )}
+            {isFiltered && (
+              <Button variant="outline" onClick={onClear} className="gap-1">
+                <X className="w-4 h-4" />
+                {t.dailyVerse?.clear || 'Clear'}
+              </Button>
+            )}
+          </div>
         </div>
-      </div>
-      {filterError && <p className="text-sm text-destructive">{filterError}</p>}
-    </CardContent>
-  </Card>
-);
+        {filterError && <p className="text-sm text-destructive">{filterError}</p>}
+      </CardContent>
+    </Card>
+  );
+};
 
 // ─── Edit dialog ─────────────────────────────────────────────────────────────────
 
@@ -1364,38 +1374,38 @@ const EditVerseDialog = ({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <BookOpen className="w-5 h-5 text-primary" />
-            Edit Daily Verse
+            {t.dailyVerse?.editVerse || 'Edit Daily Verse'}
           </DialogTitle>
           <DialogDescription>
-            Update the verse reference, date, and reflection below.
+            {t.dailyVerse?.editVerseDesc || 'Update the verse reference, date, and reflection below.'}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-5 py-2">
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             <div className="space-y-1.5">
-              <Label>Testament</Label>
+              <Label>{t.dailyVerse?.testament || 'Testament'}</Label>
               <Combobox
-                options={TESTAMENTS}
+                options={TESTAMENTS(t)}
                 value={localState.testament}
                 onChange={(v) => set("testament", v)}
-                placeholder="Select testament"
+                placeholder={t.dailyVerse?.testament || 'Select testament'}
                 width="w-full"
               />
             </div>
             <div className="space-y-1.5">
-              <Label>Book</Label>
+              <Label>{t.dailyVerse?.book || 'Book'}</Label>
               <Combobox
                 options={books.map((b) => ({ value: b, label: b }))}
                 value={localState.book}
                 onChange={(v) => set("book", v)}
-                placeholder="Select book"
+                placeholder={t.dailyVerse?.selectBook || 'Select book'}
                 disabled={!localState.testament}
                 width="w-full"
               />
             </div>
             <div className="space-y-1.5">
-              <Label>Chapter</Label>
+              <Label>{t.dailyVerse?.chapter || 'Chapter'}</Label>
               <Combobox
                 options={chapters.map((c) => ({
                   value: String(c),
@@ -1403,13 +1413,13 @@ const EditVerseDialog = ({
                 }))}
                 value={localState.chapter}
                 onChange={(v) => set("chapter", v)}
-                placeholder="Select chapter"
+                placeholder={t.dailyVerse?.selectChapter || 'Select chapter'}
                 disabled={!localState.book}
                 width="w-full"
               />
             </div>
             <div className="space-y-1.5">
-              <Label>Verse</Label>
+              <Label>{t.dailyVerse?.verse || 'Verse'}</Label>
               <Combobox
                 options={
                   maxVerses > 0
@@ -1420,13 +1430,13 @@ const EditVerseDialog = ({
                 }
                 value={localState.verseNumber}
                 onChange={(v) => set("verseNumber", v)}
-                placeholder="Select verse"
+                placeholder={t.dailyVerse?.verse || 'Select verse'}
                 disabled={!localState.chapter || maxVerses === 0}
                 width="w-full"
               />
             </div>
             <div className="space-y-1.5">
-              <Label>Version</Label>
+              <Label>{t.dailyVerse?.version || 'Version'}</Label>
               <Combobox
                 options={BIBLE_VERSIONS.map(v => ({
                   value: v.id,
@@ -1434,7 +1444,7 @@ const EditVerseDialog = ({
                 }))}
                 value={localState.bibleVersion}
                 onChange={(v) => set("bibleVersion", v)}
-                placeholder="Select version"
+                placeholder={t.dailyVerse?.selectVersion || "Select version"}
                 width="w-full"
               />
             </div>
@@ -1443,9 +1453,9 @@ const EditVerseDialog = ({
           {verseTextValue && (
             <div className="space-y-1.5">
               <Label>
-                Verse Text{" "}
+                {t.dailyVerse?.verseText || 'Verse Text'}{" "}
                 <span className="text-xs text-muted-foreground font-normal">
-                  (edit to override)
+                  {t.dailyVerse?.verseTextOverride || '(edit to override)'}
                 </span>
               </Label>
               <div className="relative">
@@ -1453,10 +1463,10 @@ const EditVerseDialog = ({
                   value={verseTextValue}
                   onChange={(e) => set("verseText", e.target.value)}
                   className="resize-none font-serif leading-relaxed min-h-[80px]"
-                  placeholder="Verse text..."
+                  placeholder={t.dailyVerse?.verseText || 'Verse text...'}
                 />
-                <span className="absolute bottom-2.5 right-3 text-xs text-muted-foreground">
-                  Ref: {localState.book} {localState.chapter}:{localState.verseNumber} ({BIBLE_VERSIONS.find(v => v.id === localState.bibleVersion)?.abbreviation || localState.bibleVersion})
+                <span className="absolute bottom-2.5 end-3 text-xs text-muted-foreground">
+                  {t.dailyVerse?.reference || 'Ref'}: {localState.book} {localState.chapter}:{localState.verseNumber} ({BIBLE_VERSIONS.find(v => v.id === localState.bibleVersion)?.abbreviation || localState.bibleVersion})
                 </span>
               </div>
             </div>
@@ -1464,7 +1474,7 @@ const EditVerseDialog = ({
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label>Date</Label>
+              <Label>{t.common?.date || 'Date'}</Label>
               <Input
                 type="date"
                 value={format(safeDateValue, "yyyy-MM-dd")}
@@ -1472,7 +1482,7 @@ const EditVerseDialog = ({
               />
             </div>
             <div className="space-y-1.5">
-              <Label>Time</Label>
+              <Label>{t.common?.time || 'Time'}</Label>
               <Input
                 type="time"
                 value={localState.selectedTime}
@@ -1487,14 +1497,14 @@ const EditVerseDialog = ({
 <div className="space-y-1.5">
             <Label className="flex items-center gap-2">
               <Lightbulb className="w-4 h-4 text-accent" />
-              Explanation <span className="text-destructive">*</span>
+              {t.dailyVerse?.explanation || 'Explanation'} <span className="text-destructive">*</span>
             </Label>
             <Textarea
               value={localState.explanation}
               onChange={(e) => set("explanation", e.target.value)}
               rows={5}
               className="resize-none"
-              placeholder="Explain what this verse means..."
+              placeholder={t.dailyVerse?.explanation || 'Explain what this verse means...'}
               required
             />
           </div>
@@ -1502,14 +1512,14 @@ const EditVerseDialog = ({
           <div className="space-y-1.5">
             <Label className="flex items-center gap-2">
               <Lightbulb className="w-4 h-4 text-muted-foreground" />
-              Learn More <span className="text-muted-foreground text-xs">(optional)</span>
+              {t.dailyVerse?.learnMore || 'Learn More'} <span className="text-muted-foreground text-xs">{t.common?.save || '(optional)'}</span>
             </Label>
             <Textarea
               value={localState.learnMore}
               onChange={(e) => set("learnMore", e.target.value)}
               rows={3}
               className="resize-none"
-              placeholder="Additional resources or related verses..."
+              placeholder={t.dailyVerse?.learnMore || 'Additional resources or related verses...'}
             />
           </div>
         </div>
@@ -1520,7 +1530,7 @@ const EditVerseDialog = ({
             onClick={() => onOpenChange(false)}
             disabled={isSaving}
           >
-            Cancel
+            {t.common?.cancel || 'Cancel'}
           </Button>
           <Button
             onClick={onSave}
@@ -1536,7 +1546,7 @@ const EditVerseDialog = ({
             ) : (
               <Save className="w-4 h-4" />
             )}
-            Save Changes
+            {t.dailyVerse?.saveChanges || 'Save Changes'}
           </Button>
         </DialogFooter>
         </DialogContent>

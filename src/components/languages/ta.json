@@ -1,0 +1,23 @@
+{
+  "sidebar": {
+    "home": "முகப்பு",
+    "bible": "வேதாகம வாசகர்",
+    "dailyVerse": "இன்றைய வசனம்",
+    "devotions": "பக்தி",
+    "journal": "நாட்குறிப்பு",
+    "readingPlans": "வாசிப்புத் திட்டங்கள்",
+    "settings": "அமைப்புகள்",
+    "dashboard": "டாஷ்போர்டு",
+    "activity": "செயல்பாடு",
+    "logout": "வெளியேறு",
+    "profile": "சுயவிவரம்",
+    "mainMenu": "பிரதான மெனு",
+    "manage": "நிர்வகி",
+    "explanations": "வசன விளக்கங்கள்",
+    "myActivity": "எனது செயல்பாடு",
+    "userActivity": "பயனர் செயல்பாடு",
+    "journalPrompts": "நாட்குறிப்பு தூண்டுதல்கள்",
+    "journalTemplates": "நாட்குறிப்பு வார்ப்புருக்கள்",
+    "myDashboard": "எனது டாஷ்போர்டு"
+  }
+}

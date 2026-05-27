@@ -41,6 +41,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Combobox } from "@/components/ui/combobox";
 import { routes } from "@/components/Routes/routes";
 import { useNavigate } from "react-router-dom";
+import { useLanguage } from "@/components/languages/languageProvider";
 import {
   format,
   addDays,
@@ -168,6 +169,7 @@ const buildEditState = (devotion: DailyDevotionItem): EditState => {
 
 const adminDailyDevotions = () => {
   const { userInfo } = useAuth();
+  const { t, isRtl } = useLanguage();
   const isAdmin = userInfo?.userRole === 1;
 
   const [dailyDevotions, setDailyDevotions] = useState<DailyDevotionItem[]>([]);
@@ -243,8 +245,8 @@ const adminDailyDevotions = () => {
         }
       } else {
         toast({
-          title: "Error",
-          description: res.returnMessage || "Failed to fetch devotions",
+          title: t.common?.error || 'Error',
+          description: res.returnMessage || (t.devotions?.failedToFetch || 'Failed to fetch devotions'),
           variant: "destructive",
         });
       }
@@ -262,7 +264,8 @@ const adminDailyDevotions = () => {
   // ── Filter ───────────────────────────────────────────────────────────────────
   const validateAndApply = () => {
     if (fromDate && toDate && isAfter(parseISO(fromDate), parseISO(toDate))) {
-      setFilterError("Start date must be before end date");
+      const dv = t.devotions;
+      setFilterError(dv?.dateRangeError || "Start date must be before end date.");
       return;
     }
     setFilterError("");
@@ -293,14 +296,13 @@ const adminDailyDevotions = () => {
 
   const handleSaveEdit = async () => {
     if (!editState) return;
-    if (!editState.title.trim() || !editState.content.trim()) {
-      toast({
-        title: "Missing fields",
-        description: "Please fill in the title and content.",
-        variant: "destructive",
-      });
-      return;
-    }
+    if (!editState.title.trim() || !editState.content.trim()) {        toast({
+          title: t.devotions?.missingFields || 'Missing fields',
+          description: t.devotions?.fillAllRequired || 'Please fill in the title and content.',
+          variant: "destructive",
+        });
+        return;
+      }
     setIsSaving(true);
     try {
       const res = await sendPostRequest("admin", "add-daily-devotion", {
@@ -318,22 +320,22 @@ const adminDailyDevotions = () => {
       });
       if (res.returnCode === 200) {
         toast({
-          title: "Updated",
-          description: "Daily devotion updated successfully.",
+          title: t.devotions?.dailyDevotions || 'Updated',
+          description: t.devotions?.devotionUpdated || 'Daily devotion updated successfully.',
         });
         setEditOpen(false);
         getAllDailyDevotions();
       } else {
         toast({
-          title: "Error",
+          title: t.common?.error || 'Error',
           description: res.returnMessage || "Failed to update.",
           variant: "destructive",
         });
       }
     } catch {
       toast({
-        title: "Error",
-        description: "An error occurred.",
+        title: t.common?.error || 'Error',
+        description: t.common?.error || 'An error occurred.',
         variant: "destructive",
       });
     } finally {
@@ -356,8 +358,8 @@ const adminDailyDevotions = () => {
       });
       if (res.returnCode === 200) {
         toast({
-          title: "Deleted",
-          description: "Daily devotion deleted successfully.",
+          title: t.devotions?.dailyDevotions || 'Deleted',
+          description: t.devotions?.devotionDeleted || 'Daily devotion deleted successfully.',
         });
         setDeleteOpen(false);
         setDeleteTarget(null);
@@ -365,15 +367,15 @@ const adminDailyDevotions = () => {
         getAllDailyDevotions();
       } else {
         toast({
-          title: "Error",
+          title: t.common?.error || 'Error',
           description: res.returnMessage || "Failed to delete.",
           variant: "destructive",
         });
       }
     } catch {
       toast({
-        title: "Error",
-        description: "An error occurred.",
+        title: t.common?.error || 'Error',
+        description: t.common?.error || 'An error occurred.',
         variant: "destructive",
       });
     } finally {
@@ -387,7 +389,7 @@ const adminDailyDevotions = () => {
       <div className="p-6 lg:p-8 flex items-center justify-center min-h-[60vh]">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="w-12 h-12 animate-spin text-primary" />
-          <p className="text-muted-foreground">Loading daily devotions...</p>
+          <p className="text-muted-foreground">{t.devotions?.loading || 'Loading daily devotions...'}</p>
         </div>
       </div>
     );
@@ -396,7 +398,7 @@ const adminDailyDevotions = () => {
   // ── Empty ──────────────────────────────────────────────────────────────────
   if (!dailyDevotions.length) {
     return (
-      <div className="p-6 lg:p-8 space-y-6">
+      <div className="p-6 lg:p-8 space-y-6" dir={isRtl ? 'rtl' : 'ltr'}>
         <PageHeader onAdd={() => navigate(routes.addDailyDevotion.path)} />
         <FilterCard
           fromDate={fromDate}
@@ -413,18 +415,18 @@ const adminDailyDevotions = () => {
         <div className="flex items-center justify-center min-h-[40vh]">
           <div className="text-center">
             <Lightbulb className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-            <h3 className="text-xl font-semibold mb-2">No devotions found</h3>
+            <h3 className="text-xl font-semibold mb-2">{t.devotions?.noDevotions || 'No devotions found'}</h3>
             <p className="text-muted-foreground mb-4">
               {isFiltered
-                ? "No devotions match the selected date range."
-                : "No daily devotions have been added yet."}
+                ? (t.devotions?.noDevotionsMatch || 'No devotions match the selected date range.')
+                : (t.devotions?.noDevotionsAdded || 'No daily devotions have been added yet.')}
             </p>
             <div className="flex gap-2 justify-center">
               {isFiltered && (
-                <Button onClick={clearFilter}>Clear Filter</Button>
+                <Button onClick={clearFilter}>{t.devotions?.clearFilter || 'Clear Filter'}</Button>
               )}
               <Button variant="outline" onClick={getAllDailyDevotions}>
-                Refresh
+                {t.devotions?.refresh || 'Refresh'}
               </Button>
             </div>
           </div>
@@ -435,7 +437,7 @@ const adminDailyDevotions = () => {
 
   // ── Main render ────────────────────────────────────────────────────────────
   return (
-    <div className="p-6 lg:p-8 space-y-6">
+    <div className="p-6 lg:p-8 space-y-6" dir={isRtl ? 'rtl' : 'ltr'}>
       <PageHeader onAdd={() => navigate(routes.addDailyDevotion.path)} />
 
       <FilterCard
@@ -460,12 +462,12 @@ const adminDailyDevotions = () => {
           disabled={!hasPrevious}
         >
           <ChevronLeft className="w-4 h-4" />
-          Previous
+          {t.common?.previous || 'Previous'}
         </Button>
         <span className="text-sm text-muted-foreground">
           {isFiltered
-            ? `Page ${page + 1} of ${totalPages}`
-            : `Devotion ${selectedIndex + 1} of ${dailyDevotions.length}`}
+            ? (t.devotions?.filteredDevotions || 'Filtered') + `: ${page + 1} / ${totalPages}`
+            : (t.devotions?.devotions || 'Devotion') + ` ${selectedIndex + 1} / ${dailyDevotions.length}`}
         </span>
         <Button
           variant="outline"
@@ -483,7 +485,7 @@ const adminDailyDevotions = () => {
             isFiltered ? !hasNext : selectedIndex >= dailyDevotions.length - 1
           }
         >
-          Next
+          {t.common?.next || 'Next'}
           <ChevronRight className="w-4 h-4" />
         </Button>
       </div>
@@ -492,7 +494,7 @@ const adminDailyDevotions = () => {
       <div className="grid lg:grid-cols-2 gap-6">
         {/* List */}
         <div className="space-y-3">
-          <h2 className="text-lg font-semibold">All Devotions</h2>
+          <h2 className="text-lg font-semibold">{t.devotions?.allDevotions || 'All Devotions'}</h2>
           {dailyDevotions.map((devotion: any, index) => (
             <Card
               key={devotion.id}
@@ -577,10 +579,10 @@ const adminDailyDevotions = () => {
                       }
                     >
                       {isToday(selectedDevotion.displayDate)
-                        ? "Today's Devotion"
+                        ? (t.devotions?.todaysDevotion || "Today's Devotion")
                         : isFuture(selectedDevotion.displayDate)
-                          ? "Upcoming"
-                          : "Past"}
+                          ? (t.devotions?.upcoming || 'Upcoming')
+                          : (t.devotions?.past || 'Past')}
                     </Badge>
                     <span className="text-sm text-muted-foreground">
                       {formatDisplayDate(selectedDevotion.displayDate)}
@@ -600,7 +602,7 @@ const adminDailyDevotions = () => {
                   {selectedDevotion.bookName && (
                     <div className="bg-secondary/50 rounded-xl p-4">
                       <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-2">
-                        Bible Reference
+                        {t.devotions?.bibleReference || 'Bible Reference'}
                       </h3>
                       <p className="text-primary font-medium">
                         {selectedDevotion.bookName} {selectedDevotion.chapter}:
@@ -631,11 +633,10 @@ const adminDailyDevotions = () => {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-destructive">
               <AlertTriangle className="w-5 h-5" />
-              Delete Daily Devotion
+              {t.devotions?.deleteDevotionTitle || 'Delete Daily Devotion'}
             </DialogTitle>
             <DialogDescription>
-              This will permanently remove the devotion. This action cannot be
-              undone.
+              {t.devotions?.deleteDevotionDesc || 'This will permanently remove the devotion. This action cannot be undone.'}
             </DialogDescription>
           </DialogHeader>
 
@@ -657,7 +658,7 @@ const adminDailyDevotions = () => {
               onClick={() => setDeleteOpen(false)}
               disabled={isDeleting}
             >
-              Cancel
+              {t.common?.cancel || 'Cancel'}
             </Button>
             <Button
               variant="destructive"
@@ -670,7 +671,7 @@ const adminDailyDevotions = () => {
               ) : (
                 <Trash2 className="w-4 h-4" />
               )}
-              Delete Devotion
+              {t.devotions?.deleteDevotion || 'Delete Devotion'}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -683,6 +684,7 @@ const adminDailyDevotions = () => {
 
 const PageHeader = ({ onAdd }: { onAdd: () => void }) => {
   const { userInfo } = useAuth();
+  const { t } = useLanguage();
   const isAdmin = userInfo?.userRole === 1;
 
   return (
@@ -693,10 +695,10 @@ const PageHeader = ({ onAdd }: { onAdd: () => void }) => {
         </div>
         <div>
           <h1 className="text-3xl font-bold font-[family-name:var(--font-heading)]">
-            Daily Devotion
+            {t.devotions?.dailyDevotions || 'Daily Devotion'}
           </h1>
           <p className="text-muted-foreground">
-            Spiritual reflections for each day
+            {t.devotions?.pageSubtitle || 'Spiritual reflections for each day'}
           </p>
         </div>
       </div>
@@ -706,7 +708,7 @@ const PageHeader = ({ onAdd }: { onAdd: () => void }) => {
           className="gap-2 bg-gradient-to-r from-primary to-primary/80 shadow-md w-fit"
         >
           <Plus className="w-4 h-4" />
-          Add Devotion
+          {t.devotions?.addDevotion || 'Add Devotion'}
         </Button>
       )}
     </div>
@@ -726,12 +728,12 @@ interface FilterCardProps {
   onPreset: (v: string) => void;
 }
 
-const PRESETS = [
-  { label: "Last 7 days", value: "last_7" },
-  { label: "Last 30 days", value: "last_30" },
-  { label: "This week", value: "this_week" },
-  { label: "This month", value: "this_month" },
-  { label: "Last month", value: "last_month" },
+const PRESETS = (t?: any) => [
+  { label: t?.devotions?.presetLast7 || 'Last 7 days', value: 'last_7' },
+  { label: t?.devotions?.presetLast30 || 'Last 30 days', value: 'last_30' },
+  { label: t?.devotions?.presetThisWeek || 'This week', value: 'this_week' },
+  { label: t?.devotions?.presetThisMonth || 'This month', value: 'this_month' },
+  { label: t?.devotions?.presetLastMonth || 'Last month', value: 'last_month' },
 ];
 
 const FilterCard = ({
@@ -745,67 +747,70 @@ const FilterCard = ({
   onApply,
   onClear,
   onPreset,
-}: FilterCardProps) => (
-  <Card className="border-border/50">
-    <CardContent className="p-5 space-y-4">
-      <div>
-        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
-          Quick Range
-        </p>
-        <div className="flex flex-wrap gap-2">
-          {PRESETS.map((p) => (
-            <button
-              key={p.value}
-              onClick={() => onPreset(p.value)}
-              className={cn(
-                "px-3 py-1 rounded-full text-sm border transition-colors",
-                activePreset === p.value
-                  ? "bg-primary text-primary-foreground border-primary"
-                  : "border-border hover:bg-secondary",
-              )}
-            >
-              {p.label}
-            </button>
-          ))}
+}: FilterCardProps) => {
+  const { t } = useLanguage();
+  return (
+    <Card className="border-border/50">
+      <CardContent className="p-5 space-y-4">
+        <div>
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
+            {t.devotions?.quickRange || 'Quick Range'}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {PRESETS(t).map((p) => (
+              <button
+                key={p.value}
+                onClick={() => onPreset(p.value)}
+                className={cn(
+                  "px-3 py-1 rounded-full text-sm border transition-colors",
+                  activePreset === p.value
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "border-border hover:bg-secondary",
+                )}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
-      <div className="border-t border-border/40" />
-      <div className="flex flex-col md:flex-row gap-4 md:items-end">
-        <div className="flex-1 space-y-1">
-          <Label htmlFor="from-date">From</Label>
-          <Input
-            id="from-date"
-            type="date"
-            value={fromDate}
-            max={toDate || undefined}
-            onChange={(e) => onFromChange(e.target.value)}
-          />
-        </div>
-        <div className="flex-1 space-y-1">
-          <Label htmlFor="to-date">To</Label>
-          <Input
-            id="to-date"
-            type="date"
-            value={toDate}
-            min={fromDate || undefined}
-            onChange={(e) => onToChange(e.target.value)}
-          />
-        </div>
-        <div className="flex gap-2">
-          <Button onClick={onApply} variant="secondary">
-            Apply
-          </Button>
-          {isFiltered && (
-            <Button onClick={onClear} variant="ghost">
-              Clear
+        <div className="border-t border-border/40" />
+        <div className="flex flex-col md:flex-row gap-4 md:items-end">
+          <div className="flex-1 space-y-1">
+            <Label htmlFor="from-date">{t.common?.from || 'From'}</Label>
+            <Input
+              id="from-date"
+              type="date"
+              value={fromDate}
+              max={toDate || undefined}
+              onChange={(e) => onFromChange(e.target.value)}
+            />
+          </div>
+          <div className="flex-1 space-y-1">
+            <Label htmlFor="to-date">{t.common?.to || 'To'}</Label>
+            <Input
+              id="to-date"
+              type="date"
+              value={toDate}
+              min={fromDate || undefined}
+              onChange={(e) => onToChange(e.target.value)}
+            />
+          </div>
+          <div className="flex gap-2">
+            <Button onClick={onApply} variant="secondary">
+              {t.devotions?.apply || 'Apply'}
             </Button>
-          )}
+            {isFiltered && (
+              <Button onClick={onClear} variant="ghost">
+                {t.devotions?.clear || 'Clear'}
+              </Button>
+            )}
+          </div>
         </div>
-      </div>
-      {filterError && <p className="text-sm text-destructive">{filterError}</p>}
-    </CardContent>
-  </Card>
-);
+        {filterError && <p className="text-sm text-destructive">{filterError}</p>}
+      </CardContent>
+    </Card>
+  );
+};
 
 interface DevotionEditDialogProps {
   open: boolean;
@@ -871,31 +876,31 @@ const DevotionEditDialog = ({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Lightbulb className="w-5 h-5 text-primary" />
-            Edit Daily Devotion
+            {t.devotions?.editDevotion || 'Edit Daily Devotion'}
           </DialogTitle>
           <DialogDescription>
-            Update the title, content, and optional Bible reference below.
+            {t.devotions?.editDevotionDesc || 'Update the title, content, and optional Bible reference below.'}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-5 py-2">
           {/* Title */}
           <div className="space-y-2">
-            <Label>Title *</Label>
+            <Label>{t.common?.title || 'Title'} *</Label>
             <Input
               value={localState.title}
               onChange={(e) => set("title", e.target.value)}
-              placeholder="Devotion title..."
+              placeholder={t.devotions?.devotionTitlePlaceholder || 'Devotion title...'}
             />
           </div>
 
           {/* Content */}
           <div className="space-y-2">
-            <Label>Content *</Label>
+            <Label>{t.common?.content || 'Content'} *</Label>
             <Textarea
               value={localState.content}
               onChange={(e) => set("content", e.target.value)}
-              placeholder="Devotion content..."
+              placeholder={t.devotions?.devotionContentPlaceholder || 'Devotion content...'}
               className="min-h-[200px]"
             />
           </div>
@@ -903,29 +908,29 @@ const DevotionEditDialog = ({
           {/* Optional Bible Reference */}
           <div className="grid grid-cols-3 gap-4">
             <div className="space-y-1.5">
-              <Label>Book</Label>
+              <Label>{t.dailyVerse?.book || 'Book'}</Label>
               <Input
                 value={localState.book}
                 onChange={(e) => set("book", e.target.value)}
-                placeholder="e.g. Psalms"
+                placeholder={t.dailyVerse?.selectBook || 'e.g. Psalms'}
               />
             </div>
             <div className="space-y-1.5">
-              <Label>Chapter</Label>
+              <Label>{t.dailyVerse?.chapter || 'Chapter'}</Label>
               <Input
                 type="number"
                 value={localState.chapter}
                 onChange={(e) => set("chapter", e.target.value)}
-                placeholder="Chapter"
+                placeholder={t.dailyVerse?.chapter || 'Chapter'}
               />
             </div>
             <div className="space-y-1.5">
-              <Label>Verse</Label>
+              <Label>{t.dailyVerse?.verse || 'Verse'}</Label>
               <Input
                 type="number"
                 value={localState.verseNumber}
                 onChange={(e) => set("verseNumber", e.target.value)}
-                placeholder="Verse"
+                placeholder={t.dailyVerse?.verse || 'Verse'}
               />
             </div>
           </div>
@@ -933,7 +938,7 @@ const DevotionEditDialog = ({
           {/* Date & Time */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label>Date</Label>
+              <Label>{t.common?.date || 'Date'}</Label>
               <Input
                 type="date"
                 value={format(safeDateValue, "yyyy-MM-dd")}
@@ -941,7 +946,7 @@ const DevotionEditDialog = ({
               />
             </div>
             <div className="space-y-1.5">
-              <Label>Time</Label>
+              <Label>{t.common?.time || 'Time'}</Label>
               <Input
                 type="time"
                 value={localState.selectedTime}
@@ -953,11 +958,11 @@ const DevotionEditDialog = ({
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
+            {t.common?.cancel || 'Cancel'}
           </Button>
           <Button onClick={onSave} disabled={isSaving} className="gap-2">
             {isSaving && <Loader2 className="w-4 h-4 animate-spin" />}
-            Save Changes
+            {t.devotions?.saveChanges || 'Save Changes'}
           </Button>
         </DialogFooter>
       </DialogContent>

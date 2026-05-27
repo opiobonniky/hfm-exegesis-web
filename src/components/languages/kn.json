@@ -1,0 +1,23 @@
+{
+  "sidebar": {
+    "home": "ಮುಖಪುಟ",
+    "bible": "ಬೈಬಲ್ ಓದುಗ",
+    "dailyVerse": "ಇಂದಿನ ವಚನ",
+    "devotions": "ಭಕ್ತಿ",
+    "journal": "ಡೈರಿ",
+    "readingPlans": "ವಾಚನ ಯೋಜನೆಗಳು",
+    "settings": "ಸೆಟ್ಟಿಂಗ್ಗಳು",
+    "dashboard": "ಡ್ಯಾಶ್ಬೋರ್ಡ್",
+    "activity": "ಚಟುವಟಿಕೆ",
+    "logout": "ಸೈನ್ ಔಟ್",
+    "profile": "ಪ್ರೊಫೈಲ್",
+    "mainMenu": "ಮುಖ್ಯ ಮೆನು",
+    "manage": "ನಿರ್ವಹಿಸಿ",
+    "explanations": "ವಚನ ವಿವರಣೆಗಳು",
+    "myActivity": "ನನ್ನ ಚಟುವಟಿಕೆ",
+    "userActivity": "ಬಳಕೆದಾರರ ಚಟುವಟಿಕೆ",
+    "journalPrompts": "ಡೈರಿ ಪ್ರಾಂಪ್ಟ್ಗಳು",
+    "journalTemplates": "ಡೈರಿ ಟೆಂಪ್ಲೇಟ್ಗಳು",
+    "myDashboard": "ನನ್ನ ಡ್ಯಾಶ್ಬೋರ್ಡ್"
+  }
+}

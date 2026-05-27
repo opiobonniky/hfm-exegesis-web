@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/components/languages/languageProvider";
 import { sendPostRequest } from "@/services/api";
 import { getVerseText, setActiveVersion } from "@/utilities/bibleUtils";
 import { BIBLE_VERSIONS } from "@/assets/bibleVersion/json/bibleVersions";
@@ -219,6 +220,7 @@ const ActionChip = ({
 // ── Main component ────────────────────────────────────────────────────────────
 
 export default function UserDailyVerse() {
+  const { t, isRtl } = useLanguage();
   const [dailyVerse, setDailyVerse] = useState<DailyVerse | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -320,7 +322,7 @@ export default function UserDailyVerse() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-background to-muted/30 flex items-center justify-center p-6">
+      <div className="min-h-screen bg-gradient-to-b from-background to-muted/30 flex items-center justify-center p-6" dir={isRtl ? 'rtl' : 'ltr'}>
         <div className="w-full max-w-lg space-y-6">
           <div className="flex items-center justify-center gap-2">
             <Skeleton className="h-10 w-10 rounded-full bg-primary/10" />
@@ -345,20 +347,19 @@ export default function UserDailyVerse() {
 
   if (!dailyVerse) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 p-6 lg:p-8">
+      <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 p-6 lg:p-8" dir={isRtl ? 'rtl' : 'ltr'}>
         <div className="max-w-xl mx-auto text-center">
           {/* Header */}
           <div className="mb-8">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-muted text-muted-foreground text-xs font-medium mb-4">
               <Calendar className="w-3 h-3" />
-              Daily Verse
+              {t.dailyVerse?.dailyVerse || 'Daily Verse'}
             </div>
             <h1 className="text-3xl font-bold font-[family-name:var(--font-heading)] text-foreground mb-2">
-              No verse yet
+              {t.dailyVerse?.noVersesYet || 'No verse yet'}
             </h1>
             <p className="text-muted-foreground text-sm max-w-md mx-auto">
-              Check back later for today's inspirational verse. New verses are
-              added daily.
+              {t.dailyVerse?.pageSubtitle || 'Check back later for today\'s inspirational verse. New verses are added daily.'}
             </p>
           </div>
 
@@ -387,7 +388,7 @@ export default function UserDailyVerse() {
               <RefreshCw
                 className={cn("w-4 h-4", refreshing && "animate-spin")}
               />
-              {refreshing ? "Checking..." : "Check for today's verse"}
+              {refreshing ? t.common?.loading || "Loading..." : (t.dailyVerse?.todaysVerse || "Check for Today's Verse")}
             </Button>
           </div>
         </div>
@@ -396,7 +397,7 @@ export default function UserDailyVerse() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20" dir={isRtl ? 'rtl' : 'ltr'}>
       {/* Floating header */}
       <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b border-border/40">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 py-3">
@@ -425,7 +426,7 @@ export default function UserDailyVerse() {
                 className="h-8 w-8"
                 onClick={() => window.history.back()}
               >
-                <ChevronLeft className="w-4 h-4" />
+                <ChevronLeft className={cn("w-4 h-4", isRtl && "rotate-180")} />
               </Button>
             </div>
           </div>
@@ -495,7 +496,8 @@ export default function UserDailyVerse() {
                 <div className="flex items-center gap-1">
                   <ActionChip
                     icon={Heart}
-                    label={liked ? "Liked" : "Like"}
+                    label={liked ? t.common?.like || "Liked" : t.common?.like || "Like"}
+                    disabled={false}
                     onClick={() => {
                       setLiked(!liked);
                       toast({
@@ -509,7 +511,7 @@ export default function UserDailyVerse() {
                   />
                   <ActionChip
                     icon={Share2}
-                    label="Share"
+                    label={t.common?.share || "Share"}
                     onClick={() => {
                       const text = `${verseText}\n— ${verseReference}`;
                       if (navigator.share) {
@@ -526,7 +528,7 @@ export default function UserDailyVerse() {
                   />
                   <ActionChip
                     icon={Copy}
-                    label="Copy"
+                    label={t.common?.copy || "Copy"}
                     onClick={() => {
                       navigator.clipboard.writeText(
                         `${verseText} — ${verseReference}`,
@@ -550,7 +552,7 @@ export default function UserDailyVerse() {
                 <div className="flex items-center gap-2 mb-4">
                   <BookMarked className="w-5 h-5 text-purple-500" />
                   <span className="text-sm font-bold uppercase tracking-wide text-purple-600 dark:text-purple-400">
-                    Reflection
+                    {t.journal?.gratitude || 'Reflection'}
                   </span>
                 </div>
                 <div className="border-l-2 border-purple-200 pl-4">
@@ -572,7 +574,7 @@ export default function UserDailyVerse() {
                 <div className="flex items-center gap-2 mb-4">
                   <Lightbulb className="w-5 h-5 text-blue-500" />
                   <span className="text-sm font-bold uppercase tracking-wide text-blue-600 dark:text-blue-400">
-                    Explanation
+                    {t.verseExplanations?.explanation || 'Explanation'}
                   </span>
                 </div>
                 <div className="border-l-2 border-blue-200 pl-4">
@@ -594,7 +596,7 @@ export default function UserDailyVerse() {
                 <div className="flex items-center gap-2 mb-4">
                   <GraduationCap className="w-5 h-5 text-emerald-500" />
                   <span className="text-sm font-bold uppercase tracking-wide text-emerald-600 dark:text-emerald-400">
-                    Learn More
+                    {t.dailyVerse?.learnMore || 'Learn More'}
                   </span>
                 </div>
                 <div className="border-l-2 border-emerald-200 pl-4">

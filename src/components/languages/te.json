@@ -1,0 +1,23 @@
+{
+  "sidebar": {
+    "home": "హోమ్",
+    "bible": "బైబిల్ పాఠకుడు",
+    "dailyVerse": "నేటి వచనం",
+    "devotions": "భక్తి",
+    "journal": "డైరీ",
+    "readingPlans": "పఠన ప్రణాళికలు",
+    "settings": "సెట్టింగ్లు",
+    "dashboard": "డ్యాష్బోర్డ్",
+    "activity": "కార్యాచరణ",
+    "logout": "సైన్ అవుట్",
+    "profile": "ప్రొఫైల్",
+    "mainMenu": "ప్రధాన మెనూ",
+    "manage": "నిర్వహించండి",
+    "explanations": "వచన వివరణలు",
+    "myActivity": "నా కార్యాచరణ",
+    "userActivity": "వినియోగదారు కార్యాచరణ",
+    "journalPrompts": "డైరీ ప్రాంప్ట్లు",
+    "journalTemplates": "డైరీ టెంప్లేట్లు",
+    "myDashboard": "నా డ్యాష్బోర్డ్"
+  }
+}

@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Lock, Eye, EyeOff, ArrowRight, Chrome, Check, X } from "lucide-react";
+import { Lock, Eye, EyeOff, ArrowRight, Chrome, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/components/languages/languageProvider";
 import { sendPostRequest } from "@/services/api";
 import { routes } from "@/components/Routes/routes";
 
@@ -14,6 +15,7 @@ const GoogleRegister = () => {
   const location = useLocation();
   const { toast } = useToast();
   const { setUserInfo } = useAuth();
+  const { t, isRtl } = useLanguage();
 
   console.log("Google registration state:", location.state);
 
@@ -39,11 +41,11 @@ const GoogleRegister = () => {
           <div className="w-20 h-20 rounded-full bg-destructive/10 flex items-center justify-center mx-auto mb-4">
             <X className="w-10 h-10 text-destructive" />
           </div>
-          <h2 className="text-2xl font-bold">Invalid Request</h2>
+          <h2 className="text-2xl font-bold">{t.auth?.invalidRequest || 'Invalid Request'}</h2>
           <p className="text-muted-foreground mt-2 mb-6">
-            Please sign in with Google first.
+            {t.auth?.pleaseSignInGoogle || 'Please sign in with Google first.'}
           </p>
-          <Button onClick={() => navigate("/login")}>Go to Login</Button>
+          <Button onClick={() => navigate("/login")}>{t.auth?.goToLogin || 'Go to Login'}</Button>
         </div>
       </div>
     );
@@ -70,19 +72,19 @@ const GoogleRegister = () => {
   };
 
   const getStrengthLabel = () => {
-    if (strength === 0) return "Very Weak";
-    if (strength === 1) return "Very Weak";
-    if (strength === 2) return "Weak";
-    if (strength === 3) return "Fair";
-    if (strength === 4) return "Good";
-    return "Strong";
+    if (strength === 0) return t.auth?.veryWeak || 'Very Weak';
+    if (strength === 1) return t.auth?.veryWeak || 'Very Weak';
+    if (strength === 2) return t.auth?.weak || 'Weak';
+    if (strength === 3) return t.auth?.fair || 'Fair';
+    if (strength === 4) return t.auth?.good || 'Good';
+    return t.auth?.strong || 'Strong';
   };
 
   const handleSubmit = async () => {
     if (!username.trim()) {
       toast({
-        title: "Username Required",
-        description: "Please enter a username.",
+        title: t.auth?.usernameRequired || 'Username Required',
+        description: t.auth?.enterUsername || 'Please enter a username.',
         variant: "destructive",
       });
       return;
@@ -90,8 +92,8 @@ const GoogleRegister = () => {
 
     if (!allReqsMet) {
       toast({
-        title: "Password Too Weak",
-        description: "Please use a stronger password.",
+        title: t.auth?.passwordTooWeak || 'Password Too Weak',
+        description: t.auth?.strongerPassword || 'Please use a stronger password.',
         variant: "destructive",
       });
       return;
@@ -99,8 +101,8 @@ const GoogleRegister = () => {
 
     if (!passwordsMatch) {
       toast({
-        title: "Passwords Don't Match",
-        description: "Please make sure both passwords are the same.",
+        title: t.auth?.passwordsDontMatch || "Passwords Don't Match",
+        description: t.auth?.passwordsMustMatch || 'Please make sure both passwords are the same.',
         variant: "destructive",
       });
       return;
@@ -148,15 +150,15 @@ const GoogleRegister = () => {
         }
       } else {
         toast({
-          title: "Registration Failed",
-          description: returnMessage || "Please try again.",
+          title: t.auth?.registrationFailed || 'Registration Failed',
+          description: returnMessage || (t.auth?.tryAgainMessage || 'Please try again.'),
           variant: "destructive",
         });
       }
     } catch (error) {
       toast({
-        title: "Registration Failed",
-        description: "Something went wrong. Please try again.",
+        title: t.auth?.registrationFailed || 'Registration Failed',
+        description: t.auth?.somethingWentWrong || 'Something went wrong. Please try again.',
         variant: "destructive",
       });
     } finally {
@@ -165,7 +167,7 @@ const GoogleRegister = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-6">
+    <div className="min-h-screen flex items-center justify-center bg-background p-6" dir={isRtl ? 'rtl' : 'ltr'}>
       <div className="w-full max-w-[400px] space-y-6">
         <div className="text-center">
           <div className="w-20 h-20 rounded-full overflow-hidden mx-auto mb-4">
@@ -184,9 +186,9 @@ const GoogleRegister = () => {
               </div>
             )}
           </div>
-          <h1 className="text-2xl font-bold">Welcome, {firstName}!</h1>
+          <h1 className="text-2xl font-bold">{(t.auth?.welcomeUser || 'Welcome, {name}!').replace('{name}', firstName || '')}</h1>
           <p className="text-muted-foreground mt-1">
-            Complete registration to continue
+            {t.auth?.completeRegistrationDesc || 'Complete your registration to get started'}
           </p>
         </div>
 
@@ -206,11 +208,11 @@ const GoogleRegister = () => {
 
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label>Username</Label>
+            <Label>{t.auth?.username || 'Username'}</Label>
             <div className="relative">
               <Input
                 type="text"
-                placeholder="Choose a username"
+                placeholder={t.auth?.chooseUsername || 'Choose a username'}
                 value={username}
                 onChange={(e) =>
                   setUsername(e.target.value.replace(/\s/g, "").toLowerCase())
@@ -219,17 +221,17 @@ const GoogleRegister = () => {
               />
             </div>
             <p className="text-xs text-muted-foreground">
-              This will be your unique identifier
+              {t.auth?.uniqueIdentifier || 'This will be your unique identifier'}
             </p>
           </div>
 
           <div className="space-y-2">
-            <Label>Create Password</Label>
+            <Label>{t.auth?.createPassword || 'Create Password'}</Label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
                 type={showPassword ? "text" : "password"}
-                placeholder="Enter password"
+                placeholder={t.auth?.enterPassword || 'Enter password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="pl-10 pr-10"
@@ -263,19 +265,19 @@ const GoogleRegister = () => {
           )}
 
           <div className="space-y-2">
-            <Label>Confirm Password</Label>
+            <Label>{t.common?.confirmPassword || 'Confirm Password'}</Label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
                 type={showPassword ? "text" : "password"}
-                placeholder="Confirm password"
+                placeholder={t.common?.confirmPassword || 'Confirm Password'}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 className="pl-10"
               />
             </div>
             {confirmPassword.length > 0 && !passwordsMatch && (
-              <p className="text-xs text-red-500">Passwords do not match</p>
+              <p className="text-xs text-red-500">{t.auth?.passwordsDoNotMatch || 'Passwords do not match'}</p>
             )}
           </div>
         </div>
@@ -288,11 +290,11 @@ const GoogleRegister = () => {
           {isLoading ? (
             <>
               <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
-              Creating account...
+              {t.auth?.creatingAccount || 'Creating account...'}
             </>
           ) : (
             <>
-              Continue
+              {t.auth?.continueBtn || 'Continue'}
               <ArrowRight className="w-4 h-4 ml-2" />
             </>
           )}
@@ -303,7 +305,7 @@ const GoogleRegister = () => {
             onClick={() => navigate("/login")}
             className="text-muted-foreground hover:text-primary"
           >
-            Use different account
+            {t.auth?.useDifferentAccount || 'Use different account'}
           </button>
         </p>
       </div>

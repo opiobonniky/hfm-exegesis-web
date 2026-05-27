@@ -1,0 +1,23 @@
+{
+  "sidebar": {
+    "home": "होम",
+    "bible": "बायबल वाचक",
+    "dailyVerse": "आजचा श्लोक",
+    "devotions": "भक्ती",
+    "journal": "डायरी",
+    "readingPlans": "वाचन योजना",
+    "settings": "सेटिंग्ज",
+    "dashboard": "डॅशबोर्ड",
+    "activity": "क्रियाकलाप",
+    "logout": "साइन आउट",
+    "profile": "प्रोफाइल",
+    "mainMenu": "मुख्य मेनू",
+    "manage": "व्यवस्थापित करा",
+    "explanations": "श्लोक स्पष्टीकरणे",
+    "myActivity": "माझा क्रियाकलाप",
+    "userActivity": "वापरकर्ता क्रियाकलाप",
+    "journalPrompts": "डायरी संकेत",
+    "journalTemplates": "डायरी टेम्पलेट",
+    "myDashboard": "माझा डॅशबोर्ड"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "sidebar": {
+    "home": "Nyumbani",
+    "bible": "Msomaji wa Biblia",
+    "dailyVerse": "Aya ya Leo",
+    "devotions": "Ibada",
+    "journal": "Shajara",
+    "readingPlans": "Mipango ya Kusoma",
+    "settings": "Mipangilio",
+    "dashboard": "Dashibodi",
+    "activity": "Shughuli",
+    "logout": "Ondoka",
+    "profile": "Wasifu",
+    "mainMenu": "Menyu Kuu",
+    "manage": "Simamia",
+    "explanations": "Maelezo ya Aya",
+    "myActivity": "Shughuli Zangu",
+    "userActivity": "Shughuli za Mtumiaji",
+    "journalPrompts": "Vichocheo vya Shajara",
+    "journalTemplates": "Violezo vya Shajara",
+    "myDashboard": "Dashibodi Yangu"
+  }
+}

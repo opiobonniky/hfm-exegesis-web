@@ -41,10 +41,12 @@ import {
   getVerseText,
 } from "@/utilities/bibleUtils";
 import { Combobox } from "@/components/ui/combobox";
+import { useLanguage } from "@/components/languages/languageProvider";
+import { cn } from "@/lib/utils";
 
 const TESTAMENTS = [
-  { value: "Old", label: "Old Testament" },
-  { value: "New", label: "New Testament" },
+  { value: "Old", labelKey: "oldTestament" },
+  { value: "New", labelKey: "newTestament" },
 ];
 
 // Helper to check testament
@@ -54,26 +56,38 @@ const getTestamentForBook = (book: string) => {
 };
 
 const CATEGORIES = [
-  { value: "general", label: "General" },
-  { value: "study", label: "Bible Study" },
-  { value: "prayer", label: "Prayer" },
-  { value: "gratitude", label: "Gratitude" },
-  { value: "reflection", label: "Reflection" },
-  { value: "application", label: "Application" },
+  { value: "general", key: "categoryGeneral" },
+  { value: "study", key: "categoryStudy" },
+  { value: "prayer", key: "categoryPrayer" },
+  { value: "gratitude", key: "categoryGratitude" },
+  { value: "reflection", key: "categoryReflection" },
+  { value: "application", key: "categoryApplication" },
 ];
 
 const MOODS = [
-  { value: "happy", label: "Happy", emoji: "😊" },
-  { value: "grateful", label: "Grateful", emoji: "🙏" },
-  { value: "peaceful", label: "Peaceful", emoji: "🕊️" },
-  { value: "thoughtful", label: "Thoughtful", emoji: "🤔" },
-  { value: "motivated", label: "Motivated", emoji: "💪" },
-  { value: "hopeful", label: "Hopeful", emoji: "🌟" },
-  { value: "challenged", label: "Challenged", emoji: "🧗" },
-  { value: "blessed", label: "Blessed", emoji: "✨" },
+  { value: "happy", key: "moodHappy", emoji: "😊" },
+  { value: "grateful", key: "moodGrateful", emoji: "🙏" },
+  { value: "peaceful", key: "moodPeaceful", emoji: "🕊️" },
+  { value: "thoughtful", key: "moodThoughtful", emoji: "🤔" },
+  { value: "motivated", key: "moodMotivated", emoji: "💪" },
+  { value: "hopeful", key: "moodHopeful", emoji: "🌟" },
+  { value: "challenged", key: "moodChallenged", emoji: "🧗" },
+  { value: "blessed", key: "moodBlessed", emoji: "✨" },
 ];
 
 const MOOD_MAP = Object.fromEntries(MOODS.map(m => [m.value, m]));
+
+function getCategoryLabel(t: any, catValue: string): string {
+  const cat = CATEGORIES.find((c) => c.value === catValue);
+  if (!cat) return catValue;
+  return (t.journal as any)?.[cat.key] || catValue;
+}
+
+function getMoodLabel(t: any, moodValue: string): string {
+  const mood = MOODS.find((m) => m.value === moodValue);
+  if (!mood) return moodValue;
+  return (t.journal as any)?.[mood.key] || moodValue;
+}
 
 interface JournalEntry {
   id?: number;
@@ -113,6 +127,7 @@ const JournalEntryPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
+  const { t, isRtl } = useLanguage();
   const isEditing = !!entryId && entryId !== "new";
   const isNewEntry = entryId === "new" || !entryId;
 
@@ -237,8 +252,9 @@ const JournalEntryPage = () => {
       }));
       setShowTemplates(false);
       toast({
-        title: "Template Applied",
-        description: `"${template.name}" prompts added to your entry.`,
+        title: t.journal?.templateApplied || "Template Applied",
+        description: (t.journal?.templateAppliedDesc || '"{name}" prompts added to your entry.')
+          .replace('{name}', template.name),
       });
     }
   };
@@ -266,8 +282,8 @@ const JournalEntryPage = () => {
       }
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to load entry",
+        title: t.common?.error || "Error",
+        description: t.journal?.failedToLoadEntry || "Failed to load entry",
         variant: "destructive",
       });
     } finally {
@@ -278,8 +294,8 @@ const JournalEntryPage = () => {
   const handleSave = async () => {
     if (!entry.content.trim()) {
       toast({
-        title: "Error",
-        description: "Content is required",
+        title: t.common?.error || "Error",
+        description: t.journal?.contentRequired || "Content is required",
         variant: "destructive",
       });
       return;
@@ -301,15 +317,17 @@ const JournalEntryPage = () => {
       const res = await sendPostRequest("journal", endpoint, payload);
       if (res.returnCode === 200) {
         toast({
-          title: "Saved",
-          description: isEditing ? "Entry updated" : "Entry created",
+          title: t.common?.save || "Saved",
+          description: isEditing
+            ? (t.journal?.entryUpdated || "Entry updated")
+            : (t.journal?.entryCreated || "Entry created"),
         });
         navigate(routes.journal.path);
       }
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to save",
+        title: t.common?.error || "Error",
+        description: t.journal?.failedToSave || "Failed to save",
         variant: "destructive",
       });
     } finally {
@@ -364,14 +382,14 @@ const JournalEntryPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" dir={isRtl ? 'rtl' : 'ltr'}>
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background" dir={isRtl ? 'rtl' : 'ltr'}>
       <div className="bg-gradient-to-r from-primary/5 via-accent/5 to-secondary/5 border-b">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
@@ -379,18 +397,20 @@ const JournalEntryPage = () => {
               variant="ghost"
               onClick={() => navigate(routes.journal.path)}
             >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Journal
+              <ArrowLeft className={cn("w-4 h-4", isRtl ? "ml-2" : "mr-2")} />
+              {t.journal?.backToJournal || "Back to Journal"}
             </Button>
             <div className="flex items-center gap-2">
               <Button variant="outline" onClick={() => setShowTemplates(true)}>
-                <Sparkles className="w-4 h-4 mr-2" />
-                Templates
+                <Sparkles className={cn("w-4 h-4", isRtl ? "ml-2" : "mr-2")} />
+                {t.journal?.templates || "Templates"}
               </Button>
               <Button onClick={handleSave} disabled={saving} size="lg" className="gap-2">
                 {saving && <Loader2 className="w-4 h-4 animate-spin" />}
                 <Save className="w-4 h-4" />
-                {saving ? "Saving..." : "Save Entry"}
+                {saving
+                  ? (t.journal?.saving || "Saving...")
+                  : (t.journal?.saveEntry || "Save Entry")}
               </Button>
             </div>
           </div>
@@ -404,14 +424,14 @@ const JournalEntryPage = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <BookOpen className="w-5 h-5" />
-                  Journal Entry
+                  {t.journal?.journalEntry || "Journal Entry"}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label>Title (optional)</Label>
+                  <Label>{t.journal?.titleOptional || "Title (optional)"}</Label>
                   <Input
-                    placeholder="Give your entry a title..."
+                    placeholder={t.journal?.titlePlaceholder || "Give your entry a title..."}
                     value={entry.title}
                     onChange={(e) => updateField("title", e.target.value)}
                   />
@@ -419,14 +439,16 @@ const JournalEntryPage = () => {
 
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <Label>What's on your mind?</Label>
+                    <Label>{t.journal?.whatOnMind || "What's on your mind?"}</Label>
                     <span className="text-xs text-muted-foreground">
                       <FileText className="w-3 h-3 inline mr-1" />
-                      {wordCount} {wordCount === 1 ? "word" : "words"}
+                      {wordCount} {wordCount === 1
+                        ? (t.journal?.word || "word")
+                        : (t.journal?.words || "words")}
                     </span>
                   </div>
                   <Textarea
-                    placeholder="Write your thoughts, feelings, or reflections..."
+                    placeholder={t.journal?.contentPlaceholder || "Write your thoughts, feelings, or reflections..."}
                     value={entry.content}
                     onChange={(e) => updateField("content", e.target.value)}
                     className="min-h-[200px]"
@@ -435,7 +457,7 @@ const JournalEntryPage = () => {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>Category</Label>
+                    <Label>{t.journal?.promptCategory || "Category"}</Label>
                     <Select
                       value={entry.category}
                       onValueChange={(v) => updateField("category", v)}
@@ -446,26 +468,26 @@ const JournalEntryPage = () => {
                       <SelectContent>
                         {CATEGORIES.map((cat) => (
                           <SelectItem key={cat.value} value={cat.value}>
-                            {cat.label}
+                            {getCategoryLabel(t, cat.value)}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label>How are you feeling?</Label>
+                    <Label>{t.journal?.howFeeling || "How are you feeling?"}</Label>
                     <Select
                       value={entry.mood}
                       onValueChange={(v) => updateField("mood", v)}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select mood">
+                        <SelectValue placeholder={t.journal?.selectMood || "Select mood"}>
                           {entry.mood && MOOD_MAP[entry.mood] ? (
                             <span>
-                              {MOOD_MAP[entry.mood].emoji} {MOOD_MAP[entry.mood].label}
+                              {MOOD_MAP[entry.mood].emoji} {getMoodLabel(t, entry.mood)}
                             </span>
                           ) : (
-                            "Select mood"
+                            t.journal?.selectMood || "Select mood"
                           )}
                         </SelectValue>
                       </SelectTrigger>
@@ -474,7 +496,7 @@ const JournalEntryPage = () => {
                           <SelectItem key={mood.value} value={mood.value}>
                             <span className="flex items-center gap-2">
                               <span className="text-lg">{mood.emoji}</span>
-                              <span>{mood.label}</span>
+                              <span>{getMoodLabel(t, mood.value)}</span>
                             </span>
                           </SelectItem>
                         ))}
@@ -489,14 +511,14 @@ const JournalEntryPage = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Lightbulb className="w-5 h-5" />
-                  Reflection Questions
+                  {t.journal?.reflectionQuestions || "Reflection Questions"}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label>What did you learn?</Label>
+                  <Label>{t.journal?.whatDidYouLearn || "What did you learn?"}</Label>
                   <Textarea
-                    placeholder="Key insights or revelations from your reading..."
+                    placeholder={t.journal?.learnPlaceholder || "Key insights or revelations from your reading..."}
                     value={entry.learnings}
                     onChange={(e) => updateField("learnings", e.target.value)}
                     className="min-h-[100px]"
@@ -504,9 +526,9 @@ const JournalEntryPage = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>How will you apply this?</Label>
+                  <Label>{t.journal?.howApply || "How will you apply this?"}</Label>
                   <Textarea
-                    placeholder="How will this change your life or actions?"
+                    placeholder={t.journal?.applyPlaceholder || "How will this change your life or actions?"}
                     value={entry.application}
                     onChange={(e) => updateField("application", e.target.value)}
                     className="min-h-[100px]"
@@ -515,18 +537,18 @@ const JournalEntryPage = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>What are you grateful for?</Label>
+                    <Label>{t.journal?.whatGrateful || "What are you grateful for?"}</Label>
                     <Textarea
-                      placeholder="List your gratitude..."
+                      placeholder={t.journal?.gratPlaceholder || "List your gratitude..."}
                       value={entry.gratitude}
                       onChange={(e) => updateField("gratitude", e.target.value)}
                       className="min-h-[100px]"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Your prayers</Label>
+                    <Label>{t.journal?.yourPrayers || "Your prayers"}</Label>
                     <Textarea
-                      placeholder="Prayers and requests..."
+                      placeholder={t.journal?.prayerPlaceholder || "Prayers and requests..."}
                       value={entry.prayers}
                       onChange={(e) => updateField("prayers", e.target.value)}
                       className="min-h-[100px]"
@@ -542,12 +564,12 @@ const JournalEntryPage = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <BookOpen className="w-5 h-5" />
-                  Link to Scripture
+                  {t.journal?.linkToScripture || "Link to Scripture"}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label>Testament</Label>
+                  <Label>{t.dailyVerse?.testament || "Testament"}</Label>
                   <Select
                     value={testament}
                     onValueChange={(v) => {
@@ -561,13 +583,13 @@ const JournalEntryPage = () => {
                     }}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select testament" />
+                      <SelectValue placeholder={t.journal?.selectTestament || "Select testament"} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">All Books</SelectItem>
-                      {TESTAMENTS.map((t) => (
-                        <SelectItem key={t.value} value={t.value}>
-                          {t.label}
+                      <SelectItem value="all">{t.journal?.allBooks || "All Books"}</SelectItem>
+                      {TESTAMENTS.map((tst) => (
+                        <SelectItem key={tst.value} value={tst.value}>
+                          {(t.dailyVerse as any)?.[tst.labelKey] || tst.labelKey}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -575,7 +597,7 @@ const JournalEntryPage = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Book</Label>
+                  <Label>{t.dailyVerse?.book || "Book"}</Label>
                   <Select
                     value={entry.bookName}
                     onValueChange={(v) => {
@@ -589,7 +611,7 @@ const JournalEntryPage = () => {
                     disabled={!testament}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select book" />
+                      <SelectValue placeholder={t.dailyVerse?.selectBook || "Select book"} />
                     </SelectTrigger>
                     <SelectContent>
                       {books.map((book) => (
@@ -604,7 +626,7 @@ const JournalEntryPage = () => {
                 {entry.bookName && chapters.length > 0 && (
                   <>
                     <div className="space-y-2">
-                      <Label>Chapter</Label>
+                      <Label>{t.dailyVerse?.chapter || "Chapter"}</Label>
                       <Select
                         value={entry.chapter}
                         onValueChange={(v) => {
@@ -616,12 +638,12 @@ const JournalEntryPage = () => {
                         }}
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="Select chapter" />
+                          <SelectValue placeholder={t.dailyVerse?.selectChapter || "Select chapter"} />
                         </SelectTrigger>
                         <SelectContent>
                           {chapters.map((ch) => (
                             <SelectItem key={ch} value={String(ch)}>
-                              Chapter {ch}
+                              {`${t.dailyVerse?.chapter || "Chapter"} ${ch}`}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -630,7 +652,7 @@ const JournalEntryPage = () => {
 
                     {entry.chapter && verses.length > 0 && (
                       <div className="space-y-2">
-                        <Label>Verse</Label>
+                        <Label>{t.dailyVerse?.verse || "Verse"}</Label>
                         <Select
                           value={entry.verseNumber}
                           onValueChange={(v) =>
@@ -638,12 +660,12 @@ const JournalEntryPage = () => {
                           }
                         >
                           <SelectTrigger>
-                            <SelectValue placeholder="Select verse" />
+                            <SelectValue placeholder={t.dailyVerse?.selectVerse || "Select verse"} />
                           </SelectTrigger>
                           <SelectContent>
                             {verses.map((v) => (
                               <SelectItem key={v} value={String(v)}>
-                                Verse {v}
+                                {`${t.dailyVerse?.verse || "Verse"} ${v}`}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -653,7 +675,7 @@ const JournalEntryPage = () => {
 
                     {verseText && (
                       <div className="space-y-2">
-                        <Label>Verse Preview</Label>
+                        <Label>{t.journal?.versePreview || "Verse Preview"}</Label>
                         <div className="bg-muted/50 rounded-lg p-3 text-sm font-serif leading-relaxed border border-border/50">
                           <p className="italic">"{verseText}"</p>
                           <p className="text-xs text-muted-foreground mt-2">
@@ -683,7 +705,7 @@ const JournalEntryPage = () => {
                     }}
                     disabled={!entry.bookName || !entry.chapter}
                   >
-                    Open in Bible Reader
+                    {t.journal?.openBibleReader || "Open in Bible Reader"}
                   </Button>
                 )}
               </CardContent>
@@ -693,21 +715,21 @@ const JournalEntryPage = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Tag className="w-5 h-5" />
-                  Additional
+                  {t.journal?.additional || "Additional"}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label>Tags</Label>
+                  <Label>{t.journal?.tags || "Tags"}</Label>
                   <Input
-                    placeholder="comma, separated, tags"
+                    placeholder={t.journal?.tagsPlaceholder || "comma, separated, tags"}
                     value={entry.tags}
                     onChange={(e) => updateField("tags", e.target.value)}
                   />
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <Label>Add to favorites</Label>
+                  <Label>{t.journal?.addToFavorites || "Add to favorites"}</Label>
                   <Switch
                     checked={entry.isFavorite}
                     onCheckedChange={(v) => updateField("isFavorite", v)}
@@ -722,7 +744,7 @@ const JournalEntryPage = () => {
       <Dialog open={showTemplates} onOpenChange={setShowTemplates}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Choose a Template</DialogTitle>
+            <DialogTitle>{t.journal?.chooseTemplate || "Choose a Template"}</DialogTitle>
           </DialogHeader>
           <div className="grid gap-3 max-h-[60vh] overflow-y-auto">
             {templates.length > 0 ? (
@@ -739,7 +761,7 @@ const JournalEntryPage = () => {
                   <div className="text-left">
                     <p className="font-semibold">{template.name}</p>
                     <p className="text-xs text-muted-foreground">
-                      {template.prompts.length} prompts
+                      {(t.journal?.promptsLabel || "{n} prompts").replace("{n}", String(template.prompts.length))}
                     </p>
                   </div>
                 </Button>
@@ -752,9 +774,9 @@ const JournalEntryPage = () => {
                   onClick={() => applyTemplate("study")}
                 >
                   <div className="text-left">
-                    <p className="font-semibold">📖 Bible Study</p>
+                    <p className="font-semibold">📖 {t.journal?.bibleStudy || "Bible Study"}</p>
                     <p className="text-xs text-muted-foreground">
-                      Learnings + Application format
+                      {t.journal?.bibleStudyDesc || "Learnings + Application format"}
                     </p>
                   </div>
                 </Button>
@@ -764,9 +786,9 @@ const JournalEntryPage = () => {
                   onClick={() => applyTemplate("prayer")}
                 >
                   <div className="text-left">
-                    <p className="font-semibold">🙏 Prayer Journal</p>
+                    <p className="font-semibold">🙏 {t.journal?.prayerJournal || "Prayer Journal"}</p>
                     <p className="text-xs text-muted-foreground">
-                      Prayers + Gratitude format
+                      {t.journal?.prayerJournalDesc || "Prayers + Gratitude format"}
                     </p>
                   </div>
                 </Button>
@@ -776,9 +798,9 @@ const JournalEntryPage = () => {
                   onClick={() => applyTemplate("gratitude")}
                 >
                   <div className="text-left">
-                    <p className="font-semibold">✨ Gratitude</p>
+                    <p className="font-semibold">✨ {t.journal?.gratitudeTitle || "Gratitude"}</p>
                     <p className="text-xs text-muted-foreground">
-                      Focus on gratitude
+                      {t.journal?.gratitudeDesc || "Focus on gratitude"}
                     </p>
                   </div>
                 </Button>
@@ -788,9 +810,9 @@ const JournalEntryPage = () => {
                   onClick={() => applyTemplate("reflection")}
                 >
                   <div className="text-left">
-                    <p className="font-semibold">💭 Reflection</p>
+                    <p className="font-semibold">💭 {t.journal?.reflectionTitle || "Reflection"}</p>
                     <p className="text-xs text-muted-foreground">
-                      What, So What, Now What
+                      {t.journal?.reflectionDesc || "What, So What, Now What"}
                     </p>
                   </div>
                 </Button>

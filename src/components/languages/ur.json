@@ -1,0 +1,23 @@
+{
+  "sidebar": {
+    "home": "ہوم",
+    "bible": "بائبل پڑھیں",
+    "dailyVerse": "آج کی آیت",
+    "devotions": "عبادت",
+    "journal": "جرنل",
+    "readingPlans": "مطالعہ کے منصوبے",
+    "settings": "ترتیبات",
+    "dashboard": "ڈیش بورڈ",
+    "activity": "سرگرمی",
+    "logout": "سائن آؤٹ",
+    "profile": "پروفائل",
+    "mainMenu": "مرکزی مینیو",
+    "manage": "انتظام کریں",
+    "explanations": "آیت کی تشریحات",
+    "myActivity": "میری سرگرمی",
+    "userActivity": "صارف کی سرگرمی",
+    "journalPrompts": "جرنل پرامپٹس",
+    "journalTemplates": "جرنل سانچے",
+    "myDashboard": "میرا ڈیش بورڈ"
+  }
+}

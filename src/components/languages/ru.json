@@ -1,0 +1,23 @@
+{
+  "sidebar": {
+    "home": "Главная",
+    "bible": "Чтение Библии",
+    "dailyVerse": "Стих дня",
+    "devotions": "Размышления",
+    "journal": "Дневник",
+    "readingPlans": "Планы чтения",
+    "settings": "Настройки",
+    "dashboard": "Панель управления",
+    "activity": "Активность",
+    "logout": "Выйти",
+    "profile": "Профиль",
+    "mainMenu": "Главное меню",
+    "manage": "Управление",
+    "explanations": "Объяснения стихов",
+    "myActivity": "Моя активность",
+    "userActivity": "Активность пользователей",
+    "journalPrompts": "Подсказки для дневника",
+    "journalTemplates": "Шаблоны дневника",
+    "myDashboard": "Моя панель"
+  }
+}

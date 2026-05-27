@@ -1,0 +1,23 @@
+{
+  "sidebar": {
+    "home": "ഹോം",
+    "bible": "ബൈബിൾ വായനക്കാരൻ",
+    "dailyVerse": "ഇന്നത്തെ വാക്യം",
+    "devotions": "ഭക്തി",
+    "journal": "ജേണൽ",
+    "readingPlans": "വായന പദ്ധതികൾ",
+    "settings": "ക്രമീകരണങ്ങൾ",
+    "dashboard": "ഡാഷ്ബോർഡ്",
+    "activity": "പ്രവർത്തനം",
+    "logout": "സൈൻ ഔട്ട്",
+    "profile": "പ്രൊഫൈൽ",
+    "mainMenu": "പ്രധാന മെനു",
+    "manage": "നിയന്ത്രിക്കുക",
+    "explanations": "വാക്യ വിശദീകരണങ്ങൾ",
+    "myActivity": "എന്റെ പ്രവർത്തനം",
+    "userActivity": "ഉപയോക്തൃ പ്രവർത്തനം",
+    "journalPrompts": "ജേണൽ പ്രോംപ്റ്റുകൾ",
+    "journalTemplates": "ജേണൽ ടെംപ്ലേറ്റുകൾ",
+    "myDashboard": "എന്റെ ഡാഷ്ബോർഡ്"
+  }
+}

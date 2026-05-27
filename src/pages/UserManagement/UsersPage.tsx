@@ -79,6 +79,7 @@ import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { sendPostRequest } from "@/services/api";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/components/languages/languageProvider";
 
 // ─────────────────────────────────────────────
 // Types
@@ -112,21 +113,6 @@ interface PagedResponse {
 // ─────────────────────────────────────────────
 // Constants
 // ─────────────────────────────────────────────
-const ROLE_FILTERS = [
-  { value: "all", label: "All Roles" },
-  { value: "admin", label: "Admin" },
-  { value: "user", label: "User" },
-];
-const STATUS_FILTERS = [
-  { value: "all", label: "All Status" },
-  { value: "active", label: "Active" },
-  { value: "inactive", label: "Inactive" },
-];
-const VERIFIED_FILTERS = [
-  { value: "all", label: "All" },
-  { value: "verified", label: "Verified" },
-  { value: "unverified", label: "Unverified" },
-];
 const PAGE_SIZE_OPTIONS = [5, 10, 20, 50];
 const NONE = "__NONE__";
 const DEBOUNCE_MS = 400;
@@ -237,6 +223,7 @@ interface VerifiedCellProps {
   toggling: boolean;
   disabled?: boolean;
   compact?: boolean;
+  t: any;
 }
 
 const VerifiedCell = ({
@@ -245,6 +232,7 @@ const VerifiedCell = ({
   toggling,
   disabled,
   compact,
+  t,
 }: VerifiedCellProps) => (
   <TooltipProvider delayDuration={200}>
     <Tooltip>
@@ -268,16 +256,16 @@ const VerifiedCell = ({
           ) : (
             <BadgeX className="w-3.5 h-3.5" />
           )}
-          {!compact && (user.isVerified ? "Verified" : "Unverified")}
-          {compact && (user.isVerified ? "Verified" : "Unverified")}
+          {!compact && (user.isVerified ? t.userManagement.verified : t.userManagement.unverified)}
+          {compact && (user.isVerified ? t.userManagement.verified : t.userManagement.unverified)}
         </button>
       </TooltipTrigger>
       <TooltipContent side="top" className="text-xs">
         {disabled
-          ? "You cannot verify your own account"
+          ? t.userManagement.cannotVerifySelf
           : user.isVerified
-            ? "Click to revoke email verification"
-            : "Click to manually verify this email"}
+            ? t.userManagement.clickToRevoke
+            : t.userManagement.clickToVerify}
       </TooltipContent>
     </Tooltip>
   </TooltipProvider>
@@ -294,6 +282,7 @@ interface UserCardProps {
   onToggleStatus: (u: User) => void;
   onEdit: (u: User) => void;
   onDelete: (u: User) => void;
+  t: any;
 }
 
 const UserCard = ({
@@ -304,6 +293,7 @@ const UserCard = ({
   onToggleStatus,
   onEdit,
   onDelete,
+  t,
 }: UserCardProps) => {
   const isSelf = user.username === currentUsername;
   return (
@@ -374,6 +364,7 @@ const UserCard = ({
           onToggle={onToggleVerified}
           toggling={toggling}
           disabled={isSelf}
+          t={t}
         />
         {/* Active toggle inline */}
         <button
@@ -393,7 +384,7 @@ const UserCard = ({
               user.status ? "bg-emerald-500" : "bg-muted-foreground",
             )}
           />
-          {user.status ? "Active" : "Inactive"}
+          {user.status ? t.common.active : t.common.inactive}
         </button>
       </div>
 
@@ -407,7 +398,7 @@ const UserCard = ({
           onClick={() => onEdit(user)}
         >
           <Edit2 className="w-3.5 h-3.5" />
-          Edit
+          {t.userManagement.edit}
         </Button>
         <Button
           variant="ghost"
@@ -417,7 +408,7 @@ const UserCard = ({
           onClick={() => onDelete(user)}
         >
           <Trash2 className="w-3.5 h-3.5" />
-          Delete
+          {t.userManagement.delete}
         </Button>
       </div>
     </div>
@@ -434,6 +425,7 @@ interface PaginationProps {
   totalPages: number;
   onPage: (p: number) => void;
   onPageSize: (s: number) => void;
+  t: any;
 }
 
 const PaginationBar = ({
@@ -443,6 +435,7 @@ const PaginationBar = ({
   totalPages,
   onPage,
   onPageSize,
+  t,
 }: PaginationProps) => {
   const from = totalCount === 0 ? 0 : (page - 1) * pageSize + 1;
   const to = Math.min(page * pageSize, totalCount);
@@ -466,7 +459,7 @@ const PaginationBar = ({
       <div className="flex items-center justify-between sm:justify-start gap-4">
         <p className="text-xs text-muted-foreground">
           {totalCount === 0 ? (
-            "No results"
+            t.common.noResults
           ) : (
             <>
               <span className="font-medium text-foreground">
@@ -478,7 +471,7 @@ const PaginationBar = ({
           )}
         </p>
         <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-          <span className="hidden sm:inline">Rows</span>
+          <span className="hidden sm:inline">{t.userManagement.rowsLabel}</span>
           <Select
             value={String(pageSize)}
             onValueChange={(v) => {
@@ -508,7 +501,7 @@ const PaginationBar = ({
           className="h-7 w-7"
           onClick={() => onPage(1)}
           disabled={page === 1}
-          aria-label="First page"
+          aria-label={t.userManagement.tableUser}
         >
           <ChevronsLeft className="w-3 h-3" />
         </Button>
@@ -518,7 +511,7 @@ const PaginationBar = ({
           className="h-7 w-7"
           onClick={() => onPage(page - 1)}
           disabled={page === 1}
-          aria-label="Previous page"
+          aria-label={t.userManagement.clearSearch}
         >
           <ChevronLeft className="w-3 h-3" />
         </Button>
@@ -555,7 +548,7 @@ const PaginationBar = ({
           className="h-7 w-7"
           onClick={() => onPage(page + 1)}
           disabled={page >= totalPages}
-          aria-label="Next page"
+          aria-label={t.userManagement.clearAllFilters}
         >
           <ChevronRight className="w-3 h-3" />
         </Button>
@@ -565,7 +558,7 @@ const PaginationBar = ({
           className="h-7 w-7"
           onClick={() => onPage(totalPages)}
           disabled={page >= totalPages}
-          aria-label="Last page"
+          aria-label={t.userManagement.clearAll}
         >
           <ChevronsRight className="w-3 h-3" />
         </Button>
@@ -580,6 +573,7 @@ const PaginationBar = ({
 const UsersPage = () => {
   const { toast } = useToast();
   const { userInfo } = useAuth();
+  const { t, isRtl } = useLanguage();
   const currentUsername = userInfo?.username;
 
   const [users, setUsers] = useState<User[]>([]);
@@ -673,8 +667,8 @@ const UsersPage = () => {
           );
         } else {
           toast({
-            title: "Failed to load users",
-            description: res?.returnMessage ?? "Unknown error",
+            title: t.userManagement.failedToLoadUsers,
+            description: res?.returnMessage ?? t.userManagement.unknownError,
             variant: "destructive",
           });
           setUsers([]);
@@ -683,8 +677,8 @@ const UsersPage = () => {
         }
       } catch (e: any) {
         toast({
-          title: "Network error",
-          description: e?.message ?? "Unknown error",
+          title: t.userManagement.networkError,
+          description: e?.message ?? t.userManagement.unknownError,
           variant: "destructive",
         });
         setUsers([]);
@@ -694,7 +688,7 @@ const UsersPage = () => {
         setLoading(false);
       }
     },
-    [toast],
+    [toast, t],
   );
 
   useEffect(() => {
@@ -745,39 +739,43 @@ const UsersPage = () => {
   };
 
   // ── Stats ──────────────────────────────────────────────────────────────────
-  const totalAdmins = users.filter((u) => u.roleName === "admin").length;
   const totalActive = users.filter((u) => !!u.status).length;
   const totalMembers = users.filter((u) => u.roleName === "user").length;
   const totalVerified = users.filter((u) => !!u.isVerified).length;
+  const tTotalUsers = t.dashboard.totalUsers;
+  const tAdmins = t.dashboard.admins;
+  const tMembers = t.dashboard.members;
+  const tActive = t.common.active;
+  const totalAdmins = users.filter((u) => u.roleName === "admin").length;
 
   const stats = useMemo(
     () => [
       {
-        label: "Total Users",
+        label: tTotalUsers,
         value: totalCount,
         icon: Users,
         color: "bg-primary/10 text-primary",
       },
       {
-        label: "Admins",
+        label: tAdmins,
         value: totalAdmins,
         icon: ShieldCheck,
         color: "bg-violet-500/10 text-violet-600",
       },
       {
-        label: "Members",
+        label: tMembers,
         value: totalMembers,
         icon: Shield,
         color: "bg-sky-500/10 text-sky-600",
       },
       {
-        label: "Active",
+        label: tActive,
         value: totalActive,
         icon: UserCheck,
         color: "bg-emerald-500/10 text-emerald-600",
       },
     ],
-    [totalCount, totalAdmins, totalMembers, totalActive],
+    [totalCount, totalAdmins, totalMembers, totalActive, tTotalUsers, tAdmins, tMembers, tActive],
   );
 
   // ── Client-side filters ────────────────────────────────────────────────────
@@ -804,7 +802,7 @@ const UsersPage = () => {
 
   const confirmDelete = async () => {
     if (!deleteTarget || deleteConfirmText !== deleteTarget.username) {
-      toast({ title: "Username does not match", variant: "destructive" });
+      toast({ title: t.userManagement.usernameMismatch, variant: "destructive" });
       return;
     }
     setDeleting(true);
@@ -814,22 +812,22 @@ const UsersPage = () => {
       });
       if (res?.returnCode === 200) {
         toast({
-          title: "User deleted",
-          description: `${deleteTarget.firstName} ${deleteTarget.lastName} has been removed.`,
+          title: t.userManagement.userDeleted,
+          description: t.userManagement.userDeletedDesc.replace('{firstName}', deleteTarget.firstName).replace('{lastName}', deleteTarget.lastName),
         });
         setDeleteTarget(null);
         loadUsers(searchQuery, page, pageSize);
       } else {
         toast({
-          title: "Delete failed",
-          description: res?.returnMessage ?? "Unknown error",
+          title: t.userManagement.deleteFailed,
+          description: res?.returnMessage ?? t.userManagement.unknownError,
           variant: "destructive",
         });
       }
     } catch (e: any) {
       toast({
-        title: "Network error",
-        description: e?.message ?? "Unknown error",
+        title: t.userManagement.networkError,
+        description: e?.message ?? t.userManagement.unknownError,
         variant: "destructive",
       });
     } finally {
@@ -861,7 +859,7 @@ const UsersPage = () => {
     if (!editTarget) return;
     if (!safeTrim(editForm.firstName) || !safeTrim(editForm.lastName)) {
       toast({
-        title: "First and last name are required",
+        title: t.userManagement.nameRequired,
         variant: "destructive",
       });
       return;
@@ -874,22 +872,21 @@ const UsersPage = () => {
       });
       if (res?.returnCode === 200) {
         toast({
-          title: "User updated",
-          description: `${editForm.firstName} ${editForm.lastName} has been updated.`,
+          title: t.userManagement.userUpdated,
+          description: t.userManagement.userUpdatedDesc.replace('{firstName}', editForm.firstName ?? '').replace('{lastName}', editForm.lastName ?? ''),
         });
         setEditTarget(null);
         loadUsers(searchQuery, page, pageSize);
       } else {
         toast({
-          title: "Update failed",
-          description: res?.returnMessage ?? "Unknown error",
+          title: t.userManagement.updateFailed,
+          description: res?.returnMessage ?? t.userManagement.unknownError,
           variant: "destructive",
         });
       }
     } catch (e: any) {
-      toast({
-        title: "Network error",
-        description: e?.message ?? "Unknown error",
+      toast({                      title: t.userManagement.networkError,
+        description: e?.message ?? t.userManagement.unknownError,
         variant: "destructive",
       });
     } finally {
@@ -912,8 +909,10 @@ const UsersPage = () => {
       });
       if (res?.returnCode === 200) {
         toast({
-          title: user.status ? "User deactivated" : "User activated",
-          description: `${user.firstName} ${user.lastName} is now ${user.status ? "inactive" : "active"}.`,
+          title: user.status ? t.userManagement.userDeactivated : t.userManagement.userActivated,
+          description: (user.status ? t.userManagement.statusInactiveDesc : t.userManagement.statusActiveDesc)
+            .replace('{firstName}', user.firstName)
+            .replace('{lastName}', user.lastName),
         });
       } else {
         setUsers((prev) =>
@@ -922,8 +921,8 @@ const UsersPage = () => {
           ),
         );
         toast({
-          title: "Failed to update status",
-          description: res?.returnMessage ?? "Unknown error",
+          title: t.userManagement.failedToUpdateStatus,
+          description: res?.returnMessage ?? t.userManagement.unknownError,
           variant: "destructive",
         });
       }
@@ -934,8 +933,8 @@ const UsersPage = () => {
         ),
       );
       toast({
-        title: "Network error",
-        description: e?.message ?? "Unknown error",
+        title: t.userManagement.networkError,
+        description: e?.message ?? t.userManagement.unknownError,
         variant: "destructive",
       });
     }
@@ -958,10 +957,10 @@ const UsersPage = () => {
       );
       if (res?.returnCode === 200) {
         toast({
-          title: next ? "Email verified" : "Verification revoked",
-          description: next
-            ? `${user.firstName} ${user.lastName}'s email has been manually verified.`
-            : `${user.firstName} ${user.lastName}'s verification has been revoked.`,
+          title: next ? t.userManagement.emailVerifiedTitle : t.userManagement.verificationRevokedTitle,
+          description: (next ? t.userManagement.emailVerifiedDesc : t.userManagement.verificationRevokedDesc)
+            .replace('{firstName}', user.firstName)
+            .replace('{lastName}', user.lastName),
         });
       } else {
         setUsers((prev) =>
@@ -972,8 +971,8 @@ const UsersPage = () => {
           ),
         );
         toast({
-          title: "Failed to update verification",
-          description: res?.returnMessage ?? "Unknown error",
+          title: t.userManagement.failedToUpdateVerification,
+          description: res?.returnMessage ?? t.userManagement.unknownError,
           variant: "destructive",
         });
       }
@@ -986,8 +985,8 @@ const UsersPage = () => {
         ),
       );
       toast({
-        title: "Network error",
-        description: e?.message ?? "Unknown error",
+        title: t.userManagement.networkError,
+        description: e?.message ?? t.userManagement.unknownError,
         variant: "destructive",
       });
     } finally {
@@ -1003,7 +1002,7 @@ const UsersPage = () => {
   // Render
   // ─────────────────────────────────────────────
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6" dir={isRtl ? 'rtl' : 'ltr'}>
       {/* ── Header ─────────────────────────────────────────────────────────── */}
       <div className="opacity-0 fade-up">
         <div className="flex items-center gap-3">
@@ -1012,10 +1011,10 @@ const UsersPage = () => {
           </div>
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold font-[family-name:var(--font-heading)]">
-              User Management
+              {t.userManagement.title}
             </h1>
             <p className="text-sm text-muted-foreground">
-              Manage accounts, roles, and access
+              {t.userManagement.subtitle}
             </p>
           </div>
         </div>
@@ -1024,8 +1023,8 @@ const UsersPage = () => {
       {/* ── Stats ──────────────────────────────────────────────────────────── */}
       {/* 2-col on mobile, 4-col on lg+ */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 opacity-0 fade-up stagger-1">
-        {stats.map((s) => (
-          <Card key={s.label} className="border-border/50">
+        {stats.map((s, idx) => (
+          <Card key={idx} className="border-border/50">
             <CardContent className="p-4 sm:p-5">
               {loading ? (
                 <div className="space-y-2">
@@ -1066,7 +1065,7 @@ const UsersPage = () => {
             <div>
               <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
                 <Users className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
-                All Users
+                {t.userManagement.allUsers}
               </CardTitle>
               <CardDescription className="text-xs sm:text-sm mt-0.5">
                 {loading ? (
@@ -1076,13 +1075,13 @@ const UsersPage = () => {
                     <span className="font-medium text-foreground">
                       {totalCount}
                     </span>{" "}
-                    user{totalCount !== 1 ? "s" : ""}
+                    {totalCount === 1 ? t.userManagement.user : t.userManagement.users}
                     {" · "}
                     <span className="text-emerald-600 font-medium">
-                      {totalVerified} verified
+                      {totalVerified} {t.dashboard.verifiedLabel}
                     </span>
                     {searchQuery && (
-                      <span className="ml-1.5 text-primary font-medium">
+                      <span className={cn("text-primary font-medium", isRtl ? "mr-1.5" : "ml-1.5")}>
                         · "{searchQuery}"
                       </span>
                     )}
@@ -1103,7 +1102,7 @@ const UsersPage = () => {
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 )}
                 <Input
-                  placeholder="Search name, email or username…"
+                  placeholder={t.userManagement.searchUsers}
                   value={searchInput}
                   onChange={handleSearchChange}
                   className="pl-9 pr-9 h-9 text-sm"
@@ -1113,7 +1112,7 @@ const UsersPage = () => {
                     type="button"
                     onClick={clearSearch}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                    aria-label="Clear search"
+                    aria-label={t.userManagement.clearSearch}
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -1129,7 +1128,7 @@ const UsersPage = () => {
                   filtersOpen && "bg-muted",
                 )}
                 onClick={() => setFiltersOpen((v) => !v)}
-                aria-label="Toggle filters"
+                aria-label={t.userManagement.toggleFilters}
               >
                 <SlidersHorizontal className="w-4 h-4" />
                 {activeFilterCount > 0 && (
@@ -1147,11 +1146,9 @@ const UsersPage = () => {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {ROLE_FILTERS.map((r) => (
-                      <SelectItem key={r.value} value={r.value}>
-                        {r.label}
-                      </SelectItem>
-                    ))}
+                  <SelectItem value="all">{t.userManagement.filterAllRoles}</SelectItem>
+                    <SelectItem value="admin">{t.common.admin}</SelectItem>
+                    <SelectItem value="user">{t.common.user}</SelectItem>
                   </SelectContent>
                 </Select>
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
@@ -1159,11 +1156,9 @@ const UsersPage = () => {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {STATUS_FILTERS.map((s) => (
-                      <SelectItem key={s.value} value={s.value}>
-                        {s.label}
-                      </SelectItem>
-                    ))}
+                    <SelectItem value="all">{t.userManagement.filterAllStatus}</SelectItem>
+                    <SelectItem value="active">{t.common.active}</SelectItem>
+                    <SelectItem value="inactive">{t.common.inactive}</SelectItem>
                   </SelectContent>
                 </Select>
                 <Select
@@ -1175,79 +1170,57 @@ const UsersPage = () => {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {VERIFIED_FILTERS.map((v) => (
-                      <SelectItem key={v.value} value={v.value}>
-                        {v.label}
-                      </SelectItem>
-                    ))}
+                    <SelectItem value="all">{t.userManagement.filterAll}</SelectItem>
+                    <SelectItem value="verified">{t.userManagement.filterVerified}</SelectItem>
+                    <SelectItem value="unverified">{t.userManagement.filterUnverified}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
-            </div>
-
-            {/* Mobile collapsible filter panel */}
-            {filtersOpen && (
-              <div className="sm:hidden grid grid-cols-3 gap-2 pt-1">
-                <Select value={roleFilter} onValueChange={setRoleFilter}>
-                  <SelectTrigger className="h-8 text-xs">
-                    <SelectValue placeholder="Role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {ROLE_FILTERS.map((r) => (
-                      <SelectItem
-                        key={r.value}
-                        value={r.value}
-                        className="text-xs"
-                      >
-                        {r.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="h-8 text-xs">
-                    <SelectValue placeholder="Status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {STATUS_FILTERS.map((s) => (
-                      <SelectItem
-                        key={s.value}
-                        value={s.value}
-                        className="text-xs"
-                      >
-                        {s.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Select
-                  value={verifiedFilter}
-                  onValueChange={setVerifiedFilter}
-                >
-                  <SelectTrigger className="h-8 text-xs">
-                    <SelectValue placeholder="Verified" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {VERIFIED_FILTERS.map((v) => (
-                      <SelectItem
-                        key={v.value}
-                        value={v.value}
-                        className="text-xs"
-                      >
-                        {v.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
+            </div>              {/* Mobile collapsible filter panel */}
+              {filtersOpen && (
+                <div className="sm:hidden grid grid-cols-3 gap-2 pt-1">
+                  <Select value={roleFilter} onValueChange={setRoleFilter}>
+                    <SelectTrigger className="h-8 text-xs">
+                      <SelectValue placeholder={t.userManagement.role} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all" className="text-xs">{t.userManagement.filterAllRoles}</SelectItem>
+                      <SelectItem value="admin" className="text-xs">{t.common.admin}</SelectItem>
+                      <SelectItem value="user" className="text-xs">{t.common.user}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Select value={statusFilter} onValueChange={setStatusFilter}>
+                    <SelectTrigger className="h-8 text-xs">
+                      <SelectValue placeholder={t.common.status} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all" className="text-xs">{t.userManagement.filterAllStatus}</SelectItem>
+                      <SelectItem value="active" className="text-xs">{t.common.active}</SelectItem>
+                      <SelectItem value="inactive" className="text-xs">{t.common.inactive}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Select
+                    value={verifiedFilter}
+                    onValueChange={setVerifiedFilter}
+                  >
+                    <SelectTrigger className="h-8 text-xs">
+                      <SelectValue placeholder={t.userManagement.tableVerified} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all" className="text-xs">{t.userManagement.filterAll}</SelectItem>
+                      <SelectItem value="verified" className="text-xs">{t.userManagement.filterVerified}</SelectItem>
+                      <SelectItem value="unverified" className="text-xs">{t.userManagement.filterUnverified}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
 
             {/* Active filter chips */}
             {activeFilterCount > 0 && (
               <div className="flex items-center gap-1.5 flex-wrap">
                 {roleFilter !== "all" && (
                   <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-muted text-xs border border-border/50">
-                    Role: {roleFilter}
+                    {t.userManagement.role}: {roleFilter}
                     <button
                       onClick={() => setRoleFilter("all")}
                       className="text-muted-foreground hover:text-foreground ml-0.5"
@@ -1282,7 +1255,7 @@ const UsersPage = () => {
                   onClick={clearAllFilters}
                   className="text-xs text-primary hover:underline ml-1"
                 >
-                  Clear all
+                  {t.userManagement.clearAll}
                 </button>
               </div>
             )}
@@ -1301,11 +1274,11 @@ const UsersPage = () => {
             ) : filtered.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 text-center px-4">
                 <UserX className="w-10 h-10 mb-3 text-muted-foreground/40" />
-                <p className="font-medium text-sm">No users found</p>
+                <p className="font-medium text-sm">{t.userManagement.noUsersFound}</p>
                 <p className="text-xs text-muted-foreground mt-1">
                   {searchQuery
-                    ? `No results for "${searchQuery}".`
-                    : "Try adjusting your filters."}
+                    ? t.userManagement.noResultsFor.replace('{query}', searchQuery)
+                    : t.userManagement.tryAdjustingFilters}
                 </p>
                 {(searchQuery || activeFilterCount > 0) && (
                   <Button
@@ -1314,7 +1287,7 @@ const UsersPage = () => {
                     className="mt-3 text-primary text-xs"
                     onClick={clearAllFilters}
                   >
-                    Clear all filters
+                    {t.userManagement.clearAllFilters}
                   </Button>
                 )}
               </div>
@@ -1330,6 +1303,7 @@ const UsersPage = () => {
                     onToggleStatus={toggleStatus}
                     onEdit={openEdit}
                     onDelete={openDelete}
+                    t={t}
                   />
                 ))}
               </div>
@@ -1341,13 +1315,13 @@ const UsersPage = () => {
             <Table>
               <TableHeader>
                 <TableRow className="bg-muted/30 hover:bg-muted/30">
-                  <TableHead className="w-[200px]">User</TableHead>
-                  <TableHead>Contact</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Joined</TableHead>
-                  <TableHead>Verified</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead className="w-[200px]">{t.userManagement.tableUser}</TableHead>
+                  <TableHead>{t.userManagement.tableContact}</TableHead>
+                  <TableHead>{t.userManagement.tableRole}</TableHead>
+                  <TableHead>{t.userManagement.tableJoined}</TableHead>
+                  <TableHead>{t.userManagement.tableVerified}</TableHead>
+                  <TableHead>{t.userManagement.tableStatus}</TableHead>
+                  <TableHead className="text-right">{t.userManagement.tableActions}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -1360,11 +1334,11 @@ const UsersPage = () => {
                     <TableCell colSpan={7}>
                       <div className="flex flex-col items-center justify-center py-16 text-center">
                         <UserX className="w-12 h-12 mb-3 text-muted-foreground/40" />
-                        <p className="font-medium">No users found</p>
+                        <p className="font-medium">{t.userManagement.noUsersFound}</p>
                         <p className="text-sm text-muted-foreground mt-1">
                           {searchQuery
-                            ? `No results for "${searchQuery}".`
-                            : "Try adjusting your filters."}
+                            ? t.userManagement.noResultsFor.replace('{query}', searchQuery)
+                            : t.userManagement.tryAdjustingFilters}
                         </p>
                         {(searchQuery || activeFilterCount > 0) && (
                           <Button
@@ -1373,7 +1347,7 @@ const UsersPage = () => {
                             className="mt-3 text-primary"
                             onClick={clearAllFilters}
                           >
-                            Clear all filters
+                            {t.userManagement.clearAllFilters}
                           </Button>
                         )}
                       </div>
@@ -1464,6 +1438,7 @@ const UsersPage = () => {
                           onToggle={toggleVerified}
                           toggling={togglingVerified.has(user.username)}
                           disabled={user.username === currentUsername}
+                          t={t}
                         />
                       </TableCell>
 
@@ -1484,7 +1459,7 @@ const UsersPage = () => {
                                 : "text-muted-foreground",
                             )}
                           >
-                            {user.status ? "Active" : "Inactive"}
+                            {user.status ? t.common.active : t.common.inactive}
                           </span>
                         </div>
                       </TableCell>
@@ -1528,6 +1503,7 @@ const UsersPage = () => {
               totalPages={totalPages}
               onPage={handlePageChange}
               onPageSize={handlePageSizeChange}
+              t={t}
             />
           )}
         </CardContent>
@@ -1541,10 +1517,10 @@ const UsersPage = () => {
         <DialogContent className="sm:max-w-md mx-4 sm:mx-auto rounded-xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-destructive">
-              <AlertTriangle className="w-5 h-5" /> Delete User
+              <AlertTriangle className="w-5 h-5" /> {t.userManagement.deleteUserTitle}
             </DialogTitle>
             <DialogDescription>
-              This permanently removes the account and all associated activity.
+              {t.userManagement.deleteUserDesc}
             </DialogDescription>
           </DialogHeader>
           {deleteTarget && (
@@ -1574,14 +1550,9 @@ const UsersPage = () => {
               </div>
               <div className="space-y-2">
                 <Label className="text-sm">
-                  Type{" "}
-                  <span className="font-mono font-bold">
-                    {deleteTarget.username}
-                  </span>{" "}
-                  to confirm
+                  {t.userManagement.typeToConfirm.replace('{username}', deleteTarget.username)}
                 </Label>
-                <Input
-                  placeholder="Type username here…"
+                <Input                      placeholder={t.userManagement?.confirmDeletePlaceholder || 'Type username here…'}
                   value={deleteConfirmText}
                   onChange={(e) => setDeleteConfirmText(e.target.value)}
                   className={cn(
@@ -1601,7 +1572,7 @@ const UsersPage = () => {
               disabled={deleting}
               className="w-full sm:w-auto"
             >
-              Cancel
+              {t.common.cancel}
             </Button>
             <Button
               variant="destructive"
@@ -1613,11 +1584,11 @@ const UsersPage = () => {
             >
               {deleting ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin" /> Deleting…
+                  <Loader2 className="w-4 h-4 animate-spin" /> {t.userManagement.deleting}
                 </>
               ) : (
                 <>
-                  <Trash2 className="w-4 h-4" /> Delete User
+                  <Trash2 className="w-4 h-4" /> {t.userManagement.deleteUserTitle}
                 </>
               )}
             </Button>
@@ -1633,17 +1604,17 @@ const UsersPage = () => {
         <DialogContent className="sm:max-w-lg mx-4 sm:mx-auto max-h-[90dvh] overflow-y-auto rounded-xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Edit2 className="w-5 h-5 text-primary" /> Edit User
+              <Edit2 className="w-5 h-5 text-primary" /> {t.userManagement.editUserTitle}
             </DialogTitle>
             <DialogDescription>
-              Update user details. Username cannot be changed.
+              {t.userManagement.editUserDesc}
             </DialogDescription>
           </DialogHeader>
           {editTarget && (
             <div className="space-y-4 py-2">
               <div className="space-y-1.5">
                 <Label className="text-xs text-muted-foreground">
-                  Username (read-only)
+                  {t.userManagement.usernameReadOnly}
                 </Label>
                 <Input
                   value={editTarget.username}
@@ -1654,7 +1625,7 @@ const UsersPage = () => {
               <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <Label>
-                    First Name <span className="text-destructive">*</span>
+                    {t.userManagement.firstName} <span className="text-destructive">*</span>
                   </Label>
                   <Input
                     value={editForm.firstName ?? ""}
@@ -1665,7 +1636,7 @@ const UsersPage = () => {
                 </div>
                 <div className="space-y-1.5">
                   <Label>
-                    Last Name <span className="text-destructive">*</span>
+                    {t.userManagement.lastName} <span className="text-destructive">*</span>
                   </Label>
                   <Input
                     value={editForm.lastName ?? ""}
@@ -1676,19 +1647,19 @@ const UsersPage = () => {
                 </div>
               </div>
               <div className="space-y-1.5">
-                <Label>Middle Name</Label>
+                <Label>{t.userManagement.middleName}</Label>
                 <Input
                   value={editForm.middleName ?? ""}
                   onChange={(e) =>
                     updateField("middleName", e.target.value as any)
                   }
-                  placeholder="Optional"
+                  placeholder={t.userManagement.optional}
                 />
               </div>
               <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <Label className="text-xs text-muted-foreground">
-                    Email (read-only)
+                    {t.userManagement.emailReadOnly}
                   </Label>
                   <Input
                     type="email"
@@ -1698,7 +1669,7 @@ const UsersPage = () => {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label>Phone</Label>
+                  <Label>{t.userManagement.phone}</Label>
                   <Input
                     value={editForm.phoneNumber ?? ""}
                     onChange={(e) =>
@@ -1709,7 +1680,7 @@ const UsersPage = () => {
               </div>
               <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
                 <div className="space-y-1.5">
-                  <Label>Gender</Label>
+                  <Label>{t.userManagement.gender}</Label>
                   <Select
                     value={(editForm.gender ?? NONE) as string}
                     onValueChange={(v) =>
@@ -1720,20 +1691,20 @@ const UsersPage = () => {
                     }
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select" />
+                      <SelectValue placeholder={t.userManagement.select} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value={NONE}>— Not set —</SelectItem>
-                      {["Male", "Female", "Not Specified"].map((g) => (
+                      <SelectItem value={NONE}>{t.userManagement.notSet}</SelectItem>
+                      {(["Male", "Female", "Not Specified"] as const).map((g) => (
                         <SelectItem key={g} value={g}>
-                          {g}
+                          {g === "Male" ? t.userManagement.genderMale : g === "Female" ? t.userManagement.genderFemale : t.userManagement.genderNotSpecified}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-1.5">
-                  <Label>Marital Status</Label>
+                  <Label>{t.userManagement.maritalStatus}</Label>
                   <Select
                     value={(editForm.maritalStatus ?? NONE) as string}
                     onValueChange={(v) =>
@@ -1744,13 +1715,13 @@ const UsersPage = () => {
                     }
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select" />
+                      <SelectValue placeholder={t.userManagement.select} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value={NONE}>— Not set —</SelectItem>
-                      {["Single", "Married", "Divorced", "Widowed"].map((m) => (
+                      <SelectItem value={NONE}>{t.userManagement.notSet}</SelectItem>
+                      {(["Single", "Married", "Divorced", "Widowed"] as const).map((m) => (
                         <SelectItem key={m} value={m}>
-                          {m}
+                          {m === "Single" ? t.userManagement.maritalSingle : m === "Married" ? t.userManagement.maritalMarried : m === "Divorced" ? t.userManagement.maritalDivorced : t.userManagement.maritalWidowed}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -1758,7 +1729,7 @@ const UsersPage = () => {
                 </div>
               </div>
               <div className="space-y-1.5">
-                <Label>Role</Label>
+                <Label>{t.userManagement.role}</Label>
                 <Select
                   value={(editForm.roleName ?? "user") as string}
                   onValueChange={(v) => {
@@ -1767,19 +1738,19 @@ const UsersPage = () => {
                   }}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select role" />
+                    <SelectValue placeholder={t.userManagement.select} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="admin">Admin</SelectItem>
-                    <SelectItem value="user">User</SelectItem>
+                    <SelectItem value="admin">{t.common.admin}</SelectItem>
+                    <SelectItem value="user">{t.common.user}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="flex items-center justify-between p-3 rounded-lg border border-border/40 bg-muted/20">
                 <div>
-                  <p className="text-sm font-medium">Account Active</p>
+                  <p className="text-sm font-medium">{t.userManagement.accountActive}</p>
                   <p className="text-xs text-muted-foreground">
-                    Allow this user to log in
+                    {t.userManagement.allowLogin}
                   </p>
                 </div>
                 <Switch
@@ -1796,7 +1767,7 @@ const UsersPage = () => {
               disabled={saving}
               className="w-full sm:w-auto"
             >
-              Cancel
+              {t.common.cancel}
             </Button>
             <Button
               onClick={confirmEdit}
@@ -1809,11 +1780,11 @@ const UsersPage = () => {
             >
               {saving ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin" /> Saving…
+                  <Loader2 className="w-4 h-4 animate-spin" /> {t.userManagement.saving}
                 </>
               ) : (
                 <>
-                  <Save className="w-4 h-4" /> Save Changes
+                  <Save className="w-4 h-4" /> {t.userManagement.saveChanges}
                 </>
               )}
             </Button>

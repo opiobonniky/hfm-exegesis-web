@@ -1,0 +1,23 @@
+{
+  "sidebar": {
+    "home": "गृहपृष्ठ",
+    "bible": "बाइबल पाठक",
+    "dailyVerse": "आजको पद",
+    "devotions": "भक्ति",
+    "journal": "डायरी",
+    "readingPlans": "पढ्ने योजनाहरू",
+    "settings": "सेटिङ्हरू",
+    "dashboard": "ड्यासबोर्ड",
+    "activity": "गतिविधि",
+    "logout": "साइन आउट",
+    "profile": "प्रोफाइल",
+    "mainMenu": "मुख्य मेनु",
+    "manage": "व्यवस्थापन गर्नुहोस्",
+    "explanations": "पद व्याख्याहरू",
+    "myActivity": "मेरो गतिविधि",
+    "userActivity": "प्रयोगकर्ता गतिविधि",
+    "journalPrompts": "डायरी संकेतहरू",
+    "journalTemplates": "डायरी टेम्पलेटहरू",
+    "myDashboard": "मेरो ड्यासबोर्ड"
+  }
+}

@@ -9,14 +9,15 @@ import {
   EyeOff,
   ChevronRight,
   ChevronLeft,
-  CheckCircle2,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import logoImage from "@/assets/logos/exegesis_bg_rm.png";
+import { useLanguage } from "@/components/languages/languageProvider";
 import { sendPostRequest, ApiError } from "@/services/api";
 import { motion, AnimatePresence } from "framer-motion";
 
 const Register = () => {
+  const { t, isRtl } = useLanguage();
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     firstName: "",
@@ -46,26 +47,26 @@ const Register = () => {
     const value = formData[name as keyof typeof formData] || "";
     switch (name) {
       case "firstName":
-        return !value.trim() ? "First name is required" : "";
+        return !value.trim() ? (t.auth?.firstNameRequired || 'First name is required') : "";
       case "lastName":
-        return !value.trim() ? "Last name is required" : "";
+        return !value.trim() ? (t.auth?.lastNameRequired || 'Last name is required') : "";
       case "email":
-        if (!value.trim()) return "Email is required";
-        if (!/\S+@\S+\.\S+/.test(value)) return "Invalid email address";
+        if (!value.trim()) return (t.auth?.emailRequired || 'Email is required');
+        if (!/\S+@\S+\.\S+/.test(value)) return (t.auth?.invalidEmail || 'Invalid email address');
         return "";
       case "phoneNumber":
-        return !value.trim() ? "Phone number is required" : "";
+        return !value.trim() ? (t.auth?.phoneRequired || 'Phone number is required') : "";
       case "username":
-        if (!value.trim()) return "Username is required";
-        if (value.length < 3) return "Username too short";
+        if (!value.trim()) return (t.auth?.usernameRequired || 'Username is required');
+        if (value.length < 3) return (t.auth?.usernameTooShort || 'Username too short');
         return "";
       case "password":
-        if (!value) return "Password is required";
-        if (value.length < 8) return "Minimum 8 characters";
+        if (!value) return (t.auth?.passwordRequired || 'Password is required');
+        if (value.length < 8) return (t.auth?.minCharacters || 'Minimum 8 characters');
         return "";
       case "confirmPassword":
-        if (!value) return "Confirm your password";
-        if (value !== formData.password) return "Passwords do not match";
+        if (!value) return (t.auth?.confirmPasswordRequired || 'Confirm your password');
+        if (value !== formData.password) return (t.auth?.passwordsDoNotMatch || 'Passwords do not match');
         return "";
       default:
         return "";
@@ -115,8 +116,8 @@ const Register = () => {
 
     if (hasErrors) {
       toast({
-        title: "Check details",
-        description: "Please correct the errors before continuing.",
+        title: t.common?.error ? 'Check Details' : 'Check Details',
+        description: 'Please correct the errors before continuing.',
         variant: "destructive",
       });
       return;
@@ -162,8 +163,8 @@ const Register = () => {
 
       if (returnCode === 200) {
         toast({
-          title: "Registration Successful",
-          description: "Please check your email to verify your account.",
+          title: t.auth?.registrationSuccessful || 'Registration Successful',
+          description: t.auth?.checkEmailVerify || 'Please check your email to verify your account.',
         });
         setTimeout(() => {
           navigate(
@@ -172,16 +173,16 @@ const Register = () => {
         }, 3000);
       } else if (returnCode === 401) {
         toast({
-          title: "Registration Failed",
+          title: t.auth?.registrationFailed || 'Registration Failed',
           description:
             returnMessage ||
-            "Email already exists. Please use a different email or login.",
+            (t.auth?.emailExists || 'Email already exists. Please use a different email or login.'),
           variant: "destructive",
         });
       } else {
         toast({
-          title: "Registration Failed",
-          description: returnMessage || "Please try again.",
+          title: t.auth?.registrationFailed || 'Registration Failed',
+          description: returnMessage || (t.auth?.tryAgainMessage || 'Please try again.'),
           variant: "destructive",
         });
       }
@@ -193,7 +194,7 @@ const Register = () => {
             ? error.message
             : "An unexpected error occurred.";
       toast({
-        title: "Registration Failed",
+        title: t.auth?.registrationFailed || 'Registration Failed',
         description: message,
         variant: "destructive",
       });
@@ -203,7 +204,7 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen flex bg-slate-50 overflow-hidden">
+    <div className="min-h-screen flex bg-slate-50 overflow-hidden" dir={isRtl ? 'rtl' : 'ltr'}>
       {/* ── Left Panel (Desktop Only) ── */}
       <div className="hidden lg:flex lg:w-[45%] relative overflow-hidden bg-slate-900">
         <div className="absolute inset-0 pointer-events-none">
@@ -256,19 +257,18 @@ const Register = () => {
             <div className="space-y-8 max-w-lg">
               <div className="space-y-4">
                 <h2 className="text-5xl font-black text-white font-[family-name:var(--font-heading)] tracking-tighter leading-none">
-                  Join the <span className="text-primary italic">Exegesis</span>{" "}
-                  Family.
+                  {t.auth?.joinExegesisFamily || 'Join the Exegesis Family.'}
                 </h2>
                 <div className="h-2 w-24 bg-primary mx-auto rounded-full shadow-[0_0_20px_rgba(57,98,132,0.5)]" />
               </div>
 
               <blockquote className="text-2xl text-slate-300 font-medium italic leading-relaxed px-4">
-                "Your word is a lamp for my feet, a light on my path."
+                "{t.auth?.lampToMyFeet || 'Your word is a lamp for my feet, a light on my path.'}"
               </blockquote>
 
               <div className="flex flex-col items-center gap-2">
                 <p className="text-slate-500 font-black uppercase tracking-[0.3em] text-xs">
-                  Psalm 119:105
+                  {t.auth?.psalmReference || 'Psalm 119:105'}
                 </p>
                 <div className="flex gap-1.5">
                   {[1, 2].map((i) => (
@@ -300,7 +300,7 @@ const Register = () => {
             ))}
           </div>
           <p className="text-slate-300 text-xs font-bold">
-            10,000+ Believers Joined
+            {t.auth?.tenThousandJoined || '10,000+ Believers Joined'}
           </p>
         </motion.div>
       </div>
@@ -313,7 +313,7 @@ const Register = () => {
         </div>
 
         <div className="w-full max-w-[440px] z-10">
-          <div className="bg-white rounded-[2.5rem] shadow-[0_40px_100px_-20px_rgba(0,0,0,0.08)] border border-slate-100 p-8 lg:p-10 space-y-8 relative overflow-hidden">
+          <div className="bg-white rounded-[2.5rem] shadow-[0_40px_100px_-20px_rgba(0,0,0,0.08)] border border-slate-100 p-8 lg:p-10 space-y-6 relative overflow-hidden">
             {/* Tab Navigation */}
             <div className="flex bg-slate-50 p-1.5 rounded-2xl border border-slate-100 mb-2">
               <button
@@ -322,7 +322,7 @@ const Register = () => {
                 className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-[14px] text-xs font-black uppercase tracking-widest transition-all duration-500 ${step === 1 ? "bg-white text-primary shadow-sm border border-slate-100" : "text-slate-400 hover:text-slate-600"}`}
               >
                 <User className="w-3.5 h-3.5" />
-                Personal
+                {(t.auth?.personalInfo || t.common?.name || 'Personal')}
               </button>
               <button
                 type="button"
@@ -330,17 +330,17 @@ const Register = () => {
                 className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-[14px] text-xs font-black uppercase tracking-widest transition-all duration-500 ${step === 2 ? "bg-white text-primary shadow-sm border border-slate-100" : "text-slate-400 hover:text-slate-600"}`}
               >
                 <Lock className="w-3.5 h-3.5" />
-                Security
+                {(t.auth?.security || t.common?.password || 'Security')}
               </button>
             </div>
 
             {/* Header */}
             <div className="space-y-2 text-center">
               <h1 className="text-2xl font-black tracking-tight text-slate-900 font-[family-name:var(--font-heading)] leading-none">
-                {step === 1 ? "Your Profile" : "Secure Account"}
+                {step === 1 ? (t.auth?.yourProfile || 'Your Profile') : (t.auth?.secureAccount || 'Secure Account')}
               </h1>
               <p className="text-slate-500 text-sm font-medium">
-                {step === 1 ? "Tell us who you are." : "Protect your journey."}
+                {step === 1 ? (t.auth?.tellUsWhoYouAre || 'Tell us who you are.') : (t.auth?.protectYourJourney || 'Protect your journey.')}
               </p>
             </div>
 
@@ -360,7 +360,7 @@ const Register = () => {
                       <div className="grid grid-cols-2 gap-3">
                         <FloatingInput
                           id="firstName"
-                          label="First Name"
+                          label={t.auth?.firstName || 'First Name'}
                           icon={User}
                           value={formData.firstName}
                           onChange={handleChange}
@@ -373,7 +373,7 @@ const Register = () => {
                         />
                         <FloatingInput
                           id="lastName"
-                          label="Last Name"
+                          label={t.auth?.lastName || 'Last Name'}
                           icon={User}
                           value={formData.lastName}
                           onChange={handleChange}
@@ -388,7 +388,7 @@ const Register = () => {
 
                       <FloatingInput
                         id="email"
-                        label="Email Address"
+                        label={t.common?.email || 'Email Address'}
                         icon={Mail}
                         type="email"
                         value={formData.email}
@@ -401,7 +401,7 @@ const Register = () => {
                       />
                       <FloatingInput
                         id="phoneNumber"
-                        label="Phone Number"
+                        label={t.auth?.phoneNumber || 'Phone Number'}
                         icon={Phone}
                         type="tel"
                         value={formData.phoneNumber}
@@ -426,7 +426,7 @@ const Register = () => {
                     >
                       <FloatingInput
                         id="username"
-                        label="Username"
+                        label={t.auth?.username || 'Username'}
                         icon={User}
                         value={formData.username}
                         onChange={handleChange}
@@ -439,7 +439,7 @@ const Register = () => {
                       />
                       <FloatingInput
                         id="password"
-                        label="Password"
+                        label={t.common?.password || 'Password'}
                         icon={Lock}
                         type={showPassword ? "text" : "password"}
                         value={formData.password}
@@ -464,7 +464,7 @@ const Register = () => {
                         >
                           <div className="flex justify-between items-center">
                             <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-                              Security Strength
+                              {t.auth?.securityStrength || 'Security Strength'}
                             </span>
                             <span
                               className={`text-[10px] font-black uppercase tracking-widest ${
@@ -476,10 +476,10 @@ const Register = () => {
                               }`}
                             >
                               {formData.password.length < 6
-                                ? "Weak"
+                                ? (t.auth?.weak || 'Weak')
                                 : formData.password.length < 10
-                                  ? "Good"
-                                  : "Strong"}
+                                  ? (t.auth?.good || 'Good')
+                                  : (t.auth?.strong || 'Strong')}
                             </span>
                           </div>
                           <div className="h-1 w-full bg-slate-100 rounded-full overflow-hidden flex gap-0.5">
@@ -500,7 +500,7 @@ const Register = () => {
 
                       <FloatingInput
                         id="confirmPassword"
-                        label="Confirm Password"
+                        label={t.common?.confirmPassword || 'Confirm Password'}
                         icon={Lock}
                         type={showPassword ? "text" : "password"}
                         value={formData.confirmPassword}
@@ -526,7 +526,7 @@ const Register = () => {
                     className="flex-1 h-14 bg-slate-50 text-slate-600 rounded-2xl font-bold text-[15px] border border-slate-100 hover:bg-slate-100 transition-all flex items-center justify-center gap-2"
                   >
                     <ChevronLeft className="w-5 h-5" />
-                    Back
+                    {t.auth?.backBtn || t.common?.back || 'Back'}
                   </button>
                 )}
 
@@ -535,7 +535,7 @@ const Register = () => {
                     type="submit"
                     className="flex-[2] h-14 bg-primary text-white rounded-2xl font-bold text-[15px] shadow-lg shadow-primary/20 hover:shadow-xl hover:translate-y-[-2px] active:translate-y-[0px] transition-all flex items-center justify-center gap-2"
                   >
-                    Continue
+                    {t.auth?.continueBtn || 'Continue'}
                     <ChevronRight className="w-5 h-5" />
                   </button>
                 ) : (
@@ -547,7 +547,7 @@ const Register = () => {
                     {isLoading ? (
                       <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                     ) : (
-                      "Create Account"
+                      t.auth?.createAccount || 'Create Account'
                     )}
                   </button>
                 )}
@@ -557,30 +557,30 @@ const Register = () => {
             {/* Footer */}
             <div className="text-center space-y-6">
               <p className="text-slate-500 text-sm font-medium">
-                Already have an account?{" "}
+                {t.auth?.alreadyHaveAccount || 'Already have an account?'}{" "}
                 <Link
                   to="/login"
                   className="text-primary font-black hover:underline transition-all"
                 >
-                  Sign in
+                  {t.auth?.signIn || 'Sign in'}
                 </Link>
               </p>
 
               <div className="pt-6 border-t border-slate-50">
                 <p className="text-[10px] text-slate-400 leading-relaxed font-medium">
-                  By joining, you agree to the{" "}
+                  {t.auth?.byJoiningTerms || 'By joining, you agree to the'}{" "}
                   <Link
                     to="/terms"
                     className="text-slate-600 underline font-bold"
                   >
-                    Terms
+                    {t.auth?.terms || 'Terms'}
                   </Link>{" "}
                   &{" "}
                   <Link
                     to="/privacy"
                     className="text-slate-600 underline font-bold"
                   >
-                    Privacy Policy
+                    {t.auth?.privacyPolicy || 'Privacy Policy'}
                   </Link>
                 </p>
               </div>

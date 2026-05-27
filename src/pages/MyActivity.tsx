@@ -33,9 +33,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/components/languages/languageProvider";
 import { sendPostRequest } from "@/services/api";
 import { HIGHLIGHT_COLORS } from "@/hooks/useBible";
 import { getVerseText } from "@/utilities/bibleUtils";
+import { cn } from "@/lib/utils";
 
 const formatTimeAgo = (dateString: string | null | undefined): string => {
   if (!dateString) return "";
@@ -116,6 +118,7 @@ const BOOKS = [
 ];
 
 export default function MyActivity() {
+  const { t, isRtl } = useLanguage();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<TabType>("highlights");
@@ -436,11 +439,11 @@ export default function MyActivity() {
   const filteredHistory = readHistory.filter(filterByBook);
 
   return (
-    <div className="container mx-auto py-6 px-4 max-w-6xl">
+    <div className="container mx-auto py-6 px-4 max-w-6xl" dir={isRtl ? 'rtl' : 'ltr'}>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold">My Activity</h1>
+        <h1 className="text-2xl font-bold">{t.sidebar?.myActivity || 'My Activity'}</h1>
         <p className="text-muted-foreground">
-          View and manage your highlights, notes, favorites, and reading history
+          {t.userDashboard?.quickAccess || 'View and manage your highlights, notes, favorites, and reading history'}
         </p>
       </div>
 
@@ -448,7 +451,7 @@ export default function MyActivity() {
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="Search by verse or note..."
+            placeholder={t.journal?.searchEntries || 'Search by verse or note...'}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-9"
@@ -459,7 +462,7 @@ export default function MyActivity() {
             <SelectValue placeholder="Filter by book" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Books</SelectItem>
+            <SelectItem value="all">{t.common?.all || 'All Books'}</SelectItem>
             {BOOKS.map((book) => (
               <SelectItem key={book} value={book}>
                 {book}
@@ -473,28 +476,28 @@ export default function MyActivity() {
         <TabsList className="grid grid-cols-4 w-full">
           <TabsTrigger value="highlights" className="gap-2">
             <Highlighter className="w-4 h-4" />
-            <span className="hidden sm:inline">Highlights</span>
+            <span className="hidden sm:inline">{t.userDashboard?.highlights || 'Highlights'}</span>
             <Badge variant="secondary" className="ml-1 text-xs">
               {highlights.length}
             </Badge>
           </TabsTrigger>
           <TabsTrigger value="notes" className="gap-2">
             <FileText className="w-4 h-4" />
-            <span className="hidden sm:inline">Notes</span>
+            <span className="hidden sm:inline">{t.userDashboard?.notes || 'Notes'}</span>
             <Badge variant="secondary" className="ml-1 text-xs">
               {notes.length}
             </Badge>
           </TabsTrigger>
           <TabsTrigger value="favorites" className="gap-2">
             <Star className="w-4 h-4" />
-            <span className="hidden sm:inline">Favorites</span>
+            <span className="hidden sm:inline">{t.userDashboard?.favorites || 'Favorites'}</span>
             <Badge variant="secondary" className="ml-1 text-xs">
               {favorites.length}
             </Badge>
           </TabsTrigger>
           <TabsTrigger value="history" className="gap-2">
             <History className="w-4 h-4" />
-            <span className="hidden sm:inline">History</span>
+            <span className="hidden sm:inline">{t.userDashboard?.history || 'History'}</span>
             <Badge variant="secondary" className="ml-1 text-xs">
               {readHistory.length}
             </Badge>
@@ -503,11 +506,10 @@ export default function MyActivity() {
 
         <TabsContent value="highlights" className="mt-6">
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Highlighter className="w-5 h-5" />
-                Highlights
-              </CardTitle>
+            <CardHeader>                <CardTitle className="flex items-center gap-2">
+                  <Highlighter className="w-5 h-5" />
+                  {t.userDashboard?.highlights || 'Highlights'}
+                </CardTitle>
             </CardHeader>
             <CardContent>
               {loading ? (
@@ -519,8 +521,8 @@ export default function MyActivity() {
               ) : filteredHighlights.length === 0 ? (
                 <div className="text-center py-12 text-muted-foreground">
                   <Highlighter className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>No highlights yet</p>
-                  <p className="text-sm">Highlight verses in the Bible Reader to see them here</p>
+                  <p>{t.journal?.noEntriesYet || 'No highlights yet'}</p>
+                  <p className="text-sm">{t.bibleReader?.highlight || 'Highlight verses in the Bible Reader to see them here'}</p>
                 </div>
               ) : (
                 <div className="grid gap-3">
@@ -533,11 +535,10 @@ export default function MyActivity() {
 
         <TabsContent value="notes" className="mt-6">
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FileText className="w-5 h-5" />
-                Notes
-              </CardTitle>
+            <CardHeader>                <CardTitle className="flex items-center gap-2">
+                  <FileText className="w-5 h-5" />
+                  {t.userDashboard?.notes || 'Notes'}
+                </CardTitle>
             </CardHeader>
             <CardContent>
               {loading ? (
@@ -549,8 +550,8 @@ export default function MyActivity() {
               ) : filteredNotes.length === 0 ? (
                 <div className="text-center py-12 text-muted-foreground">
                   <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>No notes yet</p>
-                  <p className="text-sm">Add notes to verses in the Bible Reader to see them here</p>
+                  <p>{t.journal?.noEntriesYet || 'No notes yet'}</p>
+                  <p className="text-sm">{t.bibleReader?.addNote || 'Add notes to verses in the Bible Reader to see them here'}</p>
                 </div>
               ) : (
                 <div className="grid gap-3">
@@ -563,11 +564,10 @@ export default function MyActivity() {
 
         <TabsContent value="favorites" className="mt-6">
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Star className="w-5 h-5" />
-                Favorites
-              </CardTitle>
+            <CardHeader>                <CardTitle className="flex items-center gap-2">
+                  <Star className="w-5 h-5" />
+                  {t.userDashboard?.favorites || 'Favorites'}
+                </CardTitle>
             </CardHeader>
             <CardContent>
               {loading ? (
@@ -579,8 +579,8 @@ export default function MyActivity() {
               ) : filteredFavorites.length === 0 ? (
                 <div className="text-center py-12 text-muted-foreground">
                   <Star className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>No favorites yet</p>
-                  <p className="text-sm">Favorite verses in the Bible Reader to see them here</p>
+                  <p>{t.journal?.favorites || 'No favorites yet'}</p>
+                  <p className="text-sm">{t.bibleReader?.bookmark || 'Favorite verses in the Bible Reader to see them here'}</p>
                 </div>
               ) : (
                 <div className="grid gap-3">
@@ -597,7 +597,7 @@ export default function MyActivity() {
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
                   <History className="w-5 h-5" />
-                  Reading History
+                  {t.userDashboard?.history || 'Reading History'}
                 </CardTitle>
                 {readHistory.length > 0 && (
                   <Button
@@ -627,8 +627,8 @@ export default function MyActivity() {
               ) : filteredHistory.length === 0 ? (
                 <div className="text-center py-12 text-muted-foreground">
                   <History className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>No reading history yet</p>
-                  <p className="text-sm">Read verses in the Bible Reader to see them here</p>
+                  <p>{t.userDashboard?.history || 'No reading history yet'}</p>
+                  <p className="text-sm">{t.bibleReader?.title || 'Read verses in the Bible Reader to see them here'}</p>
                 </div>
               ) : (
                 <div className="grid gap-3">

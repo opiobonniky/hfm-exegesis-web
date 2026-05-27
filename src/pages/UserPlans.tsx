@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
-  BookOpen, ChevronRight, Loader2, Play, Calendar, CheckCircle2, 
-  Flame, Target, TrendingUp, LayoutList, Trophy, Trash2, Eye
+  BookOpen, ChevronRight, Loader2, Play, CheckCircle2, 
+  Flame, TrendingUp, LayoutList, Trophy, Trash2, Eye
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/components/languages/languageProvider";
 import { sendPostRequest } from "@/services/api";
 import { routes } from "@/components/Routes/routes";
 
@@ -33,36 +34,30 @@ interface UserPlan {
   streak: number;
 }
 
-const CATEGORIES = [
-  { value: "all", label: "All" },
-  { value: "intro", label: "Introductory" },
-  { value: "whole-bible", label: "Whole Bible" },
-  { value: "nt", label: "New Testament" },
-  { value: "ot", label: "Old Testament" },
-  { value: "book", label: "Book by Book" },
-  { value: "topical", label: "Topical" },
-];
-
-const DIFFICULTY_LABEL: Record<string, string> = {
-  easy: "Beginner",
-  medium: "Intermediate", 
-  hard: "Advanced",
+const CATEGORY_KEYS: Record<string, string> = {
+  all: "catAll",
+  intro: "catIntro",
+  "whole-bible": "catWholeBible",
+  nt: "catNT",
+  ot: "catOT",
+  "book": "catBookByBook",
+  topical: "catTopical",
 };
 
-const DIFFICULTY_COLORS = {
-  easy: "bg-emerald-100 text-emerald-700 border-emerald-200",
-  medium: "bg-amber-100 text-amber-700 border-amber-200",
-  hard: "bg-red-100 text-red-700 border-red-200",
+const DIFFICULTY_KEYS: Record<string, string> = {
+  easy: "diffBeginner",
+  medium: "diffIntermediate", 
+  hard: "diffAdvanced",
 };
 
-const catLabel = (cat: string) => CATEGORIES.find(c => c.value === cat)?.label ?? cat;
+const catLabel = (t: any, cat: string) => t.readingPlan?.[CATEGORY_KEYS[cat]] || cat;
 
 export default function UserPlans() {
+  const { t, isRtl } = useLanguage();
   const [activeTab, setActiveTab] = useState<"progress" | "browse">("progress");
   const [allPlans, setAllPlans] = useState<ReadingPlan[]>([]);
   const [userPlans, setUserPlans] = useState<UserPlan[]>([]);
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
   const [catFilter, setCatFilter] = useState("all");
   const [removeModal, setRemoveModal] = useState<string | null>(null);
   const { toast } = useToast();
@@ -95,27 +90,18 @@ export default function UserPlans() {
     }
   };
 
-  const onRefresh = async () => {
-    setRefreshing(true);
-    try {
-      await loadData();
-    } finally {
-      setRefreshing(false);
-    }
-  };
-
   const startPlan = async (planId: string, title: string) => {
     try {
       const res = await sendPostRequest("reading-plans", "start", { planId });
       if (res.returnCode === 200) {
-        toast({ title: "Plan started!", description: `You've started "${title}". Let's build that habit!` });
+        toast({ title: t.readingPlan?.toastStarted || 'Plan started!', description: (t.readingPlan?.toastStartedDesc || "You've started \"{title}\". Let's build that habit!").replace('{title}', title) });
         await loadData();
         setActiveTab("progress");
       } else {
-        toast({ title: "Failed to start", description: res.returnMessage, variant: "destructive" });
+        toast({ title: t.readingPlan?.toastFailedStart || 'Failed to start', description: res.returnMessage, variant: "destructive" });
       }
     } catch (error) {
-      toast({ title: "Error", description: "Unable to start plan", variant: "destructive" });
+      toast({ title: t.common?.error || 'Error', description: t.readingPlan?.toastUnableStart || 'Unable to start plan', variant: "destructive" });
     }
   };
 
@@ -123,13 +109,13 @@ export default function UserPlans() {
     try {
       const res = await sendPostRequest("reading-plans", "remove", { planId });
       if (res.returnCode === 200) {
-        toast({ title: "Plan removed", description: "Your progress has been lost." });
+        toast({ title: t.readingPlan?.toastRemoved || 'Plan removed', description: t.readingPlan?.toastRemovedDesc || 'Your progress has been lost.' });
         await loadData();
       } else {
-        toast({ title: "Failed to remove", description: res.returnMessage, variant: "destructive" });
+        toast({ title: t.readingPlan?.toastFailedRemove || 'Failed to remove', description: res.returnMessage, variant: "destructive" });
       }
     } catch (error) {
-      toast({ title: "Error", description: "Unable to remove plan", variant: "destructive" });
+      toast({ title: t.common?.error || 'Error', description: t.readingPlan?.toastUnableRemove || 'Unable to remove plan', variant: "destructive" });
     }
     setRemoveModal(null);
   };
@@ -139,11 +125,6 @@ export default function UserPlans() {
   const getProgressPercentage = (completed: number, total: number) => {
     if (total === 0) return 0;
     return Math.round((completed / total) * 100);
-  };
-
-  const formatDate = (dateString: string) => {
-    if (!dateString) return "Not set";
-    return new Date(dateString).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
   };
 
   const inProgressPlans = userPlans.filter(p => !p.isCompleted);
@@ -156,12 +137,12 @@ export default function UserPlans() {
           <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
             <BookOpen className="w-8 h-8 text-primary" />
           </div>
-          <h3 className="text-xl font-semibold mb-2">No active plan yet</h3>
+          <h3 className="text-xl font-semibold mb-2">{t.readingPlan?.noPlansYet || 'No active plan yet'}</h3>
           <p className="text-muted-foreground text-center mb-6 max-w-xs">
-            Head over to Browse Plans and start your first reading plan.
+            {t.readingPlan?.startPlanDesc || 'Head over to Browse Plans and start your first reading plan.'}
           </p>
           <Button onClick={() => setActiveTab("browse")}>
-            Browse Plans
+            {t.readingPlan?.browsePlans || 'Browse Plans'}
             <ChevronRight className="w-4 h-4 ml-2" />
           </Button>
         </div>
@@ -183,7 +164,7 @@ export default function UserPlans() {
                       <div className="flex-1">
                         <CardTitle className="text-xl">{plan.planName}</CardTitle>
                         <p className="text-sm text-muted-foreground mt-1">
-                          {plan.completedDays} of {plan.totalDays} days done
+                          {t.readingPlan?.daysDone?.replace('{completed}', String(plan.completedDays)).replace('{total}', String(plan.totalDays)) || `${plan.completedDays} of ${plan.totalDays} days done`}
                         </p>
                       </div>
                       <div className="w-16 h-16 relative">
@@ -202,7 +183,7 @@ export default function UserPlans() {
                     <div className="h-2 bg-muted rounded-full overflow-hidden">
                       <div className="h-full bg-primary rounded-full" style={{ width: `${pct}%` }} />
                     </div>
-                    <p className="text-xs text-muted-foreground text-center">{pct}% complete</p>
+                    <p className="text-xs text-muted-foreground text-center">{pct}% {t.readingPlan?.complete || 'complete'}</p>
 
                     <div className="grid grid-cols-3 gap-2 bg-muted/50 rounded-lg p-3">
                       <div className="text-center">
@@ -210,28 +191,30 @@ export default function UserPlans() {
                           <Flame className="w-4 h-4" />
                           <span className="font-bold">{plan.streak}d</span>
                         </div>
-                        <p className="text-xs text-muted-foreground">Streak</p>
+                        <p className="text-xs text-muted-foreground">{t.readingPlan?.streak || 'Streak'}</p>
                       </div>
                       <div className="text-center border-l border-border">
                         <div className="flex items-center justify-center gap-1 text-emerald-500 mb-1">
                           <CheckCircle2 className="w-4 h-4" />
                           <span className="font-bold">{plan.completedDays}</span>
                         </div>
-                        <p className="text-xs text-muted-foreground">Done</p>
+                        <p className="text-xs text-muted-foreground">{t.readingPlan?.done || 'Done'}</p>
                       </div>
                       <div className="text-center border-l border-border">
                         <div className="flex items-center justify-center gap-1 text-muted-foreground mb-1">
                           <BookOpen className="w-4 h-4" />
-                          <span className="font-bold">Day {Math.min(plan.completedDays + 1, plan.totalDays)}</span>
+                          <span className="font-bold">{t.readingPlan?.day || 'Day'} {Math.min(plan.completedDays + 1, plan.totalDays)}</span>
                         </div>
-                        <p className="text-xs text-muted-foreground">Next</p>
+                        <p className="text-xs text-muted-foreground">{t.readingPlan?.next || 'Next'}</p>
                       </div>
                     </div>
 
                     <div className="flex gap-2">
                       <Button className="flex-1" onClick={() => navigate(`${routes.readingPlanDetail.path.replace(":planId", plan.planId)}`)}>
                         <Play className="w-4 h-4 mr-2" />
-                        {plan.completedDays === 0 ? "Begin Day 1" : `Continue · Day ${nextDay}`}
+                        {plan.completedDays === 0
+                          ? (t.readingPlan?.beginDay?.replace('{day}', '1') || 'Begin Day 1')
+                          : (t.readingPlan?.continueDay?.replace('{day}', String(nextDay)) || `Continue · Day ${nextDay}`)}
                       </Button>
                       <Button variant="outline" size="icon" onClick={() => setRemoveModal(plan.planId)}>
                         <Trash2 className="w-4 h-4 text-destructive" />
@@ -248,7 +231,7 @@ export default function UserPlans() {
           <div>
             <div className="flex items-center gap-2 mb-4">
               <Trophy className="w-5 h-5 text-emerald-500" />
-              <h3 className="text-lg font-semibold text-muted-foreground">Completed Plans</h3>
+              <h3 className="text-lg font-semibold text-muted-foreground">{t.readingPlan?.completedPlans || 'Completed Plans'}</h3>
             </div>
             <div className="space-y-4">
               {completedPlans.map((plan) => {
@@ -261,10 +244,10 @@ export default function UserPlans() {
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
                             <CardTitle className="text-lg">{plan.planName}</CardTitle>
-                            <span className="text-xs px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full font-medium">Done</span>
+                            <span className="text-xs px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full font-medium">{t.readingPlan?.badgeDone || 'Done'}</span>
                           </div>
                           <p className="text-sm text-muted-foreground mt-1">
-                            {plan.totalDays} days completed
+                            {t.readingPlan?.daysCompleted?.replace('{n}', String(plan.totalDays)) || `${plan.totalDays} days completed`}
                           </p>
                         </div>
                         <div className="w-14 h-14 relative">
@@ -282,11 +265,11 @@ export default function UserPlans() {
                     <CardContent className="flex gap-2">
                       <Button variant="outline" className="flex-1" onClick={() => navigate(`${routes.readingPlanDetail.path.replace(":planId", plan.planId)}`)}>
                         <Eye className="w-4 h-4 mr-2" />
-                        Summary
+                        {t.readingPlan?.summary || 'Summary'}
                       </Button>
                       <Button variant="outline" className="flex-1" onClick={() => navigate(`${routes.readingPlanDetail.path.replace(":planId", plan.planId)}`)}>
                         <Play className="w-4 h-4 mr-2" />
-                        Revisit
+                        {t.readingPlan?.revisit || 'Revisit'}
                       </Button>
                     </CardContent>
                   </Card>
@@ -300,17 +283,16 @@ export default function UserPlans() {
   };
 
   const renderBrowseTab = () => (
-    <div className="space-y-4">
-      <div className="flex gap-2 overflow-x-auto pb-2">
-        {CATEGORIES.map(cat => (
+    <div className="space-y-4">          <div className="flex gap-2 overflow-x-auto pb-2">
+        {Object.entries(CATEGORY_KEYS).map(([value, key]) => (
           <button
-            key={cat.value}
-            onClick={() => setCatFilter(cat.value)}
+            key={value}
+            onClick={() => setCatFilter(value)}
             className={`px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
-              catFilter === cat.value ? "bg-primary text-primary-foreground" : "bg-muted hover:bg-muted/80"
+              catFilter === value ? "bg-primary text-primary-foreground" : "bg-muted hover:bg-muted/80"
             }`}
           >
-            {cat.label}
+            {t.readingPlan?.[key] || key}
           </button>
         ))}
       </div>
@@ -323,8 +305,8 @@ export default function UserPlans() {
         <Card className="border-teal-200 bg-teal-50/50">
           <CardContent className="py-12 text-center">
             <BookOpen className="w-16 h-16 mx-auto mb-4 text-teal-400" />
-            <h3 className="text-xl font-semibold mb-2">No plans found</h3>
-            <p className="text-muted-foreground">Check back later for new reading plans.</p>
+            <h3 className="text-xl font-semibold mb-2">{t.readingPlan?.noPlansFound || 'No plans found'}</h3>
+            <p className="text-muted-foreground">{t.readingPlan?.noPlansDesc || 'Check back later for new reading plans.'}</p>
           </CardContent>
         </Card>
       ) : (
@@ -349,8 +331,8 @@ export default function UserPlans() {
                     <div className="flex-1">
                       <div className="flex items-center gap-2 flex-wrap">
                         <CardTitle className="text-base">{plan.title}</CardTitle>
-                        {isCompleted && <span className="text-xs px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full">Done</span>}
-                        {isActive && <span className="text-xs px-2 py-1 bg-primary text-primary-foreground rounded-full">Active</span>}
+                        {isCompleted && <span className="text-xs px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full">{t.readingPlan?.badgeDone || 'Done'}</span>}
+                        {isActive && <span className="text-xs px-2 py-1 bg-primary text-primary-foreground rounded-full">{t.readingPlan?.badgeActive || 'Active'}</span>}
                       </div>
                       <CardDescription className="mt-1 line-clamp-2">{plan.description}</CardDescription>
                     </div>
@@ -361,12 +343,12 @@ export default function UserPlans() {
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <div className="flex flex-wrap gap-2">
-                    <span className={`text-xs px-2 py-1 rounded-lg font-medium border ${DIFFICULTY_COLORS[plan.difficulty] || "bg-muted"}`}>
-                      {DIFFICULTY_LABEL[plan.difficulty] || plan.difficulty}
+                    <span className="text-xs px-2 py-1 bg-muted rounded-lg font-medium border">
+                      {t.readingPlan?.[DIFFICULTY_KEYS[plan.difficulty]] || plan.difficulty}
                     </span>
-                    <span className="text-xs px-2 py-1 bg-muted rounded-lg font-medium">{catLabel(plan.category)}</span>
-                    <span className="text-xs px-2 py-1 bg-muted rounded-lg font-medium">{plan.totalDays} days</span>
-                    {plan.questionsEnabled && <span className="text-xs px-2 py-1 bg-violet-100 text-violet-700 rounded-lg font-medium">Q&A</span>}
+                    <span className="text-xs px-2 py-1 bg-muted rounded-lg font-medium">{catLabel(t, plan.category)}</span>
+                    <span className="text-xs px-2 py-1 bg-muted rounded-lg font-medium">{plan.totalDays} {t.readingPlan?.days || 'days'}</span>
+                    {plan.questionsEnabled && <span className="text-xs px-2 py-1 bg-violet-100 text-violet-700 rounded-lg font-medium">{t.readingPlan?.badgeQA || 'Q&A'}</span>}
                   </div>
 
                   {hasStarted && userPlan && (
@@ -386,17 +368,19 @@ export default function UserPlans() {
                   <div className="flex gap-2">
                     {hasStarted ? (
                       <Button className="flex-1" onClick={() => navigate(`${routes.readingPlanDetail.path.replace(":planId", plan.planId)}`)}>
-                        {isCompleted ? "View Summary" : "Continue Reading"}
+                        {isCompleted
+                          ? (t.readingPlan?.viewSummary || 'View Summary')
+                          : (t.readingPlan?.continueReading || 'Continue Reading')}
                         <ChevronRight className="w-4 h-4 ml-1" />
                       </Button>
                     ) : (
                       <Button className="flex-1" onClick={() => startPlan(plan.planId, plan.title)} disabled={!plan.isActive}>
                         <Play className="w-4 h-4 mr-2" />
-                        Start Plan
+                        {t.readingPlan?.actionStart || 'Start Plan'}
                       </Button>
                     )}
                     <Button variant="outline" onClick={() => navigate(`${routes.readingPlanDetail.path.replace(":planId", plan.planId)}`)}>
-                      Details
+                      {t.readingPlan?.details || 'Details'}
                     </Button>
                   </div>
                 </CardContent>
@@ -409,15 +393,15 @@ export default function UserPlans() {
   );
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background" dir={isRtl ? 'rtl' : 'ltr'}>
       <div className="bg-gradient-to-b from-teal-50/50 to-background p-6 lg:p-8 pb-4">
         <div className="flex items-center gap-3 mb-6">
           <div className="w-12 h-12 rounded-xl bg-teal-100 flex items-center justify-center">
             <BookOpen className="w-6 h-6 text-teal-600" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold">My Reading Plans</h1>
-            <p className="text-sm text-muted-foreground">Build a daily Bible habit</p>
+            <h1 className="text-2xl font-bold">{t.readingPlan?.readingPlans || 'My Reading Plans'}</h1>
+            <p className="text-sm text-muted-foreground">{t.readingPlan?.bibleReadingPlan || 'Build a daily Bible habit'}</p>
           </div>
         </div>
 
@@ -429,7 +413,7 @@ export default function UserPlans() {
             }`}
           >
             <TrendingUp className="w-4 h-4" />
-            My Progress
+            {t.readingPlan?.progress || 'My Progress'}
             {inProgressPlans.length > 0 && (
               <span className="ml-1 bg-primary text-primary-foreground text-xs rounded-full px-1.5 py-0.5">
                 {inProgressPlans.length}
@@ -443,7 +427,7 @@ export default function UserPlans() {
             }`}
           >
             <LayoutList className="w-4 h-4" />
-            Browse Plans
+            {t.readingPlan?.browsePlans || 'Browse Plans'}
           </button>
         </div>
       </div>
@@ -466,19 +450,19 @@ export default function UserPlans() {
             <CardHeader>
               <CardTitle className="text-red-600 flex items-center gap-2">
                 <Trash2 className="w-5 h-5" />
-                Remove Plan
+                {t.readingPlan?.removeTitle || 'Remove Plan'}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground mb-6">
-                Are you sure you want to remove this plan? Your progress will be lost.
+                {t.readingPlan?.removeDesc || 'Are you sure you want to remove this plan? Your progress will be lost.'}
               </p>
               <div className="flex gap-2">
                 <Button variant="outline" className="flex-1" onClick={() => setRemoveModal(null)}>
-                  Keep It
+                  {t.readingPlan?.keepIt || 'Keep It'}
                 </Button>
                 <Button variant="destructive" className="flex-1" onClick={() => removePlan(removeModal)}>
-                  Remove
+                  {t.readingPlan?.remove || 'Remove'}
                 </Button>
               </div>
             </CardContent>

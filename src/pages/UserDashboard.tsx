@@ -24,6 +24,7 @@ import {
   PenLine,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/components/languages/languageProvider";
 import { sendPostRequest } from "@/services/api";
 import { routes } from "@/components/Routes/routes";
 import { cn } from "@/lib/utils";
@@ -62,23 +63,23 @@ interface RecentActivity {
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────
-const getGreeting = () => {
+const getGreeting = (t: any) => {
   const h = new Date().getHours();
-  if (h < 5) return "Good Night";
-  if (h < 12) return "Good Morning";
-  if (h < 17) return "Good Afternoon";
-  return "Good Evening";
+  if (h < 5) return t?.userDashboard?.goodNight || 'Good Night';
+  if (h < 12) return t?.userDashboard?.goodMorning || 'Good Morning';
+  if (h < 17) return t?.userDashboard?.goodAfternoon || 'Good Afternoon';
+  return t?.userDashboard?.goodEvening || 'Good Evening';
 };
 
-const formatTime = (ds: string): string => {
+const formatTime = (ds: string, t: any): string => {
   const diff = Date.now() - new Date(ds).getTime();
   const m = Math.floor(diff / 60000);
   const hr = Math.floor(diff / 3600000);
   const d = Math.floor(diff / 86400000);
-  if (m < 1) return "Just now";
-  if (m < 60) return `${m}m ago`;
-  if (hr < 24) return `${hr}h ago`;
-  if (d < 7) return `${d}d ago`;
+  if (m < 1) return t?.userDashboard?.justNow || 'Just now';
+  if (m < 60) return (t?.userDashboard?.minutesAgo || '{m}m ago').replace('{m}', String(m));
+  if (hr < 24) return (t?.userDashboard?.hoursAgo || '{h}h ago').replace('{h}', String(hr));
+  if (d < 7) return (t?.userDashboard?.daysAgo || '{d}d ago').replace('{d}', String(d));
   return new Date(ds).toLocaleDateString();
 };
 
@@ -92,6 +93,7 @@ const getInitials = (first?: string, last?: string, username?: string) => {
 // ─── Dashboard ─────────────────────────────────────────────────────────────
 export default function UserDashboard() {
   const { userInfo } = useAuth();
+  const { t, isRtl } = useLanguage();
   const navigate = useNavigate();
 
   const [dailyVerse, setDailyVerse] = useState<DailyVerse | null>(null);
@@ -107,7 +109,7 @@ export default function UserDashboard() {
   const [loading, setLoading] = useState(true);
 
   const displayName =
-    userInfo?.firstName || userInfo?.lastName || userInfo?.username || "Friend";
+    userInfo?.firstName || userInfo?.lastName || userInfo?.username || (t?.userDashboard?.friend || 'Friend');
   const initials = getInitials(
     userInfo?.firstName,
     userInfo?.lastName,
@@ -119,19 +121,19 @@ export default function UserDashboard() {
     () => [
       {
         id: "1",
-        label: "Exegesis Bible",
-        sub: "Read & study",
+        label: t?.userDashboard?.exegesisBible || 'Exegesis Bible',
+        sub: t?.userDashboard?.readStudy || 'Read & study',
         icon: BookOpen,
         bg: "bg-indigo-600",
         iconBg: "bg-white/15",
-        badge: "New",
+        badge: t?.userDashboard?.new || 'New',
         badgeCls: "bg-white/20 text-white",
         onPress: () => navigate(routes.bibleReader.path),
       },
       {
         id: "2",
-        label: "Daily Verse",
-        sub: "Today's word",
+        label: t?.userDashboard?.dailyVerse || 'Daily Verse',
+        sub: t?.userDashboard?.todaysWord || "Today's word",
         icon: Sun,
         bg: "bg-amber-500",
         iconBg: "bg-white/15",
@@ -141,8 +143,8 @@ export default function UserDashboard() {
       },
       {
         id: "3",
-        label: "Reading Plans",
-        sub: "Guided journeys",
+        label: t?.userDashboard?.readingPlans || 'Reading Plans',
+        sub: t?.userDashboard?.guidedJourneys || 'Guided journeys',
         icon: CalendarDays,
         bg: "bg-emerald-600",
         iconBg: "bg-white/15",
@@ -152,8 +154,8 @@ export default function UserDashboard() {
       },
       {
         id: "4",
-        label: "Prayer Wall",
-        sub: "Lift your voice",
+        label: t?.userDashboard?.prayerWall || 'Prayer Wall',
+        sub: t?.userDashboard?.liftYourVoice || 'Lift your voice',
         icon: HandHeart,
         bg: "bg-teal-600",
         iconBg: "bg-white/15",
@@ -163,8 +165,8 @@ export default function UserDashboard() {
       },
       {
         id: "5",
-        label: "Testify",
-        sub: "Share your story",
+        label: t?.userDashboard?.testify || 'Testify',
+        sub: t?.userDashboard?.shareYourStory || 'Share your story',
         icon: Mic2,
         bg: "bg-rose-500",
         iconBg: "bg-white/15",
@@ -174,8 +176,8 @@ export default function UserDashboard() {
       },
       {
         id: "6",
-        label: "My Journal",
-        sub: "Reflect & write",
+        label: t?.userDashboard?.myJournal || 'My Journal',
+        sub: t?.userDashboard?.reflectWrite || 'Reflect & write',
         icon: PenLine,
         bg: "bg-green-600",
         iconBg: "bg-white/15",
@@ -184,24 +186,24 @@ export default function UserDashboard() {
         onPress: () => navigate(routes.journal.path),
       },
       {
-        id: "6",
-        label: "Bible Trivia",
-        sub: "Test knowledge",
+        id: "7",
+        label: t?.userDashboard?.bibleTrivia || 'Bible Trivia',
+        sub: t?.userDashboard?.testKnowledge || 'Test knowledge',
         icon: Brain,
         bg: "bg-violet-600",
         iconBg: "bg-white/15",
-        badge: "Soon",
+        badge: t?.userDashboard?.soon || 'Soon',
         badgeCls: "bg-white/20 text-white",
         onPress: () => {},
       },
     ],
-    [navigate],
+    [navigate, t],
   );
 
   const statCards = useMemo(
     () => [
       {
-        label: "Chapters Read",
+        label: t?.userDashboard?.chaptersRead || 'Chapters Read',
         value: stats.chaptersRead,
         icon: BookOpen,
         accent: "#4F46E5",
@@ -209,7 +211,7 @@ export default function UserDashboard() {
         textColor: "#4338CA",
       },
       {
-        label: "Highlights",
+        label: t?.userDashboard?.highlights || 'Highlights',
         value: stats.highlights,
         icon: Star,
         accent: "#D97706",
@@ -217,7 +219,7 @@ export default function UserDashboard() {
         textColor: "#B45309",
       },
       {
-        label: "Notes",
+        label: t?.userDashboard?.notes || 'Notes',
         value: stats.notes,
         icon: BookMarked,
         accent: "#7C3AED",
@@ -225,7 +227,7 @@ export default function UserDashboard() {
         textColor: "#6D28D9",
       },
       {
-        label: "Journal Entries",
+        label: t?.userDashboard?.journalEntries || 'Journal Entries',
         value: stats.journalEntries,
         icon: PenLine,
         accent: "#059669",
@@ -233,7 +235,7 @@ export default function UserDashboard() {
         textColor: "#047857",
       },
       {
-        label: "Favorites",
+        label: t?.userDashboard?.favorites || 'Favorites',
         value: stats.favorites,
         icon: Heart,
         accent: "#E11D48",
@@ -241,14 +243,14 @@ export default function UserDashboard() {
         textColor: "#BE123C",
       },
     ],
-    [stats],
+    [stats, t],
   );
 
   const quickLinks = useMemo(
     () => [
       {
         id: "1",
-        label: "My Notes",
+        label: t?.userDashboard?.myNotes || 'My Notes',
         icon: BookMarked,
         color: "#7C3AED",
         lightBg: "#F5F3FF",
@@ -256,7 +258,7 @@ export default function UserDashboard() {
       },
       {
         id: "2",
-        label: "Journal",
+        label: t?.userDashboard?.journal || 'Journal',
         icon: PenLine,
         color: "#059669",
         lightBg: "#ECFDF5",
@@ -264,7 +266,7 @@ export default function UserDashboard() {
       },
       {
         id: "3",
-        label: "History",
+        label: t?.userDashboard?.history || 'History',
         icon: History,
         color: "#059669",
         lightBg: "#ECFDF5",
@@ -272,7 +274,7 @@ export default function UserDashboard() {
       },
       {
         id: "4",
-        label: "Highlights",
+        label: t?.userDashboard?.highlights || 'Highlights',
         icon: Star,
         color: "#D97706",
         lightBg: "#FFFBEB",
@@ -280,14 +282,14 @@ export default function UserDashboard() {
       },
       {
         id: "5",
-        label: "Favorites",
+        label: t?.userDashboard?.favorites || 'Favorites',
         icon: Heart,
         color: "#E11D48",
         lightBg: "#FFF1F2",
         onPress: () => navigate(routes.myActivity.path),
       },
     ],
-    [navigate],
+    [navigate, t],
   );
 
   // ── Fetch ──
@@ -338,14 +340,14 @@ export default function UserDashboard() {
           <BookOpen className="w-7 h-7 text-indigo-600" />
         </div>
         <p className="text-sm text-slate-400 font-medium tracking-wide">
-          Loading your dashboard…
+          {t?.userDashboard?.loadingDashboard || 'Loading your dashboard…'}
         </p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-full bg-slate-50">
+    <div className="min-h-full bg-slate-50" dir={isRtl ? 'rtl' : 'ltr'}>
       {/* ══════════════════ HERO ══════════════════ */}
       <div className="bg-white border-b border-slate-100">
         <div className=" mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
@@ -364,11 +366,11 @@ export default function UserDashboard() {
                     {initials}
                   </span>
                 </div>
-                <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-400 border-2 border-white" />
+                <div              className={`absolute -bottom-0.5 ${isRtl ? '-left-0.5' : '-right-0.5'} w-3 h-3 rounded-full bg-emerald-400 border-2 border-white`} />
               </div>
               <div>
                 <p className="text-[10px] font-semibold tracking-widest uppercase text-slate-400">
-                  {getGreeting()}
+                  {getGreeting(t)}
                 </p>
                 <h1 className="text-lg font-bold text-slate-800 leading-tight truncate max-w-[180px] sm:max-w-xs">
                   {displayName}
@@ -380,7 +382,7 @@ export default function UserDashboard() {
               <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-indigo-50 border border-indigo-100">
                 <TrendingUp className="w-3.5 h-3.5 text-indigo-500" />
                 <span className="text-xs text-indigo-600 font-semibold">
-                  {stats.chaptersRead} chapters
+                  {stats.chaptersRead} {t?.userDashboard?.chapters || 'chapters'}
                 </span>
               </div>
               <button
@@ -396,7 +398,7 @@ export default function UserDashboard() {
           {dailyVerse && (
             <button
               onClick={() => navigate(routes.userDailyVerse.path)}
-              className="group w-full flex items-start gap-4 p-5 rounded-2xl text-left transition-all active:scale-[0.99]"
+              className="group w-full flex items-start gap-4 p-5 rounded-2xl text-start transition-all active:scale-[0.99]"
               style={{
                 background: "linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)",
               }}
@@ -407,7 +409,7 @@ export default function UserDashboard() {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-[9px] font-bold tracking-[0.18em] uppercase text-white/50 mb-1.5">
-                  Verse of the day
+                  {t?.userDashboard?.verseOfTheDay || 'Verse of the day'}
                 </p>
                 <p
                   className="text-sm text-white/90 italic leading-relaxed line-clamp-2"
@@ -473,7 +475,7 @@ export default function UserDashboard() {
             <section>
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-[11px] font-bold tracking-widest uppercase text-slate-400">
-                  Explore
+                  {t?.userDashboard?.explore || 'Explore'}
                 </h2>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -484,7 +486,7 @@ export default function UserDashboard() {
                       key={item.id}
                       onClick={item.onPress}
                       className={cn(
-                        "group relative overflow-hidden rounded-2xl p-4 text-left transition-all duration-150",
+                        "group relative overflow-hidden rounded-2xl p-4 text-start transition-all duration-150",
                         "active:scale-[0.97] hover:-translate-y-0.5 hover:shadow-md",
                         item.bg,
                       )}
@@ -495,7 +497,7 @@ export default function UserDashboard() {
                       {item.badge && (
                         <span
                           className={cn(
-                            "absolute top-2.5 right-2.5 text-[9px] font-bold tracking-wider uppercase px-1.5 py-0.5 rounded-full",
+                            "absolute top-2.5 end-2.5 text-[9px] font-bold tracking-wider uppercase px-1.5 py-0.5 rounded-full",
                             item.badgeCls,
                           )}
                         >
@@ -522,7 +524,7 @@ export default function UserDashboard() {
                         {item.sub}
                       </p>
 
-                      <ChevronRight className="absolute bottom-3 right-3 w-3.5 h-3.5 text-white/30 group-hover:text-white/70 group-hover:translate-x-0.5 transition-all" />
+                      <ChevronRight className="absolute bottom-3 end-3 w-3.5 h-3.5 text-white/30 group-hover:text-white/70 group-hover:translate-x-0.5 transition-all" />
                     </button>
                   );
                 })}
@@ -534,13 +536,13 @@ export default function UserDashboard() {
               <section>
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-[11px] font-bold tracking-widest uppercase text-slate-400">
-                    Reading Plans
+                    {t?.userDashboard?.readingPlans || 'Reading Plans'}
                   </h2>
                   <button
                     onClick={() => navigate(routes.userPlans.path)}
                     className="flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-700 transition-colors"
                   >
-                    See all
+                    {t?.userDashboard?.seeAll || 'See all'}
                     <ArrowRight className="w-3 h-3" />
                   </button>
                 </div>
@@ -594,10 +596,10 @@ export default function UserDashboard() {
                           </div>
                           <div className="flex items-center justify-between">
                             <p className="text-xs text-slate-400">
-                              {plan.completedDays} of {plan.totalDays} days
+                              {(t?.userDashboard?.daysOf || '{completed} of {total} days').replace('{completed}', String(plan.completedDays)).replace('{total}', String(plan.totalDays))}
                             </p>
                             <p className="text-xs text-slate-400">
-                              {plan.totalDays - plan.completedDays} left
+                              {(t?.userDashboard?.left || '{remaining} left').replace('{remaining}', String(plan.totalDays - plan.completedDays))}
                             </p>
                           </div>
                         </div>
@@ -615,7 +617,7 @@ export default function UserDashboard() {
             <section>
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-[11px] font-bold tracking-widest uppercase text-slate-400">
-                  Quick Access
+                  {t?.userDashboard?.quickAccess || 'Quick Access'}
                 </h2>
               </div>
               <div className="grid grid-cols-2 gap-3">
@@ -650,13 +652,13 @@ export default function UserDashboard() {
               <section>
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-[11px] font-bold tracking-widest uppercase text-slate-400">
-                    Recent Activity
+                    {t?.userDashboard?.recentActivity || 'Recent Activity'}
                   </h2>
                   <button
                     onClick={() => navigate(routes.myActivity.path)}
                     className="flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-700 transition-colors"
                   >
-                    All history
+                    {t?.userDashboard?.allHistory || 'All history'}
                     <ArrowRight className="w-3 h-3" />
                   </button>
                 </div>
@@ -669,7 +671,7 @@ export default function UserDashboard() {
                           `${routes.bibleReader.path}?book=${encodeURIComponent(act.bookName)}&chapter=${act.chapter}`,
                         )
                       }
-                      className="group w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-slate-50 active:bg-slate-100 transition-colors"
+                      className="group w-full flex items-center gap-3 px-4 py-3 text-start hover:bg-slate-50 active:bg-slate-100 transition-colors"
                     >
                       <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center shrink-0">
                         <Clock className="w-3.5 h-3.5 text-indigo-500" />
@@ -679,7 +681,7 @@ export default function UserDashboard() {
                           {act.bookName} {act.chapter}
                         </p>
                         <p className="text-[11px] text-slate-400">
-                          {formatTime(act.updatedOn)}
+                          {formatTime(act.updatedOn, t)}
                         </p>
                       </div>
                       <ChevronRight className="w-3.5 h-3.5 text-slate-300 group-hover:text-slate-400 group-hover:translate-x-0.5 transition-all shrink-0" />
@@ -699,8 +701,8 @@ export default function UserDashboard() {
                 }}
               >
                 {/* Decorative circle */}
-                <div className="absolute -top-6 -right-6 w-24 h-24 rounded-full bg-indigo-100/60 pointer-events-none" />
-                <div className="absolute -bottom-4 -left-4 w-16 h-16 rounded-full bg-violet-100/40 pointer-events-none" />
+                <div className={`absolute -top-6 ${isRtl ? '-left-6' : '-right-6'} w-24 h-24 rounded-full bg-indigo-100/60 pointer-events-none`} />
+                <div className={`absolute -bottom-4 ${isRtl ? '-right-4' : '-left-4'} w-16 h-16 rounded-full bg-violet-100/40 pointer-events-none`} />
 
                 <div className="relative">
                   <div className="flex items-center gap-2.5 mb-3">
@@ -709,16 +711,15 @@ export default function UserDashboard() {
                     </div>
                     <div>
                       <p className="font-bold text-sm text-slate-800">
-                        Keep it up!
+                        {t?.userDashboard?.keepItUp || 'Keep it up!'}
                       </p>
                       <p className="text-xs text-slate-500">
-                        {stats.chaptersRead} chapters total
+                        {(t?.userDashboard?.chaptersTotal || '{n} chapters total').replace('{n}', String(stats.chaptersRead))}
                       </p>
                     </div>
                   </div>
                   <p className="text-xs text-slate-500 leading-relaxed mb-4">
-                    You're doing great. Read a chapter today to continue your
-                    journey in Scripture.
+                    {t?.userDashboard?.motivationText || "You're doing great. Read a chapter today to continue your journey in Scripture."}
                   </p>
                   <button
                     onClick={() => navigate(routes.bibleReader.path)}
@@ -727,7 +728,7 @@ export default function UserDashboard() {
                       background: "linear-gradient(135deg, #4F46E5, #7C3AED)",
                     }}
                   >
-                    Continue Reading
+                    {t?.userDashboard?.continueReading || 'Continue Reading'}
                     <ArrowRight className="w-3.5 h-3.5" />
                   </button>
                 </div>

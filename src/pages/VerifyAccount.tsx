@@ -1,8 +1,7 @@
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import {
   Mail,
-  Lock,
   ArrowLeft,
   ArrowRight,
   Sparkles,
@@ -14,10 +13,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import logoImage from "@/assets/logos/exegesis_bg_rm.png";
+import { useLanguage } from "@/components/languages/languageProvider";
 import { sendPostRequest, ApiError } from "@/services/api";
 import { routes } from "@/components/Routes/routes";
 
 const VerifyAccount = () => {
+  const { t, isRtl } = useLanguage();
   const [searchParams] = useSearchParams();
   const emailParam = searchParams.get("email") || "";
 
@@ -39,8 +40,8 @@ const VerifyAccount = () => {
     e.preventDefault();
     if (!email || !code) {
       toast({
-        title: "Verification Failed",
-        description: "Please enter both email and verification code.",
+        title: t.auth?.verification || 'Verification Failed',
+        description: t.auth?.enterEmailAndCode || 'Please enter both email and verification code.',
         variant: "destructive",
       });
       return;
@@ -57,16 +58,16 @@ const VerifyAccount = () => {
       if (returnCode === 200) {
         setIsVerified(true);
         toast({
-          title: "Email Verified",
-          description: "Your account has been verified successfully.",
+          title: t.auth?.emailVerified || 'Email Verified',
+          description: t.auth?.verifiedSuccess || 'Your account has been verified successfully.',
         });
         setTimeout(() => {
           navigate(routes.login.path);
         }, 3000);
       } else {
         toast({
-          title: "Verification Failed",
-          description: returnMessage || "Invalid verification code.",
+          title: t.auth?.verification || 'Verification Failed',
+          description: returnMessage || (t.auth?.invalidCode || 'Invalid verification code.'),
           variant: "destructive",
         });
       }
@@ -78,7 +79,7 @@ const VerifyAccount = () => {
             ? error.message
             : "An unexpected error occurred.";
       toast({
-        title: "Verification Failed",
+        title: t.auth?.verification || 'Verification Failed',
         description: message,
         variant: "destructive",
       });
@@ -90,8 +91,8 @@ const VerifyAccount = () => {
   const handleResendCode = async () => {
     if (!email) {
       toast({
-        title: "Resend Failed",
-        description: "Please enter your email address.",
+        title: t.auth?.resendVerification || 'Resend Failed',
+        description: t.auth?.enterEmailAddress || 'Please enter your email address.',
         variant: "destructive",
       });
       return;
@@ -105,9 +106,9 @@ const VerifyAccount = () => {
 
       const { returnCode, returnMessage } = response;
       toast({
-        title: returnCode === 200 ? "Code Sent" : "Error",
+        title: returnCode === 200 ? (t.auth?.codeSent || 'Code Sent') : (t.common?.error || 'Error'),
         description:
-          returnMessage || "Verification code has been sent to your email.",
+          returnMessage || (t.auth?.codeSentToEmail || 'Verification code has been sent to your email.'),
       });
     } catch (error) {
       const message =
@@ -136,10 +137,10 @@ const VerifyAccount = () => {
             </div>
             <div>
               <h1 className="text-2xl font-bold font-[family-name:var(--font-heading)]">
-                Email Verified!
+                {t.auth?.emailVerified || 'Email Verified!'}
               </h1>
               <p className="text-muted-foreground mt-2">
-                Redirecting to login...
+                {t.auth?.redirectingToLogin || 'Redirecting to login...'}
               </p>
             </div>
           </div>
@@ -149,7 +150,7 @@ const VerifyAccount = () => {
   }
 
   return (
-    <div className="min-h-screen flex bg-background">
+    <div className="min-h-screen flex bg-background" dir={isRtl ? 'rtl' : 'ltr'}>
       {/* Left Panel */}
       <div className="hidden lg:flex lg:w-[52%] relative overflow-hidden bg-gradient-to-br from-primary via-primary/95 to-primary/80">
         <div className="absolute inset-0 pointer-events-none">
@@ -186,7 +187,7 @@ const VerifyAccount = () => {
                 />
               </div>
               <span className="text-white/80 font-medium tracking-widest text-3xl uppercase">
-                Bible
+                {t.common?.appName?.split(' ')[1] || 'Bible'}
               </span>
             </div>
           </div>
@@ -213,18 +214,17 @@ const VerifyAccount = () => {
 
             <div>
               <blockquote className="text-lg lg:text-xl text-white/85 font-[family-name:var(--font-heading)] leading-relaxed max-w-sm mx-auto italic">
-                "Your word is a lamp for my feet,
-                <br />a light on my path."
+                "{t.auth?.lampToMyFeet || 'Your word is a lamp for my feet, a light on my path.'}"
               </blockquote>
               <p className="text-white/55 text-sm mt-2 tracking-wider">
-                — Psalm 119:105
+                — {t.auth?.psalmReference || 'Psalm 119:105'}
               </p>
             </div>
           </div>
 
           <div className="anim-fade" style={{ animationDelay: "0.3s" }}>
             <p className="text-white/70 text-sm">
-              Verify your email to start your spiritual journey
+              {t.auth?.startJourney || 'Verify your email to start your spiritual journey'}
             </p>
           </div>
         </div>
@@ -243,10 +243,10 @@ const VerifyAccount = () => {
             </div>
             <div className="text-center">
               <h2 className="text-2xl font-bold font-[family-name:var(--font-heading)]">
-                EXEGESIS
+                {t.common?.appName?.toUpperCase() || 'EXEGESIS'}
               </h2>
               <p className="text-xs text-muted-foreground tracking-widest uppercase">
-                Exegesis Bible
+                {t.common?.appName || 'Exegesis Bible'}
               </p>
             </div>
           </div>
@@ -260,11 +260,11 @@ const VerifyAccount = () => {
                 <ArrowLeft className="w-4 h-4" />
               </Link>
               <h1 className="text-3xl font-bold font-[family-name:var(--font-heading)] tracking-tight">
-                Verify Email
+                {t.auth?.verifyAccount || 'Verify Email'}
               </h1>
             </div>
             <p className="text-muted-foreground">
-              Enter the verification code sent to your email
+              {t.auth?.enterCode || 'Enter the verification code sent to your email'}
             </p>
           </div>
 
@@ -275,7 +275,7 @@ const VerifyAccount = () => {
           >
             <div className="space-y-2">
               <Label htmlFor="email" className="text-sm font-medium">
-                Email Address
+                {t.common?.email || 'Email Address'}
               </Label>
               <div className="relative group">
                 <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
@@ -294,7 +294,7 @@ const VerifyAccount = () => {
 
             <div className="space-y-2">
               <Label htmlFor="code" className="text-sm font-medium">
-                Verification Code
+                {t.auth?.verification || 'Verification Code'}
               </Label>
               <div className="relative group">
                 <KeyRound className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
@@ -321,11 +321,11 @@ const VerifyAccount = () => {
               {isLoading ? (
                 <>
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Verifying...
+                  {t.auth?.verifying || 'Verifying...'}
                 </>
               ) : (
                 <>
-                  Verify Account
+                  {t.auth?.verifyAccount || 'Verify Account'}
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </>
               )}
@@ -337,18 +337,18 @@ const VerifyAccount = () => {
             style={{ animationDelay: "0.3s" }}
           >
             <p className="text-sm text-muted-foreground">
-              Didn't receive the code?{" "}
+              {t.auth?.didNotReceiveCode || "Didn't receive the code?"}{" "}
               <button
                 onClick={handleResendCode}
                 disabled={isResending}
                 className="text-primary hover:underline font-medium disabled:opacity-50"
               >
-                {isResending ? "Sending..." : "Resend code"}
+                {isResending ? (t.auth?.sending || "Sending...") : (t.auth?.resendCode || "Resend code")}
               </button>
             </p>
             <p className="text-sm">
               <Link to="/register" className="text-primary hover:underline">
-                Create a new account
+                {t.auth?.createNewAccount || 'Create a new account'}
               </Link>
             </p>
           </div>
