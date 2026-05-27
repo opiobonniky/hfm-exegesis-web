@@ -9,6 +9,7 @@ import {
   ArrowLeft,
   BookOpen,
   Lightbulb,
+  AlertTriangle,
 } from "lucide-react";
 import {
   Card,
@@ -37,6 +38,14 @@ import {
   getVersesCountForChapter,
   setActiveVersion,
 } from "@/utilities/bibleUtils";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Combobox } from "@/components/ui/combobox";
 import { sendGetRequest, sendPostRequest } from "@/services/api";
 import { routes } from "@/components/Routes/routes";
@@ -150,7 +159,13 @@ const AddDailyVerse = () => {
     setSelectedDate(newDate);
   };
 
-    const handleAddVerse = async (e: React.FormEvent) => {
+  const [conflictDialog, setConflictDialog] = useState<{
+    open: boolean;
+    conflict: any;
+    payload: any;
+  }>({ open: false, conflict: null, payload: null });
+
+  const handleAddVerse = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!book || !chapter || !verseNumber || !explanation.trim()) {
@@ -171,9 +186,9 @@ const AddDailyVerse = () => {
         verseText: verseText || null,
         explanation,
         learnMore: learnMore || null,
-        published, // Add published field
-        displayDate: selectedDate.toISOString().split('T')[0], // Just date part like mobile app
-  };
+        published,
+        displayDate: selectedDate.toISOString().split('T')[0],
+      };
 
       const response = await sendPostRequest(
         "admin",
@@ -187,10 +202,11 @@ const AddDailyVerse = () => {
           description:
             response.returnMessage || "Daily verse added successfully.",
         });
-
         setTimeout(() => {
           navigate(routes.dailyVerse.path);
         }, 2000);
+      } else if (response.returnCode === 409) {
+        setConflictDialog({ open: true, conflict: response.returnData?.conflicts?.[0], payload });
       } else {
         toast({
           title: "Error",
@@ -205,6 +221,26 @@ const AddDailyVerse = () => {
         variant: "destructive",
       });
       console.error(err);
+    }
+  };
+
+  const handleConflictUpdate = async () => {
+    const c = conflictDialog.conflict;
+    if (!c) return;
+    setConflictDialog({ open: false, conflict: null, payload: null });
+    try {
+      const response = await sendPostRequest("admin", "add-daily-verse", {
+        id: c.existing.id,
+        ...conflictDialog.payload,
+      });
+      if (response.returnCode === 200) {
+        toast({ title: "Updated", description: "Existing verse updated." });
+        setTimeout(() => navigate(routes.dailyVerse.path), 2000);
+      } else {
+        toast({ title: "Error", description: response.returnMessage, variant: "destructive" });
+      }
+    } catch {
+      toast({ title: "Error", description: "Failed to update.", variant: "destructive" });
     }
   };
 
@@ -508,6 +544,36 @@ const AddDailyVerse = () => {
           </CardContent>
         </Card>
       </div>
+
+      <Dialog open={conflictDialog.open} onOpenChange={(open) => !open && setConflictDialog({ open: false, conflict: null, payload: null })}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-amber-500" />
+              Verse Already Exists
+            </DialogTitle>
+            <DialogDescription>
+              {conflictDialog.conflict?.type === 'date'
+                ? `A verse already exists for this date (${conflictDialog.conflict?.existing?.bookName} ${conflictDialog.conflict?.existing?.chapter}:${conflictDialog.conflict?.existing?.verseNumber}).`
+                : `This verse (${conflictDialog.conflict?.existing?.bookName} ${conflictDialog.conflict?.existing?.chapter}:${conflictDialog.conflict?.existing?.verseNumber}) already exists for ${conflictDialog.conflict?.existing?.displayDate}.`
+              } Update the existing entry instead?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setConflictDialog({ open: false, conflict: null, payload: null })}>
+              Cancel
+            </Button>
+            <Button variant="outline" onClick={() => { setConflictDialog({ open: false, conflict: null, payload: null }); navigate(routes.dailyVerse.path); }}>
+              <BookOpen className="h-4 w-4 mr-2" />
+              View Existing
+            </Button>
+            <Button onClick={handleConflictUpdate}>
+              <Save className="h-4 w-4 mr-2" />
+              Update Existing
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

@@ -1,17 +1,15 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import {
   ArrowLeft,
   Save,
   Loader2,
-  Star,
   BookOpen,
-  Calendar,
   Tag,
   Heart,
   Lightbulb,
   Sparkles,
-  Send,
+  FileText,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -49,6 +47,12 @@ const TESTAMENTS = [
   { value: "New", label: "New Testament" },
 ];
 
+// Helper to check testament
+const getTestamentForBook = (book: string) => {
+  const oldTestamentBooks = getBooksByTestament("Old");
+  return oldTestamentBooks.includes(book) ? "Old" : "New";
+};
+
 const CATEGORIES = [
   { value: "general", label: "General" },
   { value: "study", label: "Bible Study" },
@@ -68,6 +72,8 @@ const MOODS = [
   { value: "challenged", label: "Challenged", emoji: "🧗" },
   { value: "blessed", label: "Blessed", emoji: "✨" },
 ];
+
+const MOOD_MAP = Object.fromEntries(MOODS.map(m => [m.value, m]));
 
 interface JournalEntry {
   id?: number;
@@ -110,16 +116,20 @@ const JournalEntryPage = () => {
   const isEditing = !!entryId && entryId !== "new";
   const isNewEntry = entryId === "new" || !entryId;
 
+  const [testament, setTestament] = useState<string>("");
+
   const [entry, setEntry] = useState<JournalEntry>(() => {
     if (isNewEntry) {
       const book = searchParams.get("book");
       const chapter = searchParams.get("chapter");
       const verse = searchParams.get("verse");
+      const promptText = searchParams.get("promptText");
       return {
         ...DEFAULT_ENTRY,
         bookName: book || "",
         chapter: chapter || "",
         verseNumber: verse || "",
+        content: promptText || "",
       };
     }
     return DEFAULT_ENTRY;
@@ -136,22 +146,40 @@ const JournalEntryPage = () => {
     { id: number; name: string; prompts: string[] }[]
   >([]);
 
+  // Word count for content
+  const wordCount = useMemo(() => {
+    const text = entry.content.trim();
+    if (!text) return 0;
+    return text.split(/\s+/).length;
+  }, [entry.content]);
+
   useEffect(() => {
     if (isEditing) {
       fetchEntry();
     }
   }, [entryId]);
 
+  // Load all books once
+  const allBooks = useMemo(() => {
+    return getBooksByTestament("Old").concat(getBooksByTestament("New"));
+  }, []);
+
+  // Filter books by testament
   useEffect(() => {
-    if (entry.bookName) {
-      setBooks(getBooksByTestament("Old").concat(getBooksByTestament("New")));
+    if (testament) {
+      setBooks(getBooksByTestament(testament));
+    } else {
+      setBooks(allBooks);
     }
-  }, [entry.bookName]);
+  }, [testament, allBooks]);
 
   useEffect(() => {
     if (entry.bookName) {
       const ch = getChaptersForBook(entry.bookName);
       setChapters(ch);
+      // Auto-detect testament when book is selected
+      const detected = getTestamentForBook(entry.bookName);
+      setTestament(detected);
     }
   }, [entry.bookName]);
 
@@ -205,8 +233,13 @@ const JournalEntryPage = () => {
         .join("\n\n");
       setEntry((prev) => ({
         ...prev,
+        content: prev.content ? prev.content + "\n\n" + promptsText : promptsText,
       }));
-      setShowTemplates(true);
+      setShowTemplates(false);
+      toast({
+        title: "Template Applied",
+        description: `"${template.name}" prompts added to your entry.`,
+      });
     }
   };
 
@@ -354,10 +387,10 @@ const JournalEntryPage = () => {
                 <Sparkles className="w-4 h-4 mr-2" />
                 Templates
               </Button>
-              <Button onClick={handleSave} disabled={saving}>
-                {saving && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
-                <Save className="w-4 h-4 mr-2" />
-                Save Entry
+              <Button onClick={handleSave} disabled={saving} size="lg" className="gap-2">
+                {saving && <Loader2 className="w-4 h-4 animate-spin" />}
+                <Save className="w-4 h-4" />
+                {saving ? "Saving..." : "Save Entry"}
               </Button>
             </div>
           </div>
@@ -385,7 +418,13 @@ const JournalEntryPage = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>What's on your mind?</Label>
+                  <div className="flex items-center justify-between">
+                    <Label>What's on your mind?</Label>
+                    <span className="text-xs text-muted-foreground">
+                      <FileText className="w-3 h-3 inline mr-1" />
+                      {wordCount} {wordCount === 1 ? "word" : "words"}
+                    </span>
+                  </div>
                   <Textarea
                     placeholder="Write your thoughts, feelings, or reflections..."
                     value={entry.content}
@@ -420,12 +459,23 @@ const JournalEntryPage = () => {
                       onValueChange={(v) => updateField("mood", v)}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select mood" />
+                        <SelectValue placeholder="Select mood">
+                          {entry.mood && MOOD_MAP[entry.mood] ? (
+                            <span>
+                              {MOOD_MAP[entry.mood].emoji} {MOOD_MAP[entry.mood].label}
+                            </span>
+                          ) : (
+                            "Select mood"
+                          )}
+                        </SelectValue>
                       </SelectTrigger>
                       <SelectContent>
                         {MOODS.map((mood) => (
                           <SelectItem key={mood.value} value={mood.value}>
-                            {mood.emoji} {mood.label}
+                            <span className="flex items-center gap-2">
+                              <span className="text-lg">{mood.emoji}</span>
+                              <span>{mood.label}</span>
+                            </span>
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -499,14 +549,9 @@ const JournalEntryPage = () => {
                 <div className="space-y-2">
                   <Label>Testament</Label>
                   <Select
-                    value={
-                      entry.bookName
-                        ? getBooksByTestament("Old").includes(entry.bookName)
-                          ? "Old"
-                          : "New"
-                        : ""
-                    }
+                    value={testament}
                     onValueChange={(v) => {
+                      setTestament(v);
                       setEntry((prev) => ({
                         ...prev,
                         bookName: "",
@@ -519,6 +564,7 @@ const JournalEntryPage = () => {
                       <SelectValue placeholder="Select testament" />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="all">All Books</SelectItem>
                       {TESTAMENTS.map((t) => (
                         <SelectItem key={t.value} value={t.value}>
                           {t.label}
@@ -528,97 +574,94 @@ const JournalEntryPage = () => {
                   </Select>
                 </div>
 
-                {entry.bookName && (
+                <div className="space-y-2">
+                  <Label>Book</Label>
+                  <Select
+                    value={entry.bookName}
+                    onValueChange={(v) => {
+                      setEntry((prev) => ({
+                        ...prev,
+                        bookName: v,
+                        chapter: "",
+                        verseNumber: "",
+                      }));
+                    }}
+                    disabled={!testament}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select book" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {books.map((book) => (
+                        <SelectItem key={book} value={book}>
+                          {book}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {entry.bookName && chapters.length > 0 && (
                   <>
                     <div className="space-y-2">
-                      <Label>Book</Label>
+                      <Label>Chapter</Label>
                       <Select
-                        value={entry.bookName}
+                        value={entry.chapter}
                         onValueChange={(v) => {
                           setEntry((prev) => ({
                             ...prev,
-                            bookName: v,
-                            chapter: "",
+                            chapter: v,
                             verseNumber: "",
                           }));
                         }}
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="Select book" />
+                          <SelectValue placeholder="Select chapter" />
                         </SelectTrigger>
                         <SelectContent>
-                          {books.map((book) => (
-                            <SelectItem key={book} value={book}>
-                              {book}
+                          {chapters.map((ch) => (
+                            <SelectItem key={ch} value={String(ch)}>
+                              Chapter {ch}
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                     </div>
 
-                    {entry.bookName && chapters.length > 0 && (
-                      <>
-                        <div className="space-y-2">
-                          <Label>Chapter</Label>
-                          <Select
-                            value={entry.chapter}
-                            onValueChange={(v) => {
-                              setEntry((prev) => ({
-                                ...prev,
-                                chapter: v,
-                                verseNumber: "",
-                              }));
-                            }}
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select chapter" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {chapters.map((ch) => (
-                                <SelectItem key={ch} value={String(ch)}>
-                                  Chapter {ch}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                    {entry.chapter && verses.length > 0 && (
+                      <div className="space-y-2">
+                        <Label>Verse</Label>
+                        <Select
+                          value={entry.verseNumber}
+                          onValueChange={(v) =>
+                            updateField("verseNumber", v)
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select verse" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {verses.map((v) => (
+                              <SelectItem key={v} value={String(v)}>
+                                Verse {v}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+
+                    {verseText && (
+                      <div className="space-y-2">
+                        <Label>Verse Preview</Label>
+                        <div className="bg-muted/50 rounded-lg p-3 text-sm font-serif leading-relaxed border border-border/50">
+                          <p className="italic">"{verseText}"</p>
+                          <p className="text-xs text-muted-foreground mt-2">
+                            — {entry.bookName} {entry.chapter}:
+                            {entry.verseNumber}
+                          </p>
                         </div>
-
-                        {entry.chapter && verses.length > 0 && (
-                          <div className="space-y-2">
-                            <Label>Verse</Label>
-                            <Select
-                              value={entry.verseNumber}
-                              onValueChange={(v) =>
-                                updateField("verseNumber", v)
-                              }
-                            >
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select verse" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {verses.map((v) => (
-                                  <SelectItem key={v} value={String(v)}>
-                                    Verse {v}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        )}
-
-                        {verseText && (
-                          <div className="space-y-2">
-                            <Label>Verse Preview</Label>
-                            <div className="bg-muted/50 rounded-lg p-3 text-sm font-serif leading-relaxed border border-border/50">
-                              <p className="italic">"{verseText}"</p>
-                              <p className="text-xs text-muted-foreground mt-2">
-                                — {entry.bookName} {entry.chapter}:
-                                {entry.verseNumber}
-                              </p>
-                            </div>
-                          </div>
-                        )}
-                      </>
+                      </div>
                     )}
                   </>
                 )}

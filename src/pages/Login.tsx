@@ -233,7 +233,7 @@ const Login = () => {
   return (
     <div className="min-h-screen flex bg-background overflow-hidden">
       {/* ── Left Panel (Desktop Only) ── */}
-      <div className="hidden lg:flex lg:w-[50%] relative overflow-hidden bg-slate-900">
+      <div className="hidden lg:flex lg:w-[50%] relative overflow-hidden bg-slate-800">
         {/* Modern background elements */}
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-br from-primary/20 via-transparent to-transparent opacity-50" />

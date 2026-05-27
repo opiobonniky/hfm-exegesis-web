@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
@@ -12,10 +12,27 @@ import {
   Pencil,
   Trash2,
   Share2,
+  Copy,
+  ExternalLink,
+  CheckCircle2,
+  MoreHorizontal,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import { sendPostRequest } from "@/services/api";
 import { routes } from "@/components/Routes/routes";
@@ -31,15 +48,15 @@ const CATEGORIES: Record<string, { label: string; color: string }> = {
   application: { label: "Application", color: "bg-indigo-100 text-indigo-700" },
 };
 
-const MOODS: Record<string, string> = {
-  happy: "😊",
-  grateful: "🙏",
-  peaceful: "🕊️",
-  thoughtful: "🤔",
-  motivated: "💪",
-  hopeful: "🌟",
-  challenged: "🧗",
-  blessed: "✨",
+const MOODS: Record<string, { label: string; emoji: string }> = {
+  happy: { label: "Happy", emoji: "😊" },
+  grateful: { label: "Grateful", emoji: "🙏" },
+  peaceful: { label: "Peaceful", emoji: "🕊️" },
+  thoughtful: { label: "Thoughtful", emoji: "🤔" },
+  motivated: { label: "Motivated", emoji: "💪" },
+  hopeful: { label: "Hopeful", emoji: "🌟" },
+  challenged: { label: "Challenged", emoji: "🧗" },
+  blessed: { label: "Blessed", emoji: "✨" },
 };
 
 interface JournalEntryData {
@@ -62,6 +79,29 @@ interface JournalEntryData {
   updatedOn: string;
 }
 
+// ── Loading skeleton ────────────────────────────────────────────────────────
+const LoadingSkeleton = () => (
+  <div className="min-h-screen bg-background">
+    <div className="bg-gradient-to-r from-primary/5 via-accent/5 to-secondary/5 border-b">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="h-10 w-32 bg-muted/50 rounded-lg animate-pulse" />
+      </div>
+    </div>
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+      <div className="space-y-3">
+        <div className="h-8 w-64 bg-muted/50 rounded-lg animate-pulse" />
+        <div className="h-5 w-48 bg-muted/30 rounded-lg animate-pulse" />
+      </div>
+      <div className="h-40 bg-muted/30 rounded-xl animate-pulse" />
+      <div className="h-32 bg-muted/20 rounded-xl animate-pulse" />
+      <div className="grid grid-cols-2 gap-4">
+        <div className="h-28 bg-muted/20 rounded-xl animate-pulse" />
+        <div className="h-28 bg-muted/20 rounded-xl animate-pulse" />
+      </div>
+    </div>
+  </div>
+);
+
 const JournalDetailPage = () => {
   const { entryId } = useParams();
   const navigate = useNavigate();
@@ -70,12 +110,15 @@ const JournalDetailPage = () => {
   const [entry, setEntry] = useState<JournalEntryData | null>(null);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [copied, setCopied] = useState(false);
 
-  useEffect(() => {
+  // Use useCallback for stable function reference but inline useEffect-based fetch
+  useState(() => {
     if (entryId) {
       fetchEntry();
     }
-  }, [entryId]);
+  });
 
   const fetchEntry = async () => {
     try {
@@ -96,9 +139,6 @@ const JournalDetailPage = () => {
 
   const handleDelete = async () => {
     if (!entry) return;
-    const confirmed = window.confirm("Are you sure you want to delete this entry?");
-    if (!confirmed) return;
-
     setDeleting(true);
     try {
       const res = await sendPostRequest("journal", "delete", { id: entry.id });
@@ -110,6 +150,7 @@ const JournalDetailPage = () => {
       toast({ title: "Error", description: "Failed to delete", variant: "destructive" });
     } finally {
       setDeleting(false);
+      setShowDeleteDialog(false);
     }
   };
 
@@ -119,11 +160,55 @@ const JournalDetailPage = () => {
       const res = await sendPostRequest("journal", "toggle-favorite", { id: entry.id });
       if (res.returnCode === 200) {
         setEntry((prev) => prev ? { ...prev, isFavorite: !prev.isFavorite } : null);
+        toast({
+          title: entry.isFavorite ? "Removed from favorites" : "Added to favorites",
+          description: entry.isFavorite ? "Entry unfavorited" : "Entry favorited",
+        });
       }
     } catch (error) {
       toast({ title: "Error", description: "Failed to update", variant: "destructive" });
     }
   };
+
+  const handleCopy = useCallback(async () => {
+    if (!entry) return;
+    try {
+      let text = entry.title ? `${entry.title}\n\n` : "";
+      text += entry.content;
+      if (entry.learnings) text += `\n\nWhat I learned:\n${entry.learnings}`;
+      if (entry.application) text += `\n\nHow I'll apply this:\n${entry.application}`;
+      if (entry.gratitude) text += `\n\nGratitude:\n${entry.gratitude}`;
+      if (entry.prayers) text += `\n\nPrayers:\n${entry.prayers}`;
+      if (entry.bookName) text += `\n\n— ${entry.bookName} ${entry.chapter}:${entry.verseNumber}`;
+
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      toast({ title: "Copied", description: "Entry copied to clipboard" });
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast({ title: "Error", description: "Failed to copy", variant: "destructive" });
+    }
+  }, [entry, toast]);
+
+  const handleShare = useCallback(async () => {
+    if (!entry) return;
+    const shareText = entry.title
+      ? `${entry.title}\n\n${entry.content}`
+      : entry.content;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: entry.title || "Journal Entry",
+          text: shareText,
+        });
+      } catch {
+        // User cancelled
+      }
+    } else {
+      await handleCopy();
+    }
+  }, [entry, handleCopy]);
 
   const formatDate = (dateStr: string) => {
     if (!dateStr) return "";
@@ -136,20 +221,31 @@ const JournalDetailPage = () => {
     });
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
-    );
-  }
+  const formatDateShort = (dateStr: string) => {
+    if (!dateStr) return "";
+    const date = new Date(dateStr);
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  // ── Loading state ────────────────────────────────────────────────────────
+  if (loading) return <LoadingSkeleton />;
 
   if (!entry) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-xl font-semibold">Entry not found</h2>
-          <Button onClick={() => navigate(routes.journal.path)} className="mt-4">
+          <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-4">
+            <BookOpen className="w-8 h-8 text-muted-foreground" />
+          </div>
+          <h2 className="text-xl font-semibold mb-2">Entry not found</h2>
+          <p className="text-muted-foreground mb-4">This journal entry may have been deleted.</p>
+          <Button onClick={() => navigate(routes.journal.path)}>
             Back to Journal
           </Button>
         </div>
@@ -162,9 +258,11 @@ const JournalDetailPage = () => {
     : null;
 
   const tagsArray = entry.tags ? entry.tags.split(",").map((t) => t.trim()).filter(Boolean) : [];
+  const moodInfo = entry.mood ? MOODS[entry.mood] : null;
 
   return (
     <div className="min-h-screen bg-background">
+      {/* ── Top bar ──────────────────────────────────────────────────────── */}
       <div className="bg-gradient-to-r from-primary/5 via-accent/5 to-secondary/5 border-b">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
@@ -172,48 +270,64 @@ const JournalDetailPage = () => {
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Journal
             </Button>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="icon" onClick={handleToggleFavorite}>
+            <div className="flex items-center gap-1">
+              <Button variant="ghost" size="icon" onClick={handleToggleFavorite} title="Toggle favorite">
                 {entry.isFavorite ? (
                   <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
                 ) : (
                   <Star className="w-4 h-4" />
                 )}
               </Button>
-              <Button
-                variant="outline"
-                onClick={() => navigate(`/journal/entry/${entry.id}`)}
-              >
-                <Pencil className="w-4 h-4 mr-2" />
-                Edit
+              <Button variant="ghost" size="icon" onClick={handleShare} title="Share">
+                <Share2 className="w-4 h-4" />
               </Button>
-              <Button
-                variant="outline"
-                className="text-destructive hover:text-destructive"
-                onClick={handleDelete}
-                disabled={deleting}
-              >
-                {deleting && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
-                <Trash2 className="w-4 h-4" />
+              <Button variant="ghost" size="icon" onClick={handleCopy} title="Copy to clipboard">
+                {copied ? (
+                  <CheckCircle2 className="w-4 h-4 text-green-500" />
+                ) : (
+                  <Copy className="w-4 h-4" />
+                )}
               </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <MoreHorizontal className="w-4 h-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => navigate(`/journal/entry/${entry.id}`)}>
+                    <Pencil className="w-4 h-4 mr-2" />
+                    Edit
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => setShowDeleteDialog(true)}
+                    className="text-destructive"
+                  >
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Delete
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </div>
       </div>
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+        {/* ── Header ─────────────────────────────────────────────────────── */}
         <div className="flex items-start justify-between gap-4">
-          <div>
+          <div className="flex-1 min-w-0">
             {entry.title && (
-              <h1 className="text-3xl font-bold mb-2">{entry.title}</h1>
+              <h1 className="text-3xl font-bold mb-2 break-words">{entry.title}</h1>
             )}
             <div className="flex items-center gap-3 flex-wrap">
               <Badge className={CATEGORIES[entry.category]?.color || "bg-gray-100"}>
                 {CATEGORIES[entry.category]?.label || entry.category}
               </Badge>
-              {entry.mood && (
-                <span className="text-lg" title={entry.mood}>
-                  {MOODS[entry.mood]}
+              {moodInfo && (
+                <span className="inline-flex items-center gap-1 text-sm" title={moodInfo.label}>
+                  <span className="text-lg">{moodInfo.emoji}</span>
+                  <span className="text-muted-foreground">{moodInfo.label}</span>
                 </span>
               )}
               <div className="flex items-center gap-1 text-sm text-muted-foreground">
@@ -224,35 +338,53 @@ const JournalDetailPage = () => {
           </div>
         </div>
 
+        {/* ── Linked scripture ────────────────────────────────────────────── */}
         {verseText && (
-          <Card className="border-primary/20 bg-primary/5">
+          <Card className="border-primary/20 bg-primary/5 hover:bg-primary/10 transition-colors">
             <CardContent className="py-4">
-              <div className="flex items-start gap-3">
-                <BookOpen className="w-5 h-5 text-primary mt-1" />
-                <div>
+              <button
+                className="w-full flex items-start gap-3 text-left"
+                onClick={() => {
+                  if (entry.bookName && entry.chapter) {
+                    navigate(`/bible-reader?book=${entry.bookName}&chapter=${entry.chapter}`);
+                  }
+                }}
+              >
+                <BookOpen className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
+                <div className="flex-1 min-w-0">
                   <p className="font-serif text-lg leading-relaxed italic">
                     "{verseText}"
                   </p>
-                  <p className="text-sm text-muted-foreground mt-2">
-                    — {entry.bookName} {entry.chapter}:{entry.verseNumber}
-                  </p>
+                  <div className="flex items-center gap-2 mt-2">
+                    <p className="text-sm text-muted-foreground">
+                      — {entry.bookName} {entry.chapter}:{entry.verseNumber}
+                    </p>
+                    <ExternalLink className="w-3 h-3 text-muted-foreground" />
+                  </div>
                 </div>
-              </div>
+              </button>
             </CardContent>
           </Card>
         )}
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Journal Entry</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="whitespace-pre-line text-base leading-relaxed">
-              {entry.content}
-            </p>
-          </CardContent>
-        </Card>
+        {/* ── Main content ───────────────────────────────────────────────── */}
+        {entry.content && (
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <BookOpen className="w-5 h-5" />
+                Journal Entry
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="whitespace-pre-line text-base leading-relaxed">
+                {entry.content}
+              </p>
+            </CardContent>
+          </Card>
+        )}
 
+        {/* ── Reflection sections ─────────────────────────────────────────── */}
         {(entry.learnings || entry.application || entry.gratitude || entry.prayers) && (
           <div className="grid gap-6 md:grid-cols-2">
             {entry.learnings && (
@@ -313,6 +445,7 @@ const JournalDetailPage = () => {
           </div>
         )}
 
+        {/* ── Tags ────────────────────────────────────────────────────────── */}
         {tagsArray.length > 0 && (
           <Card>
             <CardHeader className="pb-3">
@@ -333,10 +466,41 @@ const JournalDetailPage = () => {
           </Card>
         )}
 
+        {/* ── Footer metadata ─────────────────────────────────────────────── */}
         <div className="text-sm text-muted-foreground text-center pt-4 border-t">
-          Last updated: {formatDate(entry.updatedOn)}
+          <p>Created: {formatDateShort(entry.createdOn)}</p>
+          <p>Last updated: {formatDateShort(entry.updatedOn)}</p>
         </div>
       </div>
+
+      {/* ── Delete confirmation dialog ───────────────────────────────────── */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Journal Entry</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <p>Are you sure you want to delete this entry?</p>
+            {entry.title && (
+              <p className="text-sm text-muted-foreground">
+                "<span className="font-medium">{entry.title}</span>"
+              </p>
+            )}
+            <p className="text-sm text-destructive font-medium">
+              This action cannot be undone.
+            </p>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
+              {deleting && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
+              {deleting ? "Deleting..." : "Delete Entry"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

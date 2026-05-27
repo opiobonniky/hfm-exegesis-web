@@ -187,6 +187,14 @@ const formatShortDate = (utcDateString: unknown): string =>
     day: "numeric",
   });
 
+const getConflictMessage = (conflict: any): string => {
+  if (!conflict) return '';
+  const ref = conflict.existing?.bookName + ' ' + conflict.existing?.chapter + ':' + conflict.existing?.verseNumber;
+  return conflict.type === 'date'
+    ? 'A verse already exists for this date (' + ref + ').'
+    : 'This verse (' + ref + ') already exists for ' + (conflict.existing?.displayDate || '') + '.';
+};
+
 const addDays = (d: Date, days: number): Date => {
   const result = new Date(d);
   result.setDate(result.getDate() + days);
@@ -434,6 +442,12 @@ const DailyVerse = () => {
   const handlePreviousVerse = () =>
     setSelectedIndex((p) => (p < dailyVerses.length - 1 ? p + 1 : p));
 
+  const [conflictDialog, setConflictDialog] = useState<{
+    open: boolean;
+    conflict: any;
+    payload: any;
+  }>({ open: false, conflict: null, payload: null });
+
   // ── Edit ───────────────────────────────────────────────────────────────────
   const openEdit = (verse: DailyVerseItem) => {
     setEditState(buildEditState(verse));
@@ -483,6 +497,24 @@ const DailyVerse = () => {
         });
         setEditOpen(false);
         getAllDailyVerses();
+      } else if (res.returnCode === 409) {
+        setConflictDialog({
+          open: true,
+          conflict: res.returnData?.conflicts?.[0],
+          payload: {
+            id: editState.id,
+            bookName: editState.book,
+            chapter: Number(editState.chapter),
+            verseNumber: Number(editState.verseNumber),
+            bibleVersion: editState.bibleVersion,
+            verseText: editState.verseText || null,
+            explanation: editState.explanation,
+            learnMore: editState.learnMore || null,
+            published: true,
+            displayDate: editState.selectedDate.toISOString(),
+            displayTime: editState.selectedDate.toISOString(),
+          },
+        });
       } else {
         toast({
           title: "Error",
@@ -498,6 +530,24 @@ const DailyVerse = () => {
       });
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleConflictUpdate = async () => {
+    const c = conflictDialog.conflict;
+    if (!c) return;
+    setConflictDialog({ open: false, conflict: null, payload: null });
+    try {
+      const res = await sendPostRequest("admin", "add-daily-verse", conflictDialog.payload);
+      if (res.returnCode === 200) {
+        toast({ title: "Updated", description: "Conflicting verse updated." });
+        setEditOpen(false);
+        getAllDailyVerses();
+      } else {
+        toast({ title: "Error", description: res.returnMessage, variant: "destructive" });
+      }
+    } catch {
+      toast({ title: "Error", description: "An error occurred.", variant: "destructive" });
     }
   };
 
@@ -1043,6 +1093,34 @@ const DailyVerse = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* ═══ CONFLICT DIALOG ════════════════════════════════════════════════════ */}
+      <Dialog open={conflictDialog.open} onOpenChange={(open) => !open && setConflictDialog({ open: false, conflict: null, payload: null })}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-amber-500">
+              <AlertTriangle className="w-5 h-5" />
+              Verse Already Exists
+            </DialogTitle>
+            <DialogDescription>
+              {getConflictMessage(conflictDialog.conflict)} Update the existing entry instead?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setConflictDialog({ open: false, conflict: null, payload: null })}>
+              Cancel
+            </Button>
+            <Button variant="outline" onClick={() => { setConflictDialog({ open: false, conflict: null, payload: null }); }}>
+              <BookOpen className="w-4 h-4 mr-2" />
+              View Existing
+            </Button>
+            <Button onClick={handleConflictUpdate}>
+              <Save className="w-4 h-4 mr-2" />
+              Update Existing
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
@@ -1461,9 +1539,9 @@ const EditVerseDialog = ({
             Save Changes
           </Button>
         </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-};
+        </DialogContent>
+      </Dialog>
+    );
+  };
 
 export default DailyVerse;
