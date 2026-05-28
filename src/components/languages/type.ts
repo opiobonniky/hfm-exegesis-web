@@ -165,6 +165,22 @@ export interface Translations {
     dailyDesc: string;
     exploreAll: string;
     readDevotional: string;
+    // ── Devotionals card sample content ──
+    devoCard1Date: string;
+    devoCard1Title: string;
+    devoCard1Book: string;
+    devoCard1Excerpt: string;
+    devoCard1Tag: string;
+    devoCard2Date: string;
+    devoCard2Title: string;
+    devoCard2Book: string;
+    devoCard2Excerpt: string;
+    devoCard2Tag: string;
+    devoCard3Date: string;
+    devoCard3Title: string;
+    devoCard3Book: string;
+    devoCard3Excerpt: string;
+    devoCard3Tag: string;
     // ── Prayer Wall section ──
     prayerBadge: string;
     prayerTitle: string;
@@ -173,12 +189,23 @@ export interface Translations {
     addRequest: string;
     prayingLabel: string;
     prayNow: string;
+    // ── Prayer card sample content ──
+    prayerCard1Request: string;
+    prayerCard2Request: string;
+    prayerCard3Request: string;
     // ── Testify section ──
     testifyBadge: string;
     testifyTitle: string;
     testifyTitleHighlight: string;
     testifyDesc: string;
     shareStory: string;
+    // ── Testimony card sample content ──
+    testyCard1Title: string;
+    testyCard1Story: string;
+    testyCard2Title: string;
+    testyCard2Story: string;
+    testyCard3Title: string;
+    testyCard3Story: string;
     // ── Trivia section ──
     triviaBadge: string;
     triviaTitle: string;
@@ -189,6 +216,10 @@ export interface Translations {
     nextChallenge: string;
     wellDoneMsg: string;
     keepStudyingMsg: string;
+    // ── Trivia sample content ──
+    triviaQ1: string;
+    triviaQ2: string;
+    triviaQ3: string;
     // ── About section ──
     aboutBadge: string;
     aboutTitle: string;

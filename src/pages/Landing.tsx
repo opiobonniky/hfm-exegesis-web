@@ -27,7 +27,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/components/languages/languageProvider";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { sendPostRequest } from "@/services/api";
 import { getVerseText } from "@/utilities/bibleUtils";
 import logoImage from "@/assets/logos/exegesis_bg_rm.png";
@@ -49,169 +49,6 @@ interface MenuItem {
   mobileColor?: string;
 }
 
-const menuItems: MenuItem[] = [
-  {
-    label: "Home",
-    href: "#home",
-    icon: BookOpen,
-    description: "Welcome & daily verse",
-    mobileColor: "#FFD68A",
-  },
-  {
-    label: "Exegesis Daily",
-    href: "#exegesis-daily",
-    icon: CalendarDays,
-    description: "Daily devotionals",
-    mobileColor: "#FFB4B4",
-  },
-  {
-    label: "Prayer Wall",
-    href: "#prayer-wall",
-    icon: HandHeart,
-    description: "Community prayers",
-    mobileColor: "#A7F3D0",
-  },
-  {
-    label: "Testify",
-    href: "#testify",
-    icon: Mic2,
-    description: "Share your story",
-    mobileColor: "#C7D2FE",
-  },
-  {
-    label: "Bible Trivia",
-    href: "#bible-trivia",
-    icon: Trophy,
-    description: "Test your knowledge",
-    mobileColor: "#FFD6A5",
-  },
-  {
-    label: "About Us",
-    href: "#about",
-    icon: Users,
-    description: "Our mission",
-    mobileColor: "#99F6E4",
-  },
-  {
-    label: "Contact Us",
-    href: "#contact",
-    icon: MailIcon,
-    description: "Get in touch",
-    mobileColor: "#FBCFE8",
-  },
-];
-
-const footerLinks = [
-  { label: "Privacy Policy", href: "#" },
-  { label: "Terms of Service", href: "#" },
-  { label: "Support Center", href: "#" },
-];
-
-const socialLinks: { name: string; url: string; icon: React.ElementType }[] = [
-  { name: "Facebook", url: "https://facebook.com", icon: Facebook },
-  { name: "Twitter", url: "https://twitter.com", icon: Twitter },
-  { name: "Instagram", url: "https://instagram.com", icon: Instagram },
-];
-
-const devotionals = [
-  {
-    date: "Today",
-    title: "Walking in Faith, Not Fear",
-    book: "Joshua 1:9",
-    excerpt:
-      "God's command to Joshua was clear: be strong and courageous. Not because circumstances were easy, but because God promised His presence through every difficulty.",
-    tag: "Faith",
-  },
-  {
-    date: "Yesterday",
-    title: "The Bread of Life",
-    book: "John 6:35",
-    excerpt:
-      "Jesus declares Himself the bread that truly satisfies—nourishment not for the body, but for the eternal soul that hungers for meaning and purpose.",
-    tag: "Grace",
-  },
-  {
-    date: "2 days ago",
-    title: "Still Waters, Restored Soul",
-    book: "Psalm 23:2–3",
-    excerpt:
-      "The Shepherd does not just guide us—He restores us. He leads us to stillness so He can mend what life has broken inside us.",
-    tag: "Rest",
-  },
-];
-
-const prayers = [
-  {
-    name: "Sarah M.",
-    location: "Nairobi, KE",
-    request:
-      "Please pray for my mother's healing. She was admitted to hospital yesterday and we trust God for a miracle.",
-    likes: 42,
-    time: "2h ago",
-  },
-  {
-    name: "James O.",
-    location: "Lagos, NG",
-    request:
-      "Seeking God's direction for a new job. I have an interview next week and I need wisdom and favour.",
-    likes: 29,
-    time: "5h ago",
-  },
-  {
-    name: "Grace K.",
-    location: "Kampala, UG",
-    request:
-      "Thank you all for praying for my marriage. God has restored what I thought was lost. He is faithful!",
-    likes: 87,
-    time: "1d ago",
-  },
-];
-
-const testimonies = [
-  {
-    name: "David N.",
-    title: "God Saved My Business",
-    story:
-      "When my company was on the verge of collapse, I turned to this app and found Joshua 1:9 in Exegesis Daily. Three weeks later, a contract appeared out of nowhere. God is real.",
-    verse: "Joshua 1:9",
-    avatar: "DN",
-  },
-  {
-    name: "Ruth A.",
-    title: "Healed from Depression",
-    story:
-      "For two years I battled hopelessness. The Prayer Wall community prayed with me. Psalm 34:18 became my anchor. I am standing today as living proof of God's love.",
-    verse: "Psalm 34:18",
-    avatar: "RA",
-  },
-  {
-    name: "Peter L.",
-    title: "My Family Came to Faith",
-    story:
-      "I started sharing Exegesis Daily devotionals with my wife every morning. Within six months, my entire household gave their lives to Christ.",
-    verse: "Acts 16:31",
-    avatar: "PL",
-  },
-];
-
-const triviaQuestions = [
-  {
-    question: "How many books are in the Old Testament?",
-    answer: "39",
-    options: ["27", "39", "66", "46"],
-  },
-  {
-    question: "Who built the ark?",
-    answer: "Noah",
-    options: ["Moses", "Abraham", "Noah", "David"],
-  },
-  {
-    question: "Which book comes first in the New Testament?",
-    answer: "Matthew",
-    options: ["Mark", "John", "Luke", "Matthew"],
-  },
-];
-
 const Landing = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
@@ -227,6 +64,212 @@ const Landing = () => {
   );
   const [showScorePulse, setShowScorePulse] = useState(false);
   const menuPanelRef = useRef<HTMLDivElement | null>(null);
+
+  const menuItems = useMemo<MenuItem[]>(
+    () => [
+      {
+        label: t.landing?.navHome || "Home",
+        href: "#home",
+        icon: BookOpen,
+        description: t.landing?.navHomeDesc || "Welcome & daily verse",
+        mobileColor: "#FFD68A",
+      },
+      {
+        label: t.landing?.navExegesisDaily || "Exegesis Daily",
+        href: "#exegesis-daily",
+        icon: CalendarDays,
+        description: t.landing?.navExegesisDailyDesc || "Daily devotionals",
+        mobileColor: "#FFB4B4",
+      },
+      {
+        label: t.landing?.navPrayerWall || "Prayer Wall",
+        href: "#prayer-wall",
+        icon: HandHeart,
+        description: t.landing?.navPrayerWallDesc || "Community prayers",
+        mobileColor: "#A7F3D0",
+      },
+      {
+        label: t.landing?.navTestify || "Testify",
+        href: "#testify",
+        icon: Mic2,
+        description: t.landing?.navTestifyDesc || "Share your story",
+        mobileColor: "#C7D2FE",
+      },
+      {
+        label: t.landing?.navBibleTrivia || "Bible Trivia",
+        href: "#bible-trivia",
+        icon: Trophy,
+        description: t.landing?.navBibleTriviaDesc || "Test your knowledge",
+        mobileColor: "#FFD6A5",
+      },
+      {
+        label: t.landing?.navAbout || "About Us",
+        href: "#about",
+        icon: Users,
+        description: t.landing?.navAboutDesc || "Our mission",
+        mobileColor: "#99F6E4",
+      },
+      {
+        label: t.landing?.navContact || "Contact Us",
+        href: "#contact",
+        icon: MailIcon,
+        description: t.landing?.navContactDesc || "Get in touch",
+        mobileColor: "#FBCFE8",
+      },
+    ],
+    [t],
+  );
+
+  const footerLinks = useMemo(
+    () => [
+      { label: t.landing?.footerPrivacy || "Privacy Policy", href: "#" },
+      { label: t.landing?.footerTerms || "Terms of Service", href: "#" },
+      { label: t.landing?.footerSupport || "Support Center", href: "#" },
+    ],
+    [t],
+  );
+
+  const socialLinks: { name: string; url: string; icon: React.ElementType }[] =
+    useMemo(
+      () => [
+        {
+          name: t.landing?.socialFacebook || "Facebook",
+          url: "https://facebook.com",
+          icon: Facebook,
+        },
+        {
+          name: t.landing?.socialTwitter || "Twitter",
+          url: "https://twitter.com",
+          icon: Twitter,
+        },
+        {
+          name: t.landing?.socialInstagram || "Instagram",
+          url: "https://instagram.com",
+          icon: Instagram,
+        },
+      ],
+      [t],
+    );
+
+  const devotionals = useMemo(
+    () => [
+      {
+        date: t.landing?.devoCard1Date || "Today",
+        title: t.landing?.devoCard1Title || "Walking in Faith, Not Fear",
+        book: t.landing?.devoCard1Book || "Joshua 1:9",
+        excerpt:
+          t.landing?.devoCard1Excerpt ||
+          "God's command to Joshua was clear: be strong and courageous. Not because circumstances were easy, but because God promised His presence through every difficulty.",
+        tag: t.landing?.devoCard1Tag || "Faith",
+      },
+      {
+        date: t.landing?.devoCard2Date || "Yesterday",
+        title: t.landing?.devoCard2Title || "The Bread of Life",
+        book: t.landing?.devoCard2Book || "John 6:35",
+        excerpt:
+          t.landing?.devoCard2Excerpt ||
+          "Jesus declares Himself the bread that truly satisfies—nourishment not for the body, but for the eternal soul that hungers for meaning and purpose.",
+        tag: t.landing?.devoCard2Tag || "Grace",
+      },
+      {
+        date: t.landing?.devoCard3Date || "2 days ago",
+        title: t.landing?.devoCard3Title || "Still Waters, Restored Soul",
+        book: t.landing?.devoCard3Book || "Psalm 23:2–3",
+        excerpt:
+          t.landing?.devoCard3Excerpt ||
+          "The Shepherd does not just guide us—He restores us. He leads us to stillness so He can mend what life has broken inside us.",
+        tag: t.landing?.devoCard3Tag || "Rest",
+      },
+    ],
+    [t],
+  );
+
+  const prayers = useMemo(
+    () => [
+      {
+        name: "Sarah M.",
+        location: "Nairobi, KE",
+        request:
+          t.landing?.prayerCard1Request ||
+          "Please pray for my mother's healing. She was admitted to hospital yesterday and we trust God for a miracle.",
+        likes: 42,
+        time: "2h ago",
+      },
+      {
+        name: "James O.",
+        location: "Lagos, NG",
+        request:
+          t.landing?.prayerCard2Request ||
+          "Seeking God's direction for a new job. I have an interview next week and I need wisdom and favour.",
+        likes: 29,
+        time: "5h ago",
+      },
+      {
+        name: "Grace K.",
+        location: "Kampala, UG",
+        request:
+          t.landing?.prayerCard3Request ||
+          "Thank you all for praying for my marriage. God has restored what I thought was lost. He is faithful!",
+        likes: 87,
+        time: "1d ago",
+      },
+    ],
+    [t],
+  );
+
+  const testimonies = useMemo(
+    () => [
+      {
+        name: "David N.",
+        title: t.landing?.testyCard1Title || "God Saved My Business",
+        story:
+          t.landing?.testyCard1Story ||
+          "When my company was on the verge of collapse, I turned to this app and found Joshua 1:9 in Exegesis Daily. Three weeks later, a contract appeared out of nowhere. God is real.",
+        verse: "Joshua 1:9",
+        avatar: "DN",
+      },
+      {
+        name: "Ruth A.",
+        title: t.landing?.testyCard2Title || "Healed from Depression",
+        story:
+          t.landing?.testyCard2Story ||
+          "For two years I battled hopelessness. The Prayer Wall community prayed with me. Psalm 34:18 became my anchor. I am standing today as living proof of God's love.",
+        verse: "Psalm 34:18",
+        avatar: "RA",
+      },
+      {
+        name: "Peter L.",
+        title: t.landing?.testyCard3Title || "My Family Came to Faith",
+        story:
+          t.landing?.testyCard3Story ||
+          "I started sharing Exegesis Daily devotionals with my wife every morning. Within six months, my entire household gave their lives to Christ.",
+        verse: "Acts 16:31",
+        avatar: "PL",
+      },
+    ],
+    [t],
+  );
+
+  const triviaQuestions = useMemo(
+    () => [
+      {
+        question: t.landing?.triviaQ1 || "How many books are in the Old Testament?",
+        answer: "39",
+        options: ["27", "39", "66", "46"],
+      },
+      {
+        question: t.landing?.triviaQ2 || "Who built the ark?",
+        answer: "Noah",
+        options: ["Moses", "Abraham", "Noah", "David"],
+      },
+      {
+        question: t.landing?.triviaQ3 || "Which book comes first in the New Testament?",
+        answer: "Matthew",
+        options: ["Mark", "John", "Luke", "Matthew"],
+      },
+    ],
+    [t],
+  );
 
   const hexToRgba = (hex: string, alpha = 1) => {
     const h = hex.replace("#", "");
@@ -364,9 +407,12 @@ const Landing = () => {
               className="w-32 h-auto object-contain mb-3"
             />
 
-            {/* Bible Text */}              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black text-brand-primary leading-[0.95] tracking-tighter break-words mt-1 border-1 border-t">
-              {t.landing?.heroTitle || 'Search The'}
-              <span className="block text-brand-accent">{t.landing?.heroSubtitle || 'Scriptures Daily'}</span>
+            {/* Bible Text */}
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black text-brand-primary leading-[0.95] tracking-tighter break-words mt-1 border-t">
+              {t.landing?.heroTitle || "Search The"}
+              <span className="block text-brand-accent">
+                {t.landing?.heroSubtitle || "Scriptures Daily"}
+              </span>
             </h1>
           </div>
         </div>
@@ -408,17 +454,16 @@ const Landing = () => {
                     variant="ghost"
                     className="text-slate-500 hover:text-brand-primary font-black uppercase tracking-widest text-[10px]"
                   >
-                    Sign In
+                    {t.landing?.signIn || "Sign In"}
                   </Button>
                 </Link>
                 <Link to="/login">
                   <Button className="bg-brand-primary text-white hover:bg-brand-primary-dark font-black px-6 py-5 rounded-2xl shadow-xl shadow-brand-primary/20 uppercase tracking-widest text-xs">
-                    Get Started
+                    {t.landing?.getStartedBtn || "Get Started"}
                   </Button>
                 </Link>
               </div>
 
-              {/* Mobile: sign in + hamburger */}
               {/* Mobile nav */}
               <div className="flex lg:hidden items-center justify-between w-full">
                 {/* Left: Menu */}
@@ -436,7 +481,7 @@ const Landing = () => {
                     size="sm"
                     className="text-brand-primary font-black text-xs uppercase tracking-wider px-3 py-2"
                   >
-                    Sign In
+                    {t.landing?.signIn || "Sign In"}
                   </Button>
                 </Link>
               </div>
@@ -459,7 +504,7 @@ const Landing = () => {
                 <div className="flex items-center gap-2">
                   <div className="w-1 h-5 bg-brand-primary rounded-full" />
                   <span className="font-black text-brand-primary uppercase tracking-widest text-sm">
-                    Menu
+                    {t.landing?.menu || "Menu"}
                   </span>
                 </div>
                 <button
@@ -513,7 +558,7 @@ const Landing = () => {
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <Button className="w-full bg-brand-primary text-white font-black py-6 rounded-2xl shadow-xl shadow-brand-primary/20 text-base uppercase tracking-widest">
-                    Get Started
+                    {t.landing?.getStartedBtn || "Get Started"}
                   </Button>
                 </Link>
               </div>
@@ -528,7 +573,7 @@ const Landing = () => {
         {/* ── HERO ── */}
         <section
           id="home"
-          className=" sm:pt-28 lg:pt-36 pb-12 sm:pb-20 lg:pb-28 bg-brand-bg overflow-x-hidden"
+          className="sm:pt-28 lg:pt-36 pb-12 sm:pb-20 lg:pb-28 bg-brand-bg overflow-x-hidden"
         >
           <div className="w-full max-w-screen-xl mx-auto px-4 sm:px-6 md:px-8 lg:px-12">
             <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-20 items-center">
@@ -539,20 +584,17 @@ const Landing = () => {
                 transition={{ duration: 0.8 }}
                 className="flex flex-col space-y-5 sm:space-y-8 text-center lg:text-left w-full max-w-full"
               >
-               
-
-                {/* Heading */}
-
                 {/* Paragraph */}
                 <p className="text-base sm:text-lg md:text-xl text-slate-600 max-w-lg leading-relaxed font-medium mx-auto lg:mx-0 text-center lg:text-left break-words">
-                  {t.landing?.welcome || 'Exegesis is the process of carefully studying Scripture to discover the original meaning in its historical and literary context.'}
+                  {t.landing?.welcome ||
+                    "Exegesis is the process of carefully studying Scripture to discover the original meaning in its historical and literary context."}
                 </p>
 
                 {/* CTA */}
                 <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start pt-2 w-full">
                   <Link to="/login" className="w-full sm:w-auto">
                     <Button className="w-full bg-brand-accent text-white text-sm sm:text-base px-6 sm:px-8 py-5 sm:py-6 rounded-[2rem] font-black shadow-2xl shadow-brand-accent/30 hover:bg-brand-accent-dark hover:scale-105 transition-all uppercase tracking-widest">
-                      {t.landing?.getStarted || 'Start Your Journey'}
+                      {t.landing?.getStarted || "Start Your Journey"}
                       <ArrowRight className="ml-2 w-4 h-4 sm:w-5 sm:h-5" />
                     </Button>
                   </Link>
@@ -565,7 +607,7 @@ const Landing = () => {
                       31K+
                     </div>
                     <div className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-widest mt-0.5">
-                      Holy Verses
+                      {t.landing?.statVerses || "Holy Verses"}
                     </div>
                   </div>
 
@@ -576,7 +618,7 @@ const Landing = () => {
                       66
                     </div>
                     <div className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-widest mt-0.5">
-                      Sacred Books
+                      {t.landing?.statSacredBooks || "Sacred Books"}
                     </div>
                   </div>
 
@@ -587,7 +629,7 @@ const Landing = () => {
                       150+
                     </div>
                     <div className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-widest mt-0.5">
-                      Explanations
+                      {t.landing?.statExplanations || "Explanations"}
                     </div>
                   </div>
                 </div>
@@ -633,7 +675,7 @@ const Landing = () => {
                             {dailyVerse.verseNumber}
                           </span>
                           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
-                            Holy Bible
+                            {t.landing?.holyBible || "Holy Bible"}
                           </span>
                         </div>
 
@@ -644,7 +686,7 @@ const Landing = () => {
                     </>
                   ) : (
                     <p className="text-slate-400 text-base font-bold">
-                      Seeking inspiration...
+                      {t.landing?.seekingInspiration || "Seeking inspiration..."}
                     </p>
                   )}
                 </div>
@@ -668,9 +710,15 @@ const Landing = () => {
           <div className="w-[85vw] max-w-sm sm:max-w-md lg:max-w-none">
             <div className="flex items-center justify-center gap-6 sm:gap-12 md:gap-24 flex-wrap">
               {[
-                { icon: ShieldCheck, label: "Quality" },
-                { icon: Zap, label: "Service" },
-                { icon: Globe, label: "Integrity" },
+                {
+                  icon: ShieldCheck,
+                  label: t.landing?.mottoQuality || "Quality",
+                },
+                { icon: Zap, label: t.landing?.mottoService || "Service" },
+                {
+                  icon: Globe,
+                  label: t.landing?.mottoIntegrity || "Integrity",
+                },
               ].map(({ icon: Icon, label }) => (
                 <div key={label} className="flex items-center gap-3 group">
                   <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-brand-bg flex items-center justify-center group-hover:bg-brand-primary/10 transition-colors">
@@ -701,16 +749,19 @@ const Landing = () => {
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-bg border border-slate-200 mb-5">
                   <div className="w-1.5 h-1.5 rounded-full bg-brand-primary" />
                   <span className="text-[10px] sm:text-xs font-black text-slate-400 uppercase tracking-widest">
-                    {t.landing?.features || 'Our Services'}
+                    {t.landing?.featuresBadge || "Our Services"}
                   </span>
                 </div>
                 <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-slate-900 mb-5 sm:mb-8 font-[family-name:var(--font-heading)] tracking-tighter leading-none">
-                  {t.landing?.features || 'Our'} <span className="text-brand-primary">{t.landing?.features || 'Spirit-Led'}</span>{" "}
-                  {t.landing?.features || 'Features'}
+                  {t.landing?.featuresTitle || "Our"}{" "}
+                  <span className="text-brand-primary">
+                    {t.landing?.featuresTitleHighlight || "Spirit-Led"}
+                  </span>
+                  <span className="block sm:inline"> {t.landing?.features || "Features"}</span>
                 </h2>
                 <p className="text-base sm:text-lg md:text-xl text-slate-500 max-w-2xl mx-auto leading-relaxed font-medium">
-                  We are passionate Jesus followers dedicated to helping you
-                  shine with excellence and integrity in everything you do.
+                  {t.landing?.featuresDesc ||
+                    "We are passionate Jesus followers dedicated to helping you shine with excellence and integrity in everything you do."}
                 </p>
               </motion.div>
             </div>
@@ -719,34 +770,45 @@ const Landing = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
               {[
                 {
-                  title: "Deep Biblical Exegesis",
+                  title: t.landing?.featureExegesisTitle ||
+                    "Deep Biblical Exegesis",
                   icon: BookOpen,
-                  desc: "Reach a deeper understanding of the Word. Discover original meanings through historical and literary context.",
+                  desc: t.landing?.featureExegesisDesc ||
+                    "Reach a deeper understanding of the Word. Discover original meanings through historical and literary context.",
                 },
                 {
-                  title: "Daily Kingdom Insights",
+                  title: t.landing?.featureKingdomTitle ||
+                    "Daily Kingdom Insights",
                   icon: Sparkles,
-                  desc: "Start each day with purpose-driven devotionals that reflect your mission and message in Christ.",
+                  desc: t.landing?.featureKingdomDesc ||
+                    "Start each day with purpose-driven devotionals that reflect your mission and message in Christ.",
                 },
                 {
-                  title: "Community Prayer Wall",
+                  title: t.landing?.featurePrayerTitle ||
+                    "Community Prayer Wall",
                   icon: HandHeart,
-                  desc: "Build strong engagement and spread the Gospel through our dedicated community prayer platform.",
+                  desc: t.landing?.featurePrayerDesc ||
+                    "Build strong engagement and spread the Gospel through our dedicated community prayer platform.",
                 },
                 {
-                  title: "Bible Knowledge Trivia",
+                  title: t.landing?.featureTriviaTitle ||
+                    "Bible Knowledge Trivia",
                   icon: Trophy,
-                  desc: "Engage with the Word right where you are. Be found searching for truth, hope, and deeper wisdom.",
+                  desc: t.landing?.featureTriviaDesc ||
+                    "Engage with the Word right where you are. Be found searching for truth, hope, and deeper wisdom.",
                 },
                 {
-                  title: "Spirit-Filled Growth",
+                  title: t.landing?.featureGrowthTitle ||
+                    "Spirit-Filled Growth",
                   icon: FlameKindling,
-                  desc: "We walk with you every step of the way, providing tools for your calling and Kingdom impact.",
+                  desc: t.landing?.featureGrowthDesc ||
+                    "We walk with you every step of the way, providing tools for your calling and Kingdom impact.",
                 },
                 {
-                  title: "Kingdom Mobile App",
+                  title: t.landing?.featureAppTitle || "Kingdom Mobile App",
                   icon: Globe,
-                  desc: "Take the Word with you everywhere. Reach your community right where they are—on their phones.",
+                  desc: t.landing?.featureAppDesc ||
+                    "Take the Word with you everywhere. Reach your community right where they are—on their phones.",
                 },
               ].map((f, i) => (
                 <motion.div
@@ -793,15 +855,18 @@ const Landing = () => {
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-slate-200 mb-5 shadow-sm">
                   <CalendarDays className="w-3.5 h-3.5 text-brand-primary" />
                   <span className="text-[10px] sm:text-xs font-black text-slate-400 uppercase tracking-widest">
-                    Inspiration
+                    {t.landing?.dailyBadge || "Inspiration"}
                   </span>
                 </div>
                 <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 font-[family-name:var(--font-heading)] tracking-tighter leading-none">
-                  Exegesis <span className="text-brand-primary">Daily</span>
+                  {t.landing?.dailyTitle || "Exegesis"}{" "}
+                  <span className="text-brand-primary">
+                    {t.landing?.dailyTitleHighlight || "Daily"}
+                  </span>
                 </h2>
                 <p className="text-base sm:text-lg text-slate-500 mt-4 max-w-md font-medium">
-                  Fresh devotional content every morning rooted in careful
-                  Scripture study.
+                  {t.landing?.dailyDesc ||
+                    "Fresh devotional content every morning rooted in careful Scripture study."}
                 </p>
               </motion.div>
               <Link to="/login" className="self-start lg:self-auto">
@@ -809,7 +874,8 @@ const Landing = () => {
                   variant="outline"
                   className="border-slate-300 text-slate-600 hover:bg-white px-6 sm:px-8 py-5 sm:py-6 rounded-2xl font-black text-sm sm:text-base shadow-sm whitespace-nowrap"
                 >
-                  Explore All <ChevronRight className="w-5 h-5 ml-1" />
+                  {t.landing?.exploreAll || "Explore All"}{" "}
+                  <ChevronRight className="w-5 h-5 ml-1" />
                 </Button>
               </Link>
             </div>
@@ -843,7 +909,8 @@ const Landing = () => {
                     "{d.excerpt}"
                   </p>
                   <div className="mt-auto pt-5 border-t border-slate-100 flex items-center text-brand-primary font-black uppercase tracking-widest text-[10px] sm:text-xs gap-2 group-hover:gap-4 transition-all">
-                    Read Devotional <ArrowRight className="w-4 h-4" />
+                    {t.landing?.readDevotional || "Read Devotional"}{" "}
+                    <ArrowRight className="w-4 h-4" />
                   </div>
                 </motion.div>
               ))}
@@ -867,20 +934,23 @@ const Landing = () => {
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-bg border border-slate-200 mb-5">
                   <HandHeart className="w-3.5 h-3.5 text-brand-accent" />
                   <span className="text-[10px] sm:text-xs font-black text-slate-400 uppercase tracking-widest">
-                    Community
+                    {t.landing?.prayerBadge || "Community"}
                   </span>
                 </div>
                 <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 font-[family-name:var(--font-heading)] tracking-tighter leading-none">
-                  Prayer <span className="text-brand-accent">Wall</span>
+                  {t.landing?.prayerTitle || "Prayer"}{" "}
+                  <span className="text-brand-accent">
+                    {t.landing?.prayerTitleHighlight || "Wall"}
+                  </span>
                 </h2>
                 <p className="text-base sm:text-lg text-slate-500 mt-4 max-w-md font-medium">
-                  Lift each other up in faith. Submit a request or stand in the
-                  gap.
+                  {t.landing?.prayerDesc ||
+                    "Lift each other up in faith. Submit a request or stand in the gap."}
                 </p>
               </motion.div>
               <Link to="/login" className="self-start lg:self-auto">
                 <Button className="bg-brand-primary text-white px-6 sm:px-8 py-5 sm:py-6 rounded-[1.5rem] font-black text-sm sm:text-base shadow-2xl shadow-brand-primary/30 hover:bg-brand-primary-dark transition-all uppercase tracking-widest whitespace-nowrap">
-                  Add Request
+                  {t.landing?.addRequest || "Add Request"}
                 </Button>
               </Link>
             </div>
@@ -918,13 +988,16 @@ const Landing = () => {
                   <div className="flex items-center justify-between pt-4 border-t border-slate-100">
                     <button className="flex items-center gap-2 text-[10px] font-black text-slate-400 hover:text-brand-primary transition-colors uppercase tracking-widest">
                       <HandHeart className="w-4 h-4" />
-                      Praying ({p.likes})
+                      {(t.landing?.prayingLabel || "Praying ({n})").replace(
+                        "{n}",
+                        String(p.likes),
+                      )}
                     </button>
                     <Link
                       to="/login"
                       className="text-[10px] font-black text-brand-accent uppercase tracking-widest hover:underline"
                     >
-                      PRAY NOW →
+                      {t.landing?.prayNow || "PRAY NOW →"}
                     </Link>
                   </div>
                 </motion.div>
@@ -949,15 +1022,18 @@ const Landing = () => {
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-slate-200 mb-5">
                   <Mic2 className="w-3.5 h-3.5 text-brand-primary" />
                   <span className="text-[10px] sm:text-xs font-black text-slate-400 uppercase tracking-widest">
-                    Testimonies
+                    {t.landing?.testifyBadge || "Testimonies"}
                   </span>
                 </div>
                 <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 font-[family-name:var(--font-heading)] tracking-tighter leading-none">
-                  Testify & <span className="text-brand-primary">Inspire</span>
+                  {t.landing?.testifyTitle || "Testify &"}{" "}
+                  <span className="text-brand-primary">
+                    {t.landing?.testifyTitleHighlight || "Inspire"}
+                  </span>
                 </h2>
                 <p className="text-base sm:text-lg text-slate-500 mt-4 max-w-md font-medium">
-                  God is still writing amazing stories. Share your journey and
-                  help others see His power.
+                  {t.landing?.testifyDesc ||
+                    "God is still writing amazing stories. Share your journey and help others see His power."}
                 </p>
               </motion.div>
               <Link to="/login" className="self-start lg:self-auto">
@@ -965,15 +1041,16 @@ const Landing = () => {
                   variant="outline"
                   className="border-slate-300 text-slate-600 hover:bg-white px-6 sm:px-8 py-5 sm:py-6 rounded-2xl font-black text-sm sm:text-base shadow-sm whitespace-nowrap"
                 >
-                  Share Your Story <ArrowRight className="ml-2 w-4 h-4" />
+                  {t.landing?.shareStory || "Share Your Story"}{" "}
+                  <ArrowRight className="ml-2 w-4 h-4" />
                 </Button>
               </Link>
             </div>
 
             <div className="flex lg:grid lg:grid-cols-3 gap-4 sm:gap-8 overflow-x-auto pb-4 lg:pb-0 mobile-scroll-snap -mx-4 px-4 lg:mx-0 lg:px-0">
-              {testimonies.map((t, i) => (
+              {testimonies.map((tItem, i) => (
                 <motion.div
-                  key={t.name}
+                  key={tItem.name}
                   initial={{ opacity: 0, scale: 0.95 }}
                   whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true, margin: "-60px" }}
@@ -982,22 +1059,22 @@ const Landing = () => {
                 >
                   <Quote className="w-8 h-8 sm:w-10 sm:h-10 text-brand-primary/10 absolute top-6 right-6" />
                   <h3 className="text-xl sm:text-2xl font-black text-brand-primary mb-3 font-[family-name:var(--font-heading)] tracking-tight group-hover:text-brand-accent transition-colors">
-                    {t.title}
+                    {tItem.title}
                   </h3>
                   <p className="text-sm sm:text-base text-slate-500 leading-relaxed font-medium italic mb-6">
-                    "{t.story}"
+                    "{tItem.story}"
                   </p>
                   <div className="mt-auto pt-5 border-t border-slate-100 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-brand-bg flex items-center justify-center text-brand-primary font-black text-xs border border-slate-100">
-                        {t.avatar}
+                        {tItem.avatar}
                       </div>
                       <div>
                         <p className="text-base font-black text-slate-900 tracking-tight">
-                          {t.name}
+                          {tItem.name}
                         </p>
                         <p className="text-[10px] font-black text-brand-accent uppercase tracking-widest">
-                          {t.verse}
+                          {tItem.verse}
                         </p>
                       </div>
                     </div>
@@ -1025,15 +1102,18 @@ const Landing = () => {
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-bg border border-slate-200 mb-5">
                 <Trophy className="w-3.5 h-3.5 text-brand-accent" />
                 <span className="text-[10px] sm:text-xs text-slate-400 font-black uppercase tracking-widest">
-                  Bible Challenge
+                  {t.landing?.triviaBadge || "Bible Challenge"}
                 </span>
               </div>
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 font-[family-name:var(--font-heading)] mb-5 leading-tight tracking-tighter">
-                Test Your <span className="text-brand-primary">Knowledge</span>
+                {t.landing?.triviaTitle || "Test Your"}{" "}
+                <span className="text-brand-primary">
+                  {t.landing?.triviaTitleHighlight || "Knowledge"}
+                </span>
               </h2>
               <p className="text-base sm:text-lg md:text-xl text-slate-500 mb-10 sm:mb-14 max-w-xl mx-auto leading-relaxed font-medium">
-                Grow in the Word through our interactive challenges. Hide His
-                Word in your heart while having fun!
+                {t.landing?.triviaDesc ||
+                  "Grow in the Word through our interactive challenges. Hide His Word in your heart while having fun!"}
               </p>
             </motion.div>
 
@@ -1047,7 +1127,9 @@ const Landing = () => {
               <div className="flex items-center justify-between mb-8 sm:mb-12">
                 <div className="flex flex-col items-start">
                   <span className="text-[10px] sm:text-xs font-black text-slate-400 uppercase tracking-widest mb-1">
-                    Question {triviaIndex + 1} of {triviaQuestions.length}
+                    {(t.landing?.questionOf || "Question {n} of {total}")
+                      .replace("{n}", String(triviaIndex + 1))
+                      .replace("{total}", String(triviaQuestions.length))}
                   </span>
                   <div className="flex gap-1">
                     {triviaQuestions.map((_, idx) => (
@@ -1060,7 +1142,10 @@ const Landing = () => {
                 </div>
                 <div className="relative">
                   <span className="text-xs sm:text-sm px-4 sm:px-6 py-2.5 sm:py-3 rounded-2xl bg-brand-accent text-white font-black inline-flex items-center shadow-lg shadow-brand-accent/20 uppercase tracking-widest">
-                    Score: {triviaScore}
+                    {(t.landing?.score || "Score: {n}").replace(
+                      "{n}",
+                      String(triviaScore),
+                    )}
                   </span>
                   {showScorePulse && (
                     <span className="absolute -top-7 right-0 text-xl text-green-500 font-black score-pulse">
@@ -1128,12 +1213,14 @@ const Landing = () => {
                     {triviaSelected === currentQ.answer ? (
                       <span className="flex items-center gap-2">
                         <Sparkles className="text-brand-accent w-5 h-5" />
-                        Well done! You're growing in wisdom.
+                        {t.landing?.wellDoneMsg ||
+                          "Well done! You're growing in wisdom."}
                       </span>
                     ) : (
                       <span className="flex items-center gap-2">
                         <Zap className="text-red-500 w-5 h-5" />
-                        Keep studying! The Word is a lamp to your feet.
+                        {t.landing?.keepStudyingMsg ||
+                          "Keep studying! The Word is a lamp to your feet."}
                       </span>
                     )}
                   </p>
@@ -1141,7 +1228,7 @@ const Landing = () => {
                     onClick={nextTrivia}
                     className="w-full sm:w-auto bg-brand-primary text-white hover:bg-brand-primary-dark px-8 py-5 rounded-2xl font-black text-sm sm:text-base shadow-xl shadow-brand-primary/20 uppercase tracking-widest"
                   >
-                    Next Challenge
+                    {t.landing?.nextChallenge || "Next Challenge"}
                   </Button>
                 </motion.div>
               )}
@@ -1165,34 +1252,46 @@ const Landing = () => {
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-slate-200 mb-5">
                   <Users className="w-3.5 h-3.5 text-brand-primary" />
                   <span className="text-[10px] sm:text-xs text-slate-400 font-black uppercase tracking-widest">
-                    Our Calling
+                    {t.landing?.aboutBadge || "Our Calling"}
                   </span>
                 </div>
                 <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 font-[family-name:var(--font-heading)] mb-6 leading-tight tracking-tighter">
-                  Built for Kingdom{" "}
-                  <span className="text-brand-primary">Impact</span>
+                  {t.landing?.aboutTitle || "Built for Kingdom"}{" "}
+                  <span className="text-brand-primary">
+                    {t.landing?.aboutTitleHighlight || "Impact"}
+                  </span>
                 </h2>
                 <div className="space-y-4 text-slate-500 text-base sm:text-lg leading-relaxed font-medium">
                   <p>
-                    At Exegesis, we believe your spiritual journey deserves more
-                    than just a casual reading—it deserves a powerful,
-                    purpose-driven digital footprint rooted in faith and fueled
-                    by the Gospel.
+                    {t.landing?.aboutPara1 ||
+                      "At Exegesis, we believe your spiritual journey deserves more than just a casual reading—it deserves a powerful, purpose-driven digital footprint rooted in faith and fueled by the Gospel."}
                   </p>
                   <p>
-                    We're not just another app—we're passionate Jesus followers,
-                    tech experts, and creative visionaries who live to serve the
-                    Lord in everything we do.
+                    {t.landing?.aboutPara2 ||
+                      "We're not just another app—we're passionate Jesus followers, tech experts, and creative visionaries who live to serve the Lord in everything we do."}
                   </p>
                   <p className="font-black text-brand-accent italic text-xl sm:text-2xl tracking-tight">
-                    Quality, Service, & Integrity — Built for His Glory.
+                    {t.landing?.aboutMotto ||
+                      "Quality, Service, & Integrity — Built for His Glory."}
                   </p>
                 </div>
                 <div className="grid grid-cols-3 gap-4 sm:gap-8 mt-10">
                   {[
-                    { stat: "31K+", label: "Verses Explored" },
-                    { stat: "150+", label: "Daily Insights" },
-                    { stat: "Global", label: "Kingdom Reach" },
+                    {
+                      stat: t.landing?.aboutStatVerses || "31K+",
+                      label: t.landing?.aboutStatVersesLabel ||
+                        "Verses Explored",
+                    },
+                    {
+                      stat: t.landing?.aboutStatDaily || "150+",
+                      label: t.landing?.aboutStatDailyLabel ||
+                        "Daily Insights",
+                    },
+                    {
+                      stat: t.landing?.aboutStatGlobal || "Global",
+                      label: t.landing?.aboutStatGlobalLabel ||
+                        "Kingdom Reach",
+                    },
                   ].map((s) => (
                     <div key={s.label}>
                       <p className="text-2xl sm:text-3xl font-black text-brand-primary tracking-tighter">
@@ -1210,23 +1309,31 @@ const Landing = () => {
                 {[
                   {
                     icon: ShieldCheck,
-                    title: "Rooted in Truth",
-                    desc: "Every insight and explanation is grounded in sound biblical scholarship and prayer.",
+                    title: t.landing?.aboutValueRootedTitle ||
+                      "Rooted in Truth",
+                    desc: t.landing?.aboutValueRootedDesc ||
+                      "Every insight and explanation is grounded in sound biblical scholarship and prayer.",
                   },
                   {
                     icon: Globe,
-                    title: "Global Community",
-                    desc: "Pray, testify, and grow alongside believers from every corner of the world.",
+                    title: t.landing?.aboutValueGlobalTitle ||
+                      "Global Community",
+                    desc: t.landing?.aboutValueGlobalDesc ||
+                      "Pray, testify, and grow alongside believers from every corner of the world.",
                   },
                   {
                     icon: Sparkles,
-                    title: "Spirit-Led Tech",
-                    desc: "We use modern technology to illuminate ancient wisdom for today's generation.",
+                    title: t.landing?.aboutValueSpiritTitle ||
+                      "Spirit-Led Tech",
+                    desc: t.landing?.aboutValueSpiritDesc ||
+                      "We use modern technology to illuminate ancient wisdom for today's generation.",
                   },
                   {
                     icon: Zap,
-                    title: "Always Growing",
-                    desc: "Constant updates and fresh content to keep your spiritual journey vibrant and active.",
+                    title: t.landing?.aboutValueGrowingTitle ||
+                      "Always Growing",
+                    desc: t.landing?.aboutValueGrowingDesc ||
+                      "Constant updates and fresh content to keep your spiritual journey vibrant and active.",
                   },
                 ].map((v, i) => (
                   <motion.div
@@ -1264,17 +1371,20 @@ const Landing = () => {
               transition={{ duration: 0.6 }}
             >
               <h2 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-black font-[family-name:var(--font-heading)] mb-6 sm:mb-8 leading-tight text-brand-primary tracking-tighter">
-                Ready to Deepen Your <br className="hidden sm:block" />
-                <span className="text-brand-accent">Kingdom Impact?</span>
+                {t.landing?.ctaTitle || "Ready to Deepen Your"}{" "}
+                <br className="hidden sm:block" />
+                <span className="text-brand-accent">
+                  {t.landing?.ctaTitleHighlight || "Kingdom Impact?"}
+                </span>
               </h2>
               <p className="text-slate-500 text-base sm:text-lg md:text-xl mb-8 sm:mb-12 max-w-xl mx-auto leading-relaxed font-medium">
-                Join thousands of believers who are searching the Scriptures and
-                living out their calling with excellence.
+                {t.landing?.ctaDesc ||
+                  "Join thousands of believers who are searching the Scriptures and living out their calling with excellence."}
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Link to="/login" className="w-full sm:w-auto">
                   <Button className="w-full bg-brand-primary text-white px-8 sm:px-12 py-6 sm:py-8 rounded-[2rem] font-black text-base sm:text-xl hover:bg-brand-primary-dark hover:scale-105 transition-all shadow-2xl shadow-brand-primary/20 uppercase tracking-widest">
-                    Start Your Journey Today
+                    {t.landing?.ctaButton || "Start Your Journey Today"}
                     <ArrowRight className="ml-2 w-5 h-5" />
                   </Button>
                 </Link>
@@ -1283,7 +1393,7 @@ const Landing = () => {
                     variant="outline"
                     className="w-full border-slate-300 text-slate-600 px-8 sm:px-12 py-6 sm:py-8 rounded-[2rem] font-black text-base sm:text-xl hover:bg-white hover:border-brand-primary hover:text-brand-primary transition-all uppercase tracking-widest"
                   >
-                    Sign In
+                    {t.landing?.signIn || "Sign In"}
                   </Button>
                 </Link>
               </div>
@@ -1312,8 +1422,8 @@ const Landing = () => {
                   </span>
                 </div>
                 <p className="text-slate-400 text-sm leading-relaxed font-medium">
-                  Helping you shine with excellence and integrity through the
-                  power of the Word.
+                  {t.landing?.footerDesc ||
+                    "Helping you shine with excellence and integrity through the power of the Word."}
                 </p>
                 <div className="flex gap-3">
                   {socialLinks.map((s) => (
@@ -1332,7 +1442,7 @@ const Landing = () => {
 
               <div>
                 <h4 className="text-brand-accent font-black text-[10px] sm:text-xs mb-6 uppercase tracking-widest opacity-80">
-                  Navigation
+                  {t.landing?.footerNavHeading || "Navigation"}
                 </h4>
                 <ul className="space-y-3">
                   {menuItems.map((item) => (
@@ -1350,7 +1460,7 @@ const Landing = () => {
 
               <div>
                 <h4 className="text-brand-accent font-black text-[10px] sm:text-xs mb-6 uppercase tracking-widest opacity-80">
-                  Resources
+                  {t.landing?.footerResourcesHeading || "Resources"}
                 </h4>
                 <ul className="space-y-3">
                   {footerLinks.map((link) => (
@@ -1368,16 +1478,16 @@ const Landing = () => {
 
               <div>
                 <h4 className="text-brand-accent font-black text-[10px] sm:text-xs mb-6 uppercase tracking-widest opacity-80">
-                  Our Motto
+                  {t.landing?.footerMottoHeading || "Our Motto"}
                 </h4>
                 <div className="bg-white/5 border border-white/10 rounded-2xl sm:rounded-3xl p-6 sm:p-8 space-y-3 backdrop-blur-sm">
                   <p className="text-white font-black text-xl sm:text-2xl tracking-tighter uppercase italic leading-none">
-                    Quality, <br />
-                    Service, & <br />
-                    Integrity!
+                    {t.landing?.footerMottoLine1 || "Quality,"}
+                    <br />
+                    {t.landing?.footerMottoLine2 || "Service, & Integrity!"}
                   </p>
                   <p className="text-slate-500 text-[9px] sm:text-[10px] font-black uppercase tracking-widest">
-                    Built for His Glory
+                    {t.landing?.footerBuiltFor || "Built for His Glory"}
                   </p>
                 </div>
               </div>
@@ -1385,12 +1495,15 @@ const Landing = () => {
 
             <div className="pt-8 border-t border-white/5 flex flex-col sm:flex-row justify-between items-center gap-4 text-center sm:text-left">
               <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest">
-                © {new Date().getFullYear()} Exegesis. Built for Kingdom Impact.
+                {(t.landing?.footerCopyright || "© {year} Exegesis. Built for Kingdom Impact.").replace(
+                  "{year}",
+                  String(new Date().getFullYear()),
+                )}
               </p>
               <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5">
-                Made with{" "}
+                {t.landing?.footerMadeWith || "Made with"}{" "}
                 <Heart className="w-3.5 h-3.5 text-brand-accent fill-brand-accent" />{" "}
-                for the Glory of God
+                {t.landing?.footerGloryOfGod || "for the Glory of God"}
               </p>
             </div>
           </div>
