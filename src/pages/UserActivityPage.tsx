@@ -74,6 +74,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { sendPostRequest } from "@/services/api";
+import { useLanguage } from "@/components/languages/languageProvider";
 
 interface ActivityRecord {
   id: number;
@@ -124,37 +125,37 @@ interface PagedActivity {
   summary?: ActivitySummary;
 }
 
-const SUCCESS_FILTERS = [
-  { value: "all", label: "All Attempts" },
-  { value: "success", label: "Successful" },
-  { value: "failed", label: "Failed" },
+const getSuccessFilters = (t: any) => [
+  { value: "all", label: t?.userActivity?.filterAllAttempts || "All Attempts" },
+  { value: "success", label: t?.userActivity?.filterSuccessful || "Successful" },
+  { value: "failed", label: t?.userActivity?.filterFailed || "Failed" },
 ];
-const DEVICE_FILTERS = [
-  { value: "all", label: "All Devices" },
-  { value: "DESKTOP", label: "Desktop" },
-  { value: "MOBILE", label: "Mobile" },
-  { value: "TABLET", label: "Tablet" },
-  { value: "BOT", label: "Bot" },
+const getDeviceFilters = (t: any) => [
+  { value: "all", label: t?.userActivity?.filterAllDevices || "All Devices" },
+  { value: "DESKTOP", label: t?.userActivity?.filterDesktop || "Desktop" },
+  { value: "MOBILE", label: t?.userActivity?.filterMobile || "Mobile" },
+  { value: "TABLET", label: t?.userActivity?.filterTablet || "Tablet" },
+  { value: "BOT", label: t?.userActivity?.filterBot || "Bot" },
 ];
-const SESSION_FILTERS = [
-  { value: "all", label: "All Sessions" },
-  { value: "online", label: "Online now" },
-  { value: "ended", label: "Ended" },
+const getSessionFilters = (t: any) => [
+  { value: "all", label: t?.userActivity?.filterAllSessions || "All Sessions" },
+  { value: "online", label: t?.userActivity?.filterOnlineNow || "Online now" },
+  { value: "ended", label: t?.userActivity?.filterEnded || "Ended" },
 ];
 const PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
 const DEBOUNCE_MS = 400;
 const DEFAULT_PAGE_SIZE = 20;
 
-const timeAgo = (ts: string | number | null | undefined) => {
+const timeAgo = (ts: string | number | null | undefined, t?: any) => {
   if (!ts) return "—";
   const date = new Date(ts);
   if (isNaN(date.getTime())) return "—";
   const m = Math.floor((Date.now() - date.getTime()) / 60000);
-  if (m < 1) return "just now";
-  if (m < 60) return `${m}m ago`;
+  if (m < 1) return t?.userActivity?.timeJustNow || "just now";
+  if (m < 60) return t?.userActivity?.timeMinAgo?.replace('{n}', String(m)) || `${m}m ago`;
   const h = Math.floor(m / 60);
-  if (h < 24) return `${h}h ago`;
-  return `${Math.floor(h / 24)}d ago`;
+  if (h < 24) return t?.userActivity?.timeHoursAgo?.replace('{n}', String(h)) || `${h}h ago`;
+  return t?.userActivity?.timeDaysAgo?.replace('{n}', String(Math.floor(h / 24))) || `${Math.floor(h / 24)}d ago`;
 };
 
 const formatDate = (ts: string | number | null | undefined) => {
@@ -243,20 +244,22 @@ const DeviceBadge = ({ type }: { type: string }) => {
 const SuccessBadge = ({
   success,
   reason,
+  t,
 }: {
   success: boolean;
   reason?: string;
+  t?: any;
 }) =>
   success ? (
     <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded">
-      <CheckCircle2 className="w-3 h-3" /> Login
+      <CheckCircle2 className="w-3 h-3" /> {t?.userActivity?.badgeSuccessLogin || 'Login'}
     </span>
   ) : (
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
           <span className="inline-flex items-center gap-1 text-[10px] font-bold text-rose-700 bg-rose-50 border border-rose-200 px-1.5 py-0.5 rounded cursor-help">
-            <XCircle className="w-3 h-3" /> Failed
+            <XCircle className="w-3 h-3" /> {t?.userActivity?.badgeFailed || 'Failed'}
           </span>
         </TooltipTrigger>
         {reason && (
@@ -268,7 +271,7 @@ const SuccessBadge = ({
     </TooltipProvider>
   );
 
-const SessionBadge = ({ record }: { record: ActivityRecord }) => {
+const SessionBadge = ({ record, t }: { record: ActivityRecord; t?: any }) => {
   if (!record.success) return null;
   if (record.loggedOutAt) {
     const dur = sessionDuration(record.loggedInAt, record.loggedOutAt);
@@ -276,10 +279,10 @@ const SessionBadge = ({ record }: { record: ActivityRecord }) => {
       <div className="space-y-0.5">
         <span className="inline-flex items-center gap-1 text-[10px] text-stone-500 bg-stone-50 border border-stone-200 px-1.5 py-0.5 rounded font-medium">
           <LogOut className="w-2.5 h-2.5" />
-          {dur ?? "ended"}
+          {dur ?? (t?.userActivity?.badgeEnded || 'ended')}
         </span>
         <p className="text-[10px] text-muted-foreground font-mono leading-tight">
-          out {timeAgo(record.loggedOutAt)}
+          {t?.userActivity?.timeOut || 'out'} {timeAgo(record.loggedOutAt, t)}
         </p>
       </div>
     );
@@ -287,7 +290,7 @@ const SessionBadge = ({ record }: { record: ActivityRecord }) => {
   return (
     <span className="inline-flex items-center gap-1 text-[10px] font-bold text-teal-700 bg-teal-50 border border-teal-200 px-1.5 py-0.5 rounded">
       <span className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse" />
-      Online
+      {t?.userActivity?.badgeOnline || 'Online'}
     </span>
   );
 };
@@ -375,13 +378,16 @@ const ActivityDetailDialog = ({
   record,
   open,
   onClose,
+  t,
 }: {
   record: ActivityRecord | null;
   open: boolean;
   onClose: () => void;
+  t?: any;
 }) => {
   const [showUA, setShowUA] = useState(false);
   if (!record) return null;
+  const ua = t?.userActivity || {};
 
   const Row = ({
     label,
@@ -423,25 +429,25 @@ const ActivityDetailDialog = ({
             >
               {(record.username ?? "?")[0].toUpperCase()}
             </div>
-            Session Details
+            {ua.sessionDetails || 'Session Details'}
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-0 mt-2">
           <Row
-            label="Record ID"
+            label={ua.recordId || 'Record ID'}
             value={record.id ?? "—"}
             mono
             icon={<Hash className="w-3.5 h-3.5" />}
           />
           <Row
-            label="User ID"
+            label={ua.userId || 'User ID'}
             value={record.userId ?? "—"}
             mono
             icon={<User className="w-3.5 h-3.5" />}
           />
           <Row
-            label="Username"
+            label={ua.username || 'Username'}
             value={
               <span className="font-mono font-bold">
                 @{record.username ?? "—"}
@@ -450,86 +456,87 @@ const ActivityDetailDialog = ({
             icon={<User className="w-3.5 h-3.5" />}
           />
           <Row
-            label="Email"
-            value={record.email || "—"}
+            label={ua.email || 'Email'}
+            value={record.email || (ua.noEmail || '—')}
             icon={<Mail className="w-3.5 h-3.5" />}
           />
           <Row
-            label="Status"
+            label={ua.status || 'Status'}
             value={
               <SuccessBadge
                 success={record.success}
                 reason={record.failureReason}
+                t={t}
               />
             }
             icon={<ShieldAlert className="w-3.5 h-3.5" />}
           />
           {record.failureReason && (
             <Row
-              label="Failure reason"
+              label={ua.failureReason || 'Failure reason'}
               value={record.failureReason}
               icon={<AlertTriangle className="w-3.5 h-3.5" />}
             />
           )}
           <Row
-            label="Logged in"
+            label={ua.loggedIn || 'Logged in'}
             value={formatDate(record.loggedInAt)}
             icon={<LogIn className="w-3.5 h-3.5" />}
           />
           <Row
-            label="Logged out"
+            label={ua.loggedOut || 'Logged out'}
             value={
               record.loggedOutAt ? (
                 formatDate(record.loggedOutAt)
               ) : (
-                <SessionBadge record={record} />
+                <SessionBadge record={record} t={t} />
               )
             }
             icon={<LogOut className="w-3.5 h-3.5" />}
           />
           <Row
-            label="Duration"
+            label={ua.duration || 'Duration'}
             value={
               record.loggedOutAt
                 ? (sessionDuration(record.loggedInAt, record.loggedOutAt) ??
                   "—")
-                : "Active session"
+                : (ua.activeSession || 'Active session')
             }
             icon={<Clock3 className="w-3.5 h-3.5" />}
           />
           <Row
-            label="IP Address"
+            label={ua.ipAddress || 'IP Address'}
             value={record.ip || "—"}
             mono
             icon={<MapPin className="w-3.5 h-3.5" />}
           />
           <Row
-            label="Browser"
-            value={record.browserName || "—"}
+            label={ua.browser || 'Browser'}
+            value={record.browserName || (ua.unknownBrowser || 'Unknown')}
             icon={<Globe className="w-3.5 h-3.5" />}
           />
           <Row
-            label="Operating system"
-            value={record.os || "—"}
+            label={ua.operatingSystem || 'Operating system'}
+            value={record.os || (ua.unknownOs || 'Unknown')}
             icon={<Monitor className="w-3.5 h-3.5" />}
           />
           <Row
-            label="Device type"
+            label={ua.deviceType || 'Device type'}
             value={<DeviceBadge type={record.deviceType} />}
             icon={<Laptop2 className="w-3.5 h-3.5" />}
           />
           <Row
-            label="Device name"
+            label={ua.deviceName || 'Device name'}
             value={record.deviceName || "—"}
             icon={<Smartphone className="w-3.5 h-3.5" />}
           />
           <Row
-            label="Engine"
+            label={ua.engine || 'Engine'}
             value={record.engine || "—"}
             icon={<Cpu className="w-3.5 h-3.5" />}
           />
           <Row
-            label="Locale"
+            label={ua.locale || 'Locale'}
             value={record.locale || "—"}
             icon={<Languages className="w-3.5 h-3.5" />}
           />
@@ -544,7 +551,7 @@ const ActivityDetailDialog = ({
               ) : (
                 <Eye className="w-3.5 h-3.5" />
               )}
-              {showUA ? "Hide" : "Show"} User-Agent
+              {showUA ? (ua.hideUa || 'Hide') : (ua.showUa || 'Show')} {(ua.userAgent || 'User-Agent')}
             </button>
             {showUA && (
               <p className="mt-2 text-[11px] font-mono text-muted-foreground bg-muted/30 rounded p-2 break-all leading-relaxed">
@@ -564,12 +571,14 @@ const Pagination = ({
   totalCount,
   pageSize,
   onPage,
+  isRtl,
 }: {
   page: number;
   totalPages: number;
   totalCount: number;
   pageSize: number;
   onPage: (p: number) => void;
+  isRtl?: boolean;
 }) => {
   const from = Math.min((page - 1) * pageSize + 1, totalCount);
   const to = Math.min(page * pageSize, totalCount);
@@ -593,14 +602,7 @@ const Pagination = ({
   return (
     <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-1 pt-4">
       <p className="text-sm text-muted-foreground">
-        Showing{" "}
-        <span className="font-medium text-foreground">
-          {from}–{to}
-        </span>{" "}
-        of{" "}
-        <span className="font-medium text-foreground">
-          {totalCount.toLocaleString()}
-        </span>
+        {from}–{to} {totalCount.toLocaleString()}
       </p>
       <div className="flex items-center gap-1">
         <Button
@@ -610,7 +612,7 @@ const Pagination = ({
           onClick={() => onPage(1)}
           disabled={page === 1}
         >
-          <ChevronsLeft className="w-3.5 h-3.5" />
+          <ChevronsLeft className={cn("w-3.5 h-3.5", isRtl && "rotate-180")} />
         </Button>
         <Button
           variant="outline"
@@ -619,7 +621,7 @@ const Pagination = ({
           onClick={() => onPage(page - 1)}
           disabled={page === 1}
         >
-          <ChevronLeft className="w-3.5 h-3.5" />
+          <ChevronLeft className={cn("w-3.5 h-3.5", isRtl && "rotate-180")} />
         </Button>
         {pages.map((p, i) =>
           p === "…" ? (
@@ -645,7 +647,7 @@ const Pagination = ({
           onClick={() => onPage(page + 1)}
           disabled={page >= totalPages}
         >
-          <ChevronRight className="w-3.5 h-3.5" />
+          <ChevronRight className={cn("w-3.5 h-3.5", isRtl && "rotate-180")} />
         </Button>
         <Button
           variant="outline"
@@ -654,7 +656,7 @@ const Pagination = ({
           onClick={() => onPage(totalPages)}
           disabled={page >= totalPages}
         >
-          <ChevronsRight className="w-3.5 h-3.5" />
+          <ChevronsRight className={cn("w-3.5 h-3.5", isRtl && "rotate-180")} />
         </Button>
       </div>
     </div>
@@ -662,7 +664,9 @@ const Pagination = ({
 };
 
 const UserActivityPage = () => {
+  const { t, isRtl } = useLanguage();
   const { toast } = useToast();
+  const ua = t.userActivity;
 
   const [records, setRecords] = useState<ActivityRecord[]>([]);
   const [summary, setSummary] = useState<ActivitySummary | null>(null);
@@ -694,19 +698,18 @@ const UserActivityPage = () => {
         setRecords((prev) => prev.filter((r) => r.id !== record.id));
         setTotalCount((prev) => prev - 1);
         toast({
-          title: "Record deleted",
-          description: `Activity #${record.id} removed.`,
+          title: t.userActivity.toastRecordDeleted,
         });
       } else {
         toast({
-          title: "Delete failed",
-          description: res?.returnMessage ?? "Unknown error",
+          title: t.userActivity.toastDeleteFailed,
+          description: res?.returnMessage ?? t.userActivity.toastUnknownError,
           variant: "destructive",
         });
       }
     } catch (e: any) {
       toast({
-        title: "Network error",
+        title: t.userActivity.toastNetworkError,
         description: e?.message,
         variant: "destructive",
       });
@@ -766,8 +769,8 @@ const UserActivityPage = () => {
           setTotalPages(Array.isArray(data) ? Math.ceil(data.length / 20) : (data?.totalPages ?? 1));
         } else {
           toast({
-            title: "Failed to load activity",
-            description: res?.returnMessage ?? "Unknown error",
+            title: t.userActivity.toastFailedLoad,
+            description: res?.returnMessage ?? t.userActivity.toastUnknownError,
             variant: "destructive",
           });
           setRecords([]);
@@ -775,21 +778,20 @@ const UserActivityPage = () => {
           setTotalCount(0);
           setTotalPages(1);
         }
-      } catch (e: any) {
-        toast({
-          title: "Network error",
-          description: e?.message,
-          variant: "destructive",
-        });
-        setRecords([]);
-        setSummary(null);
-        setTotalCount(0);
-        setTotalPages(1);
-      } finally {
-        setLoading(false);
-      }
-    },
-    [toast],
+      } catch (e: any) {      toast({
+        title: t.userActivity.toastNetworkError,
+        description: e?.message,
+        variant: "destructive",
+      });
+      setRecords([]);
+      setSummary(null);
+      setTotalCount(0);
+      setTotalPages(1);
+    } finally {
+      setLoading(false);
+    }
+  },
+    [toast, t],
   );
 
   useEffect(() => {
@@ -839,18 +841,17 @@ const UserActivityPage = () => {
 
   return (
     <TooltipProvider>
-      <div className="p-6 lg:p-8 space-y-8">
+      <div className="p-6 lg:p-8 space-y-8" dir={isRtl ? 'rtl' : 'ltr'}>
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
             <Activity className="w-6 h-6 text-primary" />
           </div>
           <div>
             <h1 className="text-3xl font-bold font-[family-name:var(--font-heading)]">
-              Login Activity
+              {ua.pageTitle || 'Login Activity'}
             </h1>
             <p className="text-muted-foreground">
-              Full audit log — login sessions, device context, session status,
-              and browser fingerprints
+              {ua.pageSubtitle || 'Full audit log — login sessions, device context, session status, and browser fingerprints'}
             </p>
           </div>
           <Button
@@ -868,32 +869,32 @@ const UserActivityPage = () => {
               )
             }
           >
-            <RefreshCw className="w-3.5 h-3.5" /> Refresh
+            <RefreshCw className="w-3.5 h-3.5" /> {ua.refresh || 'Refresh'}
           </Button>
         </div>
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {[
             {
-              label: "Total Records",
+              label: ua.statTotalRecords || 'Total Records',
               value: totalCount,
               icon: Activity,
               color: "bg-primary/10 text-primary",
             },
             {
-              label: "Successful Logins",
+              label: ua.statSuccessfulLogins || 'Successful Logins',
               value: pageStats.success,
               icon: CheckCircle2,
               color: "bg-emerald-100 text-emerald-600",
             },
             {
-              label: "Failed Attempts",
+              label: ua.statFailedAttempts || 'Failed Attempts',
               value: pageStats.failed,
               icon: AlertTriangle,
               color: "bg-rose-100 text-rose-600",
             },
             {
-              label: "Online Now",
+              label: ua.statOnlineNow || 'Online Now',
               value: pageStats.online,
               icon: Wifi,
               color: "bg-teal-100 text-teal-600",
@@ -935,24 +936,22 @@ const UserActivityPage = () => {
             <Card className="border-border/50">
               <CardHeader className="pb-3">
                 <h3 className="text-sm font-semibold">
-                  Top Browsers & Operating Systems
+                  {ua.topBrowsers || 'Top Browsers & Operating Systems'}
                 </h3>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <p className="text-xs text-muted-foreground mb-2">Browsers</p>
+                  <p className="text-xs text-muted-foreground mb-2">{ua.browsersLabel || 'Browsers'}</p>
                   <SummaryChips
                     items={summary.topBrowsers}
-                    emptyLabel="No browser data"
+                    emptyLabel={ua.noBrowserData || 'No browser data'}
                   />
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground mb-2">
-                    Operating Systems
-                  </p>
+                  <p className="text-xs text-muted-foreground mb-2">{ua.osLabel || 'Operating Systems'}</p>
                   <SummaryChips
                     items={summary.topOperatingSystems}
-                    emptyLabel="No OS data"
+                    emptyLabel={ua.noOsData || 'No OS data'}
                   />
                 </div>
               </CardContent>
@@ -961,31 +960,29 @@ const UserActivityPage = () => {
             <Card className="border-border/50">
               <CardHeader className="pb-3">
                 <h3 className="text-sm font-semibold">
-                  Top Device Types, Locales & IPs
+                  {ua.topDeviceTypes || 'Top Device Types, Locales & IPs'}
                 </h3>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <p className="text-xs text-muted-foreground mb-2">
-                    Device Types
-                  </p>
+                  <p className="text-xs text-muted-foreground mb-2">{ua.deviceTypesLabel || 'Device Types'}</p>
                   <SummaryChips
                     items={summary.topDeviceTypes}
-                    emptyLabel="No device data"
+                    emptyLabel={ua.noDeviceData || 'No device data'}
                   />
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground mb-2">Locales</p>
+                  <p className="text-xs text-muted-foreground mb-2">{ua.localesLabel || 'Locales'}</p>
                   <SummaryChips
                     items={summary.topLocales}
-                    emptyLabel="No locale data"
+                    emptyLabel={ua.noLocaleData || 'No locale data'}
                   />
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground mb-2">Top IPs</p>
+                  <p className="text-xs text-muted-foreground mb-2">{ua.ipsLabel || 'Top IPs'}</p>
                   <SummaryChips
                     items={summary.topIps}
-                    emptyLabel="No IP data"
+                    emptyLabel={ua.noIpData || 'No IP data'}
                   />
                 </div>
               </CardContent>
@@ -999,7 +996,7 @@ const UserActivityPage = () => {
               <div className="relative w-full sm:w-72">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search by username…"
+                  placeholder={ua.searchByUsername || 'Search by username…'}
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
                   className="pl-9 h-9 text-sm"
@@ -1027,7 +1024,7 @@ const UserActivityPage = () => {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {SUCCESS_FILTERS.map((f) => (
+                    {getSuccessFilters(t).map((f) => (
                       <SelectItem
                         key={f.value}
                         value={f.value}
@@ -1050,7 +1047,7 @@ const UserActivityPage = () => {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {DEVICE_FILTERS.map((f) => (
+                    {getDeviceFilters(t).map((f) => (
                       <SelectItem
                         key={f.value}
                         value={f.value}
@@ -1073,7 +1070,7 @@ const UserActivityPage = () => {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {SESSION_FILTERS.map((f) => (
+                    {getSessionFilters(t).map((f) => (
                       <SelectItem
                         key={f.value}
                         value={f.value}
@@ -1092,14 +1089,14 @@ const UserActivityPage = () => {
                     className="h-9 gap-1.5 text-muted-foreground text-xs"
                     onClick={clearFilters}
                   >
-                    <X className="w-3 h-3" /> Clear
+                    <X className="w-3 h-3" /> {ua.clearFilters || 'Clear'}
                   </Button>
                 )}
               </div>
 
               <div className="ml-auto flex items-center gap-2 shrink-0">
                 <span className="text-xs text-muted-foreground hidden lg:block">
-                  Rows
+                  {ua.rows || 'Rows'}
                 </span>
                 <Select
                   value={String(pageSize)}
@@ -1126,7 +1123,7 @@ const UserActivityPage = () => {
               <div className="flex flex-wrap gap-1.5 mt-2">
                 {searchQuery && (
                   <Badge variant="secondary" className="text-xs gap-1">
-                    User: {searchQuery}
+                    {(ua.userFilter || 'User: {query}').replace('{query}', searchQuery)}
                     <button
                       onClick={() => {
                         setSearchInput("");
@@ -1138,9 +1135,7 @@ const UserActivityPage = () => {
                   </Badge>
                 )}
                 {successFilter !== "all" && (
-                  <Badge variant="secondary" className="text-xs gap-1">
-                    {
-                      SUCCESS_FILTERS.find((f) => f.value === successFilter)
+                  <Badge variant="secondary" className="text-xs gap-1">                    {getSuccessFilters(t).find((f) => f.value === successFilter)
                         ?.label
                     }
                     <button onClick={() => setSuccessFilter("all")}>
@@ -1157,9 +1152,7 @@ const UserActivityPage = () => {
                   </Badge>
                 )}
                 {sessionFilter !== "all" && (
-                  <Badge variant="secondary" className="text-xs gap-1">
-                    {
-                      SESSION_FILTERS.find((f) => f.value === sessionFilter)
+                  <Badge variant="secondary" className="text-xs gap-1">                    {getSessionFilters(t).find((f) => f.value === sessionFilter)
                         ?.label
                     }
                     <button onClick={() => setSessionFilter("all")}>
@@ -1176,21 +1169,21 @@ const UserActivityPage = () => {
               <Table className="min-w-[1200px]">
                 <TableHeader>
                   <TableRow className="border-border/40 bg-muted/30">
-                    <TableHead className="pl-6 w-56">User</TableHead>
-                    <TableHead className="w-20">User ID</TableHead>
-                    <TableHead className="w-28">Status</TableHead>
+                    <TableHead className="pl-6 w-56">{ua.colUser || 'User'}</TableHead>
+                    <TableHead className="w-20">{ua.colUserId || 'User ID'}</TableHead>
+                    <TableHead className="w-28">{ua.colStatus || 'Status'}</TableHead>
                     <TableHead className="min-w-[180px]">
-                      Browser / OS
+                      {ua.colBrowserOs || 'Browser / OS'}
                     </TableHead>
-                    <TableHead className="w-32">IP Address</TableHead>
-                    <TableHead className="w-24">Device</TableHead>
-                    <TableHead className="w-44">Device Name</TableHead>
-                    <TableHead className="w-24">Locale</TableHead>
-                    <TableHead className="w-28">Session</TableHead>
-                    <TableHead className="w-36">Logged In</TableHead>
-                    <TableHead className="w-36">Logged Out</TableHead>
+                    <TableHead className="w-32">{ua.colIpAddress || 'IP Address'}</TableHead>
+                    <TableHead className="w-24">{ua.colDevice || 'Device'}</TableHead>
+                    <TableHead className="w-44">{ua.colDeviceName || 'Device Name'}</TableHead>
+                    <TableHead className="w-24">{ua.colLocale || 'Locale'}</TableHead>
+                    <TableHead className="w-28">{ua.colSession || 'Session'}</TableHead>
+                    <TableHead className="w-36">{ua.colLoggedIn || 'Logged In'}</TableHead>
+                    <TableHead className="w-36">{ua.colLoggedOut || 'Logged Out'}</TableHead>
                     <TableHead className="w-20 pr-4 text-right">
-                      Actions
+                      {ua.colActions || 'Actions'}
                     </TableHead>
                   </TableRow>
                 </TableHeader>
@@ -1205,11 +1198,11 @@ const UserActivityPage = () => {
                         <div className="flex flex-col items-center py-16 text-muted-foreground">
                           <Activity className="w-10 h-10 mb-3 opacity-30" />
                           <p className="font-medium">
-                            No activity records found
+                            {ua.noRecordsFound || 'No activity records found'}
                           </p>
                           {hasFilters && (
                             <p className="text-sm mt-1">
-                              Try clearing your filters
+                              {ua.tryClearingFilters || 'Try clearing your filters'}
                             </p>
                           )}
                         </div>
@@ -1241,7 +1234,7 @@ const UserActivityPage = () => {
                               <p className="text-xs text-muted-foreground truncate font-mono">
                                 {r.email ?? (
                                   <span className="italic opacity-50">
-                                    no email
+                                    {ua.noEmail || 'no email'}
                                   </span>
                                 )}
                               </p>
@@ -1260,6 +1253,7 @@ const UserActivityPage = () => {
                             <SuccessBadge
                               success={r.success}
                               reason={r.failureReason}
+                              t={t}
                             />
                             {!r.success && r.failureReason && (
                               <p className="text-[11px] text-rose-600 line-clamp-1 max-w-[140px]">
@@ -1272,10 +1266,10 @@ const UserActivityPage = () => {
                         <TableCell>
                           <div className="space-y-0.5">
                             <p className="text-sm font-medium truncate max-w-[180px]">
-                              {r.browserName || "Unknown"}
+                              {r.browserName || t.userActivity.unknownBrowser}
                             </p>
                             <p className="text-xs text-muted-foreground truncate max-w-[180px]">
-                              {r.os || "Unknown"}
+                              {r.os || t.userActivity.unknownOs}
                               {r.engine ? ` · ${r.engine}` : ""}
                             </p>
                           </div>
@@ -1307,7 +1301,7 @@ const UserActivityPage = () => {
                         </TableCell>
 
                         <TableCell>
-                          <SessionBadge record={r} />
+                          <SessionBadge record={r} t={t} />
                         </TableCell>
 
                         <TableCell>
@@ -1340,7 +1334,7 @@ const UserActivityPage = () => {
                           ) : r.success ? (
                             <span className="inline-flex items-center gap-1 text-[10px] font-bold text-teal-700 bg-teal-50 border border-teal-200 px-1.5 py-0.5 rounded">
                               <span className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse" />
-                              Online
+                              {t.userActivity.badgeOnline}
                             </span>
                           ) : (
                             <span className="text-xs text-muted-foreground">
@@ -1363,7 +1357,7 @@ const UserActivityPage = () => {
                                 </Button>
                               </TooltipTrigger>
                               <TooltipContent>
-                                <p className="text-xs">View details</p>
+                                <p className="text-xs">{ua.viewDetails || 'View details'}</p>
                               </TooltipContent>
                             </Tooltip>
                             <Tooltip>
@@ -1378,7 +1372,7 @@ const UserActivityPage = () => {
                                 </Button>
                               </TooltipTrigger>
                               <TooltipContent>
-                                <p className="text-xs">Delete record</p>
+                                <p className="text-xs">{ua.deleteRecordTooltip || 'Delete record'}</p>
                               </TooltipContent>
                             </Tooltip>
                           </div>
@@ -1398,6 +1392,7 @@ const UserActivityPage = () => {
                   totalCount={totalCount}
                   pageSize={pageSize}
                   onPage={setPage}
+                  isRtl={isRtl}
                 />
               </div>
             )}
@@ -1408,6 +1403,7 @@ const UserActivityPage = () => {
           record={detail}
           open={!!detail}
           onClose={() => setDetail(null)}
+          t={t}
         />
 
         {/* ── Delete confirmation dialog ── */}
@@ -1420,20 +1416,14 @@ const UserActivityPage = () => {
           <DialogContent className="max-w-sm">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2 text-rose-600">
-                <Trash2 className="w-4 h-4" /> Delete Activity Record
+                <Trash2 className="w-4 h-4" /> {t.userActivity.deleteRecordTitle}
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-3 mt-1">
               <p className="text-sm text-muted-foreground">
-                Are you sure you want to permanently delete activity record{" "}
-                <span className="font-mono font-semibold text-foreground">
-                  #{confirmDelete?.id}
-                </span>{" "}
-                for user{" "}
-                <span className="font-semibold text-foreground">
-                  @{confirmDelete?.username}
-                </span>
-                ? This action cannot be undone.
+                {t.userActivity.deleteRecordDesc
+                  .replace('{id}', String(confirmDelete?.id ?? ''))
+                  .replace('{username}', confirmDelete?.username ?? '')}
               </p>
               <div className="flex justify-end gap-2 pt-1">
                 <Button
@@ -1442,7 +1432,7 @@ const UserActivityPage = () => {
                   onClick={() => setConfirmDelete(null)}
                   disabled={deleting}
                 >
-                  Cancel
+                  {t.userActivity.deleteCancelBtn}
                 </Button>
                 <Button
                   variant="destructive"
@@ -1454,11 +1444,11 @@ const UserActivityPage = () => {
                   {deleting ? (
                     <>
                       <RefreshCw className="w-3.5 h-3.5 animate-spin" />{" "}
-                      Deleting…
+                      {t.userActivity.deletingRecord}
                     </>
                   ) : (
                     <>
-                      <Trash2 className="w-3.5 h-3.5" /> Delete
+                      <Trash2 className="w-3.5 h-3.5" /> {t.userActivity.deleteConfirmBtn}
                     </>
                   )}
                 </Button>

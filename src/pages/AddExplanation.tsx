@@ -37,6 +37,7 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/components/languages/languageProvider";
 import {
   Link,
   useNavigate,
@@ -165,6 +166,7 @@ function LivePreview({
   bibleVersion,
   explanation,
   learnMore,
+  t,
 }: {
   bookName: string;
   chapter: number;
@@ -172,6 +174,7 @@ function LivePreview({
   bibleVersion: string;
   explanation: string;
   learnMore: string;
+  t: any;
 }) {
   const [showLearnMore, setShowLearnMore] = useState(false);
 
@@ -184,7 +187,7 @@ function LivePreview({
     if (!lines.length) {
       return (
         <p className="text-sm text-muted-foreground/50 italic">
-          Nothing to preview yet…
+          {t.verseExplanations.nothingToPreview}
         </p>
       );
     }
@@ -216,7 +219,7 @@ function LivePreview({
       {/* Preview header */}
       <div className="bg-primary/8 border-b border-primary/15 px-4 py-3 flex items-center justify-between">
         <span className="text-xs font-semibold text-primary uppercase tracking-wider">
-          Live Preview
+          {t.verseExplanations.livePreview}
         </span>
         {bookName && (
           <div className="flex items-center gap-2">
@@ -238,7 +241,7 @@ function LivePreview({
           <div className="flex items-center gap-2 mb-2">
             <div className="w-1 h-4 rounded-full bg-primary" />
             <span className="text-xs font-bold text-primary uppercase tracking-wider">
-              Explanation
+              {t.verseExplanations.previewExplanation}
             </span>
           </div>
           <div className="pl-3">{renderContent(explanation)}</div>
@@ -253,7 +256,7 @@ function LivePreview({
             >
               <div className="w-1 h-4 rounded-full bg-amber-500" />
               <span className="text-xs font-bold text-amber-600 uppercase tracking-wider group-hover:text-amber-700">
-                Learn More
+                {t.verseExplanations.previewLearnMore}
               </span>
               {showLearnMore ? (
                 <ChevronUp className="w-3.5 h-3.5 text-amber-500" />
@@ -277,6 +280,7 @@ function LivePreview({
 // Component
 // ─────────────────────────────────────────────
 const AddVerseExplanation = () => {
+  const { t, isRtl } = useLanguage();
   const { toast } = useToast();
   const navigate = useNavigate();
   type Params = {
@@ -439,21 +443,21 @@ const AddVerseExplanation = () => {
         setSaved(true);
         toast({
           title: existingFound
-            ? "Explanation updated ✓"
-            : "Explanation created ✓",
-          description: `${bookName} ${chapter}:${verseNumber} saved successfully.`,
+            ? t.verseExplanations.toastExplanationUpdated
+            : t.verseExplanations.toastExplanationCreated,
+          description: t.verseExplanations.toastSavedDesc.replace('{bookName}', bookName).replace('{chapter}', String(chapter)).replace('{verseNumber}', String(verseNumber)),
         });
         setTimeout(() => navigate(routes.verseExplanations.path), 1500);
       } else {
         toast({
-          title: "Save failed",
+          title: t.verseExplanations.toastSaveFailed,
           description: res.returnMessage,
           variant: "destructive",
         });
       }
     } catch (e: any) {
       toast({
-        title: "Network error",
+        title: t.verseExplanations.toastNetworkError,
         description: e.message,
         variant: "destructive",
       });
@@ -466,7 +470,7 @@ const AddVerseExplanation = () => {
   // Render
   // ─────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/30 p-6 lg:p-10">
+    <div dir={isRtl ? 'rtl' : 'ltr'} className="min-h-screen bg-gradient-to-b from-background to-muted/30 p-6 lg:p-10">
       <div className="mx-auto space-y-6">
         {/* ── Page header ── */}
         <div className="fade-up flex items-center gap-4">
@@ -475,7 +479,7 @@ const AddVerseExplanation = () => {
             className="text-muted-foreground hover:text-foreground inline-flex items-center gap-2"
           >
             <ArrowLeft className="h-5 w-5" />
-            Back
+            {t.common.back}
           </Link>
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center shadow-sm">
@@ -484,13 +488,13 @@ const AddVerseExplanation = () => {
             <div>
               <h1 className="text-2xl font-bold tracking-tight font-heading text-gradient">
                 {isEditMode
-                  ? `Edit — ${qBookName} ${qChapter}:${qVerseNumber}`
-                  : "Add Verse Explanation"}
+                  ? t.verseExplanations.editPageTitle.replace('{bookName}', qBookName).replace('{chapter}', String(qChapter)).replace('{verseNumber}', String(qVerseNumber))
+                  : t.verseExplanations.addPageTitle}
               </h1>
               <p className="text-muted-foreground text-sm">
                 {isEditMode
-                  ? "Update the explanation for this verse"
-                  : "Create a new scripture explanation for users"}
+                  ? t.verseExplanations.editPageSubtitle
+                  : t.verseExplanations.addPageSubtitle}
               </p>
             </div>
           </div>
@@ -502,7 +506,7 @@ const AddVerseExplanation = () => {
               className="ml-auto gap-1.5 border-amber-300 bg-amber-50 text-amber-700"
             >
               <AlertCircle className="w-3.5 h-3.5" />
-              Existing entry — will be overwritten
+              {t.verseExplanations.existingBadge}
             </Badge>
           )}
         </div>
@@ -518,10 +522,10 @@ const AddVerseExplanation = () => {
               <CardHeader className="bg-gradient-to-r from-primary/5 to-accent/5 pb-4">
                 <CardTitle className="flex items-center gap-2 text-base">
                   <BookOpen className="w-4 h-4 text-primary" />
-                  Verse Reference
+                  {t.verseExplanations.refTitle}
                 </CardTitle>
                 <CardDescription>
-                  Identify the exact scripture this explanation belongs to
+                  {t.verseExplanations.refDesc}
                 </CardDescription>
               </CardHeader>
 
@@ -529,7 +533,7 @@ const AddVerseExplanation = () => {
                 {/* Book */}
                 <div className="space-y-1.5">
                   <Label>
-                    Book <span className="text-destructive">*</span>
+                    {t.verseExplanations.book}
                   </Label>
                   <Select
                     value={bookName || ""}
@@ -544,7 +548,7 @@ const AddVerseExplanation = () => {
                         isEditMode && "bg-muted/40 text-muted-foreground",
                       )}
                     >
-                      <SelectValue placeholder="Select a Bible book…" />
+                      <SelectValue placeholder={t.verseExplanations.selectBookPlaceholder} />
                     </SelectTrigger>
                     <SelectContent className="max-h-64">
                       {BIBLE_BOOKS.map((b) => (
@@ -560,7 +564,7 @@ const AddVerseExplanation = () => {
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5">
                     <Label>
-                      Chapter <span className="text-destructive">*</span>
+                      {t.verseExplanations.chapter}
                     </Label>
                     <Input
                       type="number"
@@ -580,7 +584,7 @@ const AddVerseExplanation = () => {
                   </div>
                   <div className="space-y-1.5">
                     <Label>
-                      Verse <span className="text-destructive">*</span>
+                      {t.verseExplanations.verse}
                     </Label>
                     <Input
                       type="number"
@@ -605,9 +609,9 @@ const AddVerseExplanation = () => {
                 {verseText && (
                   <div className="space-y-2">
                     <Label>
-                      Verse Text{" "}
+                      {t.verseExplanations.verseText}{" "}
                       <span className="text-xs text-muted-foreground font-normal">
-                        (auto-fetched for preview, read-only)
+                        {t.verseExplanations.verseTextHint}
                       </span>
                     </Label>
                     <div className="relative">
@@ -615,7 +619,7 @@ const AddVerseExplanation = () => {
                         value={verseText}
                         readOnly
                         className="min-h-[110px] resize-none bg-muted/40 font-serif leading-relaxed"
-                        placeholder="Verse will appear here..."
+                        placeholder={t.verseExplanations.verseTextPlaceholder}
                       />
                       {verseText && (
                         <div className="absolute bottom-3 right-3 text-xs text-muted-foreground">
@@ -629,9 +633,9 @@ const AddVerseExplanation = () => {
                 {/* Bible Version */}
                 <div className="space-y-1.5">
                   <Label>
-                    Bible Version{" "}
+                    {t.verseExplanations.bibleVersion}{" "}
                     <span className="text-xs text-muted-foreground font-normal">
-                      (optional)
+                      {t.verseExplanations.optionalLabel}
                     </span>
                   </Label>
                   <Select
@@ -641,11 +645,11 @@ const AddVerseExplanation = () => {
                     }
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="e.g. KJV, NIV…" />
+                      <SelectValue placeholder={t.verseExplanations.bibleVersionPlaceholder} />
                     </SelectTrigger>
 
                     <SelectContent>
-                      <SelectItem value={NONE_VALUE}>— None —</SelectItem>
+                      <SelectItem value={NONE_VALUE}>{t.verseExplanations.noneOption}</SelectItem>
 
                       {BIBLE_VERSIONS.map((v) => (
                         <SelectItem key={v} value={v}>
@@ -660,7 +664,7 @@ const AddVerseExplanation = () => {
                 {loadingExisting && (
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
                     <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    Checking for existing explanation…
+                    {t.verseExplanations.checkingExisting}
                   </div>
                 )}
               </CardContent>
@@ -671,27 +675,23 @@ const AddVerseExplanation = () => {
               <CardHeader className="bg-gradient-to-r from-primary/5 to-accent/5 pb-4">
                 <CardTitle className="flex items-center gap-2 text-base">
                   <ScrollText className="w-4 h-4 text-primary" />
-                  Explanation
+                  {t.verseExplanations.explanationTitle}
                 </CardTitle>
                 <CardDescription>
-                  The main content shown to users when they tap a verse.
-                  Supports bullet points starting with{" "}
-                  <code className="text-xs bg-muted px-1 rounded">-</code>,{" "}
-                  <code className="text-xs bg-muted px-1 rounded">*</code>, or{" "}
-                  <code className="text-xs bg-muted px-1 rounded">•</code>.
+                  {t.verseExplanations.explanationDesc}
                 </CardDescription>
               </CardHeader>
 
               <CardContent className="pt-5 space-y-2">
                 <div className="flex items-center justify-between">
                   <Label>
-                    Explanation text <span className="text-destructive">*</span>
+                    {t.verseExplanations.explanationText}
                   </Label>
                   <CharCount value={explanation} max={5000} />
                 </div>
                 <Textarea
                   rows={8}
-                  placeholder={`Write a clear, helpful explanation of this verse…\n\nYou can use bullet points:\n- Point one\n- Point two\n\nOr write in flowing paragraphs.`}
+                  placeholder={t.verseExplanations.explanationPlaceholder}
                   value={explanation}
                   onChange={(e) => setExplanation(e.target.value)}
                   maxLength={5000}
@@ -701,7 +701,7 @@ const AddVerseExplanation = () => {
                   (explanation ?? "").trim().length < 20 && (
                     <p className="text-xs text-amber-600 flex items-center gap-1.5">
                       <AlertCircle className="w-3.5 h-3.5" />
-                      Minimum 20 characters required
+                      {t.verseExplanations.minCharsError}
                     </p>
                   )}
               </CardContent>
@@ -714,17 +714,16 @@ const AddVerseExplanation = () => {
                   <div>
                     <CardTitle className="flex items-center gap-2 text-base">
                       <Sparkles className="w-4 h-4 text-amber-500" />
-                      Learn More
+                      {t.verseExplanations.learnMoreTitle}
                       <Badge
                         variant="outline"
                         className="text-xs font-normal border-amber-200 text-amber-600"
                       >
-                        optional
+                        {t.verseExplanations.learnMoreBadge}
                       </Badge>
                     </CardTitle>
                     <CardDescription className="mt-1">
-                      Deeper context shown when users tap the "Learn More"
-                      button in the app
+                      {t.verseExplanations.learnMoreDesc}
                     </CardDescription>
                   </div>
                 </div>
@@ -732,12 +731,12 @@ const AddVerseExplanation = () => {
 
               <CardContent className="pt-5 space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label>Additional content</Label>
+                  <Label>{t.verseExplanations.learnMoreLabel}</Label>
                   <CharCount value={learnMore} max={8000} />
                 </div>
                 <Textarea
                   rows={6}
-                  placeholder={`Historical context, cross-references, deeper theological insights…\n\nThis content is revealed when users tap "Learn more" in the app.`}
+                  placeholder={t.verseExplanations.learnMorePlaceholder}
                   value={learnMore}
                   onChange={(e) => setLearnMore(e.target.value)}
                   maxLength={8000}
@@ -752,17 +751,17 @@ const AddVerseExplanation = () => {
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center gap-2 text-base">
                     <Lightbulb className="w-4 h-4 text-amber-500" />
-                    Related Journal Prompts
+                    {t.verseExplanations.relatedPrompts}
                   </CardTitle>
                   <CardDescription className="text-xs">
-                    Select prompts to associate with this verse explanation
+                    {t.verseExplanations.promptsDesc}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-2">
                   {promptsLoading ? (
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      Loading prompts...
+                      {t.verseExplanations.loadingPrompts}
                     </div>
                   ) : prompts.length > 0 ? (
                     <>
@@ -810,13 +809,13 @@ const AddVerseExplanation = () => {
                       })}
                       {selectedPromptIds.length > 0 && (
                         <div className="text-xs text-muted-foreground pt-2">
-                          {selectedPromptIds.length} prompt(s) selected
+                          {t.verseExplanations.promptsSelected.replace('{n}', String(selectedPromptIds.length))}
                         </div>
                       )}
                     </>
                   ) : (
                     <p className="text-sm text-muted-foreground">
-                      No prompts available for this verse
+                      {t.verseExplanations.noPromptsForVerse}
                     </p>
                   )}
                 </CardContent>
@@ -828,8 +827,8 @@ const AddVerseExplanation = () => {
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <Info className="w-3.5 h-3.5" />
                 {existingFound
-                  ? "Saving will overwrite the existing entry"
-                  : "Saving will create a new entry"}
+                  ? t.verseExplanations.savingOverwrite
+                  : t.verseExplanations.savingCreate}
               </div>
               <Button
                 onClick={handleSave}
@@ -844,16 +843,16 @@ const AddVerseExplanation = () => {
               >
                 {saved ? (
                   <>
-                    <CheckCircle2 className="w-4 h-4" /> Saved!
+                    <CheckCircle2 className="w-4 h-4" /> {t.verseExplanations.savedLabel}
                   </>
                 ) : saving ? (
                   <>
-                    <Loader2 className="w-4 h-4 animate-spin" /> Saving…
+                    <Loader2 className="w-4 h-4 animate-spin" /> {t.verseExplanations.savingLabel}
                   </>
                 ) : (
                   <>
                     <Save className="w-4 h-4" />
-                    {existingFound ? "Update Explanation" : "Save Explanation"}
+                    {existingFound ? t.verseExplanations.updateExplanation : t.verseExplanations.saveExplanation}
                   </>
                 )}
               </Button>
@@ -864,7 +863,7 @@ const AddVerseExplanation = () => {
           <div className="space-y-4 lg:sticky lg:top-6">
             <div className="flex items-center gap-2 mb-1">
               <span className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-                App Preview
+                {t.verseExplanations.appPreview}
               </span>
               <div className="flex-1 h-px bg-border/50" />
             </div>
@@ -876,32 +875,33 @@ const AddVerseExplanation = () => {
               bibleVersion={bibleVersion}
               explanation={explanation}
               learnMore={learnMore}
+              t={t}
             />
 
             {/* Formatting tips */}
             <Card className="border-border/30 bg-muted/20">
               <CardContent className="p-4 space-y-2">
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                  Formatting Tips
+                  {t.verseExplanations.formattingTips}
                 </p>
-                <div className="space-y-1.5 text-xs text-muted-foreground">
+                <div className="space-y-1.5 text-xs text-muted-foreground" dir="ltr">
                   <div className="flex gap-2">
                     <code className="bg-muted px-1.5 py-0.5 rounded shrink-0">
-                      - text
+                      {t.verseExplanations.ftBulletCode}
                     </code>
-                    <span>Creates a bullet point</span>
+                    <span>{t.verseExplanations.ftBulletDesc}</span>
                   </div>
                   <div className="flex gap-2">
                     <code className="bg-muted px-1.5 py-0.5 rounded shrink-0">
-                      1. text
+                      {t.verseExplanations.ftNumberedCode}
                     </code>
-                    <span>Creates a numbered bullet</span>
+                    <span>{t.verseExplanations.ftNumberedDesc}</span>
                   </div>
                   <div className="flex gap-2">
                     <code className="bg-muted px-1.5 py-0.5 rounded shrink-0">
-                      empty line
+                      {t.verseExplanations.ftEmptyCode}
                     </code>
-                    <span>Separates paragraphs</span>
+                    <span>{t.verseExplanations.ftEmptyDesc}</span>
                   </div>
                 </div>
               </CardContent>
@@ -918,18 +918,18 @@ const AddVerseExplanation = () => {
             >
               <CardContent className="p-4 space-y-2">
                 <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  Checklist
+                  {t.verseExplanations.checklist}
                 </p>
                 {[
                   {
-                    label: "Book selected",
+                    label: t.verseExplanations.clBookSelected,
                     ok: (bookName ?? "").trim() !== "",
                   },
                   ,
-                  { label: "Valid chapter", ok: chapter >= 1 },
-                  { label: "Valid verse", ok: verseNumber >= 1 },
+                  { label: t.verseExplanations.clValidChapter, ok: chapter >= 1 },
+                  { label: t.verseExplanations.clValidVerse, ok: verseNumber >= 1 },
                   {
-                    label: "Explanation should be at least 20 words",
+                    label: t.verseExplanations.clExplanationWords,
                     ok: (explanation ?? "").trim().split(/\s+/).length >= 20,
                   },
                 ].map((item) => (

@@ -39,28 +39,31 @@ import { HIGHLIGHT_COLORS } from "@/hooks/useBible";
 import { getVerseText } from "@/utilities/bibleUtils";
 import { cn } from "@/lib/utils";
 
-const formatTimeAgo = (dateString: string | null | undefined): string => {
-  if (!dateString) return "";
-  const date = new Date(dateString);
-  if (isNaN(date.getTime())) return "";
-  
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffSecs = Math.floor(diffMs / 1000);
-  const diffMins = Math.floor(diffSecs / 60);
-  const diffHours = Math.floor(diffMins / 60);
-  const diffDays = Math.floor(diffHours / 24);
+const useFormatTimeAgo = () => {
+  const { t } = useLanguage();
+  return (dateString: string | null | undefined): string => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return "";
 
-  if (diffSecs < 60) return "just now";
-  if (diffMins < 60) return `${diffMins} min ago`;
-  if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
-  if (diffDays === 1) return "yesterday";
-  if (diffDays < 7) return `${diffDays} days ago`;
-  
-  const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-  if (diffDays < 14) return days[date.getDay()];
-  
-  return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: date.getFullYear() !== now.getFullYear() ? "numeric" : undefined });
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffSecs = Math.floor(diffMs / 1000);
+    const diffMins = Math.floor(diffSecs / 60);
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffSecs < 60) return t.myActivity.justNow;
+    if (diffMins < 60) return t.myActivity.minAgo.replace('{n}', String(diffMins));
+    if (diffHours < 24) return diffHours === 1 ? t.myActivity.hourAgo.replace('{n}', '1') : t.myActivity.hoursAgo.replace('{n}', String(diffHours));
+    if (diffDays === 1) return t.myActivity.yesterday;
+    if (diffDays < 7) return t.myActivity.daysAgo.replace('{n}', String(diffDays));
+
+    const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    if (diffDays < 14) return days[date.getDay()];
+
+    return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: date.getFullYear() !== now.getFullYear() ? "numeric" : undefined });
+  };
 };
 
 interface HighlightItem {
@@ -119,6 +122,7 @@ const BOOKS = [
 
 export default function MyActivity() {
   const { t, isRtl } = useLanguage();
+  const formatTimeAgo = useFormatTimeAgo();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<TabType>("highlights");
@@ -172,10 +176,10 @@ export default function MyActivity() {
       const res = await sendPostRequest("bible", "delete-highlight", { highlightId: id });
       if (res.returnCode === 200) {
         setHighlights((prev) => prev.filter((h) => h.id !== id));
-        toast({ title: "Highlight removed" });
+        toast({ title: t.myActivity.toastHighlightRemoved });
       }
     } catch (error) {
-      toast({ title: "Failed to remove highlight", variant: "destructive" });
+      toast({ title: t.myActivity.toastFailedRemoveHighlight, variant: "destructive" });
     } finally {
       setDeleting(null);
     }
@@ -187,10 +191,10 @@ export default function MyActivity() {
       const res = await sendPostRequest("bible", "delete-verse-note", { noteId: id });
       if (res.returnCode === 200) {
         setNotes((prev) => prev.filter((n) => n.id !== id));
-        toast({ title: "Note removed" });
+        toast({ title: t.myActivity.toastNoteRemoved });
       }
     } catch (error) {
-      toast({ title: "Failed to remove note", variant: "destructive" });
+      toast({ title: t.myActivity.toastFailedRemoveNote, variant: "destructive" });
     } finally {
       setDeleting(null);
     }
@@ -202,10 +206,10 @@ export default function MyActivity() {
       const res = await sendPostRequest("bible", "delete-favorite", { favoriteId: id });
       if (res.returnCode === 200) {
         setFavorites((prev) => prev.filter((f) => f.id !== id));
-        toast({ title: "Favorite removed" });
+        toast({ title: t.myActivity.toastFavoriteRemoved });
       }
     } catch (error) {
-      toast({ title: "Failed to remove favorite", variant: "destructive" });
+      toast({ title: t.myActivity.toastFailedRemoveFavorite, variant: "destructive" });
     } finally {
       setDeleting(null);
     }
@@ -219,10 +223,10 @@ export default function MyActivity() {
       const res = await sendPostRequest("bible", "delete-read-history", { readHistoryIds: ids });
       if (res.returnCode === 200) {
         setReadHistory([]);
-        toast({ title: "Reading history cleared" });
+        toast({ title: t.myActivity.toastHistoryCleared });
       }
     } catch (error) {
-      toast({ title: "Failed to clear history", variant: "destructive" });
+      toast({ title: t.myActivity.toastFailedClearHistory, variant: "destructive" });
     } finally {
       setClearingAll(false);
     }
@@ -234,10 +238,10 @@ export default function MyActivity() {
       const res = await sendPostRequest("bible", "delete-read-history", { readHistoryIds: [id] });
       if (res.returnCode === 200) {
         setReadHistory((prev) => prev.filter((h) => h.id !== id));
-        toast({ title: "History item removed" });
+        toast({ title: t.myActivity.toastHistoryItemRemoved });
       }
     } catch (error) {
-      toast({ title: "Failed to remove history", variant: "destructive" });
+      toast({ title: t.myActivity.toastFailedRemoveHistory, variant: "destructive" });
     } finally {
       setDeleting(null);
     }
@@ -459,10 +463,10 @@ export default function MyActivity() {
         </div>
         <Select value={filterBook} onValueChange={setFilterBook}>
           <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Filter by book" />
+            <SelectValue placeholder={t.myActivity.filterByBook} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">{t.common?.all || 'All Books'}</SelectItem>
+            <SelectItem value="all">{t.common.all}</SelectItem>
             {BOOKS.map((book) => (
               <SelectItem key={book} value={book}>
                 {book}
@@ -612,7 +616,7 @@ export default function MyActivity() {
                     ) : (
                       <Trash2 className="w-4 h-4 mr-1" />
                     )}
-                    Clear All
+                    {t.myActivity.clearAll}
                   </Button>
                 )}
               </div>

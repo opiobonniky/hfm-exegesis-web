@@ -54,6 +54,7 @@ import {
   RangePickerModal,
 } from "@/components/BibleModals";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/components/languages/languageProvider";
 
 interface Highlight {
   id?: number;
@@ -165,6 +166,7 @@ function MobileNavDrawer({
   books: string[];
   availableTranslations: { id: string; name: string; shortName: string }[];
 }) {
+  const { t } = useLanguage();
   const [open, setOpen] = useState(false);
   const [bookFilter, setBookFilter] = useState("");
   const [tab, setTab] = useState<"books" | "chapters" | "version">("books");
@@ -207,18 +209,22 @@ function MobileNavDrawer({
 
         {/* Tab switcher */}
         <div className="flex items-center gap-1 px-4 pb-3 pt-1 border-b border-border/40">
-          {(["books", "chapters", "version"] as const).map((t) => (
+          {(["books", "chapters", "version"] as const).map((tabKey) => (
             <button
-              key={t}
-              onClick={() => setTab(t)}
+              key={tabKey}
+              onClick={() => setTab(tabKey)}
               className={cn(
                 "flex-1 py-2 rounded-xl text-xs font-semibold capitalize transition-all",
-                tab === t
+                tab === tabKey
                   ? "bg-primary text-primary-foreground"
                   : "text-muted-foreground hover:bg-muted",
               )}
             >
-              {t}
+              {{
+                books: t.common.search,
+                chapters: t.bibleReader.selectChapter,
+                version: t.bibleReader.translation,
+              }[tabKey] || tabKey}
             </button>
           ))}
         </div>
@@ -228,7 +234,7 @@ function MobileNavDrawer({
           {tab === "books" && (
             <div className="flex flex-col h-full gap-3 pt-3">
               <Input
-                placeholder="Search books…"
+                placeholder={t.bibleReader.filterBooks}
                 value={bookFilter}
                 onChange={(e) => setBookFilter(e.target.value)}
                 className="h-9 text-sm"
@@ -394,6 +400,7 @@ function VoicePlayerBar({
   onSpeechRateChange: (rate: number) => void;
   onSleepTimerChange: (minutes: number | null) => void;
 }) {
+  const { t } = useLanguage();
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 px-3 pb-3 sm:px-4 sm:pb-4 pointer-events-none">
       <div
@@ -431,15 +438,15 @@ function VoicePlayerBar({
             <div className="min-w-0 flex-1">
               <p className="text-[10px] sm:text-[11px] font-medium text-muted-foreground uppercase tracking-wider leading-none mb-1 truncate">
                 {voiceMode === "chapter"
-                  ? `${displayBook} · Ch. ${displayChapter}`
-                  : "Selected verses"}
+                  ? `${displayBook} · ${t.bibleReader.chShort} ${displayChapter}`
+                  : t.bibleReader.selectedVerses}
               </p>
               <div className="flex items-center gap-2 overflow-hidden">
                 <p
                   className="text-sm sm:text-base font-semibold text-foreground truncate leading-tight"
                   style={{ fontFamily: "'Cinzel', serif" }}
                 >
-                  {currentItem ? `Verse ${currentItem.verseNum}` : "—"}
+                  {currentItem ? t.bibleReader.verseNum.replace('{n}', String(currentItem.verseNum)) : "—"}
                 </p>
                 <button
                   onClick={onToggleAfterPlay}
@@ -450,7 +457,7 @@ function VoicePlayerBar({
                       : "bg-muted text-muted-foreground border border-transparent",
                   )}
                 >
-                  {afterPlay === "continue" ? "Continue On" : "Auto-Stop"}
+                  {afterPlay === "continue" ? t.bibleReader.continueOn : t.bibleReader.autoStop}
                 </button>
               </div>
             </div>
@@ -470,7 +477,7 @@ function VoicePlayerBar({
             <div className="flex items-center gap-0.5 sm:gap-1">
               <button
                 onClick={onToggleRepeat}
-                title={`Repeat mode: ${repeatMode}`}
+                title={t.bibleReader.repeatModeLabel.replace('{mode}', repeatMode)}
                 className={cn(
                   "w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all active:scale-95",
                   repeatMode !== "none"
@@ -485,7 +492,7 @@ function VoicePlayerBar({
                 )}
                 {repeatMode === "all" && (
                   <span className="absolute text-[8px] font-bold mt-3">
-                    ALL
+                    {t.bibleReader.repeatAll}
                   </span>
                 )}
               </button>
@@ -498,10 +505,10 @@ function VoicePlayerBar({
                   const nextIdx = (currentIdx + 1) % speeds.length;
                   onSpeechRateChange(speeds[nextIdx]);
                 }}
-                title={`Speed: ${speechRate}x`}
+                title={`${t.bibleReader.speedX.replace('{rate}', String(speechRate))}`}
                 className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/60 active:scale-95 transition-all font-bold text-xs"
               >
-                {speechRate}x
+                {t.bibleReader.speedX.replace('{rate}', String(speechRate))}
               </button>
 
               {/* Sleep Timer */}
@@ -520,8 +527,8 @@ function VoicePlayerBar({
                 }}
                 title={
                   sleepTimerRemaining > 0
-                    ? `Sleep timer: ${Math.floor(sleepTimerRemaining / 60)}m ${sleepTimerRemaining % 60}s`
-                    : "Set sleep timer"
+                    ? `${t.bibleReader.setSleepTimer}: ${Math.floor(sleepTimerRemaining / 60)}m ${sleepTimerRemaining % 60}s`
+                    : t.bibleReader.setSleepTimer
                 }
                 className={cn(
                   "w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center active:scale-95 transition-all font-bold text-xs",
@@ -531,7 +538,7 @@ function VoicePlayerBar({
                 )}
               >
                 {sleepTimerRemaining > 0 ? (
-                  <span>{Math.ceil(sleepTimerRemaining / 60)}m</span>
+                  <span>{t.bibleReader.sleepMins.replace('{n}', String(Math.ceil(sleepTimerRemaining / 60)))}</span>
                 ) : (
                   <span>💤</span>
                 )}
@@ -540,7 +547,7 @@ function VoicePlayerBar({
               <button
                 onClick={onSkipBack}
                 disabled={!canSkipBack}
-                title="Previous verse"
+                title={t.bibleReader.previousVerse}
                 className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/60 disabled:opacity-25 disabled:cursor-not-allowed active:scale-95 transition-all"
               >
                 <SkipBack className="w-4 h-4" />
@@ -548,7 +555,7 @@ function VoicePlayerBar({
 
               <button
                 onClick={onPauseResume}
-                title={isPaused ? "Resume" : "Pause"}
+                title={isPaused ? t.bibleReader.resumeAudio : t.bibleReader.pauseAudio}
                 className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-primary text-primary-foreground flex items-center justify-center hover:opacity-90 active:scale-95 shadow-lg shadow-primary/20 transition-all mx-0.5"
               >
                 {isPaused ? (
@@ -561,7 +568,7 @@ function VoicePlayerBar({
               <button
                 onClick={onSkipForward}
                 disabled={!canSkipForward && afterPlay !== "continue"}
-                title="Next verse"
+                title={t.bibleReader.nextVerse}
                 className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/60 disabled:opacity-25 disabled:cursor-not-allowed active:scale-95 transition-all"
               >
                 <SkipForward className="w-4 h-4" />
@@ -572,7 +579,7 @@ function VoicePlayerBar({
 
             <button
               onClick={onStop}
-              title="Stop reading"
+              title={t.bibleReader.stopAudio}
               className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-destructive/70 hover:text-destructive hover:bg-destructive/10 active:scale-95 transition-all"
             >
               <VolumeX className="w-4 h-4" />
@@ -587,6 +594,7 @@ function VoicePlayerBar({
 // ── Main Component ────────────────────────────────────────────────────────────
 
 export default function BibleReader() {
+  const { t, isRtl } = useLanguage();
   const { toast } = useToast();
   const isAuthenticated = !!localStorage.getItem(TOKEN_KEY);
   const [searchParams] = useSearchParams();
@@ -767,14 +775,14 @@ export default function BibleReader() {
     if (!translationSearch.trim()) return availableTranslations;
     const search = translationSearch.toLowerCase();
     return availableTranslations.filter(
-      (t) =>
-        t.name.toLowerCase().includes(search) ||
-        t.shortName.toLowerCase().includes(search),
+      (tr) =>
+        tr.name.toLowerCase().includes(search) ||
+        tr.shortName.toLowerCase().includes(search),
     );
   }, [translationSearch, availableTranslations]);
 
   const currentVersion = useMemo(() => {
-    const trans = availableTranslations.find((t) => t.id === versionId);
+    const trans = availableTranslations.find((tr) => tr.id === versionId);
     return trans
       ? { abbreviation: trans.shortName, name: trans.name }
       : { abbreviation: versionId, name: versionId };
@@ -1446,8 +1454,8 @@ export default function BibleReader() {
     );
     if (!cd) {
       toast({
-        title: "Chapter not loaded",
-        description: "Scroll to the chapter first.",
+        title: t.bibleReader.chapterNotLoaded,
+        description: t.bibleReader.scrollToChapter,
         variant: "destructive",
       });
       return;
@@ -1628,8 +1636,8 @@ export default function BibleReader() {
       if (res?.returnCode === 404) {
         setExplanationLoading(false);
         toast({
-          title: "No Explanation",
-          description: res.returnMessage || "Verse explanation not found",
+          title: t.bibleReader.noExplanationTitle,
+          description: res.returnMessage || t.bibleReader.noExplanationFound,
         });
         return;
       }
@@ -1676,14 +1684,14 @@ export default function BibleReader() {
         setExpandedExplanation(verseKey);
       } else {
         toast({
-          title: "No Explanation",
-          description: "No explanation or prompts found for this verse.",
+          title: t.bibleReader.noExplanationTitle,
+          description: t.bibleReader.noExplanationFound,
         });
       }
     } catch {
       toast({
-        title: "Error",
-        description: "Failed to load explanation.",
+        title: t.common.error,
+        description: t.bibleReader.failedToLoadExplanation,
         variant: "destructive",
       });
     } finally {
@@ -1788,8 +1796,8 @@ export default function BibleReader() {
   const addFavorite = async (rangeStart?: number, rangeEnd?: number) => {
     if (!isAuthenticated) {
       toast({
-        title: "Sign In Required",
-        description: "Sign in to save favorites.",
+        title: t.bibleReader.signInRequired,
+        description: t.bibleReader.signInToFavorite,
         variant: "destructive",
       });
       return;
@@ -1815,12 +1823,12 @@ export default function BibleReader() {
           ),
         );
       }
-      toast({ title: "Added to Favorites" });
+      toast({ title: t.bibleReader.addedToFavorites });
       loadFavorites();
     } catch {
       toast({
-        title: "Error",
-        description: "Failed to add favorite.",
+        title: t.common.error,
+        description: t.bibleReader.failedToAddFavorite,
         variant: "destructive",
       });
     }
@@ -1835,8 +1843,8 @@ export default function BibleReader() {
   ) => {
     if (!isAuthenticated) {
       toast({
-        title: "Sign In Required",
-        description: "Sign in to highlight.",
+        title: t.bibleReader.signInRequired,
+        description: t.bibleReader.signInToHighlight,
         variant: "destructive",
       });
       return;
@@ -1888,8 +1896,8 @@ export default function BibleReader() {
       }
     } catch {
       toast({
-        title: "Error",
-        description: "Failed to highlight.",
+        title: t.common.error,
+        description: t.bibleReader.failedToHighlight,
         variant: "destructive",
       });
     }
@@ -1919,7 +1927,7 @@ export default function BibleReader() {
   const copyVerses = () => {
     if (selectedVerses.length === 0) return;
     navigator.clipboard.writeText(versesToText(selectedVerses));
-    toast({ title: "Copied", description: "Verses copied to clipboard." });
+    toast({ title: t.bibleReader.copiedLabel, description: t.bibleReader.versesCopied });
     clearSelection();
   };
 
@@ -1930,7 +1938,7 @@ export default function BibleReader() {
         verses.push(`${displayBook} ${displayChapter}:${v}`);
       navigator.clipboard.writeText(versesToText(verses));
       toast({
-        title: "Copied",
+        title: t.bibleReader.copiedLabel,
         description: `Verses ${rangeStart}-${rangeEnd} copied.`,
       });
     } else {
@@ -1939,12 +1947,12 @@ export default function BibleReader() {
       if (groups.length === 1) {
         const g = groups[0];
         toast({
-          title: "Copied",
+          title: t.bibleReader.copiedLabel,
           description: `${g.book} ${g.chapter}:${Math.min(...g.verses)}-${Math.max(...g.verses)}`,
         });
       } else {
         toast({
-          title: "Copied",
+          title: t.bibleReader.copiedLabel,
           description: `${selectedVerses.length} verses copied.`,
         });
       }
@@ -1983,8 +1991,8 @@ export default function BibleReader() {
   const saveNote = async (rangeStart?: number, rangeEnd?: number) => {
     if (!noteText.trim()) {
       toast({
-        title: "Empty Note",
-        description: "Please enter a note.",
+        title: t.bibleReader.emptyNote,
+        description: t.bibleReader.pleaseEnterNote,
         variant: "destructive",
       });
       return;
@@ -2012,12 +2020,12 @@ export default function BibleReader() {
           ),
         );
       }
-      toast({ title: "Note Saved" });
+      toast({ title: t.bibleReader.noteSaved });
       loadNotes(displayBook, displayChapter);
     } catch {
       toast({
-        title: "Error",
-        description: "Failed to save note.",
+        title: t.common.error,
+        description: t.bibleReader.failedToSaveNote,
         variant: "destructive",
       });
     }
@@ -2068,7 +2076,7 @@ export default function BibleReader() {
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <div className="h-screen flex flex-col overflow-hidden bg-background">
+    <div className="h-screen flex flex-col overflow-hidden bg-background" dir={isRtl ? 'rtl' : 'ltr'}>
       {/* ══════════════════ HEADER ══════════════════ */}
       <header className="flex-shrink-0 border-b bg-background/95 backdrop-blur-sm sticky top-0 z-30">
         {/* ─── Desktop top bar (hidden on mobile) ─── */}
@@ -2082,10 +2090,10 @@ export default function BibleReader() {
                 className="text-base sm:text-lg font-semibold tracking-wide text-foreground leading-none"
                 style={{ fontFamily: "'Cinzel', serif" }}
               >
-                Scripture
+                {t.bibleReader.scripture}
               </h1>
               <p className="text-[9px] sm:text-[10px] text-muted-foreground tracking-widest uppercase leading-none mt-0.5">
-                Bible Reader
+                {t.bibleReader.title}
               </p>
             </div>
           </div>
@@ -2102,12 +2110,12 @@ export default function BibleReader() {
               {isSpeaking && voiceMode === "chapter" ? (
                 <>
                   <VolumeX className="w-3.5 h-3.5" />
-                  Stop
+                  {t.bibleReader.stopReading}
                 </>
               ) : (
                 <>
                   <Volume2 className="w-3.5 h-3.5" />
-                  Read Chapter
+                  {t.bibleReader.readChapter}
                 </>
               )}
             </Button>
@@ -2119,8 +2127,8 @@ export default function BibleReader() {
                   className="w-[200px] h-8 text-xs border-border/50 bg-muted/30 justify-between font-normal"
                 >
                   <span className="truncate">
-                    {availableTranslations.find((t) => t.id === versionId)
-                      ?.name || "Select version"}
+                    {availableTranslations.find((t2) => t2.id === versionId)
+                      ?.name || t.bibleReader.selectVersion}
                   </span>
                   <ChevronDown className="w-3 h-3 ml-2 opacity-50" />
                 </Button>
@@ -2131,7 +2139,7 @@ export default function BibleReader() {
               >
                 <div className="p-2 border-b border-border/40">
                   <Input
-                    placeholder="Search translations..."
+                    placeholder={t.bibleReader.searchTranslations}
                     value={translationSearch}
                     onChange={(e) => setTranslationSearch(e.target.value)}
                     className="h-7 text-xs"
@@ -2142,7 +2150,7 @@ export default function BibleReader() {
                   <div className="py-1">
                     {filteredTranslations.length === 0 ? (
                       <div className="p-2 text-xs text-muted-foreground text-center">
-                        No translations found
+                        {t.bibleReader.noTranslations}
                       </div>
                     ) : (
                       filteredTranslations.map((v) => (
@@ -2176,7 +2184,7 @@ export default function BibleReader() {
           <div className="relative flex-1 max-w-[200px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
             <Input
-              placeholder="Filter books…"
+              placeholder={t.bibleReader.filterBooks}
               value={desktopBookFilter}
               onChange={(e) => setDesktopBookFilter(e.target.value)}
               className="pl-8 h-8 text-xs border-border/50 bg-muted/30"
@@ -2189,7 +2197,7 @@ export default function BibleReader() {
           >
             <SelectTrigger className="w-[175px] h-8 text-xs border-border/50 bg-muted/30">
               <SelectValue
-                placeholder={booksLoading ? "Loading..." : "Select book"}
+                placeholder={booksLoading ? t.bibleReader.loadingBooks : t.bibleReader.selectBook}
               />
             </SelectTrigger>
             <SelectContent>
@@ -2209,7 +2217,7 @@ export default function BibleReader() {
           >
             <SelectTrigger className="w-[130px] h-8 text-xs border-border/50 bg-muted/30">
               <SelectValue
-                placeholder={booksLoading ? "Loading..." : "Chapter"}
+                placeholder={booksLoading ? t.bibleReader.loadingBooks : t.bibleReader.selectChapter}
               />
             </SelectTrigger>
             <SelectContent>
@@ -2224,12 +2232,12 @@ export default function BibleReader() {
                       value={ch.toString()}
                       className="text-xs"
                     >
-                      Chapter {ch}
+                      {t.bibleReader.chapterLabel.replace('{n}', String(ch))}
                     </SelectItem>
                   ))
                 ) : (
                   <SelectItem value="1" disabled>
-                    Loading...
+                    {t.bibleReader.loadingBooks}
                   </SelectItem>
                 )}
               </ScrollArea>
@@ -2292,19 +2300,19 @@ export default function BibleReader() {
             disabled={isAtVeryStart}
             className="flex items-center gap-1 sm:gap-1.5 h-8 px-2 sm:px-3 text-xs text-muted-foreground hover:text-foreground disabled:opacity-30 rounded-lg hover:bg-muted/50 transition-all active:scale-95"
           >
-            <ChevronLeft className="w-3.5 h-3.5" />
+            <ChevronLeft className={cn("w-3.5 h-3.5", isRtl && "rotate-180")} />
             <span className="hidden sm:inline">
               {(() => {
                 const bookNames = backendBooks.map((b) => b.bookName);
                 const idx = bookNames.indexOf(displayBook);
                 return displayChapter > 1
-                  ? `Ch. ${displayChapter - 1}`
+                  ? `${t.bibleReader.chShort} ${displayChapter - 1}`
                   : idx > 0
                     ? bookNames[idx - 1]
-                    : "Prev";
+                    : t.bibleReader.prevShort;
               })()}
             </span>
-            <span className="sm:hidden text-[11px]">Prev</span>
+            <span className="sm:hidden text-[11px]">{t.bibleReader.prevShort}</span>
           </button>
 
           <div className="text-center">
@@ -2315,7 +2323,7 @@ export default function BibleReader() {
               {displayBook}
             </p>
             <p className="text-[10px] sm:text-[11px] text-muted-foreground mt-0.5">
-              Ch. {displayChapter} of {maxChapterForDisplay}
+              {t.bibleReader.chOf.replace('{n}', String(displayChapter)).replace('{total}', String(maxChapterForDisplay))}
               <span className="mx-1 opacity-40">·</span>
               <span className="text-primary/80">
                 {currentVersion?.abbreviation || versionId}
@@ -2333,14 +2341,14 @@ export default function BibleReader() {
                 const bookNames = backendBooks.map((b) => b.bookName);
                 const idx = bookNames.indexOf(displayBook);
                 return displayChapter < maxChapterForDisplay
-                  ? `Ch. ${displayChapter + 1}`
+                  ? `${t.bibleReader.chShort} ${displayChapter + 1}`
                   : idx >= 0 && idx < bookNames.length - 1
                     ? bookNames[idx + 1]
-                    : "End";
+                    : t.bibleReader.endLabel;
               })()}
             </span>
-            <span className="sm:hidden text-[11px]">Next</span>
-            <ChevronRight className="w-3.5 h-3.5" />
+            <span className="sm:hidden text-[11px]">{t.bibleReader.nextShort}</span>
+            <ChevronRight className={cn("w-3.5 h-3.5", isRtl && "rotate-180")} />
           </button>
         </div>
       </header>
@@ -2373,12 +2381,12 @@ export default function BibleReader() {
               {isSpeaking && voiceMode === "selected" ? (
                 <>
                   <VolumeX className="w-3 h-3" />
-                  <span className="hidden sm:inline">Stop</span>
+                  <span className="hidden sm:inline">{t.bibleReader.stop}</span>
                 </>
               ) : (
                 <>
                   <Volume2 className="w-3 h-3" />
-                  <span className="hidden sm:inline">Listen</span>
+                  <span className="hidden sm:inline">{t.bibleReader.listen}</span>
                 </>
               )}
             </button>
@@ -2386,12 +2394,12 @@ export default function BibleReader() {
             <ToolbarBtn
               onClick={() => setShowHighlightPicker(true)}
               icon={<Highlighter className="w-3 h-3" />}
-              label="Highlight"
+              label={t.bibleReader.highlight}
             />
             <ToolbarBtn
               onClick={() => setShowNoteModal(true)}
               icon={<BookMarked className="w-3 h-3" />}
-              label="Note"
+              label={t.bibleReader.addNote}
             />
             <ToolbarBtn
               onClick={() => {
@@ -2402,7 +2410,7 @@ export default function BibleReader() {
                 }
               }}
               icon={<Star className="w-3 h-3" />}
-              label="Fav"
+              label={t.bibleReader.fav}
               compact
             />
             <ToolbarBtn
@@ -2414,7 +2422,7 @@ export default function BibleReader() {
                 }
               }}
               icon={<Copy className="w-3 h-3" />}
-              label="Copy"
+              label={t.common.copy}
               compact
             />
             <ToolbarBtn
@@ -2430,7 +2438,7 @@ export default function BibleReader() {
                 );
               }}
               icon={<PenLine className="w-3 h-3" />}
-              label="Journal"
+              label={t.bibleReader.journal}
               compact
             />
             <ToolbarBtn
@@ -2442,7 +2450,7 @@ export default function BibleReader() {
                 }
               }}
               icon={<Share2 className="w-3 h-3" />}
-              label="Share"
+              label={t.common.share}
               compact
             />
           </div>
@@ -2485,7 +2493,7 @@ export default function BibleReader() {
                       {/* Chapter heading */}
                       <div className="mb-8 sm:mb-10 text-center">
                         <div className="flex items-center justify-center gap-3 sm:gap-4 mb-2 sm:mb-3">
-                          <div className="h-px flex-1 bg-gradient-to-r from-transparent to-border/60" />
+                          <div className={cn("h-px flex-1", isRtl ? "bg-gradient-to-l" : "bg-gradient-to-r", "from-transparent to-border/60")} />
                           <h2
                             className="text-xl sm:text-2xl font-medium tracking-widest text-foreground uppercase"
                             style={{
@@ -2495,7 +2503,7 @@ export default function BibleReader() {
                           >
                             {chapter.book}
                           </h2>
-                          <div className="h-px flex-1 bg-gradient-to-l from-transparent to-border/60" />
+                          <div className={cn("h-px flex-1", isRtl ? "bg-gradient-to-r" : "bg-gradient-to-l", "from-transparent to-border/60")} />
                         </div>
                         <p
                           className="text-xs sm:text-sm text-muted-foreground tracking-widest uppercase"
@@ -2504,7 +2512,7 @@ export default function BibleReader() {
                             letterSpacing: "0.2em",
                           }}
                         >
-                          Chapter {chapter.chapter}
+                          {t.bibleReader.chapterLabel.replace('{n}', String(chapter.chapter))}
                         </p>
                       </div>
 
@@ -2606,12 +2614,12 @@ export default function BibleReader() {
                                     ) : isExplanationExpanded ? (
                                       <>
                                         <ChevronUp className="w-2.5 h-2.5" />
-                                        Close
+                                        {t.bibleReader.closeExplanation}
                                       </>
                                     ) : (
                                       <>
                                         <Lightbulb className="w-2.5 h-2.5" />
-                                        Explain
+                                        {t.bibleReader.explain}
                                       </>
                                     )}
                                   </button>
@@ -2626,7 +2634,7 @@ export default function BibleReader() {
                                         <div className="flex items-center gap-2 mb-2">
                                           <div className="w-1.5 h-1.5 rounded-full bg-primary" />
                                           <span className="text-[10px] font-semibold text-primary uppercase tracking-wider">
-                                            Explanation
+                                            {t.bibleReader.explanation}
                                           </span>
                                         </div>
                                         <div className="text-xs sm:text-sm leading-relaxed text-foreground/80">
@@ -2658,12 +2666,12 @@ export default function BibleReader() {
                                               ) ? (
                                                 <>
                                                   <ChevronUp className="w-3 h-3" />
-                                                  Show less
+                                                  {t.bibleReader.showLess}
                                                 </>
                                               ) : (
                                                 <>
                                                   <ChevronDown className="w-3 h-3" />
-                                                  Read more
+                                                  {t.bibleReader.readMore}
                                                 </>
                                               )}
                                             </button>
@@ -2673,7 +2681,7 @@ export default function BibleReader() {
                                     ) : (
                                       <span className="text-xs text-muted-foreground italic flex items-center gap-2">
                                         <Loader2 className="w-3 h-3 animate-spin" />
-                                        Loading explanation...
+                                        {t.bibleReader.loadingExplanation}
                                       </span>
                                     )}
                                   </div>
@@ -2682,7 +2690,7 @@ export default function BibleReader() {
                                       <div className="flex items-center gap-2 mb-2 sm:mb-3">
                                         <Lightbulb className="w-3.5 h-3.5 text-amber-500" />
                                         <span className="text-[10px] font-semibold text-amber-600 uppercase tracking-wider">
-                                          Journal Prompts
+                                          {t.bibleReader.journalPrompts}
                                         </span>
                                       </div>
                                       <div className="space-y-2">
@@ -2719,14 +2727,14 @@ export default function BibleReader() {
                           }
                           className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground disabled:opacity-30 px-3 py-2 rounded-xl bg-muted/50 active:scale-95 transition-all"
                         >
-                          <ChevronLeft className="w-3.5 h-3.5" />
-                          Prev
+                          <ChevronLeft className={cn("w-3.5 h-3.5", isRtl && "rotate-180")} />
+                          {t.bibleReader.prevShort}
                         </button>
                         <span
                           className="text-xs text-muted-foreground"
                           style={{ fontFamily: "'Cinzel', serif" }}
                         >
-                          Ch. {chapter.chapter}
+                          {t.bibleReader.chShort} {chapter.chapter}
                         </span>
                         <button
                           onClick={goToNextChapter}
@@ -2735,8 +2743,8 @@ export default function BibleReader() {
                           }
                           className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground disabled:opacity-30 px-3 py-2 rounded-xl bg-muted/50 active:scale-95 transition-all"
                         >
-                          Next
-                          <ChevronRight className="w-3.5 h-3.5" />
+                          {t.bibleReader.nextShort}
+                          <ChevronRight className={cn("w-3.5 h-3.5", isRtl && "rotate-180")} />
                         </button>
                       </div>
 
@@ -2751,7 +2759,7 @@ export default function BibleReader() {
                                 className="text-sm font-semibold text-amber-600 uppercase tracking-wider"
                                 style={{ fontFamily: "'Cinzel', serif" }}
                               >
-                                Chapter Reflections
+                                {t.bibleReader.chapterReflections}
                               </span>
                             </div>
                             <div className="space-y-3">

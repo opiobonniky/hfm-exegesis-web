@@ -48,16 +48,13 @@ import {
 } from "@/components/ui/dialog";
 import { Combobox } from "@/components/ui/combobox";
 import { sendGetRequest, sendPostRequest } from "@/services/api";
+import { useLanguage } from "@/components/languages/languageProvider";
 import { routes } from "@/components/Routes/routes";
 import { BIBLE_VERSIONS, getVersionById } from "@/assets/bibleVersion/json/bibleVersions";
 
-const TESTAMENTS = [
-  { value: "Old", label: "Old Testament" },
-  { value: "New", label: "New Testament" },
-];
-
 const AddDailyVerse = () => {
   const { toast } = useToast();
+  const { t, isRtl } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -120,6 +117,15 @@ const AddDailyVerse = () => {
     [book, chapter],
   );
 
+  // Translated testaments
+  const TESTAMENTS = useMemo(
+    () => [
+      { value: "Old", label: t.dailyVerse.oldTestament },
+      { value: "New", label: t.dailyVerse.newTestament },
+    ],
+    [t],
+  );
+
   // Auto-fetch verse text
   useEffect(() => {
     if (!book || !chapter || !verseNumber || isVerseEditing) {
@@ -170,8 +176,8 @@ const AddDailyVerse = () => {
 
     if (!book || !chapter || !verseNumber || !explanation.trim()) {
       toast({
-        title: "Missing fields",
-        description: "Please fill all required fields.",
+        title: t.dailyVerse.missingFields,
+        description: t.dailyVerse.fillAllRequired,
         variant: "destructive",
       });
       return;
@@ -198,9 +204,9 @@ const AddDailyVerse = () => {
 
       if (response.returnCode === 200) {
         toast({
-          title: "Success",
+          title: t.dailyVerse.toastSuccess,
           description:
-            response.returnMessage || "Daily verse added successfully.",
+            response.returnMessage || t.dailyVerse.verseAdded,
         });
         setTimeout(() => {
           navigate(routes.dailyVerse.path);
@@ -209,15 +215,15 @@ const AddDailyVerse = () => {
         setConflictDialog({ open: true, conflict: response.returnData?.conflicts?.[0], payload });
       } else {
         toast({
-          title: "Error",
-          description: response.returnMessage || "Failed to save verse.",
+          title: t.dailyVerse.toastSaveFailedDesc,
+          description: response.returnMessage || t.dailyVerse.toastSaveFailedDesc,
           variant: "destructive",
         });
       }
     } catch (err) {
       toast({
-        title: "Error",
-        description: "An error occurred while saving.",
+        title: t.dailyVerse.toastSaveErrorDesc,
+        description: t.dailyVerse.toastSaveErrorDesc,
         variant: "destructive",
       });
       console.error(err);
@@ -234,13 +240,13 @@ const AddDailyVerse = () => {
         ...conflictDialog.payload,
       });
       if (response.returnCode === 200) {
-        toast({ title: "Updated", description: "Existing verse updated." });
+        toast({ title: t.dailyVerse.toastUpdated, description: t.dailyVerse.toastUpdateSuccessDesc });
         setTimeout(() => navigate(routes.dailyVerse.path), 2000);
       } else {
-        toast({ title: "Error", description: response.returnMessage, variant: "destructive" });
+        toast({ title: t.dailyVerse.toastUpdateFailedDesc, description: response.returnMessage, variant: "destructive" });
       }
     } catch {
-      toast({ title: "Error", description: "Failed to update.", variant: "destructive" });
+      toast({ title: t.dailyVerse.toastUpdateFailedDesc, description: t.dailyVerse.toastUpdateFailedDesc, variant: "destructive" });
     }
   };
 
@@ -259,7 +265,7 @@ const AddDailyVerse = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/30 p-6 lg:p-10">
+    <div dir={isRtl ? 'rtl' : 'ltr'} className="min-h-screen bg-gradient-to-b from-background to-muted/30 p-6 lg:p-10">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div className="fade-up flex items-center justify-between">
@@ -268,8 +274,8 @@ const AddDailyVerse = () => {
               to={routes.dashboard.path}
               className="text-muted-foreground hover:text-foreground inline-flex items-center gap-2"
             >
-              <ArrowLeft className="h-5 w-5" />
-              Back
+              <ArrowLeft className={cn("h-5 w-5", isRtl && "rotate-180")} />
+              {t.common.back}
             </Link>
 
             <div className="flex items-center gap-3">
@@ -278,10 +284,10 @@ const AddDailyVerse = () => {
               </div>
               <div>
                 <h1 className="text-3xl font-bold tracking-tight font-heading text-gradient">
-                  Add Daily Verse
+                  {t.dailyVerse.addVerseTitle}
                 </h1>
                 <p className="text-muted-foreground">
-                  Choose a verse & reflection
+                  {t.dailyVerse.addVerseSubtitle}
                 </p>
               </div>
             </div>
@@ -292,10 +298,10 @@ const AddDailyVerse = () => {
           <CardHeader className="bg-gradient-to-r from-primary/5 to-accent/5 pb-6">
             <CardTitle className="flex items-center gap-2">
               <BookOpen className="h-5 w-5 text-primary" />
-              Verse Details
+              {t.dailyVerse.verseDetails}
             </CardTitle>
             <CardDescription>
-              Select verse, date/time and write your thoughts
+              {t.dailyVerse.verseDetailsDesc}
             </CardDescription>
           </CardHeader>
 
@@ -304,30 +310,30 @@ const AddDailyVerse = () => {
                {/* Testament - Book - Chapter - Verse - Version */}
                <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-5">
                  <div className="space-y-2">
-                   <Label>Testament</Label>
+                   <Label>{t.dailyVerse.testament}</Label>
                    <Combobox
                      options={TESTAMENTS}
                      value={testament}
                      onChange={setTestament}
-                     placeholder="Select testament"
+                     placeholder={t.dailyVerse.selectTestament}
                      width="w-full"
                    />
                  </div>
 
                  <div className="space-y-2">
-                   <Label>Book</Label>
+                   <Label>{t.dailyVerse.book}</Label>
                    <Combobox
                      options={books.map((b) => ({ value: b, label: b }))}
                      value={book}
                      onChange={setBook}
-                     placeholder="Select book"
+                     placeholder={t.dailyVerse.selectBook}
                      disabled={!testament}
                      width="w-full"
                    />
                  </div>
 
                  <div className="space-y-2">
-                   <Label>Chapter</Label>
+                   <Label>{t.dailyVerse.chapter}</Label>
                    <Combobox
                      options={chapters.map((c) => ({
                        value: String(c),
@@ -335,14 +341,14 @@ const AddDailyVerse = () => {
                      }))}
                      value={chapter}
                      onChange={setChapter}
-                     placeholder="Select chapter"
+                     placeholder={t.dailyVerse.selectChapter}
                      disabled={!book}
                      width="w-full"
                    />
                  </div>
 
                  <div className="space-y-2">
-                   <Label>Verse</Label>
+                   <Label>{t.dailyVerse.verse}</Label>
                    <Combobox
                      options={
                        maxVerses > 0
@@ -354,14 +360,14 @@ const AddDailyVerse = () => {
                      }
                      value={verseNumber}
                      onChange={setVerseNumber}
-                     placeholder="Select verse"
+                     placeholder={t.dailyVerse.selectVerse}
                      disabled={!chapter || maxVerses === 0}
                      width="w-full"
                    />
                  </div>
 
                  <div className="space-y-2">
-                   <Label>Version</Label>
+                   <Label>{t.dailyVerse.version}</Label>
                    <Combobox
                      options={BIBLE_VERSIONS.map(v => ({
                        value: v.id,
@@ -369,7 +375,7 @@ const AddDailyVerse = () => {
                      }))}
                      value={bibleVersion}
                      onChange={setBibleVersion}
-                     placeholder="Select version"
+                     placeholder={t.dailyVerse.selectVersion}
                      width="w-full"
                    />
                  </div>
@@ -379,9 +385,9 @@ const AddDailyVerse = () => {
                 <div className="space-y-2">
                   <Label className="flex items-center justify-between">
                     <span>
-                      Verse Text{" "}
+                      {t.dailyVerse.verseText}{" "}
                       <span className="text-xs text-muted-foreground ml-2">
-                        {isVerseEditing ? '(editable)' : '(read only)'}
+                        {isVerseEditing ? t.dailyVerse.editedLabel : t.dailyVerse.readOnlyLabel}
                       </span>
                       {bibleVersion && (
                         <span className="text-xs text-primary font-medium ml-2">
@@ -389,15 +395,6 @@ const AddDailyVerse = () => {
                         </span>
                       )}
                     </span>
-                    {/* {!isVerseLoading && book && chapter && verseNumber && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setIsVerseEditing(!isVerseEditing)}
-                      >
-                        {isVerseEditing ? 'Cancel' : 'Edit'}
-                      </Button>
-                    )} */}
                   </Label>
                   <div className="relative">
                     {isVerseEditing ? (
@@ -405,19 +402,19 @@ const AddDailyVerse = () => {
                         value={verseText}
                         onChange={(e) => setVerseText(e.target.value)}
                         className="min-h-[110px] resize-none font-serif leading-relaxed"
-                        placeholder="Verse text (you can edit this)"
+                        placeholder={t.dailyVerse.editPlaceholder}
                       />
                     ) : (
                       <Textarea
                         value={verseText}
                         readOnly
                         className="min-h-[110px] resize-none font-serif leading-relaxed"
-                        placeholder="Verse text (read only)"
+                        placeholder={t.dailyVerse.readOnlyPlaceholder}
                       />
                     )}
                     {book && chapter && verseNumber && (
                       <div className="absolute bottom-3 right-3 text-xs text-muted-foreground">
-                        Ref: {book} {chapter}:{verseNumber} ({BIBLE_VERSIONS.find(v => v.id === bibleVersion)?.abbreviation || bibleVersion})
+                        {t.dailyVerse.refPrefix} {book} {chapter}:{verseNumber} ({BIBLE_VERSIONS.find(v => v.id === bibleVersion)?.abbreviation || bibleVersion})
                       </div>
                     )}
                   </div>
@@ -425,7 +422,7 @@ const AddDailyVerse = () => {
 
                {/* Date Picker */}
                <div className="space-y-2">
-                 <Label>Date</Label>
+                 <Label>{t.common.date}</Label>
                  <Popover>
                    <PopoverTrigger asChild>
                      <Button
@@ -469,7 +466,7 @@ const AddDailyVerse = () => {
                  {/* Small verse preview */}
                  {verseText && (
                    <p className="text-xs text-muted-foreground italic mt-1.5 pl-1">
-                     Selected:{" "}
+                     {t.dailyVerse.refPrefix}{" "}
                      <strong>
                        {book} {chapter}:{verseNumber}
                      </strong>
@@ -481,12 +478,12 @@ const AddDailyVerse = () => {
               <div className="space-y-2">
                 <Label className="flex items-center gap-2">
                   <Lightbulb className="h-4 w-4 text-accent" />
-                  Explanation <span className="text-destructive">*</span>
+                  {t.dailyVerse.explanation} <span className="text-destructive">*</span>
                 </Label>
                 <Textarea
                   value={explanation}
                   onChange={(e) => setExplanation(e.target.value)}
-                  placeholder="Explain what this verse means and its significance..."
+                  placeholder={t.dailyVerse.explanationPlaceholder}
                   rows={5}
                   className="resize-none"
                   required
@@ -497,12 +494,12 @@ const AddDailyVerse = () => {
                <div className="space-y-2">
                  <Label className="flex items-center gap-2">
                    <Lightbulb className="h-4 w-4 text-muted-foreground" />
-                   Learn More <span className="text-muted-foreground text-xs">(optional)</span>
+                   {t.dailyVerse.learnMore} <span className="text-muted-foreground text-xs">{t.dailyVerse.learnMoreOptional}</span>
                  </Label>
                  <Textarea
                    value={learnMore}
                    onChange={(e) => setLearnMore(e.target.value)}
-                   placeholder="Additional resources, related verses, or deeper insights..."
+                   placeholder={t.dailyVerse.learnMorePlaceholder}
                    rows={4}
                    className="resize-none"
                  />
@@ -512,7 +509,7 @@ const AddDailyVerse = () => {
                <div className="space-y-2">
                  <Label className="flex items-center gap-2">
                    <Save className="h-4 w-4 text-muted-foreground" />
-                   Published <span className="text-muted-foreground text-xs">Show to all users</span>
+                   {t.dailyVerse.publishedLabel} <span className="text-muted-foreground text-xs">{t.dailyVerse.publishedDesc}</span>
                  </Label>
                  <div className="flex items-center gap-2">
                    <input
@@ -527,7 +524,7 @@ const AddDailyVerse = () => {
               {/* Actions */}
               <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-4 pt-6 border-t">
                 <Button type="button" variant="ghost" asChild>
-                  <Link to="/daily-verse">Cancel</Link>
+                  <Link to="/daily-verse">{t.common.cancel}</Link>
                 </Button>
 
                 <Button
@@ -537,7 +534,7 @@ const AddDailyVerse = () => {
                   disabled={!verseText.trim() || !explanation.trim()}
                 >
                   <Save className="h-4 w-4 mr-2" />
-                  Save Daily Verse
+                  {t.dailyVerse.saveDailyVerse}
                 </Button>
               </div>
             </form>
@@ -550,26 +547,30 @@ const AddDailyVerse = () => {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-amber-500" />
-              Verse Already Exists
+              {t.dailyVerse.verseAlreadyExists}
             </DialogTitle>
             <DialogDescription>
-              {conflictDialog.conflict?.type === 'date'
-                ? `A verse already exists for this date (${conflictDialog.conflict?.existing?.bookName} ${conflictDialog.conflict?.existing?.chapter}:${conflictDialog.conflict?.existing?.verseNumber}).`
-                : `This verse (${conflictDialog.conflict?.existing?.bookName} ${conflictDialog.conflict?.existing?.chapter}:${conflictDialog.conflict?.existing?.verseNumber}) already exists for ${conflictDialog.conflict?.existing?.displayDate}.`
-              } Update the existing entry instead?
+              {(() => {
+                const refStr = conflictDialog.conflict?.existing?.bookName
+                  ? `${conflictDialog.conflict.existing.bookName} ${conflictDialog.conflict.existing.chapter}:${conflictDialog.conflict.existing.verseNumber}`
+                  : '';
+                return conflictDialog.conflict?.type === 'date'
+                  ? t.dailyVerse.verseConflictForDate.replace('{ref}', refStr)
+                  : t.dailyVerse.verseConflictForVerse.replace('{ref}', refStr).replace('{date}', conflictDialog.conflict?.existing?.displayDate || '');
+              })()} {t.dailyVerse.verseConflictUpdatePrompt}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setConflictDialog({ open: false, conflict: null, payload: null })}>
-              Cancel
+              {t.common.cancel}
             </Button>
             <Button variant="outline" onClick={() => { setConflictDialog({ open: false, conflict: null, payload: null }); navigate(routes.dailyVerse.path); }}>
               <BookOpen className="h-4 w-4 mr-2" />
-              View Existing
+              {t.dailyVerse.viewExisting}
             </Button>
             <Button onClick={handleConflictUpdate}>
               <Save className="h-4 w-4 mr-2" />
-              Update Existing
+              {t.dailyVerse.updateExisting}
             </Button>
           </DialogFooter>
         </DialogContent>

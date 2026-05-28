@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/components/languages/languageProvider";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate, useParams } from "react-router-dom";
 import { sendPostRequest } from "@/services/api";
@@ -76,6 +77,8 @@ interface ReadingPlan {
 interface Chapter {
   book: string;
   chapter: number;
+  startChapter?: number;
+  endChapter?: number;
 }
 
 interface QuizQuestion {
@@ -101,40 +104,37 @@ interface DayAssignment {
 // ─────────────────────────────────────────────
 const DIFFICULTY_CONFIG: Record<
   string,
-  { label: string; color: string; bg: string }
+  { color: string; bg: string }
 > = {
   easy: {
-    label: "Easy",
     color: "text-emerald-700",
     bg: "bg-emerald-50 border-emerald-200",
   },
   medium: {
-    label: "Medium",
     color: "text-amber-700",
     bg: "bg-amber-50 border-amber-200",
   },
   hard: {
-    label: "Hard",
     color: "text-rose-700",
     bg: "bg-rose-50 border-rose-200",
   },
 };
 
 const CATEGORY_LABELS: Record<string, string> = {
-  intro: "Introduction",
-  INTRO: "Introduction",
-  "whole-bible": "Whole Bible",
-  WHOLE_BIBLE: "Whole Bible",
-  nt: "New Testament",
-  NT: "New Testament",
-  NEW_TESTAMENT: "New Testament",
-  ot: "Old Testament",
-  OT: "Old Testament",
-  OLD_TESTAMENT: "Old Testament",
-  book: "Single Book",
-  BOOK: "Single Book",
-  topical: "Topical",
-  TOPICAL: "Topical",
+  intro: "intro",
+  INTRO: "intro",
+  "whole-bible": "whole-bible",
+  WHOLE_BIBLE: "whole-bible",
+  nt: "nt",
+  NT: "nt",
+  NEW_TESTAMENT: "nt",
+  ot: "ot",
+  OT: "ot",
+  OLD_TESTAMENT: "ot",
+  book: "book",
+  BOOK: "book",
+  topical: "topical",
+  TOPICAL: "topical",
 };
 
 const normalizeDifficulty = (diff: string) => {
@@ -156,9 +156,9 @@ const normalizeCategory = (cat: string) => {
   return cat?.toLowerCase() ?? "intro";
 };
 
-const formatDate = (iso: string | null) => {
+const formatDate = (iso: string | null, locale = "en-US") => {
   if (!iso) return "—";
-  return new Date(iso).toLocaleDateString("en-US", {
+  return new Date(iso).toLocaleDateString(locale, {
     year: "numeric",
     month: "long",
     day: "numeric",
@@ -268,11 +268,13 @@ const StatusBadge = ({
   active: boolean;
   completed: boolean | null;
 }) => {
+  const { t } = useLanguage();
+
   if (completed) {
     return (
       <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border border-emerald-200 bg-emerald-50 text-emerald-700">
         <Trophy className="w-3 h-3" />
-        Completed
+        {t.readingPlan.completedLabel || "Completed"}
       </span>
     );
   }
@@ -281,7 +283,7 @@ const StatusBadge = ({
     return (
       <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border border-sky-200 bg-sky-50 text-sky-700">
         <ShieldCheck className="w-3 h-3" />
-        Active
+        {t.readingPlan.activeLabel || "Active"}
       </span>
     );
   }
@@ -289,7 +291,7 @@ const StatusBadge = ({
   return (
     <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border border-slate-200 bg-slate-100 text-slate-600">
       <CircleOff className="w-3 h-3" />
-      Inactive
+      {t.common.inactive || "Inactive"}
     </span>
   );
 };
@@ -308,6 +310,7 @@ const DayCard = ({
 }) => {
   const [open, setOpen] = useState(false);
   const [quizOpen, setQuizOpen] = useState<number | null>(null);
+  const { t } = useLanguage();
 
   const hasChapters = day.chapters?.some((c) => c.book);
   const hasReflections = day.reflectionQuestions?.some((r) => r.trim());
@@ -321,7 +324,7 @@ const DayCard = ({
           {day.dayNumber}
         </div>
         <p className="text-xs text-slate-500 italic">
-          Day {day.dayNumber} — not yet configured
+          {t.readingPlan.day} {day.dayNumber} — {t.readingPlan.dayNotConfigured}
         </p>
       </div>
     );
@@ -361,7 +364,7 @@ const DayCard = ({
             <p className="text-[10px] text-slate-500 mt-0.5 truncate">
               {day.chapters
                 .filter((c) => c.book)
-                .map((c) => `${c.book} ${c.chapter}`)
+                .map((c) => `${c.book} ${c.startChapter}`)
                 .join(" · ")}
             </p>
           )}
@@ -394,7 +397,7 @@ const DayCard = ({
         <div className="border-t border-slate-200 px-4 pb-4 pt-3 space-y-5">
           {hasChapters && (
             <div>
-              <SectionLabel>Scripture Reading</SectionLabel>
+              <SectionLabel>{t.readingPlan.scriptureReading}</SectionLabel>
               <div className="flex flex-wrap gap-2">
                 {day.chapters
                   .filter((c) => c.book)
@@ -413,7 +416,7 @@ const DayCard = ({
 
           {hasReflections && (
             <div>
-              <SectionLabel>Reflection Questions</SectionLabel>
+              <SectionLabel>{t.readingPlan.reflectionQuestions}</SectionLabel>
               <div className="space-y-2">
                 {day.reflectionQuestions
                   .filter((r) => r.trim())
@@ -434,7 +437,7 @@ const DayCard = ({
           {questionsEnabled && hasQuiz && (
             <div>
               <SectionLabel>
-                Quiz Questions ({day.quizQuestions.length})
+                {t.readingPlan.quizQuestionsLabel.replace("{n}", String(day.quizQuestions.length))}
               </SectionLabel>
               <div className="space-y-2">
                 {day.quizQuestions.map((q, qi) => (
@@ -485,7 +488,7 @@ const DayCard = ({
                         {q.explanation && (
                           <div className="px-2.5 py-2 rounded-lg bg-indigo-50 border border-indigo-200">
                             <p className="text-[10px] font-semibold text-indigo-700 mb-0.5 uppercase tracking-wider">
-                              Explanation
+                              {t.readingPlan.explanation}
                             </p>
                             <p className="text-xs text-slate-600 leading-relaxed">
                               {q.explanation}
@@ -513,6 +516,7 @@ const PlanDetail = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { userInfo } = useAuth();
+  const { t, isRtl, lang } = useLanguage();
   const isAdmin = userInfo?.userRole === 1;
 
   const [plan, setPlan] = useState<ReadingPlan | null>(null);
@@ -624,7 +628,7 @@ const PlanDetail = () => {
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <div className="w-10 h-10 rounded-full border-2 border-violet-200 border-t-violet-600 animate-spin" />
-          <p className="text-slate-500 text-sm">Loading plan…</p>
+          <p className="text-slate-500 text-sm">{t.readingPlan.loadingPlan}</p>
         </div>
       </div>
     );
@@ -635,21 +639,38 @@ const PlanDetail = () => {
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="text-center space-y-3">
           <BookOpen className="w-10 h-10 text-slate-300 mx-auto" />
-          <p className="text-slate-500 text-sm">Plan not found</p>
+          <p className="text-slate-500 text-sm">{t.readingPlan.planNotFound}</p>
           <button
             onClick={() => navigate(-1)}
             className="text-violet-600 text-sm hover:underline"
           >
-            Go back
+            {t.common.goBack}
           </button>
         </div>
       </div>
     );
   }
 
-  const diff = DIFFICULTY_CONFIG[plan.difficulty] ?? DIFFICULTY_CONFIG.medium;
+  const diffKey = normalizeDifficulty(plan.difficulty);
+  const diff = DIFFICULTY_CONFIG[diffKey] ?? DIFFICULTY_CONFIG.medium;
+  const diffLabels: Record<string, string> = {
+    easy: t.readingPlan.diffBeginner,
+    medium: t.readingPlan.diffIntermediate,
+    hard: t.readingPlan.diffAdvanced,
+  };
+  const diffLabel = diffLabels[diffKey] || diffKey;
+
   const pct = Math.round(plan.completion_percentage ?? 0);
-  const catLabel = CATEGORY_LABELS[plan.category] ?? plan.category;
+  const catKey = normalizeCategory(plan.category);
+  const catLabels: Record<string, string> = {
+    intro: t.readingPlan.catIntro,
+    "whole-bible": t.readingPlan.catWholeBible,
+    nt: t.readingPlan.catNT,
+    ot: t.readingPlan.catOT,
+    book: t.readingPlan.catBookByBook,
+    topical: t.readingPlan.catTopical,
+  };
+  const catLabel = catLabels[catKey] || catKey;
 
   // ── Stats Logic ──────────────────────────────
   // For admins, we often prefer showing global stats in summary areas
@@ -681,6 +702,7 @@ const PlanDetail = () => {
   return (
     <div
       className="min-h-screen bg-slate-50 text-slate-900 overflow-x-hidden"
+      dir={isRtl ? 'rtl' : 'ltr'}
       style={{ fontFamily: "'Geist', 'Inter', system-ui, sans-serif" }}
     >
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
@@ -695,8 +717,8 @@ const PlanDetail = () => {
             onClick={() => navigate(-1)}
             className="flex items-center gap-1.5 text-slate-500 hover:text-slate-800 transition-colors text-sm group w-fit"
           >
-            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
-            Reading Plans
+            <ArrowLeft className={cn("w-4 h-4 transition-transform", isRtl ? "group-hover:translate-x-0.5" : "group-hover:-translate-x-0.5")} />
+            {t.readingPlan.backToPlans}
           </button>
 
           <div className="flex items-center gap-2 flex-wrap">
@@ -713,7 +735,7 @@ const PlanDetail = () => {
               )}
             >
               <Zap className="w-3 h-3" />
-              {diff.label}
+              {diffLabel}
             </span>
 
             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border border-slate-200 bg-white text-slate-600">
@@ -723,7 +745,7 @@ const PlanDetail = () => {
 
             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border border-slate-200 bg-white text-slate-600">
               <Eye className="w-3 h-3" />
-              Read Only
+              {t.readingPlan.readOnly}
             </span>
 
             <button
@@ -735,7 +757,7 @@ const PlanDetail = () => {
               className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border border-violet-200 bg-violet-50 text-violet-700 text-sm font-semibold hover:bg-violet-100 transition-colors"
             >
               <Pencil className="w-4 h-4" />
-              Edit Plan
+              {t.readingPlan.editPlan}
             </button>
 
             {plan.started && !isAdmin && (
@@ -750,8 +772,8 @@ const PlanDetail = () => {
               >
                 <Play className="w-4 h-4" />
                 {plan.completed_days_count === 0
-                  ? "Start Reading"
-                  : "Continue Reading"}
+                  ? t.readingPlan.actionStart
+                  : t.readingPlan.continueReading}
               </button>
             )}
           </div>
@@ -760,29 +782,29 @@ const PlanDetail = () => {
         {/* Hero summary */}
         <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_.8fr] gap-5">
           <GlassCard className="p-6">
-            <SectionLabel>Plan Summary</SectionLabel>
+            <SectionLabel>{t.readingPlan.planSummary}</SectionLabel>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <StatCard
                 icon={<Calendar className="w-4 h-4 text-violet-600" />}
-                label="Total Days"
+                label={t.readingPlan.totalDays}
                 value={plan.total_days}
                 accent="bg-violet-50"
               />
               <StatCard
                 icon={<BookMarked className="w-4 h-4 text-indigo-600" />}
-                label="Assignments"
+                label={t.readingPlan.assignments}
                 value={plan.total_assignments}
                 accent="bg-indigo-50"
               />
               <StatCard
                 icon={<HelpCircle className="w-4 h-4 text-sky-600" />}
-                label="Quiz Qs"
+                label={t.readingPlan.quizQs}
                 value={plan.total_quiz_questions}
                 accent="bg-sky-50"
               />
               <StatCard
                 icon={<Flame className="w-4 h-4 text-orange-600" />}
-                label="Streak"
+                label={t.readingPlan.streak}
                 value={plan.streak !== null ? `${plan.streak}d` : "—"}
                 accent="bg-orange-50"
               />
@@ -790,7 +812,7 @@ const PlanDetail = () => {
           </GlassCard>
 
           <GlassCard className="p-6">
-            <SectionLabel>Progress Snapshot</SectionLabel>
+            <SectionLabel>{t.readingPlan.progressSnapshot}</SectionLabel>
             <div className="flex flex-col gap-4">
               <div className="flex items-center gap-5">
                 <div className="relative shrink-0">
@@ -800,14 +822,14 @@ const PlanDetail = () => {
                       {pct}%
                     </span>
                     <span className="text-[8px] uppercase tracking-widest text-slate-500">
-                      complete
+                      {t.readingPlan.complete}
                     </span>
                   </div>
                 </div>
 
                 <div className="flex-1 space-y-2">
                   <div className="flex justify-between text-xs">
-                    <span className="text-slate-500">Days completed</span>
+                    <span className="text-slate-500">{t.readingPlan.daysCompleted}</span>
                     <span className="font-semibold text-slate-800">
                       {plan.completed_days_count} / {plan.total_days}
                     </span>
@@ -820,7 +842,7 @@ const PlanDetail = () => {
                   </div>
                   <div className="text-xs text-slate-500 space-y-1">
                     <p>
-                      Status:{" "}
+                      {t.common.status}:{" "}
                       <span
                         className={cn(
                           "font-bold",
@@ -832,17 +854,17 @@ const PlanDetail = () => {
                         )}
                       >
                         {plan.is_completed
-                          ? "Completed"
+                          ? t.readingPlan.completedLabel
                           : plan.started
-                            ? "In Progress"
-                            : "Not Started"}
+                            ? t.readingPlan.inProgress
+                            : t.readingPlan.notStartedLabel}
                       </span>
                     </p>
                     {plan.started && (
                       <p>
-                        Started:{" "}
+                        {t.readingPlan.startDate}:{" "}
                         <span className="text-slate-700 font-medium">
-                          {formatDate(plan.start_date)}
+                          {formatDate(plan.start_date, lang)}
                         </span>
                       </p>
                     )}
@@ -854,7 +876,7 @@ const PlanDetail = () => {
                 <div className="pt-4 border-t border-slate-100 grid grid-cols-2 gap-3">
                   <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-100">
                     <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider mb-1">
-                      Global Completed
+                      {t.readingPlan.globalCompleted}
                     </p>
                     <p className="text-lg font-bold text-emerald-900">
                       {adminStats.completedEnrollments}
@@ -862,7 +884,7 @@ const PlanDetail = () => {
                   </div>
                   <div className="p-3 rounded-xl bg-amber-50 border border-amber-100">
                     <p className="text-[10px] font-bold text-amber-600 uppercase tracking-wider mb-1">
-                      Global In-Progress
+                      {t.readingPlan.globalInProgress}
                     </p>
                     <p className="text-lg font-bold text-amber-900">
                       {adminStats.inProgressEnrollments}
@@ -877,10 +899,10 @@ const PlanDetail = () => {
         {/* Configuration strip */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           <GlassCard className="p-5">
-            <SectionLabel>Content Readiness</SectionLabel>
+            <SectionLabel>{t.readingPlan.contentReadiness}</SectionLabel>
             <div className="space-y-3">
               <div className="flex justify-between text-sm">
-                <span className="text-slate-500">Configured Days</span>
+                <span className="text-slate-500">{t.readingPlan.configuredDays}</span>
                 <span className="font-semibold text-slate-900">
                   {configuredDays} / {plan.total_days}
                 </span>
@@ -892,29 +914,28 @@ const PlanDetail = () => {
                 />
               </div>
               <p className="text-xs text-slate-500">
-                {configuredPct}% of the schedule currently has assignment
-                content.
+                {configuredPct}% {t.readingPlan.of} {plan.total_days} {t.readingPlan.days}
               </p>
             </div>
           </GlassCard>
 
           <GlassCard className="p-5">
-            <SectionLabel>Quiz Coverage</SectionLabel>
+            <SectionLabel>{t.readingPlan.quizCoverage}</SectionLabel>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-slate-500">Quiz Enabled</span>
+                <span className="text-slate-500">{t.readingPlan.quizEnabled}</span>
                 <span className="font-semibold text-slate-900">
-                  {plan.questions_enabled ? "Yes" : "No"}
+                  {plan.questions_enabled ? t.readingPlan.yes : t.readingPlan.no}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">Quiz Days</span>
+                <span className="text-slate-500">{t.readingPlan.quizDays}</span>
                 <span className="font-semibold text-slate-900">
                   {allQuizDays.length}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">Total Questions</span>
+                <span className="text-slate-500">{t.readingPlan.totalQuestions}</span>
                 <span className="font-semibold text-slate-900">
                   {totalQuizCount}
                 </span>
@@ -924,18 +945,18 @@ const PlanDetail = () => {
 
           <GlassCard className="p-5">
             <SectionLabel>
-              {isAdmin ? "Global Engagement" : "Engagement Stats"}
+              {isAdmin ? t.readingPlan.engagementLabel : t.readingPlan.engagementStats}
             </SectionLabel>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-slate-500">Reflections</span>
+                <span className="text-slate-500">{t.readingPlan.reflections}</span>
                 <span className="font-semibold text-slate-900">
                   {totalReflections}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-500">
-                  {isAdmin ? "Global Accuracy" : "Quiz Accuracy"}
+                  {isAdmin ? t.readingPlan.globalAccuracy : t.readingPlan.quizAccuracy}
                 </span>
                 <span className="font-semibold text-slate-900">
                   {displayQuizAccuracy}%
@@ -943,7 +964,7 @@ const PlanDetail = () => {
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-500">
-                  {isAdmin ? "Total Answers" : "Answered Questions"}
+                  {isAdmin ? t.readingPlan.totalAnswers : t.readingPlan.answeredQuestions}
                 </span>
                 <span className="font-semibold text-slate-900">
                   {displayAnsweredQuestions}
@@ -969,12 +990,12 @@ const PlanDetail = () => {
                 )}
               >
                 {tab === "quiz"
-                  ? `Quiz (${totalQuizCount})`
+                  ? t.readingPlan.quizQuestionsLabel.replace("{n}", String(totalQuizCount))
                   : tab === "schedule"
-                    ? `Schedule (${configuredDays}d)`
+                    ? `${t.readingPlan.dailyAssignments} (${configuredDays}d)`
                     : tab === "admin"
-                      ? "Admin Insights"
-                      : "Overview"}
+                      ? t.readingPlan.adminInsights
+                      : t.readingPlan.overview}
               </button>
             );
           })}
@@ -984,31 +1005,31 @@ const PlanDetail = () => {
         {activeTab === "overview" && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
             <GlassCard className="p-5">
-              <SectionLabel>Timeline & Metadata</SectionLabel>
+              <SectionLabel>{t.readingPlan.timelineMetadata}</SectionLabel>
               {[
-                { label: "Created", value: formatDate(plan.plan_created_on) },
-                { label: "Start Date", value: formatDate(plan.start_date) },
+                { label: t.readingPlan.created, value: formatDate(plan.plan_created_on, lang) },
+                { label: t.readingPlan.startDate, value: formatDate(plan.start_date, lang) },
                 {
-                  label: "Last Activity",
-                  value: formatDate(plan.last_completed_date),
+                  label: t.readingPlan.lastActivity,
+                  value: formatDate(plan.last_completed_date, lang),
                 },
                 {
-                  label: "Days Since Started",
+                  label: t.readingPlan.daysSinceStarted,
                   value:
                     plan.days_since_started !== null
                       ? `${plan.days_since_started}d`
-                      : "Not started",
+                      : t.readingPlan.notStartedLabel,
                 },
                 {
-                  label: "Days Since Activity",
+                  label: t.readingPlan.daysSinceActivity,
                   value:
                     plan.days_since_last_activity !== null
                       ? `${plan.days_since_last_activity}d`
                       : "—",
                 },
                 {
-                  label: "Completion Date",
-                  value: formatDate(plan.completed_date),
+                  label: t.readingPlan.completionDate,
+                  value: formatDate(plan.completed_date, lang),
                 },
               ].map(({ label, value }) => (
                 <div
@@ -1025,7 +1046,7 @@ const PlanDetail = () => {
 
             <GlassCard className="p-5">
               <SectionLabel>
-                {isAdmin ? "Aggregate Performance" : "User Performance"}
+                {isAdmin ? t.readingPlan.aggregatePerformance : t.readingPlan.userPerformance}
               </SectionLabel>
               <div className="flex items-center gap-4 mb-4">
                 <div className="relative shrink-0">
@@ -1035,26 +1056,26 @@ const PlanDetail = () => {
                       {displayQuizAccuracy}%
                     </span>
                     <span className="text-[7px] text-slate-500 uppercase">
-                      acc
+                      {t.readingPlan.quizAccuracyLabel}
                     </span>
                   </div>
                 </div>
                 <div className="flex-1 space-y-2">
                   {[
                     {
-                      label: isAdmin ? "Total Answers" : "Answered",
+                      label: isAdmin ? t.readingPlan.totalAnswers : t.readingPlan.answered,
                       value: isAdmin
                         ? displayAnsweredQuestions
                         : `${displayAnsweredQuestions} / ${plan.total_quiz_questions}`,
                       color: "text-slate-800",
                     },
                     {
-                      label: "Correct",
+                      label: t.readingPlan.correct,
                       value: displayCorrectAnswers,
                       color: "text-emerald-700",
                     },
                     {
-                      label: "Wrong",
+                      label: t.readingPlan.wrong,
                       value: displayWrongAnswers,
                       color: "text-rose-700",
                     },
@@ -1071,22 +1092,22 @@ const PlanDetail = () => {
 
               {[
                 {
-                  label: "Avg Days / Completion",
+                  label: t.readingPlan.avgDaysPerCompletion,
                   value:
                     plan.avg_days_per_completion !== null
                       ? `${plan.avg_days_per_completion}d`
                       : "—",
                 },
                 {
-                  label: "Est. Days to Complete",
+                  label: t.readingPlan.estDaysToComplete,
                   value:
                     plan.estimated_days_to_complete !== null
                       ? `${plan.estimated_days_to_complete}d`
                       : "—",
                 },
-                { label: "Reflection Questions", value: totalReflections },
+                { label: t.readingPlan.reflectionQuestions, value: totalReflections },
                 {
-                  label: "Configured Days",
+                  label: t.readingPlan.configuredDays,
                   value: `${configuredDays} / ${plan.total_days}`,
                 },
               ].map(({ label, value }) => (
@@ -1101,18 +1122,17 @@ const PlanDetail = () => {
             </GlassCard>
 
             <GlassCard className="p-5 lg:col-span-2">
-              <SectionLabel>Admin Notes</SectionLabel>
+              <SectionLabel>{t.readingPlan.adminNotes}</SectionLabel>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
                 <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
                   <div className="flex items-center gap-2 mb-2">
                     <FileText className="w-4 h-4 text-slate-600" />
                     <p className="text-sm font-semibold text-slate-800">
-                      Plan Content
+                      {t.readingPlan.planContent}
                     </p>
                   </div>
                   <p className="text-xs text-slate-600 leading-relaxed">
-                    Review whether all days are configured and titles/chapters
-                    are present.
+                    {t.readingPlan.reviewContent}
                   </p>
                 </div>
 
@@ -1120,12 +1140,11 @@ const PlanDetail = () => {
                   <div className="flex items-center gap-2 mb-2">
                     <HelpCircle className="w-4 h-4 text-slate-600" />
                     <p className="text-sm font-semibold text-slate-800">
-                      Quiz Quality
+                      {t.readingPlan.quizQuality}
                     </p>
                   </div>
                   <p className="text-xs text-slate-600 leading-relaxed">
-                    Confirm questions, answers, and explanations are complete
-                    and accurate.
+                    {t.readingPlan.reviewQuizQuality}
                   </p>
                 </div>
 
@@ -1133,12 +1152,11 @@ const PlanDetail = () => {
                   <div className="flex items-center gap-2 mb-2">
                     <BarChart3 className="w-4 h-4 text-slate-600" />
                     <p className="text-sm font-semibold text-slate-800">
-                      Analytics
+                      {t.readingPlan.analyticsText}
                     </p>
                   </div>
                   <p className="text-xs text-slate-600 leading-relaxed">
-                    Inspect completion, streak, and quiz accuracy for admin
-                    insights.
+                    {t.readingPlan.reviewAnalytics}
                   </p>
                 </div>
 
@@ -1146,12 +1164,11 @@ const PlanDetail = () => {
                   <div className="flex items-center gap-2 mb-2">
                     <ShieldCheck className="w-4 h-4 text-slate-600" />
                     <p className="text-sm font-semibold text-slate-800">
-                      Status
+                      {t.common.status}
                     </p>
                   </div>
                   <p className="text-xs text-slate-600 leading-relaxed">
-                    This page is for review and monitoring only. Users start
-                    plans elsewhere.
+                    {t.readingPlan.reviewStatus}
                   </p>
                 </div>
               </div>
@@ -1165,13 +1182,13 @@ const PlanDetail = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <StatCard
                 icon={<BarChart3 className="w-4 h-4 text-violet-600" />}
-                label="Total Enrollments"
+                label={t.readingPlan.totalEnrollments}
                 value={adminStats?.totalEnrollments ?? "—"}
                 accent="bg-violet-50"
               />
               <StatCard
                 icon={<HelpCircle className="w-4 h-4 text-sky-600" />}
-                label="Quiz Answers (C/W)"
+                label={t.readingPlan.quizAnswersCW}
                 value={
                   adminStats?.totalQuizAnswers > 0
                     ? `${adminStats.totalQuizCorrect} / ${adminStats.totalQuizWrong}`
@@ -1181,13 +1198,13 @@ const PlanDetail = () => {
               />
               <StatCard
                 icon={<Clock className="w-4 h-4 text-amber-600" />}
-                label="In Progress"
+                label={t.readingPlan.inProgressCount}
                 value={adminStats?.inProgressEnrollments ?? "—"}
                 accent="bg-amber-50"
               />
               <StatCard
                 icon={<Sparkles className="w-4 h-4 text-indigo-600" />}
-                label="Global Accuracy"
+                label={t.readingPlan.globalQuizAccuracy}
                 value={`${adminStats?.globalQuizAccuracy ?? 0}%`}
                 accent="bg-indigo-50"
               />
@@ -1196,41 +1213,41 @@ const PlanDetail = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
               <GlassCard className="p-5 lg:col-span-2">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
-                  <SectionLabel>User Progress Details</SectionLabel>
+                  <SectionLabel>{t.readingPlan.userProgressDetails}</SectionLabel>
                   <div className="relative">
                     <input
                       type="text"
-                      placeholder="Search users..."
+                      placeholder={t.readingPlan.searchUsers}
                       value={userSearchTerm}
                       onChange={(e) => setUserSearchFilter(e.target.value)}
                       className="text-xs px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-violet-500/20 w-full sm:w-48 transition-all"
                     />
                   </div>
                 </div>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left">
-                    <thead>
-                      <tr className="border-b border-slate-100">
-                        <th className="pb-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                          User
-                        </th>
-                        <th className="pb-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider text-center">
-                          Progress
-                        </th>
-                        <th className="pb-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider text-center">
-                          Streak
-                        </th>
-                        <th className="pb-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider text-center">
-                          Quiz (C/W)
-                        </th>
-                        <th className="pb-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider text-center">
-                          Last Activity
-                        </th>
-                        <th className="pb-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider text-right">
-                          Status
-                        </th>
-                      </tr>
-                    </thead>
+                <div className="overflow-x-auto">  
+                    <table className={cn("w-full", isRtl ? "text-right" : "text-left")}>
+                        <thead>
+                          <tr className="border-b border-slate-100">
+                            <th className={cn("pb-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider", isRtl ? "text-right" : "text-left")}>
+                              {t.common.name}
+                            </th>
+                            <th className="pb-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider text-center">
+                              {t.readingPlan.progress}
+                            </th>
+                            <th className="pb-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider text-center">
+                              {t.readingPlan.streak}
+                            </th>
+                            <th className="pb-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider text-center">
+                              {t.readingPlan.quizCW}
+                            </th>
+                            <th className="pb-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider text-center">
+                              {t.readingPlan.lastActivity}
+                            </th>
+                            <th className={cn("pb-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider", isRtl ? "text-left" : "text-right")}>
+                              {t.common.status}
+                            </th>
+                          </tr>
+                        </thead>
                     <tbody className="divide-y divide-slate-50">
                       {filteredUsers.length > 0 ? (
                         filteredUsers.map((u: any, i: number) => (
@@ -1275,7 +1292,7 @@ const PlanDetail = () => {
                                 </div>
                                 <span className="text-[10px] font-medium text-slate-600">
                                   {u.completedDaysCount} / {plan.total_days}{" "}
-                                  days
+                                  {t.readingPlan.days}
                                 </span>
                               </div>
                             </td>
@@ -1297,7 +1314,7 @@ const PlanDetail = () => {
                                   </span>
                                 </div>
                                 <span className="text-[9px] text-slate-400">
-                                  {u.quizStats?.accuracy || 0}% acc.
+                                  {u.quizStats?.accuracy || 0}%
                                 </span>
                               </div>
                             </td>
@@ -1306,8 +1323,8 @@ const PlanDetail = () => {
                                 {u.lastActivity
                                   ? new Date(
                                       u.lastActivity,
-                                    ).toLocaleDateString()
-                                  : "Never"}
+                                    ).toLocaleDateString(lang)
+                                  : t.readingPlan.dateNotSet}
                               </span>
                             </td>
                             <td className="py-3 pl-4 text-right">
@@ -1322,10 +1339,10 @@ const PlanDetail = () => {
                                 )}
                               >
                                 {u.status === "completed"
-                                  ? "Done"
+                                  ? t.readingPlan.done
                                   : u.status === "inprogress"
-                                    ? "In Progress"
-                                    : "Started"}
+                                    ? t.readingPlan.inProgress
+                                    : t.readingPlan.startedLabel}
                               </span>
                             </td>
                           </tr>
@@ -1337,8 +1354,8 @@ const PlanDetail = () => {
                             className="py-8 text-center text-xs text-slate-400 italic"
                           >
                             {userSearchTerm.trim()
-                              ? `No users matching "${userSearchTerm}"`
-                              : "No users enrolled in this plan yet."}
+                              ? t.readingPlan.noUsersMatching.replace("{term}", userSearchTerm)
+                              : t.readingPlan.noUsersEnrolled}
                           </td>
                         </tr>
                       )}
@@ -1349,12 +1366,12 @@ const PlanDetail = () => {
 
               <div className="space-y-5">
                 <GlassCard className="p-5">
-                  <SectionLabel>Engagement Trends</SectionLabel>
+                  <SectionLabel>{t.readingPlan.engagementTrends}</SectionLabel>
                   <div className="space-y-4">
                     <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100">
                       <div>
                         <p className="text-xs text-slate-500 font-medium">
-                          Global Quiz Accuracy
+                          {t.readingPlan.globalAccuracyLabel}
                         </p>
                         <p className="text-2xl font-bold text-slate-900">
                           {adminStats?.globalQuizAccuracy ?? 0}%
@@ -1367,7 +1384,7 @@ const PlanDetail = () => {
 
                     <div className="space-y-2">
                       <p className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
-                        Most Difficult Questions
+                        {t.readingPlan.mostDifficultQuestions}
                       </p>
                       {adminStats?.difficultQuestions?.length > 0 ? (
                         adminStats.difficultQuestions.map(
@@ -1381,7 +1398,7 @@ const PlanDetail = () => {
                                   {q.question}
                                 </p>
                                 <p className="text-[10px] text-slate-500">
-                                  Day {q.dayNumber} · {q.totalAnswers} attempts
+                                  {t.readingPlan.day} {q.dayNumber} · {q.totalAnswers} {t.readingPlan.quizAnswersCW.toLowerCase()}
                                 </p>
                               </div>
                               <span
@@ -1399,7 +1416,7 @@ const PlanDetail = () => {
                         )
                       ) : (
                         <p className="text-xs text-slate-500 italic">
-                          No quiz data available yet.
+                          {t.readingPlan.noQuizData}
                         </p>
                       )}
                     </div>
@@ -1407,11 +1424,11 @@ const PlanDetail = () => {
                 </GlassCard>
 
                 <GlassCard className="p-5">
-                  <SectionLabel>Plan Structure Summary</SectionLabel>
+                  <SectionLabel>{t.readingPlan.planStructureSummary}</SectionLabel>
                   <div className="space-y-3">
                     <div className="flex justify-between items-center py-2 border-b border-slate-100">
                       <span className="text-xs text-slate-500">
-                        Daily Assignments
+                        {t.readingPlan.dailyAssignments}
                       </span>
                       <span className="text-xs font-bold text-slate-900">
                         {adminStats?.assignmentsCount ?? 0}
@@ -1419,7 +1436,7 @@ const PlanDetail = () => {
                     </div>
                     <div className="flex justify-between items-center py-2 border-b border-slate-100">
                       <span className="text-xs text-slate-500">
-                        Quiz Questions
+                        {t.readingPlan.quizQuestionsCount}
                       </span>
                       <span className="text-xs font-bold text-slate-900">
                         {adminStats?.questionsCount ?? 0}
@@ -1427,7 +1444,7 @@ const PlanDetail = () => {
                     </div>
                     <div className="flex justify-between items-center py-2 border-b border-slate-100">
                       <span className="text-xs text-slate-500">
-                        Avg Qs per Day
+                        {t.readingPlan.avgQsPerDay}
                       </span>
                       <span className="text-xs font-bold text-slate-900">
                         {adminStats?.assignmentsCount > 0
@@ -1443,13 +1460,11 @@ const PlanDetail = () => {
                       <div className="flex items-center gap-2 mb-2">
                         <Zap className="w-4 h-4 text-indigo-600" />
                         <p className="text-sm font-bold text-indigo-900">
-                          Pro-tip
+                          {t.readingPlan.proTip}
                         </p>
                       </div>
                       <p className="text-xs text-indigo-700 leading-relaxed">
-                        Plans with at least 1 quiz question per day have 40%
-                        higher engagement. Consider adding more questions to
-                        days with low completion.
+                        {t.readingPlan.proTipContent}
                       </p>
                     </div>
                   </div>
@@ -1487,7 +1502,7 @@ const PlanDetail = () => {
               <div className="flex flex-col items-center py-16 text-center">
                 <HelpCircle className="w-10 h-10 text-slate-300 mb-3" />
                 <p className="text-slate-500 text-sm">
-                  Quiz questions are disabled for this plan.
+                  {t.readingPlan.quizDisabled}
                 </p>
               </div>
             ) : loadingPlan ? (
@@ -1503,7 +1518,7 @@ const PlanDetail = () => {
               <div className="flex flex-col items-center py-16 text-center">
                 <HelpCircle className="w-10 h-10 text-slate-300 mb-3" />
                 <p className="text-slate-500 text-sm">
-                  No quiz questions found.
+                  {t.readingPlan.noQuizFound}
                 </p>
               </div>
             ) : (
@@ -1593,11 +1608,11 @@ const PlanDetail = () => {
         <div className="flex flex-wrap gap-x-5 gap-y-1 pb-8 text-[10px] text-slate-400 font-mono">
           <span>{plan.plan_id}</span>
           <span>DB#{plan.plan_db_id}</span>
-          <span>{formatDate(plan.plan_created_on)}</span>
+          <span>{formatDate(plan.plan_created_on, lang)}</span>
           <span
             className={plan.is_active ? "text-emerald-600" : "text-rose-600"}
           >
-            {plan.is_active ? "● Active" : "● Inactive"}
+            {plan.is_active ? `● ${t.readingPlan.activeLabel}` : `● ${t.common.inactive}`}
           </span>
         </div>
       </div>

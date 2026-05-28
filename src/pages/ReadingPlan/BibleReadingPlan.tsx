@@ -349,7 +349,7 @@ const BibleReadingPlan = () => {
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-sm font-semibold transition-all"
           >
             {t.readingPlan?.browsePlans || 'Browse Plans'}
-            <ChevronRight className="w-4 h-4" />
+            <ChevronRight className={cn("w-4 h-4", isRtl && "rotate-180")} />
           </button>
         </div>
       );
@@ -504,7 +504,7 @@ const BibleReadingPlan = () => {
       dir={isRtl ? 'rtl' : 'ltr'}
       style={{ fontFamily: "'DM Sans', 'Inter', system-ui, sans-serif" }}
     >
-      <div className="h-1 bg-gradient-to-r from-teal-400 via-emerald-400 to-cyan-400" />
+      <div className={cn("h-1", isRtl ? "bg-gradient-to-l" : "bg-gradient-to-r", "from-teal-400 via-emerald-400 to-cyan-400")} />
 
       <div className="max-w-7xl mx-auto px-5 sm:px-8 py-8 space-y-7">
         {/* Header */}
@@ -580,7 +580,7 @@ const BibleReadingPlan = () => {
             <TrendingUp className="w-4 h-4" />
             {t.readingPlan?.tabProgress || 'My Progress'}
             {activePlans.length > 0 && (
-              <span className="ml-1 bg-teal-100 text-teal-700 text-xs rounded-full px-1.5 py-0.5">
+              <span className={cn(isRtl ? "mr-1" : "ml-1", "bg-teal-100 text-teal-700 text-xs rounded-full px-1.5 py-0.5")}>
                 {activePlans.length}
               </span>
             )}
@@ -852,7 +852,7 @@ function BrowsePlanCard({
   pct: number;
   onPress: () => void;
 }) {
-  const { t } = useLanguage();
+  const { t, isRtl } = useLanguage();
   const totalDays = plan.totalDays || plan.total_days || 1;
   const diffColor =
     DIFFICULTY_COLOR[plan.difficulty]?.badge || "bg-stone-100 text-stone-600";
@@ -861,7 +861,7 @@ function BrowsePlanCard({
     <button
       onClick={onPress}
       className={cn(
-        "w-full bg-white rounded-2xl border text-left transition-all hover:shadow-md",
+        "w-full bg-white rounded-2xl border transition-all hover:shadow-md", isRtl ? "text-right" : "text-left",
         isActive || isCompleted
           ? "border-teal-200"
           : "border-stone-200 hover:border-stone-300"
@@ -942,7 +942,7 @@ function BrowsePlanCard({
           )}
         </div>
 
-        <ChevronRight className="w-5 h-5 text-stone-400 shrink-0" />
+        <ChevronRight className={cn("w-5 h-5 text-stone-400 shrink-0", isRtl && "rotate-180")} />
       </div>
     </button>
   );

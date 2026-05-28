@@ -55,6 +55,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import { sendPostRequest } from "@/services/api";
 import { routes } from "@/components/Routes/routes";
+import { useLanguage } from "@/components/languages/languageProvider";
 
 // ─────────────────────────────────────────────
 // Types
@@ -80,16 +81,15 @@ interface ReadingPlan {
 // ─────────────────────────────────────────────
 // Constants
 // ─────────────────────────────────────────────
-const CATEGORIES = [
-  { value: "all", label: "All Categories" },
-  { value: "intro", label: "Introduction" },
-  { value: "whole-bible", label: "Whole Bible" },
-  { value: "nt", label: "New Testament" },
-  { value: "ot", label: "Old Testament" },
-  { value: "book", label: "Single Book" },
-  { value: "topical", label: "Topical" },
-];
-const EDIT_CATEGORIES = CATEGORIES.filter((c) => c.value !== "all");
+const CATEGORY_KEY: Record<string, string> = {
+  all: "catAllCategories",
+  intro: "catIntroduction",
+  "whole-bible": "catWholeBible",
+  nt: "catNT",
+  ot: "catOT",
+  book: "catSingleBook",
+  topical: "catTopical",
+};
 
 const DIFF_STYLES: Record<string, { bar: string; badge: string }> = {
   easy: {
@@ -103,8 +103,21 @@ const DIFF_STYLES: Record<string, { bar: string; badge: string }> = {
   hard: { bar: "bg-red-500", badge: "bg-red-50 text-red-700 border-red-200" },
 };
 
-const catLabel = (cat: string) =>
-  CATEGORIES.find((c) => c.value === cat)?.label ?? cat;
+const DIFF_KEY: Record<string, string> = {
+  easy: "diffEasy",
+  medium: "diffMedium",
+  hard: "diffHard",
+};
+
+const diffLabel = (diff: string, t: any) => {
+  const key = DIFF_KEY[diff];
+  return key ? (t.readingPlan as Record<string, string>)[key] ?? diff : diff;
+};
+
+const catLabel = (cat: string, t: any) => {
+  const key = CATEGORY_KEY[cat];
+  return key ? (t.readingPlan as Record<string, string>)[key] ?? cat : cat;
+};
 
 // ─────────────────────────────────────────────
 // Component
@@ -113,6 +126,7 @@ const ReadingPlans = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { userInfo } = useAuth();
+  const { t, isRtl } = useLanguage();
   const isAdmin = userInfo?.userRole === 1;
 
   const [plans, setPlans] = useState<ReadingPlan[]>([]);
@@ -145,13 +159,13 @@ const ReadingPlans = () => {
         setPlans(plansWithDefaults);
       } else
         toast({
-          title: "Failed to load plans",
+          title: t.readingPlan.toastFailedLoad,
           description: res.returnMessage,
           variant: "destructive",
         });
     } catch (e: any) {
       toast({
-        title: "Network error",
+        title: t.readingPlan.toastNetworkError,
         description: e.message,
         variant: "destructive",
       });
@@ -177,7 +191,7 @@ const ReadingPlans = () => {
   const confirmDelete = async () => {
     if (!deleteTarget) return;
     if (deleteConfirmText !== deleteTarget.planId) {
-      toast({ title: "Plan ID does not match", variant: "destructive" });
+      toast({ title: t.readingPlan.toastIdMismatch, variant: "destructive" });
       return;
     }
     setDeleting(true);
@@ -187,8 +201,8 @@ const ReadingPlans = () => {
       });
       if (res.returnCode === 200) {
         toast({
-          title: "Plan deleted",
-          description: `"${deleteTarget.title}" removed.`,
+          title: t.readingPlan.toastPlanDeleted,
+          description: t.readingPlan.toastPlanDeletedDesc.replace('{title}', deleteTarget.title),
         });
         setPlans((prev) =>
           prev.filter((p) => p.planId !== deleteTarget.planId),
@@ -196,14 +210,14 @@ const ReadingPlans = () => {
         setDeleteTarget(null);
       } else {
         toast({
-          title: "Delete failed",
+          title: t.readingPlan.toastDeleteFailed,
           description: res.returnMessage,
           variant: "destructive",
         });
       }
     } catch (e: any) {
       toast({
-        title: "Network error",
+        title: t.readingPlan.toastNetworkError,
         description: e.message,
         variant: "destructive",
       });
@@ -223,19 +237,19 @@ const ReadingPlans = () => {
       });
       if (res.returnCode === 200) {
         toast({
-          title: "Plan started!",
-          description: `You've started "${plan.title}". Good luck!`,
+          title: t.readingPlan.toastStarted,
+          description: t.readingPlan.toastPlanStartedDesc.replace('{title}', plan.title),
         });
       } else {
         toast({
-          title: "Failed to start plan",
+          title: t.readingPlan.toastFailedStart,
           description: res.returnMessage,
           variant: "destructive",
         });
       }
     } catch (e: any) {
       toast({
-        title: "Error",
+        title: t.common.error,
         description: e.message,
         variant: "destructive",
       });
@@ -245,7 +259,7 @@ const ReadingPlans = () => {
   const confirmEdit = async () => {
     if (!editTarget) return;
     if (!editForm.title?.trim()) {
-      toast({ title: "Title is required", variant: "destructive" });
+      toast({ title: t.readingPlan.toastTitleRequired, variant: "destructive" });
       return;
     }
     setSaving(true);
@@ -261,8 +275,8 @@ const ReadingPlans = () => {
       });
       if (res.returnCode === 200) {
         toast({
-          title: "Plan updated",
-          description: `"${editForm.title}" saved.`,
+          title: t.readingPlan.toastPlanUpdated,
+          description: t.readingPlan.toastPlanUpdatedDesc.replace('{title}', editForm.title),
         });
         setPlans((prev) =>
           prev.map((p) =>
@@ -272,14 +286,14 @@ const ReadingPlans = () => {
         setEditTarget(null);
       } else {
         toast({
-          title: "Update failed",
+          title: t.readingPlan.toastUpdateFailed,
           description: res.returnMessage,
           variant: "destructive",
         });
       }
     } catch (e: any) {
       toast({
-        title: "Network error",
+        title: t.readingPlan.toastNetworkError,
         description: e.message,
         variant: "destructive",
       });
@@ -302,17 +316,17 @@ const ReadingPlans = () => {
             p.planId === plan.planId ? { ...p, isActive: newVal } : p,
           ),
         );
-        toast({ title: newVal ? "Plan activated" : "Plan deactivated" });
+        toast({ title: newVal ? t.readingPlan.toastPlanActivated : t.readingPlan.toastPlanDeactivated });
       } else {
         toast({
-          title: "Toggle failed",
+          title: t.readingPlan.toastToggleFailed,
           description: res.returnMessage,
           variant: "destructive",
         });
       }
     } catch (e: any) {
       toast({
-        title: "Network error",
+        title: t.readingPlan.toastNetworkError,
         description: e.message,
         variant: "destructive",
       });
@@ -344,8 +358,8 @@ const ReadingPlans = () => {
               to="/dashboard"
               className="text-stone-400 hover:text-stone-700 inline-flex items-center gap-1.5 text-sm font-medium transition-colors"
             >
-              <ArrowLeft className="h-4 w-4" />
-              Back
+              <ArrowLeft className={cn("h-4 w-4", isRtl && "rotate-180")} />
+              {t.common.back}
             </Link>
             <div className="flex items-center gap-3">
               <div className="w-11 h-11 rounded-2xl bg-teal-100 flex items-center justify-center shadow-sm">
@@ -356,10 +370,10 @@ const ReadingPlans = () => {
                   className="text-2xl font-bold text-stone-800 tracking-tight leading-none"
                   style={{ fontFamily: "'Fraunces', Georgia, serif" }}
                 >
-                  Reading Plans
+                  {t.readingPlan.manageTitle}
                 </h1>
                 <p className="text-stone-400 text-xs mt-0.5 font-medium">
-                  {isAdmin ? "Admin management" : "Your reading plans"}
+                  {isAdmin ? t.readingPlan.adminManagement : t.readingPlan.yourSubtitle}
                 </p>
               </div>
             </div>
@@ -370,7 +384,7 @@ const ReadingPlans = () => {
               className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-sm font-semibold shadow-sm shadow-teal-600/20 transition-all hover:-translate-y-px"
             >
               <Plus className="w-4 h-4" />
-              New Reading Plan
+              {t.readingPlan.newPlan}
             </button>
           )}
         </div>
@@ -379,25 +393,25 @@ const ReadingPlans = () => {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
             {
-              label: "Total Plans",
+              label: t.readingPlan.statTotalPlans,
               value: stats.total,
               color: "text-teal-700",
               bg: "bg-teal-50 border-teal-100",
             },
             {
-              label: "Active",
-              value: stats.active,
+              label: t.readingPlan.quizEnabled,
+              value: stats.withQuiz,
               color: "text-emerald-700",
               bg: "bg-emerald-50 border-emerald-100",
             },
             {
-              label: "Quiz Enabled",
-              value: stats.withQuiz,
+              label: t.readingPlan.statQuizEnabled,
+              value: stats.active,
               color: "text-violet-700",
               bg: "bg-violet-50 border-violet-100",
             },
             {
-              label: "Easy Plans",
+              label: t.readingPlan.statEasy,
               value: stats.easy,
               color: "text-amber-700",
               bg: "bg-amber-50 border-amber-100",
@@ -427,7 +441,7 @@ const ReadingPlans = () => {
             <input
               value={search}
               onChange={(e: { target: { value: any; }; }) => setSearch(e.target.value)}
-              placeholder="Search by title or plan ID…"
+              placeholder={t.readingPlan.searchPlanId}
               className="w-full pl-9 pr-9 py-2.5 rounded-xl border border-stone-200 bg-white text-sm text-stone-700 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-teal-400/40 focus:border-teal-400 transition-all shadow-sm"
             />
             {search && (
@@ -446,9 +460,9 @@ const ReadingPlans = () => {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {CATEGORIES.map((c) => (
-                  <SelectItem key={c.value} value={c.value}>
-                    {c.label}
+                {Object.keys(CATEGORY_KEY).map((val) => (
+                  <SelectItem key={val} value={val}>
+                    {catLabel(val, t)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -469,8 +483,8 @@ const ReadingPlans = () => {
               </div>
               <p className="text-stone-400 font-medium">
                 {plans.length === 0
-                  ? "No reading plans yet"
-                  : "No plans match your search"}
+                  ? t.readingPlan.noPlansYet
+                  : t.readingPlan.noSearchMatch}
               </p>
               {plans.length === 0 && (
                 <button
@@ -478,7 +492,7 @@ const ReadingPlans = () => {
                   className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-sm font-semibold transition-all"
                 >
                   <Plus className="w-4 h-4" />
-                  Create your first plan
+                  {t.readingPlan.createFirstPlan}
                 </button>
               )}
             </div>
@@ -514,8 +528,9 @@ const ReadingPlans = () => {
                             {plan.title}
                           </h3>
                           {plan.isActive === false && (
-                            <span className="text-[10px] border border-stone-200 bg-stone-50 text-stone-400 rounded px-1.5 py-0.5 font-bold uppercase tracking-wide">
-                              Inactive
+                            <span                              className="text-[10px] border border-stone-200 bg-stone-50 text-stone-400 rounded px-1.5 py-0.5 font-bold uppercase tracking-wide"
+                            >
+                              {t.readingPlan.inactiveBadge}
                             </span>
                           )}
                         </div>
@@ -534,19 +549,19 @@ const ReadingPlans = () => {
                               ds.badge,
                             )}
                           >
-                            {plan.difficulty}
+                            {diffLabel(plan.difficulty, t)}
                           </span>
                           <span className="inline-flex items-center px-2 py-0.5 rounded-lg text-[11px] font-semibold border bg-stone-50 text-stone-600 border-stone-200">
-                            {catLabel(plan.category)}
+                            {catLabel(plan.category, t)}
                           </span>
                           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] font-semibold border bg-stone-50 text-stone-600 border-stone-200">
                             <Calendar className="w-3 h-3" />
-                            {plan.totalDays} days
+                            {t.readingPlan.daysCount.replace('{n}', String(plan.totalDays))}
                           </span>
                           {plan.questionsEnabled && (
                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] font-bold border bg-violet-50 text-violet-700 border-violet-200">
                               <HelpCircle className="w-3 h-3" />
-                              Quiz
+                              {t.dashboard.quiz}
                             </span>
                           )}
                         </div>
@@ -560,7 +575,7 @@ const ReadingPlans = () => {
                             <button
                               onClick={() => toggleActive(plan)}
                               title={
-                                plan.isActive !== false ? "Deactivate" : "Activate"
+                                plan.isActive !== false ? t.readingPlan.deactivateTitle : t.readingPlan.activateTitle
                               }
                               className="p-1.5 rounded-lg hover:bg-stone-100 transition-colors"
                             >
@@ -573,7 +588,7 @@ const ReadingPlans = () => {
                             {/* Edit */}
                             <button
                               onClick={() => openEdit(plan)}
-                              title="Edit plan"
+                              title={t.readingPlan.editPlanTitle}
                               className="p-1.5 rounded-lg hover:bg-teal-50 text-stone-400 hover:text-teal-600 transition-colors"
                             >
                               <Edit2 className="w-4 h-4" />
@@ -584,7 +599,7 @@ const ReadingPlans = () => {
                                 setDeleteTarget(plan);
                                 setDeleteConfirmText("");
                               }}
-                              title="Delete plan"
+                              title={t.readingPlan.deletePlanTitle}
                               className="p-1.5 rounded-lg hover:bg-red-50 text-stone-400 hover:text-red-600 transition-colors"
                             >
                               <Trash2 className="w-4 h-4" />
@@ -594,7 +609,7 @@ const ReadingPlans = () => {
                         {!isAdmin && (
                           <button
                             onClick={() => startPlan(plan)}
-                            title="Start plan"
+                            title={t.readingPlan.startPlanTitle}
                             className="p-1.5 rounded-lg hover:bg-emerald-50 text-stone-400 hover:text-emerald-600 transition-colors"
                           >
                             <Play className="w-4 h-4" />
@@ -605,7 +620,7 @@ const ReadingPlans = () => {
                           to={routes.readingPlanDetail.path.replace(":planId", plan.planId)}
                           className="p-1.5 rounded-lg hover:bg-stone-100 text-stone-400 hover:text-stone-700 transition-colors"
                         >
-                          <ChevronRight className="w-4 h-4" />
+                          <ChevronRight className={cn("w-4 h-4", isRtl && "rotate-180")} />
                         </Link>
                       </div>
                     </div>
@@ -618,8 +633,9 @@ const ReadingPlans = () => {
 
         {!loading && filtered.length > 0 && (
           <p className="text-xs text-stone-400 text-center pb-4 font-medium">
-            Showing {filtered.length} of {plans.length} plan
-            {plans.length !== 1 ? "s" : ""}
+            {plans.length === 1
+              ? t.readingPlan.showingCount.replace('{filtered}', String(filtered.length)).replace('{total}', String(plans.length))
+              : t.readingPlan.showingCountPlural.replace('{filtered}', String(filtered.length)).replace('{total}', String(plans.length))}
           </p>
         )}
       </div>
@@ -630,14 +646,12 @@ const ReadingPlans = () => {
         onOpenChange={(o) => !o && setDeleteTarget(null)}
       >
         <DialogContent className="sm:max-w-md rounded-2xl border-stone-100">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-red-600">
+          <DialogHeader>              <DialogTitle className="flex items-center gap-2 text-red-600">
               <AlertTriangle className="w-5 h-5" />
-              Delete Reading Plan
+              {t.readingPlan.deleteDialogTitle}
             </DialogTitle>
             <DialogDescription>
-              This will permanently delete the plan and{" "}
-              <strong>all user progress data</strong>. This cannot be undone.
+              {t.readingPlan.deleteDialogDesc}
             </DialogDescription>
           </DialogHeader>
           {deleteTarget && (
@@ -651,25 +665,21 @@ const ReadingPlans = () => {
                 </p>
                 <div className="flex gap-1.5 pt-1">
                   <span className="text-[10px] border border-stone-200 bg-white text-stone-600 rounded px-1.5 py-0.5 font-semibold">
-                    {deleteTarget.totalDays} days
+                    {t.readingPlan.daysCount.replace('{n}', String(deleteTarget.totalDays))}
                   </span>
                   <span className="text-[10px] border border-stone-200 bg-white text-stone-600 rounded px-1.5 py-0.5 font-semibold">
-                    {catLabel(deleteTarget.category)}
+                    {catLabel(deleteTarget.category, t)}
                   </span>
                 </div>
               </div>
               <div className="space-y-2">
                 <Label className="text-sm text-stone-700">
-                  Type{" "}
-                  <span className="font-mono font-bold text-stone-800">
-                    {deleteTarget.planId}
-                  </span>{" "}
-                  to confirm
+                  {t.readingPlan.deleteConfirmLabel.replace('{planId}', deleteTarget.planId)}
                 </Label>
                 <Input
                   value={deleteConfirmText}
                   onChange={(e) => setDeleteConfirmText(e.target.value)}
-                  placeholder="Paste the plan ID here…"
+                  placeholder={t.readingPlan.deleteConfirmPlaceholder}
                   className={cn(
                     "rounded-xl border-stone-200 focus:ring-teal-400/30",
                     deleteConfirmText &&
@@ -688,7 +698,7 @@ const ReadingPlans = () => {
               disabled={deleting}
               className="rounded-xl"
             >
-              Cancel
+              {t.common.cancel}
             </Button>
             <Button
               variant="destructive"
@@ -699,12 +709,12 @@ const ReadingPlans = () => {
               {deleting ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  Deleting…
+                  {t.readingPlan.deletingLabel}
                 </>
               ) : (
                 <>
                   <Trash2 className="w-4 h-4" />
-                  Delete Plan
+                  {t.readingPlan.deletePlanButton}
                 </>
               )}
             </Button>
