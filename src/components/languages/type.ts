@@ -286,6 +286,7 @@ export interface Translations {
     completeRegistration: string;
     completeRegistrationDesc: string;
     signInWithGoogle: string;
+    signInWithLordsbook: string;
     backToLogin: string;
     createYourAccount: string;
     /** Forgot Password page specific keys */

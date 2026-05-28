@@ -22,6 +22,7 @@ import { getDeviceInfo, getClientIP } from "@/lib/utils";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth, googleProvider } from "@/firebaseConfiguration/config";
 import googleIcon from "@/assets/icons/google-icon.svg";
+import lordsbookLogo from "@/assets/logos/lordsbook.png";
 
 const Login = () => {
   const { t, isRtl, setLanguage, lang: currentLang, isLoading: langLoading } = useLanguage();
@@ -49,6 +50,10 @@ const Login = () => {
       </div>
     );
   }
+
+  const handleLordsbookLogin = () => {
+    console.log("lords book clicked");
+  };
 
   const handleGoogleLogin = async () => {
     setIsGoogleLoading(true);
@@ -536,6 +541,20 @@ const Login = () => {
                   <span>{t.auth?.signInWithGoogle || 'Continue with Google'}</span>
                 </>
               )}
+            </button>
+
+            {/* Lordsbook button */}
+            <button
+              type="button"
+              className="w-full h-14 bg-white border-2 border-slate-100 rounded-2xl flex items-center justify-center gap-3 hover:bg-slate-50 hover:border-slate-300 hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 transition-all duration-200 font-semibold text-slate-900 relative"
+              onClick={handleLordsbookLogin}
+            >
+              <img
+                src={lordsbookLogo}
+                alt="Lordsbook"
+                className={`w-5 h-5 absolute ${isRtl ? 'right-6' : 'left-6'}`}
+              />
+              <span>{t.auth?.signInWithLordsbook || 'Continue with Lordsbook'}</span>
             </button>
           </form>
 
