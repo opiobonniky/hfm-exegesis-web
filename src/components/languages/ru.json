@@ -21,7 +21,7 @@
     "actions": "Действия",
     "status": "Статус",
     "role": "Роль",
-    "email": "Email",
+    "email": "Проверьте email для ссылки сброса",
     "name": "Имя",
     "password": "Пароль",
     "confirmPassword": "Подтвердите пароль",
@@ -43,7 +43,7 @@
     "goHome": "На главную",
     "goBack": "Назад",
     "orContinueWith": "Или продолжить с",
-    "google": "Google",
+    "google": "Войти через Google",
     "admin": "Админ",
     "user": "Пользователь",
     "active": "Активен",
@@ -54,7 +54,6 @@
     "like": "Нравится",
     "liked": "Понравилось"
   },
-
   "landing": {
     "welcome": "Добро пожаловать в Exegesis Библия",
     "heroTitle": "Исследуйте",
@@ -108,7 +107,7 @@
     "featureAppTitle": "Царственное мобильное приложение",
     "featureAppDesc": "Носите Слово с собой повсюду. Достигайте свое сообщество там, где оно находится — на их телефонах.",
     "dailyBadge": "Вдохновение",
-    "dailyTitle": "Exegesis",
+    "dailyTitle": "Exegesis Библия",
     "dailyTitleHighlight": "Ежедневно",
     "dailyDesc": "Свежие чтения каждое утро, основанные на тщательном изучении Писания.",
     "exploreAll": "Исследовать всё",
@@ -202,7 +201,6 @@
     "socialTwitter": "Twitter",
     "socialInstagram": "Instagram"
   },
-
   "auth": {
     "login": "Войти",
     "register": "Регистрация",
@@ -315,7 +313,6 @@
     "agreeToTerms": "Продолжая, вы соглашаетесь с нашими",
     "fullVersionComing": "Полная версия выйдет с публичным запуском."
   },
-
   "dashboard": {
     "welcome": "С возвращением",
     "myDashboard": "Моя панель",
@@ -387,7 +384,6 @@
     "recentUsers": "Недавние пользователи",
     "daysShort": "{n}д"
   },
-
   "userDashboard": {
     "loadingDashboard": "Загрузка панели...",
     "goodMorning": "Доброе утро",
@@ -436,7 +432,6 @@
     "hoursAgo": "{h} ч назад",
     "daysAgo": "{d} д назад"
   },
-
   "bibleReader": {
     "title": "Читатель Библии",
     "scripture": "Писание",
@@ -513,9 +508,19 @@
     "failedToSaveNote": "Не удалось сохранить заметку.",
     "noExplanationTitle": "Нет объяснения",
     "noExplanationFound": "Объяснение или темы для этого стиха не найдены.",
-    "failedToLoadExplanation": "Не удалось загрузить объяснение."
+    "failedToLoadExplanation": "Не удалось загрузить объяснение.",
+    "verseRange": "стих Быстрый диапазон",
+    "versesSelected": "{n} стихов Выбранные стихи",
+    "searchBible": "Поиск Exegesis Библия",
+    "searchPlaceholder": "Поиск for стихов",
+    "searching": "Взаимодействуйте со Словом, где бы вы ни были. Ищите истину, надежду и глубокую мудрость.",
+    "searchHint": "Введите {planId} at Название и хотя бы одна тема обязательны 3 Минимум 8 символов to Поиск",
+    "saveNote": "Сохранить Добавить заметку",
+    "notePlaceholder": "Введите код подтверждения Начните свой путь Добавить заметку",
+    "note": "Добавить заметку",
+    "favorite": "В избранное",
+    "clearSelection": "Очистить"
   },
-
   "dailyVerse": {
     "verseOfDay": "Стих дня",
     "dailyVerse": "Ежедневный стих",
@@ -636,7 +641,6 @@
     "ctaGuideText": "Позвольте Слову Божьему направлять ваши мысли и действия сегодня.",
     "ctaMeditateText": "Найдите время, чтобы поразмышлять над этим стихом"
   },
-
   "devotions": {
     "dailyDevotions": "Ежедневные чтения",
     "devotions": "Чтения",
@@ -699,7 +703,6 @@
     "failedToAdd": "Не удалось добавить чтение.",
     "referenceFormat": "Ссылка: {book} {chapter}:{verse}"
   },
-
   "journal": {
     "journal": "Дневник",
     "myJournal": "Мой дневник",
@@ -869,7 +872,6 @@
     "deletePrompt": "Удалить",
     "deletePromptDesc": "Вы уверены?"
   },
-
   "verseExplanations": {
     "title": "Объяснения стихов",
     "explanations": "Объяснения",
@@ -943,7 +945,6 @@
     "clValidVerse": "Верный стих",
     "clExplanationWords": "Минимум 20 слов"
   },
-
   "readingPlan": {
     "readingPlans": "Планы чтения",
     "myPlans": "Мои планы",
@@ -1199,7 +1200,6 @@
     "catIntroduction": "Введение",
     "catSingleBook": "Одна книга"
   },
-
   "myActivity": {
     "justNow": "только что",
     "minAgo": "{n} мин назад",
@@ -1220,7 +1220,6 @@
     "toastHistoryItemRemoved": "Запись удалена",
     "toastFailedRemoveHistory": "Не удалось удалить"
   },
-
   "userActivity": {
     "userActivity": "Активность",
     "activities": "Действия",
@@ -1291,7 +1290,7 @@
     "recordId": "ID",
     "userId": "ID",
     "username": "Имя",
-    "email": "Email",
+    "email": "Проверьте email для ссылки сброса",
     "login": "Вход",
     "logout": "Выход",
     "duration": "Длительность",
@@ -1331,7 +1330,6 @@
     "toastNetworkError": "Ошибка сети",
     "toastFailedLoad": "Ошибка загрузки"
   },
-
   "userManagement": {
     "title": "Управление",
     "subtitle": "Управление аккаунтами",
@@ -1421,7 +1419,6 @@
     "clearAll": "Очистить",
     "allUsers": "Все"
   },
-
   "error": {
     "notFound": "404",
     "pageNotFound": "Страница не найдена",
@@ -1429,7 +1426,6 @@
     "redirecting": "Перенаправление...",
     "pleaseLogin": "Войдите для доступа"
   },
-
   "sidebar": {
     "home": "Главная",
     "bible": "Читатель",

@@ -19,7 +19,7 @@
     "title": "Título",
     "content": "Conteúdo",
     "actions": "Ações",
-    "status": "Status",
+    "status": "Estado Civil",
     "role": "Função",
     "email": "E-mail",
     "name": "Nome",
@@ -43,8 +43,8 @@
     "goHome": "Ir para Início",
     "goBack": "Voltar",
     "orContinueWith": "Ou continue com",
-    "google": "Google",
-    "admin": "Admin",
+    "google": "Entrar com Google",
+    "admin": "Console Admin",
     "user": "Usuário",
     "active": "Ativo",
     "inactive": "Inativo",
@@ -54,7 +54,6 @@
     "like": "Curtir",
     "liked": "Curtiu"
   },
-
   "landing": {
     "welcome": "Bem-vindo à Exegesis Bíblia",
     "heroTitle": "Busque as",
@@ -80,7 +79,7 @@
     "navBibleTriviaDesc": "Teste seu conhecimento",
     "navAboutDesc": "Nossa missão",
     "navContactDesc": "Entre em contato",
-    "menu": "Menu",
+    "menu": "Menu Principal",
     "signIn": "Entrar",
     "getStartedBtn": "Começar",
     "statVerses": "Versículos Sagrados",
@@ -108,7 +107,7 @@
     "featureAppTitle": "App Móvel do Reino",
     "featureAppDesc": "Leve a Palavra com você para todo lugar. Alcance sua comunidade onde ela está — em seus celulares.",
     "dailyBadge": "Inspiração",
-    "dailyTitle": "Exegesis",
+    "dailyTitle": "Exegesis Bíblia",
     "dailyTitleHighlight": "Diário",
     "dailyDesc": "Conteúdo devocional fresco todas as manhãs, enraizado no estudo cuidadoso das Escrituras.",
     "exploreAll": "Explorar Tudo",
@@ -169,7 +168,7 @@
     "aboutMotto": "Qualidade, Serviço & Integridade — Construído para Sua Glória.",
     "aboutStatVerses": "31K+",
     "aboutStatDaily": "150+",
-    "aboutStatGlobal": "Global",
+    "aboutStatGlobal": "Comunidade Global",
     "aboutStatVersesLabel": "Versículos Explorados",
     "aboutStatDailyLabel": "Insights Diários",
     "aboutStatGlobalLabel": "Alcance do Reino",
@@ -202,7 +201,6 @@
     "socialTwitter": "Twitter",
     "socialInstagram": "Instagram"
   },
-
   "auth": {
     "login": "Entrar",
     "register": "Registrar",
@@ -315,7 +313,6 @@
     "agreeToTerms": "Ao continuar, você concorda com nossos",
     "fullVersionComing": "Versão completa no lançamento público."
   },
-
   "dashboard": {
     "welcome": "Bem-vindo de volta",
     "myDashboard": "Meu Painel",
@@ -366,7 +363,7 @@
     "noActivityYet": "Nenhuma atividade registrada ainda",
     "failedLabel": "FALHOU",
     "unknown": "Desconhecido",
-    "online": "online",
+    "online": "Atualmente online",
     "out": "offline",
     "fullReport": "Relatório completo",
     "viewAll": "Ver tudo",
@@ -374,7 +371,7 @@
     "noReadingPlans": "Nenhum plano de leitura ainda",
     "notStarted": "Não iniciado",
     "done": "Concluído",
-    "quiz": "Quiz",
+    "quiz": "Quiz Ativado",
     "todaysDailyVerse": "Versículo do Dia",
     "published": "Publicado",
     "draft": "Rascunho",
@@ -385,9 +382,8 @@
     "hoursAgo": "há {h} h",
     "daysAgo": "há {d} d",
     "recentUsers": "Usuários Recentes",
-    "daysShort": "{n}d"
+    "daysShort": "há {n}d"
   },
-
   "userDashboard": {
     "loadingDashboard": "Carregando seu painel...",
     "goodMorning": "Bom Dia",
@@ -436,7 +432,6 @@
     "hoursAgo": "há {h} h",
     "daysAgo": "há {d} d"
   },
-
   "bibleReader": {
     "title": "Leitor da Bíblia",
     "scripture": "Escritura",
@@ -513,9 +508,19 @@
     "failedToSaveNote": "Falha ao salvar nota.",
     "noExplanationTitle": "Sem Explicação",
     "noExplanationFound": "Nenhuma explicação ou sugestão encontrada para este versículo.",
-    "failedToLoadExplanation": "Falha ao carregar explicação."
+    "failedToLoadExplanation": "Falha ao carregar explicação.",
+    "verseRange": "versículo Intervalo Rápido",
+    "versesSelected": "{n} versículos Versículos selecionados",
+    "searchBible": "Pesquisar Exegesis Bíblia",
+    "searchPlaceholder": "Pesquisar for versículos",
+    "searching": "Envolva-se com a Palavra onde você estiver. Seja encontrado buscando verdade, esperança e sabedoria mais profunda.",
+    "searchHint": "Digite {planId} para confirmar at Nome e pelo menos uma sugestão são obrigatórios 3 Mínimo de 8 caracteres to Pesquisar",
+    "saveNote": "Salvar Adicionar Nota",
+    "notePlaceholder": "Digite o código de verificação Inicie Sua Jornada Adicionar Nota",
+    "note": "Adicionar Nota",
+    "favorite": "Alternar favorito",
+    "clearSelection": "Limpar"
   },
-
   "dailyVerse": {
     "verseOfDay": "Versículo do Dia",
     "dailyVerse": "Versículo Diário",
@@ -636,7 +641,6 @@
     "ctaGuideText": "Deixe a Palavra de Deus guiar seus pensamentos e ações hoje.",
     "ctaMeditateText": "Reserve um momento para meditar neste versículo"
   },
-
   "devotions": {
     "dailyDevotions": "Devocionais Diários",
     "devotions": "Devocionais",
@@ -699,7 +703,6 @@
     "failedToAdd": "Falha ao adicionar devocional.",
     "referenceFormat": "Referência: {book} {chapter}:{verse}"
   },
-
   "journal": {
     "journal": "Diário",
     "myJournal": "Meu Diário",
@@ -712,7 +715,7 @@
     "entryTitle": "Título da Entrada",
     "entryContent": "Conteúdo da Entrada",
     "deleteEntry": "Excluir Entrada",
-    "tags": "Tags",
+    "tags": "tags, separadas, por, vírgula",
     "addTag": "Adicionar Tag",
     "mood": "Humor",
     "scriptureReference": "Referência Bíblica",
@@ -869,7 +872,6 @@
     "deletePrompt": "Excluir Sugestão",
     "deletePromptDesc": "Tem certeza que deseja excluir esta sugestão?"
   },
-
   "verseExplanations": {
     "title": "Explicações de Versículos",
     "explanations": "Explicações",
@@ -943,7 +945,6 @@
     "clValidVerse": "Versículo válido",
     "clExplanationWords": "Explicação deve ter pelo menos 20 palavras"
   },
-
   "readingPlan": {
     "readingPlans": "Planos de Leitura",
     "myPlans": "Meus Planos",
@@ -1199,7 +1200,6 @@
     "catIntroduction": "Introdução",
     "catSingleBook": "Livro Único"
   },
-
   "myActivity": {
     "justNow": "agora mesmo",
     "minAgo": "há {n} min",
@@ -1220,7 +1220,6 @@
     "toastHistoryItemRemoved": "Item do histórico removido",
     "toastFailedRemoveHistory": "Falha ao remover item do histórico"
   },
-
   "userActivity": {
     "userActivity": "Atividade do Usuário",
     "activities": "Atividades",
@@ -1270,7 +1269,7 @@
     "userFilter": "Usuário: {query}",
     "colUser": "Usuário",
     "colUserId": "ID do Usuário",
-    "colStatus": "Status",
+    "colStatus": "Estado Civil",
     "colBrowserOs": "Navegador / SO",
     "colIpAddress": "Endereço IP",
     "colDevice": "Dispositivo",
@@ -1282,9 +1281,9 @@
     "colActions": "Ações",
     "noRecordsFound": "Nenhum registro de atividade encontrado",
     "tryClearingFilters": "Tente limpar seus filtros",
-    "badgeSuccessLogin": "Login",
+    "badgeSuccessLogin": "Entrar",
     "badgeFailed": "Falhou",
-    "badgeOnline": "Online",
+    "badgeOnline": "Atualmente online",
     "badgeEnded": "encerrado",
     "badgeActiveSession": "Sessão ativa",
     "sessionDetails": "Detalhes da Sessão",
@@ -1292,8 +1291,8 @@
     "userId": "ID do Usuário",
     "username": "Nome de Usuário",
     "email": "E-mail",
-    "login": "Login",
-    "logout": "Logout",
+    "login": "Entrar",
+    "logout": "Sair",
     "duration": "Duração",
     "ipAddress": "Endereço IP",
     "browser": "Navegador",
@@ -1331,7 +1330,6 @@
     "toastNetworkError": "Erro de rede",
     "toastFailedLoad": "Falha ao carregar atividade"
   },
-
   "userManagement": {
     "title": "Gerenciamento de Usuários",
     "subtitle": "Gerenciar contas, funções e acesso",
@@ -1381,7 +1379,7 @@
     "tableRole": "Função",
     "tableJoined": "Ingressou",
     "tableVerified": "Verificado",
-    "tableStatus": "Status",
+    "tableStatus": "Estado Civil",
     "tableActions": "Ações",
     "filterAllRoles": "Todas as Funções",
     "filterAllStatus": "Todos os Status",
@@ -1421,7 +1419,6 @@
     "clearAll": "Limpar tudo",
     "allUsers": "Todos os Usuários"
   },
-
   "error": {
     "notFound": "404",
     "pageNotFound": "Página Não Encontrada",
@@ -1429,7 +1426,6 @@
     "redirecting": "Redirecionando...",
     "pleaseLogin": "Faça login para acessar esta página"
   },
-
   "sidebar": {
     "home": "Início",
     "bible": "Leitor Bíblico",
