@@ -314,7 +314,7 @@ const Login = () => {
           className="absolute bottom-10 start-0 w-full px-16 flex justify-between items-center text-slate-500 text-xs font-bold uppercase tracking-widest anim-fade"
           style={{ animationDelay: "0.5s" }}
         >
-          <span>{t.auth?.loginCopyright || '© 2024 Exegesis Bible'}</span>
+          <span>{t.auth?.loginCopyright || '© 2026 Exegesis Bible'}</span>
           <div className="flex gap-6">
             <span className="hover:text-white cursor-pointer transition-colors">
               {t.auth?.instagram || 'Instagram'}

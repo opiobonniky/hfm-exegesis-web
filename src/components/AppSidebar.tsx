@@ -52,17 +52,19 @@ import { Separator } from "@/components/ui/separator";
 import { routes } from "./Routes/routes";
 import logoImage from "@/assets/logos/exegesis_bg_rm.png";
 
-const LANGUAGE_GROUPS: { label: string; languages: Language[] }[] = [
-  { label: "Primary", languages: ["en"] },
+const LANGUAGE_GROUPS = (t: any): { label: string; labelKey: string; languages: Language[] }[] => [
+  { label: t.languageGroups?.primary || 'Primary', labelKey: 'primary', languages: ["en"] },
   {
-    label: "European",
+    label: t.languageGroups?.european || 'European',
+    labelKey: 'european',
     languages: ["de", "fr", "es", "pt", "it", "el", "ru"],
   },
   {
-    label: "Indian",
+    label: t.languageGroups?.indian || 'Indian',
+    labelKey: 'indian',
     languages: ["hi", "bn", "ta", "te", "mr", "gu", "kn", "ml", "pa", "ur"],
   },
-  { label: "Other", languages: ["ar", "sw", "ne", "fil"] },
+  { label: t.languageGroups?.other || 'Other', labelKey: 'other', languages: ["ar", "sw", "ne", "fil"] },
 ];
 
 const adminNavItems = [
@@ -131,16 +133,16 @@ export function AppSidebar() {
           <div className="w-16 h-16 rounded-lg bg-white flex items-center justify-center shrink-0 overflow-hidden p-1.5">
             <img
               src={logoImage}
-              alt="Exegesis"
+              alt={t.brand?.title || 'EXEGESIS'}
               className="w-full h-full object-contain"
             />
           </div>
           {!collapsed && (
             <div className="overflow-hidden">
               <h1 className="font-bold text-sm font-[family-name:var(--font-heading)] truncate">
-                EXEGESIS
+                {t.brand?.title}
               </h1>
-              <p className="text-xl text-accent font-bold">Bible</p>
+              <p className="text-xl text-accent font-bold">{t.brand?.subtitle || 'Bible'}</p>
             </div>
           )}
         </div>
@@ -255,8 +257,8 @@ export function AppSidebar() {
                 </SelectValue>
               </SelectTrigger>
               <SelectContent>
-                {LANGUAGE_GROUPS.map((group) => (
-                  <SelectGroup key={group.label}>
+                {LANGUAGE_GROUPS(t).map((group) => (
+                  <SelectGroup key={group.labelKey}>
                     <SelectLabel className="text-[10px] font-bold tracking-widest uppercase text-muted-foreground/50">
                       {group.label}
                     </SelectLabel>

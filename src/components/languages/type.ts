@@ -490,7 +490,6 @@ export interface Translations {
     chaptersTotal: string;
     motivationText: string;
     continueReading: string;
-    daysRemaining: string;
     daysOf: string;
     left: string;
     new: string;
@@ -1458,7 +1457,6 @@ export interface Translations {
     editUser: string;
     deleteUser: string;
     confirmDeletePlaceholder: string;
-    confirmDeleteLabel: string;
     noUsersFound: string;
     noResultsFor: string;
     tryAdjustingFilters: string;
@@ -1546,6 +1544,121 @@ export interface Translations {
     pageNotFoundDesc: string;
     redirecting: string;
     pleaseLogin: string;
+  };
+
+  /** Settings page */
+  settings: {
+    pageTitle: string;
+    yourProfile: string;
+    pageSubtitle: string;
+    loading: string;
+    tabProfile: string;
+    tabProfileShort: string;
+    tabExtra: string;
+    tabExtraShort: string;
+    tabPassword: string;
+    tabPasswordShort: string;
+    tabLanguage: string;
+    tabLanguageShort: string;
+
+    personalInfo: string;
+    personalInfoDesc: string;
+    usernameLabel: string;
+    emailLabel: string;
+    firstNameLabel: string;
+    firstNamePlaceholder: string;
+    lastNameLabel: string;
+    lastNamePlaceholder: string;
+    middleNameLabel: string;
+    optionalPlaceholder: string;
+    phoneLabel: string;
+    phonePlaceholder: string;
+    dateOfBirthLabel: string;
+    genderLabel: string;
+    genderPlaceholder: string;
+    genderPreferNot: string;
+    genderMale: string;
+    genderFemale: string;
+    genderOther: string;
+
+    additionalDetails: string;
+    additionalDetailsDesc: string;
+    maritalStatusLabel: string;
+    maritalPlaceholder: string;
+    maritalPreferNot: string;
+    maritalSingle: string;
+    maritalMarried: string;
+    maritalDivorced: string;
+    maritalWidowed: string;
+    maritalSeparated: string;
+    alternativePhoneLabel: string;
+    ministryGroupLabel: string;
+    ministryGroupPlaceholder: string;
+    servicePositionLabel: string;
+    servicePositionPlaceholder: string;
+    spiritualGiftsLabel: string;
+    spiritualGiftsPlaceholder: string;
+
+    emergencyContact: string;
+    emergencyContactDesc: string;
+    contactNameLabel: string;
+    contactNamePlaceholder: string;
+    contactPhoneLabel: string;
+    relationshipLabel: string;
+    relationshipPlaceholder: string;
+
+    languageRegion: string;
+    languageDesc: string;
+    interfaceLanguage: string;
+    translationNote: string;
+    switchNote: string;
+    translationWarning: string;
+
+    changePassword: string;
+    changePasswordDesc: string;
+    currentPasswordLabel: string;
+    currentPasswordPlaceholder: string;
+    newPasswordLabel: string;
+    newPasswordPlaceholder: string;
+    confirmPasswordLabel: string;
+    confirmPasswordPlaceholder: string;
+    passwordsMatch: string;
+    passwordsDontMatch: string;
+    passwordsRequirementNote: string;
+    updatePassword: string;
+
+    profileUpdated: string;
+    profileUpdateFailed: string;
+    profileUpdateError: string;
+    passwordFieldsRequired: string;
+    passwordMinChars: string;
+    passwordNeedUpperLower: string;
+    passwordNeedNumber: string;
+    passwordNeedSpecial: string;
+    passwordMismatch: string;
+    passwordSameAsCurrent: string;
+    passwordUpdated: string;
+    passwordUpdateFailed: string;
+    passwordUpdateError: string;
+
+    langGroupPrimary: string;
+    langGroupEuropean: string;
+    langGroupIndian: string;
+    langGroupOther: string;
+  };
+
+  /** App brand identity */
+  brand: {
+    title: string;
+    subtitle: string;
+  };
+
+  /** Language group labels used in sidebar selector */
+  languageGroups: {
+    primary: string;
+    european: string;
+    indian: string;
+    other: string;
   };
 
   /** Sidebar / Navigation */

@@ -45,21 +45,21 @@ import { LANGUAGE_NAMES, type Language } from "@/components/languages/type";
 import { getLanguageName } from "@/components/languages/localeUtils";
 
 /** Language grouped by region for the picker */
-const LANGUAGE_GROUPS: { label: string; languages: Language[] }[] = [
+const LANGUAGE_GROUPS: { key: string; languages: Language[] }[] = [
   {
-    label: "Primary",
+    key: "langGroupPrimary",
     languages: ["en"],
   },
   {
-    label: "European",
+    key: "langGroupEuropean",
     languages: ["de", "fr", "es", "pt", "it", "el", "ru"],
   },
   {
-    label: "Indian",
+    key: "langGroupIndian",
     languages: ["hi", "bn", "ta", "te", "mr", "gu", "kn", "ml", "pa", "ur"],
   },
   {
-    label: "Other",
+    key: "langGroupOther",
     languages: ["ar", "sw", "ne", "fil"],
   },
 ];
@@ -91,6 +91,9 @@ export default function Settings() {
   const [loading, setLoading] = useState(true);
   const [savingProfile, setSavingProfile] = useState(false);
   const [savingPassword, setSavingPassword] = useState(false);
+
+  const { t, lang: currentLang, setLanguage, isLoading: langLoading, isRtl } = useLanguage();
+
   
   const [profile, setProfile] = useState<UserProfile>({
     id: "",
@@ -133,10 +136,10 @@ export default function Settings() {
     if (/\d/.test(password)) score += 1;
     if (/[^a-zA-Z0-9]/.test(password)) score += 1;
 
-    if (score <= 1) return { level: score, label: "Weak", color: "bg-red-500" };
-    if (score <= 2) return { level: score, label: "Fair", color: "bg-orange-500" };
-    if (score <= 3) return { level: score, label: "Good", color: "bg-yellow-500" };
-    return { level: score, label: "Strong", color: "bg-green-500" };
+    if (score <= 1) return { level: score, label: t.auth?.weak || "Weak", color: "bg-red-500" };
+    if (score <= 2) return { level: score, label: t.auth?.fair || "Fair", color: "bg-orange-500" };
+    if (score <= 3) return { level: score, label: t.auth?.good || "Good", color: "bg-yellow-500" };
+    return { level: score, label: t.auth?.strong || "Strong", color: "bg-green-500" };
   };
 
   const passwordStrength = getPasswordStrength(passwords.newPassword);
@@ -216,16 +219,16 @@ export default function Settings() {
         emergencyContactRelationship: profile.emergencyContactRelationship,
       });
       if (res.returnCode === 200) {
-        toast({ title: "Profile updated successfully" });
+        toast({ title: t.settings?.profileUpdated });
         loadProfile();
       } else {
         toast({ 
-          title: res.message || "Failed to update profile", 
+          title: res.message || t.settings?.profileUpdateFailed, 
           variant: "destructive" 
         });
       }
     } catch (error) {
-      toast({ title: "Error updating profile", variant: "destructive" });
+      toast({ title: t.settings?.profileUpdateError, variant: "destructive" });
     } finally {
       setSavingProfile(false);
     }
@@ -233,37 +236,37 @@ export default function Settings() {
 
   const handlePasswordChange = async () => {
     if (!passwords.currentPassword || !passwords.newPassword || !passwords.confirmPassword) {
-      toast({ title: "All password fields are required", variant: "destructive" });
+      toast({ title: t.settings?.passwordFieldsRequired, variant: "destructive" });
       return;
     }
 
     if (passwords.newPassword.length < 8) {
-      toast({ title: "Password must be at least 8 characters", variant: "destructive" });
+      toast({ title: t.settings?.passwordMinChars, variant: "destructive" });
       return;
     }
 
     if (!/[A-Z]/.test(passwords.newPassword) || !/[a-z]/.test(passwords.newPassword)) {
-      toast({ title: "Password must include both uppercase and lowercase letters", variant: "destructive" });
+      toast({ title: t.settings?.passwordNeedUpperLower, variant: "destructive" });
       return;
     }
 
     if (!/\d/.test(passwords.newPassword)) {
-      toast({ title: "Password must include at least one number", variant: "destructive" });
+      toast({ title: t.settings?.passwordNeedNumber, variant: "destructive" });
       return;
     }
 
     if (!/[^a-zA-Z0-9]/.test(passwords.newPassword)) {
-      toast({ title: "Password must include at least one special character", variant: "destructive" });
+      toast({ title: t.settings?.passwordNeedSpecial, variant: "destructive" });
       return;
     }
 
     if (passwords.newPassword !== passwords.confirmPassword) {
-      toast({ title: "New passwords do not match", variant: "destructive" });
+      toast({ title: t.settings?.passwordMismatch, variant: "destructive" });
       return;
     }
 
     if (passwords.currentPassword === passwords.newPassword) {
-      toast({ title: "New password must be different from current password", variant: "destructive" });
+      toast({ title: t.settings?.passwordSameAsCurrent, variant: "destructive" });
       return;
     }
 
@@ -274,13 +277,13 @@ export default function Settings() {
         newPassword: passwords.newPassword,
       });
       if (res.returnCode === 200) {
-        toast({ title: "Password updated successfully" });
+        toast({ title: t.settings?.passwordUpdated });
         setPasswords({ currentPassword: "", newPassword: "", confirmPassword: "" });
       } else {
-        toast({ title: res.returnMessage || "Failed to update password", variant: "destructive" });
+        toast({ title: res.returnMessage || t.settings?.passwordUpdateFailed, variant: "destructive" });
       }
     } catch (error: any) {
-      const errorMessage = error?.response?.data?.returnMessage || error?.message || "Error updating password";
+      const errorMessage = error?.response?.data?.returnMessage || error?.message || (t.settings?.passwordUpdateError ?? "Error updating password");
       toast({ title: errorMessage, variant: "destructive" });
     } finally {
       setSavingPassword(false);
@@ -298,13 +301,12 @@ export default function Settings() {
           <Shield className="w-7 h-7 text-primary" />
           <Loader2 className="w-5 h-5 animate-spin text-primary absolute -bottom-1.5 -right-1.5 bg-background rounded-full p-0.5" />
         </div>
-        <p className="text-sm text-muted-foreground">Loading settings...</p>
+        <p className="text-sm text-muted-foreground">{t.settings?.loading}</p>
       </div>
     );
   }
 
   return (
-    const { lang: currentLang, setLanguage, isLoading: langLoading } = useLanguage();
 
     <div className="min-h-full bg-background">
       <div className="relative bg-slate-450 overflow-hidden">
@@ -323,15 +325,15 @@ export default function Settings() {
             </div>
             <div>
               <p className="text-[10px] font-bold tracking-widest uppercase text-primary/40">
-                Account Settings
+                {t.settings?.pageTitle}
               </p>
               <h1 className="text-xl sm:text-2xl font-bold text-primary">
-                Your Profile
+                {t.settings?.yourProfile}
               </h1>
             </div>
           </div>
-          <p className="text-sm text-primary/50 ml-[52px]">
-            Manage your personal information and preferences
+          <p className={cn("text-sm text-primary/50", isRtl ? "mr-[52px]" : "ml-[52px]")}>
+            {t.settings?.pageSubtitle}
           </p>
         </div>
       </div>
@@ -344,32 +346,32 @@ export default function Settings() {
               className="rounded-lg gap-1.5 sm:gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm"
             >
               <User className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Profile</span>
-              <span className="sm:hidden text-[10px]">PROF</span>
+              <span className="hidden sm:inline">{t.settings?.tabProfile}</span>
+              <span className="sm:hidden text-[10px]">{t.settings?.tabProfileShort}</span>
             </TabsTrigger>
             <TabsTrigger 
               value="additional" 
               className="rounded-lg gap-1.5 sm:gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm"
             >
               <Star className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Extra</span>
-              <span className="sm:hidden text-[10px]">EXTRA</span>
+              <span className="hidden sm:inline">{t.settings?.tabExtra}</span>
+              <span className="sm:hidden text-[10px]">{t.settings?.tabExtraShort}</span>
             </TabsTrigger>
             <TabsTrigger 
               value="password" 
               className="rounded-lg gap-1.5 sm:gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm"
             >
               <Lock className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Password</span>
-              <span className="sm:hidden text-[10px]">PASS</span>
+              <span className="hidden sm:inline">{t.settings?.tabPassword}</span>
+              <span className="sm:hidden text-[10px]">{t.settings?.tabPasswordShort}</span>
             </TabsTrigger>
             <TabsTrigger 
               value="preferences" 
               className="rounded-lg gap-1.5 sm:gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm"
             >
               <Globe className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Language</span>
-              <span className="sm:hidden text-[10px]">LANG</span>
+              <span className="hidden sm:inline">{t.settings?.tabLanguage}</span>
+              <span className="sm:hidden text-[10px]">{t.settings?.tabLanguageShort}</span>
             </TabsTrigger>
           </TabsList>
 
@@ -382,14 +384,14 @@ export default function Settings() {
                       <User className="w-5 h-5 text-amber-600" />
                     </div>
                     <div>
-                      <h3 className="font-semibold">Personal Info</h3>
-                      <p className="text-xs text-muted-foreground">Your basic account details</p>
+                      <h3 className="font-semibold">{t.settings?.personalInfo}</h3>
+                      <p className="text-xs text-muted-foreground">{t.settings?.personalInfoDesc}</p>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="username" className="text-xs font-medium text-muted-foreground">Username</Label>
+                      <Label htmlFor="username" className="text-xs font-medium text-muted-foreground">{t.settings?.usernameLabel}</Label>
                       <Input
                         id="username"
                         value={profile.username}
@@ -399,24 +401,24 @@ export default function Settings() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="email" className="text-xs font-medium text-muted-foreground">Email Address</Label>
+                      <Label htmlFor="email" className="text-xs font-medium text-muted-foreground">{t.settings?.emailLabel}</Label>
                       <div className="relative">
-                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50" />
+                        <Mail className={cn("absolute top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50", isRtl ? "right-3" : "left-3")} />
                         <Input
                           id="email"
                           type="email"
                           value={profile.email}
                           disabled
-                          className="bg-muted/50 border-dashed pl-10"
+                          className={cn("bg-muted/50 border-dashed", isRtl ? "pr-10" : "pl-10")}
                         />
                       </div>
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="firstName" className="text-xs font-medium text-muted-foreground">First Name *</Label>
+                      <Label htmlFor="firstName" className="text-xs font-medium text-muted-foreground">{t.settings?.firstNameLabel}</Label>
                       <Input
                         id="firstName"
-                        placeholder="Enter first name"
+                        placeholder={t.settings?.firstNamePlaceholder}
                         value={profile.firstName}
                         onChange={(e) => handleProfileChange("firstName", e.target.value)}
                         required
@@ -424,10 +426,10 @@ export default function Settings() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="lastName" className="text-xs font-medium text-muted-foreground">Last Name *</Label>
+                      <Label htmlFor="lastName" className="text-xs font-medium text-muted-foreground">{t.settings?.lastNameLabel}</Label>
                       <Input
                         id="lastName"
-                        placeholder="Enter last name"
+                        placeholder={t.settings?.lastNamePlaceholder}
                         value={profile.lastName}
                         onChange={(e) => handleProfileChange("lastName", e.target.value)}
                         required
@@ -435,58 +437,58 @@ export default function Settings() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="middleName" className="text-xs font-medium text-muted-foreground">Middle Name</Label>
+                      <Label htmlFor="middleName" className="text-xs font-medium text-muted-foreground">{t.settings?.middleNameLabel}</Label>
                       <Input
                         id="middleName"
-                        placeholder="Optional"
+                        placeholder={t.settings?.optionalPlaceholder}
                         value={profile.middleName}
                         onChange={(e) => handleProfileChange("middleName", e.target.value)}
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="phoneNumber" className="text-xs font-medium text-muted-foreground">Phone Number</Label>
+                      <Label htmlFor="phoneNumber" className="text-xs font-medium text-muted-foreground">{t.settings?.phoneLabel}</Label>
                       <div className="relative">
-                        <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50" />
+                        <Phone className={cn("absolute top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50", isRtl ? "right-3" : "left-3")} />
                         <Input
                           id="phoneNumber"
                           type="tel"
-                          placeholder="+1 (555) 000-0000"
+                          placeholder={t.settings?.phonePlaceholder}
                           value={profile.phoneNumber}
                           onChange={(e) => handleProfileChange("phoneNumber", e.target.value)}
-                          className="pl-10"
+                          className={isRtl ? "pr-10" : "pl-10"}
                         />
                       </div>
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="dateOfBirth" className="text-xs font-medium text-muted-foreground">Date of Birth</Label>
+                      <Label htmlFor="dateOfBirth" className="text-xs font-medium text-muted-foreground">{t.settings?.dateOfBirthLabel}</Label>
                       <div className="relative">
-                        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50" />
+                        <Calendar className={cn("absolute top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50", isRtl ? "right-3" : "left-3")} />
                         <Input
                           id="dateOfBirth"
                           type="date"
                           value={profile.dateOfBirth}
                           onChange={(e) => handleProfileChange("dateOfBirth", e.target.value)}
-                          className="pl-10"
+                          className={isRtl ? "pr-10" : "pl-10"}
                         />
                       </div>
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="gender" className="text-xs font-medium text-muted-foreground">Gender</Label>
+                      <Label htmlFor="gender" className="text-xs font-medium text-muted-foreground">{t.settings?.genderLabel}</Label>
                       <Select
                         value={profile.gender || "none"}
                         onValueChange={(value) => handleProfileChange("gender", value === "none" ? "" : value)}
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="Select gender" />
+                          <SelectValue placeholder={t.settings?.genderPlaceholder} />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="none">Prefer not to say</SelectItem>
-                          <SelectItem value="Male">Male</SelectItem>
-                          <SelectItem value="Female">Female</SelectItem>
-                          <SelectItem value="Other">Other</SelectItem>
+                          <SelectItem value="none">{t.settings?.genderPreferNot}</SelectItem>
+                          <SelectItem value="Male">{t.settings?.genderMale}</SelectItem>
+                          <SelectItem value="Female">{t.settings?.genderFemale}</SelectItem>
+                          <SelectItem value="Other">{t.settings?.genderOther}</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -499,11 +501,11 @@ export default function Settings() {
                     disabled={savingProfile || !profile.firstName || !profile.lastName}
                   >
                     {savingProfile ? (
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      <Loader2 className={cn("w-4 h-4 animate-spin", isRtl ? "ml-2" : "mr-2")} />
                     ) : (
-                      <Save className="w-4 h-4 mr-2" />
+                      <Save className={cn("w-4 h-4", isRtl ? "ml-2" : "mr-2")} />
                     )}
-                    Save Changes
+                    {t.settings?.saveChanges}
                   </Button>
                 </div>
               </CardContent>
@@ -519,70 +521,70 @@ export default function Settings() {
                       <Users className="w-5 h-5 text-teal-600" />
                     </div>
                     <div>
-                      <h3 className="font-semibold">Additional Details</h3>
-                      <p className="text-xs text-muted-foreground">More info about yourself</p>
+                      <h3 className="font-semibold">{t.settings?.additionalDetails}</h3>
+                      <p className="text-xs text-muted-foreground">{t.settings?.additionalDetailsDesc}</p>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="maritalStatus" className="text-xs font-medium text-muted-foreground">Marital Status</Label>
+                      <Label htmlFor="maritalStatus" className="text-xs font-medium text-muted-foreground">{t.settings?.maritalStatusLabel}</Label>
                       <Select
                         value={profile.maritalStatus || "none"}
                         onValueChange={(value) => handleProfileChange("maritalStatus", value === "none" ? "" : value)}
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="Select status" />
+                          <SelectValue placeholder={t.settings?.maritalPlaceholder} />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="none">Prefer not to say</SelectItem>
-                          <SelectItem value="Single">Single</SelectItem>
-                          <SelectItem value="Married">Married</SelectItem>
-                          <SelectItem value="Divorced">Divorced</SelectItem>
-                          <SelectItem value="Widowed">Widowed</SelectItem>
-                          <SelectItem value="Separated">Separated</SelectItem>
+                          <SelectItem value="none">{t.settings?.maritalPreferNot}</SelectItem>
+                          <SelectItem value="Single">{t.settings?.maritalSingle}</SelectItem>
+                          <SelectItem value="Married">{t.settings?.maritalMarried}</SelectItem>
+                          <SelectItem value="Divorced">{t.settings?.maritalDivorced}</SelectItem>
+                          <SelectItem value="Widowed">{t.settings?.maritalWidowed}</SelectItem>
+                          <SelectItem value="Separated">{t.settings?.maritalSeparated}</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="alternativePhone" className="text-xs font-medium text-muted-foreground">Alternative Phone</Label>
+                      <Label htmlFor="alternativePhone" className="text-xs font-medium text-muted-foreground">{t.settings?.alternativePhoneLabel}</Label>
                       <Input
                         id="alternativePhone"
                         type="tel"
-                        placeholder="+1 (555) 000-0000"
+                        placeholder={t.settings?.phonePlaceholder}
                         value={profile.alternativePhone}
                         onChange={(e) => handleProfileChange("alternativePhone", e.target.value)}
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="ministryGroup" className="text-xs font-medium text-muted-foreground">Ministry Group</Label>
+                      <Label htmlFor="ministryGroup" className="text-xs font-medium text-muted-foreground">{t.settings?.ministryGroupLabel}</Label>
                       <Input
                         id="ministryGroup"
                         value={profile.ministryGroup}
                         onChange={(e) => handleProfileChange("ministryGroup", e.target.value)}
-                        placeholder="e.g., Worship, Ushering"
+                        placeholder={t.settings?.ministryGroupPlaceholder}
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="servicePosition" className="text-xs font-medium text-muted-foreground">Service Position</Label>
+                      <Label htmlFor="servicePosition" className="text-xs font-medium text-muted-foreground">{t.settings?.servicePositionLabel}</Label>
                       <Input
                         id="servicePosition"
                         value={profile.servicePosition}
                         onChange={(e) => handleProfileChange("servicePosition", e.target.value)}
-                        placeholder="e.g., Leader, Volunteer"
+                        placeholder={t.settings?.servicePositionPlaceholder}
                       />
                     </div>
 
                     <div className="space-y-2 sm:col-span-2">
-                      <Label htmlFor="spiritualGifts" className="text-xs font-medium text-muted-foreground">Spiritual Gifts</Label>
+                      <Label htmlFor="spiritualGifts" className="text-xs font-medium text-muted-foreground">{t.settings?.spiritualGiftsLabel}</Label>
                       <Input
                         id="spiritualGifts"
                         value={profile.spiritualGifts}
                         onChange={(e) => handleProfileChange("spiritualGifts", e.target.value)}
-                        placeholder="e.g., Teaching, Mercy, Evangelism"
+                        placeholder={t.settings?.spiritualGiftsPlaceholder}
                       />
                     </div>
                   </div>
@@ -594,38 +596,38 @@ export default function Settings() {
                       <Heart className="w-5 h-5 text-rose-600" />
                     </div>
                     <div>
-                      <h3 className="font-semibold">Emergency Contact</h3>
-                      <p className="text-xs text-muted-foreground">Who to contact in case of emergency</p>
+                      <h3 className="font-semibold">{t.settings?.emergencyContact}</h3>
+                      <p className="text-xs text-muted-foreground">{t.settings?.emergencyContactDesc}</p>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="emergencyContactName" className="text-xs font-medium text-muted-foreground">Contact Name</Label>
+                      <Label htmlFor="emergencyContactName" className="text-xs font-medium text-muted-foreground">{t.settings?.contactNameLabel}</Label>
                       <Input
                         id="emergencyContactName"
-                        placeholder="Full name"
+                        placeholder={t.settings?.contactNamePlaceholder}
                         value={profile.emergencyContactName}
                         onChange={(e) => handleProfileChange("emergencyContactName", e.target.value)}
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="emergencyContactPhone" className="text-xs font-medium text-muted-foreground">Phone Number</Label>
+                      <Label htmlFor="emergencyContactPhone" className="text-xs font-medium text-muted-foreground">{t.settings?.contactPhoneLabel}</Label>
                       <Input
                         id="emergencyContactPhone"
                         type="tel"
-                        placeholder="+1 (555) 000-0000"
+                        placeholder={t.settings?.phonePlaceholder}
                         value={profile.emergencyContactPhone}
                         onChange={(e) => handleProfileChange("emergencyContactPhone", e.target.value)}
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="emergencyContactRelationship" className="text-xs font-medium text-muted-foreground">Relationship</Label>
+                      <Label htmlFor="emergencyContactRelationship" className="text-xs font-medium text-muted-foreground">{t.settings?.relationshipLabel}</Label>
                       <Input
                         id="emergencyContactRelationship"
-                        placeholder="e.g., Spouse, Parent"
+                        placeholder={t.settings?.relationshipPlaceholder}
                         value={profile.emergencyContactRelationship}
                         onChange={(e) => handleProfileChange("emergencyContactRelationship", e.target.value)}
                       />
@@ -639,11 +641,11 @@ export default function Settings() {
                     disabled={savingProfile || !profile.firstName || !profile.lastName}
                   >
                     {savingProfile ? (
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      <Loader2 className={cn("w-4 h-4 animate-spin", isRtl ? "ml-2" : "mr-2")} />
                     ) : (
-                      <Save className="w-4 h-4 mr-2" />
+                      <Save className={cn("w-4 h-4", isRtl ? "ml-2" : "mr-2")} />
                     )}
-                    Save Changes
+                    {t.settings?.saveChanges}
                   </Button>
                 </div>
               </CardContent>
@@ -659,13 +661,13 @@ export default function Settings() {
                       <Languages className="w-5 h-5 text-violet-600" />
                     </div>
                     <div>
-                      <h3 className="font-semibold">Language & Region</h3>
-                      <p className="text-xs text-muted-foreground">Choose your preferred language for the app interface</p>
+                      <h3 className="font-semibold">{t.settings?.languageRegion}</h3>
+                      <p className="text-xs text-muted-foreground">{t.settings?.languageDesc}</p>
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <Label className="text-xs font-medium text-muted-foreground">Interface Language</Label>
+                    <Label className="text-xs font-medium text-muted-foreground">{t.settings?.interfaceLanguage}</Label>
                     <div className="relative">
                       <Select
                         value={currentLang}
@@ -678,16 +680,16 @@ export default function Settings() {
                             <SelectValue>
                               <span className="font-medium">{LANGUAGE_NAMES[currentLang]}</span>
                               {currentLang !== 'en' && (
-                                <span className="text-muted-foreground text-xs ml-2">({getLanguageName(currentLang, 'en')})</span>
+                                <span className={cn("text-muted-foreground text-xs", isRtl ? "mr-2" : "ml-2")}>({getLanguageName(currentLang, 'en')})</span>
                               )}
                             </SelectValue>
                           </div>
                         </SelectTrigger>
                         <SelectContent className="max-h-[320px]">
                           {LANGUAGE_GROUPS.map((group) => (
-                            <SelectGroup key={group.label}>
+                            <SelectGroup key={group.key}>
                               <SelectLabel className="px-2 py-1.5 text-[10px] font-bold tracking-widest uppercase text-muted-foreground/50">
-                                {group.label}
+                                {(t.settings as Record<string, string>)?.[group.key] || group.key}
                               </SelectLabel>
                               {group.languages.map((code) => (
                                 <SelectItem key={code} value={code} className="py-2.5">
@@ -718,15 +720,15 @@ export default function Settings() {
                     </div>
                     <p className="text-[11px] text-muted-foreground/60 mt-1.5">
                       {currentLang !== 'en'
-                        ? "Some translations may be incomplete. Missing text will appear in English."
-                        : "Switch to any supported language. The interface will update immediately."}
+                        ? t.settings?.translationNote
+                        : t.settings?.switchNote}
                     </p>
                   </div>
 
                   {currentLang !== 'en' && (
                     <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400 text-sm">
                       <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />
-                      <p>Translations are in progress. Parts of the interface may still display in English.</p>
+                      <p>{t.settings?.translationWarning}</p>
                     </div>
                   )}
                 </div>
@@ -743,18 +745,18 @@ export default function Settings() {
                       <Lock className="w-5 h-5 text-red-600" />
                     </div>
                     <div>
-                      <h3 className="font-semibold">Change Password</h3>
-                      <p className="text-xs text-muted-foreground">Keep your account secure</p>
+                      <h3 className="font-semibold">{t.settings?.changePassword}</h3>
+                      <p className="text-xs text-muted-foreground">{t.settings?.changePasswordDesc}</p>
                     </div>
                   </div>
 
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="currentPassword" className="text-xs font-medium text-muted-foreground">Current Password *</Label>
+                      <Label htmlFor="currentPassword" className="text-xs font-medium text-muted-foreground">{t.settings?.currentPasswordLabel}</Label>
                       <div className="relative">
                         <Input
                           id="currentPassword"
-                          placeholder="Enter current password"
+                          placeholder={t.settings?.currentPasswordPlaceholder}
                           type={showPasswords.current ? "text" : "password"}
                           value={passwords.currentPassword}
                           onChange={(e) => setPasswords((prev) => ({ ...prev, currentPassword: e.target.value }))}
@@ -764,7 +766,7 @@ export default function Settings() {
                           type="button"
                           variant="ghost"
                           size="icon"
-                          className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 hover:bg-transparent"
+                          className={cn("absolute top-1/2 -translate-y-1/2 h-8 w-8 hover:bg-transparent", isRtl ? "left-1" : "right-1")}
                           onClick={() => togglePasswordVisibility("current")}
                         >
                           {showPasswords.current ? (
@@ -777,11 +779,11 @@ export default function Settings() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="newPassword" className="text-xs font-medium text-muted-foreground">New Password *</Label>
+                      <Label htmlFor="newPassword" className="text-xs font-medium text-muted-foreground">{t.settings?.newPasswordLabel}</Label>
                       <div className="relative">
                         <Input
                           id="newPassword"
-                          placeholder="Enter new password"
+                          placeholder={t.settings?.newPasswordPlaceholder}
                           type={showPasswords.new ? "text" : "password"}
                           value={passwords.newPassword}
                           onChange={(e) => setPasswords((prev) => ({ ...prev, newPassword: e.target.value }))}
@@ -791,7 +793,7 @@ export default function Settings() {
                           type="button"
                           variant="ghost"
                           size="icon"
-                          className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 hover:bg-transparent"
+                          className={cn("absolute top-1/2 -translate-y-1/2 h-8 w-8 hover:bg-transparent", isRtl ? "left-1" : "right-1")}
                           onClick={() => togglePasswordVisibility("new")}
                         >
                           {showPasswords.new ? (
@@ -816,9 +818,9 @@ export default function Settings() {
                           </div>
                           <p className={cn(
                             "text-xs font-medium",
-                            passwordStrength.label === "Weak" || passwordStrength.label === "Fair"
+                            passwordStrength.level <= 2
                               ? "text-red-500"
-                              : passwordStrength.label === "Good"
+                              : passwordStrength.level <= 3
                               ? "text-yellow-500"
                               : "text-green-500"
                           )}>
@@ -829,11 +831,11 @@ export default function Settings() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="confirmPassword" className="text-xs font-medium text-muted-foreground">Confirm Password *</Label>
+                      <Label htmlFor="confirmPassword" className="text-xs font-medium text-muted-foreground">{t.settings?.confirmPasswordLabel}</Label>
                       <div className="relative">
                         <Input
                           id="confirmPassword"
-                          placeholder="Confirm new password"
+                          placeholder={t.settings?.confirmPasswordPlaceholder}
                           type={showPasswords.confirm ? "text" : "password"}
                           value={passwords.confirmPassword}
                           onChange={(e) => setPasswords((prev) => ({ ...prev, confirmPassword: e.target.value }))}
@@ -843,7 +845,7 @@ export default function Settings() {
                           type="button"
                           variant="ghost"
                           size="icon"
-                          className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 hover:bg-transparent"
+                          className={cn("absolute top-1/2 -translate-y-1/2 h-8 w-8 hover:bg-transparent", isRtl ? "left-1" : "right-1")}
                           onClick={() => togglePasswordVisibility("confirm")}
                         >
                           {showPasswords.confirm ? (
@@ -856,11 +858,11 @@ export default function Settings() {
                       {passwords.newPassword && passwords.confirmPassword && (
                         passwords.newPassword === passwords.confirmPassword ? (
                           <p className="text-xs text-green-600 flex items-center gap-1">
-                            <CheckCircle className="w-3 h-3" /> Passwords match
+                            <CheckCircle className="w-3 h-3" /> {t.settings?.passwordsMatch}
                           </p>
                         ) : (
                           <p className="text-xs text-red-500 flex items-center gap-1">
-                            <AlertCircle className="w-3 h-3" /> Passwords don't match
+                            <AlertCircle className="w-3 h-3" /> {t.settings?.passwordsDontMatch}
                           </p>
                         )
                       )}
@@ -870,7 +872,7 @@ export default function Settings() {
                   {passwords.newPassword && passwords.confirmPassword && passwords.newPassword !== passwords.confirmPassword && (
                     <div className="flex items-start gap-2 p-3 rounded-lg bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 text-sm">
                       <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />
-                      <p>Passwords must match and meet all requirements before saving.</p>
+                      <p>{t.settings?.passwordsRequirementNote}</p>
                     </div>
                   )}
                 </div>
@@ -892,11 +894,11 @@ export default function Settings() {
                     }
                   >
                     {savingPassword ? (
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      <Loader2 className={cn("w-4 h-4 animate-spin", isRtl ? "ml-2" : "mr-2")} />
                     ) : (
-                      <Lock className="w-4 h-4 mr-2" />
+                      <Lock className={cn("w-4 h-4", isRtl ? "ml-2" : "mr-2")} />
                     )}
-                    Update Password
+                    {t.settings?.updatePassword}
                   </Button>
                 </div>
               </CardContent>
