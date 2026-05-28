@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { HIGHLIGHT_COLORS } from "@/hooks/useBible";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/components/languages/languageProvider";
 
 // ── Shared Verse Range Slider ─────────────────────────────────────────────────
 
@@ -32,12 +33,14 @@ function VerseRangeSlider({
   currentBook: string;
   currentChapter: number | string;
 }) {
+  const { t } = useLanguage();
+
   return (
     <div className="space-y-4 p-4 rounded-xl bg-muted/40 border border-border/40">
       {/* Reference label */}
       <div className="flex items-center justify-between">
         <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-          Verse Range
+          {t.bibleReader?.verseRange || 'Verse Range'}
         </span>
         <span className="text-xs font-semibold text-foreground">
           {currentBook} {currentChapter}:{rangeStart}
@@ -70,7 +73,7 @@ function VerseRangeSlider({
           </Button>
           <div className="text-center min-w-[52px]">
             <p className="text-[10px] text-muted-foreground leading-none mb-0.5">
-              From
+              {t.common?.from || 'From'}
             </p>
             <p className="text-sm font-bold text-foreground tabular-nums">
               {rangeStart}
@@ -106,7 +109,7 @@ function VerseRangeSlider({
           </Button>
           <div className="text-center min-w-[52px]">
             <p className="text-[10px] text-muted-foreground leading-none mb-0.5">
-              To
+              {t.common?.to || 'To'}
             </p>
             <p className="text-sm font-bold text-foreground tabular-nums">
               {rangeEnd}
@@ -129,8 +132,7 @@ function VerseRangeSlider({
       {/* Verse count pill */}
       <div className="flex justify-center">
         <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold">
-          {rangeEnd - rangeStart + 1} verse
-          {rangeEnd - rangeStart + 1 !== 1 ? "s" : ""} selected
+          {(t.bibleReader?.versesSelected || '{n} verses selected').replace('{n}', String(rangeEnd - rangeStart + 1))}
         </span>
       </div>
     </div>
@@ -175,10 +177,12 @@ function SelectedVersesDisplay({
     .filter((n): n is number => n !== null)
     .sort((a, b) => a - b);
 
+  const { t } = useLanguage();
+
   return (
     <div className="p-4 rounded-xl bg-muted/40 border border-border/40 space-y-2">
       <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-        Selected Verses
+        {t.bibleReader?.selectedVerses || 'Selected Verses'}
       </span>
       <div className="flex flex-wrap gap-1.5">
         {verseNums.map((n) => (
@@ -191,7 +195,7 @@ function SelectedVersesDisplay({
         ))}
       </div>
       <p className="text-xs text-muted-foreground">
-        {verseNums.length} verse{verseNums.length !== 1 ? "s" : ""} selected
+        {(t.bibleReader?.versesSelected || '{n} verses selected').replace('{n}', String(verseNums.length))}
       </p>
     </div>
   );
@@ -240,6 +244,7 @@ export function HighlightPickerModal({
     }
   }, [visible, derived.start, derived.end]);
 
+  const { t } = useLanguage();
   if (!visible) return null;
 
   return (
@@ -248,7 +253,7 @@ export function HighlightPickerModal({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Highlighter className="w-4 h-4 text-primary" />
-            Highlight Verses
+            {t.bibleReader?.highlight || 'Highlight'}
           </DialogTitle>
           <DialogDescription>
             {currentBook} {currentChapter}
@@ -290,7 +295,7 @@ export function HighlightPickerModal({
 
         <DialogFooter>
           <Button variant="ghost" onClick={onClose} className="text-sm">
-            Cancel
+            {t.common?.cancel || 'Cancel'}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -320,13 +325,14 @@ export function NoteModal({
   onSave,
   noteText,
   onNoteChange,
-  saving,
+  saving: isSaving,
   currentBook,
   currentChapter,
   totalVerses = 1,
   selectedVerses = [],
   allowRange = true,
 }: NoteModalProps) {
+  const { t } = useLanguage();
   const derived = useMemo(
     () => deriveRange(selectedVerses, totalVerses),
     [selectedVerses, totalVerses],
@@ -346,7 +352,7 @@ export function NoteModal({
     <Dialog open={visible} onOpenChange={onClose}>
       <DialogContent className="max-w-sm w-full">
         <DialogHeader>
-          <DialogTitle>Add Note</DialogTitle>
+          <DialogTitle>{t.bibleReader?.addNote || 'Add Note'}</DialogTitle>
           <DialogDescription>
             {currentBook} {currentChapter}
           </DialogDescription>
@@ -372,22 +378,22 @@ export function NoteModal({
           <textarea
             value={noteText}
             onChange={(e) => onNoteChange(e.target.value)}
-            placeholder="Enter your note..."
+            placeholder={t.bibleReader?.notePlaceholder || 'Enter your note...'}
             className="w-full min-h-[120px] p-3 rounded-md border border-input bg-background text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-none"
             autoFocus
           />
 
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={onClose}>
-              Cancel
+              {t.common?.cancel || 'Cancel'}
             </Button>
             <Button
               onClick={() =>
                 allowRange ? onSave(rangeStart, rangeEnd) : onSave()
               }
-              disabled={saving || !noteText.trim()}
+              disabled={isSaving || !noteText.trim()}
             >
-              {saving ? "Saving..." : "Save Note"}
+              {isSaving ? (t.bibleReader?.saving || 'Saving...') : (t.bibleReader?.saveNote || 'Save Note')}
             </Button>
           </div>
         </div>
@@ -421,6 +427,7 @@ export function RangePickerModal({
   actionLabel,
   onConfirm,
 }: RangePickerModalProps) {
+  const { t } = useLanguage();
   const derived = useMemo(
     () => deriveRange(selectedVerses, totalVerses),
     [selectedVerses, totalVerses],
@@ -472,7 +479,7 @@ export function RangePickerModal({
 
         <div className="flex justify-end gap-2 pt-1">
           <Button variant="outline" onClick={onClose}>
-            Cancel
+            {t.common?.cancel || 'Cancel'}
           </Button>
           <Button
             onClick={() => {
@@ -509,15 +516,16 @@ export function SearchModal({
   onSelectResult,
   loading,
 }: SearchModalProps) {
+  const { t } = useLanguage();
   return (
     <Dialog open={visible} onOpenChange={onClose}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>Search Bible</DialogTitle>
+          <DialogTitle>{t.bibleReader?.searchBible || 'Search Bible'}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           <Input
-            placeholder="Search for verses..."
+            placeholder={t.bibleReader?.searchPlaceholder || 'Search for verses...'}
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             autoFocus
@@ -525,13 +533,13 @@ export function SearchModal({
           <ScrollArea className="h-[300px]">
             {loading ? (
               <div className="flex items-center justify-center py-8 text-muted-foreground">
-                Searching...
+                {t.bibleReader?.searching || 'Searching...'}
               </div>
             ) : searchResults.length === 0 ? (
               <div className="flex items-center justify-center py-8 text-muted-foreground">
                 {searchQuery.length > 2
-                  ? "No results found"
-                  : "Type at least 3 characters to search"}
+                  ? (t.common?.noResults || 'No results found')
+                  : (t.bibleReader?.searchHint || 'Type at least 3 characters to search')}
               </div>
             ) : (
               <div className="space-y-2">
@@ -577,11 +585,12 @@ export function ExplanationModal({
   currentBook,
   currentChapter,
 }: ExplanationModalProps) {
+  const { t } = useLanguage();
   return (
     <Dialog open={visible} onOpenChange={onClose}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>Verse Explanation</DialogTitle>
+          <DialogTitle>{t.bibleReader?.explanation || 'Verse Explanation'}</DialogTitle>
           <DialogDescription>
             {currentBook} {currentChapter}
           </DialogDescription>
@@ -591,7 +600,7 @@ export function ExplanationModal({
         </div>
         <div className="flex justify-end">
           <Button variant="outline" onClick={onClose}>
-            Close
+            {t.common?.close || 'Close'}
           </Button>
         </div>
       </DialogContent>
@@ -616,6 +625,7 @@ export function BookSelectorModal({
   currentBook,
   onSelectBook,
 }: BookSelectorModalProps) {
+  const { t } = useLanguage();
   const BOOKS = [
     "Genesis",
     "Exodus",
@@ -689,7 +699,7 @@ export function BookSelectorModal({
     <Dialog open={visible} onOpenChange={onClose}>
       <DialogContent className="max-w-sm">
         <DialogHeader>
-          <DialogTitle>Select Book</DialogTitle>
+          <DialogTitle>{t.bibleReader?.selectBook || 'Select Book'}</DialogTitle>
         </DialogHeader>
         <ScrollArea className="h-[300px]">
           <div className="space-y-1">
@@ -729,11 +739,12 @@ export function ChapterSelectorModal({
   currentChapter,
   onSelectChapter,
 }: ChapterSelectorModalProps) {
+  const { t } = useLanguage();
   return (
     <Dialog open={visible} onOpenChange={onClose}>
       <DialogContent className="max-w-sm">
         <DialogHeader>
-          <DialogTitle>Select Chapter</DialogTitle>
+          <DialogTitle>{t.bibleReader?.selectChapter || 'Select Chapter'}</DialogTitle>
         </DialogHeader>
         <ScrollArea className="h-[300px]">
           <div className="grid grid-cols-5 gap-2">

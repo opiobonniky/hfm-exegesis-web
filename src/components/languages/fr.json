@@ -1287,6 +1287,27 @@
     "allUsers": "Tous les utilisateurs"
   },
 
+  "myActivity": {
+    "justNow": "à l'instant",
+    "minAgo": "il y a {n} min",
+    "hourAgo": "il y a {n} heure",
+    "hoursAgo": "il y a {n} heures",
+    "yesterday": "hier",
+    "daysAgo": "il y a {n} jours",
+    "clearAll": "Tout effacer",
+    "filterByBook": "Filtrer par livre",
+    "toastHighlightRemoved": "Surlignage supprimé",
+    "toastFailedRemoveHighlight": "Échec de la suppression du surlignage",
+    "toastNoteRemoved": "Note supprimée",
+    "toastFailedRemoveNote": "Échec de la suppression de la note",
+    "toastFavoriteRemoved": "Favori supprimé",
+    "toastFailedRemoveFavorite": "Échec de la suppression du favori",
+    "toastHistoryCleared": "Historique de lecture effacé",
+    "toastFailedClearHistory": "Échec de l'effacement de l'historique",
+    "toastHistoryItemRemoved": "Élément d'historique supprimé",
+    "toastFailedRemoveHistory": "Échec de la suppression de l'historique"
+  },
+
   "error": {
     "notFound": "404",
     "pageNotFound": "Page non trouvée",

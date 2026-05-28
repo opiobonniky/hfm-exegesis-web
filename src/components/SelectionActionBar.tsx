@@ -7,8 +7,10 @@ import {
   Share2,
   Copy,
   X,
+  BookOpen,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/components/languages/languageProvider";
 
 interface SelectionActionBarProps {
   selectedCount: number;
@@ -34,16 +36,18 @@ export default function SelectionActionBar({
   onCopy,
   onClear,
 }: SelectionActionBarProps) {
+  const { t } = useLanguage();
+
   return (
     <div className="sticky top-0 z-20 bg-background border-b shadow-sm">
       <div className="flex items-center justify-between px-4 py-2">
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="sm" onClick={onClear} className="gap-2">
             <X className="w-4 h-4" />
-            Clear
+            {t.bibleReader?.clearSelection || 'Clear'}
           </Button>
           <span className="text-sm text-muted-foreground">
-            {selectedCount} verse{selectedCount > 1 ? "s" : ""} selected
+            {(t.bibleReader?.versesSelected || '{n} verses selected').replace('{n}', String(selectedCount))}
           </span>
         </div>
 
@@ -56,7 +60,7 @@ export default function SelectionActionBar({
               className="gap-1"
             >
               <Volume2 className="w-4 h-4" />
-              <span className="hidden sm:inline">Listen</span>
+              <span className="hidden sm:inline">{t.bibleReader?.listen || 'Listen'}</span>
             </Button>
           )}
 
@@ -68,7 +72,7 @@ export default function SelectionActionBar({
               className="gap-1"
             >
               <BookOpen className="w-4 h-4" />
-              <span className="hidden sm:inline">Journal</span>
+              <span className="hidden sm:inline">{t.bibleReader?.journal || 'Journal'}</span>
             </Button>
           )}
 
@@ -80,7 +84,7 @@ export default function SelectionActionBar({
               className="gap-1"
             >
               <Lightbulb className="w-4 h-4" />
-              <span className="hidden sm:inline">Explain</span>
+              <span className="hidden sm:inline">{t.bibleReader?.explain || 'Explain'}</span>
             </Button>
           )}
 
@@ -92,35 +96,35 @@ export default function SelectionActionBar({
               className="gap-1"
             >
               <Highlighter className="w-4 h-4" />
-              <span className="hidden sm:inline">Highlight</span>
+              <span className="hidden sm:inline">{t.bibleReader?.highlight || 'Highlight'}</span>
             </Button>
           )}
 
           {onNote && (
             <Button variant="ghost" size="sm" onClick={onNote} className="gap-1">
               <StickyNote className="w-4 h-4" />
-              <span className="hidden sm:inline">Note</span>
+              <span className="hidden sm:inline">{t.bibleReader?.note || 'Note'}</span>
             </Button>
           )}
 
           {onFavorite && (
             <Button variant="ghost" size="sm" onClick={onFavorite} className="gap-1">
               <Heart className="w-4 h-4" />
-              <span className="hidden sm:inline">Favorite</span>
+              <span className="hidden sm:inline">{t.bibleReader?.favorite || 'Favorite'}</span>
             </Button>
           )}
 
           {onShare && (
             <Button variant="ghost" size="sm" onClick={onShare} className="gap-1">
               <Share2 className="w-4 h-4" />
-              <span className="hidden sm:inline">Share</span>
+              <span className="hidden sm:inline">{t.common?.share || 'Share'}</span>
             </Button>
           )}
 
           {onCopy && (
             <Button variant="ghost" size="sm" onClick={onCopy} className="gap-1">
               <Copy className="w-4 h-4" />
-              <span className="hidden sm:inline">Copy</span>
+              <span className="hidden sm:inline">{t.common?.copy || 'Copy'}</span>
             </Button>
           )}
         </div>

@@ -1306,6 +1306,27 @@
     "allUsers": "جميع المستخدمين"
   },
 
+  "myActivity": {
+    "justNow": "الآن",
+    "minAgo": "منذ {n} د",
+    "hourAgo": "منذ {n} س",
+    "hoursAgo": "منذ {n} ساعات",
+    "yesterday": "أمس",
+    "daysAgo": "منذ {n} أيام",
+    "clearAll": "مسح الكل",
+    "filterByBook": "تصفية حسب السفر",
+    "toastHighlightRemoved": "تم إزالة التمييز",
+    "toastFailedRemoveHighlight": "فشل إزالة التمييز",
+    "toastNoteRemoved": "تم إزالة الملاحظة",
+    "toastFailedRemoveNote": "فشل إزالة الملاحظة",
+    "toastFavoriteRemoved": "تم إزالة المفضلة",
+    "toastFailedRemoveFavorite": "فشل إزالة المفضلة",
+    "toastHistoryCleared": "تم مسح تاريخ القراءة",
+    "toastFailedClearHistory": "فشل مسح التاريخ",
+    "toastHistoryItemRemoved": "تم إزالة عنصر من التاريخ",
+    "toastFailedRemoveHistory": "فشل إزالة من التاريخ"
+  },
+
   "error": {
     "notFound": "404",
     "pageNotFound": "الصفحة غير موجودة",

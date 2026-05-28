@@ -597,6 +597,19 @@ export interface Translations {
     noExplanationTitle: string;
     noExplanationFound: string;
     failedToLoadExplanation: string;
+    // ── Modal-specific keys ──
+    verseRange: string;
+    versesSelected: string;
+    selectedVerses: string;
+    searchBible: string;
+    searchPlaceholder: string;
+    searching: string;
+    searchHint: string;
+    saveNote: string;
+    notePlaceholder: string;
+    note: string;
+    favorite: string;
+    clearSelection: string;
   };
 
   /** Daily Verse pages */

@@ -464,7 +464,19 @@
     "failedToSaveNote": "Failed to save note.",
     "noExplanationTitle": "No Explanation",
     "noExplanationFound": "No explanation or prompts found for this verse.",
-    "failedToLoadExplanation": "Failed to load explanation."
+    "failedToLoadExplanation": "Failed to load explanation.",
+    "verseRange": "Verse Range",
+    "versesSelected": "{n} verses selected",
+    "selectedVerses": "Selected Verses",
+    "searchBible": "Search Bible",
+    "searchPlaceholder": "Search for verses...",
+    "searching": "Searching...",
+    "searchHint": "Type at least 3 characters to search",
+    "saveNote": "Save Note",
+    "notePlaceholder": "Enter your note...",
+    "note": "Note",
+    "favorite": "Favorite",
+    "clearSelection": "Clear"
   },
 
   "dailyVerse": {
