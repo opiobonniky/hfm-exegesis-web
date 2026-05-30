@@ -80,7 +80,7 @@ async function loadTranslation(lang: Language): Promise<Translations> {
   if (lang === 'en') return en as unknown as Translations;
 
   try {
-    const mod = await import(`./${lang}.json`);
+    const mod = await import(/* @vite-ignore */ `./${lang}.json`);
     // Merge so any missing keys fall back to English
     return deepMerge(
       deepClone(en) as unknown as Record<string, unknown>,

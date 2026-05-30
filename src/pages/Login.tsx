@@ -19,7 +19,7 @@ import {
 import { sendPostRequest, ApiError } from "@/services/api";
 import { routes } from "@/components/Routes/routes";
 import { getDeviceInfo, getClientIP } from "@/lib/utils";
-import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { GoogleAuthProvider, signInWithPopup, getRedirectResult } from "firebase/auth";
 import { auth, googleProvider } from "@/firebaseConfiguration/config";
 import googleIcon from "@/assets/icons/google-icon.svg";
 import lordsbookLogo from "@/assets/logos/lordsbook.png";
@@ -43,23 +43,8 @@ const Login = () => {
     }
   }, [userInfo, loading, navigate]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
-  const handleLordsbookLogin = () => {
-    console.log("lords book clicked");
-  };
-
-  const handleGoogleLogin = async () => {
-    setIsGoogleLoading(true);
+  const processGoogleResult = async (result: any) => {
     try {
-      const result = await signInWithPopup(auth, googleProvider);
-
       const credential = GoogleAuthProvider.credentialFromResult(result);
       const idToken = credential?.idToken;
 
@@ -118,34 +103,63 @@ const Login = () => {
       }
     } catch (error: any) {
       console.error("Google login error:", error);
-
-      // ✅ User just closed the popup — NOT an error
-      if (error.code === "auth/popup-closed-by-user") {
-        toast({
-          title: "Login cancelled",
-          description: "You closed the Google sign-in window.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Optional: handle popup blocked
-      if (error.code === "auth/popup-blocked") {
-        toast({
-          title: "Popup blocked",
-          description: "Please allow popups and try again.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Real errors
       toast({
         title: "Google Login Failed",
         description:
           error.message || "Unable to sign in with Google. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsGoogleLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    getRedirectResult(auth)
+      .then((result) => {
+        if (!result) return;
+        processGoogleResult(result);
+      })
+      .catch((error) => {
+        console.error("Google redirect error:", error);
+        toast({
+          title: "Google Login Failed",
+          description: error.message || "Unable to sign in with Google.",
+          variant: "destructive",
+        });
+      });
+  }, []);
+
+  const handleLordsbookLogin = () => {
+    console.log("lords book clicked");
+  };
+
+  const handleGoogleLogin = async () => {
+    setIsGoogleLoading(true);
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      await processGoogleResult(result);
+      return;
+    } catch (error: any) {
+      if (error.code === "auth/popup-closed-by-user") {
+        toast({
+          title: "Login cancelled",
+          description: "You closed the Google sign-in window.",
+          variant: "destructive",
+        });
+      } else if (error.code === "auth/popup-blocked") {
+        toast({
+          title: "Popup blocked",
+          description: "Please allow popups and try again.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Google Login Failed",
+          description: error.message || "Unable to sign in with Google.",
+          variant: "destructive",
+        });
+      }
     } finally {
       setIsGoogleLoading(false);
     }

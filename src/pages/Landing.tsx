@@ -23,10 +23,22 @@ import {
   ShieldCheck,
   Zap,
   Globe,
+  Check,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/components/languages/languageProvider";
+import { LANGUAGE_NAMES, type Language } from "@/components/languages/type";
+import { getLanguageName } from "@/components/languages/localeUtils";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectGroup,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useEffect, useState, useRef, useMemo } from "react";
 import { sendPostRequest } from "@/services/api";
 import { getVerseText } from "@/utilities/bibleUtils";
@@ -50,7 +62,7 @@ interface MenuItem {
 }
 
 const Landing = () => {
-  const { t } = useLanguage();
+  const { t, setLanguage, lang: currentLang, isLoading: langLoading } = useLanguage();
   const navigate = useNavigate();
   const { userInfo, loading: authLoading } = useAuth();
   const [dailyVerse, setDailyVerse] = useState<DailyVerse | null>(null);
@@ -449,6 +461,52 @@ const Landing = () => {
 
               {/* Desktop CTA */}
               <div className="hidden lg:flex items-center gap-4">
+                {/* Language Selector */}
+                <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-slate-50 border border-slate-200">
+                  <Globe className="w-3 h-3 text-slate-400" />
+                  <Select
+                    value={currentLang}
+                    onValueChange={(value) => setLanguage(value as Language)}
+                    disabled={langLoading}
+                  >
+                    <SelectTrigger className="h-6 text-[10px] border-0 bg-transparent shadow-none p-0 gap-1 text-slate-500 hover:text-slate-700 focus:ring-0 [&>svg]:hidden">
+                      <SelectValue>
+                        <span className="font-bold">{LANGUAGE_NAMES[currentLang]}</span>
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent className="min-w-[140px]">
+                      {[
+                        { label: "Primary", languages: ["en"] as Language[] },
+                        { label: "European", languages: ["de", "fr", "es", "pt", "it", "el", "ru"] as Language[] },
+                        { label: "Indian", languages: ["hi", "bn", "ta", "te", "mr", "gu", "kn", "ml", "pa", "ur"] as Language[] },
+                        { label: "Other", languages: ["ar", "sw", "ne", "fil"] as Language[] },
+                      ].map((group) => (
+                        <SelectGroup key={group.label}>
+                          <SelectLabel className="text-[9px] font-bold tracking-widest uppercase text-muted-foreground/50">
+                            {group.label}
+                          </SelectLabel>
+                          {group.languages.map((code) => (
+                            <SelectItem key={code} value={code} className="py-1 text-[11px]">
+                              <div className="flex items-center justify-between w-full gap-2">
+                                <div className="flex items-center gap-1 min-w-0">
+                                  <span>{LANGUAGE_NAMES[code]}</span>
+                                  {code !== 'en' && (
+                                    <span className="text-muted-foreground/60 text-[9px]">
+                                      ({getLanguageName(code, 'en')})
+                                    </span>
+                                  )}
+                                </div>
+                                {code === currentLang && (
+                                  <Check className="w-2.5 h-2.5 text-primary shrink-0" />
+                                )}
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
                 <Link to="/login">
                   <Button
                     variant="ghost"
@@ -548,6 +606,55 @@ const Landing = () => {
                       <ChevronRight className="w-4 h-4 text-slate-200 group-hover:text-brand-primary transition-colors" />
                     </button>
                   ))}
+                </div>
+              </div>
+
+              {/* Language Selector - Mobile */}
+              <div className="px-5 py-3 border-t border-slate-100">
+                <div className="flex items-center gap-2 px-3 py-2 rounded-full bg-slate-50 border border-slate-200">
+                  <Globe className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                  <Select
+                    value={currentLang}
+                    onValueChange={(value) => setLanguage(value as Language)}
+                    disabled={langLoading}
+                  >
+                    <SelectTrigger className="h-6 text-xs border-0 bg-transparent shadow-none p-0 gap-1 text-slate-500 hover:text-slate-700 focus:ring-0 [&>svg]:hidden flex-1">
+                      <SelectValue>
+                        <span className="font-bold">{LANGUAGE_NAMES[currentLang]}</span>
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent className="min-w-[140px]">
+                      {[
+                        { label: "Primary", languages: ["en"] as Language[] },
+                        { label: "European", languages: ["de", "fr", "es", "pt", "it", "el", "ru"] as Language[] },
+                        { label: "Indian", languages: ["hi", "bn", "ta", "te", "mr", "gu", "kn", "ml", "pa", "ur"] as Language[] },
+                        { label: "Other", languages: ["ar", "sw", "ne", "fil"] as Language[] },
+                      ].map((group) => (
+                        <SelectGroup key={group.label}>
+                          <SelectLabel className="text-[9px] font-bold tracking-widest uppercase text-muted-foreground/50">
+                            {group.label}
+                          </SelectLabel>
+                          {group.languages.map((code) => (
+                            <SelectItem key={code} value={code} className="py-1 text-[11px]">
+                              <div className="flex items-center justify-between w-full gap-2">
+                                <div className="flex items-center gap-1 min-w-0">
+                                  <span>{LANGUAGE_NAMES[code]}</span>
+                                  {code !== 'en' && (
+                                    <span className="text-muted-foreground/60 text-[9px]">
+                                      ({getLanguageName(code, 'en')})
+                                    </span>
+                                  )}
+                                </div>
+                                {code === currentLang && (
+                                  <Check className="w-2.5 h-2.5 text-primary shrink-0" />
+                                )}
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 

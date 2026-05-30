@@ -11,6 +11,9 @@ export default defineConfig(({ mode }) => ({
     hmr: {
       overlay: false,
     },
+    headers: {
+      "Cross-Origin-Opener-Policy": "unsafe-none",
+    },
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(
     Boolean,
