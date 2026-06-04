@@ -642,6 +642,7 @@ export default function BibleReader() {
   const verseRefs = useRef<Record<string, HTMLSpanElement | null>>({});
   const isNavigatingRef = useRef(false);
   const loadingRef = useRef(false);
+  const scrollObserverRef = useRef<IntersectionObserver | null>(null);
 
   const [selectedVerses, setSelectedVerses] = useState<string[]>([]);
   const [highlights, setHighlights] = useState<Record<string, Highlight>>({});
@@ -876,25 +877,46 @@ export default function BibleReader() {
       setLoading(true);
       try {
         const translationId = mapTranslationId(versionId);
-        const loaded: ChapterData[] = [];
         const maxChapter = getMaxChapter(book);
 
+        // Determine which chapters to fetch
+        const chaptersToFetch: number[] = [];
         for (let i = 0; i < count; i++) {
           const ch = startChapter + i;
           if (ch > maxChapter) break;
-          try {
-            const verseData = await bibleApi.getVerses(translationId, book, ch);
-            const verses = verseData.verses.map((v) => ({
+          chaptersToFetch.push(ch);
+        }
+
+        let loaded: ChapterData[];
+
+        if (chaptersToFetch.length > 1) {
+          // Use batch endpoint for multiple chapters — single HTTP round trip
+          const batchData = await bibleApi.getVersesBatch(translationId, book, chaptersToFetch);
+          loaded = batchData.map((cd) => ({
+            book,
+            chapter: cd.chapterNumber,
+            verses: cd.verses.map((v) => ({
+              key: `${book} ${cd.chapterNumber}:${v.verseNumber}`,
+              text: v.text,
+              num: v.verseNumber,
+            })),
+          }));
+        } else if (chaptersToFetch.length === 1) {
+          const ch = chaptersToFetch[0];
+          const verseData = await bibleApi.getVerses(translationId, book, ch);
+          loaded = [{
+            book,
+            chapter: ch,
+            verses: verseData.verses.map((v) => ({
               key: `${book} ${ch}:${v.verseNumber}`,
               text: v.text,
               num: v.verseNumber,
-            }));
-            loaded.push({ book, chapter: ch, verses });
-          } catch (err) {
-            console.error(`Failed to load ${book} chapter ${ch}:`, err);
-            break;
-          }
+            })),
+          }];
+        } else {
+          loaded = [];
         }
+
         setChapters((prev) => {
           const ex = new Set(prev.map((c) => `${c.book}-${c.chapter}`));
           return [
@@ -902,7 +924,7 @@ export default function BibleReader() {
             ...loaded.filter((c) => !ex.has(`${c.book}-${c.chapter}`)),
           ];
         });
-        setHasMore(loaded.length === count);
+        setHasMore(loaded.length === chaptersToFetch.length);
       } catch (err) {
         console.error("Failed to load chapters:", err);
       } finally {
@@ -1030,7 +1052,7 @@ export default function BibleReader() {
     setHasMore(true);
     setDisplayBook(selectedBook);
     setDisplayChapter(selectedChapter);
-    loadChapters(selectedBook, selectedChapter, 4);
+    loadChapters(selectedBook, selectedChapter, 8);
     if (isAuthenticated) {
       loadHighlights(selectedBook, selectedChapter);
       loadFavorites();
@@ -1043,7 +1065,7 @@ export default function BibleReader() {
   // Load chapters when backendBooks becomes available (after initial load)
   useEffect(() => {
     if (backendBooks.length > 0 && chapters.length === 0) {
-      loadChapters(selectedBook, selectedChapter, 4);
+      loadChapters(selectedBook, selectedChapter, 8);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [backendBooks.length]);
@@ -1086,7 +1108,7 @@ export default function BibleReader() {
             const nextChapter = lastChapter.chapter + 1;
             const maxChapter = getMaxChapter(lastChapter.book);
             if (nextChapter <= maxChapter) {
-              loadChapters(lastChapter.book, nextChapter, 1);
+              loadChapters(lastChapter.book, nextChapter, 3);
             }
           }
         }
@@ -1097,9 +1119,9 @@ export default function BibleReader() {
     return () => observer.disconnect();
   }, [hasMore, loadChapters, chapters]);
 
+  // Stable observer — created once, never disconnects, so intersection state is never lost.
   useEffect(() => {
-    if (chapters.length === 0) return;
-    const observer = new IntersectionObserver(
+    scrollObserverRef.current = new IntersectionObserver(
       (entries) => {
         if (isNavigatingRef.current) return;
         let best: IntersectionObserverEntry | null = null;
@@ -1119,7 +1141,7 @@ export default function BibleReader() {
           if (!book || isNaN(ch)) return;
           setDisplayBook(book);
           setDisplayChapter(ch);
-          setSelectedChapter(ch);
+          // NOT updating selectedChapter — prevents scroll fighting
         }
       },
       {
@@ -1127,10 +1149,18 @@ export default function BibleReader() {
         threshold: [0, 0.1, 0.25, 0.5, 0.75, 1.0],
       },
     );
+    return () => {
+      scrollObserverRef.current?.disconnect();
+      scrollObserverRef.current = null;
+    };
+  }, []);
+
+  // Observe new chapter elements as they render — doesn't disconnect existing observer.
+  useEffect(() => {
+    if (chapters.length === 0 || !scrollObserverRef.current) return;
     Object.values(chapterRefs.current).forEach((el) => {
-      if (el) observer.observe(el);
+      if (el) scrollObserverRef.current?.observe(el);
     });
-    return () => observer.disconnect();
   }, [chapters]);
 
   useEffect(() => {
@@ -1712,7 +1742,7 @@ export default function BibleReader() {
     setDisplayChapter(1);
     setChapters([]);
     setHasMore(true);
-    loadChapters(book, 1, 4);
+    loadChapters(book, 1, 8);
     if (isAuthenticated) {
       loadHighlights(book, 1);
       loadFavorites();
@@ -1743,7 +1773,7 @@ export default function BibleReader() {
       setHasMore(true);
       setDisplayBook(selectedBook);
       setDisplayChapter(ch);
-      loadChapters(selectedBook, ch, 4);
+      loadChapters(selectedBook, ch, 8);
       if (isAuthenticated) {
         loadHighlights(selectedBook, ch);
         loadNotes(selectedBook, ch);
@@ -1770,7 +1800,7 @@ export default function BibleReader() {
         setDisplayChapter(lastCh);
         setChapters([]);
         setHasMore(true);
-        loadChapters(prevBook, lastCh, 4);
+        loadChapters(prevBook, lastCh, 8);
         if (isAuthenticated) {
           loadHighlights(prevBook, lastCh);
           loadFavorites();

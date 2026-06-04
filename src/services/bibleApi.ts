@@ -65,6 +65,13 @@ export interface BookNames {
   [key: number]: string;
 }
 
+export interface ChapterVerseData {
+  bookNumber: number;
+  bookName: string;
+  chapterNumber: number;
+  verses: Verse[];
+}
+
 const BASE_URL = "/translations";
 
 export const bibleApi = {
@@ -119,6 +126,21 @@ export const bibleApi = {
       return response.data.data;
     }
     throw new Error(response.data.message || "Failed to fetch chapters");
+  },
+
+  getVersesBatch: async (
+    translationId: string,
+    bookName: string,
+    chapters: number[]
+  ): Promise<ChapterVerseData[]> => {
+    const response = await api.post(`${BASE_URL}/${translationId}/verses-batch`, {
+      bookName,
+      chapters,
+    });
+    if (response.data.success) {
+      return response.data.data;
+    }
+    throw new Error(response.data.message || "Failed to fetch verses batch");
   },
 
   getVerses: async (
