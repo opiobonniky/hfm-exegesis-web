@@ -75,12 +75,17 @@ function deepMerge<T extends Record<string, unknown>>(target: T, ...sources: Par
   return output;
 }
 
+/** Vite glob — all JSON translation files discovered at build time */
+const translationGlob = import.meta.glob('./*.json');
+
 /** Preload a translation JSON file, falling back to English on error */
 async function loadTranslation(lang: Language): Promise<Translations> {
   if (lang === 'en') return en as unknown as Translations;
 
   try {
-    const mod = await import(/* @vite-ignore */ `./${lang}.json`);
+    const loader = translationGlob[`./${lang}.json`];
+    if (!loader) throw new Error(`No loader found for "${lang}"`);
+    const mod = await loader() as { default: unknown };
     // Merge so any missing keys fall back to English
     return deepMerge(
       deepClone(en) as unknown as Record<string, unknown>,
