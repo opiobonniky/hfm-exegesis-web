@@ -46,18 +46,18 @@ const parseDisplayDate = (displayDate: string | object): string => {
   return new Date().toISOString();
 };
 
-const getGreetingHeader = () => {
+const getGreetingHeader = (t: any) => {
   const hour = new Date().getHours();
   let greeting: string;
 
   if (hour < 5) {
-    greeting = "Good evening";
+    greeting = t.userDashboard?.goodEvening || 'Good Evening';
   } else if (hour < 12) {
-    greeting = "Good morning";
+    greeting = t.userDashboard?.goodMorning || 'Good Morning';
   } else if (hour < 17) {
-    greeting = "Good afternoon";
+    greeting = t.userDashboard?.goodAfternoon || 'Good Afternoon';
   } else {
-    greeting = "Good evening";
+    greeting = t.userDashboard?.goodEvening || 'Good Evening';
   }
 
   const time = new Date().toLocaleTimeString(undefined, {
@@ -143,18 +143,17 @@ export default function UserDevotions() {
         setDevotion(returnData as DailyDevotion);
       } else if (returnCode === 404) {
         setDevotion(null);
-      } else {
-        toast({
-          title: "Error",
-          description: returnMessage || "Failed to load today's devotion.",
-          variant: "destructive",
-        });
-        setDevotion(null);
-      }
-    } catch {
+      } else {          toast({
+        title: t.devotions?.toastError || "Error",
+        description: returnMessage || (t.devotions?.toastFailedToLoad || "Failed to load today's devotion."),
+        variant: "destructive",
+      });
+      setDevotion(null);
+    }
+  } catch {
       toast({
-        title: "Error",
-        description: "Unable to load today's devotion. Please try again.",
+        title: t.devotions?.toastError || "Error",
+        description: t.devotions?.toastFailedToLoadDesc || "Unable to load today's devotion. Please try again.",
         variant: "destructive",
       });
       setDevotion(null);
@@ -172,14 +171,14 @@ export default function UserDevotions() {
     setRefreshing(true);
     await fetchTodaysDevotion();
     toast({
-      title: "Refreshed",
-      description: "Today's devotion updated.",
+      title: t.devotions?.toastRefreshed || "Refreshed",
+      description: t.devotions?.toastRefreshDesc || "Today's devotion updated.",
     });
   };
 
   const headerTitle = scrollOffset > 50 
-    ? (devotion ? devotion.title : "Today's Devotion") 
-    : getGreetingHeader();
+    ? (devotion ? devotion.title : (t.devotions?.todaysDevotion || "Today's Devotion")) 
+    : getGreetingHeader(t);
 
   if (loading && !devotion) {
     return (
@@ -270,7 +269,7 @@ export default function UserDevotions() {
                 {isTodayDate(devotion.displayDate) ? (
                   <Sparkles className="w-3 h-3 mr-1 text-accent" />
                 ) : null}
-                {isTodayDate(devotion.displayDate) ? "Today" : "Past"}
+                {isTodayDate(devotion.displayDate) ? (t.devotions?.todayBadge || "Today") : (t.devotions?.pastBadge || "Past")}
               </Badge>
               <Button
                 variant="ghost"
@@ -341,7 +340,7 @@ export default function UserDevotions() {
                       onClick={() => {
                         setLiked(!liked);
                         toast({
-                          title: liked ? "Like removed" : "Devotion liked!",
+                          title: liked ? (t.devotions?.toastLikeRemoved || "Like removed") : (t.devotions?.toastDevotionLiked || "Devotion liked!"),
                           description: "",
                         });
                       }}
@@ -354,10 +353,9 @@ export default function UserDevotions() {
                         if (navigator.share) {
                           navigator.share({ text, title: devotion.title });
                         } else {
-                          navigator.clipboard.writeText(text);
-                          toast({
-                            title: "Copied!",
-                            description: "Devotion copied to clipboard.",
+                          navigator.clipboard.writeText(text);                            toast({
+                            title: t.devotions?.toastCopied || "Copied!",
+                            description: t.devotions?.toastCopiedDesc || "Devotion copied to clipboard.",
                           });
                         }
                       }}
@@ -370,8 +368,8 @@ export default function UserDevotions() {
                           `${devotion.title}\n\n${devotion.content}`,
                         );
                         toast({
-                          title: "Copied!",
-                          description: "Devotion copied to clipboard.",
+                          title: t.devotions?.toastCopied || "Copied!",
+                          description: t.devotions?.toastCopiedDesc || "Devotion copied to clipboard.",
                         });
                       }}
                     />
@@ -406,7 +404,7 @@ export default function UserDevotions() {
             <div className="flex items-center justify-center gap-3">
               <Sparkles className="w-4 h-4 text-accent" />
               <span className="text-xs text-muted-foreground">
-                Reflect on this devotion today
+                {t.devotions?.reflectOnThis || 'Reflect on this devotion today'}
               </span>
               <Sparkles className="w-4 h-4 text-accent" />
             </div>

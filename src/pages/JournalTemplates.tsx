@@ -111,8 +111,8 @@ const JournalTemplates = () => {
   const handleSave = async () => {
     if (!formData.name.trim() || !formData.prompts.some((p) => p.trim())) {
       toast({
-        title: "Error",
-        description: "Name and at least one prompt are required",
+        title: t.common?.error || 'Error',
+        description: t.journal?.templateNameRequired || 'Name and at least one prompt are required',
         variant: "destructive",
       });
       return;
@@ -122,7 +122,7 @@ const JournalTemplates = () => {
     try {
       const res = await sendPostRequest("journal", "templates/create", formData);
       if (res.returnCode === 200) {
-        toast({ title: "Success", description: "Template created successfully" });
+        toast({ title: t.common?.save || 'Success', description: t.journal?.templateCreated || 'Template created successfully' });
         setDialogOpen(false);
         setFormData({
           name: "",
@@ -135,8 +135,8 @@ const JournalTemplates = () => {
       }
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to create template",
+        title: t.common?.error || 'Error',
+        description: t.journal?.failedToCreate || 'Failed to create template',
         variant: "destructive",
       });
     } finally {
@@ -150,14 +150,14 @@ const JournalTemplates = () => {
     try {
       const res = await sendPostRequest("journal", "templates/delete", { id: deleteDialog.id });
       if (res.returnCode === 200) {
-        toast({ title: "Deleted", description: "Template deleted" });
+        toast({ title: t.journal?.templateDeleted || 'Deleted', description: t.journal?.deleteTemplate || 'Template deleted' });
         setDeleteDialog(null);
         fetchTemplates();
       }
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to delete",
+        title: t.common?.error || 'Error',
+        description: t.journal?.failedToDelete || 'Failed to delete',
         variant: "destructive",
       });
     } finally {
@@ -224,7 +224,7 @@ const JournalTemplates = () => {
         <div className="flex flex-col sm:flex-row gap-4 mb-6">
           <Select value={category} onValueChange={setCategory}>
             <SelectTrigger className="w-full sm:w-48">
-              <SelectValue placeholder="Category" />
+              <SelectValue placeholder={t.journal?.promptCategory || 'Category'} />
             </SelectTrigger>
             <SelectContent>
               {CATEGORIES.map((cat) => (
@@ -315,17 +315,17 @@ const JournalTemplates = () => {
           </DialogHeader>
           <div className="space-y-4 max-h-[60vh] overflow-y-auto">
             <div className="space-y-2">
-              <Label>{t.journal?.templateName || "Template Name"}</Label>
+              <Label>{t.journal?.templateName || 'Template Name'}</Label>
               <Input
-                placeholder={t.journal?.templateName || "Template Name"}
+                placeholder={t.journal?.templateName || 'Template Name'}
                 value={formData.name}
                 onChange={(e) => setFormData((p) => ({ ...p, name: e.target.value }))}
               />
             </div>
             <div className="space-y-2">
-              <Label>{t.journal?.descriptionOptional || "Description (optional)"}</Label>
+              <Label>{t.journal?.descriptionOptional || 'Description (optional)'}</Label>
               <Input
-                placeholder={t.journal?.descriptionOptional || "Brief description..."}
+                placeholder={t.journal?.descriptionOptional || 'Brief description...'}
                 value={formData.description}
                 onChange={(e) => setFormData((p) => ({ ...p, description: e.target.value }))}
               />

@@ -116,9 +116,9 @@ const VerifyAccount = () => {
           ? error.returnMessage
           : error instanceof Error
             ? error.message
-            : "An unexpected error occurred.";
+            : (t.auth?.anErrorOccurred || 'An unexpected error occurred.');
       toast({
-        title: "Resend Failed",
+        title: t.auth?.resendVerification || 'Resend Failed',
         description: message,
         variant: "destructive",
       });

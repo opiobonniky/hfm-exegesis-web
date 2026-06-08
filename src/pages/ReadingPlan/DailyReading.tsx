@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate, useParams } from "react-router-dom";
 import { sendPostRequest } from "@/services/api";
+import { useLanguage } from "@/components/languages/languageProvider";
 
 // ─────────────────────────────────────────────
 // Types
@@ -65,35 +66,35 @@ const normalizeCorrectAnswer = (
   return isNaN(n) ? null : n;
 };
 
-const getQuizPerformance = (correct: number, total: number) => {
+const getQuizPerformance = (correct: number, total: number, t: any) => {
   if (total === 0)
-    return { label: "Complete!", emoji: "📖", color: "#6366F1", passed: false };
+    return { label: t.readingPlan?.done ?? "Complete!", emoji: "📖", color: "#6366F1", passed: false };
   const pct = (correct / total) * 100;
   if (correct === 0)
     return {
-      label: "Keep Going!",
+      label: t.readingPlan?.keepGoing ?? "Keep Going!",
       emoji: "💪",
       color: "#F59E0B",
       passed: false,
     };
   if (pct < 50)
     return {
-      label: "Good Effort!",
+      label: t.readingPlan?.goodEffort ?? "Good Effort!",
       emoji: "🌱",
       color: "#F97316",
       passed: false,
     };
   if (pct < 70)
     return {
-      label: "Almost There!",
+      label: t.readingPlan?.almostThere ?? "Almost There!",
       emoji: "🔥",
       color: "#EAB308",
       passed: false,
     };
   if (pct < 100)
-    return { label: "Well Done!", emoji: "⭐", color: "#10B981", passed: true };
+    return { label: t.readingPlan?.wellDone ?? "Well Done!", emoji: "⭐", color: "#10B981", passed: true };
   return {
-    label: "Perfect Score!",
+    label: t.readingPlan?.perfectScore ?? "Perfect Score!",
     emoji: "🏆",
     color: "#6366F1",
     passed: true,
@@ -107,6 +108,7 @@ const DailyReading = () => {
   const { planId, day } = useParams<{ planId: string; day: string }>();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { t, isRtl } = useLanguage();
   const dayNum = parseInt(day || "1", 10);
 
   // Inject fonts
@@ -126,7 +128,7 @@ const DailyReading = () => {
   const [assignment, setAssignment] = useState<DailyAssignment | null>(null);
   const [notYetAdded, setNotYetAdded] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
-  const [planTitle, setPlanTitle] = useState("Reading Plan");
+  const [planTitle, setPlanTitle] = useState("");
   const [totalDays, setTotalDays] = useState(0);
   const [ponderedReflections, setPonderedReflections] = useState<Set<number>>(
     new Set(),
@@ -162,7 +164,7 @@ const DailyReading = () => {
   const canMarkComplete = !isCompleted && (!hasQuiz || quizDone);
   const accuracyPct =
     quizTotal > 0 ? Math.round((correctCount / quizTotal) * 100) : 0;
-  const perf = getQuizPerformance(correctCount, quizTotal);
+  const perf = getQuizPerformance(correctCount, quizTotal, t);
   const canGoPrev = dayNum > 1;
   const canGoNext = totalDays > 0 && dayNum < totalDays;
   const progressPct =
@@ -178,7 +180,7 @@ const DailyReading = () => {
           ? plans.find((p: any) => p.planId === planId)
           : null;
         if (meta) {
-          setPlanTitle(meta.title || "Reading Plan");
+          setPlanTitle(meta.title || t.readingPlan?.readingPlans || "Reading Plan");
           setTotalDays(meta.totalDays || meta.total_days || 0);
         }
       }
@@ -225,7 +227,7 @@ const DailyReading = () => {
         setAssignment(null);
       } else {
         toast({
-          title: "Failed to load",
+          title: t.readingPlan.failedToLoadData,
           description: returnMessage,
           variant: "destructive",
         });
@@ -333,7 +335,7 @@ const DailyReading = () => {
         }
       } else if (res?.returnMessage) {
         toast({
-          title: "Error",
+          title: t.common.error,
           description: res.returnMessage,
           variant: "destructive",
         });
@@ -417,8 +419,8 @@ const DailyReading = () => {
   const markComplete = async () => {
     if (isCompleted) {
       toast({
-        title: "Already Completed",
-        description: `Day ${dayNum} was marked as complete earlier.`,
+        title: t.readingPlan.alreadyCompleted,
+        description: `${t.readingPlan.day} ${dayNum} ${t.readingPlan.markedEarlier}`,
       });
       return;
     }
@@ -430,8 +432,8 @@ const DailyReading = () => {
       if (r.returnCode === 200) {
         setIsCompleted(true);
         toast({
-          title: "Day Complete!",
-          description: `Day ${dayNum} marked as done!`,
+          title: t.readingPlan.dayCompleteToast,
+          description: `${t.readingPlan.day} ${dayNum} ${t.readingPlan.markedAsDone}`,
         });
         loadData();
 
@@ -444,8 +446,8 @@ const DailyReading = () => {
       } else if (r.returnMessage?.includes("already completed")) {
         setIsCompleted(true);
         toast({
-          title: "Already Completed",
-          description: `Day ${dayNum} was marked as complete.`,
+          title: t.readingPlan.alreadyCompleted,
+          description: `${t.readingPlan.day} ${dayNum} ${t.readingPlan.markedEarlier}`,
         });
       } else {
         toast({
@@ -455,18 +457,16 @@ const DailyReading = () => {
         });
       }
     } catch (e: any) {
-      toast({ title: "Error", description: e.message, variant: "destructive" });
+      toast({ title: t.common.error, description: e.message, variant: "destructive" });
     }
   };
 
   const navigateDay = (dir: "prev" | "next") => {
-    if (dir === "next" && !isCompleted) {
-      toast({
-        title: "Complete Today's Reading First",
-        description:
-          "Finish the quiz or mark as done before moving to the next day.",
-        variant: "destructive",
-      });
+    if (dir === "next" && !isCompleted) {        toast({
+          title: t.readingPlan.completeReadingFirst,
+          description: t.readingPlan.completeReadingFirstDesc,
+          variant: "destructive",
+        });
       return;
     }
     const nd = dir === "prev" ? dayNum - 1 : dayNum + 1;
@@ -536,7 +536,7 @@ const DailyReading = () => {
             onClick={() => navigate(-1)}
             className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors mb-4 text-sm"
           >
-            <ArrowLeft className="w-4 h-4" /> Back
+            <ArrowLeft className={cn("w-4 h-4", isRtl && "rotate-180")} /> {t.common.back}
           </button>
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
@@ -547,7 +547,7 @@ const DailyReading = () => {
                 className="text-base font-semibold text-foreground"
                 style={{ fontFamily: "'Cinzel', serif" }}
               >
-                {loading ? "Loading…" : `Day ${dayNum}`}
+                {loading ? t.common.loading : `${t.readingPlan.day} ${dayNum}`}
               </h1>
               <p className="text-xs text-muted-foreground">{planTitle}</p>
             </div>
@@ -576,10 +576,10 @@ const DailyReading = () => {
                 className="text-base font-semibold text-foreground mb-1"
                 style={{ fontFamily: "'Cinzel', serif" }}
               >
-                Coming Soon
+                {t.readingPlan.comingSoon}
               </h3>
               <p className="text-sm text-muted-foreground text-center max-w-xs">
-                Day {dayNum}'s reading assignment hasn't been added yet.
+                {t.readingPlan.dayNotAddedDesc.replace('{dayNum}', String(dayNum))}
               </p>
             </div>
           ) : null}
@@ -613,7 +613,7 @@ const DailyReading = () => {
             onClick={() => navigate(-1)}
             className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors mb-4 text-sm"
           >
-            <ArrowLeft className="w-4 h-4" /> Back
+            <ArrowLeft className={cn("w-4 h-4", isRtl && "rotate-180")} /> {t.common.back}
           </button>
 
           <div className="flex items-start justify-between gap-3">
@@ -626,7 +626,7 @@ const DailyReading = () => {
                   className="text-base font-semibold text-foreground leading-snug"
                   style={{ fontFamily: "'Cinzel', serif" }}
                 >
-                  {assignment.title || `Day ${dayNum}`}
+                  {assignment.title || `${t.readingPlan.day} ${dayNum}`}
                 </h1>
                 <p className="text-xs text-muted-foreground">{planTitle}</p>
               </div>
@@ -649,18 +649,16 @@ const DailyReading = () => {
               ) : (
                 <Circle className="w-3.5 h-3.5" />
               )}
-              {isCompleted ? "Done" : "Mark Done"}
+              {isCompleted ? t.readingPlan.done : t.readingPlan.markDone}
             </button>
           </div>
         </div>
 
         {totalDays > 0 && (
-          <div className="px-5 pb-3 flex items-center gap-3">
-            <span
-              className="text-[11px] font-medium text-muted-foreground whitespace-nowrap"
+          <div className="px-5 pb-3 flex items-center gap-3">            <span className="text-[11px] font-medium text-muted-foreground whitespace-nowrap"
               style={{ fontFamily: "'Cinzel', serif" }}
             >
-              Day {dayNum} / {totalDays}
+              {t.readingPlan.day} {dayNum} / {totalDays}
             </span>
             <div className="flex-1 h-1 bg-muted rounded-full overflow-hidden">
               <div
@@ -685,7 +683,7 @@ const DailyReading = () => {
               className="text-[11px] font-semibold tracking-widest uppercase text-muted-foreground"
               style={{ fontFamily: "'Cinzel', serif" }}
             >
-              Today's Reading
+              {t.readingPlan.todaysReading}
             </span>
           </div>
           <div className="p-4 space-y-2.5">
@@ -704,7 +702,7 @@ const DailyReading = () => {
                     `/bible-reader?book=${encodeURIComponent(ch.book)}&chapter=${ch.chapter}`,
                   );
                 }}
-                className="w-full flex items-center gap-4 p-3.5 rounded-xl border border-border/40 hover:border-primary/40 hover:bg-primary/5 transition-all text-left group"
+                className={cn("w-full flex items-center gap-4 p-3.5 rounded-xl border border-border/40 hover:border-primary/40 hover:bg-primary/5 transition-all group", isRtl && "text-right")}
               >
                 <div className="w-10 h-10 rounded-xl bg-primary/8 flex items-center justify-center shrink-0 group-hover:bg-primary/15 transition-colors">
                   <BookOpen className="w-4.5 h-4.5 text-primary" />
@@ -717,10 +715,10 @@ const DailyReading = () => {
                     {ch.book} {ch.chapter}
                   </p>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    Tap to read
+                    {t.readingPlan.tapToRead}
                   </p>
                 </div>
-                <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                <ChevronRight className={cn("w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors", isRtl && "rotate-180")} />
               </button>
             ))}
           </div>
@@ -737,13 +735,12 @@ const DailyReading = () => {
                   className="text-[11px] font-bold tracking-widest uppercase text-muted-foreground"
                   style={{ fontFamily: "'Cinzel', serif" }}
                 >
-                  Personal Reflection
+                  {t.readingPlan.personalReflection}
                 </span>
               </div>
               <div className="p-4 space-y-3">
                 <p className="text-xs text-muted-foreground mb-3 px-1">
-                  Take a moment to meditate on these questions as you read
-                  today's scripture.
+                  {t.readingPlan.reflectionIntro}
                 </p>
                 {assignment.reflectionQuestions.map((q, idx) => {
                   const isPondered = ponderedReflections.has(idx);
@@ -757,7 +754,7 @@ const DailyReading = () => {
                         setPonderedReflections(next);
                       }}
                       className={cn(
-                        "w-full flex items-start gap-4 p-4 rounded-xl transition-all duration-200 text-left border group",
+                        "w-full flex items-start gap-4 p-4 rounded-xl transition-all duration-200 border group",
                         isPondered
                           ? "bg-amber-50/30 dark:bg-amber-950/10 border-amber-200/40 dark:border-amber-800/20 opacity-70"
                           : "bg-amber-50/60 dark:bg-amber-950/20 border-amber-200/50 dark:border-amber-800/30 hover:border-amber-300 dark:hover:border-amber-700",
@@ -792,7 +789,7 @@ const DailyReading = () => {
                       </div>
                       {!isPondered && (
                         <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider px-2 py-1 rounded-md bg-amber-100 dark:bg-amber-900/30 opacity-0 group-hover:opacity-100 transition-opacity">
-                          Ponder
+                          {t.readingPlan.ponder}
                         </span>
                       )}
                     </button>
@@ -815,7 +812,7 @@ const DailyReading = () => {
                   className="text-[11px] font-semibold tracking-widest uppercase text-muted-foreground"
                   style={{ fontFamily: "'Cinzel', serif" }}
                 >
-                  Knowledge Check
+                  {t.readingPlan.knowledgeCheck}
                 </span>
               </div>
               <span className="text-xs text-muted-foreground font-medium">
@@ -829,7 +826,7 @@ const DailyReading = () => {
                 <div className="mb-4 p-3 rounded-xl bg-blue-50 dark:bg-blue-950/30 border border-blue-200/60 dark:border-blue-800/40 flex items-center gap-2">
                   <RotateCcw className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 shrink-0" />
                   <span className="text-xs text-blue-700 dark:text-blue-400">
-                    Review mode — tap an option to retry this question
+                    {t.readingPlan.reviewMode}
                   </span>
                 </div>
               )}
@@ -838,13 +835,13 @@ const DailyReading = () => {
               {autoNavigateTimer && lastAnswerCorrect && (
                 <div className="mb-4 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200/60 dark:border-emerald-800/40 flex items-center justify-between">
                   <span className="text-xs text-emerald-700 dark:text-emerald-400 font-medium">
-                    ✓ Moving to next question…
+                    {t.readingPlan.movingToNext}
                   </span>
                   <button
                     onClick={cancelAutoNavigate}
                     className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold hover:underline"
                   >
-                    Cancel
+                    {t.common.cancel}
                   </button>
                 </div>
               )}
@@ -878,7 +875,7 @@ const DailyReading = () => {
                       onClick={() => handleSelect(idx)}
                       disabled={showResult && !isReviewing}
                       className={cn(
-                        "w-full flex items-center gap-3 p-4 rounded-2xl border-2 transition-all duration-200 text-left",
+                        "w-full flex items-center gap-3 p-4 rounded-2xl border-2 transition-all duration-200",
                         isCorrectOpt
                           ? "border-emerald-500 bg-emerald-500/20 dark:bg-emerald-500/25 shadow-md shadow-emerald-500/10"
                           : isWrongSel
@@ -925,12 +922,12 @@ const DailyReading = () => {
 
                       {showResult && isCorrectOpt && (
                         <span className="px-2.5 py-1 rounded-full bg-emerald-500 text-white text-[10px] font-bold uppercase tracking-wide whitespace-nowrap">
-                          ✓ Correct
+                          {t.readingPlan.correctBadge}
                         </span>
                       )}
                       {showResult && isWrongSel && (
                         <span className="px-2.5 py-1 rounded-full bg-red-500 text-white text-[10px] font-bold uppercase tracking-wide whitespace-nowrap">
-                          ✗ Wrong
+                          {t.readingPlan.wrongBadge}
                         </span>
                       )}
                     </button>
@@ -942,7 +939,8 @@ const DailyReading = () => {
               {showResult && activeQ.explanation && (
                 <div
                   className={cn(
-                    "mb-5 p-4 rounded-xl border-l-4",
+                    "mb-5 p-4 rounded-xl",
+                    isRtl ? "border-r-4" : "border-l-4",
                     selected === normalizeCorrectAnswer(activeQ.correctAnswer)
                       ? "bg-emerald-50 dark:bg-emerald-950/30 border-emerald-500"
                       : "bg-red-50 dark:bg-red-950/30 border-red-500",
@@ -957,8 +955,8 @@ const DailyReading = () => {
                     )}
                   >
                     {selected === normalizeCorrectAnswer(activeQ.correctAnswer)
-                      ? "✓ Correct!"
-                      : "✗ Incorrect"}
+                      ? t.readingPlan.correctLabel
+                      : t.readingPlan.incorrectLabel}
                   </p>
                   <p
                     className="text-sm text-foreground/80 leading-relaxed"
@@ -981,16 +979,16 @@ const DailyReading = () => {
                   }}
                   className="w-full flex items-center justify-center gap-2 px-5 py-3.5 rounded-2xl bg-violet-600 text-white text-sm font-semibold hover:bg-violet-700 active:scale-[0.98] transition-all shadow-md shadow-violet-500/20"
                 >
-                  {currentQ < quizTotal - 1 ? "Next Question" : "See Results"}
-                  <ChevronRight className="w-4 h-4" />
+                  {currentQ < quizTotal - 1 ? t.readingPlan.nextQuestion : t.readingPlan.seeResults}
+                  <ChevronRight className={cn("w-4 h-4", isRtl && "rotate-180")} />
                 </button>
               ) : showResult ? (
                 <button
                   onClick={handleNext}
                   className="w-full flex items-center justify-center gap-2 px-5 py-3.5 rounded-2xl bg-violet-600 text-white text-sm font-semibold hover:bg-violet-700 active:scale-[0.98] transition-all shadow-md shadow-violet-500/20"
                 >
-                  {currentQ < quizTotal - 1 ? "Next Question" : "See Results"}
-                  <ChevronRight className="w-4 h-4" />
+                  {currentQ < quizTotal - 1 ? t.readingPlan.nextQuestion : t.readingPlan.seeResults}
+                  <ChevronRight className={cn("w-4 h-4", isRtl && "rotate-180")} />
                 </button>
               ) : (
                 <div className="space-y-2.5">
@@ -1006,7 +1004,7 @@ const DailyReading = () => {
                       }}
                       className="w-full flex items-center justify-center gap-2 px-5 py-3 rounded-2xl border-2 border-border/50 text-muted-foreground text-sm font-medium hover:bg-muted/40 hover:text-foreground active:scale-[0.98] transition-all"
                     >
-                      <SkipForward className="w-4 h-4" /> Skip this question
+                      <SkipForward className="w-4 h-4" /> {t.readingPlan.skipThisQuestion}
                     </button>
                   )}
                   <button
@@ -1021,17 +1019,17 @@ const DailyReading = () => {
                   >
                     {isSubmitting ? (
                       <>
-                        <Loader2 className="w-4 h-4 animate-spin" /> Checking…
+                        <Loader2 className="w-4 h-4 animate-spin" /> {t.readingPlan.checking}
                       </>
                     ) : assignment.quizQuestions![currentQ].userAnswer !==
                       null ? (
-                      "Update Answer"
+                      t.readingPlan.updateAnswer
                     ) : (
-                      "Submit Answer"
+                      t.readingPlan.submitAnswer
                     )}
                   </button>
                   <p className="text-xs text-center text-muted-foreground/50">
-                    ← → to select · Enter to submit
+                    {t.readingPlan.keyboardHints}
                   </p>
                 </div>
               )}
@@ -1051,7 +1049,7 @@ const DailyReading = () => {
                 className="text-[11px] font-semibold tracking-widest uppercase"
                 style={{ color: perf.color, fontFamily: "'Cinzel', serif" }}
               >
-                Quiz Complete
+                {t.readingPlan.quizComplete}
               </span>
               <Star className="w-3.5 h-3.5" style={{ color: perf.color }} />
             </div>
@@ -1101,7 +1099,7 @@ const DailyReading = () => {
                 </h2>
                 <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-muted/50 mb-3">
                   <span className="text-sm font-medium text-muted-foreground">
-                    {accuracyPct}% accuracy
+                    {t.readingPlan.accuracyPct.replace('{n}', String(accuracyPct))}
                   </span>
                 </div>
                 <p
@@ -1109,14 +1107,14 @@ const DailyReading = () => {
                   style={{ fontFamily: "'Lora', serif" }}
                 >
                   {correctCount === 0
-                    ? "Don't worry — re-read the passages and try again."
+                    ? t.readingPlan.quizFeedbackZero
                     : accuracyPct < 50
-                      ? "A solid start! Review the chapters to deepen your understanding."
+                      ? t.readingPlan.quizFeedbackLow
                       : accuracyPct < 70
-                        ? "You're close! A quick re-read will push you over the line."
+                        ? t.readingPlan.quizFeedbackMid
                         : accuracyPct < 100
-                          ? "Great understanding of the reading. Keep the momentum going!"
-                          : "Flawless! Outstanding grasp of this passage."}
+                          ? t.readingPlan.quizFeedbackHigh
+                          : t.readingPlan.quizFeedbackPerfect}
                 </p>
               </div>
 
@@ -1125,13 +1123,13 @@ const DailyReading = () => {
                 <div className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200/60 dark:border-emerald-800/40">
                   <CheckCircle className="w-4 h-4 text-emerald-500" />
                   <span className="text-sm font-medium text-emerald-700 dark:text-emerald-400">
-                    {correctCount} Correct
+                    {t.readingPlan.correctCount.replace('{n}', String(correctCount))}
                   </span>
                 </div>
                 <div className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-200/60 dark:border-red-800/40">
                   <XCircle className="w-4 h-4 text-red-500" />
                   <span className="text-sm font-medium text-red-700 dark:text-red-400">
-                    {quizTotal - correctCount} Wrong
+                    {t.readingPlan.wrongCount.replace('{n}', String(quizTotal - correctCount))}
                   </span>
                 </div>
               </div>
@@ -1143,7 +1141,7 @@ const DailyReading = () => {
                     className="text-[11px] font-semibold tracking-widest uppercase text-muted-foreground"
                     style={{ fontFamily: "'Cinzel', serif" }}
                   >
-                    Question Summary
+                    {t.readingPlan.questionSummary}
                   </span>
                 </div>
                 <div className="divide-y divide-border/30 max-h-[40vh] overflow-y-auto">
@@ -1161,7 +1159,7 @@ const DailyReading = () => {
                         setIsReviewing(true);
                         jumpToQuestion(idx);
                       }}
-                      className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-muted/30 transition-colors"
+                      className="w-full flex items-center gap-3 px-4 py-3 hover:bg-muted/30 transition-colors"
                     >
                       <span
                         className={cn(
@@ -1185,10 +1183,10 @@ const DailyReading = () => {
                       <div className="flex items-center gap-2 shrink-0">
                         {q.numberAttempt && q.numberAttempt > 1 && (
                           <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 font-medium">
-                            {q.numberAttempt} tries
+                            {t.readingPlan.triesCount.replace('{n}', String(q.numberAttempt))}
                           </span>
                         )}
-                        <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
+                  <ChevronRight className={cn("w-3.5 h-3.5 text-muted-foreground", isRtl && "rotate-180")} />
                       </div>
                     </button>
                   ))}
@@ -1204,7 +1202,7 @@ const DailyReading = () => {
                   }}
                   className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-border/50 text-foreground text-sm font-medium hover:bg-muted/40 transition-colors"
                 >
-                  <RotateCcw className="w-4 h-4" /> Review & Retry
+                  <RotateCcw className="w-4 h-4" /> {t.readingPlan.reviewRetry}
                 </button>
 
                 {canMarkComplete && (
@@ -1213,13 +1211,13 @@ const DailyReading = () => {
                     className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-all"
                   >
                     <CheckCircle className="w-4 h-4" />
-                    Mark Day {dayNum} Complete
+                    {t.readingPlan.markDayComplete.replace('{dayNum}', String(dayNum))}
                   </button>
                 )}
 
                 {isCompleted && (
                   <div className="flex items-center justify-center gap-2 text-emerald-700 dark:text-emerald-400 text-sm font-medium p-3 bg-emerald-50 dark:bg-emerald-950/30 rounded-xl border border-emerald-200/50 dark:border-emerald-800/40">
-                    <CheckCircle className="w-4 h-4" /> Day {dayNum} completed
+                    <CheckCircle className="w-4 h-4" /> {t.readingPlan.dayCompleted.replace('{dayNum}', String(dayNum))}
                   </div>
                 )}
               </div>
@@ -1233,12 +1231,12 @@ const DailyReading = () => {
             onClick={markComplete}
             className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-all"
           >
-            <CheckCircle className="w-4 h-4" /> Mark Day {dayNum} Complete
+            <CheckCircle className="w-4 h-4" /> {t.readingPlan.markDayComplete.replace('{dayNum}', String(dayNum))}
           </button>
         )}
         {isCompleted && !hasQuiz && (
           <div className="flex items-center justify-center gap-2 text-emerald-700 dark:text-emerald-400 text-sm font-medium p-3 bg-emerald-50 dark:bg-emerald-950/30 rounded-xl border border-emerald-200/50 dark:border-emerald-800/40">
-            <CheckCircle className="w-4 h-4" /> Day {dayNum} completed
+            <CheckCircle className="w-4 h-4" /> {t.readingPlan.dayCompleted.replace('{dayNum}', String(dayNum))}
           </div>
         )}
 
@@ -1258,7 +1256,7 @@ const DailyReading = () => {
               }}
             >
               <PenLine className="w-4 h-4" />
-              Reflect in Journal
+              {t.readingPlan.reflectInJournal}
             </Button>
           </div>
         )}
@@ -1296,6 +1294,7 @@ function NavButton({
   disabled: boolean;
   onClick: () => void;
 }) {
+  const { t, isRtl } = useLanguage();
   const isPrev = dir === "prev";
   return (
     <button
@@ -1308,10 +1307,15 @@ function NavButton({
           : "bg-muted/50 text-muted-foreground/40 cursor-not-allowed border border-muted/20",
       )}
     >
-      {isPrev && <ChevronLeft className="w-3.5 h-3.5" />}
-      <span className="hidden sm:inline">{isPrev ? "Previous" : "Next"}</span>
-      <span className="sm:hidden">{isPrev ? "Prev" : "Next"}</span>
-      {!isPrev && <ChevronRight className="w-3.5 h-3.5" />}
+      {isPrev ? (
+        isRtl ? <ChevronRight className="w-3.5 h-3.5" /> : <ChevronLeft className="w-3.5 h-3.5" />
+      ) : isRtl ? (
+        <ChevronLeft className="w-3.5 h-3.5" />
+      ) : (
+        <ChevronRight className="w-3.5 h-3.5" />
+      )}
+      <span className="hidden sm:inline">{isPrev ? t.common.previous : t.common.next}</span>
+      <span className="sm:hidden">{isPrev ? t.common.previous : t.common.next}</span>
     </button>
   );
 }

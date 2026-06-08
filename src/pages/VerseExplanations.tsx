@@ -250,14 +250,14 @@ const VerseExplanations = () => {
         setExplanations(explanations as VerseExplanation[]);
       } else {
         toast({
-          title: "Failed to load explanations",
+          title: t.verseExplanations?.failedToLoad || 'Failed to load explanations',
           description: res.returnMessage,
           variant: "destructive",
         });
       }
     } catch (e: any) {
       toast({
-        title: "Network error",
+        title: t.verseExplanations?.networkError || 'Network error',
         description: e.message,
         variant: "destructive",
       });
@@ -292,21 +292,24 @@ const VerseExplanations = () => {
       });
       if (res.returnCode === 200) {
         toast({
-          title: "Explanation deleted",
-          description: `${deleteTarget.bookName} ${deleteTarget.chapter}:${deleteTarget.verseNumber} removed.`,
+          title: t.verseExplanations?.deletedToast || 'Explanation deleted',
+          description: (t.verseExplanations?.deletedToastDesc || '{bookName} {chapter}:{verseNumber} removed.')
+            .replace('{bookName}', deleteTarget.bookName)
+            .replace('{chapter}', String(deleteTarget.chapter))
+            .replace('{verseNumber}', String(deleteTarget.verseNumber)),
         });
         setExplanations((prev) => prev.filter((v) => v.id !== deleteTarget.id));
         setDeleteTarget(null);
       } else {
         toast({
-          title: "Delete failed",
+          title: t.verseExplanations?.deleteFailed || 'Delete failed',
           description: res.returnMessage,
           variant: "destructive",
         });
       }
     } catch (e: any) {
       toast({
-        title: "Network error",
+        title: t.verseExplanations?.networkError || "Network error",
         description: e.message,
         variant: "destructive",
       });
@@ -336,7 +339,7 @@ const VerseExplanations = () => {
               className="text-muted-foreground hover:text-foreground inline-flex items-center gap-2"
             >
               <ArrowLeft className="h-5 w-5" />
-              Back
+              {t.common?.back || 'Back'}
             </Link>
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center shadow-sm">
@@ -344,10 +347,10 @@ const VerseExplanations = () => {
               </div>
               <div>
                 <h1 className="text-2xl font-bold tracking-tight font-heading text-gradient">
-                  Verse Explanations
+                  {t.verseExplanations?.pageTitle || 'Verse Explanations'}
                 </h1>
                 <p className="text-muted-foreground text-sm">
-                  Admin management
+                  {t.verseExplanations?.adminManagement || 'Admin management'}
                 </p>
               </div>
             </div>
@@ -358,7 +361,7 @@ const VerseExplanations = () => {
             className="gap-2 bg-gradient-to-r from-primary to-primary/80 shadow-md"
           >
             <Plus className="w-4 h-4" />
-            Add Explanation
+            {t.verseExplanations?.addExplanation || 'Add Explanation'}
           </Button>
         </div>
 
@@ -366,19 +369,19 @@ const VerseExplanations = () => {
         <div className="fade-up stagger-1 grid grid-cols-2 sm:grid-cols-3 gap-3">
           {[
             {
-              label: "Total Explanations",
+              label: t.verseExplanations?.statTotal || 'Total Explanations',
               value: stats.total,
               color: "text-primary",
               icon: ScrollText,
             },
             {
-              label: "With Learn More",
+              label: t.verseExplanations?.statWithLearnMore || 'With Learn More',
               value: stats.withLearnMore,
               color: "text-amber-600",
               icon: Sparkles,
             },
             {
-              label: "Books Covered",
+              label: t.verseExplanations?.statBooksCovered || 'Books Covered',
               value: stats.books,
               color: "text-emerald-600",
               icon: BookMarked,
@@ -403,7 +406,7 @@ const VerseExplanations = () => {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
-              placeholder="Search by book, chapter, verse, or keyword…"
+              placeholder={t.verseExplanations?.searchPlaceholder || 'Search by book, chapter, verse, or keyword…'}
               className="pl-9"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -446,8 +449,8 @@ const VerseExplanations = () => {
                 <BookOpen className="w-12 h-12 text-muted-foreground/40" />
                 <p className="text-muted-foreground font-medium">
                   {explanations.length === 0
-                    ? "No verse explanations yet"
-                    : "No results match your search"}
+                    ? (t.verseExplanations?.noExplanationsYet || 'No verse explanations yet')
+                    : (t.verseExplanations?.noSearchMatch || 'No results match your search')}
                 </p>
                 {explanations.length === 0 && (
                   <Button
@@ -456,7 +459,7 @@ const VerseExplanations = () => {
                     onClick={() => navigate(routes.addExplanation.path)}
                     className="gap-2 mt-1"
                   >
-                    <Plus className="w-4 h-4" /> Add your first explanation
+                    <Plus className="w-4 h-4" /> {t.verseExplanations?.addFirstExplanation || 'Add your first explanation'}
                   </Button>
                 )}
               </CardContent>
@@ -507,7 +510,7 @@ const VerseExplanations = () => {
                               className="text-xs gap-1 border-amber-200 bg-amber-50 text-amber-700"
                             >
                               <Sparkles className="w-3 h-3" />
-                              Learn More
+                              {t.verseExplanations?.learnMoreBadge || 'Learn More'}
                             </Badge>
                           )}
                         </div>
@@ -516,7 +519,7 @@ const VerseExplanations = () => {
                         </p>
                         {item.updatedOn && (
                           <p className="text-xs text-muted-foreground/60 mt-1.5">
-                            Updated{" "}
+                            {t.verseExplanations?.updatedLabel || 'Updated'}{" "}
                             {new Date(item.updatedOn).toLocaleDateString(
                               "en-US",
                               {
@@ -540,7 +543,7 @@ const VerseExplanations = () => {
                             setExpandedId(isExpanded ? null : item.id)
                           }
                           title={
-                            isExpanded ? "Collapse" : "Preview explanation"
+                            isExpanded ? (t.verseExplanations?.collapseLabel || 'Collapse') : (t.verseExplanations?.previewLabel || 'Preview explanation')
                           }
                         >
                           {isExpanded ? (
@@ -565,7 +568,7 @@ const VerseExplanations = () => {
                                   }),
                                 )
                               }
-                              title="Edit explanation"
+                              title={t.verseExplanations?.editTitle || 'Edit explanation'}
                             >
                               <Edit2 className="w-4 h-4" />
                             </Button>
@@ -575,7 +578,7 @@ const VerseExplanations = () => {
                               size="icon"
                               className="h-8 w-8 text-muted-foreground hover:text-destructive"
                               onClick={() => setDeleteTarget(item)}
-                              title="Delete explanation"
+                              title={t.verseExplanations?.deleteTitle || 'Delete explanation'}
                             >
                               <Trash2 className="w-4 h-4" />
                             </Button>
@@ -596,8 +599,13 @@ const VerseExplanations = () => {
         {/* ── Results count ── */}
         {!loading && filtered.length > 0 && (
           <p className="text-xs text-muted-foreground text-center pb-4">
-            Showing {filtered.length} of {explanations.length} explanation
-            {explanations.length !== 1 ? "s" : ""}
+            {explanations.length === 1
+              ? (t.verseExplanations?.showingCount || 'Showing {filtered} of {total} explanation')
+                  .replace('{filtered}', String(filtered.length))
+                  .replace('{total}', String(explanations.length))
+              : (t.verseExplanations?.showingCountPlural || 'Showing {filtered} of {total} explanations')
+                  .replace('{filtered}', String(filtered.length))
+                  .replace('{total}', String(explanations.length))}
           </p>
         )}
       </div>
@@ -613,15 +621,13 @@ const VerseExplanations = () => {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-destructive">
               <AlertTriangle className="w-5 h-5" />
-              Delete Explanation
+              {t.verseExplanations?.deleteDialogTitle || 'Delete Explanation'}
             </DialogTitle>
             <DialogDescription>
-              This will permanently delete the explanation for{" "}
-              <strong>
-                {deleteTarget?.bookName} {deleteTarget?.chapter}:
-                {deleteTarget?.verseNumber}
-              </strong>
-              . This action cannot be undone.
+              {(t.verseExplanations?.deleteDialogDesc || 'This will permanently delete the explanation for {bookName} {chapter}:{verseNumber}. This action cannot be undone.')
+                .replace('{bookName}', deleteTarget?.bookName || '')
+                .replace('{chapter}', String(deleteTarget?.chapter || ''))
+                .replace('{verseNumber}', String(deleteTarget?.verseNumber || ''))}
             </DialogDescription>
           </DialogHeader>
 
@@ -643,7 +649,7 @@ const VerseExplanations = () => {
               onClick={() => setDeleteTarget(null)}
               disabled={deleting}
             >
-              Cancel
+              {t.common?.cancel || 'Cancel'}
             </Button>
             <Button
               variant="destructive"
@@ -653,11 +659,11 @@ const VerseExplanations = () => {
             >
               {deleting ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin" /> Deleting…
+                  <Loader2 className="w-4 h-4 animate-spin" /> {t.verseExplanations?.deleteDialogTitle || 'Deleting…'}
                 </>
               ) : (
                 <>
-                  <Trash2 className="w-4 h-4" /> Delete
+                  <Trash2 className="w-4 h-4" /> {t.verseExplanations?.deleteDialogTitle || 'Delete'}
                 </>
               )}
             </Button>

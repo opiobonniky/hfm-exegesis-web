@@ -47,20 +47,20 @@ const ForgotPassword = () => {
 
     switch (name) {
       case "email":
-        if (!value.trim()) return "Email is required";
-        if (!/\S+@\S+\.\S+/.test(value)) return "Invalid email address";
+        if (!value.trim()) return t.auth?.emailRequired || 'Email is required';
+        if (!/\S+@\S+\.\S+/.test(value)) return t.auth?.invalidEmail || 'Invalid email address';
         return "";
       case "code":
-        if (!value) return "Reset code is required";
-        if (value.length < 6) return "Enter 6-digit code";
+        if (!value) return t.auth?.resetCodeRequired || 'Reset code is required';
+        if (value.length < 6) return t.auth?.enterSixDigitCode || 'Enter 6-digit code';
         return "";
       case "newPassword":
-        if (!value) return "Password is required";
-        if (value.length < 8) return "Minimum 8 characters";
+        if (!value) return t.auth?.passwordRequired || 'Password is required';
+        if (value.length < 8) return t.auth?.minCharacters || 'Minimum 8 characters';
         return "";
       case "confirmPassword":
-        if (!value) return "Confirm your password";
-        if (value !== newPassword) return "Passwords do not match";
+        if (!value) return t.auth?.confirmPasswordRequired || 'Confirm your password';
+        if (value !== newPassword) return t.auth?.passwordsDoNotMatch || 'Passwords do not match';
         return "";
       default:
         return "";

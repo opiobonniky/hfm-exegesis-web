@@ -165,22 +165,11 @@ export interface Translations {
     dailyDesc: string;
     exploreAll: string;
     readDevotional: string;
-    // ── Devotionals card sample content ──
-    devoCard1Date: string;
-    devoCard1Title: string;
-    devoCard1Book: string;
-    devoCard1Excerpt: string;
-    devoCard1Tag: string;
-    devoCard2Date: string;
-    devoCard2Title: string;
-    devoCard2Book: string;
-    devoCard2Excerpt: string;
-    devoCard2Tag: string;
-    devoCard3Date: string;
-    devoCard3Title: string;
-    devoCard3Book: string;
-    devoCard3Excerpt: string;
-    devoCard3Tag: string;
+    // ── Exegesis Project section ──
+    exegesisProjectBadge: string;
+    exegesisProjectTitle: string;
+    exegesisProjectTitleHighlight: string;
+    exegesisProjectDesc: string;
     // ── Prayer Wall section ──
     prayerBadge: string;
     prayerTitle: string;
@@ -260,6 +249,13 @@ export interface Translations {
     footerTerms: string;
     footerSupport: string;
     footerDesc: string;
+    // ── Bible Stats section ──
+    bibleStatsBadge: string;
+    bibleStatsTitle: string;
+    bibleStatsTitleHighlight: string;
+    bibleStatsBooks: string;
+    bibleStatsChapters: string;
+    bibleStatsVerses: string;
     // ── Social ──
     socialFacebook: string;
     socialTwitter: string;
@@ -384,6 +380,23 @@ export interface Translations {
     twitter: string;
     agreeToTerms: string;
     fullVersionComing: string;
+    /** Login - toast messages */
+    googleLoginFailed: string;
+    unableToSignInGoogle: string;
+    loginCancelled: string;
+    youClosedWindow: string;
+    popupBlocked: string;
+    allowPopupsAndRetry: string;
+    loginFailed: string;
+    emailVerificationRequired: string;
+    verificationCodeSent: string;
+    invalidCredentials: string;
+    unexpectedErrorWithRetry: string;
+    /** Forgot Password - validation */
+    resetCodeRequired: string;
+    enterSixDigitCode: string;
+    /** Register - toast */
+    correctErrorsBeforeContinuing: string;
   };
 
   /** Dashboard / Index / UserDashboard */
@@ -779,6 +792,19 @@ export interface Translations {
     devotionTitlePlaceholder: string;
     devotionContentPlaceholder: string;
     dateRangeError: string;
+    /** Toast / feedback keys */
+    toastError: string;
+    toastFailedToLoad: string;
+    toastFailedToLoadDesc: string;
+    toastRefreshed: string;
+    toastRefreshDesc: string;
+    toastLikeRemoved: string;
+    toastDevotionLiked: string;
+    toastCopied: string;
+    toastCopiedDesc: string;
+    todayBadge: string;
+    pastBadge: string;
+    reflectOnThis: string;
   };
 
   /** Journal pages */
@@ -1034,6 +1060,34 @@ export interface Translations {
     clValidChapter: string;
     clValidVerse: string;
     clExplanationWords: string;
+    /** Verse Explanations page - admin */
+    pageTitle: string;
+    adminManagement: string;
+    addExplanation: string;
+    statTotal: string;
+    statWithLearnMore: string;
+    statBooksCovered: string;
+    searchPlaceholder: string;
+    filterAllBooks: string;
+    noExplanationsYet: string;
+    noSearchMatch: string;
+    addFirstExplanation: string;
+    learnMoreBadge: string;
+    updatedLabel: string;
+    showingCount: string;
+    showingCountPlural: string;
+    deleteDialogTitle: string;
+    deleteDialogDesc: string;
+    deletedToast: string;
+    deletedToastDesc: string;
+    deleteFailed: string;
+    failedToLoad: string;
+    networkError: string;
+    collapseLabel: string;
+    previewLabel: string;
+    explanationLabel: string;
+    editTitle: string;
+    deleteTitle: string;
   };
 
   /** Reading Plan pages */
@@ -1298,6 +1352,86 @@ export interface Translations {
     catOT: string;
     catSingleBook: string;
     catTopical: string;
+    // ── Daily Reading page ──
+    comingSoon: string;
+    dayNotAddedDesc: string;
+    tapToRead: string;
+    personalReflection: string;
+    reflectionIntro: string;
+    ponder: string;
+    knowledgeCheck: string;
+    reviewMode: string;
+    movingToNext: string;
+    nextQuestion: string;
+    seeResults: string;
+    skipThisQuestion: string;
+    submitAnswer: string;
+    updateAnswer: string;
+    keyboardHints: string;
+    quizComplete: string;
+    questionSummary: string;
+    reviewRetry: string;
+    markDayComplete: string;
+    dayCompleted: string;
+    markDone: string;
+    reflectInJournal: string;
+    alreadyCompleted: string;
+    completeReadingFirst: string;
+    completeReadingFirstDesc: string;
+    correctLabel: string;
+    incorrectLabel: string;
+    correctBadge: string;
+    wrongBadge: string;
+    checking: string;
+    correctCount: string;
+    wrongCount: string;
+    accuracyPct: string;
+    triesCount: string;
+    quizFeedbackZero: string;
+    quizFeedbackLow: string;
+    quizFeedbackMid: string;
+    quizFeedbackHigh: string;
+    quizFeedbackPerfect: string;
+    keepGoing: string;
+    goodEffort: string;
+    almostThere: string;
+    wellDone: string;
+    perfectScore: string;
+    // ── Add Reading Plan page ──
+    stepPlanInfo: string;
+    stepDailyContent: string;
+    stepReviewSave: string;
+    createPlanTitle: string;
+    adminPlanBuilder: string;
+    planDetails: string;
+    planDetailsDesc: string;
+    dailyContentTitle: string;
+    dailyContentDesc: string;
+    daysReady: string;
+    reviewConfirm: string;
+    atLeastOneDay: string;
+    maxDays: string;
+    dayIncomplete: string;
+    dayIncompleteDesc: string;
+    completeAtLeastOneDay: string;
+    failedToCreatePlan: string;
+    dayFailed: string;
+    quizDayFailed: string;
+    planCreated: string;
+    readyLabel: string;
+    partialLabel: string;
+    notConfiguredEdit: string;
+    quizLabel: string;
+    planDetailsBasic: string;
+    basicMeta: string;
+    markedAsDone: string;
+    markedEarlier: string;
+    dayCompleteToast: string;
+    failedToLoadData: string;
+    willSave: string;
+    reflectionsShort: string;
+    quizShort: string;
+    chapterShort: string
   };
 
   /** My Activity page (user's own highlights/notes/favorites/history) */

@@ -112,9 +112,7 @@ const isToday = (dateString: string | object): boolean => {
   } catch {
     return false;
   }
-};
-
-const ExpandableContent = ({
+};const ExpandableContent = ({
   content,
   label,
   icon: Icon,
@@ -127,6 +125,7 @@ const ExpandableContent = ({
 }) => {
   const [expanded, setExpanded] = useState(false);
   const [copied, setCopied] = useState(false);
+  const { t, isRtl } = useLanguage();
   const lines = content.split("\n").filter((p) => p.trim());
   const shouldTruncate = lines.length > 4;
   const visibleLines = expanded ? lines : lines.slice(0, 4);
@@ -156,7 +155,7 @@ const ExpandableContent = ({
           className="h-7 px-2 text-xs hover:bg-muted/50"
         >
           <Copy size={12} className="mr-1" />
-          {copied ? "Copied!" : "Copy"}
+          {copied ? (t.dailyVerse?.expandCopied || 'Copied!') : (t.dailyVerse?.expandCopy || 'Copy')}
         </Button>
       </div>
       <div className="space-y-2 pl-6">
@@ -174,12 +173,12 @@ const ExpandableContent = ({
             {expanded ? (
               <>
                 <ChevronUp size={12} />
-                Show less
+                {(t.dailyVerse?.expandShowLess || 'Show less')}
               </>
             ) : (
               <>
                 <ChevronDown size={12} />
-                Continue reading
+                {(t.dailyVerse?.expandContinueReading || 'Continue reading')}
               </>
             )}
           </button>
@@ -249,15 +248,15 @@ export default function UserDailyVerse() {
           setDailyVerse(null);
         } else {
           toast({
-            title: "Error",
-            description: returnMessage || "Failed to load today's verse.",
+            title: t.dailyVerse?.toastErrorTitle || 'Error',
+            description: returnMessage || (t.dailyVerse?.failedToFetch || 'Failed to load today\'s verse.'),
             variant: "destructive",
           });
         }
       } catch {
         toast({
-          title: "Error",
-          description: "Unable to load today's verse. Please try again.",
+          title: t.dailyVerse?.toastErrorTitle || 'Error',
+          description: t.dailyVerse?.toastLoadError || 'Unable to load today\'s verse. Please try again.',
           variant: "destructive",
         });
       } finally {
@@ -286,14 +285,14 @@ export default function UserDailyVerse() {
         );
         setDailyVerse({ ...returnData, verseText });
         toast({
-          title: "Refreshed",
-          description: "Today's verse updated.",
+          title: t.dailyVerse?.toastRefreshed || 'Refreshed',
+          description: t.dailyVerse?.toastRefreshDesc || 'Today\'s verse updated.',
         });
       }
     } catch {
       toast({
-        title: "Error",
-        description: "Failed to refresh. Please try again.",
+        title: t.dailyVerse?.toastErrorTitle || 'Error',
+        description: t.dailyVerse?.toastRefreshFailed || 'Failed to refresh. Please try again.',
         variant: "destructive",
       });
     } finally {
@@ -418,7 +417,7 @@ export default function UserDailyVerse() {
                 {isToday(dailyVerse.displayDate) ? (
                   <Sparkles className="w-3 h-3 mr-1 text-accent" />
                 ) : null}
-                {isToday(dailyVerse.displayDate) ? "Today" : "Past"}
+                {isToday(dailyVerse.displayDate) ? (t.dailyVerse?.todayBadge || "Today") : (t.dailyVerse?.badgePast || "Past")}
               </Badge>
               <Button
                 variant="ghost"
@@ -501,10 +500,10 @@ export default function UserDailyVerse() {
                     onClick={() => {
                       setLiked(!liked);
                       toast({
-                        title: liked ? "Like removed" : "Verse liked!",
+                        title: liked ? (t.dailyVerse?.toastLikeRemoved || 'Like removed') : (t.dailyVerse?.toastVerseLiked || 'Verse liked!'),
                         description: liked
                           ? ""
-                          : `${verseReference} added to your favorites.`,
+                          : (t.dailyVerse?.toastAddedToFavorites || '{ref} added to your favorites.').replace('{ref}', verseReference),
                       });
                     }}
                     disabled={false}
@@ -519,8 +518,8 @@ export default function UserDailyVerse() {
                       } else {
                         navigator.clipboard.writeText(text);
                         toast({
-                          title: "Copied!",
-                          description: "Verse copied to clipboard.",
+                          title: t.dailyVerse?.toastCopied || 'Copied!',
+                          description: t.dailyVerse?.toastVerseCopied || 'Verse copied to clipboard.',
                         });
                       }
                     }}
@@ -532,12 +531,11 @@ export default function UserDailyVerse() {
                     onClick={() => {
                       navigator.clipboard.writeText(
                         `${verseText} — ${verseReference}`,
-                      );
-                      toast({
-                        title: "Copied!",
-                        description: "Verse copied to clipboard.",
-                      });
-                    }}
+                      );                      toast({
+                          title: t.dailyVerse?.toastCopied || "Copied!",
+                          description: t.dailyVerse?.toastVerseCopied || "Verse copied to clipboard.",
+                        });
+                      }}
                     disabled={false}
                   />
                 </div>

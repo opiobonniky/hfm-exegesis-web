@@ -40,13 +40,33 @@ import { getVerseText } from "@/utilities/bibleUtils";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/components/languages/languageProvider";
 
-const CATEGORIES: Record<string, { label: string; color: string }> = {
-  general: { label: "General", color: "bg-gray-100 text-gray-700" },
-  study: { label: "Bible Study", color: "bg-blue-100 text-blue-700" },
-  prayer: { label: "Prayer", color: "bg-purple-100 text-purple-700" },
-  gratitude: { label: "Gratitude", color: "bg-amber-100 text-amber-700" },
-  reflection: { label: "Reflection", color: "bg-green-100 text-green-700" },
-  application: { label: "Application", color: "bg-indigo-100 text-indigo-700" },
+const CATEGORY_LABELS: Record<string, string> = {
+  general: 'categoryGeneral',
+  study: 'categoryStudy',
+  prayer: 'categoryPrayer',
+  gratitude: 'categoryGratitude',
+  reflection: 'categoryReflection',
+  application: 'categoryApplication',
+};
+
+const CATEGORY_COLORS: Record<string, string> = {
+  general: "bg-gray-100 text-gray-700",
+  study: "bg-blue-100 text-blue-700",
+  prayer: "bg-purple-100 text-purple-700",
+  gratitude: "bg-amber-100 text-amber-700",
+  reflection: "bg-green-100 text-green-700",
+  application: "bg-indigo-100 text-indigo-700",
+};
+
+const MOOD_LABELS: Record<string, string> = {
+  happy: 'moodHappy',
+  grateful: 'moodGrateful',
+  peaceful: 'moodPeaceful',
+  thoughtful: 'moodThoughtful',
+  motivated: 'moodMotivated',
+  hopeful: 'moodHopeful',
+  challenged: 'moodChallenged',
+  blessed: 'moodBlessed',
 };
 
 const MOODS: Record<string, { label: string; emoji: string }> = {
@@ -327,23 +347,13 @@ const JournalDetailPage = () => {
               <h1 className="text-3xl font-bold mb-2 break-words">{entry.title}</h1>
             )}
             <div className="flex items-center gap-3 flex-wrap">
-              <Badge className={CATEGORIES[entry.category]?.color || "bg-gray-100"}>
-                {(() => {
-                  const catMap: Record<string, string> = {
-                    general: t.journal?.categoryGeneral || "General",
-                    study: t.journal?.categoryStudy || "Bible Study",
-                    prayer: t.journal?.categoryPrayer || "Prayer",
-                    gratitude: t.journal?.categoryGratitude || "Gratitude",
-                    reflection: t.journal?.categoryReflection || "Reflection",
-                    application: t.journal?.categoryApplication || "Application",
-                  };
-                  return catMap[entry.category] || entry.category;
-                })()}
+              <Badge className={CATEGORY_COLORS[entry.category] || "bg-gray-100"}>
+                {(t.journal as any)?.[CATEGORY_LABELS[entry.category]] || entry.category}
               </Badge>
               {moodInfo && (
-                <span className="inline-flex items-center gap-1 text-sm" title={moodInfo.label}>
+                <span className="inline-flex items-center gap-1 text-sm" title={(t.journal as any)?.[MOOD_LABELS[entry.mood!]] || moodInfo.label}>
                   <span className="text-lg">{moodInfo.emoji}</span>
-                  <span className="text-muted-foreground">{moodInfo.label}</span>
+                  <span className="text-muted-foreground">{(t.journal as any)?.[MOOD_LABELS[entry.mood!]] || moodInfo.label}</span>
                 </span>
               )}
               <div className="flex items-center gap-1 text-sm text-muted-foreground">

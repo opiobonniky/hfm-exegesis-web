@@ -117,7 +117,7 @@ const Register = () => {
     if (hasErrors) {
       toast({
         title: t.common?.error ? 'Check Details' : 'Check Details',
-        description: 'Please correct the errors before continuing.',
+        description: t.auth?.correctErrorsBeforeContinuing || 'Please correct the errors before continuing.',
         variant: "destructive",
       });
       return;

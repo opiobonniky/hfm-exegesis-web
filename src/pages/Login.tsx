@@ -48,7 +48,7 @@ const Login = () => {
       const credential = GoogleAuthProvider.credentialFromResult(result);
       const idToken = credential?.idToken;
 
-      if (!idToken) throw new Error("Could not get Google ID token");
+      if (!idToken) throw new Error(t.auth?.googleLoginFailed || "Could not get Google ID token");
 
       const { user } = result;
       const deviceInfo = getDeviceInfo();
@@ -95,18 +95,18 @@ const Login = () => {
         });
       } else {
         toast({
-          title: "Google Login Failed",
+          title: t.auth?.googleLoginFailed || 'Google Login Failed',
           description:
-            returnMessage || "Unable to sign in with Google. Please try again.",
+            returnMessage || (t.auth?.unableToSignInGoogle || 'Unable to sign in with Google.'),
           variant: "destructive",
         });
       }
     } catch (error: any) {
       console.error("Google login error:", error);
       toast({
-        title: "Google Login Failed",
+        title: t.auth?.googleLoginFailed || 'Google Login Failed',
         description:
-          error.message || "Unable to sign in with Google. Please try again.",
+          error.message || (t.auth?.unableToSignInGoogle || 'Unable to sign in with Google.'),
         variant: "destructive",
       });
     } finally {
@@ -123,8 +123,8 @@ const Login = () => {
       .catch((error) => {
         console.error("Google redirect error:", error);
         toast({
-          title: "Google Login Failed",
-          description: error.message || "Unable to sign in with Google.",
+          title: t.auth?.googleLoginFailed || 'Google Login Failed',
+          description: error.message || (t.auth?.unableToSignInGoogle || 'Unable to sign in with Google.'),
           variant: "destructive",
         });
       });
@@ -143,20 +143,20 @@ const Login = () => {
     } catch (error: any) {
       if (error.code === "auth/popup-closed-by-user") {
         toast({
-          title: "Login cancelled",
-          description: "You closed the Google sign-in window.",
+          title: t.auth?.loginCancelled || 'Login cancelled',
+          description: t.auth?.youClosedWindow || 'You closed the Google sign-in window.',
           variant: "destructive",
         });
       } else if (error.code === "auth/popup-blocked") {
         toast({
-          title: "Popup blocked",
-          description: "Please allow popups and try again.",
+          title: t.auth?.popupBlocked || 'Popup blocked',
+          description: t.auth?.allowPopupsAndRetry || 'Please allow popups and try again.',
           variant: "destructive",
         });
       } else {
         toast({
-          title: "Google Login Failed",
-          description: error.message || "Unable to sign in with Google.",
+          title: t.auth?.googleLoginFailed || 'Google Login Failed',
+          description: error.message || (t.auth?.unableToSignInGoogle || 'Unable to sign in with Google.'),
           variant: "destructive",
         });
       }
@@ -208,8 +208,8 @@ const Login = () => {
         }
       } else if (returnCode === 405) {
         toast({
-          title: "Email Verification Required",
-          description: "A verification code has been sent to your email.",
+          title: t.auth?.emailVerificationRequired || 'Email Verification Required',
+          description: t.auth?.verificationCodeSent || 'A verification code has been sent to your email.',
         });
         setTimeout(() => {
           navigate(
@@ -227,8 +227,8 @@ const Login = () => {
           },
         });
         toast({
-          title: "Login Failed",
-          description: returnMessage || "Invalid email or password.",
+          title: t.auth?.loginFailed || 'Login Failed',
+          description: returnMessage || (t.auth?.invalidCredentials || 'Invalid email or password.'),
           variant: "destructive",
         });
       }
@@ -238,7 +238,7 @@ const Login = () => {
           ? error.returnMessage
           : error instanceof Error
             ? error.message
-            : "An unexpected error occurred. Please try again.";
+            : (t.auth?.unexpectedErrorWithRetry || 'An unexpected error occurred. Please try again.');
 
       const deviceInfo = getDeviceInfo();
       const clientIP = await getClientIP().catch(() => "");
@@ -253,7 +253,7 @@ const Login = () => {
       } catch {}
 
       toast({
-        title: "Login Failed",
+        title: t.auth?.loginFailed || 'Login Failed',
         description: message,
         variant: "destructive",
       });
@@ -383,10 +383,10 @@ const Login = () => {
                 </SelectTrigger>
                 <SelectContent className="min-w-[140px]">
                   {[
-                    { label: "Primary", languages: ["en"] as Language[] },
-                    { label: "European", languages: ["de", "fr", "es", "pt", "it", "el", "ru"] as Language[] },
-                    { label: "Indian", languages: ["hi", "bn", "ta", "te", "mr", "gu", "kn", "ml", "pa", "ur"] as Language[] },
-                    { label: "Other", languages: ["ar", "sw", "ne", "fil"] as Language[] },
+                    { label: t.languageGroups?.primary || "Primary", languages: ["en"] as Language[] },
+                    { label: t.languageGroups?.european || "European", languages: ["de", "fr", "es", "pt", "it", "el", "ru"] as Language[] },
+                    { label: t.languageGroups?.indian || "Indian", languages: ["hi", "bn", "ta", "te", "mr", "gu", "kn", "ml", "pa", "ur"] as Language[] },
+                    { label: t.languageGroups?.other || "Other", languages: ["ar", "sw", "ne", "fil"] as Language[] },
                   ].map((group) => (
                     <SelectGroup key={group.label}>
                       <SelectLabel className="text-[10px] font-bold tracking-widest uppercase text-muted-foreground/50">

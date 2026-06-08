@@ -27,6 +27,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/components/languages/languageProvider";
 import { Link, useNavigate } from "react-router-dom";
 import { sendPostRequest } from "@/services/api";
 import { routes } from "@/components/Routes/routes";
@@ -64,22 +65,22 @@ interface PlanMeta {
 // Constants — module-level so they are never recreated
 // ─────────────────────────────────────────────
 const STEPS = [
-  { id: 1, label: "Plan Info", icon: BookOpen },
-  { id: 2, label: "Daily Content", icon: Calendar },
-  { id: 3, label: "Review & Save", icon: CheckCircle2 },
+  { id: 1, label: "stepPlanInfo", icon: BookOpen },
+  { id: 2, label: "stepDailyContent", icon: Calendar },
+  { id: 3, label: "stepReviewSave", icon: CheckCircle2 },
 ];
 const CATEGORIES = [
-  { value: "intro", label: "Introduction" },
-  { value: "whole-bible", label: "Whole Bible" },
-  { value: "nt", label: "New Testament" },
-  { value: "ot", label: "Old Testament" },
-  { value: "book", label: "Single Book" },
-  { value: "topical", label: "Topical" },
+  { value: "intro", labelKey: "catIntroduction" },
+  { value: "whole-bible", labelKey: "catWholeBible" },
+  { value: "nt", labelKey: "catNT" },
+  { value: "ot", labelKey: "catOT" },
+  { value: "book", labelKey: "catSingleBook" },
+  { value: "topical", labelKey: "catTopical" },
 ];
 const DIFFICULTIES = [
-  { value: "easy", label: "Easy" },
-  { value: "medium", label: "Medium" },
-  { value: "hard", label: "Hard" },
+  { value: "easy", labelKey: "diffBeginner" },
+  { value: "medium", labelKey: "diffIntermediate" },
+  { value: "hard", labelKey: "diffAdvanced" },
 ];
 const BIBLE_BOOKS = [
   "Genesis",
@@ -202,6 +203,7 @@ const DayCard = ({
   onToggle,
   onUpdateDay,
 }: DayCardProps) => {
+  const { t } = useLanguage();
   const complete = isDayComplete(day);
   const partial = isDayPartial(day);
 
@@ -306,12 +308,12 @@ const DayCard = ({
         <div className="flex items-center gap-1.5 shrink-0">
           {complete && (
             <span className="text-[10px] text-emerald-600 font-bold border border-emerald-200 bg-emerald-50 rounded px-1.5 py-0.5">
-              Ready
+              {t.readingPlan.readyLabel}
             </span>
           )}
           {partial && (
             <span className="text-[10px] text-amber-600 font-bold border border-amber-200 bg-amber-50 rounded px-1.5 py-0.5">
-              Partial
+              {t.readingPlan.partialLabel}
             </span>
           )}
           {isOpen ? (
@@ -328,12 +330,12 @@ const DayCard = ({
           {/* Title */}
           <div className="space-y-1.5">
             <label className="text-sm font-semibold text-stone-700">
-              Day Title <span className="text-red-500">*</span>
+              {t.readingPlan.dayTitle} <span className="text-red-500">*</span>
             </label>
             <input
               value={day.title}
               onChange={(e) => onUpdateDay(dayIdx, { title: e.target.value })}
-              placeholder="e.g. Creation — In the beginning"
+              placeholder={t.readingPlan.dayTitlePlaceholder}
               className={inputCls}
             />
           </div>
@@ -341,7 +343,7 @@ const DayCard = ({
           {/* Chapters */}
           <div className="space-y-2">
             <label className="text-sm font-semibold text-stone-700">
-              Chapters <span className="text-red-500">*</span>
+              {t.readingPlan.chapters} <span className="text-red-500">*</span>
             </label>
             {day.chapters.map((ch, ci) => (
               <div key={ci} className="flex items-center gap-2">
@@ -350,7 +352,7 @@ const DayCard = ({
                   onValueChange={(v) => updateChapter(ci, { book: v })}
                 >
                   <SelectTrigger className="flex-1 rounded-xl border-stone-200 bg-white text-sm focus:ring-teal-400/30">
-                    <SelectValue placeholder="Select book" />
+                    <SelectValue placeholder={t.readingPlan.bookPlaceholder} />
                   </SelectTrigger>
                   <SelectContent className="max-h-60">
                     {BIBLE_BOOKS.map((b) => (
@@ -370,7 +372,7 @@ const DayCard = ({
                     })
                   }
                   className={cn(inputCls, "w-20 text-center")}
-                  placeholder="Ch"
+                  placeholder={t.readingPlan.chapterShort}
                 />
                 {day.chapters.length > 1 && (
                   <button
@@ -389,21 +391,21 @@ const DayCard = ({
               className="flex items-center gap-1.5 text-xs text-teal-600 hover:text-teal-700 font-semibold mt-1 transition-colors"
             >
               <Plus className="w-3.5 h-3.5" />
-              Add Chapter
+              {t.readingPlan.addChapter}
             </button>
           </div>
 
           {/* Reflections */}
           <div className="space-y-2">
             <label className="text-sm font-semibold text-stone-700">
-              Reflection Questions
+              {t.readingPlan.reflectionQuestions}
             </label>
             {day.reflectionQuestions.map((q, ri) => (
               <div key={ri} className="flex items-center gap-2">
                 <input
                   value={q}
                   onChange={(e) => updateReflection(ri, e.target.value)}
-                  placeholder={`Reflection question ${ri + 1}`}
+                  placeholder={`${t.readingPlan.reflectionQuestions} ${ri + 1}`}
                   className={cn(inputCls, "flex-1")}
                 />
                 {day.reflectionQuestions.length > 1 && (
@@ -423,7 +425,7 @@ const DayCard = ({
               className="flex items-center gap-1.5 text-xs text-teal-600 hover:text-teal-700 font-semibold transition-colors"
             >
               <Plus className="w-3.5 h-3.5" />
-              Add Reflection
+              {t.readingPlan.addReflection}
             </button>
           </div>
 
@@ -432,7 +434,7 @@ const DayCard = ({
             <div className="space-y-3">
               <label className="text-sm font-semibold text-stone-700 flex items-center gap-1.5">
                 <HelpCircle className="w-4 h-4 text-violet-500" />
-                Quiz Questions
+                {t.readingPlan.quizQuestions}
               </label>
               {day.quizQuestions.map((quiz, qi) => (
                 <div
@@ -456,7 +458,7 @@ const DayCard = ({
                     onChange={(e) =>
                       updateQuiz(qi, { question: e.target.value })
                     }
-                    placeholder="Question text…"
+                    placeholder={t.readingPlan.questionPlaceholder}
                     rows={2}
                     className={textareaCls}
                   />
@@ -482,7 +484,7 @@ const DayCard = ({
                           onChange={(e) =>
                             updateQuizOption(qi, oi, e.target.value)
                           }
-                          placeholder={`Option ${oi + 1}`}
+                          placeholder={t.readingPlan.optionLabel.replace('{n}', String(oi + 1))}
                           className={cn(
                             inputCls,
                             "flex-1",
@@ -498,7 +500,7 @@ const DayCard = ({
                     onChange={(e) =>
                       updateQuiz(qi, { explanation: e.target.value })
                     }
-                    placeholder="Explanation (optional)"
+                    placeholder={`${t.readingPlan.explanation} (${t.userManagement.optional.toLowerCase()})`}
                     rows={2}
                     className={textareaCls}
                   />
@@ -510,7 +512,7 @@ const DayCard = ({
                 className="flex items-center gap-1.5 text-xs text-violet-600 hover:text-violet-700 font-semibold transition-colors"
               >
                 <Plus className="w-3.5 h-3.5" />
-                Add Quiz Question
+                {t.readingPlan.addQuestion}
               </button>
             </div>
           )}
@@ -525,6 +527,7 @@ const DayCard = ({
 // ─────────────────────────────────────────────
 const AddReadingPlan = () => {
   const { toast } = useToast();
+  const { t, isRtl } = useLanguage();
   const navigate = useNavigate();
 
   const [step, setStep] = useState(1);
@@ -561,15 +564,15 @@ const AddReadingPlan = () => {
   // ── Navigation ──────────────────────────────
   const goToStep2 = () => {
     if (!meta.title.trim()) {
-      toast({ title: "Title is required", variant: "destructive" });
+      toast({ title: t.readingPlan.toastTitleRequired, variant: "destructive" });
       return;
     }
     if (meta.totalDays < 1) {
-      toast({ title: "At least 1 day required", variant: "destructive" });
+      toast({ title: t.readingPlan.atLeastOneDay, variant: "destructive" });
       return;
     }
     if (meta.totalDays > 365) {
-      toast({ title: "Maximum 365 days", variant: "destructive" });
+      toast({ title: t.readingPlan.maxDays, variant: "destructive" });
       return;
     }
     normaliseDays(meta.totalDays);
@@ -581,8 +584,8 @@ const AddReadingPlan = () => {
     for (let i = 0; i < days.length; i++) {
       if (isDayPartial(days[i])) {
         toast({
-          title: `Day ${days[i].dayNumber} is incomplete`,
-          description: "Add both a title and at least one chapter",
+          title: t.readingPlan.dayIncomplete.replace('{day}', String(days[i].dayNumber)),
+          description: t.readingPlan.dayIncompleteDesc,
           variant: "destructive",
         });
         setExpandedDay(days[i].dayNumber);
@@ -590,7 +593,7 @@ const AddReadingPlan = () => {
       }
     }
     if (days.filter(isDayComplete).length === 0) {
-      toast({ title: "Complete at least 1 day", variant: "destructive" });
+      toast({ title: t.readingPlan.completeAtLeastOneDay, variant: "destructive" });
       setExpandedDay(1);
       return;
     }
@@ -611,7 +614,7 @@ const AddReadingPlan = () => {
       });
       if (planRes.returnCode !== 200) {
         toast({
-          title: "Failed to create plan",
+          title: t.readingPlan.failedToCreatePlan,
           description: planRes.returnMessage,
           variant: "destructive",
         });
@@ -629,7 +632,7 @@ const AddReadingPlan = () => {
         });
         if (aRes.returnCode !== 200) {
           toast({
-            title: `Day ${day.dayNumber} failed`,
+            title: t.readingPlan.dayFailed.replace('{dayNumber}', String(day.dayNumber)),
             description: aRes.returnMessage,
             variant: "destructive",
           });
@@ -647,7 +650,7 @@ const AddReadingPlan = () => {
           );
           if (qRes.returnCode !== 200) {
             toast({
-              title: `Quiz for Day ${day.dayNumber} failed`,
+              title: t.readingPlan.quizDayFailed.replace('{dayNumber}', String(day.dayNumber)),
               description: qRes.returnMessage,
               variant: "destructive",
             });
@@ -655,11 +658,10 @@ const AddReadingPlan = () => {
           }
         }
       }
-      toast({ title: "Reading plan created! 🎉" });
+      toast({ title: t.readingPlan.planCreated });
       navigate(routes.readingPlans.path);
-    } catch (e: any) {
-      toast({
-        title: "Network error",
+    } catch (e: any) {        toast({
+        title: t.common.error,
         description: e.message,
         variant: "destructive",
       });
@@ -683,8 +685,8 @@ const AddReadingPlan = () => {
             to="/reading-plans"
             className="text-stone-400 hover:text-stone-700 inline-flex items-center gap-1.5 text-sm font-medium transition-colors"
           >
-            <ArrowLeft className="h-4 w-4" />
-            Back
+            <ArrowLeft className={cn("h-4 w-4", isRtl && "rotate-180")} />
+            {t.common.back}
           </Link>
           <div className="flex items-center gap-3">
             <div className="w-11 h-11 rounded-2xl bg-teal-100 flex items-center justify-center shadow-sm">
@@ -695,10 +697,10 @@ const AddReadingPlan = () => {
                 className="text-2xl font-bold text-stone-800 tracking-tight leading-none"
                 style={{ fontFamily: "'Fraunces', Georgia, serif" }}
               >
-                Create Reading Plan
+                {t.readingPlan.createPlanTitle}
               </h1>
               <p className="text-stone-400 text-xs mt-0.5 font-medium">
-                Admin — full plan builder
+                {t.readingPlan.adminPlanBuilder}
               </p>
             </div>
           </div>
@@ -736,7 +738,7 @@ const AddReadingPlan = () => {
                   >
                     {done ? <CheckCircle2 className="w-3.5 h-3.5" /> : s.id}
                   </div>
-                  <span className="hidden sm:block">{s.label}</span>
+                  <span className="hidden sm:block">{t.readingPlan[s.label as keyof typeof t.readingPlan] as string}</span>
                 </div>
                 {i < STEPS.length - 1 && (
                   <div
@@ -757,33 +759,33 @@ const AddReadingPlan = () => {
             <div className="px-6 py-4 border-b border-stone-100 bg-stone-50/50">
               <h2 className="font-bold text-stone-800 flex items-center gap-2">
                 <BookOpen className="w-4 h-4 text-teal-600" />
-                Plan Details
+                {t.readingPlan.planDetails}
               </h2>
               <p className="text-xs text-stone-400 mt-0.5">
-                Basic metadata for the reading plan
+                {t.readingPlan.planDetailsDesc}
               </p>
             </div>
             <div className="p-6 space-y-5">
               <div className="space-y-1.5">
                 <label className="text-sm font-semibold text-stone-700">
-                  Title <span className="text-red-500">*</span>
+                  {t.common.title} <span className="text-red-500">*</span>
                 </label>
                 <input
                   value={meta.title}
                   onChange={(e) => updateMeta("title", e.target.value)}
-                  placeholder="e.g. One Week Bible Highlights"
+                  placeholder={t.readingPlan.titlePlaceholder}
                   className={inputCls}
                 />
               </div>
 
               <div className="space-y-1.5">
                 <label className="text-sm font-semibold text-stone-700">
-                  Description
+                  {t.readingPlan.description}
                 </label>
                 <textarea
                   value={meta.description}
                   onChange={(e) => updateMeta("description", e.target.value)}
-                  placeholder="Brief description of this plan…"
+                  placeholder={t.readingPlan.descriptionPlaceholder}
                   rows={3}
                   className={textareaCls}
                 />
@@ -791,7 +793,7 @@ const AddReadingPlan = () => {
 
               <div className="space-y-1.5">
                 <label className="text-sm font-semibold text-stone-700">
-                  Total Days <span className="text-red-500">*</span>
+                  {t.readingPlan.totalDays} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="number"
@@ -811,10 +813,8 @@ const AddReadingPlan = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-sm font-semibold text-stone-700">
-                    Category
-                  </label>
-                  <Select
-                    value={meta.category}
+                    {t.readingPlan.category}
+                  </label>                  <Select value={meta.category}
                     onValueChange={(v) => updateMeta("category", v)}
                   >
                     <SelectTrigger className="rounded-xl border-stone-200 focus:ring-teal-400/30 bg-white">
@@ -823,7 +823,7 @@ const AddReadingPlan = () => {
                     <SelectContent>
                       {CATEGORIES.map((c) => (
                         <SelectItem key={c.value} value={c.value}>
-                          {c.label}
+                          {t.readingPlan[c.labelKey as keyof typeof t.readingPlan] as string}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -831,10 +831,8 @@ const AddReadingPlan = () => {
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-sm font-semibold text-stone-700">
-                    Difficulty
-                  </label>
-                  <Select
-                    value={meta.difficulty}
+                    {t.readingPlan.difficulty}
+                  </label>                  <Select value={meta.difficulty}
                     onValueChange={(v) => updateMeta("difficulty", v)}
                   >
                     <SelectTrigger className="rounded-xl border-stone-200 focus:ring-teal-400/30 bg-white">
@@ -843,7 +841,7 @@ const AddReadingPlan = () => {
                     <SelectContent>
                       {DIFFICULTIES.map((d) => (
                         <SelectItem key={d.value} value={d.value}>
-                          {d.label}
+                          {t.readingPlan[d.labelKey as keyof typeof t.readingPlan] as string}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -854,10 +852,10 @@ const AddReadingPlan = () => {
               <div className="flex items-center justify-between p-4 rounded-xl border border-stone-100 bg-stone-50">
                 <div>
                   <p className="text-sm font-semibold text-stone-700">
-                    Quiz Questions
+                    {t.readingPlan.quizQuestions}
                   </p>
                   <p className="text-xs text-stone-400 mt-0.5">
-                    Enable daily quizzes for readers
+                    {t.readingPlan.quizDesc}
                   </p>
                 </div>
                 <Switch
@@ -872,7 +870,7 @@ const AddReadingPlan = () => {
                   onClick={goToStep2}
                   className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-sm font-semibold shadow-sm transition-all hover:-translate-y-px"
                 >
-                  Daily Content <ArrowRight className="w-4 h-4" />
+                  {t.readingPlan.stepDailyContent} <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
             </div>
@@ -887,14 +885,14 @@ const AddReadingPlan = () => {
                 <div>
                   <h2 className="font-bold text-stone-800 flex items-center gap-2">
                     <Calendar className="w-4 h-4 text-teal-600" />
-                    Daily Content — {meta.totalDays} Days
+                    {t.readingPlan.dailyContentTitle} — {meta.totalDays} {t.readingPlan.days}
                   </h2>
                   <p className="text-xs text-stone-400 mt-0.5">
-                    Assign chapters and questions per day
+                    {t.readingPlan.dailyContentDesc}
                   </p>
                 </div>
                 <span className="text-[11px] border border-emerald-200 bg-emerald-50 text-emerald-700 rounded-lg px-2 py-1 font-bold">
-                  {days.filter(isDayComplete).length}/{meta.totalDays} ready
+                  {t.readingPlan.daysReady.replace('{ready}', String(days.filter(isDayComplete).length)).replace('{total}', String(meta.totalDays))}
                 </span>
               </div>
               <div className="p-4 space-y-2">
@@ -919,20 +917,20 @@ const AddReadingPlan = () => {
             </div>
 
             <div className="flex justify-between">
-              <button
-                type="button"
-                onClick={() => setStep(1)}
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-stone-200 bg-white text-stone-600 hover:bg-stone-50 text-sm font-semibold transition-all"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                Back
-              </button>
-              <button
-                type="button"
-                onClick={goToStep3}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-sm font-semibold shadow-sm transition-all hover:-translate-y-px"
-              >
-                Review Plan <ArrowRight className="w-4 h-4" />
+          <button
+            type="button"
+            onClick={() => setStep(1)}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-stone-200 bg-white text-stone-600 hover:bg-stone-50 text-sm font-semibold transition-all"
+          >
+            <ArrowLeft className={cn("w-4 h-4", isRtl && "rotate-180")} />
+            {t.common.back}
+          </button>
+          <button
+            type="button"
+            onClick={goToStep3}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-sm font-semibold shadow-sm transition-all hover:-translate-y-px"
+          >
+            {t.readingPlan.stepReviewSave} <ArrowRight className={cn("w-4 h-4", isRtl && "rotate-180")} />
               </button>
             </div>
           </div>
@@ -945,7 +943,7 @@ const AddReadingPlan = () => {
               <div className="px-6 py-4 border-b border-stone-100 bg-stone-50/50">
                 <h2 className="font-bold text-stone-800 flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-teal-600" />
-                  Review & Confirm
+                  {t.readingPlan.reviewConfirm}
                 </h2>
               </div>
               <div className="p-6 space-y-6">
@@ -958,10 +956,10 @@ const AddReadingPlan = () => {
                   )}
                   <div className="flex flex-wrap gap-2 pt-1">
                     <span className="text-[11px] border border-stone-200 bg-white text-stone-600 rounded-lg px-2 py-0.5 font-semibold">
-                      {meta.totalDays} days
+                      {meta.totalDays} {t.readingPlan.days}
                     </span>
                     <span className="text-[11px] border border-stone-200 bg-white text-stone-600 rounded-lg px-2 py-0.5 font-semibold">
-                      {CATEGORIES.find((c) => c.value === meta.category)?.label}
+                      {t.readingPlan[(CATEGORIES.find((c) => c.value === meta.category)?.labelKey ?? 'catIntroduction') as keyof typeof t.readingPlan] as string}
                     </span>
                     <span
                       className={cn(
@@ -969,14 +967,11 @@ const AddReadingPlan = () => {
                         DIFF_BADGE[meta.difficulty],
                       )}
                     >
-                      {
-                        DIFFICULTIES.find((d) => d.value === meta.difficulty)
-                          ?.label
-                      }
+                      {t.readingPlan[(DIFFICULTIES.find((d) => d.value === meta.difficulty)?.labelKey ?? 'diffBeginner') as keyof typeof t.readingPlan] as string}
                     </span>
                     {meta.questionsEnabled && (
                       <span className="text-[11px] border border-violet-200 bg-violet-50 text-violet-700 rounded-lg px-2 py-0.5 font-bold">
-                        Quiz enabled
+                        {t.readingPlan.quizLabel}
                       </span>
                     )}
                   </div>
@@ -985,18 +980,18 @@ const AddReadingPlan = () => {
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <p className="text-xs font-bold text-stone-500 uppercase tracking-wider">
-                      Day Assignments
+                      {t.readingPlan.dailyAssignments}
                     </p>
                     {days.filter(isDayComplete).length < meta.totalDays && (
                       <p className="text-xs text-stone-400">
                         <span className="text-teal-600 font-bold">
                           {days.filter(isDayComplete).length}
-                        </span>{" "}
-                        will save ·{" "}
+                        </span>
+                        {` ${t.readingPlan.willSave} · `}
                         <span className="font-semibold">
                           {meta.totalDays - days.filter(isDayComplete).length}
-                        </span>{" "}
-                        pending
+                        </span>
+                        {` ${t.readingPlan.partialLabel.toLowerCase()}`}
                       </p>
                     )}
                   </div>
@@ -1036,7 +1031,7 @@ const AddReadingPlan = () => {
                               </>
                             ) : (
                               <p className="text-xs text-stone-400 italic">
-                                Not configured — can add via Edit after saving
+                                {t.readingPlan.notConfiguredEdit}
                               </p>
                             )}
                           </div>
@@ -1050,17 +1045,17 @@ const AddReadingPlan = () => {
                                       r.trim(),
                                     ).length
                                   }{" "}
-                                  reflect.
+                                  {t.readingPlan.reflectionsShort}
                                 </span>
                               )}
                             {ok && day.quizQuestions.length > 0 && (
                               <span className="text-[10px] border border-violet-200 bg-violet-50 text-violet-700 rounded px-1.5 py-0.5 font-semibold">
-                                {day.quizQuestions.length} quiz
+                                {day.quizQuestions.length} {t.readingPlan.quizShort}
                               </span>
                             )}
                             {!ok && (
                               <span className="text-[10px] border border-stone-200 text-stone-400 rounded px-1.5 py-0.5 font-semibold">
-                                pending
+                                {t.readingPlan.partialLabel.toLowerCase()}
                               </span>
                             )}
                           </div>
@@ -1079,8 +1074,8 @@ const AddReadingPlan = () => {
                 disabled={submitting}
                 className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-stone-200 bg-white text-stone-600 hover:bg-stone-50 text-sm font-semibold transition-all disabled:opacity-50"
               >
-                <ArrowLeft className="w-4 h-4" />
-                Back
+                <ArrowLeft className={cn("w-4 h-4", isRtl && "rotate-180")} />
+                {t.common.back}
               </button>
               <button
                 type="button"
@@ -1091,12 +1086,12 @@ const AddReadingPlan = () => {
                 {submitting ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    Saving…
+                    {t.readingPlan.savingLabel}
                   </>
                 ) : (
                   <>
                     <Save className="w-4 h-4" />
-                    Create Reading Plan
+                    {t.readingPlan.createPlanTitle}
                   </>
                 )}
               </button>

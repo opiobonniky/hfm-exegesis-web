@@ -588,14 +588,14 @@ const PlanDetail = () => {
         }
       } else {
         toast({
-          title: "Failed to load plan",
+          title: t.readingPlan?.toastLoadError || 'Failed to load plan',
           description: resp.returnMessage,
           variant: "destructive",
         });
       }
     } catch (e: any) {
       toast({
-        title: "Network error",
+        title: t.readingPlan?.toastNetworkError || 'Network error',
         description: e.message,
         variant: "destructive",
       });
