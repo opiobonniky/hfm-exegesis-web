@@ -47,6 +47,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/components/languages/languageProvider";
 import { Link, useNavigate } from "react-router-dom";
 import { sendPostRequest } from "@/services/api";
 import { generatePath, routes } from "@/components/Routes/routes";
@@ -223,6 +224,7 @@ const VerseExplanations = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { userInfo } = useAuth();
+  const { t } = useLanguage();
   const isAdmin = userInfo?.userRole === 1;
 
   const [explanations, setExplanations] = useState<VerseExplanation[]>([]);

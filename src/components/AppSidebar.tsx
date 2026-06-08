@@ -141,47 +141,55 @@ export function AppSidebar() {
   }, [anyJournalActive]);
 
   return (
+    <>
+      <style>{`
+        [data-sidebar="sidebar"] {
+          --sidebar-background: hsl(var(--primary));
+          --sidebar-foreground: hsl(var(--primary-foreground));
+          --sidebar-accent: hsl(var(--primary-foreground) / 0.12);
+          --sidebar-accent-foreground: hsl(var(--primary-foreground));
+          --sidebar-border: hsl(var(--primary-foreground) / 0.1);
+          --sidebar-ring: hsl(var(--primary-foreground) / 0.3);
+        }
+      `}</style>
     <Sidebar
       side={isRtl ? "right" : "left"}
       dir={isRtl ? 'rtl' : 'ltr'}
       className={cn(
-        isRtl ? "border-l" : "border-r",
-        "border-sidebar-border transition-all duration-300",
+        isRtl ? "border-l-0" : "border-r-0",
+        "transition-all duration-300",
         collapsed ? "w-16" : "w-64",
       )}
       collapsible="icon"
     >
       <SidebarHeader className="p-4">
         <div className="flex items-center gap-3">
-          <div className={cn(
-            "w-11 h-11 shrink-0 overflow-hidden rounded-xl flex items-center justify-center",
-            "bg-gradient-to-br from-primary/10 via-primary/5 to-transparent",
-            "ring-1 ring-primary/10",
-          )}>
+          <div className="w-10 h-10 shrink-0 overflow-hidden rounded-xl flex items-center justify-center bg-sidebar-accent ring-1 ring-sidebar-ring">
             <img
               src={logoImage}
               alt={t.brand?.title || 'EXEGESIS'}
-              className="w-8 h-8 object-contain"
+              className="w-7 h-7 object-contain"
+              style={{ filter: 'brightness(0) invert()' }}
             />
           </div>
           {!collapsed && (
             <div className="overflow-hidden">
-              <h1 className="font-bold text-sm font-[family-name:var(--font-heading)] truncate text-foreground">
+              <h1 className="font-bold text-sm font-[family-name:var(--font-heading)] truncate text-sidebar-foreground">
                 {t.brand?.title}
               </h1>
-              <p className="text-[11px] text-muted-foreground/70 font-medium tracking-wide">{t.brand?.subtitle || 'Bible'}</p>
+              <p className="text-[11px] text-sidebar-foreground/50 font-medium tracking-wide">{t.brand?.subtitle || 'Bible'}</p>
             </div>
           )}
         </div>
       </SidebarHeader>
 
-      <Separator className="mx-4" />
+      <Separator className="mx-4 bg-sidebar-border" />
 
       <SidebarContent className="px-2 py-4">
         <SidebarGroup>
           <SidebarGroupLabel
             className={cn(
-              "text-xs uppercase tracking-wider",
+              "text-[10px] font-bold tracking-[0.15em] uppercase text-sidebar-foreground/40",
               collapsed && "sr-only",
             )}
           >
@@ -201,15 +209,27 @@ export function AppSidebar() {
                       <NavLink
                         to={item.url}
                         className={cn(
-                          "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200",
+                          "group relative flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200",
                           isActive(item.url)
-                            ? "bg-primary text-primary-foreground shadow-md"
-                            : "hover:bg-sidebar-accent text-sidebar-foreground",
+                            ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold shadow-sm"
+                            : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground hover:translate-x-0.5",
                         )}
                       >
-                        <item.icon className="w-5 h-5 shrink-0" />
+                        {/* Active indicator bar */}
+                        {isActive(item.url) && (
+                          <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-sidebar-accent-foreground rounded-full shadow-sm" />
+                        )}
+                        <item.icon className={cn(
+                          "w-[18px] h-[18px] shrink-0 transition-all duration-200",
+                          isActive(item.url)
+                            ? "text-sidebar-accent-foreground"
+                            : "text-sidebar-foreground/40 group-hover:text-sidebar-accent-foreground",
+                        )} />
                         {!collapsed && (
-                          <span className="font-medium">{label}</span>
+                          <span className={cn(
+                            "text-sm transition-all duration-200",
+                            isActive(item.url) ? "font-semibold" : "font-medium",
+                          )}>{label}</span>
                         )}
                       </NavLink>
                     </SidebarMenuButton>
@@ -229,14 +249,30 @@ export function AppSidebar() {
                       <SidebarMenuButton
                         tooltip={getNavTitle(t, 'sidebar.journal')}
                         isActive={anyJournalActive}
+                        className={cn(
+                          anyJournalActive
+                            ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold shadow-sm"
+                            : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                        )}
                       >
-                        <PenLine className="w-5 h-5 shrink-0" />
+                        <PenLine className={cn(
+                          "w-[18px] h-[18px] shrink-0 transition-all duration-200",
+                          anyJournalActive
+                            ? "text-sidebar-accent-foreground"
+                            : "text-sidebar-foreground/40",
+                        )} />
                         {!collapsed && (
                           <>
-                            <span className="font-medium flex-1 text-start">
+                            <span className="text-sm font-medium flex-1 text-start">
                               {getNavTitle(t, 'sidebar.journal')}
                             </span>
-                            <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-180" />
+                            <ChevronDown className={cn(
+                              "h-3.5 w-3.5 shrink-0 transition-all duration-200",
+                              "group-data-[state=open]/collapsible:rotate-180",
+                              anyJournalActive
+                                ? "text-sidebar-accent-foreground/60"
+                                : "text-sidebar-foreground/30",
+                            )} />
                           </>
                         )}
                       </SidebarMenuButton>
@@ -250,10 +286,20 @@ export function AppSidebar() {
                               <SidebarMenuSubButton
                                 asChild
                                 isActive={isActive(subItem.url)}
+                                className={cn(
+                                  isActive(subItem.url)
+                                    ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                                    : "",
+                                )}
                               >
-                                <NavLink to={subItem.url}>
-                                  <subItem.icon className="w-4 h-4" />
-                                  <span>{subLabel}</span>
+                                <NavLink to={subItem.url} className="flex items-center gap-2.5">
+                                  <subItem.icon className={cn(
+                                    "w-3.5 h-3.5 shrink-0",
+                                    isActive(subItem.url)
+                                      ? "text-sidebar-accent-foreground"
+                                      : "text-sidebar-foreground/40",
+                                  )} />
+                                  <span className="text-xs">{subLabel}</span>
                                 </NavLink>
                               </SidebarMenuSubButton>
                             </SidebarMenuSubItem>
@@ -271,7 +317,7 @@ export function AppSidebar() {
         <SidebarGroup className="mt-6">
           <SidebarGroupLabel
             className={cn(
-              "text-xs uppercase tracking-wider",
+              "text-[10px] font-bold tracking-[0.15em] uppercase text-sidebar-foreground/40",
               collapsed && "sr-only",
             )}
           >
@@ -291,15 +337,27 @@ export function AppSidebar() {
                       <NavLink
                         to={item.url}
                         className={cn(
-                          "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200",
+                          "group relative flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200",
                           isActive(item.url)
-                            ? "bg-primary text-primary-foreground shadow-md"
-                            : "hover:bg-sidebar-accent text-sidebar-foreground",
+                            ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold shadow-sm"
+                            : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground hover:translate-x-0.5",
                         )}
                       >
-                        <item.icon className="w-5 h-5 shrink-0" />
+                        {/* Active indicator bar */}
+                        {isActive(item.url) && (
+                          <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-sidebar-accent-foreground rounded-full shadow-sm" />
+                        )}
+                        <item.icon className={cn(
+                          "w-[18px] h-[18px] shrink-0 transition-all duration-200",
+                          isActive(item.url)
+                            ? "text-sidebar-accent-foreground"
+                            : "text-sidebar-foreground/40 group-hover:text-sidebar-accent-foreground",
+                        )} />
                         {!collapsed && (
-                          <span className="font-medium">{label}</span>
+                          <span className={cn(
+                            "text-sm transition-all duration-200",
+                            isActive(item.url) ? "font-semibold" : "font-medium",
+                          )}>{label}</span>
                         )}
                       </NavLink>
                     </SidebarMenuButton>
@@ -316,8 +374,8 @@ export function AppSidebar() {
         {!collapsed && (
           <div className="mb-4">
             <div className="flex items-center gap-2 px-1 mb-2">
-              <Globe className="w-3.5 h-3.5 text-muted-foreground/60" />
-              <span className="text-[10px] font-bold tracking-wider uppercase text-muted-foreground/50">
+              <Globe className="w-3.5 h-3.5 text-sidebar-foreground/40" />
+              <span className="text-[10px] font-bold tracking-wider uppercase text-sidebar-foreground/30">
                 {t.common?.language || 'Language'}
               </span>
             </div>
@@ -326,7 +384,7 @@ export function AppSidebar() {
               onValueChange={(value) => setLanguage(value as Language)}
               disabled={langLoading}
             >
-              <SelectTrigger className="h-9 text-xs">
+              <SelectTrigger className="h-9 text-xs bg-sidebar-accent border-sidebar-border text-sidebar-foreground hover:bg-sidebar-accent">
                 <SelectValue>
                   <span className="truncate">{LANGUAGE_NAMES[currentLang]}</span>
                 </SelectValue>
@@ -364,17 +422,17 @@ export function AppSidebar() {
         <Separator className="mb-3" />
 
         {!collapsed && userInfo && (
-          <div className="flex items-center gap-3 mb-3 px-2">
-            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-              <span className="text-sm font-medium text-primary">
+          <div className="flex items-center gap-3 mb-4 px-2 py-2 rounded-lg bg-sidebar-accent border border-sidebar-border">
+            <div className="w-9 h-9 rounded-full bg-sidebar-accent-foreground/15 flex items-center justify-center shrink-0">
+              <span className="text-sm font-semibold text-sidebar-accent-foreground">
                 {userInfo.username.charAt(0).toUpperCase()}
               </span>
             </div>
-            <div className="overflow-hidden">
-              <p className="text-sm font-medium truncate">
+            <div className="overflow-hidden min-w-0">
+              <p className="text-sm font-semibold truncate text-sidebar-foreground">
                 {userInfo.username}
               </p>
-              <p className="text-xs text-muted-foreground truncate">
+              <p className="text-[11px] text-sidebar-foreground/50 truncate">
                 {userInfo.email}
               </p>
             </div>
@@ -384,15 +442,20 @@ export function AppSidebar() {
         <Button
           variant="ghost"
           className={cn(
-            "w-full justify-start text-muted-foreground hover:text-destructive hover:bg-destructive/10",
+            "group w-full justify-start gap-3 px-3 py-2 h-auto text-sidebar-foreground/50 hover:text-red-300 hover:bg-sidebar-accent rounded-lg transition-all duration-200",
             collapsed && "justify-center px-0",
           )}
           onClick={logout}
         >
-          <LogOut className="w-5 h-5 shrink-0" />
-          {!collapsed && <span className="ms-3">{t.sidebar?.logout || 'Sign Out'}</span>}
+          <LogOut className="w-[18px] h-[18px] shrink-0 text-sidebar-foreground/40 group-hover:text-red-300 transition-colors duration-200" />
+          {!collapsed && (
+            <span className="text-sm font-medium">
+              {t.sidebar?.logout || 'Sign Out'}
+            </span>
+          )}
         </Button>
       </SidebarFooter>
     </Sidebar>
+    </>
   );
 }
