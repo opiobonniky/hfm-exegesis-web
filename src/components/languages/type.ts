@@ -258,8 +258,8 @@ export interface Translations {
     bibleStatsVerses: string;
     // ── Social ──
     socialFacebook: string;
-    socialTwitter: string;
-    socialInstagram: string;
+    socialTikTok: string;
+    socialWhatsApp: string;
   };
 
   /** Auth pages (Login, Register, ForgotPassword, VerifyAccount, GoogleRegister) */

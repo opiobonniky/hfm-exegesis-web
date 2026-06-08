@@ -6,6 +6,7 @@ import {
   Plus,
   LogOut,
   ChevronLeft,
+  ChevronDown,
   Users,
   Activity,
   BookText,
@@ -21,6 +22,7 @@ import {
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { LANGUAGE_NAMES, type Language } from "@/components/languages/type";
@@ -34,6 +36,9 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubItem,
+  SidebarMenuSubButton,
   SidebarHeader,
   SidebarFooter,
   useSidebar,
@@ -49,6 +54,11 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { routes } from "./Routes/routes";
 import logoImage from "@/assets/logos/exegesis_bg_rm.png";
 
@@ -77,6 +87,9 @@ const adminNavItems = [
   { title: "sidebar.readingPlans", url: routes.readingPlans.path, icon: BookOpen },
   { title: "sidebar.myActivity", url: routes.myActivity.path, icon: Highlighter },
   { title: "sidebar.userActivity", url: routes.useractivity.path, icon: Activity },
+];
+
+const journalSubItems = [
   { title: "sidebar.journal", url: routes.journal.path, icon: PenLine },
   { title: "sidebar.journalPrompts", url: routes.journalPrompts.path, icon: Lightbulb },
   { title: "sidebar.journalTemplates", url: routes.journalTemplates.path, icon: LayoutTemplate },
@@ -117,6 +130,16 @@ export function AppSidebar() {
 
   const isActive = (path: string) => location.pathname === path;
 
+  const anyJournalActive =
+    isAdmin && journalSubItems.some((sub) => isActive(sub.url));
+  const [journalOpen, setJournalOpen] = useState(false);
+  // Close journal submenu when navigating away from journal pages
+  useEffect(() => {
+    if (!anyJournalActive) {
+      setJournalOpen(false);
+    }
+  }, [anyJournalActive]);
+
   return (
     <Sidebar
       side={isRtl ? "right" : "left"}
@@ -130,19 +153,23 @@ export function AppSidebar() {
     >
       <SidebarHeader className="p-4">
         <div className="flex items-center gap-3">
-          <div className="w-16 h-16 rounded-lg bg-white flex items-center justify-center shrink-0 overflow-hidden p-1.5">
+          <div className={cn(
+            "w-11 h-11 shrink-0 overflow-hidden rounded-xl flex items-center justify-center",
+            "bg-gradient-to-br from-primary/10 via-primary/5 to-transparent",
+            "ring-1 ring-primary/10",
+          )}>
             <img
               src={logoImage}
               alt={t.brand?.title || 'EXEGESIS'}
-              className="w-full h-full object-contain"
+              className="w-8 h-8 object-contain"
             />
           </div>
           {!collapsed && (
             <div className="overflow-hidden">
-              <h1 className="font-bold text-sm font-[family-name:var(--font-heading)] truncate">
+              <h1 className="font-bold text-sm font-[family-name:var(--font-heading)] truncate text-foreground">
                 {t.brand?.title}
               </h1>
-              <p className="text-xl text-accent font-bold">{t.brand?.subtitle || 'Bible'}</p>
+              <p className="text-[11px] text-muted-foreground/70 font-medium tracking-wide">{t.brand?.subtitle || 'Bible'}</p>
             </div>
           )}
         </div>
@@ -189,6 +216,54 @@ export function AppSidebar() {
                   </SidebarMenuItem>
                 );
               })}
+
+              {/* Journal collapsible section — admin only */}
+              {isAdmin && (
+                <SidebarMenuItem>
+                  <Collapsible
+                    open={journalOpen}
+                    onOpenChange={setJournalOpen}
+                    className="group/collapsible"
+                  >
+                    <CollapsibleTrigger asChild>
+                      <SidebarMenuButton
+                        tooltip={getNavTitle(t, 'sidebar.journal')}
+                        isActive={anyJournalActive}
+                      >
+                        <PenLine className="w-5 h-5 shrink-0" />
+                        {!collapsed && (
+                          <>
+                            <span className="font-medium flex-1 text-start">
+                              {getNavTitle(t, 'sidebar.journal')}
+                            </span>
+                            <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-180" />
+                          </>
+                        )}
+                      </SidebarMenuButton>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <SidebarMenuSub>
+                        {journalSubItems.map((subItem) => {
+                          const subLabel = getNavTitle(t, subItem.title);
+                          return (
+                            <SidebarMenuSubItem key={subItem.title}>
+                              <SidebarMenuSubButton
+                                asChild
+                                isActive={isActive(subItem.url)}
+                              >
+                                <NavLink to={subItem.url}>
+                                  <subItem.icon className="w-4 h-4" />
+                                  <span>{subLabel}</span>
+                                </NavLink>
+                              </SidebarMenuSubButton>
+                            </SidebarMenuSubItem>
+                          );
+                        })}
+                      </SidebarMenuSub>
+                    </CollapsibleContent>
+                  </Collapsible>
+                </SidebarMenuItem>
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
