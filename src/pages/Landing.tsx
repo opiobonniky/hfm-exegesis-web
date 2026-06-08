@@ -431,15 +431,15 @@ const Landing = () => {
           <div className="w-full px-4 sm:px-6 lg:px-12">
             <div className="flex items-center justify-between h-14 sm:h-16 lg:h-20">
               {/* Logo */}
-              <div className={`items-center gap-2 sm:gap-3 hidden sm:flex transition-all duration-300 ${scrolled ? "" : "gap-3 sm:gap-4"}`}>
-                <div className={`rounded-xl bg-brand-bg border border-slate-200 flex items-center justify-center shrink-0 overflow-hidden p-1 transition-all duration-300 ${scrolled ? "w-9 h-9 sm:w-11 sm:h-11" : "w-11 h-11 sm:w-14 sm:h-14"}`}>
+              <div className={`items-center gap-2 sm:gap-3 hidden sm:flex transition-all duration-300 ${scrolled ? "translate-y-0" : "gap-3 sm:gap-4 translate-y-2 sm:translate-y-3"}`}>
+                <div className={`rounded-xl bg-transparent flex items-center justify-center shrink-0 overflow-hidden p-0 transition-all duration-300 ${scrolled ? "w-9 h-9 sm:w-11 sm:h-11" : "w-20 h-20 sm:w-24 sm:h-24"}`}>
                   <img
                     src={logoImage}
                     alt="Exegesis"
                     className="w-full h-full object-contain"
                   />
                 </div>
-                <span className={`font-black font-[family-name:var(--font-heading)] tracking-tighter transition-all duration-300 ${scrolled ? "text-base sm:text-xl text-brand-primary" : "text-xl sm:text-2xl md:text-3xl text-white"}`}>
+                <span className={`font-black font-[family-name:var(--font-heading)] tracking-tighter transition-all duration-300 ${scrolled ? "text-base sm:text-xl text-brand-primary" : "text-2xl sm:text-3xl md:text-3xl text-white"}`}>
                   EXEGESIS
                 </span>
               </div>
@@ -555,15 +555,15 @@ const Landing = () => {
                 </button>
 
                 {/* Center: Compact Logo */}
-                <div className="flex items-center gap-1.5">
-                  <div className={`rounded-lg flex items-center justify-center overflow-hidden p-0.5 transition-all duration-300 ${scrolled ? "w-6 h-6" : "w-7 h-7"}`}>
+                <div className={`flex items-center gap-1.5 transition-all duration-300 ${scrolled ? "translate-y-0" : "translate-y-1 sm:translate-y-1.5"}`}>
+                  <div className={`rounded-lg bg-transparent flex items-center justify-center overflow-hidden p-0 transition-all duration-300 ${scrolled ? "w-6 h-6" : "w-10 h-10 sm:w-12 sm:h-12"}`}>
                     <img
                       src={logoImage}
                       alt="Exegesis"
                       className={`w-full h-full object-contain transition-all duration-300 ${scrolled ? "" : "brightness-0 invert"}`}
                     />
                   </div>
-                  <span className={`font-black font-[family-name:var(--font-heading)] tracking-tighter transition-all duration-300 ${scrolled ? "text-xs text-brand-primary" : "text-sm text-white"}`}>
+                  <span className={`font-black font-[family-name:var(--font-heading)] tracking-tighter transition-all duration-300 ${scrolled ? "text-xs text-brand-primary" : "text-sm sm:text-base text-white"}`}>
                     EXEGESIS
                   </span>
                 </div>

@@ -148,28 +148,34 @@ function cleanTextForSpeech(text: string): string {
 function MobileNavDrawer({
   selectedBook,
   selectedChapter,
+  selectedVerse,
   versionId,
   maxChapter,
   onBookChange,
   onChapterChange,
+  onVerseChange,
   onVersionChange,
   books,
   availableTranslations,
+  verseCount,
 }: {
   selectedBook: string;
   selectedChapter: number;
+  selectedVerse: number | null;
   versionId: string;
   maxChapter: number;
   onBookChange: (b: string) => void;
   onChapterChange: (c: number) => void;
+  onVerseChange: (v: string) => void;
   onVersionChange: (v: string) => void;
   books: string[];
   availableTranslations: { id: string; name: string; shortName: string }[];
+  verseCount: number;
 }) {
   const { t } = useLanguage();
   const [open, setOpen] = useState(false);
   const [bookFilter, setBookFilter] = useState("");
-  const [tab, setTab] = useState<"books" | "chapters" | "version">("books");
+  const [tab, setTab] = useState<"books" | "chapters" | "verses" | "version">("books");
 
   const filtered = useMemo(
     () =>
@@ -209,7 +215,7 @@ function MobileNavDrawer({
 
         {/* Tab switcher */}
         <div className="flex items-center gap-1 px-4 pb-3 pt-1 border-b border-border/40">
-          {(["books", "chapters", "version"] as const).map((tabKey) => (
+          {(["books", "chapters", "verses", "version"] as const).map((tabKey) => (
             <button
               key={tabKey}
               onClick={() => setTab(tabKey)}
@@ -223,6 +229,7 @@ function MobileNavDrawer({
               {{
                 books: t.common.search,
                 chapters: t.bibleReader.selectChapter,
+                verses: t.bibleReader.selectVerse,
                 version: t.bibleReader.translation,
               }[tabKey] || tabKey}
             </button>
@@ -284,6 +291,38 @@ function MobileNavDrawer({
                       {ch}
                     </button>
                   ),
+                )}
+              </div>
+            </ScrollArea>
+          )}
+
+          {tab === "verses" && (
+            <ScrollArea className="h-full pt-3">
+              <div className="grid grid-cols-5 gap-2 pb-6">
+                {verseCount > 0 ? (
+                  Array.from({ length: verseCount }, (_, i) => i + 1).map(
+                    (v) => (
+                      <button
+                        key={v}
+                        onClick={() => {
+                          onVerseChange(v.toString());
+                          setOpen(false);
+                        }}
+                        className={cn(
+                          "aspect-square rounded-xl text-sm font-semibold transition-all active:scale-95 flex items-center justify-center",
+                          selectedVerse === v
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-muted/50 hover:bg-muted text-foreground",
+                        )}
+                      >
+                        {v}
+                      </button>
+                    ),
+                  )
+                ) : (
+                  <div className="col-span-5 text-center text-xs text-muted-foreground py-8">
+                    {t.bibleReader.loadingBooks}
+                  </div>
                 )}
               </div>
             </ScrollArea>
@@ -618,6 +657,7 @@ export default function BibleReader() {
   const [selectedChapter, setSelectedChapter] = useState(
     urlChapter ? parseInt(urlChapter, 10) : 1,
   );
+  const [selectedVerse, setSelectedVerse] = useState<number | null>(null);
   const [versionId, setVersionId] = useState("Berean");
   const [bookFilter, setBookFilter] = useState("");
   const [displayBook, setDisplayBook] = useState(urlBook || "Genesis");
@@ -1734,6 +1774,7 @@ export default function BibleReader() {
     if (book === selectedBook) return;
     if (isSpeaking) stopSpeaking();
     clearSelection();
+    setSelectedVerse(null);
     chapterRefs.current = {};
     verseRefs.current = {};
     setSelectedBook(book);
@@ -1753,6 +1794,7 @@ export default function BibleReader() {
   const handleChapterChange = (ch: number) => {
     if (isSpeaking) stopSpeaking();
     clearSelection();
+    setSelectedVerse(null);
     setSelectedChapter(ch);
     const key = `${selectedBook}-${ch}`;
     if (chapterRefs.current[key]) {
@@ -1819,6 +1861,17 @@ export default function BibleReader() {
       if (idx >= 0 && idx < bookNames.length - 1) {
         handleBookChange(bookNames[idx + 1]);
       }
+    }
+  };
+
+  const handleVerseChange = (verseStr: string) => {
+    const verseNum = parseInt(verseStr, 10);
+    if (isNaN(verseNum)) return;
+    setSelectedVerse(verseNum);
+    const verseKey = `${displayBook} ${displayChapter}:${verseNum}`;
+    const el = verseRefs.current[verseKey];
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
     }
   };
 
@@ -2273,6 +2326,38 @@ export default function BibleReader() {
               </ScrollArea>
             </SelectContent>
           </Select>
+          {/* Verse select */}
+          <Select
+            value={selectedVerse?.toString() || ""}
+            onValueChange={handleVerseChange}
+            disabled={currentChapterVerseCount === 0}
+          >
+            <SelectTrigger className="w-[130px] h-8 text-xs border-border/50 bg-muted/30">
+              <SelectValue placeholder={t.bibleReader.selectVerse} />
+            </SelectTrigger>
+            <SelectContent>
+              <ScrollArea className="h-[200px]">
+                {currentChapterVerseCount > 0 ? (
+                  Array.from(
+                    { length: currentChapterVerseCount },
+                    (_, i) => i + 1,
+                  ).map((v) => (
+                    <SelectItem
+                      key={v}
+                      value={v.toString()}
+                      className="text-xs"
+                    >
+                      {t.bibleReader.verseNum.replace("{n}", String(v))}
+                    </SelectItem>
+                  ))
+                ) : (
+                  <SelectItem value="-" disabled className="text-xs">
+                    {t.bibleReader.loadingBooks}
+                  </SelectItem>
+                )}
+              </ScrollArea>
+            </SelectContent>
+          </Select>
         </div>
 
         {/* ─── Mobile top bar ─── */}
@@ -2287,13 +2372,16 @@ export default function BibleReader() {
             <MobileNavDrawer
               selectedBook={selectedBook}
               selectedChapter={displayChapter}
+              selectedVerse={selectedVerse}
               versionId={versionId}
               maxChapter={maxChapterForDisplay}
               onBookChange={handleBookChange}
               onChapterChange={handleChapterChange}
+              onVerseChange={handleVerseChange}
               onVersionChange={setVersionId}
               books={backendBooks.map((b) => b.bookName)}
               availableTranslations={availableTranslations}
+              verseCount={currentChapterVerseCount}
             />
           </div>
 
@@ -2563,6 +2651,8 @@ export default function BibleReader() {
                             expandedExplanation === verse.key;
                           const isCurrentlyReading =
                             isSpeaking && currentItem?.verseKey === verse.key;
+                          const isVerseTargeted =
+                            selectedVerse !== null && selectedVerse === verse.num;
 
                           return (
                             <span key={verse.key}>
@@ -2581,8 +2671,14 @@ export default function BibleReader() {
                                     : "",
                                   highlightColor &&
                                     !isSelected &&
-                                    !isCurrentlyReading
+                                    !isCurrentlyReading &&
+                                    !isVerseTargeted
                                     ? "-mx-0.5 px-0.5"
+                                    : "",
+                                  isVerseTargeted &&
+                                    !isSelected &&
+                                    !isCurrentlyReading
+                                    ? "ring-2 ring-primary/40 bg-primary/5 -mx-0.5 px-0.5"
                                     : "",
                                 )}
                                 style={
