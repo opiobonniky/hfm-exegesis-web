@@ -858,6 +858,22 @@ export default function BibleReader() {
   const [translationSearch, setTranslationSearch] = useState("");
   const [translationOpen, setTranslationOpen] = useState(false);
 
+  const effectiveTranslations = useMemo(() => {
+    if (!freeTranslationsOnly) return availableTranslations;
+    return availableTranslations.filter((t) => FREE_TRANSLATION_IDS.has(t.id));
+  }, [availableTranslations, freeTranslationsOnly]);
+
+  // Reset to a free translation if current one is no longer available
+  useEffect(() => {
+    if (freeTranslationsOnly && availableTranslations.length > 0) {
+      const isFree = FREE_TRANSLATION_IDS.has(versionId);
+      if (!isFree) {
+        const firstFree = availableTranslations.find((t) => FREE_TRANSLATION_IDS.has(t.id));
+        if (firstFree) setVersionId(firstFree.id);
+      }
+    }
+  }, [freeTranslationsOnly, availableTranslations.length, versionId]);
+
   const filteredTranslations = useMemo(() => {
     if (!translationSearch.trim()) return effectiveTranslations;
     const search = translationSearch.toLowerCase();
@@ -896,22 +912,6 @@ export default function BibleReader() {
       .map((b) => b.bookName)
       .filter((b) => b.toLowerCase().includes(desktopBookFilter.toLowerCase()));
   }, [desktopBookFilter, backendBooks]);
-
-  const effectiveTranslations = useMemo(() => {
-    if (!freeTranslationsOnly) return availableTranslations;
-    return availableTranslations.filter((t) => FREE_TRANSLATION_IDS.has(t.id));
-  }, [availableTranslations, freeTranslationsOnly]);
-
-  // Reset to a free translation if current one is no longer available
-  useEffect(() => {
-    if (freeTranslationsOnly && availableTranslations.length > 0) {
-      const isFree = FREE_TRANSLATION_IDS.has(versionId);
-      if (!isFree) {
-        const firstFree = availableTranslations.find((t) => FREE_TRANSLATION_IDS.has(t.id));
-        if (firstFree) setVersionId(firstFree.id);
-      }
-    }
-  }, [freeTranslationsOnly, availableTranslations.length, versionId]);
 
   // Load available translations and books on mount
   useEffect(() => {
@@ -2289,7 +2289,7 @@ export default function BibleReader() {
                   <ChevronDown className="w-3 h-3 ml-2 opacity-50" />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent
+                <PopoverContent
                 className="w-[220px] max-h-[560px] p-0"
                 align="start"
               >
@@ -2302,7 +2302,7 @@ export default function BibleReader() {
                     autoFocus
                   />
                 </div>
-                <ScrollArea className="h-[500px]">
+                <ScrollArea className="max-h-[500px]">
                   <div className="py-1">
                     {filteredTranslations.length === 0 ? (
                       <div className="p-2 text-xs text-muted-foreground text-center">
