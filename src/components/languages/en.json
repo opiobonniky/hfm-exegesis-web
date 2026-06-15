@@ -1763,6 +1763,8 @@
     "leadershipMember3Role": "Project Management",
     "leadershipMember4Name": "Andrew Kamuli",
     "leadershipMember4Role": "App Development",
+    "leadershipClosing": "\"And He Himself gave some to be apostles, some prophets, some evangelists, and some pastors and teachers, for the equipping of the saints for the work of ministry.\"",
+    "leadershipClosingRef": "Ephesians 4:11-12",
     "foundersBadge": "Founders",
     "foundersTitle": "Our",
     "foundersTitleHighlight": "Founders",
@@ -1773,6 +1775,8 @@
     "foundersPara3": "The Exegesis Project is the fulfillment of a long-held dream to create a Bible study platform that combines deep theological insight with cutting-edge technology — making the Word of God accessible, engaging, and transformative for believers around the world.",
     "foundersMotto": "\"Quality, Service, & Integrity — Built for His Glory.\"",
     "foundersMottoRef": "— The Him First Media Group Motto",
+    "foundersQuote": "\"The Exegesis Project was born out of a simple but powerful conviction that every believer deserves access to deep, reliable, and Spirit-led Bible study tools.\"",
+    "foundersQuoteAttribution": "— Apostle Charles Ubani",
     "foundersCta": "Be Part of the Story"
   }
 }

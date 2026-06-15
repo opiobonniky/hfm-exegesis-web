@@ -1942,6 +1942,8 @@ export interface Translations {
     leadershipMember3Role: string;
     leadershipMember4Name: string;
     leadershipMember4Role: string;
+    leadershipClosing: string;
+    leadershipClosingRef: string;
     // ── Founders ──
     foundersBadge: string;
     foundersTitle: string;
@@ -1953,6 +1955,8 @@ export interface Translations {
     foundersPara3: string;
     foundersMotto: string;
     foundersMottoRef: string;
+    foundersQuote: string;
+    foundersQuoteAttribution: string;
     foundersCta: string;
   };
 }
