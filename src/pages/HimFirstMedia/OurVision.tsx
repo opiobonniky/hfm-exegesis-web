@@ -6,7 +6,7 @@ import { useLanguage } from "@/components/languages/languageProvider";
 
 const OurVision = () => {
   const { t } = useLanguage();
-  const animFadeUp = {
+  const animFadeUp:any = {
     hidden: { opacity: 0, y: 24 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.25, 0.1, 0.25, 1] } },
   };
@@ -16,10 +16,10 @@ const OurVision = () => {
       <section className="pt-16 sm:pt-20 pb-16 sm:pb-20 px-4 sm:px-6 lg:px-12 bg-brand-dark">
         <div className="w-full max-w-4xl mx-auto text-center">
           <motion.div variants={animFadeUp} initial="hidden" animate="visible">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/20 mb-6">
+            {/* <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/20 mb-6">
               <Eye className="w-3.5 h-3.5 text-brand-accent" />
               <span className="text-[10px] sm:text-xs font-black text-white/70 uppercase tracking-widest">{t.himFirstMedia?.ourVisionBadge || "Our Vision"}</span>
-            </div>
+            </div> */}
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-white font-[family-name:var(--font-heading)] tracking-tighter leading-none mb-6">
               {t.himFirstMedia?.ourVisionTitle || "Our"} <span className="text-brand-accent">{t.himFirstMedia?.ourVisionTitleHighlight || "Vision"}</span>
             </h1>

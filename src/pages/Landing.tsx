@@ -720,8 +720,8 @@ const Landing = () => {
               </h1>
 
               {/* Two buttons */}
-              <div className="flex flex-col sm:flex-row gap-6 sm:gap-8 justify-center mt-8 sm:mt-10">
-                <Link to="/login" className="w-full sm:flex-1">
+              <div className="flex flex-col sm:flex-row gap-6 sm:gap-8 justify-center mt-8 sm:mt-24 mx-auto">
+                <Link to="/login" className="w-full sm:w-80">
                   <Button
                     variant="outline"
                     className="w-full border-2 border-white/40 bg-transparent text-white hover:bg-white/10 hover:text-white px-6 sm:px-8 py-6 rounded-[2rem] font-black text-sm sm:text-base backdrop-blur-sm uppercase tracking-widest transition-all"
@@ -729,7 +729,7 @@ const Landing = () => {
                     {t.landing?.watchIntro || "Watch The Intro"}
                   </Button>
                 </Link>
-                <Link to="/register" className="w-full sm:flex-1">
+                <Link to="/register" className="w-full sm:w-80">
                   <Button className="w-full bg-brand-accent text-white hover:bg-brand-accent-dark px-6 sm:px-8 py-6 rounded-[2rem] font-black text-sm sm:text-base shadow-2xl shadow-brand-accent/30 hover:scale-105 transition-all uppercase tracking-widest">
                     {t.landing?.getStarted || "Get Started"}
                     <ArrowRight className="ml-2 w-4 h-4 sm:w-5 sm:h-5" />
