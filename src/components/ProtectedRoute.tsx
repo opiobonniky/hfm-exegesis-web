@@ -7,7 +7,6 @@ const adminOnlyRoutes = [
   { path: routes.addDailyDevotion.path, pattern: /^\/add-daily-devotion/ },
   { path: routes.addExplanation.path, pattern: /^\/add-explanation/ },
   { path: routes.systemUsers.path, pattern: /^\/system-users/ },
-  { path: routes.useractivity.path, pattern: /^\/user-activity/ },
   { path: routes.addReadingPlan.path, pattern: /^\/add-reading-plan/ },
   { path: routes.editReadingPlan.path, pattern: /^\/edit-reading-plan/ },
   { path: routes.readingPlanDetail.path, pattern: /^\/reading-plan-detail/ },

@@ -20,15 +20,6 @@ import {
   CheckCircle2,
   BadgeX,
   ChevronRight,
-  Monitor,
-  Smartphone,
-  Tablet,
-  Globe,
-  LogIn,
-  LogOut,
-  AlertTriangle,
-  Wifi,
-  MapPin,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/components/languages/languageProvider";
@@ -92,24 +83,6 @@ interface DailyVerse {
   chapter?: number;
   verseNumber?: number;
 }
-interface ActivityRecord {
-  id: number;
-  userId: number;
-  username: string;
-  email?: string;
-  ip: string;
-  browserName: string;
-  os: string;
-  deviceType: string;
-  deviceName: string;
-  engine: string;
-  locale: string;
-  userAgent: string;
-  success: boolean;
-  failureReason?: string;
-  loggedInAt: string;
-  loggedOutAt?: string;
-}
 
 // ─────────────────────────────────────────────
 // Hooks & tiny utils
@@ -172,20 +145,6 @@ const Av = ({ f, l, u }: { f: string; l: string; u: string }) => (
     {(l?.[0] ?? "?").toUpperCase()}
   </div>
 );
-
-const DeviceIcon = ({
-  type,
-  className,
-}: {
-  type: string;
-  className?: string;
-}) => {
-  const t = (type ?? "").toUpperCase();
-  if (t === "MOBILE") return <Smartphone className={className} />;
-  if (t === "TABLET") return <Tablet className={className} />;
-  if (t === "BOT") return <Globe className={className} />;
-  return <Monitor className={className} />;
-};
 
 // ── KPI card — compact on mobile, normal on sm+ ──
 const KPI = ({
@@ -315,9 +274,7 @@ const Dashboard = () => {
   const [recentUsers, setRecentUsers] = useState<RecentUser[]>([]);
   const [plans, setPlans] = useState<ReadingPlan[]>([]);
   const [verse, setVerse] = useState<DailyVerse | null>(null);
-  const [activity, setActivity] = useState<ActivityRecord[]>([]);
   const [loading, setLoading] = useState(true);
-  const [actLoad, setActLoad] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -331,61 +288,6 @@ const Dashboard = () => {
       }),
     [],
   );
-
-  // ── Derived activity metrics ────────────────
-  const actStats = useMemo(() => {
-    const todayStart = new Date();
-    todayStart.setHours(0, 0, 0, 0);
-    const todayLogins = activity.filter(
-      (a) => a.success && new Date(a.loggedInAt) >= todayStart,
-    ).length;
-    const failedToday = activity.filter(
-      (a) => !a.success && new Date(a.loggedInAt) >= todayStart,
-    ).length;
-    const activeSessions = activity.filter(
-      (a) => a.success && !a.loggedOutAt,
-    ).length;
-    const deviceCounts = activity.reduce<Record<string, number>>((acc, a) => {
-      const t = a.deviceType || "UNKNOWN";
-      acc[t] = (acc[t] || 0) + 1;
-      return acc;
-    }, {});
-    const browserCounts = activity.reduce<Record<string, number>>((acc, a) => {
-      const b = (a.browserName || "Unknown").split(" ")[0];
-      acc[b] = (acc[b] || 0) + 1;
-      return acc;
-    }, {});
-    const topBrowser =
-      Object.entries(browserCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? "—";
-    return {
-      todayLogins,
-      failedToday,
-      activeSessions,
-      deviceCounts,
-      topBrowser,
-    };
-  }, [activity]);
-
-  const fetchActivity = useCallback(async () => {
-    setActLoad(true);
-    try {
-      const r: any = await sendPostRequest("admin", "get-all-activity", {
-        page: 1,
-        pageSize: 20,
-      });
-      if (r?.returnCode === 200) {
-        const activityData = r.returnData;
-        setActivity(
-          Array.isArray(activityData)
-            ? activityData
-            : (activityData?.sessions ?? []),
-        );
-      }
-    } catch {
-    } finally {
-      setActLoad(false);
-    }
-  }, []);
 
   const fetchAll = useCallback(async (isRefresh = false) => {
     if (isRefresh) setRefreshing(true);
@@ -439,72 +341,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     fetchAll();
-    fetchActivity();
-  }, [fetchAll, fetchActivity]);
-
-  // ── Device breakdown bar ─────────────────────
-  const DeviceBar = () => {
-    const total = Object.values(actStats.deviceCounts).reduce(
-      (a, b) => a + b,
-      0,
-    );
-    if (total === 0)
-      return (
-        <p className="text-xs text-stone-400 text-center py-2">{t.dashboard?.noDataYet || 'No data yet'}</p>
-      );
-    const items = [
-      {
-        key: "DESKTOP",
-        label: t.dashboard?.desktop || 'Desktop',
-        color: "bg-indigo-500",
-        Icon: Monitor,
-      },
-      {
-        key: "MOBILE",
-        label: t.dashboard?.mobile || 'Mobile',
-        color: "bg-emerald-500",
-        Icon: Smartphone,
-      },
-      { key: "TABLET", label: t.dashboard?.tablet || 'Tablet', color: "bg-amber-500", Icon: Tablet },
-      { key: "BOT", label: t.dashboard?.bot || 'Bot', color: "bg-rose-400", Icon: Globe },
-    ];
-    return (
-      <div className="space-y-3">
-        <div className="flex h-2.5 sm:h-3 rounded-full overflow-hidden gap-px">
-          {items.map(({ key, color }) => {
-            const pct = Math.round(
-              ((actStats.deviceCounts[key] ?? 0) / total) * 100,
-            );
-            return pct > 0 ? (
-              <div
-                key={key}
-                className={cn("h-full transition-all duration-700", color)}
-                style={{ width: `${pct}%` }}
-              />
-            ) : null;
-          })}
-        </div>
-        <div className="grid grid-cols-2 gap-x-3 gap-y-1.5">
-          {items.map(({ key, label, color, Icon }) => {
-            const count = actStats.deviceCounts[key] ?? 0;
-            const pct = Math.round((count / total) * 100);
-            return (
-              <div key={key} className="flex items-center gap-1.5">
-                <div className={cn("w-2 h-2 rounded-full shrink-0", color)} />
-                <Icon className="w-3 h-3 text-stone-400 shrink-0" />
-                <span className="text-[11px] text-stone-500 font-medium">
-                  {label}
-                </span>
-                <span className="ms-auto text-[11px] font-bold text-stone-700">
-                  {pct}%
-                </span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    );
-  };
+  }, [fetchAll]);
 
   // ─────────────────────────────────────────────
   // Render
@@ -547,7 +384,6 @@ const Dashboard = () => {
           <button
             onClick={() => {
               fetchAll(true);
-              fetchActivity();
             }}
             disabled={refreshing}
             className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 text-stone-500 hover:text-stone-700 text-xs sm:text-sm shadow-sm transition-all shrink-0 font-medium"
@@ -648,56 +484,6 @@ const Dashboard = () => {
             iconColor="text-amber-600"
             loading={loading}
           />
-        </div>
-
-        {/* ── Activity KPIs ─────────────────────── */}
-        <div>
-          <div className="flex items-center gap-2 mb-2.5 sm:mb-3">
-            <Activity className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-stone-400" />
-            <h2 className="text-xs sm:text-sm font-bold text-stone-600 uppercase tracking-widest">
-              {t.common?.activity || 'Login Activity'}
-            </h2>
-            <div className="flex-1 h-px bg-stone-200" />
-            <a
-              href="/admin/activity"
-              className="text-[11px] sm:text-xs text-stone-400 hover:text-indigo-600 flex items-center gap-1 font-medium transition-colors"
-            >
-              {t.dashboard?.fullReport || 'Full report'} <ChevronRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-            </a>
-          </div>
-          {/* 3 cols on sm+, 1 col (horizontal scroll row) on mobile */}
-          <div className="grid grid-cols-3 gap-2 sm:gap-3">
-            <KPI
-              label={t.dashboard?.loginsToday || 'Logins Today'}
-              value={actStats.todayLogins}
-              icon={LogIn}
-              accent="bg-indigo-500"
-              iconBg="bg-indigo-50"
-              iconColor="text-indigo-600"
-              sub={t.dashboard?.successful || 'Successful'}
-              loading={actLoad}
-            />
-            <KPI
-              label={t.dashboard?.failedToday || 'Failed Today'}
-              value={actStats.failedToday}
-              icon={AlertTriangle}
-              accent="bg-rose-400"
-              iconBg="bg-rose-50"
-              iconColor="text-rose-500"
-              sub={t.dashboard?.badCredentials || 'Bad credentials'}
-              loading={actLoad}
-            />
-            <KPI
-              label={t.dashboard?.activeSessions || 'Active Sessions'}
-              value={actStats.activeSessions}
-              icon={Wifi}
-              accent="bg-teal-500"
-              iconBg="bg-teal-50"
-              iconColor="text-teal-600"
-              sub={t.dashboard?.currentlyOnline || 'Currently online'}
-              loading={actLoad}
-            />
-          </div>
         </div>
 
         {/* ── Health + Verse — stacked on mobile ── */}
@@ -1051,147 +837,6 @@ const Dashboard = () => {
                 <ChevronRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
               </a>
             )}
-          </div>
-        </div>
-
-        {/* ── Activity Section — stacked on mobile ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4">
-          {/* Device + Browser breakdown */}
-          <div className="bg-white rounded-xl sm:rounded-2xl border border-stone-100 shadow-[0_1px_3px_rgba(0,0,0,0.05)] overflow-hidden">
-            <div className="flex items-center gap-2 px-3.5 sm:px-5 py-3 sm:py-4 border-b border-stone-100">
-              <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-indigo-50 flex items-center justify-center">
-                <Monitor className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-indigo-500" />
-              </div>                <h3 className="text-xs sm:text-sm font-bold text-stone-700">
-                  {t.dashboard?.deviceBreakdown || 'Device Breakdown'}
-                </h3>
-            </div>
-            <div className="p-3.5 sm:p-5">
-              {actLoad ? (
-                <div className="space-y-2.5 sm:space-y-3">
-                  <Shimmer className="h-2.5 w-full rounded-full" />
-                  {Array.from({ length: 4 }).map((_, i) => (
-                    <Shimmer key={i} className="h-3.5 sm:h-4 w-full" />
-                  ))}
-                </div>
-              ) : (
-                <DeviceBar />
-              )}
-              {!actLoad && (
-                <div className="mt-4 sm:mt-5 pt-3.5 sm:pt-4 border-t border-stone-100 space-y-1 sm:space-y-1.5">
-                  <p className="text-[9px] sm:text-[10px] text-stone-400 uppercase tracking-widest font-bold">
-                    {t.dashboard?.topBrowser || 'Top Browser'}
-                  </p>
-                  <div className="flex items-center gap-1.5 sm:gap-2">
-                    <Globe className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-stone-400" />
-                    <span className="text-xs sm:text-sm font-semibold text-stone-700">
-                      {actStats.topBrowser}
-                    </span>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Recent login feed */}
-          <div className="lg:col-span-2 bg-white rounded-xl sm:rounded-2xl border border-stone-100 shadow-[0_1px_3px_rgba(0,0,0,0.05)] overflow-hidden">
-            <div className="flex items-center gap-2 px-3.5 sm:px-5 py-3 sm:py-4 border-b border-stone-100">
-              <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-emerald-50 flex items-center justify-center">
-                <Activity className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-600" />
-              </div>
-              <h3 className="text-xs sm:text-sm font-bold text-stone-700">
-                {t.dashboard?.recentLoginActivity || 'Recent Login Activity'}
-              </h3>
-              <a
-                href={routes.useractivity.path}
-                className="ms-auto text-[11px] sm:text-xs text-stone-400 hover:text-emerald-600 flex items-center gap-0.5 sm:gap-1 font-medium transition-colors"
-              >
-                {t.dashboard?.viewAll || 'View all'} <ChevronRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-              </a>
-            </div>
-            <div className="divide-y divide-stone-50">
-              {actLoad ? (
-                Array.from({ length: 6 }).map((_, i) => (
-                  <div
-                    key={i}
-                    className="flex items-center gap-2.5 sm:gap-3 px-3.5 sm:px-5 py-3"
-                  >
-                    <Shimmer className="w-7 h-7 sm:w-8 sm:h-8 rounded-full shrink-0" />
-                    <div className="flex-1 space-y-1.5">
-                      <Shimmer className="h-3 w-24 sm:w-32" />
-                      <Shimmer className="h-2.5 w-36 sm:w-48" />
-                    </div>
-                    <Shimmer className="h-3.5 sm:h-4 w-12 sm:w-16" />
-                  </div>
-                ))
-              ) : activity.length === 0 ? (
-                <div className="flex flex-col items-center py-10 sm:py-12 text-stone-300">
-                  <Activity className="w-7 h-7 sm:w-8 sm:h-8 mb-2" />
-                  <p className="text-xs sm:text-sm">{t.dashboard?.noActivityYet || 'No activity recorded yet'}</p>
-                </div>
-              ) : (
-                activity.slice(0, 4).map((a) => (
-                  <div
-                    key={a.id}
-                    className="flex items-center gap-2.5 sm:gap-3 px-3.5 sm:px-5 py-2.5 sm:py-3 hover:bg-stone-50/70 transition-colors"
-                  >
-                    <div
-                      className={cn(
-                        "w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center shrink-0 border-2",
-                        a.success
-                          ? "bg-emerald-50 border-emerald-200"
-                          : "bg-rose-50 border-rose-200",
-                      )}
-                    >
-                      <DeviceIcon
-                        type={a.deviceType}
-                        className={cn(
-                          "w-3 h-3 sm:w-3.5 sm:h-3.5",
-                          a.success ? "text-emerald-500" : "text-rose-400",
-                        )}
-                      />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-1 sm:gap-1.5">
-                        <p className="text-xs sm:text-sm font-semibold text-stone-700 truncate">
-                          {a.username ?? (t.dashboard?.unknown || 'Unknown')}
-                        </p>
-                        {!a.success && (
-                          <span className="shrink-0 text-[8px] sm:text-[9px] font-bold text-rose-600 bg-rose-50 border border-rose-200 px-1 rounded">
-                            {t.dashboard?.failedLabel || 'FAILED'}
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-[10px] sm:text-[11px] text-stone-400 truncate">
-                        <span className="font-medium text-stone-500">
-                          {a.browserName || (t.dashboard?.unknown || 'Unknown')}
-                        </span>
-                        {" · "}
-                        {/* hide OS on very small screens */}
-                        <span className="hidden xs:inline sm:inline">
-                          {a.os || (t.dashboard?.unknown || 'Unknown')} ·{" "}
-                        </span>
-                        <span className="font-mono">{a.ip}</span>
-                      </p>
-                    </div>
-                    <div className="text-end shrink-0">
-                      <p className="text-[10px] sm:text-[11px] text-stone-400 font-medium whitespace-nowrap">
-                        {timeAgo(a.loggedInAt, t)}
-                      </p>
-                      {a.loggedOutAt ? (
-                        <p className="text-[9px] sm:text-[10px] text-stone-300 flex items-center gap-0.5 justify-end mt-0.5">
-                          <LogOut className="w-2 h-2 sm:w-2.5 sm:h-2.5" /> {t.dashboard?.out || 'out'}
-                        </p>
-                      ) : a.success ? (
-                        <span className="inline-flex items-center gap-0.5 text-[9px] sm:text-[10px] text-emerald-600 font-bold mt-0.5">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />{" "}
-                          {t.dashboard?.online || 'online'}
-                        </span>
-                      ) : null}
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
           </div>
         </div>
       </div>

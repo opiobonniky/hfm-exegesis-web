@@ -8,7 +8,6 @@ import {
   ChevronLeft,
   ChevronDown,
   Users,
-  Activity,
   BookText,
   Home,
   Highlighter,
@@ -86,7 +85,6 @@ const adminNavItems = [
   { title: "sidebar.explanations", url: routes.verseExplanations.path, icon: BookMarked },
   { title: "sidebar.readingPlans", url: routes.readingPlans.path, icon: BookOpen },
   { title: "sidebar.myActivity", url: routes.myActivity.path, icon: Highlighter },
-  { title: "sidebar.userActivity", url: routes.useractivity.path, icon: Activity },
 ];
 
 const journalSubItems = [

@@ -1,5 +1,4 @@
 import PlanDetail from "@/pages/ReadingPlan/Plandetail";
-import UserActivityPage from "@/pages/UserActivityPage";
 import UsersPage from "@/pages/UserManagement/UsersPage";
 import { Component } from "lucide-react";
 import path from "path";
@@ -199,13 +198,6 @@ export const routes = {
     isProtected: true,
     requiresLayout: true,
     title: "Reading Plan Detail",
-  },
-  useractivity: {
-    path: "/user-activity",
-    component: UserActivityPage,
-    isProtected: true,
-    requiresLayout: true,
-    title: "User Activity",
   },
   bibleReader: {
     path: "/bible-reader",
