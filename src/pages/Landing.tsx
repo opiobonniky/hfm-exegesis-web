@@ -122,8 +122,8 @@ const Landing = () => {
           { label: t.landing?.aboutSubVision || "Our Vision", href: "/our-vision" },
           { label: t.landing?.aboutSubMission || "Our Mission", href: "/our-mission" },
           { label: t.landing?.aboutSubGoals || "Our Goals", href: "/our-goals" },
-          { label: t.landing?.aboutSubLeadership || "Leadership", href: "/leadership" },
-          { label: t.landing?.aboutSubFounders || "Founders", href: "/founders" },
+          { label: t.landing?.aboutSubLeadership || "Leadership", href: "/leadership1" },
+          { label: t.landing?.aboutSubFounders || "Founders", href: "/founders1" },
         ],
       },
       {
@@ -714,13 +714,18 @@ const Landing = () => {
               {/* Logo badge */}
 
               {/* Tagline */}
-              <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-black text-white leading-[1.1] tracking-tighter whitespace-nowrap">
+              <h1 className="text-sm sm:text-lg md:text-2xl lg:text-4xl xl:text-5xl 2xl:text-7xl font-black text-white leading-[1.1] tracking-tighter whitespace-nowrap uppercase text-center mx-auto w-full">
                 {t.landing?.welcome || "Welcome To The"}{" "}
-                <span className="text-brand-accent">{t.landing?.heroTitle || "Exegesis Project!"}</span>
+                <span className="text-brand-accent">{t.landing?.heroTitle || "Exegesis Project"}</span>
               </h1>
 
+              {/* Subtitle */}
+              <p className="text-lg sm:text-xl md:text-2xl text-white/80 font-bold tracking-wider mt-4 uppercase">
+                {t.landing?.heroSubtitle || "Search The Scriptures Daily"}
+              </p>
+
               {/* Two buttons */}
-              <div className="flex flex-col sm:flex-row gap-6 sm:gap-8 justify-center mt-8 sm:mt-24 mx-auto">
+              <div className="flex flex-col sm:flex-row gap-6 sm:gap-8 justify-center mt-8 sm:mt-10 mx-auto">
                 <Link to="/login" className="w-full sm:w-80">
                   <Button
                     variant="outline"

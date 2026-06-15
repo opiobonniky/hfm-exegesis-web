@@ -506,7 +506,6 @@ export default function UserDailyVerse() {
                           : (t.dailyVerse?.toastAddedToFavorites || '{ref} added to your favorites.').replace('{ref}', verseReference),
                       });
                     }}
-                    disabled={false}
                   />
                   <ActionChip
                     icon={Share2}
