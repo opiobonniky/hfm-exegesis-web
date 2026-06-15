@@ -161,22 +161,14 @@ export function AppSidebar() {
       collapsible="icon"
     >
       <SidebarHeader className="p-4">
-        <div className="flex items-center gap-3">
-          <div className="w-16 h-16 shrink-0 overflow-hidden rounded-xl flex items-center justify-center bg-sidebar-accent ring-1 ring-sidebar-ring">
+        <div className="flex items-center justify-center">
+          <div className="w-full max-w-[160px] aspect-square shrink-0 overflow-hidden rounded-2xl flex items-center justify-center bg-sidebar-accent ring-1 ring-sidebar-ring">
             <img
               src={logoImage}
               alt={t.brand?.title || 'EXEGESIS'}
-              className="w-12 h-12 object-contain"
+              className="w-full h-full object-contain p-2"
             />
           </div>
-          {!collapsed && (
-            <div className="overflow-hidden">
-              <h1 className="font-bold text-sm font-[family-name:var(--font-heading)] truncate text-sidebar-foreground">
-                {t.brand?.title}
-              </h1>
-              <p className="text-[11px] text-sidebar-foreground/50 font-medium tracking-wide">{t.brand?.subtitle || 'Bible'}</p>
-            </div>
-          )}
         </div>
       </SidebarHeader>
 
