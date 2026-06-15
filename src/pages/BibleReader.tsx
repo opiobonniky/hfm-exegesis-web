@@ -53,6 +53,7 @@ import {
   NoteModal,
   RangePickerModal,
 } from "@/components/BibleModals";
+import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/components/languages/languageProvider";
 
@@ -141,6 +142,48 @@ function cleanTextForSpeech(text: string): string {
     .replace(/\[[^\]]*\]/g, "")
     .replace(/\s+/g, " ")
     .trim();
+}
+
+function TextContent({ text }: { text?: string | null }) {
+  if (!text) return null;
+  const paragraphs = text.replace(/\r/g, "").split(/\n\s*\n/).filter(Boolean);
+  return (
+    <div className="text-sm sm:text-base leading-relaxed text-foreground/80">
+      {paragraphs.map((para, pi) => {
+        const lines = para.split("\n").map((s) => s.trim()).filter(Boolean);
+        const isBulletList = lines.some((l) => /^(\-|\*|•|\d+\.)\s+/.test(l));
+        if (isBulletList) {
+          return (
+            <div key={pi} className="space-y-2 mb-4">
+              {lines.map((line, li) => {
+                const isBullet = /^(\-|\*|•|\d+\.)\s+/.test(line);
+                if (isBullet) {
+                  return (
+                    <div key={li} className="flex gap-3 items-start">
+                      <span className="w-2 h-2 rounded-full bg-primary mt-2 shrink-0" />
+                      <span className="leading-7 sm:leading-8">
+                        {line.replace(/^(\-|\*|•|\d+\.)\s+/, "")}
+                      </span>
+                    </div>
+                  );
+                }
+                return (
+                  <p key={li} className="leading-7 sm:leading-8">
+                    {line}
+                  </p>
+                );
+              })}
+            </div>
+          );
+        }
+        return (
+          <p key={pi} className="leading-7 sm:leading-8 mb-4 last:mb-0">
+            {lines.join(" ")}
+          </p>
+        );
+      })}
+    </div>
+  );
 }
 
 // ── Mobile Navigation Drawer ─────────────────────────────────────────────────
@@ -690,7 +733,7 @@ export default function BibleReader() {
   const [verseNotes, setVerseNotes] = useState<Record<string, string>>({});
 
   const [verseExplanationMap, setVerseExplanationMap] = useState<
-    Record<string, { explanation: string; promptIds?: number[] }>
+    Record<string, { explanation: string; learnMore?: string; promptIds?: number[] }>
   >({});
   const [expandedExplanation, setExpandedExplanation] = useState<string | null>(
     null,
@@ -1646,6 +1689,8 @@ export default function BibleReader() {
   const getVerseNote = (vk: string) => verseNotes[vk] || null;
   const getVerseExplanation = (vk: string) =>
     verseExplanationMap[vk]?.explanation || null;
+  const getVerseLearnMore = (vk: string) =>
+    verseExplanationMap[vk]?.learnMore || null;
   const getVerseExplanationPrompts = (vk: string) =>
     verseExplanationPrompts[vk] || [];
 
@@ -1736,7 +1781,7 @@ export default function BibleReader() {
 
         setVerseExplanationMap((prev) => ({
           ...prev,
-          [verseKey]: { explanation: data.explanation, promptIds },
+          [verseKey]: { explanation: data.explanation, learnMore: data.learnMore, promptIds },
         }));
 
         if (allVersePrompts.length > 0) {
@@ -2645,6 +2690,7 @@ export default function BibleReader() {
                           const isFav = isFavorite(verse.key);
                           const vNote = getVerseNote(verse.key);
                           const vExplanation = getVerseExplanation(verse.key);
+                          const vLearnMore = getVerseLearnMore(verse.key);
                           const vExplanationPrompts =
                             getVerseExplanationPrompts(verse.key);
                           const isExplanationExpanded =
@@ -2752,70 +2798,102 @@ export default function BibleReader() {
                                 )}{" "}
                               </span>
 
+                              <AnimatePresence>
                               {isExplanationExpanded && (
-                                <div className="mt-2 mb-3 ml-2 sm:ml-3 rounded-lg border border-primary/20 bg-primary/5 dark:bg-primary/10">
-                                  <div className="p-3 sm:p-4">
+                                <motion.div
+                                  initial={{ opacity: 0, height: 0 }}
+                                  animate={{ opacity: 1, height: "auto" }}
+                                  exit={{ opacity: 0, height: 0 }}
+                                  transition={{ duration: 0.25, ease: "easeInOut" }}
+                                  className="mt-2 mb-3 ml-2 sm:ml-3 rounded-xl border border-primary/20 bg-primary/5 dark:bg-primary/10 overflow-hidden"
+                                >
+                                  <div className="p-4 sm:p-5">
                                     {vExplanation ? (
-                                      <div className="animate-in slide-in-from-top-2">
-                                        <div className="flex items-center gap-2 mb-2">
+                                      <div>
+                                        {/* Explanation header */}
+                                        <div className="flex items-center gap-2 mb-3">
                                           <div className="w-1.5 h-1.5 rounded-full bg-primary" />
-                                          <span className="text-[10px] font-semibold text-primary uppercase tracking-wider">
+                                          <span className="text-xs font-semibold text-primary uppercase tracking-wider">
                                             {t.bibleReader.explanation}
                                           </span>
                                         </div>
-                                        <div className="text-xs sm:text-sm leading-relaxed text-foreground/80">
-                                          <p className="whitespace-pre-wrap">
-                                            {expandedFullExplanation.has(
-                                              verse.key,
-                                            )
-                                              ? vExplanation
-                                              : truncateText(vExplanation, 200)}
-                                          </p>
-                                          {vExplanation.length > 200 && (
-                                            <button
-                                              onClick={(e) => {
-                                                e.stopPropagation();
-                                                setExpandedFullExplanation(
-                                                  (prev) => {
-                                                    const n = new Set(prev);
-                                                    n.has(verse.key)
-                                                      ? n.delete(verse.key)
-                                                      : n.add(verse.key);
-                                                    return n;
-                                                  },
-                                                );
-                                              }}
-                                              className="mt-2 flex items-center gap-1 text-xs font-medium text-primary hover:text-primary/80 transition-colors"
-                                            >
-                                              {expandedFullExplanation.has(
-                                                verse.key,
-                                              ) ? (
-                                                <>
-                                                  <ChevronUp className="w-3 h-3" />
-                                                  {t.bibleReader.showLess}
-                                                </>
-                                              ) : (
-                                                <>
-                                                  <ChevronDown className="w-3 h-3" />
-                                                  {t.bibleReader.readMore}
-                                                </>
-                                              )}
-                                            </button>
-                                          )}
-                                        </div>
+                                        {/* Full explanation text */}
+                                        <TextContent text={vExplanation} />
+                                        {/* Read more — reveals Learn More */}
+                                        {vLearnMore && (
+                                          <button
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              setExpandedFullExplanation((prev) => {
+                                                const n = new Set(prev);
+                                                n.has(verse.key)
+                                                  ? n.delete(verse.key)
+                                                  : n.add(verse.key);
+                                                return n;
+                                              });
+                                            }}
+                                            className="mt-3 flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary/80 transition-all duration-200"
+                                          >
+                                            <ChevronDown
+                                              className={`w-4 h-4 transition-transform duration-300 ease-in-out ${
+                                                expandedFullExplanation.has(verse.key) ? "rotate-180" : ""
+                                              }`}
+                                            />
+                                            {expandedFullExplanation.has(verse.key)
+                                              ? (t.verseExplanations?.learnMoreTitle || "Learn More")
+                                              : t.bibleReader.readMore}
+                                          </button>
+                                        )}
                                       </div>
                                     ) : (
-                                      <span className="text-xs text-muted-foreground italic flex items-center gap-2">
-                                        <Loader2 className="w-3 h-3 animate-spin" />
+                                      <span className="text-sm text-muted-foreground italic flex items-center gap-2">
+                                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
                                         {t.bibleReader.loadingExplanation}
                                       </span>
                                     )}
                                   </div>
+
+                                  {/* Learn More — smooth accordion */}
+                                  <div
+                                    className="grid transition-all duration-300 ease-in-out"
+                                    style={{
+                                      gridTemplateRows: vLearnMore && expandedFullExplanation.has(verse.key) ? "1fr" : "0fr",
+                                    }}
+                                  >
+                                    <div className="overflow-hidden">
+                                      {vLearnMore && (
+                                        <div className="px-4 sm:px-5 pb-4 sm:pb-5 border-t border-primary/10">
+                                          <div className="pt-3">
+                                            <div className="flex items-center gap-2 mb-3">
+                                              <div className="w-1.5 h-1.5 rounded-full bg-primary/60" />
+                                              <span className="text-xs font-semibold text-primary/60 uppercase tracking-wider">
+                                                {t.verseExplanations?.learnMoreTitle || "Learn More"}
+                                              </span>
+                                            </div>
+                                            <TextContent text={vLearnMore} />
+                                            {/* Close — collapses the entire panel */}
+                                            <button
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                toggleExplanation(verse.key);
+                                              }}
+                                              className="mt-4 flex items-center gap-1.5 text-sm font-medium text-destructive/70 hover:text-destructive transition-colors duration-200"
+                                            >
+                                              <ChevronUp className="w-4 h-4" />
+                                              {t.bibleReader.closeExplanation}
+                                            </button>
+                                          </div>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+
+                                  {/* Journal Prompts */}
                                   {vExplanationPrompts.length > 0 && (
-                                    <div className="px-3 sm:px-4 pb-3 sm:pb-4 pt-2 border-t border-amber-200/30">
-                                      <div className="flex items-center gap-2 mb-2 sm:mb-3">
-                                        <Lightbulb className="w-3.5 h-3.5 text-amber-500" />
-                                        <span className="text-[10px] font-semibold text-amber-600 uppercase tracking-wider">
+                                    <div className="px-4 sm:px-5 pb-4 sm:pb-5 pt-3 border-t border-amber-200/30">
+                                      <div className="flex items-center gap-2 mb-3">
+                                        <Lightbulb className="w-4 h-4 text-amber-500" />
+                                        <span className="text-xs font-semibold text-amber-600 uppercase tracking-wider">
                                           {t.bibleReader.journalPrompts}
                                         </span>
                                       </div>
@@ -2823,7 +2901,7 @@ export default function BibleReader() {
                                         {vExplanationPrompts.map((prompt) => (
                                           <div
                                             key={prompt.id}
-                                            className="text-xs leading-relaxed text-foreground/70 bg-amber-50/70 dark:bg-amber-950/30 rounded-md p-2.5 border border-amber-100/40 dark:border-amber-900/40"
+                                            className="text-sm leading-relaxed text-foreground/70 bg-amber-50/70 dark:bg-amber-950/30 rounded-md p-3 border border-amber-100/40 dark:border-amber-900/40"
                                           >
                                             <span className="text-amber-600/80 mr-1">
                                               "
@@ -2837,8 +2915,9 @@ export default function BibleReader() {
                                       </div>
                                     </div>
                                   )}
-                                </div>
+                                </motion.div>
                               )}
+                              </AnimatePresence>
                             </span>
                           );
                         })}

@@ -145,72 +145,88 @@ const BIBLE_BOOKS = [
 // ─────────────────────────────────────────────
 function ExplanationPreview({ item }: { item: VerseExplanation }) {
   const [showLearnMore, setShowLearnMore] = useState(false);
+  const { t } = useLanguage();
 
   const renderContent = (text?: string) => {
     if (!text) return null;
-    const lines = text
-      .replace(/\r/g, "")
-      .split("\n")
-      .map((s) => s.trim())
-      .filter(Boolean);
-    return lines.map((line, i) => {
-      const isBullet = /^(\-|\*|•|\d+\.)\s+/.test(line);
-      if (isBullet) {
+    const paragraphs = text.replace(/\r/g, "").split(/\n\s*\n/).filter(Boolean);
+    return paragraphs.map((para, pi) => {
+      const lines = para.split("\n").map((s) => s.trim()).filter(Boolean);
+      const isBulletList = lines.some((l) => /^(\-|\*|•|\d+\.)\s+/.test(l));
+      if (isBulletList) {
         return (
-          <div key={i} className="flex gap-2.5 items-start mb-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" />
-            <span className="text-sm text-muted-foreground leading-relaxed">
-              {line.replace(/^(\-|\*|•|\d+\.)\s+/, "")}
-            </span>
+          <div key={pi} className="space-y-2 mb-4">
+            {lines.map((line, li) => {
+              const isBullet = /^(\-|\*|•|\d+\.)\s+/.test(line);
+              if (isBullet) {
+                return (
+                  <div key={li} className="flex gap-3 items-start">
+                    <span className="w-2 h-2 rounded-full bg-primary mt-2 shrink-0" />
+                    <span className="text-sm sm:text-base text-foreground/80 leading-relaxed">
+                      {line.replace(/^(\-|\*|•|\d+\.)\s+/, "")}
+                    </span>
+                  </div>
+                );
+              }
+              return (
+                <p key={li} className="text-sm sm:text-base text-foreground/80 leading-relaxed">
+                  {line}
+                </p>
+              );
+            })}
           </div>
         );
       }
       return (
-        <p
-          key={i}
-          className="text-sm text-muted-foreground leading-relaxed mb-2"
-        >
-          {line}
+        <p key={pi} className="text-sm sm:text-base text-foreground/80 leading-relaxed mb-4 last:mb-0">
+          {lines.join(" ")}
         </p>
       );
     });
   };
 
   return (
-    <div className="px-4 pb-5 pt-3 border-t border-border/30 space-y-4 bg-muted/10">
+    <div className="px-4 sm:px-5 pb-4 sm:pb-5 pt-3 border-t border-border/30 space-y-4 bg-muted/10">
       {/* Explanation */}
-      <div className="space-y-2">
+      <div className="space-y-3">
         <div className="flex items-center gap-2">
-          <div className="w-1 h-4 rounded-full bg-primary" />
+          <div className="w-1.5 h-1.5 rounded-full bg-primary" />
           <span className="text-xs font-semibold text-primary uppercase tracking-wider">
-            Explanation
+            {t.verseExplanations?.explanationTitle || "Explanation"}
           </span>
         </div>
-        <div className="pl-3">{renderContent(item.explanation)}</div>
+        <div className="pl-4">{renderContent(item.explanation)}</div>
       </div>
 
-      {/* Learn more toggle */}
+      {/* Learn more toggle with accordion */}
       {item.learnMore && (
-        <div className="space-y-2">
+        <div className="space-y-3">
           <button
             onClick={() => setShowLearnMore((p) => !p)}
             className="flex items-center gap-2 group"
           >
-            <div className="w-1 h-4 rounded-full bg-amber-500" />
-            <span className="text-xs font-semibold text-amber-600 uppercase tracking-wider group-hover:text-amber-700">
-              Learn More
+            <div className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+            <span className="text-xs font-semibold text-amber-600 uppercase tracking-wider group-hover:text-amber-700 transition-colors">
+              {t.verseExplanations?.learnMoreTitle || "Learn More"}
             </span>
-            {showLearnMore ? (
-              <ChevronUp className="w-3.5 h-3.5 text-amber-500" />
-            ) : (
-              <ChevronDown className="w-3.5 h-3.5 text-amber-500" />
-            )}
+            <ChevronDown
+              className={`w-4 h-4 text-amber-500 transition-transform duration-300 ease-in-out ${
+                showLearnMore ? "rotate-180" : ""
+              }`}
+            />
           </button>
-          {showLearnMore && (
-            <div className="pl-3 rounded-lg bg-amber-50/60 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900/40 p-3">
-              {renderContent(item.learnMore)}
+          <div
+            className="grid transition-all duration-300 ease-in-out"
+            style={{
+              gridTemplateRows: showLearnMore ? "1fr" : "0fr",
+            }}
+          >
+            <div className="overflow-hidden">
+              <div className="pl-4 rounded-lg bg-amber-50/60 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900/40 p-4 sm:p-5">
+                {renderContent(item.learnMore)}
+              </div>
             </div>
-          )}
+          </div>
         </div>
       )}
     </div>
@@ -232,11 +248,7 @@ const VerseExplanations = () => {
   const [search, setSearch] = useState("");
   const [bookFilter, setBookFilter] = useState("All Books");
   const [expandedId, setExpandedId] = useState<number | null>(null);
-
-  // Delete dialog
-  const [deleteTarget, setDeleteTarget] = useState<VerseExplanation | null>(
-    null,
-  );
+  const [deleteTarget, setDeleteTarget] = useState<VerseExplanation | null>(null);
   const [deleting, setDeleting] = useState(false);
 
   // ── fetch ─────────────────────────────────
