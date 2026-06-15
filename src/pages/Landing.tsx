@@ -471,30 +471,6 @@ const Landing = () => {
                   <Menu className="w-6 h-6" />
                 </button>
 
-                {/* Center: Compact Logo */}
-                <div className={`flex items-center gap-1.5 transition-all duration-300 ${scrolled ? "translate-y-0" : "translate-y-1 sm:translate-y-1.5"}`}>
-                  <div className={`rounded-lg bg-transparent flex items-center justify-center overflow-hidden p-0 transition-all duration-300 ${scrolled ? "w-6 h-6" : "w-10 h-10 sm:w-12 sm:h-12"}`}>
-                    <img
-                      src={logoImage}
-                      alt="Exegesis"
-                      className={`w-full h-full object-contain transition-all duration-300 ${scrolled ? "" : "brightness-0 invert"}`}
-                    />
-                  </div>
-                  <span className={`font-black font-[family-name:var(--font-heading)] tracking-tighter transition-all duration-300 ${scrolled ? "text-xs text-brand-primary" : "text-sm sm:text-base text-white"}`}>
-                    {t.landing?.siteTitle || "EXEGESIS PROJECT"}
-                  </span>
-                </div>
-
-                {/* Right: Sign In */}
-                <Link to="/login">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className={`font-black text-xs uppercase tracking-wider px-3 py-2 ${scrolled ? "text-brand-primary" : "text-white hover:bg-white/10"}`}
-                  >
-                    {t.landing?.signIn || "Sign In"}
-                  </Button>
-                </Link>
               </div>
             </div>
           </div>
@@ -617,6 +593,25 @@ const Landing = () => {
                       </button>
                     )
                   )}
+                  {/* Sign In - mobile menu item */}
+                  <Link
+                    to="/login"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-full flex items-center gap-3 p-3.5 rounded-2xl hover:bg-brand-bg transition-all group text-left"
+                  >
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-brand-primary/15 text-brand-primary">
+                      <ArrowRight className="w-5 h-5" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-xs font-black text-slate-900 uppercase tracking-widest">
+                        {t.landing?.signIn || "Sign In"}
+                      </div>
+                      <div className="text-[11px] font-medium text-slate-400 truncate">
+                        {t.landing?.signInDesc || "Access your account"}
+                      </div>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-slate-200 group-hover:text-brand-primary transition-colors" />
+                  </Link>
                 </div>
               </div>
 
@@ -711,7 +706,14 @@ const Landing = () => {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               transition={{ duration: 0.9, ease: [0.25, 0.1, 0.25, 1] }}
             >
-              {/* Logo badge */}
+              {/* Logo badge - mobile only */}
+              <div className="w-28 h-28 mx-auto mb-6 lg:hidden">
+                <img
+                  src={logoImage}
+                  alt="Exegesis"
+                  className="w-full h-full object-contain"
+                />
+              </div>
 
               {/* Tagline */}
               <h1 className="text-lg sm:text-2xl md:text-4xl lg:text-5xl xl:text-6xl font-black text-white leading-[1.1] tracking-tighter whitespace-nowrap uppercase text-center w-full">
@@ -720,7 +722,7 @@ const Landing = () => {
               </h1>
 
               {/* Subtitle */}
-              <p className="text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl text-white/80 font-bold tracking-wider mt-4 uppercase whitespace-nowrap">
+              <p className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-3xl text-white/80 font-bold tracking-wider mt-4 uppercase whitespace-nowrap">
                 {t.landing?.heroSubtitle || "Search The Scriptures Daily"}
               </p>
 
