@@ -449,16 +449,16 @@ const Landing = () => {
                 <Link to="/login">
                   <Button
                     variant="ghost"
-                    className="text-slate-500 hover:text-brand-primary font-black uppercase tracking-widest text-[10px] nav-signin"
+                   className="bg-brand-primary text-white hover:bg-brand-primary-dark font-black px-6 py-5 rounded-2xl shadow-xl shadow-brand-primary/20 uppercase tracking-widest text-xs"
                   >
                     {t.landing?.signIn || "Sign In"}
                   </Button>
                 </Link>
-                <Link to="/login">
+                {/* <Link to="/login">
                   <Button className="bg-brand-primary text-white hover:bg-brand-primary-dark font-black px-6 py-5 rounded-2xl shadow-xl shadow-brand-primary/20 uppercase tracking-widest text-xs">
                     {t.landing?.getStartedBtn || "Get Started"}
                   </Button>
-                </Link>
+                </Link> */}
               </div>
 
               {/* Mobile nav */}
