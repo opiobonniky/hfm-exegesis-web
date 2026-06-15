@@ -234,6 +234,14 @@ export const bibleApi = {
   },
 };
 
+export const getTranslationSettings = async (): Promise<{ freeTranslationsOnly: boolean }> => {
+  const response = await api.get(`${BASE_URL}/settings`);
+  if (response.data.success) {
+    return response.data.data;
+  }
+  return { freeTranslationsOnly: false };
+};
+
 export const mapTranslationId = (frontendId: string): string => {
   const mapping: Record<string, string> = {
     Berean: "Berean",

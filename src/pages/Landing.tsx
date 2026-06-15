@@ -714,13 +714,13 @@ const Landing = () => {
               {/* Logo badge */}
 
               {/* Tagline */}
-              <h1 className="text-sm sm:text-lg md:text-2xl lg:text-4xl xl:text-5xl 2xl:text-7xl font-black text-white leading-[1.1] tracking-tighter whitespace-nowrap uppercase text-center mx-auto w-full">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black text-white leading-[1.1] tracking-tighter uppercase text-center mx-auto w-full">
                 {t.landing?.welcome || "Welcome To The"}{" "}
                 <span className="text-brand-accent">{t.landing?.heroTitle || "Exegesis Project"}</span>
               </h1>
 
               {/* Subtitle */}
-              <p className="text-lg sm:text-xl md:text-2xl text-white/80 font-bold tracking-wider mt-4 uppercase">
+              <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-white/80 font-bold tracking-wider mt-4 uppercase">
                 {t.landing?.heroSubtitle || "Search The Scriptures Daily"}
               </p>
 

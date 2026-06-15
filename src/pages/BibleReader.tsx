@@ -46,7 +46,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useToast } from "@/hooks/use-toast";
 import { sendPostRequest, TOKEN_KEY } from "@/services/api";
-import { bibleApi, mapTranslationId, mapFrontendId } from "@/services/bibleApi";
+import { bibleApi, mapTranslationId, mapFrontendId, getTranslationSettings } from "@/services/bibleApi";
 import {
   HighlightPickerModal,
   SearchModal,
@@ -88,6 +88,8 @@ interface TranslationOption {
   shortName: string;
   year?: string | null;
 }
+
+const FREE_TRANSLATION_IDS = new Set(["Berean", "KJV", "NIV", "ESV", "GW"]);
 
 const HIGHLIGHT_COLORS = [
   { id: 1, name: "Red", color: "#F87171" },
@@ -710,6 +712,7 @@ export default function BibleReader() {
   const [availableTranslations, setAvailableTranslations] = useState<
     TranslationOption[]
   >([]);
+  const [freeTranslationsOnly, setFreeTranslationsOnly] = useState(false);
   const [backendBooks, setBackendBooks] = useState<
     { bookNumber: number; bookName: string; maxChapter: number }[]
   >([]);
@@ -856,21 +859,21 @@ export default function BibleReader() {
   const [translationOpen, setTranslationOpen] = useState(false);
 
   const filteredTranslations = useMemo(() => {
-    if (!translationSearch.trim()) return availableTranslations;
+    if (!translationSearch.trim()) return effectiveTranslations;
     const search = translationSearch.toLowerCase();
-    return availableTranslations.filter(
+    return effectiveTranslations.filter(
       (tr) =>
         tr.name.toLowerCase().includes(search) ||
         tr.shortName.toLowerCase().includes(search),
     );
-  }, [translationSearch, availableTranslations]);
+  }, [translationSearch, effectiveTranslations]);
 
   const currentVersion = useMemo(() => {
-    const trans = availableTranslations.find((tr) => tr.id === versionId);
+    const trans = effectiveTranslations.find((tr) => tr.id === versionId);
     return trans
       ? { abbreviation: trans.shortName, name: trans.name }
       : { abbreviation: versionId, name: versionId };
-  }, [versionId, availableTranslations]);
+  }, [versionId, effectiveTranslations]);
 
   const getMaxChapter = (bookName: string): number => {
     const book = backendBooks.find((b) => b.bookName === bookName);
@@ -894,10 +897,34 @@ export default function BibleReader() {
       .filter((b) => b.toLowerCase().includes(desktopBookFilter.toLowerCase()));
   }, [desktopBookFilter, backendBooks]);
 
+  const effectiveTranslations = useMemo(() => {
+    if (!freeTranslationsOnly) return availableTranslations;
+    return availableTranslations.filter((t) => FREE_TRANSLATION_IDS.has(t.id));
+  }, [availableTranslations, freeTranslationsOnly]);
+
+  // Reset to a free translation if current one is no longer available
+  useEffect(() => {
+    if (freeTranslationsOnly && availableTranslations.length > 0) {
+      const isFree = FREE_TRANSLATION_IDS.has(versionId);
+      if (!isFree) {
+        const firstFree = availableTranslations.find((t) => FREE_TRANSLATION_IDS.has(t.id));
+        if (firstFree) setVersionId(firstFree.id);
+      }
+    }
+  }, [freeTranslationsOnly, availableTranslations.length, versionId]);
+
   // Load available translations and books on mount
   useEffect(() => {
     const loadData = async () => {
       try {
+        // Load translation settings
+        try {
+          const settings = await getTranslationSettings();
+          setFreeTranslationsOnly(settings.freeTranslationsOnly);
+        } catch (e) {
+          console.error("Failed to load translation settings:", e);
+        }
+
         // Load translations
         const translations = await bibleApi.getTranslations();
         const sorted = [...translations].sort((a, b) => {
@@ -906,6 +933,7 @@ export default function BibleReader() {
             "KJV",
             "NIV",
             "ESV",
+            "GW",
             "NASB",
             "NLT",
             "BSB",
@@ -2255,7 +2283,7 @@ export default function BibleReader() {
                   className="w-[200px] h-8 text-xs border-border/50 bg-muted/30 justify-between font-normal"
                 >
                   <span className="truncate">
-                    {availableTranslations.find((t2) => t2.id === versionId)
+                    {effectiveTranslations.find((t2) => t2.id === versionId)
                       ?.name || t.bibleReader.selectVersion}
                   </span>
                   <ChevronDown className="w-3 h-3 ml-2 opacity-50" />
@@ -2424,8 +2452,8 @@ export default function BibleReader() {
               onChapterChange={handleChapterChange}
               onVerseChange={handleVerseChange}
               onVersionChange={setVersionId}
-              books={backendBooks.map((b) => b.bookName)}
-              availableTranslations={availableTranslations}
+               books={backendBooks.map((b) => b.bookName)}
+               availableTranslations={effectiveTranslations}
               verseCount={currentChapterVerseCount}
             />
           </div>

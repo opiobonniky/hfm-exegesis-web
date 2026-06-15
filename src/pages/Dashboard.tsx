@@ -20,12 +20,14 @@ import {
   CheckCircle2,
   BadgeX,
   ChevronRight,
+  Settings,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { sendPostRequest } from "@/services/api";
 import { getVerseText } from "@/utilities/bibleUtils";
 import { routes } from "@/components/Routes/routes";
+import { Switch } from "@/components/ui/switch";
 
 // ─────────────────────────────────────────────
 // Types
@@ -274,6 +276,8 @@ const Dashboard = () => {
   const [recentUsers, setRecentUsers] = useState<RecentUser[]>([]);
   const [plans, setPlans] = useState<ReadingPlan[]>([]);
   const [verse, setVerse] = useState<DailyVerse | null>(null);
+  const [freeTranslationsOnly, setFreeTranslationsOnly] = useState(false);
+  const [settingLoading, setSettingLoading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -331,6 +335,16 @@ const Dashboard = () => {
       }
       if (vR.status === "fulfilled" && (vR.value as any)?.returnCode === 200)
         setVerse((vR.value as any).returnData);
+
+      // Load site settings
+      try {
+        const settingRes = await sendPostRequest("admin", "get-site-setting", { key: "freeTranslationsOnly" });
+        if (settingRes.returnCode === 200 && settingRes.returnData) {
+          setFreeTranslationsOnly(settingRes.returnData.value === "true");
+        }
+      } catch (e) {
+        console.error("Failed to load site setting:", e);
+      }
     } catch (e: any) {
       setError(e?.message ?? (t.dashboard?.failedToLoad || 'Failed to load'));
     } finally {
@@ -338,6 +352,23 @@ const Dashboard = () => {
       setRefreshing(false);
     }
   }, []);
+
+  const handleToggleFreeTranslations = async (checked: boolean) => {
+    setSettingLoading(true);
+    try {
+      const res = await sendPostRequest("admin", "set-site-setting", {
+        key: "freeTranslationsOnly",
+        value: String(checked),
+      });
+      if (res.returnCode === 200) {
+        setFreeTranslationsOnly(checked);
+      }
+    } catch (e) {
+      console.error("Failed to set site setting:", e);
+    } finally {
+      setSettingLoading(false);
+    }
+  };
 
   useEffect(() => {
     fetchAll();
@@ -622,6 +653,42 @@ const Dashboard = () => {
                   </div>
                 )}
               </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ── System Settings ── */}
+        <div>
+          {/* System Settings */}
+          <div className="bg-white rounded-xl sm:rounded-2xl border border-stone-100 shadow-[0_1px_3px_rgba(0,0,0,0.05)] overflow-hidden">
+            <div className="flex items-center gap-2 px-3.5 sm:px-5 py-3 sm:py-4 border-b border-stone-100">
+              <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-stone-100 flex items-center justify-center">
+                <Settings className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-stone-600" />
+              </div>
+              <h3 className="text-xs sm:text-sm font-bold text-stone-700">
+                {t.dashboard?.systemSettings || 'System Settings'}
+              </h3>
+            </div>
+            <div className="p-3.5 sm:p-5 space-y-4">
+              {loading ? (
+                <Shimmer className="h-12 w-full" />
+              ) : (
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-xs sm:text-sm font-semibold text-stone-700">
+                      {t.dashboard?.freeTranslationsOnly || 'Free Translations Only'}
+                    </p>
+                    <p className="text-[10px] sm:text-[11px] text-stone-400 mt-0.5">
+                      {t.dashboard?.freeTranslationsDesc || 'Limit Bible readers to free translations only'}
+                    </p>
+                  </div>
+                  <Switch
+                    checked={freeTranslationsOnly}
+                    onCheckedChange={handleToggleFreeTranslations}
+                    disabled={settingLoading}
+                  />
+                </div>
+              )}
             </div>
           </div>
         </div>
