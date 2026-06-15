@@ -142,27 +142,23 @@ export function AppSidebar() {
     <>
       <style>{`
         [data-sidebar="sidebar"] {
-          --sidebar-background: hsl(var(--primary));
-          --sidebar-foreground: hsl(var(--primary-foreground));
-          --sidebar-accent: hsl(var(--primary-foreground) / 0.12);
-          --sidebar-accent-foreground: hsl(var(--primary-foreground));
-          --sidebar-border: hsl(var(--primary-foreground) / 0.1);
-          --sidebar-ring: hsl(var(--primary-foreground) / 0.3);
+          --sidebar-accent: var(--primary);
+          --sidebar-accent-foreground: var(--primary-foreground);
         }
       `}</style>
     <Sidebar
       side={isRtl ? "right" : "left"}
       dir={isRtl ? 'rtl' : 'ltr'}
       className={cn(
-        isRtl ? "border-l-0" : "border-r-0",
+        isRtl ? "border-l-0 [&>div]:border-l-0" : "border-r-0 [&>div]:border-r-0",
         "transition-all duration-300",
         collapsed ? "w-16" : "w-64",
       )}
       collapsible="icon"
     >
-      <SidebarHeader className="p-4">
+      <SidebarHeader className="px-4 pt-4 pb-2">
         <div className="flex items-center justify-center">
-          <div className="w-full max-w-[160px] aspect-square shrink-0 overflow-hidden rounded-2xl flex items-center justify-center bg-sidebar-accent ring-1 ring-sidebar-ring">
+          <div className="w-full max-w-[160px] aspect-square shrink-0 overflow-hidden rounded-2xl flex items-center justify-center">
             <img
               src={logoImage}
               alt={t.brand?.title || 'EXEGESIS'}
@@ -172,9 +168,7 @@ export function AppSidebar() {
         </div>
       </SidebarHeader>
 
-      <Separator className="mx-4 bg-sidebar-border" />
-
-      <SidebarContent className="px-2 py-4">
+      <SidebarContent className="px-2 pt-1 pb-4">
         <SidebarGroup>
           <SidebarGroupLabel
             className={cn(
@@ -373,7 +367,7 @@ export function AppSidebar() {
               onValueChange={(value) => setLanguage(value as Language)}
               disabled={langLoading}
             >
-              <SelectTrigger className="h-9 text-xs bg-sidebar-accent border-sidebar-border text-sidebar-foreground hover:bg-sidebar-accent">
+              <SelectTrigger className="h-9 text-xs text-sidebar-foreground hover:bg-sidebar-accent">
                 <SelectValue>
                   <span className="truncate">{LANGUAGE_NAMES[currentLang]}</span>
                 </SelectValue>
@@ -411,17 +405,17 @@ export function AppSidebar() {
         <Separator className="mb-3" />
 
         {!collapsed && userInfo && (
-          <div className="flex items-center gap-3 mb-4 px-2 py-2 rounded-lg bg-sidebar-accent border border-sidebar-border">
+          <div className="flex items-center gap-3 mb-4 px-2 py-2 rounded-lg bg-sidebar-accent">
             <div className="w-9 h-9 rounded-full bg-sidebar-accent-foreground/15 flex items-center justify-center shrink-0">
               <span className="text-sm font-semibold text-sidebar-accent-foreground">
                 {userInfo.username.charAt(0).toUpperCase()}
               </span>
             </div>
             <div className="overflow-hidden min-w-0">
-              <p className="text-sm font-semibold truncate text-sidebar-foreground">
+              <p className="text-sm font-semibold truncate text-white">
                 {userInfo.username}
               </p>
-              <p className="text-[11px] text-sidebar-foreground/50 truncate">
+              <p className="text-[11px] text-white/50 truncate">
                 {userInfo.email}
               </p>
             </div>
