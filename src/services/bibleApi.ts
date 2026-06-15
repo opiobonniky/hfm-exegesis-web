@@ -234,12 +234,12 @@ export const bibleApi = {
   },
 };
 
-export const getTranslationSettings = async (): Promise<{ freeTranslationsOnly: boolean }> => {
+export const getTranslationSettings = async (): Promise<{ freeTranslationsOnly: boolean; defaultTranslationId: string }> => {
   const response = await api.get(`${BASE_URL}/settings`);
   if (response.data.success) {
     return response.data.data;
   }
-  return { freeTranslationsOnly: false };
+  return { freeTranslationsOnly: false, defaultTranslationId: "Berean" };
 };
 
 export const mapTranslationId = (frontendId: string): string => {

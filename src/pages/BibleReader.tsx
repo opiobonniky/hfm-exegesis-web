@@ -916,63 +916,67 @@ export default function BibleReader() {
   // Load available translations and books on mount
   useEffect(() => {
     const loadData = async () => {
+      // Load translation settings
+      let loadedDefaultId = "Berean";
       try {
-        // Load translation settings
-        try {
-          const settings = await getTranslationSettings();
-          setFreeTranslationsOnly(settings.freeTranslationsOnly);
-        } catch (e) {
-          console.error("Failed to load translation settings:", e);
-        }
+        const settings = await getTranslationSettings();
+        setFreeTranslationsOnly(settings.freeTranslationsOnly);
+        loadedDefaultId = settings.defaultTranslationId;
+      } catch (e) {
+        console.error("Failed to load translation settings:", e);
+      }
 
-        // Load translations
-        const translations = await bibleApi.getTranslations();
-        const sorted = [...translations].sort((a, b) => {
-          const popular = [
-            "Berean",
-            "KJV",
-            "NIV",
-            "ESV",
-            "GW",
-            "NASB",
-            "NLT",
-            "BSB",
-            "CSB",
-          ];
-          const aIdx = popular.indexOf(a.id);
-          const bIdx = popular.indexOf(b.id);
-          if (aIdx !== -1 && bIdx !== -1) return aIdx - bIdx;
-          if (aIdx !== -1) return -1;
-          if (bIdx !== -1) return 1;
-          return a.name.localeCompare(b.name);
-        });
-        const options = sorted.map((t) => ({
-          id: t.id,
-          name: t.year ? `${t.name} (${t.year})` : t.name,
-          shortName: t.shortName,
-          year: t.year,
-        }));
-        setAvailableTranslations(options);
+      // Load translations
+      const translations = await bibleApi.getTranslations();
+      const sorted = [...translations].sort((a, b) => {
+        const popular = [
+          "Berean",
+          "KJV",
+          "NIV",
+          "ESV",
+          "GW",
+          "NASB",
+          "NLT",
+          "BSB",
+          "CSB",
+        ];
+        const aIdx = popular.indexOf(a.id);
+        const bIdx = popular.indexOf(b.id);
+        if (aIdx !== -1 && bIdx !== -1) return aIdx - bIdx;
+        if (aIdx !== -1) return -1;
+        if (bIdx !== -1) return 1;
+        return a.name.localeCompare(b.name);
+      });
+      const options = sorted.map((t) => ({
+        id: t.id,
+        name: t.year ? `${t.name} (${t.year})` : t.name,
+        shortName: t.shortName,
+        year: t.year,
+      }));
+      setAvailableTranslations(options);
 
-        // Load books from Berean translation
-        setBooksLoading(true);
-        try {
-          const backendId = mapTranslationId("Berean");
-          const books = await bibleApi.getBooksWithMaxChapters(backendId);
-          setBackendBooks(
-            books.map((b) => ({
-              bookNumber: b.bookNumber,
-              bookName: b.bookName,
-              maxChapter: b.maxChapter,
-            })),
-          );
-        } catch (err) {
-          console.error("Failed to load books:", err);
-        } finally {
-          setBooksLoading(false);
-        }
+      // Apply admin-configured default translation
+      if (loadedDefaultId && loadedDefaultId !== "Berean") {
+        const exists = options.some((o) => o.id === loadedDefaultId);
+        if (exists) setVersionId(loadedDefaultId);
+      }
+
+      // Load books from Berean translation
+      setBooksLoading(true);
+      try {
+        const backendId = mapTranslationId("Berean");
+        const books = await bibleApi.getBooksWithMaxChapters(backendId);
+        setBackendBooks(
+          books.map((b) => ({
+            bookNumber: b.bookNumber,
+            bookName: b.bookName,
+            maxChapter: b.maxChapter,
+          })),
+        );
       } catch (err) {
-        console.error("Failed to load translations:", err);
+        console.error("Failed to load books:", err);
+      } finally {
+        setBooksLoading(false);
       }
     };
     loadData();

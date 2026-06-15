@@ -28,6 +28,7 @@ import { sendPostRequest } from "@/services/api";
 import { getVerseText } from "@/utilities/bibleUtils";
 import { routes } from "@/components/Routes/routes";
 import { Switch } from "@/components/ui/switch";
+import { bibleApi, type Translation } from "@/services/bibleApi";
 
 // ─────────────────────────────────────────────
 // Types
@@ -277,6 +278,8 @@ const Dashboard = () => {
   const [plans, setPlans] = useState<ReadingPlan[]>([]);
   const [verse, setVerse] = useState<DailyVerse | null>(null);
   const [freeTranslationsOnly, setFreeTranslationsOnly] = useState(false);
+  const [defaultTranslationId, setDefaultTranslationId] = useState("Berean");
+  const [translationOptions, setTranslationOptions] = useState<Translation[]>([]);
   const [settingLoading, setSettingLoading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -338,12 +341,26 @@ const Dashboard = () => {
 
       // Load site settings
       try {
-        const settingRes = await sendPostRequest("admin", "get-site-setting", { key: "freeTranslationsOnly" });
-        if (settingRes.returnCode === 200 && settingRes.returnData) {
-          setFreeTranslationsOnly(settingRes.returnData.value === "true");
+        const [freeSettingRes, defaultSettingRes] = await Promise.all([
+          sendPostRequest("admin", "get-site-setting", { key: "freeTranslationsOnly" }),
+          sendPostRequest("admin", "get-site-setting", { key: "defaultTranslationId" }),
+        ]);
+        if (freeSettingRes.returnCode === 200 && freeSettingRes.returnData) {
+          setFreeTranslationsOnly(freeSettingRes.returnData.value === "true");
+        }
+        if (defaultSettingRes.returnCode === 200 && defaultSettingRes.returnData) {
+          setDefaultTranslationId(defaultSettingRes.returnData.value || "Berean");
         }
       } catch (e) {
-        console.error("Failed to load site setting:", e);
+        console.error("Failed to load site settings:", e);
+      }
+
+      // Load translations for the default translation dropdown
+      try {
+        const translations = await bibleApi.getTranslations();
+        setTranslationOptions(translations);
+      } catch (e) {
+        console.error("Failed to load translations:", e);
       }
     } catch (e: any) {
       setError(e?.message ?? (t.dashboard?.failedToLoad || 'Failed to load'));
@@ -365,6 +382,23 @@ const Dashboard = () => {
       }
     } catch (e) {
       console.error("Failed to set site setting:", e);
+    } finally {
+      setSettingLoading(false);
+    }
+  };
+
+  const handleChangeDefaultTranslation = async (id: string) => {
+    setSettingLoading(true);
+    try {
+      const res = await sendPostRequest("admin", "set-site-setting", {
+        key: "defaultTranslationId",
+        value: id,
+      });
+      if (res.returnCode === 200) {
+        setDefaultTranslationId(id);
+      }
+    } catch (e) {
+      console.error("Failed to set default translation:", e);
     } finally {
       setSettingLoading(false);
     }
@@ -673,6 +707,7 @@ const Dashboard = () => {
               {loading ? (
                 <Shimmer className="h-12 w-full" />
               ) : (
+                <>
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <p className="text-xs sm:text-sm font-semibold text-stone-700">
@@ -688,6 +723,30 @@ const Dashboard = () => {
                     disabled={settingLoading}
                   />
                 </div>
+
+                <div className="flex items-center justify-between gap-3 pt-3 border-t border-stone-100">
+                  <div>
+                    <p className="text-xs sm:text-sm font-semibold text-stone-700">
+                      {t.dashboard?.defaultTranslation || 'Default Bible Translation'}
+                    </p>
+                    <p className="text-[10px] sm:text-[11px] text-stone-400 mt-0.5">
+                      {t.dashboard?.defaultTranslationDesc || 'Translation to use by default in the Bible reader'}
+                    </p>
+                  </div>
+                  <select
+                    value={defaultTranslationId}
+                    onChange={(e) => handleChangeDefaultTranslation(e.target.value)}
+                    disabled={settingLoading || translationOptions.length === 0}
+                    className="h-8 text-xs rounded-lg border border-stone-200 bg-white px-2 text-stone-700 font-medium focus:outline-none focus:ring-2 focus:ring-amber-300 disabled:opacity-50"
+                  >
+                    {translationOptions.map((t) => (
+                      <option key={t.id} value={t.id}>
+                        {t.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                </>
               )}
             </div>
           </div>
