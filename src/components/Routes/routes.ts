@@ -43,6 +43,12 @@ const JournalDetail = lazy(() => import("@/pages/JournalDetail"));
 const JournalPrompts = lazy(() => import("@/pages/JournalPrompts"));
 const JournalTemplates = lazy(() => import("@/pages/JournalTemplates"));
 const UserDevotions = lazy(() => import("@/pages/UserDevotions"));
+const WhoWeAre = lazy(() => import("@/pages/HimFirstMedia/WhoWeAre"));
+const OurVision = lazy(() => import("@/pages/HimFirstMedia/OurVision"));
+const OurMission = lazy(() => import("@/pages/HimFirstMedia/OurMission"));
+const OurGoals = lazy(() => import("@/pages/HimFirstMedia/OurGoals"));
+const Leadership = lazy(() => import("@/pages/HimFirstMedia/Leadership"));
+const Founders = lazy(() => import("@/pages/HimFirstMedia/Founders"));
 
 // Route configuration interface
 export interface RouteConfig {
@@ -50,7 +56,8 @@ export interface RouteConfig {
   component: ComponentType<any>;
   isProtected: boolean;
   requiresLayout?: boolean; // Whether to use AppLayout
-  title?: string; // For breadcrumbs or page titles
+  requiresPublicLayout?: boolean; // Whether to use PublicLayout
+  title?: string;
   exact?: boolean;
 }
 
@@ -299,6 +306,56 @@ export const routes = {
     title: "Journal Templates",
   },
 
+  // ==================== PUBLIC HIM FIRST MEDIA PAGES ====================
+  whoWeAre: {
+    path: "/who-we-are",
+    component: WhoWeAre,
+    isProtected: false,
+    requiresPublicLayout: true,
+    requiresLayout: false,
+    title: "Who We Are",
+  },
+  ourVision: {
+    path: "/our-vision",
+    component: OurVision,
+    isProtected: false,
+    requiresPublicLayout: true,
+    requiresLayout: false,
+    title: "Our Vision",
+  },
+  ourMission: {
+    path: "/our-mission",
+    component: OurMission,
+    isProtected: false,
+    requiresPublicLayout: true,
+    requiresLayout: false,
+    title: "Our Mission",
+  },
+  ourGoals: {
+    path: "/our-goals",
+    component: OurGoals,
+    isProtected: false,
+    requiresPublicLayout: true,
+    requiresLayout: false,
+    title: "Our Goals",
+  },
+  leadership: {
+    path: "/leadership",
+    component: Leadership,
+    isProtected: false,
+    requiresPublicLayout: true,
+    requiresLayout: false,
+    title: "Leadership",
+  },
+  founders: {
+    path: "/founders",
+    component: Founders,
+    isProtected: false,
+    requiresPublicLayout: true,
+    requiresLayout: false,
+    title: "Founders",
+  },
+
   // ==================== 404 NOT FOUND ====================
   notFound: {
     path: "*",
@@ -316,9 +373,13 @@ export const getRoute = (key: keyof typeof routes) => routes[key];
 export const getProtectedRoutes = () =>
   Object.values(routes).filter((route) => route.isProtected);
 
-// Helper function to get all public routes
+// Helper function to get all public routes (excluding those that use PublicLayout)
 export const getPublicRoutes = () =>
-  Object.values(routes).filter((route) => !route.isProtected);
+  Object.values(routes).filter((route) => !route.isProtected && !route.requiresPublicLayout);
+
+// Helper function to get public routes that use PublicLayout
+export const getPublicLayoutRoutes = () =>
+  Object.values(routes).filter((route) => !route.isProtected && route.requiresPublicLayout);
 
 // Helper function to get routes that require layout
 export const getLayoutRoutes = () =>

@@ -118,12 +118,12 @@ const Landing = () => {
         description: t.landing?.navAboutDesc || "Learn about our mission",
         mobileColor: "#99F6E4",
         subItems: [
-          { label: "Who We Are", href: "#about" },
-          { label: "Our Vision", href: "#" },
-          { label: "Our Mission", href: "#" },
-          { label: "Our Goals", href: "#" },
-          { label: "Leadership", href: "#" },
-          { label: "Founders", href: "#" },
+          { label: "Who We Are", href: "/who-we-are" },
+          { label: "Our Vision", href: "/our-vision" },
+          { label: "Our Mission", href: "/our-mission" },
+          { label: "Our Goals", href: "/our-goals" },
+          { label: "Leadership", href: "/leadership" },
+          { label: "Founders", href: "/founders" },
         ],
       },
       {

@@ -6,11 +6,13 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { LanguageProvider } from "@/components/languages/languageProvider";
 import { AppLayout } from "@/components/AppLayout";
+import PublicLayout from "@/components/PublicLayout";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { Loader2 } from "lucide-react";
 import {
   getLayoutRoutes,
   getPublicRoutes,
+  getPublicLayoutRoutes,
   routes,
 } from "./components/Routes/routes";
 
@@ -44,6 +46,7 @@ const AuthLoader = ({ children }: { children: React.ReactNode }) => {
 
 const AppRoutes = () => {
   const publicRoutes = getPublicRoutes();
+  const publicLayoutRoutes = getPublicLayoutRoutes();
   const layoutRoutes = getLayoutRoutes();
   const notFoundRoute = routes.notFound;
 
@@ -63,6 +66,18 @@ const AppRoutes = () => {
               element={<route.component />}
             />
           ))}
+          {/* Public routes with PublicLayout */}
+          {publicLayoutRoutes.length > 0 && (
+            <Route element={<PublicLayout />}>
+              {publicLayoutRoutes.map((route) => (
+                <Route
+                  key={route.path}
+                  path={route.path}
+                  element={<route.component />}
+                />
+              ))}
+            </Route>
+          )}
           <Route element={<ProtectedRoute />}>
             {/* Routes that use AppLayout */}
             <Route element={<AppLayout />}>
