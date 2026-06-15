@@ -162,12 +162,11 @@ export function AppSidebar() {
     >
       <SidebarHeader className="p-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 shrink-0 overflow-hidden rounded-xl flex items-center justify-center bg-sidebar-accent ring-1 ring-sidebar-ring">
+          <div className="w-16 h-16 shrink-0 overflow-hidden rounded-xl flex items-center justify-center bg-sidebar-accent ring-1 ring-sidebar-ring">
             <img
               src={logoImage}
               alt={t.brand?.title || 'EXEGESIS'}
-              className="w-7 h-7 object-contain"
-              style={{ filter: 'brightness(0) invert()' }}
+              className="w-12 h-12 object-contain"
             />
           </div>
           {!collapsed && (
