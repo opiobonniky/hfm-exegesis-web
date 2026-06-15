@@ -118,12 +118,12 @@ const Landing = () => {
         description: t.landing?.navAboutDesc || "Learn about our mission",
         mobileColor: "#99F6E4",
         subItems: [
-          { label: "Who We Are", href: "/who-we-are" },
-          { label: "Our Vision", href: "/our-vision" },
-          { label: "Our Mission", href: "/our-mission" },
-          { label: "Our Goals", href: "/our-goals" },
-          { label: "Leadership", href: "/leadership" },
-          { label: "Founders", href: "/founders" },
+          { label: t.landing?.aboutSubWhoWeAre || "Who We Are", href: "/who-we-are" },
+          { label: t.landing?.aboutSubVision || "Our Vision", href: "/our-vision" },
+          { label: t.landing?.aboutSubMission || "Our Mission", href: "/our-mission" },
+          { label: t.landing?.aboutSubGoals || "Our Goals", href: "/our-goals" },
+          { label: t.landing?.aboutSubLeadership || "Leadership", href: "/leadership" },
+          { label: t.landing?.aboutSubFounders || "Founders", href: "/founders" },
         ],
       },
       {
@@ -134,17 +134,17 @@ const Landing = () => {
         mobileColor: "#FFB4B4",
       },
       {
-        label: "Features",
+        label: t.landing?.navFeatures || "Features",
         href: "#features",
         icon: Sparkles,
-        description: "App features & tools",
+        description: t.landing?.navFeaturesDesc || "App features & tools",
         mobileColor: "#A7F3D0",
       },
       {
-        label: "Resources",
+        label: t.landing?.navResources || "Resources",
         href: "#",
         icon: Globe,
-        description: "Bible studies & guides",
+        description: t.landing?.navResourcesDesc || "Bible studies & guides",
         mobileColor: "#C7D2FE",
       },
       {
@@ -357,7 +357,7 @@ const Landing = () => {
                   />
                 </div>
                 <span className={`font-black font-[family-name:var(--font-heading)] tracking-tighter transition-all duration-300 ${scrolled ? "text-base sm:text-xl text-brand-primary" : "hidden"}`}>
-                  EXEGESIS PROJECT
+                  {t.landing?.siteTitle || "EXEGESIS PROJECT"}
                 </span>
               </div>
 
@@ -481,7 +481,7 @@ const Landing = () => {
                     />
                   </div>
                   <span className={`font-black font-[family-name:var(--font-heading)] tracking-tighter transition-all duration-300 ${scrolled ? "text-xs text-brand-primary" : "text-sm sm:text-base text-white"}`}>
-                    EXEGESIS PROJECT
+                    {t.landing?.siteTitle || "EXEGESIS PROJECT"}
                   </span>
                 </div>
 
@@ -715,22 +715,22 @@ const Landing = () => {
 
               {/* Tagline */}
               <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-black text-white leading-[1.1] tracking-tighter whitespace-nowrap">
-                Welcome To The{" "}
-                <span className="text-brand-accent">Exegesis Project!</span>
+                {t.landing?.welcome || "Welcome To The"}{" "}
+                <span className="text-brand-accent">{t.landing?.heroTitle || "Exegesis Project!"}</span>
               </h1>
 
               {/* Two buttons */}
               <div className="flex flex-col sm:flex-row gap-6 sm:gap-8 justify-center mt-8 sm:mt-10">
-                <Link to="/login" className="w-full sm:w-auto">
+                <Link to="/login" className="w-full sm:flex-1">
                   <Button
                     variant="outline"
-                    className="w-full border-2 border-white/40 bg-transparent text-white hover:bg-white/10 hover:text-white px-8 sm:px-10 py-6 rounded-[2rem] font-black text-sm sm:text-base backdrop-blur-sm uppercase tracking-widest transition-all"
+                    className="w-full border-2 border-white/40 bg-transparent text-white hover:bg-white/10 hover:text-white px-6 sm:px-8 py-6 rounded-[2rem] font-black text-sm sm:text-base backdrop-blur-sm uppercase tracking-widest transition-all"
                   >
                     {t.landing?.watchIntro || "Watch The Intro"}
                   </Button>
                 </Link>
-                <Link to="/register" className="w-full sm:w-auto">
-                  <Button className="w-full bg-brand-accent text-white hover:bg-brand-accent-dark px-8 sm:px-10 py-6 rounded-[2rem] font-black text-sm sm:text-base shadow-2xl shadow-brand-accent/30 hover:scale-105 transition-all uppercase tracking-widest">
+                <Link to="/register" className="w-full sm:flex-1">
+                  <Button className="w-full bg-brand-accent text-white hover:bg-brand-accent-dark px-6 sm:px-8 py-6 rounded-[2rem] font-black text-sm sm:text-base shadow-2xl shadow-brand-accent/30 hover:scale-105 transition-all uppercase tracking-widest">
                     {t.landing?.getStarted || "Get Started"}
                     <ArrowRight className="ml-2 w-4 h-4 sm:w-5 sm:h-5" />
                   </Button>
@@ -778,36 +778,12 @@ const Landing = () => {
               className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8"
             >
               {[
-                {
-                  title: "Bible App",
-                  icon: Globe,
-                  desc: "Access the full Scriptures anytime, anywhere. Multiple translations for deeper study and understanding.",
-                },
-                {
-                  title: "Bible Studies",
-                  icon: BookOpen,
-                  desc: "Structured study guides that walk you through books of the Bible with rich insights and historical context.",
-                },
-                {
-                  title: "Verse by Verse Teaching",
-                  icon: Mic2,
-                  desc: "Detailed verse-by-verse explanations to uncover the depth and meaning of every passage of Scripture.",
-                },
-                {
-                  title: "Verse Devotionals",
-                  icon: Heart,
-                  desc: "Daily devotionals centered on specific verses to help you meditate on God's Word and apply it to your life.",
-                },
-                {
-                  title: "Journaling",
-                  icon: Sparkles,
-                  desc: "Capture your thoughts, prayers, and reflections as you journey through Scripture with guided journal prompts.",
-                },
-                {
-                  title: "Challenges",
-                  icon: Trophy,
-                  desc: "Engage in Bible reading challenges and trivia to grow your knowledge and stay consistent in the Word.",
-                },
+                { title: t.landing?.featureBibleAppTitle || "Bible App", icon: Globe, desc: t.landing?.featureBibleAppDesc || "Access the full Scriptures anytime, anywhere. Multiple translations for deeper study and understanding." },
+                { title: t.landing?.featureBibleStudiesTitle || "Bible Studies", icon: BookOpen, desc: t.landing?.featureBibleStudiesDesc || "Structured study guides that walk you through books of the Bible with rich insights and historical context." },
+                { title: t.landing?.featureVVTeachingTitle || "Verse by Verse Teaching", icon: Mic2, desc: t.landing?.featureVVTeachingDesc || "Detailed verse-by-verse explanations to uncover the depth and meaning of every passage of Scripture." },
+                { title: t.landing?.featureVDevotionalsTitle || "Verse Devotionals", icon: Heart, desc: t.landing?.featureVDevotionalsDesc || "Daily devotionals centered on specific verses to help you meditate on God's Word and apply it to your life." },
+                { title: t.landing?.featureJournalingTitle || "Journaling", icon: Sparkles, desc: t.landing?.featureJournalingDesc || "Capture your thoughts, prayers, and reflections as you journey through Scripture with guided journal prompts." },
+                { title: t.landing?.featureChallengesTitle || "Challenges", icon: Trophy, desc: t.landing?.featureChallengesDesc || "Engage in Bible reading challenges and trivia to grow your knowledge and stay consistent in the Word." },
               ].map((f, i) => (
                 <motion.div
                   key={f.title}
@@ -855,7 +831,7 @@ const Landing = () => {
                   <span className="text-brand-primary">
                     {t.landing?.bibleStatsTitleHighlight || "Word"}
                   </span>
-                  {" of God"}
+                  {t.landing?.bibleStatsOfGod || " of God"}
                 </h2>
               </div>
 
@@ -927,26 +903,10 @@ const Landing = () => {
                 className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6"
               >
                 {[
-                  {
-                    title: "Verse by Verse Teaching",
-                    icon: Mic2,
-                    desc: "Explanation and application with a learn more tab just like our Lordsbook dailies verse by verse.",
-                  },
-                  {
-                    title: "Verse Devotionals",
-                    icon: Heart,
-                    desc: "Daily devotionals centered on specific verses to help you meditate on God's Word and apply it to your life.",
-                  },
-                  {
-                    title: "Bible Study",
-                    icon: BookOpen,
-                    desc: "Structured study guides that walk you through books of the Bible with rich insights and historical context.",
-                  },
-                  {
-                    title: "Journaling",
-                    icon: Sparkles,
-                    desc: "Capture your thoughts, prayers, and reflections as you journey through Scripture with guided journal prompts.",
-                  },
+                  { title: t.landing?.exegesisVVTeachingTitle || "Verse by Verse Teaching", icon: Mic2, desc: t.landing?.exegesisVVTeachingDesc || "Explanation and application with a learn more tab just like our Lordsbook dailies verse by verse." },
+                  { title: t.landing?.exegesisVDevotionalsTitle || "Verse Devotionals", icon: Heart, desc: t.landing?.exegesisVDevotionalsDesc || "Daily devotionals centered on specific verses to help you meditate on God's Word and apply it to your life." },
+                  { title: t.landing?.exegesisBibleStudyTitle || "Bible Study", icon: BookOpen, desc: t.landing?.exegesisBibleStudyDesc || "Structured study guides that walk you through books of the Bible with rich insights and historical context." },
+                  { title: t.landing?.exegesisJournalingTitle || "Journaling", icon: Sparkles, desc: t.landing?.exegesisJournalingDesc || "Capture your thoughts, prayers, and reflections as you journey through Scripture with guided journal prompts." },
                 ].map((item, i) => (
                   <motion.div
                     key={item.title}
@@ -1179,7 +1139,7 @@ const Landing = () => {
                     />
                   </div>
                   <span className="text-xl sm:text-2xl font-black text-white font-[family-name:var(--font-heading)] tracking-tighter">
-                    EXEGESIS PROJECT
+                    {t.landing?.siteTitle || "EXEGESIS PROJECT"}
                   </span>
                 </div>
                 <p className="text-slate-400 text-sm sm:text-base leading-relaxed max-w-xs mx-auto">
@@ -1237,7 +1197,7 @@ const Landing = () => {
                 )}
               </p>
               <p className="text-slate-500 text-[10px] sm:text-xs font-black uppercase tracking-widest">
-                {t.landing?.footerPoweredBy || "Powered by Him First media Group."}
+                {t.landing?.footerPoweredBy || "Powered by Him First Media Group."}
               </p>
             </div>
           </div>

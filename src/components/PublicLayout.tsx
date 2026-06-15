@@ -74,17 +74,17 @@ const PublicLayout = () => {
       {
         label: t.landing?.navAbout || "About Us", icon: Users, description: t.landing?.navAboutDesc || "Learn about our mission", mobileColor: "#99F6E4",
         subItems: [
-          { label: "Who We Are", href: "/who-we-are" },
-          { label: "Our Vision", href: "/our-vision" },
-          { label: "Our Mission", href: "/our-mission" },
-          { label: "Our Goals", href: "/our-goals" },
-          { label: "Leadership", href: "/leadership" },
-          { label: "Founders", href: "/founders" },
+          { label: t.landing?.aboutSubWhoWeAre || "Who We Are", href: "/who-we-are" },
+          { label: t.landing?.aboutSubVision || "Our Vision", href: "/our-vision" },
+          { label: t.landing?.aboutSubMission || "Our Mission", href: "/our-mission" },
+          { label: t.landing?.aboutSubGoals || "Our Goals", href: "/our-goals" },
+          { label: t.landing?.aboutSubLeadership || "Leadership", href: "/leadership" },
+          { label: t.landing?.aboutSubFounders || "Founders", href: "/founders" },
         ],
       },
       { label: t.landing?.navExegesisDaily || "Exegesis", href: "/", icon: CalendarDays, description: t.landing?.navExegesisDailyDesc || "Daily devotionals", mobileColor: "#FFB4B4" },
-      { label: "Features", href: "/#features", icon: Sparkles, description: "App features & tools", mobileColor: "#A7F3D0" },
-      { label: "Resources", href: "/", icon: Globe, description: "Bible studies & guides", mobileColor: "#C7D2FE" },
+      { label: t.landing?.navFeatures || "Features", href: "/#features", icon: Sparkles, description: t.landing?.navFeaturesDesc || "App features & tools", mobileColor: "#A7F3D0" },
+      { label: t.landing?.navResources || "Resources", href: "/", icon: Globe, description: t.landing?.navResourcesDesc || "Bible studies & guides", mobileColor: "#C7D2FE" },
       { label: t.landing?.navContact || "Contact Us", href: "/#contact", icon: MailIcon, description: t.landing?.navContactDesc || "Get in touch", mobileColor: "#FBCFE8" },
     ],
     [t],
@@ -162,7 +162,7 @@ const PublicLayout = () => {
                 <img src={logoImage} alt="Exegesis" className="w-full h-full object-contain" />
               </div>
               <span className="font-black text-base sm:text-xl text-brand-primary font-[family-name:var(--font-heading)] tracking-tighter">
-                EXEGESIS PROJECT
+                {t.landing?.siteTitle || "EXEGESIS PROJECT"}
               </span>
             </Link>
 
@@ -248,7 +248,7 @@ const PublicLayout = () => {
                   <img src={logoImage} alt="Exegesis" className="w-full h-full object-contain" />
                 </div>
                 <span className="font-black text-xs text-brand-primary font-[family-name:var(--font-heading)] tracking-tighter">
-                  EXEGESIS PROJECT
+                  {t.landing?.siteTitle || "EXEGESIS PROJECT"}
                 </span>
               </div>
               <Link to="/login">
@@ -379,7 +379,7 @@ const PublicLayout = () => {
                 <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-white/5 p-2 flex items-center justify-center border border-white/10">
                   <img src={logoImage} alt="Exegesis" className="w-full h-full object-contain brightness-0 invert" />
                 </div>
-                <span className="text-xl sm:text-2xl font-black text-white font-[family-name:var(--font-heading)] tracking-tighter">EXEGESIS PROJECT</span>
+                <span className="text-xl sm:text-2xl font-black text-white font-[family-name:var(--font-heading)] tracking-tighter">{t.landing?.siteTitle || "EXEGESIS PROJECT"}</span>
               </div>
               <p className="text-slate-400 text-sm sm:text-base leading-relaxed max-w-xs mx-auto">
                 {t.landing?.footerDesc || "Helping you shine with excellence and integrity through the power of the Word."}

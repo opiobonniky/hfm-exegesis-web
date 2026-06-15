@@ -54,10 +54,9 @@
     "like": "Like",
     "liked": "Liked"
   },
-
   "landing": {
-    "welcome": "Welcome to Exegesis Bible",
-    "heroTitle": "Search The",
+    "welcome": "Welcome To The",
+    "heroTitle": "Exegesis Project!",
     "heroSubtitle": "Scriptures Daily",
     "getStarted": "Start Your Journey",
     "readBible": "Read the Bible",
@@ -73,7 +72,7 @@
     "navBibleTrivia": "Bible Trivia",
     "navAbout": "About Us",
     "navContact": "Contact Us",
-    "navHomeDesc": "Welcome \u0026 daily verse",
+    "navHomeDesc": "Welcome & daily verse",
     "navExegesisDailyDesc": "Daily devotionals",
     "navPrayerWallDesc": "Community prayers",
     "navTestifyDesc": "Share your story",
@@ -125,7 +124,7 @@
     "prayingLabel": "Praying ({n})",
     "prayNow": "PRAY NOW →",
     "testifyBadge": "Testimonies",
-    "testifyTitle": "Testify \u0026",
+    "testifyTitle": "Testify &",
     "testifyTitleHighlight": "Inspire",
     "testifyDesc": "God is still writing amazing stories. Share your journey and help others see His power.",
     "shareStory": "Share Your Story",
@@ -143,7 +142,7 @@
     "aboutTitleHighlight": "Impact",
     "aboutPara1": "At Exegesis, we believe your spiritual journey deserves more than just a casual reading—it deserves a powerful, purpose-driven digital footprint rooted in faith and fueled by the Gospel.",
     "aboutPara2": "We're not just another app—we're passionate Jesus followers, tech experts, and creative visionaries who live to serve the Lord in everything we do.",
-    "aboutMotto": "Quality, Service, \u0026 Integrity — Built for His Glory.",
+    "aboutMotto": "Quality, Service, & Integrity — Built for His Glory.",
     "aboutStatVerses": "31K+",
     "aboutStatDaily": "150+",
     "aboutStatGlobal": "Global",
@@ -166,7 +165,7 @@
     "footerResourcesHeading": "Resources",
     "footerMottoHeading": "Our Motto",
     "footerMottoLine1": "Quality,",
-    "footerMottoLine2": "Service, \u0026 Integrity!",
+    "footerMottoLine2": "Service, & Integrity!",
     "footerBuiltFor": "Built for His Glory",
     "footerCopyright": "© {year} Exegesis. Built for Kingdom Impact.",
     "footerMadeWith": "Made with",
@@ -195,9 +194,46 @@
     "testyCard3Story": "I started sharing Exegesis Daily devotionals with my wife every morning. Within six months, my entire household gave their lives to Christ.",
     "triviaQ1": "How many books are in the Old Testament?",
     "triviaQ2": "Who built the ark?",
-    "triviaQ3": "Which book comes first in the New Testament?"
+    "triviaQ3": "Which book comes first in the New Testament?",
+    "navFeatures": "Features",
+    "navFeaturesDesc": "App features & tools",
+    "navResources": "Resources",
+    "navResourcesDesc": "Bible studies & guides",
+    "aboutSubWhoWeAre": "Who We Are",
+    "aboutSubVision": "Our Vision",
+    "aboutSubMission": "Our Mission",
+    "aboutSubGoals": "Our Goals",
+    "aboutSubLeadership": "Leadership",
+    "aboutSubFounders": "Founders",
+    "watchIntro": "Watch The Intro",
+    "bibleStatsOfGod": " of God",
+    "featureBibleAppTitle": "Bible App",
+    "featureBibleAppDesc": "Access the full Scriptures anytime, anywhere. Multiple translations for deeper study and understanding.",
+    "featureBibleStudiesTitle": "Bible Studies",
+    "featureBibleStudiesDesc": "Structured study guides that walk you through books of the Bible with rich insights and historical context.",
+    "featureVVTeachingTitle": "Verse by Verse Teaching",
+    "featureVVTeachingDesc": "Detailed verse-by-verse explanations to uncover the depth and meaning of every passage of Scripture.",
+    "featureVDevotionalsTitle": "Verse Devotionals",
+    "featureVDevotionalsDesc": "Daily devotionals centered on specific verses to help you meditate on God's Word and apply it to your life.",
+    "featureJournalingTitle": "Journaling",
+    "featureJournalingDesc": "Capture your thoughts, prayers, and reflections as you journey through Scripture with guided journal prompts.",
+    "featureChallengesTitle": "Challenges",
+    "featureChallengesDesc": "Engage in Bible reading challenges and trivia to grow your knowledge and stay consistent in the Word.",
+    "exegesisVVTeachingTitle": "Verse by Verse Teaching",
+    "exegesisVVTeachingDesc": "Explanation and application with a learn more tab just like our Lordsbook dailies verse by verse.",
+    "exegesisVDevotionalsTitle": "Verse Devotionals",
+    "exegesisVDevotionalsDesc": "Daily devotionals centered on specific verses to help you meditate on God's Word and apply it to your life.",
+    "exegesisBibleStudyTitle": "Bible Study",
+    "exegesisBibleStudyDesc": "Structured study guides that walk you through books of the Bible with rich insights and historical context.",
+    "exegesisJournalingTitle": "Journaling",
+    "exegesisJournalingDesc": "Capture your thoughts, prayers, and reflections as you journey through Scripture with guided journal prompts.",
+    "socialLordsBook": "LordsBook",
+    "footerConnect": "Connect With Us",
+    "footerPoweredBy": "Powered by Him First Media Group.",
+    "footerVerse": "\"Write the vision, and make it plain upon tables, that he may run that readeth it.\"",
+    "footerVerseRef": "Habakkuk 2:2",
+    "siteTitle": "EXEGESIS PROJECT"
   },
-
   "auth": {
     "login": "Login",
     "register": "Register",
@@ -324,7 +360,6 @@
     "enterSixDigitCode": "Enter 6-digit code",
     "correctErrorsBeforeContinuing": "Please correct the errors before continuing."
   },
-
   "dashboard": {
     "welcome": "Welcome back",
     "myDashboard": "My Dashboard",
@@ -396,7 +431,6 @@
     "recentUsers": "Recent Users",
     "daysShort": "{n}d"
   },
-
   "bibleReader": {
     "title": "Bible Reader",
     "scripture": "Scripture",
@@ -435,7 +469,7 @@
     "stop": "Stop",
     "fav": "Fav",
     "journal": "Journal",
-    "selectedVerses": "Selected verses",
+    "selectedVerses": "Selected Verses",
     "verseNum": "Verse {n}",
     "continueOn": "Continue On",
     "autoStop": "Auto-Stop",
@@ -476,7 +510,6 @@
     "failedToLoadExplanation": "Failed to load explanation.",
     "verseRange": "Verse Range",
     "versesSelected": "{n} verses selected",
-    "selectedVerses": "Selected Verses",
     "searchBible": "Search Bible",
     "searchPlaceholder": "Search for verses...",
     "searching": "Searching...",
@@ -487,7 +520,6 @@
     "favorite": "Favorite",
     "clearSelection": "Clear"
   },
-
   "dailyVerse": {
     "verseOfDay": "Verse of the Day",
     "dailyVerse": "Daily Verse",
@@ -608,7 +640,6 @@
     "ctaGuideText": "Let God's Word guide your thoughts and actions today.",
     "ctaMeditateText": "Take a moment to meditate on this verse"
   },
-
   "devotions": {
     "dailyDevotions": "Daily Devotions",
     "devotions": "Devotions",
@@ -647,7 +678,8 @@
     "presetLastMonth": "Last month",
     "saveChanges": "Save Changes",
     "devotionUpdated": "Daily devotion updated successfully.",
-    "devotionDeleted": "Daily devotion deleted successfully.",    "devotionTitlePlaceholder": "Devotion title...",
+    "devotionDeleted": "Daily devotion deleted successfully.",
+    "devotionTitlePlaceholder": "Devotion title...",
     "devotionContentPlaceholder": "Devotion content...",
     "dateRangeError": "Start date must be before end date.",
     "toastError": "Error",
@@ -662,7 +694,8 @@
     "todayBadge": "Today",
     "pastBadge": "Past",
     "reflectOnThis": "Reflect on this devotion today"
-  },"journal": {
+  },
+  "journal": {
     "journal": "Journal",
     "myJournal": "My Journal",
     "newEntry": "New Entry",
@@ -831,7 +864,6 @@
     "deletePrompt": "Delete Prompt",
     "deletePromptDesc": "Are you sure you want to delete this prompt?"
   },
-
   "verseExplanations": {
     "title": "Verse Explanations",
     "explanations": "Explanations",
@@ -867,7 +899,7 @@
     "explanationPlaceholder": "Write a clear, helpful explanation of this verse...",
     "minCharsError": "Minimum 20 characters required",
     "learnMoreTitle": "Learn More",
-    "learnMoreBadge": "optional",
+    "learnMoreBadge": "Learn More",
     "learnMoreDesc": "Deeper context shown when users tap the \"Learn More\" button in the app",
     "learnMoreLabel": "Additional content",
     "learnMorePlaceholder": "Historical context, cross-references, deeper theological insights...",
@@ -906,7 +938,6 @@
     "clExplanationWords": "Explanation should be at least 20 words",
     "pageTitle": "Verse Explanations",
     "adminManagement": "Admin management",
-    "addExplanation": "Add Explanation",
     "statTotal": "Total Explanations",
     "statWithLearnMore": "With Learn More",
     "statBooksCovered": "Books Covered",
@@ -915,7 +946,6 @@
     "noExplanationsYet": "No verse explanations yet",
     "noSearchMatch": "No results match your search",
     "addFirstExplanation": "Add your first explanation",
-    "learnMoreBadge": "Learn More",
     "updatedLabel": "Updated",
     "showingCount": "Showing {filtered} of {total} explanation",
     "showingCountPlural": "Showing {filtered} of {total} explanations",
@@ -932,7 +962,6 @@
     "editTitle": "Edit explanation",
     "deleteTitle": "Delete explanation"
   },
-
   "readingPlan": {
     "readingPlans": "Reading Plans",
     "myPlans": "My Plans",
@@ -1186,10 +1215,6 @@
     "catAllCategories": "All Categories",
     "catIntroduction": "Introduction",
     "catSingleBook": "Single Book",
-    "catNT": "New Testament",
-    "catOT": "Old Testament",
-    "catTopical": "Topical",
-    "catWholeBible": "Whole Bible",
     "comingSoon": "Coming Soon",
     "dayNotAddedDesc": "Day {dayNum}'s reading assignment hasn't been added yet.",
     "tapToRead": "Tap to read",
@@ -1269,7 +1294,6 @@
     "quizShort": "quiz",
     "chapterShort": "Ch"
   },
-
   "myActivity": {
     "justNow": "just now",
     "minAgo": "{n} min ago",
@@ -1290,7 +1314,6 @@
     "toastHistoryItemRemoved": "History item removed",
     "toastFailedRemoveHistory": "Failed to remove history"
   },
-
   "userActivity": {
     "userActivity": "User Activity",
     "activities": "Activities",
@@ -1307,9 +1330,9 @@
     "statSuccessfulLogins": "Successful Logins",
     "statFailedAttempts": "Failed Attempts",
     "statOnlineNow": "Online Now",
-    "topBrowsers": "Top Browsers \u0026 Operating Systems",
+    "topBrowsers": "Top Browsers & Operating Systems",
     "operatingSystems": "Operating Systems",
-    "topDeviceTypes": "Top Device Types, Locales \u0026 IPs",
+    "topDeviceTypes": "Top Device Types, Locales & IPs",
     "topLocales": "Locales",
     "topIps": "Top IPs",
     "browsersLabel": "Browsers",
@@ -1401,7 +1424,6 @@
     "toastNetworkError": "Network error",
     "toastFailedLoad": "Failed to load activity"
   },
-
   "userManagement": {
     "title": "User Management",
     "subtitle": "Manage accounts, roles, and access",
@@ -1491,7 +1513,6 @@
     "clearAll": "Clear all",
     "allUsers": "All Users"
   },
-
   "error": {
     "notFound": "404",
     "pageNotFound": "Page Not Found",
@@ -1499,7 +1520,6 @@
     "redirecting": "Redirecting...",
     "pleaseLogin": "Please login to access this page"
   },
-
   "userDashboard": {
     "loadingDashboard": "Loading your dashboard…",
     "goodMorning": "Good Morning",
@@ -1548,19 +1568,16 @@
     "hoursAgo": "{h}h ago",
     "daysAgo": "{d}d ago"
   },
-
   "brand": {
     "title": "EXEGESIS",
     "subtitle": "PROJECT"
   },
-
   "languageGroups": {
     "primary": "Primary",
     "european": "European",
     "indian": "Indian",
     "other": "Other"
   },
-
   "sidebar": {
     "home": "Home",
     "bible": "Bible app",
@@ -1582,7 +1599,6 @@
     "journalTemplates": "Journal Templates",
     "myDashboard": "My Dashboard"
   },
-
   "settings": {
     "pageTitle": "Account Settings",
     "yourProfile": "Your Profile",
@@ -1596,7 +1612,6 @@
     "tabPasswordShort": "PASS",
     "tabLanguage": "Language",
     "tabLanguageShort": "LANG",
-
     "personalInfo": "Personal Info",
     "personalInfoDesc": "Your basic account details",
     "usernameLabel": "Username",
@@ -1616,7 +1631,6 @@
     "genderMale": "Male",
     "genderFemale": "Female",
     "genderOther": "Other",
-
     "additionalDetails": "Additional Details",
     "additionalDetailsDesc": "More info about yourself",
     "maritalStatusLabel": "Marital Status",
@@ -1634,7 +1648,6 @@
     "servicePositionPlaceholder": "e.g., Leader, Volunteer",
     "spiritualGiftsLabel": "Spiritual Gifts",
     "spiritualGiftsPlaceholder": "e.g., Teaching, Mercy, Evangelism",
-
     "emergencyContact": "Emergency Contact",
     "emergencyContactDesc": "Who to contact in case of emergency",
     "contactNameLabel": "Contact Name",
@@ -1642,14 +1655,12 @@
     "contactPhoneLabel": "Phone Number",
     "relationshipLabel": "Relationship",
     "relationshipPlaceholder": "e.g., Spouse, Parent",
-
     "languageRegion": "Language & Region",
     "languageDesc": "Choose your preferred language for the app interface",
     "interfaceLanguage": "Interface Language",
     "translationNote": "Some translations may be incomplete. Missing text will appear in English.",
     "switchNote": "Switch to any supported language. The interface will update immediately.",
     "translationWarning": "Translations are in progress. Parts of the interface may still display in English.",
-
     "changePassword": "Change Password",
     "changePasswordDesc": "Keep your account secure",
     "currentPasswordLabel": "Current Password *",
@@ -1662,7 +1673,6 @@
     "passwordsDontMatch": "Passwords don't match",
     "passwordsRequirementNote": "Passwords must match and meet all requirements before saving.",
     "updatePassword": "Update Password",
-
     "profileUpdated": "Profile updated successfully",
     "profileUpdateFailed": "Failed to update profile",
     "profileUpdateError": "Error updating profile",
@@ -1676,10 +1686,93 @@
     "passwordUpdated": "Password updated successfully",
     "passwordUpdateFailed": "Failed to update password",
     "passwordUpdateError": "Error updating password",
-
     "langGroupPrimary": "Primary",
     "langGroupEuropean": "European",
     "langGroupIndian": "Indian",
     "langGroupOther": "Other"
+  },
+  "himFirstMedia": {
+    "whoWeAreBadge": "About Us",
+    "whoWeAreTitle": "Who",
+    "whoWeAreTitleHighlight": "We Are",
+    "whoWeAreTagline": "We're passionate Jesus followers, tech experts, and creative visionaries who live to serve the Lord in everything we do.",
+    "whoWeArePara1": "At Exegesis, we believe your spiritual journey deserves more than just a casual reading — it deserves a powerful, purpose-driven digital footprint rooted in faith and fueled by the Gospel.",
+    "whoWeArePara2": "We are a project of Him First Media Group, a full-service Christian digital marketing agency dedicated to helping Christian businesses, churches, and ministries shine online with excellence and integrity.",
+    "whoWeArePara3": "Our goal is simple: to help you reach more people, impact more lives, and glorify God through the power of His Word.",
+    "whoWeAreValue1Title": "Rooted in Truth",
+    "whoWeAreValue1Desc": "Every insight is grounded in sound biblical scholarship and prayer.",
+    "whoWeAreValue2Title": "Faith-Filled",
+    "whoWeAreValue2Desc": "Everything we do is centered around faith, excellence, and Kingdom impact.",
+    "whoWeAreValue3Title": "Spirit-Led Tech",
+    "whoWeAreValue3Desc": "We use modern technology to illuminate ancient wisdom for today's generation.",
+    "whoWeAreMotto": "\"Quality, Service, & Integrity — Built for His Glory.\"",
+    "whoWeAreCta": "Join Our Community",
+    "ourVisionBadge": "Our Vision",
+    "ourVisionTitle": "Our",
+    "ourVisionTitleHighlight": "Vision",
+    "ourVisionTagline": "To see every believer equipped with the Word of God through technology that inspires, teaches, and transforms.",
+    "ourVisionSectionTitle": "A Kingdom-Focused Future",
+    "ourVisionPara1": "Our vision is to build the most comprehensive, accessible, and Spirit-led Bible study platform in the world. We envision a global community where believers from every nation can dive deep into Scripture, grow in their faith, and connect with others on the same journey.",
+    "ourVisionPara2": "As a project of Him First Media Group, we are committed to using cutting-edge digital tools to spread the Gospel and make disciples of all nations. We believe that technology, when submitted to the Lordship of Jesus Christ, can be a powerful vehicle for Kingdom impact.",
+    "ourVisionPara3": "We see a world where every Christian has a personalized Bible study experience — with daily verses, reading plans, journaling tools, and rich verse-by-verse teaching — all designed to draw them closer to the heart of God.",
+    "ourVisionVerse": "\"Write the vision, and make it plain upon tables, that he may run that readeth it.\"",
+    "ourVisionVerseRef": "Habakkuk 2:2",
+    "ourVisionCta": "Join the Vision",
+    "ourMissionBadge": "Our Mission",
+    "ourMissionTitle": "Our",
+    "ourMissionTitleHighlight": "Mission",
+    "ourMissionTagline": "To help you reach more people, impact more lives, and glorify God through the power of His Word.",
+    "ourMissionSectionTitle": "What Drives Us",
+    "ourMissionPara1": "Our mission is simple: to make the deep truths of Scripture accessible to everyone, everywhere. We believe that the Word of God is alive, active, and relevant for every generation — and we're committed to using every tool at our disposal to help people engage with it.",
+    "ourMissionPara2": "As a project of Him First Media Group, we bring decades of experience in Christian digital marketing, app development, and web design to the service of the Church. We're not just building an app — we're building a movement of believers who are rooted in the Word and equipped for every good work.",
+    "ourMissionCard1Title": "Teach the Word",
+    "ourMissionCard1Desc": "Provide rich, verse-by-verse teaching that makes Scripture come alive.",
+    "ourMissionCard2Title": "Build Community",
+    "ourMissionCard2Desc": "Create a space where believers can pray, testify, and grow together.",
+    "ourMissionCard3Title": "Reach the World",
+    "ourMissionCard3Desc": "Make the Bible accessible in multiple languages and translations.",
+    "ourMissionCard4Title": "Equip the Saints",
+    "ourMissionCard4Desc": "Give believers the tools they need to study, journal, and apply God's Word.",
+    "ourMissionCta": "Join Our Mission",
+    "ourGoalsBadge": "Our Goals",
+    "ourGoalsTitle": "Our",
+    "ourGoalsTitleHighlight": "Goals",
+    "ourGoalsTagline": "Clear targets we're pursuing to fulfill our calling and maximize Kingdom impact.",
+    "ourGoalsCard1Title": "Deepen Scriptural Engagement",
+    "ourGoalsCard1Desc": "Help users read, understand, and apply the Bible daily through multi-translation access, verse-by-verse teaching, and interactive reading plans.",
+    "ourGoalsCard2Title": "Build a Global Prayer Community",
+    "ourGoalsCard2Desc": "Connect believers from every nation to pray for one another, share testimonies, and encourage each other in faith.",
+    "ourGoalsCard3Title": "Expand Language Reach",
+    "ourGoalsCard3Desc": "Make the platform accessible in 23+ languages so that the Word of God can reach every tongue and tribe.",
+    "ourGoalsCard4Title": "Equip the Next Generation",
+    "ourGoalsCard4Desc": "Provide tools like journaling, reading challenges, and trivia that help young believers grow in their knowledge of Scripture.",
+    "ourGoalsCta": "Join Us in Reaching These Goals",
+    "leadershipBadge": "Leadership",
+    "leadershipTitle": "Our",
+    "leadershipTitleHighlight": "Leadership",
+    "leadershipTagline": "A team of dedicated professionals committed to serving the Lord with excellence.",
+    "leadershipSectionTitle": "Tom Donovan — Founder & Visionary",
+    "leadershipPara1": "Tom Donovan is the innovative Founder of Him First Media Group and a bold Christian businessman with a heart on fire for Jesus. With decades of entrepreneurial experience, Tom has launched and developed numerous faith-based companies and Christian digital products designed to serve the Body of Christ.",
+    "leadershipPara2": "His mission is clear: to help ministries, churches, and Christian businesses grow, thrive, and impact the world for God's glory. Tom leads with integrity, creativity, and a deep love for the Lord, keeping his faith at the very top of everything he does.",
+    "leadershipPara3": "Through his visionary leadership, countless organizations have built strong digital foundations rooted in faith, purpose, and excellence. Tom is not just building businesses — he's building the Kingdom.",
+    "leadershipMember1Name": "Eric Johnson",
+    "leadershipMember1Role": "Account Manager",
+    "leadershipMember2Name": "Adrian Ostendauf",
+    "leadershipMember2Role": "Social Media Strategist",
+    "leadershipMember3Name": "Allyson Tibaldi",
+    "leadershipMember3Role": "Project Management",
+    "leadershipMember4Name": "Andrew Kamuli",
+    "leadershipMember4Role": "App Development",
+    "foundersBadge": "Founders",
+    "foundersTitle": "Our",
+    "foundersTitleHighlight": "Founders",
+    "foundersTagline": "Built on a foundation of faith, vision, and a relentless commitment to Kingdom impact.",
+    "foundersSectionTitle": "Tom Donovan — Founder, Him First Media Group",
+    "foundersPara1": "The Exegesis Project was born out of the vision and resources of Him First Media Group, founded by Tom Donovan. A Christian businessman with a passion for using technology to advance the Gospel, Tom has spent decades building digital solutions that serve the Body of Christ.",
+    "foundersPara2": "Him First Media Group is a full-service Christian digital marketing agency that specializes in Christian SEO, social media marketing, website design, and app development for Christian businesses, churches, and ministries. The company was founded on the principle that every digital effort should put Jesus first.",
+    "foundersPara3": "The Exegesis Project is the fulfillment of a long-held dream to create a Bible study platform that combines deep theological insight with cutting-edge technology — making the Word of God accessible, engaging, and transformative for believers around the world.",
+    "foundersMotto": "\"Quality, Service, & Integrity — Built for His Glory.\"",
+    "foundersMottoRef": "— The Him First Media Group Motto",
+    "foundersCta": "Be Part of the Story"
   }
 }

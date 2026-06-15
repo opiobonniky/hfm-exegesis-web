@@ -260,6 +260,52 @@ export interface Translations {
     socialFacebook: string;
     socialTikTok: string;
     socialWhatsApp: string;
+    // ── Nav extra ──
+    navFeatures: string;
+    navFeaturesDesc: string;
+    navResources: string;
+    navResourcesDesc: string;
+    // ── Nav about subitems ──
+    aboutSubWhoWeAre: string;
+    aboutSubVision: string;
+    aboutSubMission: string;
+    aboutSubGoals: string;
+    aboutSubLeadership: string;
+    aboutSubFounders: string;
+    // ── Hero ──
+    watchIntro: string;
+    bibleStatsOfGod: string;
+    // ── Features cards ──
+    featureBibleAppTitle: string;
+    featureBibleAppDesc: string;
+    featureBibleStudiesTitle: string;
+    featureBibleStudiesDesc: string;
+    featureVVTeachingTitle: string;
+    featureVVTeachingDesc: string;
+    featureVDevotionalsTitle: string;
+    featureVDevotionalsDesc: string;
+    featureJournalingTitle: string;
+    featureJournalingDesc: string;
+    featureChallengesTitle: string;
+    featureChallengesDesc: string;
+    // ── Exegesis Daily cards ──
+    exegesisVVTeachingTitle: string;
+    exegesisVVTeachingDesc: string;
+    exegesisVDevotionalsTitle: string;
+    exegesisVDevotionalsDesc: string;
+    exegesisBibleStudyTitle: string;
+    exegesisBibleStudyDesc: string;
+    exegesisJournalingTitle: string;
+    exegesisJournalingDesc: string;
+    // ── Social extra ──
+    socialLordsBook: string;
+    // ── Footer extra ──
+    footerConnect: string;
+    footerPoweredBy: string;
+    footerVerse: string;
+    footerVerseRef: string;
+    // ── Site brand ──
+    siteTitle: string;
   };
 
   /** Auth pages (Login, Register, ForgotPassword, VerifyAccount, GoogleRegister) */
@@ -1816,6 +1862,98 @@ export interface Translations {
     journalPrompts: string;
     journalTemplates: string;
     myDashboard: string;
+  };
+
+  /** Him First Media pages (Who We Are, Our Vision, etc.) */
+  himFirstMedia: {
+    // ── Who We Are ──
+    whoWeAreBadge: string;
+    whoWeAreTitle: string;
+    whoWeAreTitleHighlight: string;
+    whoWeAreTagline: string;
+    whoWeArePara1: string;
+    whoWeArePara2: string;
+    whoWeArePara3: string;
+    whoWeAreValue1Title: string;
+    whoWeAreValue1Desc: string;
+    whoWeAreValue2Title: string;
+    whoWeAreValue2Desc: string;
+    whoWeAreValue3Title: string;
+    whoWeAreValue3Desc: string;
+    whoWeAreMotto: string;
+    whoWeAreCta: string;
+    // ── Our Vision ──
+    ourVisionBadge: string;
+    ourVisionTitle: string;
+    ourVisionTitleHighlight: string;
+    ourVisionTagline: string;
+    ourVisionSectionTitle: string;
+    ourVisionPara1: string;
+    ourVisionPara2: string;
+    ourVisionPara3: string;
+    ourVisionVerse: string;
+    ourVisionVerseRef: string;
+    ourVisionCta: string;
+    // ── Our Mission ──
+    ourMissionBadge: string;
+    ourMissionTitle: string;
+    ourMissionTitleHighlight: string;
+    ourMissionTagline: string;
+    ourMissionSectionTitle: string;
+    ourMissionPara1: string;
+    ourMissionPara2: string;
+    ourMissionCard1Title: string;
+    ourMissionCard1Desc: string;
+    ourMissionCard2Title: string;
+    ourMissionCard2Desc: string;
+    ourMissionCard3Title: string;
+    ourMissionCard3Desc: string;
+    ourMissionCard4Title: string;
+    ourMissionCard4Desc: string;
+    ourMissionCta: string;
+    // ── Our Goals ──
+    ourGoalsBadge: string;
+    ourGoalsTitle: string;
+    ourGoalsTitleHighlight: string;
+    ourGoalsTagline: string;
+    ourGoalsCard1Title: string;
+    ourGoalsCard1Desc: string;
+    ourGoalsCard2Title: string;
+    ourGoalsCard2Desc: string;
+    ourGoalsCard3Title: string;
+    ourGoalsCard3Desc: string;
+    ourGoalsCard4Title: string;
+    ourGoalsCard4Desc: string;
+    ourGoalsCta: string;
+    // ── Leadership ──
+    leadershipBadge: string;
+    leadershipTitle: string;
+    leadershipTitleHighlight: string;
+    leadershipTagline: string;
+    leadershipSectionTitle: string;
+    leadershipPara1: string;
+    leadershipPara2: string;
+    leadershipPara3: string;
+    leadershipMember1Name: string;
+    leadershipMember1Role: string;
+    leadershipMember2Name: string;
+    leadershipMember2Role: string;
+    leadershipMember3Name: string;
+    leadershipMember3Role: string;
+    leadershipMember4Name: string;
+    leadershipMember4Role: string;
+    // ── Founders ──
+    foundersBadge: string;
+    foundersTitle: string;
+    foundersTitleHighlight: string;
+    foundersTagline: string;
+    foundersSectionTitle: string;
+    foundersPara1: string;
+    foundersPara2: string;
+    foundersPara3: string;
+    foundersMotto: string;
+    foundersMottoRef: string;
+    foundersCta: string;
   };
 }
 
