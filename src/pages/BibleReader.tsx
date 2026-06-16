@@ -1335,6 +1335,9 @@ export default function BibleReader() {
           const book = ck.substring(0, ld);
           const ch = parseInt(ck.substring(ld + 1), 10);
           if (!book || isNaN(ch)) return;
+          if (book !== displayBookRef.current || ch !== displayChapterRef.current) {
+            setSelectedVerse(null);
+          }
           setDisplayBook(book);
           setDisplayChapter(ch);
           // NOT updating selectedChapter — prevents scroll fighting
@@ -1993,6 +1996,7 @@ export default function BibleReader() {
         const lastCh = getMaxChapter(prevBook);
         if (isSpeaking) stopSpeaking();
         clearSelection();
+        setSelectedVerse(null);
         chapterRefs.current = {};
         verseRefs.current = {};
         setSelectedBook(prevBook);
@@ -2812,7 +2816,10 @@ export default function BibleReader() {
                           const isCurrentlyReading =
                             isSpeaking && currentItem?.verseKey === verse.key;
                           const isVerseTargeted =
-                            selectedVerse !== null && selectedVerse === verse.num;
+                            selectedVerse !== null &&
+                            selectedVerse === verse.num &&
+                            chapter.book === displayBook &&
+                            chapter.chapter === displayChapter;
 
                           return (
                             <span key={verse.key}>
