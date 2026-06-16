@@ -89,7 +89,7 @@ interface TranslationOption {
   year?: string | null;
 }
 
-const FREE_TRANSLATION_IDS = new Set(["Berean", "KJV", "NIV", "ESV", "GW"]);
+const FREE_TRANSLATION_IDS = new Set(["Berean", "KJV", "NIV", "ESV", "GW", "ASV", "YLT"]);
 
 const HIGHLIGHT_COLORS = [
   { id: 1, name: "Red", color: "#F87171" },
@@ -452,6 +452,8 @@ function VoicePlayerBar({
   afterPlay,
   speechRate,
   sleepTimerRemaining,
+  voices,
+  selectedVoice,
   onPauseResume,
   onStop,
   onSkipBack,
@@ -460,6 +462,7 @@ function VoicePlayerBar({
   onToggleAfterPlay,
   onSpeechRateChange,
   onSleepTimerChange,
+  onVoiceChange,
 }: {
   currentItem: SpeechItem | null;
   currentIndex: number;
@@ -475,6 +478,8 @@ function VoicePlayerBar({
   afterPlay: "continue" | "stop";
   speechRate: number;
   sleepTimerRemaining: number;
+  voices: SpeechSynthesisVoice[];
+  selectedVoice: SpeechSynthesisVoice | null;
   onPauseResume: () => void;
   onStop: () => void;
   onSkipBack: () => void;
@@ -483,7 +488,9 @@ function VoicePlayerBar({
   onToggleAfterPlay: () => void;
   onSpeechRateChange: (rate: number) => void;
   onSleepTimerChange: (minutes: number | null) => void;
+  onVoiceChange: (voice: SpeechSynthesisVoice) => void;
 }) {
+  const [showVoicePicker, setShowVoicePicker] = useState(false);
   const { t } = useLanguage();
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 px-3 pb-3 sm:px-4 sm:pb-4 pointer-events-none">
@@ -627,6 +634,49 @@ function VoicePlayerBar({
                   <span>💤</span>
                 )}
               </button>
+
+              {/* Voice Selector */}
+              <Popover open={showVoicePicker} onOpenChange={setShowVoicePicker}>
+                <PopoverTrigger asChild>
+                  <button
+                    title={selectedVoice?.name || 'Voice'}
+                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/60 active:scale-95 transition-all text-[9px] font-semibold truncate max-w-[50px]"
+                  >
+                    {selectedVoice
+                      ? selectedVoice.name.replace(/^(Microsoft\s+|Google\s+|English\s+)?(.{0,6}).*/i, '$2')
+                      : 'V'}
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent
+                  align="center"
+                  side="top"
+                  className="w-64 p-1 max-h-48 overflow-y-auto"
+                >
+                  {voices.length === 0 && (
+                    <p className="text-xs text-muted-foreground p-2">No voices available</p>
+                  )}
+                  {voices.map((v) => (
+                    <button
+                      key={v.name}
+                      onClick={() => {
+                        onVoiceChange(v);
+                        setShowVoicePicker(false);
+                      }}
+                      className={cn(
+                        "w-full text-left px-3 py-1.5 rounded-md text-sm transition-colors",
+                        selectedVoice?.name === v.name
+                          ? "bg-primary/10 text-primary font-medium"
+                          : "text-foreground/80 hover:bg-muted",
+                      )}
+                    >
+                      <span className="block leading-tight">{v.name}</span>
+                      <span className="block text-[10px] text-muted-foreground">
+                        {v.lang} {v.localService ? '(local)' : '(remote)'}
+                      </span>
+                    </button>
+                  ))}
+                </PopoverContent>
+              </Popover>
 
               <button
                 onClick={onSkipBack}
@@ -778,6 +828,8 @@ export default function BibleReader() {
   const [speechRate, setSpeechRate] = useState<number>(0.92);
   const [sleepTimer, setSleepTimer] = useState<number | null>(null);
   const [sleepTimerRemaining, setSleepTimerRemaining] = useState<number>(0);
+  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
+  const [selectedVoice, setSelectedVoice] = useState<SpeechSynthesisVoice | null>(null);
 
   const speechItemsRef = useRef<SpeechItem[]>([]);
   const currentIdxRef = useRef(0);
@@ -816,6 +868,35 @@ export default function BibleReader() {
   useEffect(() => {
     speechRateRef.current = speechRate;
   }, [speechRate]);
+
+  const voiceRef = useRef<SpeechSynthesisVoice | null>(null);
+
+  useEffect(() => {
+    voiceRef.current = selectedVoice;
+  }, [selectedVoice]);
+
+  // Load available TTS voices
+  useEffect(() => {
+    const loadVoices = () => {
+      const available = window.speechSynthesis.getVoices();
+      if (available.length > 0) {
+        setVoices(available);
+        // Auto-select best voice: prefer enhanced/premium/natural/neural voices
+        const preferred = available.find(
+          (v) =>
+            /enhanced|premium|natural|neural|samantha|alex/i.test(v.name) &&
+            v.localService,
+        );
+        const fallback = available.find((v) => v.localService) || available[0];
+        setSelectedVoice(preferred || fallback);
+      }
+    };
+    loadVoices();
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+    return () => {
+      window.speechSynthesis.onvoiceschanged = null;
+    };
+  }, []);
 
   // Sleep timer countdown effect
   useEffect(() => {
@@ -1303,7 +1384,7 @@ export default function BibleReader() {
   // activeUtteranceRef holds the in-flight utterance so skip/stop can cancel it.
   const activeUtteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
 
-  const speakOne = (text: string): Promise<void> =>
+  const speakOne = (text: string, idx: number): Promise<void> =>
     new Promise((resolve) => {
       if (!("speechSynthesis" in window)) {
         resolve();
@@ -1312,7 +1393,8 @@ export default function BibleReader() {
 
       const u = new SpeechSynthesisUtterance(text);
       u.rate = speechRateRef.current;
-      u.pitch = 1.0;
+      u.pitch = 0.92 + (idx % 5) * 0.04;
+      if (voiceRef.current) u.voice = voiceRef.current;
       activeUtteranceRef.current = u;
 
       skipRef.current = () => {
@@ -1402,7 +1484,7 @@ export default function BibleReader() {
       }
 
       setCurrentSpeechIdx(i);
-      await speakOne(speechItemsRef.current[i].text);
+      await speakOne(speechItemsRef.current[i].text, i);
 
       // Speed change: re-speak same verse from the beginning at the new rate.
       if (isSpeedChangingRef.current) {
@@ -1432,7 +1514,7 @@ export default function BibleReader() {
     cd.verses.map((v) => ({
       verseKey: v.key,
       verseNum: v.num,
-      text: `Verse ${v.num}. ${cleanTextForSpeech(v.text)}`,
+      text: cleanTextForSpeech(v.text),
     }));
 
   const buildSelectionItems = (keys: string[]): SpeechItem[] => {
@@ -1451,7 +1533,7 @@ export default function BibleReader() {
           (c) => c.book === p.book && c.chapter === p.chapter,
         );
         const v = ch?.verses.find((vv) => vv.num === p.verse);
-        if (v) text = `Verse ${p.verse}. ${cleanTextForSpeech(v.text)}`;
+        if (v) text = cleanTextForSpeech(v.text);
       }
       return { verseKey: key, verseNum: p?.verse ?? 0, text };
     });
@@ -3165,6 +3247,9 @@ export default function BibleReader() {
           onSpeechRateChange={handleSpeedChange}
           sleepTimerRemaining={sleepTimerRemaining}
           onSleepTimerChange={setSleepTimerMinutes}
+          voices={voices}
+          selectedVoice={selectedVoice}
+          onVoiceChange={setSelectedVoice}
         />
       )}
     </div>
