@@ -492,6 +492,7 @@ function VoicePlayerBar({
   onVoiceChange: (voice: TTSVoice) => void;
 }) {
   const [showVoicePicker, setShowVoicePicker] = useState(false);
+  const [voiceSearch, setVoiceSearch] = useState("");
   const { t } = useLanguage();
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 px-3 pb-3 sm:px-4 sm:pb-4 pointer-events-none">
@@ -637,7 +638,7 @@ function VoicePlayerBar({
               </button>
 
               {/* Voice Selector */}
-              <Popover open={showVoicePicker} onOpenChange={setShowVoicePicker}>
+              <Popover open={showVoicePicker} onOpenChange={(open) => { setShowVoicePicker(open); if (!open) setVoiceSearch(""); }}>
                 <PopoverTrigger asChild>
                   <button
                     title={selectedVoice?.name || 'Voice'}
@@ -651,31 +652,48 @@ function VoicePlayerBar({
                 <PopoverContent
                   align="center"
                   side="top"
-                  className="w-64 p-1 max-h-48 overflow-y-auto"
+                  className="w-64 p-1"
                 >
-                  {voices.length === 0 && (
-                    <p className="text-xs text-muted-foreground p-2">No voices available</p>
-                  )}
-                  {voices.map((v) => (
-                    <button
-                      key={v.voiceId}
-                      onClick={() => {
-                        onVoiceChange(v);
-                        setShowVoicePicker(false);
-                      }}
-                      className={cn(
-                        "w-full text-left px-3 py-1.5 rounded-md text-sm transition-colors",
-                        selectedVoice?.name === v.name
-                          ? "bg-primary/10 text-primary font-medium"
-                          : "text-foreground/80 hover:bg-muted",
-                      )}
-                    >
-                      <span className="block leading-tight">{v.name}</span>
-                      <span className="block text-[10px] text-muted-foreground">
-                        {v.category || 'Neural'} {v.source === 'edge' ? '(free)' : v.source === 'builtin' ? '(built-in)' : '(cloud)'}
-                      </span>
-                    </button>
-                  ))}
+                  <div className="p-1.5 border-b border-border/40 mb-1">
+                    <Input
+                      placeholder="Search voices…"
+                      value={voiceSearch}
+                      onChange={(e) => setVoiceSearch(e.target.value)}
+                      className="h-7 text-xs"
+                      autoFocus
+                    />
+                  </div>
+                  <div className="max-h-48 overflow-y-auto">
+                  {(() => {
+                    const filtered = voices.filter((v) =>
+                      v.name.toLowerCase().includes(voiceSearch.toLowerCase()) ||
+                      (v.category || "").toLowerCase().includes(voiceSearch.toLowerCase())
+                    );
+                    return filtered.length === 0 ? (
+                      <p className="text-xs text-muted-foreground p-2 text-center">No voices found</p>
+                    ) : filtered.map((v) => (
+                      <button
+                        key={v.voiceId}
+                        onClick={() => {
+                          onVoiceChange(v);
+                          setShowVoicePicker(false);
+                          setVoiceSearch("");
+                        }}
+                        className={cn(
+                          "w-full text-left px-3 py-1.5 rounded-md text-sm transition-colors",
+                          selectedVoice?.name === v.name
+                            ? "bg-primary/10 text-primary font-medium"
+                            : "text-foreground/80 hover:bg-muted",
+                        )}
+                      >
+                        <span className="block leading-tight">{v.name}</span>
+                        <span className="block text-[10px] text-muted-foreground">
+                          {v.category || 'Neural'} {v.source === 'edge' ? '(free)' : v.source === 'builtin' ? '(built-in)' : '(cloud)'}
+                        </span>
+                      </button>
+                    ));
+                  })()}
+                  </div>
                 </PopoverContent>
               </Popover>
 
