@@ -56,6 +56,7 @@ import {
 import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/components/languages/languageProvider";
+import { ttsService, type TTSVoice } from "@/services/ttsService";
 
 interface Highlight {
   id?: number;
@@ -478,8 +479,8 @@ function VoicePlayerBar({
   afterPlay: "continue" | "stop";
   speechRate: number;
   sleepTimerRemaining: number;
-  voices: SpeechSynthesisVoice[];
-  selectedVoice: SpeechSynthesisVoice | null;
+  voices: TTSVoice[];
+  selectedVoice: TTSVoice | null;
   onPauseResume: () => void;
   onStop: () => void;
   onSkipBack: () => void;
@@ -488,7 +489,7 @@ function VoicePlayerBar({
   onToggleAfterPlay: () => void;
   onSpeechRateChange: (rate: number) => void;
   onSleepTimerChange: (minutes: number | null) => void;
-  onVoiceChange: (voice: SpeechSynthesisVoice) => void;
+  onVoiceChange: (voice: TTSVoice) => void;
 }) {
   const [showVoicePicker, setShowVoicePicker] = useState(false);
   const { t } = useLanguage();
@@ -643,7 +644,7 @@ function VoicePlayerBar({
                     className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/60 active:scale-95 transition-all text-[9px] font-semibold truncate max-w-[50px]"
                   >
                     {selectedVoice
-                      ? selectedVoice.name.replace(/^(Microsoft\s+|Google\s+|English\s+)?(.{0,6}).*/i, '$2')
+                      ? selectedVoice.name.substring(0, 6)
                       : 'V'}
                   </button>
                 </PopoverTrigger>
@@ -657,7 +658,7 @@ function VoicePlayerBar({
                   )}
                   {voices.map((v) => (
                     <button
-                      key={v.name}
+                      key={v.voiceId}
                       onClick={() => {
                         onVoiceChange(v);
                         setShowVoicePicker(false);
@@ -671,7 +672,7 @@ function VoicePlayerBar({
                     >
                       <span className="block leading-tight">{v.name}</span>
                       <span className="block text-[10px] text-muted-foreground">
-                        {v.lang} {v.localService ? '(local)' : '(remote)'}
+                        {v.category || 'Neural'} {v.source === 'edge' ? '(free)' : v.source === 'builtin' ? '(built-in)' : '(cloud)'}
                       </span>
                     </button>
                   ))}
@@ -828,8 +829,9 @@ export default function BibleReader() {
   const [speechRate, setSpeechRate] = useState<number>(0.92);
   const [sleepTimer, setSleepTimer] = useState<number | null>(null);
   const [sleepTimerRemaining, setSleepTimerRemaining] = useState<number>(0);
-  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
-  const [selectedVoice, setSelectedVoice] = useState<SpeechSynthesisVoice | null>(null);
+  const [voices, setVoices] = useState<TTSVoice[]>([]);
+  const [selectedVoice, setSelectedVoice] = useState<TTSVoice | null>(null);
+  const [elevenLabsEnabled, setElevenLabsEnabled] = useState(false);
 
   const speechItemsRef = useRef<SpeechItem[]>([]);
   const currentIdxRef = useRef(0);
@@ -842,8 +844,11 @@ export default function BibleReader() {
   const speechRateRef = useRef(0.92);
   const displayBookRef = useRef(displayBook);
   const displayChapterRef = useRef(displayChapter);
-  const isSpeedChangingRef = useRef(false);
   const sleepTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const voiceIdRef = useRef<string>("21m00Tcm4TlvDq8ikWAM");
+  const activeUtteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const voiceRef = useRef<string | null>(null);
 
   useEffect(() => {
     repeatModeRef.current = repeatMode;
@@ -869,33 +874,23 @@ export default function BibleReader() {
     speechRateRef.current = speechRate;
   }, [speechRate]);
 
-  const voiceRef = useRef<SpeechSynthesisVoice | null>(null);
-
   useEffect(() => {
-    voiceRef.current = selectedVoice;
+    voiceIdRef.current = selectedVoice?.voiceId || "en-US-AriaNeural";
+    voiceRef.current = selectedVoice?.voiceId || null;
   }, [selectedVoice]);
 
-  // Load available TTS voices
+  // Check whether ElevenLabs is enabled
   useEffect(() => {
-    const loadVoices = () => {
-      const available = window.speechSynthesis.getVoices();
-      if (available.length > 0) {
-        setVoices(available);
-        // Auto-select best voice: prefer enhanced/premium/natural/neural voices
-        const preferred = available.find(
-          (v) =>
-            /enhanced|premium|natural|neural|samantha|alex/i.test(v.name) &&
-            v.localService,
-        );
-        const fallback = available.find((v) => v.localService) || available[0];
-        setSelectedVoice(preferred || fallback);
-      }
-    };
-    loadVoices();
-    window.speechSynthesis.onvoiceschanged = loadVoices;
-    return () => {
-      window.speechSynthesis.onvoiceschanged = null;
-    };
+    ttsService.isEnabled().then(setElevenLabsEnabled).catch(() => setElevenLabsEnabled(false));
+  }, []);
+
+  // Load available voices from backend (Edge TTS, always free)
+  useEffect(() => {
+    ttsService.getVoices().then((available) => {
+      setVoices(available);
+      const preferred = available.find((v) => /aria|jenny|guy|davis|emma|brian/i.test(v.name));
+      setSelectedVoice(preferred || available[0] || null);
+    }).catch(() => {});
   }, []);
 
   // Sleep timer countdown effect
@@ -905,7 +900,18 @@ export default function BibleReader() {
         setSleepTimerRemaining((prev) => {
           if (prev <= 1) {
             // Timer expired - stop speaking
-            window.speechSynthesis.cancel();
+            if (elevenLabsEnabled) {
+              if (audioRef.current) {
+                audioRef.current.pause();
+                audioRef.current.src = "";
+                audioRef.current = null;
+              }
+            } else {
+              if (window.speechSynthesis.paused) window.speechSynthesis.resume();
+              window.speechSynthesis.cancel();
+            }
+            skipRef.current?.();
+            skipRef.current = null;
             isReadingRef.current = false;
             setIsSpeaking(false);
             setIsPaused(false);
@@ -918,7 +924,7 @@ export default function BibleReader() {
 
       return () => clearInterval(interval);
     }
-  }, [sleepTimer]);
+  }, [sleepTimer, elevenLabsEnabled]);
 
   const [showSearchModal, setShowSearchModal] = useState(false);
   const [showHighlightPicker, setShowHighlightPicker] = useState(false);
@@ -1384,11 +1390,60 @@ export default function BibleReader() {
     displayChapter >= maxChapterForDisplay;
 
   // ── Speech ──
-  // activeUtteranceRef holds the in-flight utterance so skip/stop can cancel it.
-  const activeUtteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
 
-  const speakOne = (text: string, idx: number): Promise<void> =>
-    new Promise((resolve) => {
+  const speakOne = (text: string, idx: number): Promise<void> => {
+    if (elevenLabsEnabled) {
+      return new Promise((resolve) => {
+        const doSpeak = async () => {
+          try {
+            const arrayBuffer = await ttsService.speak(
+              text,
+              voiceIdRef.current,
+            );
+            const blob = new Blob([arrayBuffer], { type: "audio/mpeg" });
+            const url = URL.createObjectURL(blob);
+            const audio = new Audio(url);
+            audioRef.current = audio;
+            audio.playbackRate = speechRateRef.current;
+
+            skipRef.current = () => {
+              audio.pause();
+              audio.src = "";
+              URL.revokeObjectURL(url);
+              audioRef.current = null;
+              resolve();
+            };
+
+            audio.onended = () => {
+              URL.revokeObjectURL(url);
+              audioRef.current = null;
+              skipRef.current = null;
+              resolve();
+            };
+
+            audio.onerror = () => {
+              URL.revokeObjectURL(url);
+              audioRef.current = null;
+              skipRef.current = null;
+              resolve();
+            };
+
+            await audio.play();
+            // Honour a pause that was requested while the API was still fetching
+            if (isPausedRef.current) audio.pause();
+          } catch (err) {
+            console.error("TTS speak error:", err);
+            audioRef.current = null;
+            skipRef.current = null;
+            resolve();
+          }
+        };
+        doSpeak();
+      });
+    }
+
+    // Web Speech API fallback
+    return new Promise((resolve) => {
       if (!("speechSynthesis" in window)) {
         resolve();
         return;
@@ -1397,7 +1452,10 @@ export default function BibleReader() {
       const u = new SpeechSynthesisUtterance(text);
       u.rate = speechRateRef.current;
       u.pitch = 0.92 + (idx % 5) * 0.04;
-      if (voiceRef.current) u.voice = voiceRef.current;
+      if (voiceRef.current) {
+        const match = window.speechSynthesis.getVoices().find((v) => v.name === voiceRef.current);
+        if (match) u.voice = match;
+      }
       activeUtteranceRef.current = u;
 
       skipRef.current = () => {
@@ -1412,7 +1470,6 @@ export default function BibleReader() {
       };
 
       u.onerror = (e) => {
-        // "interrupted" fires when we cancel() for skip/stop — already resolved via skipRef.
         if (e.error === "interrupted") return;
         activeUtteranceRef.current = null;
         skipRef.current = null;
@@ -1421,6 +1478,7 @@ export default function BibleReader() {
 
       window.speechSynthesis.speak(u);
     });
+  };
 
   const advanceToNextChapter = async (): Promise<boolean> => {
     const bookNames = backendBooks.map((b) => b.bookName);
@@ -1489,12 +1547,6 @@ export default function BibleReader() {
       setCurrentSpeechIdx(i);
       await speakOne(speechItemsRef.current[i].text, i);
 
-      // Speed change: re-speak same verse from the beginning at the new rate.
-      if (isSpeedChangingRef.current) {
-        isSpeedChangingRef.current = false;
-        continue;
-      }
-
       // Advance to next verse (unless a skip already changed the index).
       if (currentIdxRef.current === i) {
         if (repeatModeRef.current !== "one") {
@@ -1547,7 +1599,19 @@ export default function BibleReader() {
     mode: "chapter" | "selected",
     startIdx = 0,
   ) => {
-    window.speechSynthesis.cancel();
+    // Cancel any existing playback
+    if (elevenLabsEnabled) {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = "";
+        audioRef.current = null;
+      }
+    } else {
+      if (window.speechSynthesis.paused) window.speechSynthesis.resume();
+      window.speechSynthesis.cancel();
+    }
+    skipRef.current?.();
+    skipRef.current = null;
     speechItemsRef.current = items;
     currentIdxRef.current = startIdx;
     isReadingRef.current = true;
@@ -1563,9 +1627,16 @@ export default function BibleReader() {
   const stopSpeaking = useCallback(() => {
     isReadingRef.current = false;
     isPausedRef.current = false;
-    // Must resume before cancel — browser ignores cancel() while paused.
-    if (window.speechSynthesis.paused) window.speechSynthesis.resume();
-    window.speechSynthesis.cancel();
+    if (elevenLabsEnabled) {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = "";
+        audioRef.current = null;
+      }
+    } else {
+      if (window.speechSynthesis.paused) window.speechSynthesis.resume();
+      window.speechSynthesis.cancel();
+    }
     skipRef.current?.();
     skipRef.current = null;
     setIsSpeaking(false);
@@ -1573,19 +1644,29 @@ export default function BibleReader() {
     setCurrentSpeechIdx(0);
     setSpeechItems([]);
     setVoiceMode(null);
-  }, []);
+  }, [elevenLabsEnabled]);
 
   const pauseResume = () => {
-    if (isPausedRef.current) {
-      // Resume — native browser resumes exactly where audio was suspended.
-      isPausedRef.current = false;
-      setIsPaused(false);
-      window.speechSynthesis.resume();
+    if (elevenLabsEnabled) {
+      if (isPausedRef.current) {
+        isPausedRef.current = false;
+        setIsPaused(false);
+        audioRef.current?.play().catch(() => {});
+      } else {
+        isPausedRef.current = true;
+        setIsPaused(true);
+        audioRef.current?.pause();
+      }
     } else {
-      // Pause — native browser suspends audio mid-word; no position tracking needed.
-      isPausedRef.current = true;
-      setIsPaused(true);
-      window.speechSynthesis.pause();
+      if (isPausedRef.current) {
+        isPausedRef.current = false;
+        setIsPaused(false);
+        window.speechSynthesis.resume();
+      } else {
+        isPausedRef.current = true;
+        setIsPaused(true);
+        window.speechSynthesis.pause();
+      }
     }
   };
 
@@ -1617,36 +1698,38 @@ export default function BibleReader() {
     setSpeechRate(newRate);
     speechRateRef.current = newRate;
     if (!isReadingRef.current) return;
-
-    // Signal the loop to re-speak the current verse at the new rate.
-    isSpeedChangingRef.current = true;
-
-    if (isPausedRef.current) {
-      // Must resume before cancel — browser ignores cancel() while paused.
-      isPausedRef.current = false;
-      setIsPaused(false);
-      window.speechSynthesis.resume();
+    if (elevenLabsEnabled) {
+      if (audioRef.current) audioRef.current.playbackRate = newRate;
+    } else {
+      // Web Speech API: re-speak current verse at new rate
+      if (isPausedRef.current) {
+        isPausedRef.current = false;
+        setIsPaused(false);
+        window.speechSynthesis.resume();
+      }
+      const idx = currentIdxRef.current;
+      window.speechSynthesis.cancel();
+      skipRef.current?.();
+      skipRef.current = null;
+      currentIdxRef.current = idx; // re-speak same verse, not the next one
     }
-
-    // Cancel current utterance — onerror("interrupted") is swallowed in speakOne,
-    // and skipRef resolves the promise so the runLoop re-speaks immediately.
-    window.speechSynthesis.cancel();
-    skipRef.current?.();
-    skipRef.current = null;
   };
 
   const skipForward = () => {
     if (isPausedRef.current) {
       isPausedRef.current = false;
       setIsPaused(false);
-      window.speechSynthesis.resume();
+      if (elevenLabsEnabled) {
+        audioRef.current?.play().catch(() => {});
+      } else {
+        window.speechSynthesis.resume();
+      }
     }
     const next = currentIdxRef.current + 1;
     if (next >= speechItemsRef.current.length) {
       if (afterPlay === "continue" && voiceMode === "chapter") {
-        // Handled by runLoop's continue logic
         currentIdxRef.current = next;
-        window.speechSynthesis.cancel();
+        cancelCurrentAudio();
         skipRef.current?.();
         skipRef.current = null;
       } else {
@@ -1655,7 +1738,7 @@ export default function BibleReader() {
       return;
     }
     currentIdxRef.current = next;
-    window.speechSynthesis.cancel();
+    cancelCurrentAudio();
     skipRef.current?.();
     skipRef.current = null;
   };
@@ -1664,13 +1747,29 @@ export default function BibleReader() {
     if (isPausedRef.current) {
       isPausedRef.current = false;
       setIsPaused(false);
-      window.speechSynthesis.resume();
+      if (elevenLabsEnabled) {
+        audioRef.current?.play().catch(() => {});
+      } else {
+        window.speechSynthesis.resume();
+      }
     }
     const prev = Math.max(0, currentIdxRef.current - 1);
     currentIdxRef.current = prev;
-    window.speechSynthesis.cancel();
+    cancelCurrentAudio();
     skipRef.current?.();
     skipRef.current = null;
+  };
+
+  const cancelCurrentAudio = () => {
+    if (elevenLabsEnabled) {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = "";
+        audioRef.current = null;
+      }
+    } else {
+      window.speechSynthesis.cancel();
+    }
   };
 
   const readChapter = () => {
