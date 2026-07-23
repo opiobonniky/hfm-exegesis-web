@@ -65,7 +65,7 @@ api.interceptors.response.use(
   },
   (error) => {
     const responseData = error.response?.data;
-    if (responseData) {
+    if (responseData && typeof responseData === 'object' && !Array.isArray(responseData)) {
       responseData.returnCode =
         responseData.returnCode ??
         responseData.status ??

@@ -13,6 +13,7 @@ const Register = lazy(() => import("@/pages/Register"));
 const VerifyAccount = lazy(() => import("@/pages/VerifyAccount"));
 const ForgotPassword = lazy(() => import("@/pages/ForgotPassword"));
 const Dashboard = lazy(() => import("@/pages/Dashboard"));
+const HomeDashboard = lazy(() => import("@/pages/Index"));
 const DailyVerse = lazy(() => import("@/pages/DailyVerse"));
 const VerseExplanations = lazy(() => import("@/pages/VerseExplanations"));
 const AddDailyVerse = lazy(() => import("@/pages/AddDailyVerse"));
@@ -42,6 +43,17 @@ const JournalDetail = lazy(() => import("@/pages/JournalDetail"));
 const JournalPrompts = lazy(() => import("@/pages/JournalPrompts"));
 const JournalTemplates = lazy(() => import("@/pages/JournalTemplates"));
 const UserDevotions = lazy(() => import("@/pages/UserDevotions"));
+const Search = lazy(() => import("@/pages/Search"));
+const Trivia = lazy(() => import("@/pages/Trivia"));
+const StudyBible = lazy(() => import("@/pages/LabDictionary"));
+const BibleStudyFlow = lazy(() => import("@/pages/LabFlow"));
+const LabHome = lazy(() => import("@/pages/LabHome"));
+const AdminStudyTools = lazy(() => import("@/pages/AdminStudyTools"));
+const DailyExegesis = lazy(() => import("@/pages/DailyExegesis"));
+const SowerPage = lazy(() => import("@/pages/SowerPage"));
+const BibleLibrary = lazy(() => import("@/pages/BibleLibrary"));
+const VerseResources = lazy(() => import("@/pages/VerseResources"));
+const Onboarding = lazy(() => import("@/pages/Onboarding"));
 const WhoWeAre = lazy(() => import("@/pages/HimFirstMedia/WhoWeAre"));
 const OurVision = lazy(() => import("@/pages/HimFirstMedia/OurVision"));
 const OurMission = lazy(() => import("@/pages/HimFirstMedia/OurMission"));
@@ -63,6 +75,14 @@ export interface RouteConfig {
 // Define all routes in a centralized configuration
 export const routes = {
   // ==================== PUBLIC ROUTES ====================
+  onboarding: {
+    path: "/onboarding",
+    component: Onboarding,
+    isProtected: false,
+    requiresLayout: false,
+    title: "Welcome",
+  },
+
   landing: {
     path: "/",
     component: Landing,
@@ -108,6 +128,13 @@ export const routes = {
   },
 
   // ==================== PROTECTED ROUTES (WITH LAYOUT) ====================
+  home: {
+    path: "/home",
+    component: HomeDashboard,
+    isProtected: true,
+    requiresLayout: true,
+    title: "Home",
+  },
   dashboard: {
     path: "/dashboard",
     component: Dashboard,
@@ -297,6 +324,101 @@ export const routes = {
     requiresLayout: true,
     title: "Journal Templates",
   },
+  search: {
+    path: "/search",
+    component: Search,
+    isProtected: true,
+    requiresLayout: true,
+    title: "Search the Word",
+  },
+  trivia: {
+    path: "/trivia",
+    component: Trivia,
+    isProtected: true,
+    requiresLayout: true,
+    title: "Bible Trivia",
+  },
+  dictionary: {
+    path: "/study-bible",
+    component: StudyBible,
+    isProtected: true,
+    requiresLayout: true,
+    title: "Dictionary",
+  },
+  labFlow: {
+    path: "/bible-study",
+    component: BibleStudyFlow,
+    isProtected: true,
+    requiresLayout: true,
+    title: "Bible Study",
+  },
+  studyBible: {
+    path: "/lab-home",
+    component: LabHome,
+    isProtected: true,
+    requiresLayout: true,
+    title: "Study Bible",
+  },
+  // Backwards-compat alias for BibleStudy accessed from bible reader
+  // Backwards-compat alias for BibleStudy accessed from bible reader
+  bibleStudyDirect: {
+    path: "/bible-study/:bookName/:chapter/:verseStart",
+    component: BibleStudyFlow,
+    isProtected: true,
+    requiresLayout: true,
+    title: "Bible Study",
+  },
+  bibleStudyDirectRange: {
+    path: "/bible-study/:bookName/:chapter/:verseStart/:verseEnd",
+    component: BibleStudyFlow,
+    isProtected: true,
+    requiresLayout: true,
+    title: "Bible Study",
+  },
+  adminStudyTools: {
+    path: "/admin/study-tools",
+    component: AdminStudyTools,
+    isProtected: true,
+    requiresLayout: true,
+    title: "Study Tools Admin",
+  },
+  dailyExegesis: {
+    path: "/daily-exegesis",
+    component: DailyExegesis,
+    isProtected: true,
+    requiresLayout: true,
+    title: "Daily Exegesis",
+  },
+  sower: {
+    path: "/sower",
+    component: SowerPage,
+    isProtected: true,
+    requiresLayout: true,
+    title: "Sower",
+  },
+  verseResources: {
+    path: "/verse-resources",
+    component: VerseResources,
+    isProtected: true,
+    requiresLayout: true,
+    title: "Verse Resources",
+  },
+
+  bibleLibrary: {
+    path: "/bible-library",
+    component: BibleLibrary,
+    isProtected: true,
+    requiresLayout: true,
+    title: "Bible Library",
+  },
+  // Backward-compat alias
+  bibleLibraryLegacy: {
+    path: "/bible",
+    component: BibleLibrary,
+    isProtected: true,
+    requiresLayout: true,
+    title: "Bible Library",
+  },
 
   // ==================== PUBLIC HIM FIRST MEDIA PAGES ====================
   whoWeAre: {
@@ -367,11 +489,11 @@ export const getProtectedRoutes = () =>
 
 // Helper function to get all public routes (excluding those that use PublicLayout)
 export const getPublicRoutes = () =>
-  Object.values(routes).filter((route) => !route.isProtected && !route.requiresPublicLayout);
+  Object.values(routes).filter((route:any) => !route.isProtected && !route.requiresPublicLayout);
 
 // Helper function to get public routes that use PublicLayout
 export const getPublicLayoutRoutes = () =>
-  Object.values(routes).filter((route) => !route.isProtected && route.requiresPublicLayout);
+  Object.values(routes).filter((route:any) => !route.isProtected && route.requiresPublicLayout);
 
 // Helper function to get routes that require layout
 export const getLayoutRoutes = () =>

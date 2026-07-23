@@ -1862,6 +1862,10 @@ export interface Translations {
     journalPrompts: string;
     journalTemplates: string;
     myDashboard: string;
+    search: string;
+    dailyExegesis: string;
+    exegesisLab: string;
+    trivia: string;
   };
 
   /** Him First Media pages (Who We Are, Our Vision, etc.) */

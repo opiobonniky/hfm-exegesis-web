@@ -174,7 +174,7 @@ export default function UserDailyVerse() {
             )}>
               {isToday(verse.displayDate) ? "Today" : (t.dailyVerse?.badgePast || "Past")}
             </Badge>
-            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => window.history.back()}>
+            <Button variant="ghost" size="icon" className="relative h-7 w-7 before:absolute before:content-[''] before:-inset-2 before:rounded-lg [touch-action:manipulation]" onClick={() => window.history.back()}>
               <ChevronLeft className={cn("w-4 h-4", isRtl && "rotate-180")} />
             </Button>
           </div>
@@ -211,12 +211,12 @@ export default function UserDailyVerse() {
                   <button onClick={() => setLiked(!liked)} className={cn(
                     "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all",
                     liked ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-primary hover:bg-primary/5",
-                  )}>
+                    "[touch-action:manipulation]")}>
                     <Heart className={cn("w-3.5 h-3.5", liked && "fill-primary text-primary scale-110")} />
                     {liked ? "Liked" : "Like"}
                   </button>
                   <button onClick={() => { navigator.clipboard.writeText(`${text} — ${ref}`); toast({ title: 'Copied!' }); }}
-                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all">
+                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all [touch-action:manipulation]">
                     <Copy className="w-3.5 h-3.5" /> Copy
                   </button>
                 </div>

@@ -1,11 +1,10 @@
-import { useState, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   Loader2,
   Star,
   BookOpen,
-  Calendar,
   Tag,
   Heart,
   Lightbulb,
@@ -16,8 +15,9 @@ import {
   ExternalLink,
   CheckCircle2,
   MoreHorizontal,
+  FileDown,
+  Quote,
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -39,87 +39,56 @@ import { routes } from "@/components/Routes/routes";
 import { getVerseText } from "@/utilities/bibleUtils";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/components/languages/languageProvider";
+import WordDetailSheet from "@/components/WordDetailSheet";
 
-const CATEGORY_LABELS: Record<string, string> = {
-  general: 'categoryGeneral',
-  study: 'categoryStudy',
-  prayer: 'categoryPrayer',
-  gratitude: 'categoryGratitude',
-  reflection: 'categoryReflection',
-  application: 'categoryApplication',
+const CATEGORY_META: Record<string, { labelKey: string; label: string; color: string }> = {
+  general: { labelKey: "categoryGeneral", label: "General", color: "bg-zinc-500" },
+  study: { labelKey: "categoryStudy", label: "Study", color: "bg-blue-500" },
+  prayer: { labelKey: "categoryPrayer", label: "Prayer", color: "bg-violet-500" },
+  gratitude: { labelKey: "categoryGratitude", label: "Gratitude", color: "bg-amber-500" },
+  reflection: { labelKey: "categoryReflection", label: "Reflection", color: "bg-emerald-500" },
+  application: { labelKey: "categoryApplication", label: "Application", color: "bg-indigo-500" },
 };
 
-const CATEGORY_COLORS: Record<string, string> = {
-  general: "bg-gray-100 text-gray-700",
-  study: "bg-blue-100 text-blue-700",
-  prayer: "bg-purple-100 text-purple-700",
-  gratitude: "bg-amber-100 text-amber-700",
-  reflection: "bg-green-100 text-green-700",
-  application: "bg-indigo-100 text-indigo-700",
+const MOOD_EMOJI: Record<string, { label: string; emoji: string }> = {
+  happy: { label: "Happy", emoji: "😊" }, grateful: { label: "Grateful", emoji: "🙏" },
+  peaceful: { label: "Peaceful", emoji: "🕊️" }, thoughtful: { label: "Thoughtful", emoji: "🤔" },
+  motivated: { label: "Motivated", emoji: "💪" }, hopeful: { label: "Hopeful", emoji: "🌟" },
+  challenged: { label: "Challenged", emoji: "🧗" }, blessed: { label: "Blessed", emoji: "✨" },
 };
 
-const MOOD_LABELS: Record<string, string> = {
-  happy: 'moodHappy',
-  grateful: 'moodGrateful',
-  peaceful: 'moodPeaceful',
-  thoughtful: 'moodThoughtful',
-  motivated: 'moodMotivated',
-  hopeful: 'moodHopeful',
-  challenged: 'moodChallenged',
-  blessed: 'moodBlessed',
-};
-
-const MOODS: Record<string, { label: string; emoji: string }> = {
-  happy: { label: "Happy", emoji: "😊" },
-  grateful: { label: "Grateful", emoji: "🙏" },
-  peaceful: { label: "Peaceful", emoji: "🕊️" },
-  thoughtful: { label: "Thoughtful", emoji: "🤔" },
-  motivated: { label: "Motivated", emoji: "💪" },
-  hopeful: { label: "Hopeful", emoji: "🌟" },
-  challenged: { label: "Challenged", emoji: "🧗" },
-  blessed: { label: "Blessed", emoji: "✨" },
-};
+interface StudiedWord { strongsId: string; surfaceText: string; lemma?: string }
 
 interface JournalEntryData {
-  id: number;
-  title: string | null;
-  content: string;
-  bookName: string | null;
-  chapter: number | null;
-  verseNumber: number | null;
-  category: string;
-  mood: string | null;
-  prayers: string | null;
-  gratitude: string | null;
-  learnings: string | null;
-  application: string | null;
-  isPublished: boolean;
-  isFavorite: boolean;
-  tags: string | null;
-  createdOn: string;
-  updatedOn: string;
+  id: number; title: string | null; content: string;
+  bookName: string | null; chapter: number | null; verseNumber: number | null;
+  category: string; mood: string | null;
+  prayers: string | null; gratitude: string | null; learnings: string | null; application: string | null;
+  isPublished: boolean; isFavorite: boolean; tags: string | null;
+  strongsWords?: string | null; strongsIds?: string | null;
+  createdOn: string; updatedOn: string;
 }
 
-// ── Loading skeleton ────────────────────────────────────────────────────────
-const LoadingSkeleton = () => (
-  <div className="min-h-screen bg-background">
-    <div className="bg-gradient-to-r from-primary/5 via-accent/5 to-secondary/5 border-b">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        <div className="h-10 w-32 bg-muted/50 rounded-lg animate-pulse" />
+/* ── Loading ── */
+const PageSkeleton = () => (
+  <div className="min-h-full bg-amber-50/30 dark:bg-stone-950">
+    {[1, 2, 3].map((i) => (
+      <div key={i} className="max-w-2xl mx-auto px-5 py-4">
+        <div className="h-4 w-16 bg-stone-200 dark:bg-stone-800 rounded animate-pulse mb-3" />
+        <div className="h-6 w-3/4 bg-stone-200 dark:bg-stone-800 rounded animate-pulse mb-2" />
+        <div className="h-4 w-full bg-stone-100 dark:bg-stone-800/50 rounded animate-pulse mb-1" />
+        <div className="h-4 w-5/6 bg-stone-100 dark:bg-stone-800/50 rounded animate-pulse" />
       </div>
-    </div>
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-      <div className="space-y-3">
-        <div className="h-8 w-64 bg-muted/50 rounded-lg animate-pulse" />
-        <div className="h-5 w-48 bg-muted/30 rounded-lg animate-pulse" />
-      </div>
-      <div className="h-40 bg-muted/30 rounded-xl animate-pulse" />
-      <div className="h-32 bg-muted/20 rounded-xl animate-pulse" />
-      <div className="grid grid-cols-2 gap-4">
-        <div className="h-28 bg-muted/20 rounded-xl animate-pulse" />
-        <div className="h-28 bg-muted/20 rounded-xl animate-pulse" />
-      </div>
-    </div>
+    ))}
+  </div>
+);
+
+/* ── Decorative divider ── */
+const LeafDivider = () => (
+  <div className="flex items-center gap-3 my-8 select-none">
+    <span className="flex-1 h-px bg-stone-200 dark:bg-stone-800" />
+    <span className="text-stone-300 dark:text-stone-700 text-xs tracking-[0.3em]">✦ ✦ ✦</span>
+    <span className="flex-1 h-px bg-stone-200 dark:bg-stone-800" />
   </div>
 );
 
@@ -134,46 +103,28 @@ const JournalDetailPage = () => {
   const [deleting, setDeleting] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [copied, setCopied] = useState(false);
-
-  // Use useCallback for stable function reference but inline useEffect-based fetch
-  useState(() => {
-    if (entryId) {
-      fetchEntry();
-    }
-  });
+  const [studiedWordSheetOpen, setStudiedWordSheetOpen] = useState(false);
+  const [selectedStudiedWord, setSelectedStudiedWord] = useState<{ strongsId: string; surfaceText: string } | null>(null);
 
   const fetchEntry = async () => {
     try {
       const res = await sendPostRequest("journal", "get", { id: entryId });
-      if (res.returnCode === 200 && res.returnData) {
-        setEntry(res.returnData);
-      } else {
-        toast({ title: t.common?.error || "Error", description: t.journal?.entryNotFound || "Entry not found", variant: "destructive" });
-        navigate(routes.journal.path);
-      }
-    } catch (error) {
-      toast({ title: t.common?.error || "Error", description: t.journal?.failedToLoadEntry || "Failed to load entry", variant: "destructive" });
-      navigate(routes.journal.path);
-    } finally {
-      setLoading(false);
-    }
+      if (res.returnCode === 200 && res.returnData) setEntry(res.returnData);
+      else { toast({ title: "Error", description: "Entry not found", variant: "destructive" }); navigate(routes.journal.path); }
+    } catch { toast({ title: "Error", description: "Failed to load", variant: "destructive" }); navigate(routes.journal.path); }
+    finally { setLoading(false); }
   };
+
+  useEffect(() => { if (entryId) fetchEntry(); }, [entryId]);
 
   const handleDelete = async () => {
     if (!entry) return;
     setDeleting(true);
     try {
       const res = await sendPostRequest("journal", "delete", { id: entry.id });
-      if (res.returnCode === 200) {
-        toast({ title: t.common?.delete || "Deleted", description: t.journal?.entryDeleted || "Journal entry deleted" });
-        navigate(routes.journal.path);
-      }
-    } catch (error) {
-      toast({ title: t.common?.error || "Error", description: t.journal?.failedToDelete || "Failed to delete", variant: "destructive" });
-    } finally {
-      setDeleting(false);
-      setShowDeleteDialog(false);
-    }
+      if (res.returnCode === 200) { toast({ title: "Deleted" }); navigate(routes.journal.path); }
+    } catch { toast({ title: "Error", variant: "destructive" }); }
+    finally { setDeleting(false); setShowDeleteDialog(false); }
   };
 
   const handleToggleFavorite = async () => {
@@ -181,348 +132,300 @@ const JournalDetailPage = () => {
     try {
       const res = await sendPostRequest("journal", "toggle-favorite", { id: entry.id });
       if (res.returnCode === 200) {
-        setEntry((prev) => prev ? { ...prev, isFavorite: !prev.isFavorite } : null);
-        toast({
-          title: entry.isFavorite
-            ? (t.journal?.removedFromFavorites || "Removed from favorites")
-            : (t.journal?.addedToFavorites || "Added to favorites"),
-          description: entry.isFavorite
-            ? (t.journal?.entryUnfavorited || "Entry unfavorited")
-            : (t.journal?.entryFavorited || "Entry favorited"),
-        });
+        setEntry((p) => p ? { ...p, isFavorite: !p.isFavorite } : null);
+        toast({ title: entry.isFavorite ? "Removed from favorites" : "Added to favorites" });
       }
-    } catch (error) {
-      toast({ title: t.common?.error || "Error", description: t.journal?.failedToUpdate || "Failed to update", variant: "destructive" });
-    }
+    } catch { toast({ title: "Error", variant: "destructive" }); }
   };
 
   const handleCopy = useCallback(async () => {
     if (!entry) return;
-    try {
-      let text = entry.title ? `${entry.title}\n\n` : "";
-      text += entry.content;
-      if (entry.learnings) text += `\n\n${t.journal?.whatILearned || 'What I learned'}:\n${entry.learnings}`;
-      if (entry.application) text += `\n\n${t.journal?.howIllApply || "How I'll apply this"}:\n${entry.application}`;
-      if (entry.gratitude) text += `\n\n${t.journal?.gratitude || 'Gratitude'}:\n${entry.gratitude}`;
-      if (entry.prayers) text += `\n\n${t.journal?.prayers || 'Prayers'}:\n${entry.prayers}`;
-      if (entry.bookName) text += `\n\n— ${entry.bookName} ${entry.chapter}:${entry.verseNumber}`;
-
-      await navigator.clipboard.writeText(text);
-      setCopied(true);
-      toast({ title: t.common?.copy || "Copied", description: t.journal?.copiedToClipboard || "Entry copied to clipboard" });
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      toast({ title: t.common?.error || "Error", description: t.journal?.failedToCopy || "Failed to copy", variant: "destructive" });
-    }
-  }, [entry, toast, t]);
+    let text = entry.title ? `${entry.title}\n\n` : "";
+    text += entry.content;
+    if (entry.learnings) text += `\n\nWhat I learned:\n${entry.learnings}`;
+    if (entry.application) text += `\n\nApplication:\n${entry.application}`;
+    if (entry.gratitude) text += `\n\nGratitude:\n${entry.gratitude}`;
+    if (entry.prayers) text += `\n\nPrayers:\n${entry.prayers}`;
+    if (entry.bookName) text += `\n\n— ${entry.bookName} ${entry.chapter}:${entry.verseNumber}`;
+    try { await navigator.clipboard.writeText(text); setCopied(true); setTimeout(() => setCopied(false), 2000); toast({ title: "Copied" }); }
+    catch { toast({ title: "Error", variant: "destructive" }); }
+  }, [entry]);
 
   const handleShare = useCallback(async () => {
     if (!entry) return;
-    const shareText = entry.title
-      ? `${entry.title}\n\n${entry.content}`
-      : entry.content;
+    const text = entry.title ? `${entry.title}\n\n${entry.content}` : entry.content;
+    if (navigator.share) { try { await navigator.share({ title: entry.title || "Entry", text }); } catch { } }
+    else await handleCopy();
+  }, [entry, handleCopy]);
 
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: entry.title || (t.journal?.journalEntry || "Journal Entry"),
-          text: shareText,
-        });
-      } catch {
-        // User cancelled
+  const handleDownloadPDF = useCallback(async () => {
+    if (!entry) return;
+    try {
+      toast({ title: "Generating PDF..." });
+      const res = await sendPostRequest("journal", "export-one", { id: entry.id, format: "pdf" });
+      if (res.returnCode === 200 && res.returnData) {
+        const { content, filename } = res.returnData;
+        const bytes = Uint8Array.from(atob(content), (c) => c.charCodeAt(0));
+        const blob = new Blob([bytes], { type: "application/pdf" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a"); a.href = url; a.download = filename || "entry.pdf";
+        document.body.appendChild(a); a.click();
+        setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 500);
+        toast({ title: "Downloaded" });
       }
-    } else {
-      await handleCopy();
-    }
-  }, [entry, handleCopy, t]);
+    } catch { toast({ title: "Error", variant: "destructive" }); }
+  }, [entry]);
 
-  const formatDate = (dateStr: string) => {
-    if (!dateStr) return "";
-    const date = new Date(dateStr);
-    return date.toLocaleDateString("en-US", {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  };
+  const formatDate = (ds: string) => ds ? new Date(ds).toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" }) : "";
+  const formatDateShort = (ds: string) => ds ? new Date(ds).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "";
 
-  const formatDateShort = (dateStr: string) => {
-    if (!dateStr) return "";
-    const date = new Date(dateStr);
-    return date.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
+  if (loading) return <PageSkeleton />;
 
-  // ── Loading state ────────────────────────────────────────────────────────
-  if (loading) return <LoadingSkeleton />;
-
-  if (!entry) {
-    return (
-      <div className="min-h-screen flex items-center justify-center" dir={isRtl ? 'rtl' : 'ltr'}>
-        <div className="text-center">
-          <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-4">
-            <BookOpen className="w-8 h-8 text-muted-foreground" />
-          </div>
-          <h2 className="text-xl font-semibold mb-2">{t.journal?.entryNotFound || "Entry not found"}</h2>
-          <p className="text-muted-foreground mb-4">{t.journal?.entryNotFoundDesc || "This journal entry may have been deleted."}</p>
-          <Button onClick={() => navigate(routes.journal.path)}>
-            {t.journal?.backToJournal || "Back to Journal"}
-          </Button>
+  if (!entry) return (
+    <div className="min-h-full bg-amber-50/30 dark:bg-stone-950 flex items-center justify-center">
+      <div className="text-center px-6">
+        <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-stone-100 dark:bg-stone-900 flex items-center justify-center">
+          <BookOpen className="w-7 h-7 text-stone-400" />
         </div>
+        <h2 className="text-lg font-semibold text-stone-800 dark:text-stone-200 mb-1">Journal entry not found</h2>
+        <p className="text-sm text-stone-500 dark:text-stone-400 mb-5">It may have been deleted or moved.</p>
+        <Button
+          onClick={() => navigate(routes.journal.path)}
+          className="rounded-xl bg-stone-800 hover:bg-stone-700 text-white dark:bg-stone-200 dark:hover:bg-stone-300 dark:text-stone-900"
+        >
+          ← Back to Journal
+        </Button>
       </div>
-    );
-  }
+    </div>
+  );
 
-  const verseText = entry.bookName && entry.chapter && entry.verseNumber
-    ? getVerseText(entry.bookName, entry.chapter, entry.verseNumber)
-    : null;
-
+  const verseText = entry.bookName && entry.chapter && entry.verseNumber ? getVerseText(entry.bookName, entry.chapter, entry.verseNumber) : null;
   const tagsArray = entry.tags ? entry.tags.split(",").map((t) => t.trim()).filter(Boolean) : [];
-  const moodInfo = entry.mood ? MOODS[entry.mood] : null;
+  const moodInfo = entry.mood ? MOOD_EMOJI[entry.mood] : null;
+  const catMeta = CATEGORY_META[entry.category] || CATEGORY_META.general;
+
+  const studiedWords: StudiedWord[] = (() => {
+    if (!entry.strongsWords) return [];
+    try { const p = typeof entry.strongsWords === 'string' ? JSON.parse(entry.strongsWords) : entry.strongsWords; if (Array.isArray(p)) return p; } catch { }
+    return [];
+  })();
+
+  const reflectionSections = [
+    entry.learnings && { icon: Lightbulb, label: t.journal?.whatILearned || "What I Learned", content: entry.learnings, iconColor: "text-amber-600 dark:text-amber-400" },
+    entry.application && { icon: Pencil, label: t.journal?.howIllApply || "How I'll Apply", content: entry.application, iconColor: "text-indigo-600 dark:text-indigo-400" },
+    entry.gratitude && { icon: Heart, label: t.journal?.gratitude || "Gratitude", content: entry.gratitude, iconColor: "text-rose-600 dark:text-rose-400" },
+    entry.prayers && { icon: Star, label: t.journal?.prayers || "Prayers", content: entry.prayers, iconColor: "text-violet-600 dark:text-violet-400" },
+  ].filter(Boolean) as { icon: any; label: string; content: string; iconColor: string }[];
 
   return (
-    <div className="min-h-screen bg-background" dir={isRtl ? 'rtl' : 'ltr'}>
-      {/* ── Top bar ──────────────────────────────────────────────────────── */}
-      <div className="bg-gradient-to-r from-primary/5 via-accent/5 to-secondary/5 border-b">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <Button variant="ghost" onClick={() => navigate(routes.journal.path)}>
-              <ArrowLeft className={cn("w-4 h-4", isRtl ? "ml-2" : "mr-2")} />
-              {t.journal?.backToJournal || "Back to Journal"}
-            </Button>
-            <div className="flex items-center gap-1">
-              <Button variant="ghost" size="icon" onClick={handleToggleFavorite} title={t.journal?.toggleFavorite || "Toggle favorite"}>
-                {entry.isFavorite ? (
-                  <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
-                ) : (
-                  <Star className="w-4 h-4" />
-                )}
-              </Button>
-              <Button variant="ghost" size="icon" onClick={handleShare} title={t.common?.share || "Share"}>
-                <Share2 className="w-4 h-4" />
-              </Button>
-              <Button variant="ghost" size="icon" onClick={handleCopy} title={t.journal?.copyToClipboard || "Copy to clipboard"}>
-                {copied ? (
-                  <CheckCircle2 className="w-4 h-4 text-green-500" />
-                ) : (
-                  <Copy className="w-4 h-4" />
-                )}
-              </Button>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon">
-                    <MoreHorizontal className="w-4 h-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align={isRtl ? "start" : "end"}>
-                  <DropdownMenuItem onClick={() => navigate(`/journal/entry/${entry.id}`)}>
-                    <Pencil className={cn("w-4 h-4", isRtl ? "ml-2" : "mr-2")} />
-                    {t.common?.edit || "Edit"}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => setShowDeleteDialog(true)}
-                    className="text-destructive"
-                  >
-                    <Trash2 className={cn("w-4 h-4", isRtl ? "ml-2" : "mr-2")} />
-                    {t.common?.delete || "Delete"}
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
+    <div className="min-h-full bg-amber-50/30 dark:bg-stone-950" dir={isRtl ? 'rtl' : 'ltr'}>
+      {/* ═══════ Top Navigation Bar ═══════ */}
+      <div className="sticky top-0 z-20 border-b border-stone-200/60 dark:border-stone-800/60 bg-amber-50/80 dark:bg-stone-950/80 backdrop-blur-md">
+        <div className="max-w-2xl mx-auto px-4 flex items-center justify-between h-12">
+          <button
+            onClick={() => navigate(routes.journal.path)}
+            className="flex items-center gap-1.5 text-xs font-medium text-stone-500 hover:text-stone-800 dark:text-stone-400 dark:hover:text-stone-200 transition-colors"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            Journal
+          </button>
+
+          <div className="flex items-center gap-0.5">
+            <button onClick={handleToggleFavorite} className="p-1.5 rounded-lg hover:bg-stone-200/60 dark:hover:bg-stone-800/60 transition-colors" title="Favorite">
+              <Star className={cn("w-3.5 h-3.5", entry.isFavorite ? "text-amber-500 fill-amber-500" : "text-stone-400")} />
+            </button>
+            <button onClick={handleShare} className="p-1.5 rounded-lg hover:bg-stone-200/60 dark:hover:bg-stone-800/60 transition-colors" title="Share">
+              <Share2 className="w-3.5 h-3.5 text-stone-400" />
+            </button>
+            <button onClick={handleCopy} className="p-1.5 rounded-lg hover:bg-stone-200/60 dark:hover:bg-stone-800/60 transition-colors" title="Copy">
+              {copied ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5 text-stone-400" />}
+            </button>
+            <button onClick={handleDownloadPDF} className="p-1.5 rounded-lg hover:bg-stone-200/60 dark:hover:bg-stone-800/60 transition-colors" title="Download PDF">
+              <FileDown className="w-3.5 h-3.5 text-stone-400" />
+            </button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="p-1.5 rounded-lg hover:bg-stone-200/60 dark:hover:bg-stone-800/60 transition-colors">
+                  <MoreHorizontal className="w-3.5 h-3.5 text-stone-400" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="rounded-xl border-stone-200 dark:border-stone-800">
+                <DropdownMenuItem onClick={() => navigate(`/journal/entry/${entry.id}`)} className="text-xs">
+                  <Pencil className="w-3.5 h-3.5 mr-2" /> Edit
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setShowDeleteDialog(true)} className="text-xs text-red-600 dark:text-red-400">
+                  <Trash2 className="w-3.5 h-3.5 mr-2" /> Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-        {/* ── Header ─────────────────────────────────────────────────────── */}
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex-1 min-w-0">
-            {entry.title && (
-              <h1 className="text-3xl font-bold mb-2 break-words">{entry.title}</h1>
-            )}
-            <div className="flex items-center gap-3 flex-wrap">
-              <Badge className={CATEGORY_COLORS[entry.category] || "bg-gray-100"}>
-                {(t.journal as any)?.[CATEGORY_LABELS[entry.category]] || entry.category}
-              </Badge>
-              {moodInfo && (
-                <span className="inline-flex items-center gap-1 text-sm" title={(t.journal as any)?.[MOOD_LABELS[entry.mood!]] || moodInfo.label}>
-                  <span className="text-lg">{moodInfo.emoji}</span>
-                  <span className="text-muted-foreground">{(t.journal as any)?.[MOOD_LABELS[entry.mood!]] || moodInfo.label}</span>
-                </span>
-              )}
-              <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                <Calendar className="w-4 h-4" />
-                {formatDate(entry.createdOn)}
-              </div>
-            </div>
-          </div>
+      {/* ═══════ Content ═══════ */}
+      <div className="max-w-2xl mx-auto px-5 py-8 sm:py-12">
+
+        {/* ── Category + Mood + Date ── */}
+        <div className="flex items-center gap-3 flex-wrap mb-4">
+          <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold tracking-wide uppercase">
+            <span className={cn("w-2 h-2 rounded-full", catMeta.color)} />
+            <span className="text-stone-500 dark:text-stone-400">
+              {(t.journal as any)?.[catMeta.labelKey] || catMeta.label}
+            </span>
+          </span>
+          {moodInfo && (
+            <span className="text-sm leading-none">{moodInfo.emoji}</span>
+          )}
+          <span className="text-[11px] text-stone-400 dark:text-stone-500">
+            {formatDate(entry.createdOn)}
+          </span>
         </div>
 
-        {/* ── Linked scripture ────────────────────────────────────────────── */}
+        {/* ── Title ── */}
+        {entry.title && (
+          <h1 className="text-3xl sm:text-4xl font-bold text-stone-900 dark:text-stone-100 leading-tight mb-2 tracking-tight" style={{ fontFamily: "'Georgia', 'Times New Roman', serif" }}>
+            {entry.title}
+          </h1>
+        )}
+
+        {/* ── Chapter ref inline ── */}
+        {entry.bookName && (
+          <div className="flex items-center gap-1.5 mt-1 mb-6 text-xs text-stone-400 dark:text-stone-500">
+            <BookOpen className="w-3 h-3" />
+            <span className="font-medium">{entry.bookName} {entry.chapter}:{entry.verseNumber}</span>
+          </div>
+        )}
+
+        {/* ── Scripture Quote ── */}
         {verseText && (
-          <Card className="border-primary/20 bg-primary/5 hover:bg-primary/10 transition-colors">
-            <CardContent className="py-4">
-              <button
-                className="w-full flex items-start gap-3 text-left"
-                onClick={() => {
-                  if (entry.bookName && entry.chapter) {
-                    navigate(`/bible-reader?book=${entry.bookName}&chapter=${entry.chapter}`);
-                  }
-                }}
-              >
-                <BookOpen className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <p className="font-serif text-lg leading-relaxed italic">
-                    &ldquo;{verseText}&rdquo;
-                  </p>
-                  <div className="flex items-center gap-2 mt-2">
-                    <p className="text-sm text-muted-foreground">
-                      — {entry.bookName} {entry.chapter}:{entry.verseNumber}
-                    </p>
-                    <ExternalLink className="w-3 h-3 text-muted-foreground" />
-                  </div>
-                </div>
-              </button>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* ── Main content ───────────────────────────────────────────────── */}
-        {entry.content && (
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <BookOpen className="w-5 h-5" />
-                {t.journal?.journalEntry || "Journal Entry"}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="whitespace-pre-line text-base leading-relaxed">
-                {entry.content}
-              </p>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* ── Reflection sections ─────────────────────────────────────────── */}
-        {(entry.learnings || entry.application || entry.gratitude || entry.prayers) && (
-          <div className="grid gap-6 md:grid-cols-2">
-            {entry.learnings && (
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm flex items-center gap-2">
-                    <Lightbulb className="w-4 h-4 text-amber-500" />
-                    {t.journal?.whatILearned || "What I Learned"}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="whitespace-pre-line text-sm">{entry.learnings}</p>
-                </CardContent>
-              </Card>
-            )}
-
-            {entry.application && (
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm flex items-center gap-2">
-                    <Pencil className="w-4 h-4 text-indigo-500" />
-                    {t.journal?.howIllApply || "How I'll Apply This"}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="whitespace-pre-line text-sm">{entry.application}</p>
-                </CardContent>
-              </Card>
-            )}
-
-            {entry.gratitude && (
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm flex items-center gap-2">
-                    <Heart className="w-4 h-4 text-rose-500" />
-                    {t.journal?.gratitude || "Gratitude"}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="whitespace-pre-line text-sm">{entry.gratitude}</p>
-                </CardContent>
-              </Card>
-            )}
-
-            {entry.prayers && (
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm flex items-center gap-2">
-                    <Star className="w-4 h-4 text-purple-500" />
-                    {t.journal?.prayers || "Prayers"}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="whitespace-pre-line text-sm">{entry.prayers}</p>
-                </CardContent>
-              </Card>
-            )}
+          <div
+            onClick={() => { if (entry.bookName && entry.chapter) navigate(`/bible-reader?book=${entry.bookName}&chapter=${entry.chapter}`); }}
+            className="group relative mb-10 p-5 sm:p-6 rounded-2xl bg-white dark:bg-stone-900/80 border border-stone-200 dark:border-stone-800 shadow-sm hover:shadow-md cursor-pointer transition-all active:scale-[0.99]"
+            style={{ fontFamily: "'Georgia', 'Times New Roman', serif" }}
+          >
+            <Quote className="absolute top-3 left-3 w-5 h-5 text-stone-200 dark:text-stone-700 group-hover:text-stone-300 transition-colors" />
+            <p className="text-base sm:text-lg leading-relaxed italic text-stone-700 dark:text-stone-300 pl-2">
+              &ldquo;{verseText}&rdquo;
+            </p>
+            <div className="flex items-center gap-1 mt-3 text-xs text-stone-400 dark:text-stone-500 group-hover:text-stone-600 dark:group-hover:text-stone-400 transition-colors">
+              <span>&mdash; {entry.bookName} {entry.chapter}:{entry.verseNumber}</span>
+              <ExternalLink className="w-3 h-3 ml-0.5" />
+            </div>
           </div>
         )}
 
-        {/* ── Tags ────────────────────────────────────────────────────────── */}
-        {tagsArray.length > 0 && (
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm flex items-center gap-2">
-                <Tag className="w-4 h-4" />
-                {t.journal?.tags || "Tags"}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-wrap gap-2">
-                {tagsArray.map((tag, idx) => (
-                  <Badge key={idx} variant="outline">
-                    {tag}
-                  </Badge>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* ── Footer metadata ─────────────────────────────────────────────── */}
-        <div className="text-sm text-muted-foreground text-center pt-4 border-t">
-          <p>{t.journal?.created || "Created:"} {formatDateShort(entry.createdOn)}</p>
-          <p>{t.journal?.lastUpdated || "Last updated:"} {formatDateShort(entry.updatedOn)}</p>
-        </div>
-      </div>
-
-      {/* ── Delete confirmation dialog ───────────────────────────────────── */}
-      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t.journal?.deleteDialogTitle || "Delete Journal Entry"}</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-3">
-            <p>{t.journal?.deleteDialogDesc2 || "Are you sure you want to delete this entry?"}</p>
-            {entry.title && (
-              <p className="text-sm text-muted-foreground">
-                &ldquo;<span className="font-medium">{entry.title}</span>&rdquo;
-              </p>
-            )}
-            <p className="text-sm text-destructive font-medium">
-              {t.journal?.cannotUndo || "This action cannot be undone."}
+        {/* ── Main content ── */}
+        {entry.content && (
+          <div className="mb-6">
+            <p className="text-sm sm:text-base leading-[1.8] text-stone-700 dark:text-stone-300 whitespace-pre-line" style={{ fontFamily: "'Georgia', 'Times New Roman', serif" }}>
+              {entry.content}
             </p>
           </div>
+        )}
+
+        {/* ── Reflection sections ── */}
+        {reflectionSections.length > 0 && (
+          <>
+            <LeafDivider />
+            <div className="grid gap-4 sm:grid-cols-2 mb-6">
+              {reflectionSections.map(({ icon: Icon, label, content, iconColor }) => (
+                <div
+                  key={label}
+                  className="rounded-xl bg-white/70 dark:bg-stone-900/50 border border-stone-200/70 dark:border-stone-800/70 p-4 hover:bg-white dark:hover:bg-stone-900/80 transition-colors"
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-7 h-7 rounded-lg bg-stone-100 dark:bg-stone-800 flex items-center justify-center">
+                      <Icon className={cn("w-3.5 h-3.5", iconColor)} />
+                    </div>
+                    <h3 className="text-[11px] font-semibold uppercase tracking-wider text-stone-500 dark:text-stone-400">
+                      {label}
+                    </h3>
+                  </div>
+                  <p className="text-sm leading-relaxed text-stone-700 dark:text-stone-300 whitespace-pre-line" style={{ fontFamily: "'Georgia', 'Times New Roman', serif" }}>
+                    {content}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+
+        {/* ── Studied Words ── */}
+        {studiedWords.length > 0 && (
+          <div className="mb-6">
+            <LeafDivider />
+            <h3 className="text-[11px] font-semibold uppercase tracking-wider text-stone-500 dark:text-stone-400 mb-3 flex items-center gap-1.5">
+              <BookOpen className="w-3 h-3" />
+              Studied Words
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {studiedWords.map((w, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => { setSelectedStudiedWord({ strongsId: w.strongsId, surfaceText: w.surfaceText }); setStudiedWordSheetOpen(true); }}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-xs font-medium text-stone-600 dark:text-stone-400 hover:border-amber-300 dark:hover:border-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950/20 hover:text-amber-700 dark:hover:text-amber-300 transition-all active:scale-[0.97]"
+                >
+                  <BookOpen className="w-3 h-3 shrink-0" />
+                  <span>{w.surfaceText || w.strongsId}</span>
+                  <span className="text-[10px] font-mono text-stone-400/60">{w.strongsId}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ── Tags ── */}
+        {tagsArray.length > 0 && (
+          <div className="mb-6">
+            <LeafDivider />
+            <h3 className="text-[11px] font-semibold uppercase tracking-wider text-stone-500 dark:text-stone-400 mb-3 flex items-center gap-1.5">
+              <Tag className="w-3 h-3" />
+              Tags
+            </h3>
+            <div className="flex flex-wrap gap-1.5">
+              {tagsArray.map((tag, idx) => (
+                <span
+                  key={idx}
+                  className="inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-medium bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400"
+                >
+                  # {tag}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ── Footer ── */}
+        <LeafDivider />
+        <div className="text-center space-y-0.5 pb-8">
+          <p className="text-[11px] text-stone-400 dark:text-stone-500">
+            Written {formatDateShort(entry.createdOn)}
+          </p>
+          <p className="text-[11px] text-stone-300 dark:text-stone-600">
+            Last edited {formatDateShort(entry.updatedOn)}
+          </p>
+        </div>
+      </div>
+
+      <WordDetailSheet
+        open={studiedWordSheetOpen}
+        onOpenChange={setStudiedWordSheetOpen}
+        strongsId={selectedStudiedWord?.strongsId}
+        surfaceText={selectedStudiedWord?.surfaceText}
+        verseRef={entry.bookName ? `${entry.bookName} ${entry.chapter}:${entry.verseNumber}` : undefined}
+        verseText={verseText || undefined}
+      />
+
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent className="rounded-2xl border-stone-200 dark:border-stone-800">
+          <DialogHeader><DialogTitle>Delete Entry</DialogTitle></DialogHeader>
+          <p className="text-sm text-stone-600 dark:text-stone-400">This cannot be undone.</p>
+          {entry.title && <p className="text-sm font-medium text-stone-800 dark:text-stone-200">&ldquo;{entry.title}&rdquo;</p>}
           <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
-              {t.common?.cancel || "Cancel"}
-            </Button>
-            <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
+            <Button variant="outline" onClick={() => setShowDeleteDialog(false)} className="rounded-xl">Cancel</Button>
+            <Button variant="destructive" onClick={handleDelete} disabled={deleting} className="rounded-xl">
               {deleting && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
-              {deleting ? (t.journal?.deleting || "Deleting...") : (t.journal?.deleteEntry || "Delete Entry")}
+              Delete
             </Button>
           </DialogFooter>
         </DialogContent>

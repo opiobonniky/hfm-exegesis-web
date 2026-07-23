@@ -35,3 +35,7 @@ yarn/*
 
 # VSCode settings
 .vscode/*
+
+# Playwright e2e
+test-results/
+playwright-report/

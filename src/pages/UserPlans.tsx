@@ -288,7 +288,7 @@ export default function UserPlans() {
           <button
             key={value}
             onClick={() => setCatFilter(value)}
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
+            className={`min-h-[44px] px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition-colors active:scale-[0.97] [touch-action:manipulation] ${
               catFilter === value ? "bg-primary text-primary-foreground" : "bg-muted hover:bg-muted/80"
             }`}
           >

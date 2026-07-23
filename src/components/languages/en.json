@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "Exegesis Bible",
+    "appName": "Exegesis Project",
     "loading": "Loading...",
     "error": "An error occurred",
     "save": "Save",
@@ -1597,7 +1597,14 @@
     "userActivity": "User Activity",
     "journalPrompts": "Journal Prompts",
     "journalTemplates": "Journal Templates",
-    "myDashboard": "My Dashboard"
+    "myDashboard": "My Dashboard",
+    "search": "Search Bible",
+    "dailyExegesis": "Daily Exegesis",
+    "exegesisLab": "Dictionary",
+    "studyBible": "Study Bible",
+    "sower": "Sower",
+    "studyTools": "Study Tools",
+    "trivia": "Bible Trivia"
   },
   "settings": {
     "pageTitle": "Account Settings",

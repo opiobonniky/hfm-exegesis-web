@@ -21,7 +21,18 @@ import {
   AlertTriangle,
   Globe,
   Check,
-  Languages
+  Languages,
+  Sparkles,
+  CreditCard,
+  Sprout,
+  ExternalLink,
+  Bell,
+  Sun,
+  Moon,
+  Monitor,
+  BookOpen,
+  Sliders,
+  Type
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -41,8 +52,12 @@ import { useToast } from "@/hooks/use-toast";
 import { sendPostRequest, TOKEN_KEY } from "@/services/api";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/components/languages/languageProvider";
+import { useSubscription } from "@/hooks/useSubscription";
+import { routes } from "@/components/Routes/routes";
 import { LANGUAGE_NAMES, type Language } from "@/components/languages/type";
 import { getLanguageName } from "@/components/languages/localeUtils";
+import { Switch } from "@/components/ui/switch";
+import { Slider } from "@/components/ui/slider";
 
 /** Language grouped by region for the picker */
 const LANGUAGE_GROUPS: { key: string; languages: Language[] }[] = [
@@ -93,8 +108,10 @@ export default function Settings() {
   const [savingPassword, setSavingPassword] = useState(false);
 
   const { t, lang: currentLang, setLanguage, isLoading: langLoading, isRtl } = useLanguage();
-
+  const { isPayingUser, tierLabel, expiresLabel } = useSubscription();
   
+  const [sowerPortalLoading, setSowerPortalLoading] = useState(false);
+
   const [profile, setProfile] = useState<UserProfile>({
     id: "",
     username: "",
@@ -126,6 +143,85 @@ export default function Settings() {
     new: false,
     confirm: false,
   });
+
+  // ── Notification preferences ──
+  const [notifications, setNotifications] = useState({
+    dailyVerseReminder: localStorage.getItem("notify_daily_verse") !== "false",
+    devotionReminder: localStorage.getItem("notify_devotion") !== "false",
+    emailNotifications: localStorage.getItem("notify_email") !== "false",
+    pushNotifications: localStorage.getItem("notify_push") !== "false",
+    studyReminders: localStorage.getItem("notify_study") !== "false",
+  });
+
+  const NOTIFICATION_STORAGE_KEYS: Record<keyof typeof notifications, string> = {
+    dailyVerseReminder: "notify_daily_verse",
+    devotionReminder: "notify_devotion",
+    emailNotifications: "notify_email",
+    pushNotifications: "notify_push",
+    studyReminders: "notify_study",
+  };
+
+  const handleNotificationChange = (key: keyof typeof notifications, value: boolean) => {
+    setNotifications((prev) => ({ ...prev, [key]: value }));
+    localStorage.setItem(NOTIFICATION_STORAGE_KEYS[key], String(value));
+    const labelMap: Record<string, string> = {
+      dailyVerseReminder: "Daily Verse Reminder",
+      devotionReminder: "Devotion Reminder",
+      emailNotifications: "Email Notifications",
+      pushNotifications: "Push Notifications",
+      studyReminders: "Study Reminders",
+    };
+    toast({
+      title: labelMap[key] || "Notification",
+      description: value ? "Enabled" : "Disabled",
+    });
+  };
+
+  // ── Reading preferences ──
+  const [readingFontSize, setReadingFontSize] = useState(() => {
+    return parseInt(localStorage.getItem("reading_font_size") || "18", 10);
+  });
+  const [themeMode, setThemeMode] = useState(() => {
+    return localStorage.getItem("theme_mode") || "system";
+  });
+  const [preferredTranslation, setPreferredTranslation] = useState(() => {
+    return localStorage.getItem("preferred_translation") || "BSB";
+  });
+
+  const handleFontSizeChange = (size: number[]) => {
+    const val = size[0];
+    setReadingFontSize(val);
+    localStorage.setItem("reading_font_size", String(val));
+  };
+
+  const handleThemeChange = (mode: string) => {
+    setThemeMode(mode);
+    localStorage.setItem("theme_mode", mode);
+    // Apply theme class to html element
+    const root = document.documentElement;
+    if (mode === "dark") {
+      root.classList.add("dark");
+      root.classList.remove("light");
+    } else if (mode === "light") {
+      root.classList.add("light");
+      root.classList.remove("dark");
+    } else {
+      root.classList.remove("light", "dark");
+    }
+    toast({
+      title: "Theme Updated",
+      description: mode === "dark" ? "Dark mode enabled" : mode === "light" ? "Light mode enabled" : "System theme",
+    });
+  };
+
+  const handleTranslationChange = (id: string) => {
+    setPreferredTranslation(id);
+    localStorage.setItem("preferred_translation", id);
+    toast({
+      title: "Translation Updated",
+      description: `Preferred Bible translation set`,
+    });
+  };
 
   const getPasswordStrength = (password: string): { level: number; label: string; color: string } => {
     if (!password) return { level: 0, label: "", color: "" };
@@ -294,6 +390,40 @@ export default function Settings() {
     setShowPasswords((prev) => ({ ...prev, [field]: !prev[field] }));
   };
 
+  const handleSowerAction = async () => {
+    if (isPayingUser) {
+      // Open Stripe Customer Portal
+      setSowerPortalLoading(true);
+      try {
+        const res = await sendPostRequest(
+          "subscriptions",
+          "create-portal-session",
+          {},
+        );
+        if (res.returnCode === 200 && res.returnData?.url) {
+          window.open(res.returnData.url, "_blank");
+        } else {
+          toast({
+            title: "Portal error",
+            description: res.returnMessage || "Could not open billing portal.",
+            variant: "destructive",
+          });
+        }
+      } catch (err: any) {
+        toast({
+          title: "Error",
+          description: err?.message || "Something went wrong",
+          variant: "destructive",
+        });
+      } finally {
+        setSowerPortalLoading(false);
+      }
+    } else {
+      // Free user — go to Sower page
+      navigate(routes.sower.path);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[70vh] gap-4">
@@ -340,10 +470,10 @@ export default function Settings() {
 
       <div className="max-w-6xl mx-auto px-3 sm:px-4 lg:px-6 py-6">
         <Tabs defaultValue="profile" className="w-full">
-          <TabsList className="grid grid-cols-4 w-full max-w-lg mb-6 bg-muted/50 p-1 rounded-xl">
+          <TabsList className="flex w-full max-w-2xl mb-6 bg-muted/50 p-1 rounded-xl overflow-x-auto">
             <TabsTrigger 
               value="profile" 
-              className="rounded-lg gap-1.5 sm:gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm"
+              className="rounded-lg gap-1.5 sm:gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm shrink-0"
             >
               <User className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">{t.settings?.tabProfile}</span>
@@ -351,7 +481,7 @@ export default function Settings() {
             </TabsTrigger>
             <TabsTrigger 
               value="additional" 
-              className="rounded-lg gap-1.5 sm:gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm"
+              className="rounded-lg gap-1.5 sm:gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm shrink-0"
             >
               <Star className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">{t.settings?.tabExtra}</span>
@@ -359,7 +489,7 @@ export default function Settings() {
             </TabsTrigger>
             <TabsTrigger 
               value="password" 
-              className="rounded-lg gap-1.5 sm:gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm"
+              className="rounded-lg gap-1.5 sm:gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm shrink-0"
             >
               <Lock className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">{t.settings?.tabPassword}</span>
@@ -367,11 +497,19 @@ export default function Settings() {
             </TabsTrigger>
             <TabsTrigger 
               value="preferences" 
-              className="rounded-lg gap-1.5 sm:gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm"
+              className="rounded-lg gap-1.5 sm:gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm shrink-0"
             >
-              <Globe className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">{t.settings?.tabLanguage}</span>
-              <span className="sm:hidden text-[10px]">{t.settings?.tabLanguageShort}</span>
+              <Sliders className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">{t.settings?.tabLanguage || 'Reading'}</span>
+              <span className="sm:hidden text-[10px]">Read</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="notifications" 
+              className="rounded-lg gap-1.5 sm:gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm shrink-0"
+            >
+              <Bell className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Notifications</span>
+              <span className="sm:hidden text-[10px]">Notify</span>
             </TabsTrigger>
           </TabsList>
 
@@ -492,6 +630,85 @@ export default function Settings() {
                         </SelectContent>
                       </Select>
                     </div>
+                  </div>
+                </div>
+
+                {/* ── SOWER STATUS ──────────────────────────────────── */}
+                <div className="rounded-2xl bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-950/40 dark:to-purple-950/40 border border-violet-200 dark:border-violet-800/40 p-4 sm:p-6 space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-violet-100 dark:bg-violet-900/50 flex items-center justify-center">
+                      {isPayingUser ? (
+                        <Sparkles className="w-5 h-5 text-violet-600 dark:text-violet-400" />
+                      ) : (
+                        <Sprout className="w-5 h-5 text-violet-600 dark:text-violet-400" />
+                      )}
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-violet-900 dark:text-violet-100">
+                        Sower Status
+                      </h3>
+                      <p className="text-xs text-violet-600/70 dark:text-violet-300/70">
+                        {isPayingUser
+                          ? 'You are supporting the mission'
+                          : 'Support the Word, unlock tools'}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-bold text-violet-900 dark:text-violet-100">
+                          {tierLabel}
+                        </span>
+                        <span
+                          className={cn(
+                            "inline-block w-2 h-2 rounded-full",
+                            isPayingUser
+                              ? "bg-emerald-500"
+                              : "bg-slate-400",
+                          )}
+                        />
+                      </div>
+                      {isPayingUser && expiresLabel && (
+                        <p className="text-xs text-violet-600/60 dark:text-violet-300/60 mt-0.5">
+                          Renews {expiresLabel}
+                        </p>
+                      )}
+                      {!isPayingUser && (
+                        <p className="text-xs text-violet-600/60 dark:text-violet-300/60 mt-0.5">
+                          Bible reading is always free
+                        </p>
+                      )}
+                    </div>
+
+                    <Button
+                      variant={isPayingUser ? "outline" : "default"}
+                      size="sm"
+                      onClick={handleSowerAction}
+                      disabled={sowerPortalLoading}
+                      className={cn(
+                        "gap-1.5 text-xs font-bold h-9 shrink-0",
+                        !isPayingUser &&
+                          "bg-violet-600 hover:bg-violet-700 text-white shadow-sm",
+                      )}
+                    >
+                      {sowerPortalLoading ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : isPayingUser ? (
+                        <CreditCard className="w-3.5 h-3.5" />
+                      ) : (
+                        <Sparkles className="w-3.5 h-3.5" />
+                      )}
+                      {sowerPortalLoading
+                        ? "Loading..."
+                        : isPayingUser
+                          ? "Manage Sowing"
+                          : "Become a Sower"}
+                      {!isPayingUser && (
+                        <ExternalLink className="w-3 h-3 opacity-70" />
+                      )}
+                    </Button>
                   </div>
                 </div>
 
@@ -655,6 +872,98 @@ export default function Settings() {
           <TabsContent value="preferences">
             <Card className="border-none shadow-none bg-transparent">
               <CardContent className="p-0 space-y-4">
+                {/* ── Reading Settings ── */}
+                <div className="rounded-2xl bg-card border border-border/50 p-4 sm:p-6 space-y-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-sky-100 dark:bg-sky-900/30 flex items-center justify-center">
+                      <BookOpen className="w-5 h-5 text-sky-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold">Reading Settings</h3>
+                      <p className="text-xs text-muted-foreground">Customize your Bible reading experience</p>
+                    </div>
+                  </div>
+
+                  {/* Font Size */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-xs font-medium text-muted-foreground flex items-center gap-2">
+                        <Type className="w-3.5 h-3.5" />
+                        Font Size
+                      </Label>
+                      <span className="text-sm font-bold text-foreground tabular-nums">{readingFontSize}px</span>
+                    </div>
+                    <Slider
+                      value={[readingFontSize]}
+                      onValueChange={handleFontSizeChange}
+                      min={12}
+                      max={32}
+                      step={1}
+                      className="w-full"
+                    />
+                    <div className="flex justify-between text-[10px] text-muted-foreground/60">
+                      <span>Aa</span>
+                      <span>Aa</span>
+                    </div>
+                  </div>
+
+                  {/* Theme */}
+                  <div className="space-y-3">
+                    <Label className="text-xs font-medium text-muted-foreground">Theme</Label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {[
+                        { value: "light", icon: Sun, label: "Light" },
+                        { value: "dark", icon: Moon, label: "Dark" },
+                        { value: "system", icon: Monitor, label: "System" },
+                      ].map(({ value, icon: Icon, label }) => (
+                        <button
+                          key={value}
+                          onClick={() => handleThemeChange(value)}
+                          className={cn(
+                            "flex flex-col items-center gap-1.5 py-3 rounded-xl border-2 transition-all",
+                            themeMode === value
+                              ? "border-primary bg-primary/10 text-primary"
+                              : "border-border/50 text-muted-foreground hover:border-border",
+                          )}
+                        >
+                          <Icon className="w-5 h-5" />
+                          <span className="text-xs font-semibold">{label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Preferred Translation */}
+                  <div className="space-y-2">
+                    <Label className="text-xs font-medium text-muted-foreground">Preferred Bible Translation</Label>
+                    <Select value={preferredTranslation} onValueChange={handleTranslationChange}>
+                      <SelectTrigger className="h-10">
+                        <div className="flex items-center gap-2">
+                          <BookOpen className="w-4 h-4 text-muted-foreground/60" />
+                          <SelectValue />
+                        </div>
+                      </SelectTrigger>
+                      <SelectContent>
+                        {[
+                          { id: "BSB", name: "Berean Standard Bible" },
+                          { id: "KJV", name: "King James Version" },
+                          { id: "WEB", name: "World English Bible" },
+                          { id: "ASV", name: "American Standard Version" },
+                          { id: "YLT", name: "Young's Literal Translation" },
+                          { id: "DARBY", name: "Darby Translation" },
+                          { id: "WEBSTER", name: "Webster Bible" },
+                          { id: "BBE", name: "Bible in Basic English" },
+                        ].map((v) => (
+                          <SelectItem key={v.id} value={v.id}>
+                            {v.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                {/* ── Language / Region ── */}
                 <div className="rounded-2xl bg-card border border-border/50 p-4 sm:p-6 space-y-6">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center">
@@ -736,6 +1045,95 @@ export default function Settings() {
             </Card>
           </TabsContent>
 
+          <TabsContent value="notifications">
+            <Card className="border-none shadow-none bg-transparent">
+              <CardContent className="p-0 space-y-4">
+                <div className="rounded-2xl bg-card border border-border/50 p-4 sm:p-6 space-y-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
+                      <Bell className="w-5 h-5 text-amber-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold">Notification Preferences</h3>
+                      <p className="text-xs text-muted-foreground">Manage how you receive updates and reminders</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    {[
+                      {
+                        key: "dailyVerseReminder" as const,
+                        label: "Daily Verse Reminder",
+                        description: "Receive a notification each day with the verse of the day",
+                        icon: Sun,
+                        iconBg: "bg-amber-100 dark:bg-amber-900/30",
+                        iconColor: "text-amber-600",
+                      },
+                      {
+                        key: "devotionReminder" as const,
+                        label: "Devotion Reminder",
+                        description: "Get notified when a new daily devotion is available",
+                        icon: BookOpen,
+                        iconBg: "bg-blue-100 dark:bg-blue-900/30",
+                        iconColor: "text-blue-600",
+                      },
+                      {
+                        key: "studyReminders" as const,
+                        label: "Study Reminders",
+                        description: "Gentle reminders to continue your Exegesis Lab studies",
+                        icon: Bell,
+                        iconBg: "bg-violet-100 dark:bg-violet-900/30",
+                        iconColor: "text-violet-600",
+                      },
+                      {
+                        key: "emailNotifications" as const,
+                        label: "Email Notifications",
+                        description: "Receive updates and digests via email",
+                        icon: Mail,
+                        iconBg: "bg-green-100 dark:bg-green-900/30",
+                        iconColor: "text-green-600",
+                      },
+                      {
+                        key: "pushNotifications" as const,
+                        label: "Push Notifications",
+                        description: "Enable browser push notifications for real-time updates",
+                        icon: Bell,
+                        iconBg: "bg-rose-100 dark:bg-rose-900/30",
+                        iconColor: "text-rose-600",
+                      },
+                    ].map(({ key, label, description, icon: Icon, iconBg, iconColor }) => (
+                      <div
+                        key={key}
+                        className="flex items-center justify-between p-4 rounded-xl bg-muted/20 border border-border/30 hover:bg-muted/40 transition-colors"
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center shrink-0", iconBg)}>
+                            <Icon className={cn("w-5 h-5", iconColor)} />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-sm font-semibold text-foreground">{label}</p>
+                            <p className="text-xs text-muted-foreground truncate">{description}</p>
+                          </div>
+                        </div>
+                        <Switch
+                          checked={notifications[key]}
+                          onCheckedChange={(checked) => handleNotificationChange(key, checked)}
+                        />
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="flex items-start gap-2 p-3 rounded-lg bg-muted/30 border border-border/30">
+                    <AlertCircle className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
+                    <p className="text-xs text-muted-foreground">
+                      Notification preferences are stored locally. Enable browser notifications in your device settings for the best experience.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           <TabsContent value="password">
             <Card className="border-none shadow-none bg-transparent">
               <CardContent className="p-0 space-y-4">
@@ -766,7 +1164,7 @@ export default function Settings() {
                           type="button"
                           variant="ghost"
                           size="icon"
-                          className={cn("absolute top-1/2 -translate-y-1/2 h-8 w-8 hover:bg-transparent", isRtl ? "left-1" : "right-1")}
+                          className={cn("absolute top-1/2 -translate-y-1/2 h-8 w-8 before:absolute before:content-[''] before:-inset-2 before:rounded-lg hover:bg-transparent [touch-action:manipulation]", isRtl ? "left-1" : "right-1")}
                           onClick={() => togglePasswordVisibility("current")}
                         >
                           {showPasswords.current ? (
@@ -793,7 +1191,7 @@ export default function Settings() {
                           type="button"
                           variant="ghost"
                           size="icon"
-                          className={cn("absolute top-1/2 -translate-y-1/2 h-8 w-8 hover:bg-transparent", isRtl ? "left-1" : "right-1")}
+                          className={cn("absolute top-1/2 -translate-y-1/2 h-8 w-8 before:absolute before:content-[''] before:-inset-2 before:rounded-lg hover:bg-transparent [touch-action:manipulation]", isRtl ? "left-1" : "right-1")}
                           onClick={() => togglePasswordVisibility("new")}
                         >
                           {showPasswords.new ? (
@@ -845,7 +1243,7 @@ export default function Settings() {
                           type="button"
                           variant="ghost"
                           size="icon"
-                          className={cn("absolute top-1/2 -translate-y-1/2 h-8 w-8 hover:bg-transparent", isRtl ? "left-1" : "right-1")}
+                          className={cn("absolute top-1/2 -translate-y-1/2 h-8 w-8 before:absolute before:content-[''] before:-inset-2 before:rounded-lg hover:bg-transparent [touch-action:manipulation]", isRtl ? "left-1" : "right-1")}
                           onClick={() => togglePasswordVisibility("confirm")}
                         >
                           {showPasswords.confirm ? (

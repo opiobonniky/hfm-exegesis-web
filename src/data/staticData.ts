@@ -136,6 +136,88 @@ export const dailyVerses: DailyVerse[] = [
   }
 ];
 
+/** Canonical list of all 66 books of the Bible in canonical order. */
+export const BIBLE_BOOKS = [
+  "Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy",
+  "Joshua", "Judges", "Ruth", "1 Samuel", "2 Samuel",
+  "1 Kings", "2 Kings", "1 Chronicles", "2 Chronicles", "Ezra",
+  "Nehemiah", "Esther", "Job", "Psalms", "Proverbs",
+  "Ecclesiastes", "Song of Solomon", "Isaiah", "Jeremiah", "Lamentations",
+  "Ezekiel", "Daniel", "Hosea", "Joel", "Amos",
+  "Obadiah", "Jonah", "Micah", "Nahum", "Habakkuk",
+  "Zephaniah", "Haggai", "Zechariah", "Malachi",
+  "Matthew", "Mark", "Luke", "John", "Acts",
+  "Romans", "1 Corinthians", "2 Corinthians", "Galatians", "Ephesians",
+  "Philippians", "Colossians", "1 Thessalonians", "2 Thessalonians",
+  "1 Timothy", "2 Timothy", "Titus", "Philemon", "Hebrews",
+  "James", "1 Peter", "2 Peter", "1 John", "2 John",
+  "3 John", "Jude", "Revelation",
+] as const;
+
+// ── Shared Strong's Word entry type ──
+
+export interface VerseRef {
+  bookName: string;
+  chapter: number;
+  verse: number | null;
+  translation?: string;
+  surfaceText?: string | null;
+  adminExplanation?: string | null;
+}
+
+export interface StrongsWordEntry {
+  strongsId: string;
+  originalWord: string | null;
+  transliteration: string | null;
+  shortDefinition: string;
+  fullDefinition: string | null;
+  language: string;
+  partOfSpeech: string | null;
+  grammaticalCase: string | null;
+  gender: string | null;
+  number: string | null;
+  usageCount: number | null;
+  crossReferences: string | null;
+  adminExplanation?: string | null;
+  /** Whether this word has a verse-specific study note (from verse_word_studies table) */
+  hasVerseStudy?: boolean;
+  /** The verse-specific study note content */
+  verseStudyNote?: string | null;
+  /** Number of verses this word study is attached to */
+  verseCount?: number;
+  /** JSON array of {bookName, chapter, verse, translation} — verse attachments */
+  verseReferences?: VerseRef[] | null;
+}
+
+// ── Language color/icon helpers ──
+
+export const LANG_COLORS: Record<string, string> = {
+  greek: "#3b82f6",
+  hebrew: "#f59e0b",
+  aramaic: "#e11d48",
+};
+
+export const LANG_LETTERS: Record<string, string> = {
+  greek: "\u03b1",
+  hebrew: "\u05d0",
+  aramaic: "\U00010840",
+};
+
+export const LANG_SCRIPTS: Record<string, string> = {
+  greek: "'Noto Sans', serif",
+  hebrew: "'Noto Serif Hebrew', serif",
+  aramaic: "'Noto Sans', serif",
+};
+
+export const getLangColor = (lang?: string): string =>
+  LANG_COLORS[lang?.toLowerCase() || ""] || "#6366f1";
+
+export const getLangLetter = (lang?: string): string =>
+  LANG_LETTERS[lang?.toLowerCase() || ""] || "?";
+
+export const getLangScript = (lang?: string): string =>
+  LANG_SCRIPTS[lang?.toLowerCase() || ""] || "'Noto Sans', serif";
+
 export const dashboardStats = {
   totalVerses: 31102,
   explanationsCount: 156,

@@ -1,7 +1,28 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, type ReactNode } from 'react';
 import type { Language, Translations } from './type';
 import { isRtlLanguage } from './localeUtils';
 import en from './en.json';
+import ar from './ar.json';
+import bn from './bn.json';
+import de from './de.json';
+import el from './el.json';
+import es from './es.json';
+import fil from './fil.json';
+import fr from './fr.json';
+import gu from './gu.json';
+import hi from './hi.json';
+import it from './it.json';
+import kn from './kn.json';
+import ml from './ml.json';
+import mr from './mr.json';
+import ne from './ne.json';
+import pa from './pa.json';
+import pt from './pt.json';
+import ru from './ru.json';
+import sw from './sw.json';
+import ta from './ta.json';
+import te from './te.json';
+import ur from './ur.json';
 
 /** Storage key for persisting language preference */
 const STORAGE_KEY = 'exegesis-language';
@@ -23,34 +44,15 @@ interface LanguageContextType {
   t: Translations;
   /** Whether the active language is RTL */
   isRtl: boolean;
-  /** Whether a new translation is currently loading */
+  /** Whether a new translation is currently loading (always false with static imports) */
   isLoading: boolean;
-  /** Switch to a different language (loads its JSON on the fly) */
+  /** Switch to a different language */
   setLanguage: (lang: Language) => Promise<void>;
   /** List of all supported language codes */
   supportedLanguages: Language[];
-  /** Progress info for each language */
-  translationProgress: Record<Language, number>;
 }
 
 const LanguageContext = createContext<LanguageContextType | null>(null);
-
-/** Attempt to read a persisted language, falling back to browser preference or English */
-function getInitialLanguage(): Language {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) return stored as Language;
-  } catch { /* localStorage unavailable */ }
-
-  // Respect browser language preference
-  if (typeof navigator !== 'undefined') {
-    const browserLang = navigator.language?.split('-')[0] ?? '';
-    const supported = ['en','ar','de','fr','es','pt','hi','bn','ta','te','mr','gu','kn','ml','pa','ur','sw','it','el','ru','ne','fil'];
-    if (supported.includes(browserLang)) return browserLang as Language;
-  }
-
-  return 'en';
-}
 
 /**
  * Recursive deep-merge. Later sources override earlier ones.
@@ -75,92 +77,94 @@ function deepMerge<T extends Record<string, unknown>>(target: T, ...sources: Par
   return output;
 }
 
-/** Vite glob — all JSON translation files discovered at build time */
-const translationGlob = import.meta.glob('./*.json');
+/** All translations keyed by language code — statically imported at build time.
+ *  Each non-English translation is merged with English so missing keys fall back gracefully. */
+const ALL_TRANSLATIONS: Record<Language, Translations> = {
+  en: en as unknown as Translations,
+  ar: deepMerge(deepClone(en) as unknown as Record<string, unknown>, ar as unknown as Record<string, unknown>) as unknown as Translations,
+  bn: deepMerge(deepClone(en) as unknown as Record<string, unknown>, bn as unknown as Record<string, unknown>) as unknown as Translations,
+  de: deepMerge(deepClone(en) as unknown as Record<string, unknown>, de as unknown as Record<string, unknown>) as unknown as Translations,
+  el: deepMerge(deepClone(en) as unknown as Record<string, unknown>, el as unknown as Record<string, unknown>) as unknown as Translations,
+  es: deepMerge(deepClone(en) as unknown as Record<string, unknown>, es as unknown as Record<string, unknown>) as unknown as Translations,
+  fil: deepMerge(deepClone(en) as unknown as Record<string, unknown>, fil as unknown as Record<string, unknown>) as unknown as Translations,
+  fr: deepMerge(deepClone(en) as unknown as Record<string, unknown>, fr as unknown as Record<string, unknown>) as unknown as Translations,
+  gu: deepMerge(deepClone(en) as unknown as Record<string, unknown>, gu as unknown as Record<string, unknown>) as unknown as Translations,
+  hi: deepMerge(deepClone(en) as unknown as Record<string, unknown>, hi as unknown as Record<string, unknown>) as unknown as Translations,
+  it: deepMerge(deepClone(en) as unknown as Record<string, unknown>, it as unknown as Record<string, unknown>) as unknown as Translations,
+  kn: deepMerge(deepClone(en) as unknown as Record<string, unknown>, kn as unknown as Record<string, unknown>) as unknown as Translations,
+  ml: deepMerge(deepClone(en) as unknown as Record<string, unknown>, ml as unknown as Record<string, unknown>) as unknown as Translations,
+  mr: deepMerge(deepClone(en) as unknown as Record<string, unknown>, mr as unknown as Record<string, unknown>) as unknown as Translations,
+  ne: deepMerge(deepClone(en) as unknown as Record<string, unknown>, ne as unknown as Record<string, unknown>) as unknown as Translations,
+  pa: deepMerge(deepClone(en) as unknown as Record<string, unknown>, pa as unknown as Record<string, unknown>) as unknown as Translations,
+  pt: deepMerge(deepClone(en) as unknown as Record<string, unknown>, pt as unknown as Record<string, unknown>) as unknown as Translations,
+  ru: deepMerge(deepClone(en) as unknown as Record<string, unknown>, ru as unknown as Record<string, unknown>) as unknown as Translations,
+  sw: deepMerge(deepClone(en) as unknown as Record<string, unknown>, sw as unknown as Record<string, unknown>) as unknown as Translations,
+  ta: deepMerge(deepClone(en) as unknown as Record<string, unknown>, ta as unknown as Record<string, unknown>) as unknown as Translations,
+  te: deepMerge(deepClone(en) as unknown as Record<string, unknown>, te as unknown as Record<string, unknown>) as unknown as Translations,
+  ur: deepMerge(deepClone(en) as unknown as Record<string, unknown>, ur as unknown as Record<string, unknown>) as unknown as Translations,
+};
 
-/** Preload a translation JSON file, falling back to English on error */
-async function loadTranslation(lang: Language): Promise<Translations> {
-  if (lang === 'en') return en as unknown as Translations;
-
+/** Attempt to read a persisted language, falling back to browser preference or English */
+function getInitialLanguage(): Language {
   try {
-    const loader = translationGlob[`./${lang}.json`];
-    if (!loader) throw new Error(`No loader found for "${lang}"`);
-    const mod = await loader() as { default: unknown };
-    // Merge so any missing keys fall back to English
-    return deepMerge(
-      deepClone(en) as unknown as Record<string, unknown>,
-      mod.default as Record<string, unknown>,
-    ) as unknown as Translations;
-  } catch (err) {
-    console.warn(`[LanguageProvider] Failed to load "${lang}" translations:`, err);
-    return en as unknown as Translations;
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) return stored as Language;
+  } catch { /* localStorage unavailable */ }
+
+  // Respect browser language preference
+  if (typeof navigator !== 'undefined') {
+    const browserLang = navigator.language?.split('-')[0] ?? '';
+    const supported = Object.keys(ALL_TRANSLATIONS) as Language[];
+    if (supported.includes(browserLang)) return browserLang as Language;
   }
+
+  return 'en';
 }
+
+const INITIAL_LANG = getInitialLanguage();
 
 interface Props {
   children: ReactNode;
 }
 
-const SUPPORTED_LANGUAGES: Language[] = [
-  'en','ar','de','fr','es','pt',
-  'hi','bn','ta','te','mr','gu','kn','ml','pa','ur',
-  'sw','it','el','ru','ne','fil',
-];
+const SUPPORTED_LANGUAGES = Object.keys(ALL_TRANSLATIONS) as Language[];
 
 export const LanguageProvider: React.FC<Props> = ({ children }) => {
-  const [lang, setLang] = useState<Language>(getInitialLanguage);
-  const [t, setT] = useState<Translations>(en as unknown as Translations);
-  const [isLoading, setIsLoading] = useState(false);
-  const [progress] = useState<Record<Language, number>>(() => {
-    const p = { en: 100 } as Record<Language, number>;
-    return p;
-  });
+  const [lang, setLang] = useState<Language>(INITIAL_LANG);
+  const [t, setT] = useState<Translations>(ALL_TRANSLATIONS[INITIAL_LANG]);
 
   const isRtl = isRtlLanguage(lang);
 
   const setLanguage = useCallback(async (newLang: Language) => {
     if (newLang === lang) return;
-    setIsLoading(true);
+    setLang(newLang);
+    setT(ALL_TRANSLATIONS[newLang]);
     try {
-      const translations = await loadTranslation(newLang);
-      setLang(newLang);
-      setT(translations);
-      try {
-        localStorage.setItem(STORAGE_KEY, newLang);
-      } catch { /* ignore */ }
+      localStorage.setItem(STORAGE_KEY, newLang);
+    } catch { /* ignore */ }
 
-      // Update the <html> dir and lang attributes for RTL support
-      document.documentElement.lang = newLang;
-      document.documentElement.dir = isRtlLanguage(newLang) ? 'rtl' : 'ltr';
-    } finally {
-      setIsLoading(false);
-    }
+    // Update the <html> dir and lang attributes for RTL support
+    document.documentElement.lang = newLang;
+    document.documentElement.dir = isRtlLanguage(newLang) ? 'rtl' : 'ltr';
   }, [lang]);
 
-  // Load translations for the initial language (if non-English) on mount
+  // Initialize <html> attributes on mount for the stored/browser language
   useEffect(() => {
-    const initLang = lang;
-    if (initLang !== 'en') {
-      loadTranslation(initLang).then((translations) => {
-        setT(translations);
-      });
-    }
     document.documentElement.lang = lang;
     document.documentElement.dir = isRtl ? 'rtl' : 'ltr';
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const value = useMemo(() => ({
+    lang,
+    t,
+    isRtl,
+    isLoading: false,
+    setLanguage,
+    supportedLanguages: SUPPORTED_LANGUAGES,
+  }), [lang, t, setLanguage]);
+
   return (
-    <LanguageContext.Provider
-      value={{
-        lang,
-        t,
-        isRtl,
-        isLoading,
-        setLanguage,
-        supportedLanguages: SUPPORTED_LANGUAGES,
-        translationProgress: progress,
-      }}
-    >
+    <LanguageContext.Provider value={value}>
       {children}
     </LanguageContext.Provider>
   );

@@ -1,0 +1,67 @@
+{
+  "name": "Exegesis Bible",
+  "short_name": "Exegesis",
+  "description": "Read, study, and abide in God's Word. A clean, mobile-first Bible reading and exegesis application.",
+  "start_url": "/",
+  "display": "standalone",
+  "display_override": ["standalone", "window-controls-overlay"],
+  "orientation": "any",
+  "theme_color": "#1e1b4b",
+  "background_color": "#ffffff",
+  "categories": ["religion", "books", "education"],
+  "lang": "en",
+  "dir": "ltr",
+  "scope": "/",
+  "prefer_related_applications": false,
+  "icons": [
+    { "src": "/exegesis-icon-16x16.png", "sizes": "16x16", "type": "image/png" },
+    { "src": "/exegesis-icon-32x32.png", "sizes": "32x32", "type": "image/png" },
+    { "src": "/exegesis-icon-48x48.png", "sizes": "48x48", "type": "image/png" },
+    { "src": "/exegesis-icon-64x64.png", "sizes": "64x64", "type": "image/png" },
+    { "src": "/exegesis-icon-128x128.png", "sizes": "128x128", "type": "image/png" },
+    { "src": "/exegesis-icon-180x180.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "/exegesis-icon-192x192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/exegesis-icon-256x256.png", "sizes": "256x256", "type": "image/png" },
+    { "src": "/exegesis-icon-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/exegesis-icon-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    {
+      "name": "Bible Reader",
+      "short_name": "Bible",
+      "description": "Read the Bible",
+      "url": "/bible-reader?book=Genesis&chapter=1",
+      "icons": [{ "src": "/exegesis-icon-192x192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Daily Verse",
+      "short_name": "Verse",
+      "description": "Today's Bible verse",
+      "url": "/user-daily-verse",
+      "icons": [{ "src": "/exegesis-icon-192x192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Journal",
+      "short_name": "Journal",
+      "description": "Write in your journal",
+      "url": "/journal",
+      "icons": [{ "src": "/exegesis-icon-192x192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Exegesis Lab",
+      "short_name": "Lab",
+      "description": "Study Scripture deeply",
+      "url": "/lab",
+      "icons": [{ "src": "/exegesis-icon-192x192.png", "sizes": "192x192", "type": "image/png" }]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/exegesis-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Exegesis Bible App"
+    }
+  ]
+}

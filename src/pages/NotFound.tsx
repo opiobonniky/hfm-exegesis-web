@@ -25,9 +25,15 @@ const NotFound = () => {
         <p className="mb-4 text-xl text-muted-foreground">
           {t.error?.pageNotFound || "Oops! Page not found"}
         </p>
-        <a href="/" className="text-primary underline hover:text-primary/90">
+        <button
+          onClick={() => {
+            // Attempt to open the mobile app via the custom scheme
+            window.location.href = 'exegesis://sower';
+          }}
+          className="mb-4 text-primary underline hover:text-primary/90"
+        >
           {t.common?.goHome || "Return to Home"}
-        </a>
+        </button>
       </div>
     </div>
   );

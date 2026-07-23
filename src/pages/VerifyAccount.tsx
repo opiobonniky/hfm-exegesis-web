@@ -16,9 +16,11 @@ import logoImage from "@/assets/logos/exegesis_bg_rm.png";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { sendPostRequest, ApiError } from "@/services/api";
 import { routes } from "@/components/Routes/routes";
+import { useAuth } from "@/contexts/AuthContext";
 
 const VerifyAccount = () => {
   const { t, isRtl } = useLanguage();
+  const { setUserInfo } = useAuth();
   const [searchParams] = useSearchParams();
   const emailParam = searchParams.get("email") || "";
 
@@ -54,16 +56,28 @@ const VerifyAccount = () => {
         code,
       });
 
-      const { returnCode, returnMessage } = response;
-      if (returnCode === 200) {
+      const { returnCode, returnMessage, returnData } = response;
+      if (returnCode === 200 && returnData) {
+        const userInfo: any = {
+          token: returnData.token,
+          tokenType: returnData.tokenType,
+          username: returnData.username,
+          email: returnData.email,
+          firstName: returnData.firstName,
+          lastName: returnData.lastName,
+          profilePhotoUrl: returnData.profilePhotoUrl,
+          userRole: returnData.userRole,
+          roleName: returnData.roleName,
+        };
+        setUserInfo(userInfo);
         setIsVerified(true);
         toast({
           title: t.auth?.emailVerified || 'Email Verified',
           description: t.auth?.verifiedSuccess || 'Your account has been verified successfully.',
         });
         setTimeout(() => {
-          navigate(routes.login.path);
-        }, 3000);
+          navigate(returnData.userRole === 1 ? routes.dashboard.path : routes.userDashboard.path);
+        }, 2000);
       } else {
         toast({
           title: t.auth?.verification || 'Verification Failed',

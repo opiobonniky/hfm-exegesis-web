@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import {
   Search,
   ChevronLeft,
@@ -26,6 +26,8 @@ import {
   ChevronUp as ArrowUp,
   PenLine,
   Lightbulb,
+  Library,
+  GraduationCap,
 } from "lucide-react";
 import {
   Select,
@@ -57,6 +59,11 @@ import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { ttsService, type TTSVoice } from "@/services/ttsService";
+import { getVerseWords } from "@/services/strongsApi";
+import WordDetailSheet from "@/components/WordDetailSheet";
+import StudyToolsSheet from "@/components/StudyToolsSheet";
+import HowToStudySheet from "@/components/HowToStudySheet";
+
 
 interface Highlight {
   id?: number;
@@ -122,6 +129,50 @@ function renderVerseText(text: string) {
         {part.substring(0, close)}
       </span>
     );
+  });
+}
+
+/**
+ * Render verse text with Strong's Concordance word-level markup.
+ * Words that have Strong's data get a subtle dotted underline and become tappable.
+ */
+function renderVerseWithStrongs(
+  text: string,
+  verseKey: string,
+  strongsWords: { text: string; strongsId: string | null; hasData: boolean }[],
+  onWordTap: (strongsId: string, wordText: string) => void,
+) {
+  // If no Strong's data for this verse, fall back to plain rendering
+  const wordsWithStrongs = strongsWords.filter((w) => w.strongsId && w.hasData);
+  if (wordsWithStrongs.length === 0) {
+    return renderVerseText(text);
+  }
+
+
+  // Split the verse text into words and render with markup
+  const parts = text.split(/(\s+)/);
+  return parts.map((part, idx) => {
+    // Check if this word has a Strong's entry
+    const cleanWord = part.replace(/[^a-zA-ZÀ-ÿ'\-]+/g, "").toLowerCase();
+    const match = wordsWithStrongs.find(
+      (w) => w.text.toLowerCase() === cleanWord,
+    );
+    if (match && match.strongsId) {
+      return (
+        <button
+          key={idx}
+          onClick={(e) => {
+            e.stopPropagation();
+            onWordTap(match.strongsId!, match.text);
+          }}
+          className="inline border-b border-dotted border-primary/40 hover:border-primary hover:text-primary cursor-help transition-colors focus:outline-none focus:ring-1 focus:ring-primary/20 rounded-sm"
+          title={'Tap to study this word'}
+        >
+          {part}
+        </button>
+      );
+    }
+    return <span key={idx}>{part}</span>;
   });
 }
 
@@ -266,7 +317,7 @@ function MobileNavDrawer({
               key={tabKey}
               onClick={() => setTab(tabKey)}
               className={cn(
-                "flex-1 py-2 rounded-xl text-xs font-semibold capitalize transition-all",
+                "flex-1 min-h-[44px] py-2 rounded-xl text-xs font-semibold capitalize transition-all active:scale-[0.97] [touch-action:manipulation]",
                 tab === tabKey
                   ? "bg-primary text-primary-foreground"
                   : "text-muted-foreground hover:bg-muted",
@@ -300,13 +351,12 @@ function MobileNavDrawer({
                       onClick={() => {
                         onBookChange(book);
                         setOpen(false);
-                      }}
-                      className={cn(
-                        "text-left px-3 py-2.5 rounded-xl text-sm transition-all active:scale-95",
-                        selectedBook === book
-                          ? "bg-primary text-primary-foreground font-semibold"
-                          : "bg-muted/50 hover:bg-muted text-foreground",
-                      )}
+                      }}                        className={cn(
+                          "text-left px-3 py-2.5 rounded-xl text-sm transition-all active:scale-95 [touch-action:manipulation]",
+                          selectedBook === book
+                            ? "bg-primary text-primary-foreground font-semibold"
+                            : "bg-muted/50 hover:bg-muted text-foreground",
+                        )}
                     >
                       {book}
                     </button>
@@ -326,13 +376,12 @@ function MobileNavDrawer({
                       onClick={() => {
                         onChapterChange(ch);
                         setOpen(false);
-                      }}
-                      className={cn(
-                        "aspect-square rounded-xl text-sm font-semibold transition-all active:scale-95 flex items-center justify-center",
-                        selectedChapter === ch
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-muted/50 hover:bg-muted text-foreground",
-                      )}
+                      }}                        className={cn(
+                          "aspect-square rounded-xl text-sm font-semibold transition-all active:scale-95 flex items-center justify-center [touch-action:manipulation]",
+                          selectedChapter === ch
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-muted/50 hover:bg-muted text-foreground",
+                        )}
                     >
                       {ch}
                     </button>
@@ -355,9 +404,9 @@ function MobileNavDrawer({
                           setOpen(false);
                         }}
                         className={cn(
-                          "aspect-square rounded-xl text-sm font-semibold transition-all active:scale-95 flex items-center justify-center",
+                          "aspect-square rounded-xl text-sm font-semibold transition-all active:scale-95 flex items-center justify-center [touch-action:manipulation]",
                           selectedVerse === v
-                            ? "bg-primary text-primary-foreground"
+                            ? "bg-red-500 text-primary-foreground"
                             : "bg-muted/50 hover:bg-muted text-foreground",
                         )}
                       >
@@ -384,7 +433,7 @@ function MobileNavDrawer({
                     setOpen(false);
                   }}
                   className={cn(
-                    "w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm transition-all active:scale-95",
+                    "w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm transition-all active:scale-95 [touch-action:manipulation]",
                     versionId === v.id
                       ? "bg-primary text-primary-foreground"
                       : "bg-muted/50 hover:bg-muted text-foreground",
@@ -427,16 +476,18 @@ function ToolbarBtn({
   return (
     <button
       onClick={onClick}
-      className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground px-2 py-1.5 rounded-full hover:bg-muted/50 active:bg-muted transition-colors whitespace-nowrap"
+      className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground min-h-[44px] px-2 py-1.5 rounded-full hover:bg-muted/50 active:bg-muted transition-colors whitespace-nowrap [touch-action:manipulation]"
     >
       {icon}
       {!compact && <span className="hidden sm:inline">{label}</span>}
       {compact && <span>{label}</span>}
     </button>
   );
-}
+}          // ── Voice Player Bar ──────────────────────────────────────────────────────────
 
-// ── Voice Player Bar ──────────────────────────────────────────────────────────
+function playerBtnCn(base: string): string {
+  return `${base} before:absolute before:content-[''] before:-inset-2 before:rounded-full relative [touch-action:manipulation]`;
+}
 
 function VoicePlayerBar({
   currentItem,
@@ -572,7 +623,7 @@ function VoicePlayerBar({
                 onClick={onToggleRepeat}
                 title={t.bibleReader.repeatModeLabel.replace('{mode}', repeatMode)}
                 className={cn(
-                  "w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all active:scale-95",
+                  playerBtnCn("w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all active:scale-95"),
                   repeatMode !== "none"
                     ? "text-primary bg-primary/10"
                     : "text-muted-foreground hover:text-foreground hover:bg-muted/60",
@@ -599,7 +650,7 @@ function VoicePlayerBar({
                   onSpeechRateChange(speeds[nextIdx]);
                 }}
                 title={`${t.bibleReader.speedX.replace('{rate}', String(speechRate))}`}
-                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/60 active:scale-95 transition-all font-bold text-xs"
+                className={playerBtnCn("w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/60 active:scale-95 transition-all font-bold text-xs")}
               >
                 {t.bibleReader.speedX.replace('{rate}', String(speechRate))}
               </button>
@@ -624,7 +675,7 @@ function VoicePlayerBar({
                     : t.bibleReader.setSleepTimer
                 }
                 className={cn(
-                  "w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center active:scale-95 transition-all font-bold text-xs",
+                  playerBtnCn("w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center active:scale-95 transition-all font-bold text-xs"),
                   sleepTimerRemaining > 0
                     ? "text-amber-500 bg-amber-500/10"
                     : "text-muted-foreground hover:text-foreground hover:bg-muted/60",
@@ -642,7 +693,7 @@ function VoicePlayerBar({
                 <PopoverTrigger asChild>
                   <button
                     title={selectedVoice?.name || 'Voice'}
-                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/60 active:scale-95 transition-all text-[9px] font-semibold truncate max-w-[50px]"
+                    className={playerBtnCn("w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/60 active:scale-95 transition-all text-[9px] font-semibold truncate max-w-[50px]")}
                   >
                     {selectedVoice
                       ? selectedVoice.name.substring(0, 6)
@@ -701,7 +752,7 @@ function VoicePlayerBar({
                 onClick={onSkipBack}
                 disabled={!canSkipBack}
                 title={t.bibleReader.previousVerse}
-                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/60 disabled:opacity-25 disabled:cursor-not-allowed active:scale-95 transition-all"
+                className={playerBtnCn("w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/60 disabled:opacity-25 disabled:cursor-not-allowed active:scale-95 transition-all")}
               >
                 <SkipBack className="w-4 h-4" />
               </button>
@@ -722,7 +773,7 @@ function VoicePlayerBar({
                 onClick={onSkipForward}
                 disabled={!canSkipForward && afterPlay !== "continue"}
                 title={t.bibleReader.nextVerse}
-                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/60 disabled:opacity-25 disabled:cursor-not-allowed active:scale-95 transition-all"
+                className={playerBtnCn("w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/60 disabled:opacity-25 disabled:cursor-not-allowed active:scale-95 transition-all")}
               >
                 <SkipForward className="w-4 h-4" />
               </button>
@@ -733,7 +784,7 @@ function VoicePlayerBar({
             <button
               onClick={onStop}
               title={t.bibleReader.stopAudio}
-              className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-destructive/70 hover:text-destructive hover:bg-destructive/10 active:scale-95 transition-all"
+              className={playerBtnCn("w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-destructive/70 hover:text-destructive hover:bg-destructive/10 active:scale-95 transition-all")}
             >
               <VolumeX className="w-4 h-4" />
             </button>
@@ -749,11 +800,13 @@ function VoicePlayerBar({
 export default function BibleReader() {
   const { t, isRtl } = useLanguage();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const isAuthenticated = !!localStorage.getItem(TOKEN_KEY);
   const [searchParams] = useSearchParams();
 
   const urlBook = searchParams.get("book");
   const urlChapter = searchParams.get("chapter");
+  const urlTranslation = searchParams.get("translation");
 
   useEffect(() => {
     const link = document.createElement("link");
@@ -772,7 +825,7 @@ export default function BibleReader() {
     urlChapter ? parseInt(urlChapter, 10) : 1,
   );
   const [selectedVerse, setSelectedVerse] = useState<number | null>(null);
-  const [versionId, setVersionId] = useState("Berean");
+  const [versionId, setVersionId] = useState(urlTranslation || "Berean");
   const [bookFilter, setBookFilter] = useState("");
   const [displayBook, setDisplayBook] = useState(urlBook || "Genesis");
   const [displayChapter, setDisplayChapter] = useState(
@@ -957,7 +1010,74 @@ export default function BibleReader() {
   const [searchQuery, setSearchQuery] = useState("");
 
   // Desktop-only book filter
+  const [verseWordsMap, setVerseWordsMap] = useState<
+  Record<string, { text: string; strongsId: string | null; hasData: boolean }[]>
+>({});
+  const [strongsWordModalOpen, setStrongsWordModalOpen] = useState(false);
+  const [selectedStrongsId, setSelectedStrongsId] = useState<string | null>(null);
+  const [selectedStrongsWordText, setSelectedStrongsWordText] = useState<string>("");
+
+  const handleWordTap = useCallback((strongsId: string, wordText: string) => {
+    setSelectedStrongsId(strongsId);
+    setSelectedStrongsWordText(wordText);
+    setStrongsWordModalOpen(true);
+  }, []);
+
   const [desktopBookFilter, setDesktopBookFilter] = useState("");
+
+  const [showStudyTools, setShowStudyTools] = useState(false);
+  const [showHowToStudy, setShowHowToStudy] = useState(false);
+
+  // ── Strong's verse words loading ──
+  const loadVerseWordsForChapter = useCallback(
+    async (book: string, chapter: number) => {
+      const chapterKey = `${book}-${chapter}`;
+      try {
+        if (versionId !== 'Berean') return; // Strong's only available for Berean
+
+        const words = await getVerseWords(book, chapter);
+        if (!words || words.length === 0) return;
+
+        // Group words by verse number
+        const grouped: Record<
+          string,
+          { text: string; strongsId: string | null; hasData: boolean }[]
+        > = {};
+        for (const w of words) {
+          const vNum = w.verseNumber || 1;
+          const key = `${book} ${chapter}:${vNum}`;
+          if (!grouped[key]) grouped[key] = [];
+          grouped[key].push({
+            text: w.surfaceText,
+            strongsId: w.strongsId,
+            hasData: w.hasData,
+          });
+        }
+
+        setVerseWordsMap((prev) => ({ ...prev, ...grouped }));
+      } catch {
+        // Silently fail — Strong's data is additive
+      }
+    },
+    [versionId],
+  );
+
+  // Load Strong's verse words when the chapter changes (debounced)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      loadVerseWordsForChapter(selectedBook, selectedChapter);
+    }, 300);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedBook, selectedChapter]);
+
+  // Helper to get Strong's words for a verse key
+  const getStrongsForVerse = useCallback(
+    (verseKey: string) => {
+      return verseWordsMap[verseKey] || [];
+    },
+    [verseWordsMap],
+  );
 
   // Translation search
   const [translationSearch, setTranslationSearch] = useState("");
@@ -1060,8 +1180,12 @@ export default function BibleReader() {
       }));
       setAvailableTranslations(options);
 
-      // Apply admin-configured default translation
-      if (loadedDefaultId && loadedDefaultId !== "Berean") {
+      // Apply URL translation param (overrides admin default)
+      if (urlTranslation && urlTranslation !== "Berean") {
+        const exists = options.some((o) => o.id === urlTranslation);
+        if (exists) setVersionId(urlTranslation);
+      } else if (loadedDefaultId && loadedDefaultId !== "Berean") {
+        // Fallback to admin-configured default translation
         const exists = options.some((o) => o.id === loadedDefaultId);
         if (exists) setVersionId(loadedDefaultId);
       }
@@ -2483,6 +2607,17 @@ export default function BibleReader() {
               )}
             </Button>
 
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowStudyTools(true)}
+              className="h-8 px-2.5 text-xs gap-1.5 border-border/50 bg-muted/30"
+              title="Study Tools"
+            >
+              <Lightbulb className="w-3.5 h-3.5 text-amber-500" />
+              <span className="hidden lg:inline">Tools</span>
+            </Button>
+
             <Popover open={translationOpen} onOpenChange={setTranslationOpen}>
               <PopoverTrigger asChild>
                 <Button
@@ -2558,7 +2693,7 @@ export default function BibleReader() {
             onValueChange={handleBookChange}
             disabled={booksLoading || backendBooks.length === 0}
           >
-            <SelectTrigger className="w-[175px] h-8 text-xs border-border/50 bg-muted/30">
+            <SelectTrigger aria-label="Select book" className="w-[175px] h-8 text-xs border-border/50 bg-muted/30">
               <SelectValue
                 placeholder={booksLoading ? t.bibleReader.loadingBooks : t.bibleReader.selectBook}
               />
@@ -2578,7 +2713,7 @@ export default function BibleReader() {
             onValueChange={(val) => handleChapterChange(parseInt(val, 10))}
             disabled={booksLoading || backendBooks.length === 0}
           >
-            <SelectTrigger className="w-[130px] h-8 text-xs border-border/50 bg-muted/30">
+            <SelectTrigger aria-label="Select chapter" className="w-[130px] h-8 text-xs border-border/50 bg-muted/30">
               <SelectValue
                 placeholder={booksLoading ? t.bibleReader.loadingBooks : t.bibleReader.selectChapter}
               />
@@ -2612,7 +2747,7 @@ export default function BibleReader() {
             onValueChange={handleVerseChange}
             disabled={currentChapterVerseCount === 0}
           >
-            <SelectTrigger className="w-[130px] h-8 text-xs border-border/50 bg-muted/30">
+            <SelectTrigger aria-label="Select verse" className="w-[130px] h-8 text-xs border-border/50 bg-muted/30">
               <SelectValue placeholder={t.bibleReader.selectVerse} />
             </SelectTrigger>
             <SelectContent>
@@ -2665,10 +2800,18 @@ export default function BibleReader() {
             />
           </div>
 
+          {/* Mobile study tools */}
+          <button
+            onClick={() => setShowStudyTools(true)}
+            className="relative w-8 h-8 before:absolute before:content-[''] before:-inset-2 before:rounded-xl rounded-xl bg-muted/50 flex items-center justify-center border border-border/40 active:scale-95 transition-all [touch-action:manipulation]"
+          >
+            <Lightbulb className="w-3.5 h-3.5 text-amber-500" />
+          </button>
+
           {/* Search button */}
           <button
             onClick={() => setShowSearchModal(true)}
-            className="w-8 h-8 rounded-xl bg-muted/50 flex items-center justify-center border border-border/40 active:scale-95 transition-all"
+            className="relative w-8 h-8 before:absolute before:content-[''] before:-inset-2 before:rounded-xl rounded-xl bg-muted/50 flex items-center justify-center border border-border/40 active:scale-95 transition-all [touch-action:manipulation]"
           >
             <Search className="w-3.5 h-3.5 text-muted-foreground" />
           </button>
@@ -2677,7 +2820,7 @@ export default function BibleReader() {
           <button
             onClick={readChapter}
             className={cn(
-              "w-8 h-8 rounded-xl flex items-center justify-center border transition-all active:scale-95",
+              "relative w-8 h-8 before:absolute before:content-[''] before:-inset-2 before:rounded-xl rounded-xl flex items-center justify-center border transition-all active:scale-95 [touch-action:manipulation]",
               isSpeaking && voiceMode === "chapter"
                 ? "bg-primary border-primary text-primary-foreground"
                 : "bg-muted/50 border-border/40 text-muted-foreground",
@@ -2696,7 +2839,7 @@ export default function BibleReader() {
           <button
             onClick={goToPrevChapter}
             disabled={isAtVeryStart}
-            className="flex items-center gap-1 sm:gap-1.5 h-8 px-2 sm:px-3 text-xs text-muted-foreground hover:text-foreground disabled:opacity-30 rounded-lg hover:bg-muted/50 transition-all active:scale-95"
+            className="relative flex items-center gap-1 sm:gap-1.5 h-8 px-2 sm:px-3 before:absolute before:content-[''] before:-inset-2 before:rounded-lg rounded-lg text-xs text-muted-foreground hover:text-foreground disabled:opacity-30 hover:bg-muted/50 transition-all active:scale-95 [touch-action:manipulation]"
           >
             <ChevronLeft className={cn("w-3.5 h-3.5", isRtl && "rotate-180")} />
             <span className="hidden sm:inline">
@@ -2732,7 +2875,7 @@ export default function BibleReader() {
           <button
             onClick={goToNextChapter}
             disabled={isAtVeryEnd}
-            className="flex items-center gap-1 sm:gap-1.5 h-8 px-2 sm:px-3 text-xs text-muted-foreground hover:text-foreground disabled:opacity-30 rounded-lg hover:bg-muted/50 transition-all active:scale-95"
+            className="relative flex items-center gap-1 sm:gap-1.5 h-8 px-2 sm:px-3 before:absolute before:content-[''] before:-inset-2 before:rounded-lg rounded-lg text-xs text-muted-foreground hover:text-foreground disabled:opacity-30 hover:bg-muted/50 transition-all active:scale-95 [touch-action:manipulation]"
           >
             <span className="hidden sm:inline">
               {(() => {
@@ -2758,7 +2901,7 @@ export default function BibleReader() {
             {/* Count + clear */}
             <button
               onClick={clearSelection}
-              className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground px-2 py-1 rounded-full hover:bg-muted/50 transition-colors shrink-0"
+              className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground min-h-[44px] px-2 py-1 rounded-full hover:bg-muted/50 active:scale-[0.97] transition-all shrink-0 [touch-action:manipulation]"
             >
               <X className="w-3 h-3" />
               <span>{selectedVerses.length}</span>
@@ -2770,7 +2913,7 @@ export default function BibleReader() {
             <button
               onClick={readSelectedVerses}
               className={cn(
-                "flex items-center gap-1 text-xs px-2 py-1 rounded-full transition-colors whitespace-nowrap shrink-0",
+                "flex items-center gap-1 text-xs min-h-[44px] px-2 py-1 rounded-full transition-colors whitespace-nowrap shrink-0 active:scale-[0.97] [touch-action:manipulation]",
                 isSpeaking && voiceMode === "selected"
                   ? "bg-primary text-white"
                   : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
@@ -2849,6 +2992,12 @@ export default function BibleReader() {
               }}
               icon={<Share2 className="w-3 h-3" />}
               label={t.common.share}
+              compact
+            />
+            <ToolbarBtn
+              onClick={() => navigate(`/verse-resources?book=${encodeURIComponent(displayBook)}&chapter=${displayChapter}&verse=${selectedVerse || 1}`)}
+              icon={<Library className="w-3 h-3" />}
+              label={"Study"}
               compact
             />
           </div>
@@ -2988,7 +3137,7 @@ export default function BibleReader() {
                                 >
                                   {verse.num}
                                 </sup>
-                                {renderVerseText(verse.text)}
+                                {renderVerseWithStrongs(verse.text, verse.key, getStrongsForVerse(verse.key), handleWordTap)}
                                 {!isSelected && (
                                   <>
                                     {isFav && (
@@ -3005,34 +3154,46 @@ export default function BibleReader() {
                                   </>
                                 )}{" "}
                                 {isSelected && selectedVerses.length === 1 && (
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      toggleExplanation(verse.key);
-                                    }}
-                                    disabled={explanationLoading}
-                                    className={cn(
-                                      "inline-flex items-center gap-1 ml-1.5 text-[0.65rem] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-md transition-all duration-150",
-                                      isExplanationExpanded
-                                        ? "bg-primary text-primary-foreground shadow-sm"
-                                        : "bg-primary/10 text-primary/80 hover:bg-primary/20 hover:text-primary",
-                                    )}
-                                  >
-                                    {explanationLoading &&
-                                    expandedExplanation === verse.key ? (
-                                      <Loader2 className="w-2.5 h-2.5 animate-spin" />
-                                    ) : isExplanationExpanded ? (
-                                      <>
-                                        <ChevronUp className="w-2.5 h-2.5" />
-                                        {t.bibleReader.closeExplanation}
-                                      </>
-                                    ) : (
-                                      <>
-                                        <Lightbulb className="w-2.5 h-2.5" />
-                                        {t.bibleReader.explain}
-                                      </>
-                                    )}
-                                  </button>
+                                  <>
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        toggleExplanation(verse.key);
+                                      }}
+                                      disabled={explanationLoading}
+                                      className={cn(
+                                        "inline-flex items-center gap-1 ml-1.5 text-[0.65rem] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-md transition-all duration-150",
+                                        isExplanationExpanded
+                                          ? "bg-primary text-primary-foreground shadow-sm"
+                                          : "bg-primary/10 text-primary/80 hover:bg-primary/20 hover:text-primary",
+                                      )}
+                                    >
+                                      {explanationLoading &&
+                                      expandedExplanation === verse.key ? (
+                                        <Loader2 className="w-2.5 h-2.5 animate-spin" />
+                                      ) : isExplanationExpanded ? (
+                                        <>
+                                          <ChevronUp className="w-2.5 h-2.5" />
+                                          {t.bibleReader.closeExplanation}
+                                        </>
+                                      ) : (
+                                        <>
+                                          <Lightbulb className="w-2.5 h-2.5" />
+                                          {t.bibleReader.explain}
+                                        </>
+                                      )}
+                                    </button>
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        navigate(`/verse-resources?book=${encodeURIComponent(displayBook)}&chapter=${displayChapter}&verse=${verse.num}`);
+                                      }}
+                                      className="inline-flex items-center gap-1 ml-1.5 text-[0.65rem] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-md transition-all duration-150 bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20 hover:text-amber-600 dark:hover:text-amber-300"
+                                    >
+                                      <GraduationCap className="w-2.5 h-2.5" />
+                                      Explore
+                                    </button>
+                                  </>
                                 )}{" "}
                               </span>
 
@@ -3343,6 +3504,49 @@ export default function BibleReader() {
         onConfirm={(rangeStart, rangeEnd) => {
           setShowShareModal(false);
           shareVersesRange(rangeStart, rangeEnd);
+        }}
+      />
+
+      {/* ══════════════════ WORD STUDY ══════════════════ */}
+      <WordDetailSheet
+        open={strongsWordModalOpen}
+        onOpenChange={setStrongsWordModalOpen}
+        strongsId={selectedStrongsId}
+        surfaceText={selectedStrongsWordText}
+      />
+
+      {/* ══════════════════ STUDY TOOLS ══════════════════ */}
+      <StudyToolsSheet
+        open={showStudyTools}
+        onOpenChange={setShowStudyTools}
+        bookName={displayBook}
+        chapter={displayChapter}
+        onOpenHowToStudy={() => setShowHowToStudy(true)}
+        onGoToVerse={(vk) => {
+          // vk might be a range like "1-3" or "1,2,3" — take the first verse
+          const firstVerse = vk.split(/[,\-]/)[0].trim();
+          const verseKey = firstVerse.match(/^\d+$/)
+            ? `${displayBook} ${displayChapter}:${firstVerse}`
+            : vk;
+          const p = parseVerseKey(verseKey);
+          if (p) {
+            handleBookChange(p.book);
+            setTimeout(() => handleChapterChange(p.chapter), 100);
+          }
+        }}
+      />
+
+      {/* ══════════════════ HOW TO STUDY ══════════════════ */}
+      <HowToStudySheet
+        open={showHowToStudy}
+        onOpenChange={setShowHowToStudy}
+        bookName={displayBook}
+        chapter={displayChapter}
+        onOpenJournal={() => {
+          window.open(
+            `/journal/new?book=${displayBook}&chapter=${displayChapter}&verse=1`,
+            "_blank",
+          );
         }}
       />
 

@@ -113,7 +113,7 @@ const ActionChip = ({
     onClick={onClick}
     disabled={disabled}
     className={cn(
-      "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200",
+      "inline-flex items-center gap-1.5 min-h-[44px] px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 [touch-action:manipulation]",
       disabled
         ? "bg-muted text-muted-foreground cursor-not-allowed"
         : "bg-primary/10 text-primary hover:bg-primary/20 active:scale-95",
@@ -274,7 +274,7 @@ export default function UserDevotions() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8"
+                className="relative h-8 w-8 before:absolute before:content-[''] before:-inset-2 before:rounded-lg [touch-action:manipulation]"
                 onClick={() => window.history.back()}
               >
                 <ChevronLeft className={cn("w-4 h-4", isRtl && "rotate-180")} />

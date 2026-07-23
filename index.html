@@ -4,7 +4,14 @@
 <head>
     <meta charset="UTF-8" />
 
-    
+    <!-- PWA: manifest + theme color -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#1e1b4b" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Exegesis" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="application-name" content="Exegesis Bible" />
 
     <link rel="icon" href="/exegesis-icon.ico" />
     <link rel="icon" type="image/png" sizes="16x16" href="/exegesis-icon-16x16.png" />
@@ -14,7 +21,10 @@
     <link rel="icon" type="image/png" sizes="128x128" href="/exegesis-icon-128x128.png" />
     <link rel="apple-touch-icon" href="/exegesis-icon-180x180.png" />
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Splash screen for iOS when launched from home screen -->
+    <link href="/exegesis-logo.png" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)" rel="apple-touch-startup-image" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
     <title>Exegesis Bible</title>
 
