@@ -211,11 +211,11 @@ const JournalDetailPage = () => {
   })();
 
   const reflectionSections = [
-    entry.learnings && { icon: Lightbulb, label: t.journal?.whatILearned || "What I Learned", content: entry.learnings, iconColor: "text-amber-600 dark:text-amber-400" },
-    entry.application && { icon: Pencil, label: t.journal?.howIllApply || "How I'll Apply", content: entry.application, iconColor: "text-indigo-600 dark:text-indigo-400" },
-    entry.gratitude && { icon: Heart, label: t.journal?.gratitude || "Gratitude", content: entry.gratitude, iconColor: "text-rose-600 dark:text-rose-400" },
-    entry.prayers && { icon: Star, label: t.journal?.prayers || "Prayers", content: entry.prayers, iconColor: "text-violet-600 dark:text-violet-400" },
-  ].filter(Boolean) as { icon: any; label: string; content: string; iconColor: string }[];
+    entry.learnings && { key: "learnings", icon: Lightbulb, label: t.journal?.whatILearned || "What I Learned", subtitle: t.journal?.learnSubtitle || "Insights & revelations from this reading", content: entry.learnings, iconColor: "text-amber-600 dark:text-amber-400" },
+    entry.application && { key: "application", icon: Pencil, label: t.journal?.howIllApply || "How I'll Apply", subtitle: t.journal?.applySubtitle || "Practical steps to live out this truth", content: entry.application, iconColor: "text-indigo-600 dark:text-indigo-400" },
+    entry.gratitude && { key: "gratitude", icon: Heart, label: t.journal?.gratitude || "Gratitude", subtitle: t.journal?.gratitudeSubtitle || "Counting blessings and gifts", content: entry.gratitude, iconColor: "text-rose-600 dark:text-rose-400" },
+    entry.prayers && { key: "prayers", icon: Star, label: t.journal?.prayers || "Prayers", subtitle: t.journal?.prayerSubtitle || "Conversations with the Father", content: entry.prayers, iconColor: "text-violet-600 dark:text-violet-400" },
+  ].filter(Boolean) as { key: string; icon: any; label: string; subtitle: string; content: string; iconColor: string }[];
 
   return (
     <div className="min-h-full bg-amber-50/30 dark:bg-stone-950" dir={isRtl ? 'rtl' : 'ltr'}>
@@ -323,27 +323,37 @@ const JournalDetailPage = () => {
           </div>
         )}
 
-        {/* ── Reflection sections ── */}
+        {/* ── Reflection sections (paragraph style with prominent headings) ── */}
         {reflectionSections.length > 0 && (
           <>
             <LeafDivider />
-            <div className="grid gap-4 sm:grid-cols-2 mb-6">
-              {reflectionSections.map(({ icon: Icon, label, content, iconColor }) => (
-                <div
-                  key={label}
-                  className="rounded-xl bg-white/70 dark:bg-stone-900/50 border border-stone-200/70 dark:border-stone-800/70 p-4 hover:bg-white dark:hover:bg-stone-900/80 transition-colors"
-                >
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="w-7 h-7 rounded-lg bg-stone-100 dark:bg-stone-800 flex items-center justify-center">
-                      <Icon className={cn("w-3.5 h-3.5", iconColor)} />
+            <div className="space-y-8 mb-6">
+              {reflectionSections.map(({ key, icon: Icon, label, subtitle, content, iconColor }) => (
+                <div key={key} className="rounded-2xl bg-white/70 dark:bg-stone-900/50 border border-stone-200/70 dark:border-stone-800/70 p-6 hover:bg-white dark:hover:bg-stone-900/80 transition-colors shadow-sm">
+                  {/* Section heading row */}
+                  <div className="flex items-start gap-4 mb-4 pb-4 border-b border-stone-100 dark:border-stone-800/60">
+                    <div className="w-10 h-10 rounded-xl bg-stone-100 dark:bg-stone-800 flex items-center justify-center shrink-0 ring-1 ring-stone-200/50 dark:ring-stone-700/50">
+                      <Icon className={cn("w-5 h-5", iconColor)} />
                     </div>
-                    <h3 className="text-[11px] font-semibold uppercase tracking-wider text-stone-500 dark:text-stone-400">
-                      {label}
-                    </h3>
+                    <div>
+                      <h3 className="text-base font-bold text-stone-800 dark:text-stone-200 leading-tight">
+                        {label}
+                      </h3>
+                      {subtitle && (
+                        <p className="text-[11px] text-stone-400 dark:text-stone-500 mt-0.5">
+                          {subtitle}
+                        </p>
+                      )}
+                    </div>
                   </div>
-                  <p className="text-sm leading-relaxed text-stone-700 dark:text-stone-300 whitespace-pre-line" style={{ fontFamily: "'Georgia', 'Times New Roman', serif" }}>
-                    {content}
-                  </p>
+                  {/* Content as flowing paragraphs */}
+                  <div className="text-sm sm:text-base leading-[1.9] text-stone-700 dark:text-stone-300" style={{ fontFamily: "'Georgia', 'Times New Roman', serif" }}>
+                    {content.split('\n').filter(Boolean).map((paragraph, i) => (
+                      <p key={i} className={i > 0 ? 'mt-4' : ''}>
+                        {paragraph}
+                      </p>
+                    ))}
+                  </div>
                 </div>
               ))}
             </div>

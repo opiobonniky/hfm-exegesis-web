@@ -1029,6 +1029,7 @@ export default function LegacyLedgerPage() {
           {/* ── Export Modal ── */}
           <Dialog open={showExportModal} onOpenChange={(open) => { if (!open) { setShowExportModal(false); if (selectedIds.size > 0) exitSelectionMode(); } }}>
             <DialogContent className="rounded-2xl border-stone-200 dark:border-stone-800">
+              <DialogTitle className="sr-only">Export Journal Entries</DialogTitle>
               <ExportModal
                 onClose={() => { setShowExportModal(false); if (selectedIds.size > 0) exitSelectionMode(); }}
                 selectedIds={selectedIds.size > 0 ? Array.from(selectedIds) : undefined}

@@ -414,7 +414,7 @@ export function AppSidebar() {
         {/* ═══════════════════════════════════════════════════════════════════
            HEADER — Minimal brand mark
            ═══════════════════════════════════════════════════════════════════ */}
-        <SidebarHeader className={collapsed ? "px-2 pt-4 pb-2" : "px-4 pt-5 pb-3"}>
+        <SidebarHeader className={collapsed ? "px-2 pt-4 pb-2" : "px-4 pt-6 pb-4"}>
           <NavLink
             to={isAdmin ? routes.dashboard.path : routes.home.path}
             className={cn(
@@ -423,38 +423,22 @@ export function AppSidebar() {
             )}
           >
             <div className={cn(
-              "flex items-center gap-3",
-              collapsed && "flex-col gap-1.5",
+              collapsed && "flex-col items-center gap-1.5",
             )}>
-              {/* Logo */}
+              {/* Logo — the image already contains the app name text */}
               <div className={cn(
-                "shrink-0 flex items-center justify-center",
-                "bg-gradient-to-br from-accent/15 to-accent/5 rounded-xl",
-                "ring-1 ring-accent/10 group-hover:ring-accent/25",
-                "transition-all duration-300 group-hover:scale-105",
-                collapsed ? "w-10 h-10" : "w-9 h-9",
+                "mx-auto flex items-center justify-center",
+                collapsed ? "w-10 h-10" : "w-[140px] h-[140px]",
               )}>
                 <img
                   src={logoImage}
                   alt={t.brand?.title || "EXEGESIS"}
                   className={cn(
                     "object-contain",
-                    collapsed ? "w-7 h-7 p-1" : "w-6 h-6 p-1",
+                    collapsed ? "w-8 h-8 p-0.5" : "w-full h-full p-3",
                   )}
                 />
               </div>
-
-              {/* Brand text */}
-              {!collapsed && (
-                <div className="flex flex-col">
-                  <span className="text-sm font-bold tracking-tight text-foreground/90">
-                    Exegesis
-                  </span>
-                  <span className="text-[9px] font-medium tracking-[0.18em] uppercase text-foreground/25">
-                    Bible Study
-                  </span>
-                </div>
-              )}
             </div>
           </NavLink>
         </SidebarHeader>

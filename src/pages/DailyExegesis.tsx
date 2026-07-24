@@ -188,12 +188,22 @@ export default function DailyExegesisPage() {
   };
 
   const saveToLedger = () => {
-    navigate(
-      `/journal/new?title=${encodeURIComponent(item.title)}&reflection=${encodeURIComponent(
-        [item.introduction, item.contextSummary, item.teachingBody].filter(Boolean).join("\n\n"),
-      )}&prayer=${encodeURIComponent(item.prayer || "")}&application=${encodeURIComponent(item.application || "")}&tags=${encodeURIComponent(item.tags || "")}&passage=${encodeURIComponent(item.passageReference)}&source=daily-exegesis` +
-        (passage ? `&book=${encodeURIComponent(passage.bookName)}&chapter=${passage.chapter}&verse=${passage.verseNumber}` : ""),
-    );
+    const params = new URLSearchParams({
+      title: item.title,
+      reflection: [item.introduction, item.contextSummary, item.teachingBody].filter(Boolean).join("\n\n"),
+      prayer: item.prayer || "",
+      application: item.application || "",
+      tags: item.tags || "",
+      passage: item.passageReference,
+      source: "daily-exegesis",
+      date: item.displayDate,
+    });
+    if (passage) {
+      params.set("book", passage.bookName);
+      params.set("chapter", String(passage.chapter));
+      params.set("verse", String(passage.verseNumber));
+    }
+    navigate(`/journal/new?${params.toString()}`);
   };
 
   // ── Loading ──

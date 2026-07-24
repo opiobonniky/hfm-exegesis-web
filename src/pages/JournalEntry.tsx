@@ -9,6 +9,9 @@ import {
   Lightbulb,
   Sparkles,
   FileText,
+  Pencil,
+  Heart,
+  Star,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -116,15 +119,20 @@ const DEFAULT_ENTRY: JournalEntry = {
   tags: "",
 };
 
-/* ── Reusable warm card wrapper ── */
-function FormCard({ title, icon: Icon, children }: { title: string; icon: ComponentType<{ className?: string }>; children: ReactNode }) {
+/* ── Reusable warm card wrapper (matches JournalDetail heading style) ── */
+function FormCard({ title, icon: Icon, subtitle, children }: { title: string; icon: ComponentType<{ className?: string }>; subtitle?: string; children: ReactNode }) {
   return (
-    <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900/80 p-5">
-      <div className="flex items-center gap-2 mb-4 pb-3 border-b border-stone-100 dark:border-stone-800/60">
-        <div className="w-7 h-7 rounded-lg bg-stone-100 dark:bg-stone-800 flex items-center justify-center">
-          <Icon className="w-3.5 h-3.5 text-stone-600 dark:text-stone-400" />
+    <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900/80 p-6 shadow-sm">
+      <div className="flex items-start gap-4 mb-4 pb-4 border-b border-stone-100 dark:border-stone-800/60">
+        <div className="w-10 h-10 rounded-xl bg-stone-100 dark:bg-stone-800 flex items-center justify-center shrink-0 ring-1 ring-stone-200/50 dark:ring-stone-700/50">
+          <Icon className="w-5 h-5 text-stone-600 dark:text-stone-400" />
         </div>
-        <h2 className="text-sm font-semibold text-stone-800 dark:text-stone-200">{title}</h2>
+        <div>
+          <h2 className="text-base font-bold text-stone-800 dark:text-stone-200 leading-tight">{title}</h2>
+          {subtitle && (
+            <p className="text-[11px] text-stone-400 dark:text-stone-500 mt-0.5">{subtitle}</p>
+          )}
+        </div>
       </div>
       {children}
     </div>
@@ -148,12 +156,28 @@ const JournalEntryPage = () => {
       const chapter = searchParams.get("chapter");
       const verse = searchParams.get("verse");
       const promptText = searchParams.get("promptText");
+      const title = searchParams.get("title");
+      const reflection = searchParams.get("reflection");
+      const prayer = searchParams.get("prayer");
+      const application = searchParams.get("application");
+      const tags = searchParams.get("tags");
+      const source = searchParams.get("source");
+
+      // When coming from Daily Exegesis, split reflection content
+      const content = source === "daily-exegesis" && reflection
+        ? reflection
+        : (promptText || "");
+
       return {
         ...DEFAULT_ENTRY,
+        title: title || "",
         bookName: book || "",
         chapter: chapter || "",
         verseNumber: verse || "",
-        content: promptText || "",
+        content,
+        prayers: prayer || "",
+        application: application || "",
+        tags: tags || "",
       };
     }
     return DEFAULT_ENTRY;
@@ -226,6 +250,41 @@ const JournalEntryPage = () => {
       setVerseText("");
     }
   }, [entry.bookName, entry.chapter, entry.verseNumber]);
+
+  // ── When coming from Daily Exegesis, fetch full content from backend ──
+  useEffect(() => {
+    const entrySource = searchParams.get("source");
+    const date = searchParams.get("date");
+
+    if (isNewEntry && entrySource === "daily-exegesis" && date) {
+      const fetchDailyExegesis = async () => {
+        try {
+          const res = await sendPostRequest("bible", "get-exegesis-by-date", {
+            date,
+          });
+          if (res.returnCode === 200 && res.returnData) {
+            const data = res.returnData;
+            setEntry((prev) => ({
+              ...prev,
+              title: data.title || prev.title,
+              content: [data.introduction, data.contextSummary, data.teachingBody]
+                .filter(Boolean)
+                .join("\n\n") || prev.content,
+              prayers: data.prayer || prev.prayers,
+              application: data.application || prev.application,
+              learnings: data.contextSummary || data.introduction || prev.learnings,
+              tags: data.tags || prev.tags,
+            }));
+          }
+        } catch (e) {
+          console.error("Failed to fetch daily exegesis:", e);
+        }
+      };
+      fetchDailyExegesis();
+    }
+    // Only fetch once on mount — deps intentionally omitted
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (isNewEntry) {
@@ -522,58 +581,66 @@ const JournalEntryPage = () => {
               </div>
             </FormCard>
 
-            <FormCard title={t.journal?.reflectionQuestions || "Reflection Questions"} icon={Lightbulb}>
-              <div className="space-y-4">
-                <div className="space-y-1.5">
-                  <Label className="text-xs font-medium text-stone-700 dark:text-stone-300">{t.journal?.whatDidYouLearn || "What did you learn?"}</Label>
-                  <Textarea
-                    aria-label={t.journal?.whatDidYouLearn || "What did you learn"}
-                    placeholder={t.journal?.learnPlaceholder || "Key insights or revelations from your reading..."}
-                    value={entry.learnings}
-                    onChange={(e) => updateField("learnings", e.target.value)}
-                    className="min-h-[100px] rounded-xl border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-sm text-stone-800 dark:text-stone-200"
-                    style={{ fontFamily: "'Georgia', 'Times New Roman', serif" }}
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <Label className="text-xs font-medium text-stone-700 dark:text-stone-300">{t.journal?.howApply || "How will you apply this?"}</Label>
-                  <Textarea
-                    aria-label={t.journal?.howApply || "How will you apply this"}
-                    placeholder={t.journal?.applyPlaceholder || "How will this change your life or actions?"}
-                    value={entry.application}
-                    onChange={(e) => updateField("application", e.target.value)}
-                    className="min-h-[100px] rounded-xl border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-sm text-stone-800 dark:text-stone-200"
-                    style={{ fontFamily: "'Georgia', 'Times New Roman', serif" }}
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <Label className="text-xs font-medium text-stone-700 dark:text-stone-300">{t.journal?.whatGrateful || "What are you grateful for?"}</Label>
-                    <Textarea
-                      aria-label={t.journal?.whatGrateful || "What are you grateful for"}
-                      placeholder={t.journal?.gratPlaceholder || "List your gratitude..."}
-                      value={entry.gratitude}
-                      onChange={(e) => updateField("gratitude", e.target.value)}
-                      className="min-h-[100px] rounded-xl border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-sm text-stone-800 dark:text-stone-200"
-                      style={{ fontFamily: "'Georgia', 'Times New Roman', serif" }}
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label className="text-xs font-medium text-stone-700 dark:text-stone-300">{t.journal?.yourPrayers || "Your prayers"}</Label>
-                    <Textarea
-                      aria-label={t.journal?.yourPrayers || "Your prayers"}
-                      placeholder={t.journal?.prayerPlaceholder || "Prayers and requests..."}
-                      value={entry.prayers}
-                      onChange={(e) => updateField("prayers", e.target.value)}
-                      className="min-h-[100px] rounded-xl border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-sm text-stone-800 dark:text-stone-200"
-                      style={{ fontFamily: "'Georgia', 'Times New Roman', serif" }}
-                    />
-                  </div>
-                </div>
+            {/* ── What I Learned ── */}
+            <FormCard title={t.journal?.whatILearned || "What I Learned"} icon={Lightbulb} subtitle={t.journal?.learnSubtitle || "Insights & revelations from this reading"}>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-stone-700 dark:text-stone-300">{t.journal?.whatDidYouLearn || "What did you learn?"}</Label>
+                <Textarea
+                  aria-label={t.journal?.whatDidYouLearn || "What did you learn"}
+                  placeholder={t.journal?.learnPlaceholder || "Key insights or revelations from your reading..."}
+                  value={entry.learnings}
+                  onChange={(e) => updateField("learnings", e.target.value)}
+                  className="min-h-[100px] rounded-xl border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-sm text-stone-800 dark:text-stone-200"
+                  style={{ fontFamily: "'Georgia', 'Times New Roman', serif" }}
+                />
               </div>
             </FormCard>
+
+            {/* ── How I'll Apply ── */}
+            <FormCard title={t.journal?.howIllApply || "How I'll Apply"} icon={Pencil} subtitle={t.journal?.applySubtitle || "Practical steps to live out this truth"}>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-stone-700 dark:text-stone-300">{t.journal?.howApply || "How will you apply this?"}</Label>
+                <Textarea
+                  aria-label={t.journal?.howApply || "How will you apply this"}
+                  placeholder={t.journal?.applyPlaceholder || "How will this change your life or actions?"}
+                  value={entry.application}
+                  onChange={(e) => updateField("application", e.target.value)}
+                  className="min-h-[100px] rounded-xl border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-sm text-stone-800 dark:text-stone-200"
+                  style={{ fontFamily: "'Georgia', 'Times New Roman', serif" }}
+                />
+              </div>
+            </FormCard>
+
+            {/* ── Gratitude & Prayers side by side ── */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <FormCard title={t.journal?.gratitude || "Gratitude"} icon={Heart} subtitle={t.journal?.gratitudeSubtitle || "Counting blessings and gifts"}>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium text-stone-700 dark:text-stone-300">{t.journal?.whatGrateful || "What are you grateful for?"}</Label>
+                  <Textarea
+                    aria-label={t.journal?.whatGrateful || "What are you grateful for"}
+                    placeholder={t.journal?.gratPlaceholder || "List your gratitude..."}
+                    value={entry.gratitude}
+                    onChange={(e) => updateField("gratitude", e.target.value)}
+                    className="min-h-[120px] rounded-xl border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-sm text-stone-800 dark:text-stone-200"
+                    style={{ fontFamily: "'Georgia', 'Times New Roman', serif" }}
+                  />
+                </div>
+              </FormCard>
+
+              <FormCard title={t.journal?.prayers || "Prayers"} icon={Star} subtitle={t.journal?.prayerSubtitle || "Conversations with the Father"}>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium text-stone-700 dark:text-stone-300">{t.journal?.yourPrayers || "Your prayers"}</Label>
+                  <Textarea
+                    aria-label={t.journal?.yourPrayers || "Your prayers"}
+                    placeholder={t.journal?.prayerPlaceholder || "Prayers and requests..."}
+                    value={entry.prayers}
+                    onChange={(e) => updateField("prayers", e.target.value)}
+                    className="min-h-[120px] rounded-xl border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-sm text-stone-800 dark:text-stone-200"
+                    style={{ fontFamily: "'Georgia', 'Times New Roman', serif" }}
+                  />
+                </div>
+              </FormCard>
+            </div>
           </div>
 
           {/* ── Right Column (1/3) ── */}
