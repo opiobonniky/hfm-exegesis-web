@@ -16,7 +16,7 @@ export function BookPrologueSection({
   prologue: BookPrologue;
   bookName: string;
 }) {
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(true);
 
   return (
     <button

@@ -1,27 +1,36 @@
-// ── MobileBottomNav ──────────────────────────────────────────────────────────
-// Bottom tab navigation for mobile. Shows on small screens (<768px).
-// Mirrors the sidebar navigation with the 6 core tabs from the spec:
-// Home, Bible, Lab, Journal, Search, Profile
-
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   BookOpen,
   Home,
   Microscope,
   PenLine,
-  Search,
-  User,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { routes } from "./Routes/routes";
 import { useLanguage } from "@/components/languages/languageProvider";
+import { useSubscription } from "@/hooks/useSubscription";
+
+const LAST_BIBLE_KEY = "exegesis_last_bible";
+
+function getBibleUrl(): string {
+  try {
+    const raw = localStorage.getItem(LAST_BIBLE_KEY);
+    if (raw) {
+      const { book, chapter } = JSON.parse(raw);
+      if (book && chapter) {
+        return `${routes.bibleReader.path}?book=${encodeURIComponent(book)}&chapter=${chapter}`;
+      }
+    }
+  } catch {}
+  return routes.bibleLibrary.path;
+}
 
 interface NavTab {
   label: string;
   icon: typeof Home;
   path: string;
-  /** Routes that should make this tab appear active */
   activePaths: string[];
+  minTier?: "free" | "legacy_sower" | "covenant_sower";
 }
 
 const NAV_TABS: NavTab[] = [
@@ -46,6 +55,7 @@ const NAV_TABS: NavTab[] = [
     icon: Microscope,
     path: routes.dictionary.path,
     activePaths: [routes.dictionary.path, routes.labFlow.path],
+    minTier: "legacy_sower",
   },
   {
     label: "Journal",
@@ -58,24 +68,13 @@ const NAV_TABS: NavTab[] = [
       routes.journalDetail.path,
     ],
   },
-  {
-    label: "Search",
-    icon: Search,
-    path: routes.search.path,
-    activePaths: [routes.search.path],
-  },
-  {
-    label: "Profile",
-    icon: User,
-    path: routes.settings.path,
-    activePaths: [routes.settings.path],
-  },
 ];
 
 export default function MobileBottomNav() {
   const location = useLocation();
   const navigate = useNavigate();
   const { t, isRtl } = useLanguage();
+  const { hasAccess } = useSubscription();
 
   const isActive = (tab: NavTab) =>
     tab.activePaths.some((p) => location.pathname.startsWith(p));
@@ -89,12 +88,23 @@ export default function MobileBottomNav() {
     return baseLabel;
   };
 
+  const handleTabClick = (tab: NavTab) => {
+    if (tab.label === "Bible") {
+      navigate(getBibleUrl());
+      return;
+    }
+    if (tab.minTier && !hasAccess(tab.minTier)) {
+      navigate(routes.sower.path);
+      return;
+    }
+    navigate(tab.path);
+  };
+
   return (
     <nav
       className="fixed bottom-0 left-0 right-0 z-50 block md:hidden safe-area-inset-bottom"
       dir={isRtl ? "rtl" : "ltr"}
     >
-      {/* Subtle top border */}
       <div className="h-px bg-border/60" />
 
       <div
@@ -112,7 +122,7 @@ export default function MobileBottomNav() {
           return (
             <button
               key={tab.path}
-              onClick={() => navigate(tab.path)}
+              onClick={() => handleTabClick(tab)}
               className={cn(
                 "relative flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all duration-150 min-w-[52px]",
                 active
@@ -120,7 +130,6 @@ export default function MobileBottomNav() {
                   : "text-muted-foreground/60 hover:text-muted-foreground",
               )}
             >
-              {/* Active indicator dot */}
               {active && (
                 <span className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-5 h-0.5 rounded-full bg-primary" />
               )}

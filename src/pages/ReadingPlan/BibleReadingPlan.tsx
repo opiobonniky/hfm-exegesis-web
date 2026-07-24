@@ -20,6 +20,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { sendPostRequest } from "@/services/api";
 import { routes } from "@/components/Routes/routes";
+import Gate from "@/components/Gate";
 import { useLanguage } from "@/components/languages/languageProvider";
 
 // ─────────────────────────────────────────────
@@ -499,6 +500,7 @@ const BibleReadingPlan = () => {
 
   // ─────────────────────────────────────────────
   return (
+    <Gate tier="legacy_sower" featureName="Reading Plans" featureDescription="Track your daily Bible reading progress with personalized reading plans.">
     <div
       className="min-h-screen bg-[#f7f5f2]"
       dir={isRtl ? 'rtl' : 'ltr'}
@@ -684,6 +686,7 @@ const BibleReadingPlan = () => {
         </div>
       )}
     </div>
+    </Gate>
   );
 };
 

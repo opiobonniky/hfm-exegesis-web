@@ -317,6 +317,11 @@ export default function BibleReader() {
   const verseRefs = useRef<Record<string, HTMLSpanElement | null>>({});
   const isNavigatingRef = useRef(false);
   const loadingRef = useRef(false);
+  const pendingNavigationRef = useRef<{
+    book: string;
+    startChapter: number;
+    count: number;
+  } | null>(null);
   const scrollObserverRef = useRef<IntersectionObserver | null>(null);
 
   const [selectedVerses, setSelectedVerses] = useState<string[]>([]);
@@ -410,6 +415,13 @@ export default function BibleReader() {
   useEffect(() => {
     displayChapterRef.current = displayChapter;
   }, [displayChapter]);
+
+  useEffect(() => {
+    localStorage.setItem(
+      "exegesis_last_bible",
+      JSON.stringify({ book: selectedBook, chapter: selectedChapter }),
+    );
+  }, [selectedBook, selectedChapter]);
 
   useEffect(() => {
     speechRateRef.current = speechRate;
@@ -712,6 +724,7 @@ export default function BibleReader() {
 
       loadingRef.current = true;
       setLoading(true);
+      pendingNavigationRef.current = null;
       try {
         const translationId = mapTranslationId(versionId);
         const maxChapter = getMaxChapter(book);
@@ -767,6 +780,13 @@ export default function BibleReader() {
       } finally {
         loadingRef.current = false;
         setLoading(false);
+        const pending = pendingNavigationRef.current;
+        if (pending) {
+          pendingNavigationRef.current = null;
+          setChapters([]);
+          setHasMore(true);
+          loadChapters(pending.book, pending.startChapter, pending.count);
+        }
       }
     },
     [versionId, backendBooks],
@@ -3018,8 +3038,26 @@ export default function BibleReader() {
             : vk;
           const p = parseVerseKey(verseKey);
           if (p) {
-            handleBookChange(p.book);
-            setTimeout(() => handleChapterChange(p.chapter), 100);
+            if (isSpeaking) stopSpeaking();
+            clearSelection();
+            setSelectedVerse(p.verse);
+            setSelectedBook(p.book);
+            setSelectedChapter(p.chapter);
+            setDisplayBook(p.book);
+            setDisplayChapter(p.chapter);
+            chapterRefs.current = {};
+            verseRefs.current = {};
+            setChapters([]);
+            setHasMore(true);
+            if (loadingRef.current) {
+              pendingNavigationRef.current = {
+                book: p.book,
+                startChapter: Math.max(1, p.chapter - 2),
+                count: 5,
+              };
+            } else {
+              loadChapters(p.book, Math.max(1, p.chapter - 2), 5);
+            }
           }
         }}
       />
@@ -3039,7 +3077,8 @@ export default function BibleReader() {
       />
 
       {/* ══════════════════ VOICE PLAYER ══════════════════ */}
-      {isSpeaking && (          <VoicePlayerBar
+      {isSpeaking && (
+        <VoicePlayerBar
           currentItem={currentItem}
           currentIndex={currentSpeechIdx}
           total={speechItems.length}
@@ -3051,9 +3090,7 @@ export default function BibleReader() {
           canSkipBack={canSkipBack}
           canSkipForward={canSkipForward}
           repeatMode={repeatMode}
-          afterPlay={afterPlay}
           speechRate={speechRate}
-          sleepTimerRemaining={sleepTimerRemaining}
           voices={voices}
           selectedVoice={selectedVoice}
           voice={volume}
@@ -3062,9 +3099,7 @@ export default function BibleReader() {
           onSkipBack={skipBack}
           onSkipForward={skipForward}
           onToggleRepeat={toggleRepeatMode}
-          onToggleAfterPlay={toggleAfterPlay}
           onSpeechRateChange={handleSpeedChange}
-          onSleepTimerChange={setSleepTimerMinutes}
           onToggleMute={() => {
             setVolume((prev) => {
               if (prev > 0) {
@@ -3073,10 +3108,6 @@ export default function BibleReader() {
               }
               return previousVolumeRef.current || 1;
             });
-          }}
-          onVolumeChange={(v) => {
-            if (v > 0) previousVolumeRef.current = v;
-            setVolume(v);
           }}
           onVoiceChange={setSelectedVoice}
         />

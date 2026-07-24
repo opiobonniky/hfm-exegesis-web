@@ -22,6 +22,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useNavigate, useParams } from "react-router-dom";
 import { sendPostRequest } from "@/services/api";
 import { useLanguage } from "@/components/languages/languageProvider";
+import Gate from "@/components/Gate";
 
 // ─────────────────────────────────────────────
 // Types
@@ -224,6 +225,9 @@ const DailyReading = () => {
         }
       } else if (returnCode === 404) {
         setNotYetAdded(true);
+        setAssignment(null);
+      } else if (returnCode === 403) {
+        // Gate component already shows the upgrade prompt
         setAssignment(null);
       } else {
         toast({
@@ -530,6 +534,7 @@ const DailyReading = () => {
   // ─────────────────────────────────────────────
   if (loading || notYetAdded || !assignment) {
     return (
+      <Gate tier="legacy_sower" featureName="Daily Reading" featureDescription="Follow your personalized reading plan day by day.">
       <div className="min-h-screen bg-background flex flex-col">
         <div className="bg-background border-b border-border/40 px-5 py-4">
           <button
@@ -598,6 +603,7 @@ const DailyReading = () => {
           />
         </div>
       </div>
+      </Gate>
     );
   }
 
@@ -605,6 +611,7 @@ const DailyReading = () => {
   // Main render
   // ─────────────────────────────────────────────
   return (
+    <Gate tier="legacy_sower" featureName="Daily Reading" featureDescription="Follow your personalized reading plan day by day.">
     <div className="min-h-screen bg-background flex flex-col">
       {/* ── Header ── */}
       <div className="bg-background border-b border-border/40 sticky top-0 z-30">
@@ -1281,6 +1288,7 @@ const DailyReading = () => {
         />
       </div>
     </div>
+    </Gate>
   );
 };
 

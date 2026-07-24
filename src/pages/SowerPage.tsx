@@ -271,7 +271,7 @@ export default function SowerPage() {
     : null;
 
   return (
-    <div className="min-h-full bg-background" dir={isRtl ? "rtl" : "ltr"}>
+    <div className="min-h-full bg-background overflow-x-hidden" dir={isRtl ? "rtl" : "ltr"}>
       {/* ══════════════════ HERO ══════════════════ */}
       <section className="relative overflow-hidden bg-gradient-to-b from-violet-950 via-violet-900 to-violet-800">
         {/* Decorative elements */}
@@ -281,48 +281,47 @@ export default function SowerPage() {
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-white/[0.02] blur-2xl" />
         </div>
 
-        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
-          {/* Back button */}
-          <button
-            onClick={() => navigate(-1)}
-            className="inline-flex items-center gap-2 text-sm font-semibold text-violet-300 hover:text-white transition-colors mb-8"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back
-          </button>
+        <div className="relative max-w-6xl mx-auto px-5 sm:px-6 py-12 sm:py-24">
+          {/* Top bar: back + badge */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-8">
+            <button
+              onClick={() => navigate(-1)}
+              className="inline-flex items-center gap-2 text-sm font-semibold text-violet-300 hover:text-white transition-colors self-start"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back
+            </button>
 
-          {/* Current subscription badge */}
-          {isPaying && (
-            <div className="inline-flex items-center float-right gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm mb-6">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-              <span className="text-xs font-bold text-white">
-                You are a {currentTierLabel}
-              </span>
-              {expiresAt && (
-                <span className="text-[10px] text-violet-300">
-                  · Renews {expiresAt}
+            {isPaying && (
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm self-start sm:self-auto">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                <span className="text-xs font-bold text-white whitespace-nowrap">
+                  You are a {currentTierLabel}
                 </span>
-              )}
-            </div>
-          )}
+                {expiresAt && (
+                  <span className="text-[10px] text-violet-300 whitespace-nowrap">
+                    · Renews {expiresAt}
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
 
-          <div className="flex flex-col items-center justify-center">
-            {/* Icon */}
-            <div className="w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-sm flex items-center justify-center mb-6 border border-white/20">
-              <Sparkles className="w-8 h-8 text-amber-300" />
+          <div className="flex flex-col items-center justify-center text-center">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-white/10 backdrop-blur-sm flex items-center justify-center mb-5 sm:mb-6 border border-white/20">
+              <Sparkles className="w-7 h-7 sm:w-8 sm:h-8 text-amber-300" />
             </div>
 
-            {/* Headline */}
             <h1
-              className="text-4xl sm:text-5xl lg:text-6xl font-black text-white leading-tight mb-4"
+              className="text-3xl sm:text-5xl lg:text-6xl font-black text-white leading-tight mb-4 px-2"
               style={{ fontFamily: "'Cinzel', serif" }}
             >
               Sow into the Word
             </h1>
-            <p className="text-lg sm:text-xl text-violet-200 max-w-2xl mb-2 font-medium">
+            <p className="text-base sm:text-xl text-violet-200 max-w-2xl mb-2 font-medium px-4">
               The Word remains free. Your support makes the mission possible.
             </p>
-            <p className="text-sm text-violet-300/70 max-w-xl italic mb-8">
+            <p className="text-xs sm:text-sm text-violet-300/70 max-w-xl italic mb-8 px-4">
               "Whoever sows sparingly will also reap sparingly, and whoever sows
               bountifully will also reap bountifully."
               <br />
@@ -364,7 +363,7 @@ export default function SowerPage() {
       </section>
 
       {/* ══════════════════ TIER CARDS ══════════════════ */}
-      <section className="max-w-6xl mx-auto px-4 sm:px-6 -mt-10 pb-12 relative z-10">
+      <section className="max-w-6xl mx-auto px-5 sm:px-6 -mt-8 sm:-mt-10 pb-10 sm:pb-12 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {TIERS.map((tier) => {
             const Icon = tier.icon;
@@ -439,10 +438,10 @@ export default function SowerPage() {
                 )}
 
                 {/* Card header */}
-                <div className="p-6 pb-0">
+                <div className="p-4 sm:p-6 pb-0">
                   <div
                     className={cn(
-                      "w-11 h-11 rounded-xl flex items-center justify-center mb-4",
+                      "w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center mb-3 sm:mb-4",
                       tier.id === "free" && "bg-slate-100 dark:bg-slate-800",
                       tier.id === "legacy_sower" &&
                         "bg-violet-100 dark:bg-violet-900",
@@ -500,8 +499,8 @@ export default function SowerPage() {
                 </div>
 
                 {/* Features */}
-                <div className="px-6 flex-1">
-                  <div className="space-y-2.5">
+                <div className="px-4 sm:px-6 flex-1">
+                  <div className="space-y-2 sm:space-y-2.5">
                     {tier.features.map((feature, idx) => (
                       <div
                         key={idx}
@@ -552,7 +551,7 @@ export default function SowerPage() {
                 </div>
 
                 {/* CTA */}
-                <div className="p-6 pt-5 mt-auto">
+                <div className="p-4 sm:p-6 pt-4 sm:pt-5 mt-auto">
                   {isCurrentTier ? (
                     <>
                       {isPaying ? (
@@ -615,7 +614,7 @@ export default function SowerPage() {
 
       {/* ══════════════════ FEATURE COMPARISON ══════════════════ */}
       <section className="bg-card border-t border-border/50 py-14">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6">
+        <div className="max-w-4xl mx-auto px-5 sm:px-6">
           <div className="text-center mb-10">
             <h2 className="text-2xl sm:text-3xl font-black text-foreground mb-2">
               Compare Plans
@@ -625,17 +624,17 @@ export default function SowerPage() {
             </p>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+          <div className="-mx-4 sm:mx-0 overflow-x-auto">
+             <table className="w-full text-xs sm:text-sm">
               <thead>
                 <tr className="border-b border-border/50">
-                  <th className="text-left py-3 pr-4 text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                  <th className="text-left py-3 pr-4 text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-wider">
                     Feature
                   </th>
                   {TIERS.map((tier) => (
                     <th
                       key={tier.id}
-                      className="py-3 px-4 text-center text-xs font-bold uppercase tracking-wider"
+                      className="py-3 px-2 sm:px-4 text-center text-[10px] sm:text-xs font-bold uppercase tracking-wider"
                     >
                       {tier.name}
                     </th>
@@ -757,12 +756,12 @@ export default function SowerPage() {
                         key={idx}
                         className="border-t border-border/20 hover:bg-muted/30 transition-colors"
                       >
-                        <td className="py-2.5 pr-4 text-sm text-foreground">
+                        <td className="py-2.5 pr-2 sm:pr-4 text-xs sm:text-sm text-foreground">
                           {item.label}
                         </td>
                         {[item.free, item.legacy, item.covenant].map(
                           (included, tIdx) => (
-                            <td key={tIdx} className="py-2.5 px-4 text-center">
+                            <td key={tIdx} className="py-2.5 px-2 sm:px-4 text-center">
                               {included ? (
                                 <Check className="w-4 h-4 mx-auto text-emerald-500" />
                               ) : (
@@ -783,14 +782,14 @@ export default function SowerPage() {
 
       {/* ══════════════════ PRINCIPLE BANNER ══════════════════ */}
       <section className="bg-gradient-to-r from-violet-600 to-purple-700 py-10">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
+        <div className="max-w-4xl mx-auto px-5 sm:px-6 text-center">
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-white/15 mb-4">
             <Heart className="w-7 h-7 text-white" />
           </div>
           <h2 className="text-xl sm:text-2xl font-black text-white mb-2">
             Bible Reading Is Always Free
           </h2>
-          <p className="text-violet-200 text-sm max-w-xl mx-auto leading-relaxed">
+          <p className="text-violet-200 text-sm max-w-xl mx-auto leading-relaxed px-2">
             Subscription only gates advanced study tools, not Scripture itself.
             Every translation, every chapter, every verse remains freely
             accessible to everyone — always.
@@ -800,7 +799,7 @@ export default function SowerPage() {
 
       {/* ══════════════════ FAQ ══════════════════ */}
       <section className="py-14 bg-background">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6">
+        <div className="max-w-3xl mx-auto px-5 sm:px-6">
           <div className="text-center mb-10">
             <h2 className="text-2xl sm:text-3xl font-black text-foreground mb-2">
               Frequently Asked Questions
@@ -818,13 +817,13 @@ export default function SowerPage() {
                   key={idx}
                   className="rounded-xl border border-border/50 bg-card overflow-hidden"
                 >
-                  <button
-                    onClick={() => setOpenFaq(isOpen ? null : idx)}
-                    className="w-full flex items-center justify-between gap-3 p-4 text-left hover:bg-muted/30 transition-colors"
-                  >
-                    <span className="text-sm font-semibold text-foreground flex-1">
-                      {faq.q}
-                    </span>
+                    <button
+                      onClick={() => setOpenFaq(isOpen ? null : idx)}
+                      className="w-full flex items-center justify-between gap-3 p-3 sm:p-4 text-left hover:bg-muted/30 transition-colors"
+                    >
+                      <span className="text-xs sm:text-sm font-semibold text-foreground flex-1 leading-relaxed">
+                        {faq.q}
+                      </span>
                     <ChevronDown
                       className={cn(
                         "w-4 h-4 text-muted-foreground shrink-0 transition-transform",
@@ -848,7 +847,7 @@ export default function SowerPage() {
 
       {/* ══════════════════ FOOTER ══════════════════ */}
       <footer className="border-t border-border/50 py-8 bg-card">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="max-w-6xl mx-auto px-5 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <BookOpen className="w-4 h-4 text-primary" />
             <span

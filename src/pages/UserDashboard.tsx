@@ -473,7 +473,7 @@ export default function UserDashboard() {
       {/* ══════════════════ BODY ══════════════════ */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-7 space-y-8">
         {/* ── Stats ── */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-both">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3 animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-both">
           {statCards.map((s, idx) => {
             const Icon = s.icon;
             return (
@@ -495,7 +495,7 @@ export default function UserDashboard() {
         </div>
 
         {/* ── Main grid ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8">
+        <div className="grid grid-cols-1 xl:grid-cols-[1fr_360px] gap-6 sm:gap-8">
           {/* ============ LEFT COLUMN ============ */}
           <div className="space-y-8">
             {/* Explore */}
@@ -654,39 +654,35 @@ export default function UserDashboard() {
             {/* Challenge Yourself — under Reading Plans */}
             <section className="animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-both" style={{ animationDelay: '200ms' }}>
               <div
-                className="relative overflow-hidden rounded-2xl p-5 cursor-pointer transition-all duration-200 hover:shadow-md active:scale-[0.99]"
+                className="relative overflow-hidden rounded-2xl p-5 cursor-pointer transition-all duration-200 hover:shadow-md active:scale-[0.99] bg-gradient-to-br from-rose-50 via-rose-50/80 to-pink-50 dark:from-rose-950/30 dark:via-rose-900/20 dark:to-pink-950/30"
                 onClick={() => navigate(routes.trivia.path)}
-                style={{
-                  background: "linear-gradient(135deg, #FFF1F2 0%, #FFE4E6 100%)",
-                }}
               >
                 <div className={cn(
-                  "absolute -top-6 w-24 h-24 rounded-full bg-rose-200/50 pointer-events-none",
+                  "absolute -top-6 w-24 h-24 rounded-full bg-rose-200/50 dark:bg-rose-500/10 pointer-events-none",
                   isRtl ? "-left-6" : "-right-6",
                 )} />
                 <div className={cn(
-                  "absolute -bottom-4 w-16 h-16 rounded-full bg-rose-200/30 pointer-events-none",
+                  "absolute -bottom-4 w-16 h-16 rounded-full bg-rose-200/30 dark:bg-rose-500/5 pointer-events-none",
                   isRtl ? "-right-4" : "-left-4",
                 )} />
 
                 <div className="relative">
                   <div className="flex items-center gap-2.5 mb-2.5">
-                    <div className="w-9 h-9 rounded-xl bg-white shadow-sm flex items-center justify-center shrink-0">
+                    <div className="w-9 h-9 rounded-xl bg-white dark:bg-rose-950/50 shadow-sm flex items-center justify-center shrink-0">
                       <Trophy className="w-4 h-4 text-rose-500" />
                     </div>
                     <div>
-                      <p className="font-bold text-sm text-rose-800">Challenge Yourself</p>
-                      <p className="text-[10px] text-rose-500">Bible Trivia Quiz</p>
+                      <p className="font-bold text-sm text-rose-800 dark:text-rose-300">Challenge Yourself</p>
+                      <p className="text-[10px] text-rose-500 dark:text-rose-400">Bible Trivia Quiz</p>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-rose-300 shrink-0 ml-auto" />
+                    <ChevronRight className="w-4 h-4 text-rose-300 dark:text-rose-600 shrink-0 ml-auto" />
                   </div>
-                  <p className="text-xs text-rose-600/70 leading-relaxed mb-3">
+                  <p className="text-xs text-rose-600/70 dark:text-rose-400/70 leading-relaxed mb-3">
                     Test your knowledge of the Scriptures with fun trivia questions across all difficulty levels!
                   </p>
                   <button
                     onClick={(e) => { e.stopPropagation(); navigate(routes.trivia.path); }}
-                    className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold text-white transition-all active:scale-[0.98] hover:opacity-90"
-                    style={{ background: "linear-gradient(135deg, #E11D48, #BE123C)" }}
+                    className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold text-white transition-all active:scale-[0.98] hover:opacity-90 bg-gradient-to-r from-rose-600 to-rose-700 dark:from-rose-500 dark:to-rose-600"
                   >
                     Play Trivia
                     <Sparkles className="w-3.5 h-3.5" />
@@ -880,8 +876,67 @@ export default function UserDashboard() {
               </section>
             )}
 
-            {/* Daily Devotional + Keep it up! + Bible Trivia */}
-            
+            {/* Daily Devotion */}
+            {dailyDevotion && (
+              <section className="animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-both" style={{ animationDelay: '250ms' }}>
+                <SectionHeader
+                  title="Daily Devotion"
+                  action={{
+                    label: "Read",
+                    onClick: () => navigate(routes.userDevotions.path),
+                  }}
+                />
+                <DashboardCard
+                  onClick={() => navigate(routes.userDevotions.path)}
+                  className="border-sky-200/50 dark:border-sky-800/30 hover:border-sky-300 dark:hover:border-sky-700/50"
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-500 to-cyan-500 flex items-center justify-center shrink-0 shadow-sm">
+                      <Lightbulb className="w-5 h-5 text-white" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-sm text-foreground line-clamp-1">
+                        {dailyDevotion.title || 'Daily Devotion'}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">
+                        {dailyDevotion.theme || dailyDevotion.passageRef || ''}
+                      </p>
+                    </div>
+                  </div>
+                </DashboardCard>
+              </section>
+            )}
+
+            {/* Daily Trivia */}
+            {dailyTrivia && (
+              <section className="animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-both" style={{ animationDelay: '275ms' }}>
+                <SectionHeader
+                  title="Daily Trivia"
+                  action={{
+                    label: "Play",
+                    onClick: () => navigate(routes.trivia.path),
+                  }}
+                />
+                <DashboardCard
+                  onClick={() => navigate(routes.trivia.path)}
+                  className="border-amber-200/50 dark:border-amber-800/30 hover:border-amber-300 dark:hover:border-amber-700/50"
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shrink-0 shadow-sm">
+                      <Trophy className="w-5 h-5 text-white" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-sm text-foreground line-clamp-1">
+                        {dailyTrivia.question || "Today's Trivia"}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {dailyTrivia.category ? `${dailyTrivia.category} · ` : ''}{dailyTrivia.difficulty || 'Mixed'} difficulty
+                      </p>
+                    </div>
+                  </div>
+                </DashboardCard>
+              </section>
+            )}
 
             {/* Journal Preview */}
             {latestEntry && (

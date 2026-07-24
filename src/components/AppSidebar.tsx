@@ -19,7 +19,7 @@ import {
   Microscope,
   CreditCard,
 } from "lucide-react";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -208,6 +208,93 @@ function CollapsedTooltipButton({
   );
 }
 
+/* ── Bible Nav Item (dynamic — checks last-read position) ──────────────── */
+
+const LAST_BIBLE_KEY = "exegesis_last_bible";
+
+function getBibleNavUrl(): string {
+  try {
+    const raw = localStorage.getItem(LAST_BIBLE_KEY);
+    if (raw) {
+      const { book, chapter } = JSON.parse(raw);
+      if (book && chapter) {
+        return `${routes.bibleReader.path}?book=${encodeURIComponent(book)}&chapter=${chapter}`;
+      }
+    }
+  } catch {}
+  return routes.bibleLibrary.path;
+}
+
+function BibleNavItem({ collapsed }: { collapsed: boolean }) {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const t = useLanguage().t;
+  const label = getNavTitle(t, "sidebar.bible");
+  const targetUrl = getBibleNavUrl();
+  const isBibleReaderActive = location.pathname.startsWith(routes.bibleReader.path);
+  const isBibleLibraryActive = location.pathname.startsWith(routes.bibleLibrary.path);
+  const active = isBibleReaderActive || isBibleLibraryActive;
+
+  return (
+    <button
+      onClick={() => navigate(targetUrl)}
+      className={cn(
+        "group flex items-center gap-3 w-full transition-all duration-200",
+        collapsed ? "justify-center px-0" : "px-1",
+      )}
+    >
+      <div
+        className={cn(
+          "flex items-center w-full transition-all duration-200 rounded-xl",
+          collapsed ? "justify-center p-1" : "gap-3 p-2",
+          active
+            ? "bg-accent/10 dark:bg-accent/15 shadow-sm"
+            : "hover:bg-accent/5 dark:hover:bg-accent/8",
+        )}
+      >
+        <div
+          className={cn(
+            "flex items-center justify-center shrink-0 transition-all duration-300",
+            "rounded-lg",
+            collapsed ? "w-9 h-9" : "w-8 h-8",
+            active
+              ? "bg-accent text-accent-foreground shadow-[0_2px_8px_rgba(232,163,23,0.25)]"
+              : "bg-transparent group-hover:bg-accent/10 dark:group-hover:bg-accent/15",
+          )}
+        >
+          <BookText
+            className={cn(
+              "transition-all duration-200",
+              collapsed ? "w-4 h-4" : "w-3.5 h-3.5",
+              active
+                ? "text-accent-foreground"
+                : "text-foreground/40 group-hover:text-accent/80 dark:group-hover:text-accent/70",
+              !active && collapsed && "group-hover:scale-110",
+            )}
+          />
+        </div>
+
+        {!collapsed && (
+          <span
+            className={cn(
+              "text-sm transition-all duration-200 truncate",
+              active
+                ? "font-semibold text-foreground"
+                : "font-normal text-foreground/60 group-hover:text-foreground/80",
+            )}
+          >
+            {label}
+          </span>
+        )}
+
+        {active && !collapsed && (
+          <span className="ml-auto w-1 h-1 rounded-full bg-accent shrink-0 shadow-[0_0_4px_rgba(232,163,23,0.4)]" />
+        )}
+      </div>
+    </button>
+  );
+}
+
 /* ═══════════════════════════════════════════════════════════════════════════
    MAIN COMPONENT
    ═══════════════════════════════════════════════════════════════════════════ */
@@ -232,16 +319,34 @@ export function AppSidebar() {
 
   /* ── Render helper for nav list ── */
   const renderNavItems = (items: NavItem[]) =>
-    items.map((item) => (
-      <li key={item.title}>
-        <PillNavItem item={item} isActive={isActive(item.url)} collapsed={collapsed} />
-      </li>
-    ));
+    items.map((item) => {
+      if (item.title === "sidebar.bible" && !isAdmin) {
+        return (
+          <li key={item.title}>
+            <BibleNavItem collapsed={collapsed} />
+          </li>
+        );
+      }
+      return (
+        <li key={item.title}>
+          <PillNavItem item={item} isActive={isActive(item.url)} collapsed={collapsed} />
+        </li>
+      );
+    });
 
   /* ── Render helper for collapsed nav items (with tooltips) ── */
   const renderCollapsedNavItems = (items: NavItem[]) =>
     items.map((item) => {
       const label = getNavTitle(t, item.title);
+      if (item.title === "sidebar.bible" && !isAdmin) {
+        return (
+          <li key={item.title}>
+            <CollapsedTooltipButton label={label}>
+              <BibleNavItem collapsed />
+            </CollapsedTooltipButton>
+          </li>
+        );
+      }
       return (
         <li key={item.title}>
           <CollapsedTooltipButton label={label}>
