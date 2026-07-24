@@ -255,7 +255,7 @@ export default function SearchPage() {
           )}
 
           {/* Actions */}
-          <div className="flex items-center gap-1 mt-3 pt-3 border-t border-border/20 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          <div className="flex items-center gap-1 mt-3 pt-3 border-t border-border/20 opacity-75 group-hover:opacity-100 transition-opacity duration-200">
             <Button
               variant="ghost"
               size="sm"
@@ -545,6 +545,7 @@ export default function SearchPage() {
               )}
               autoCapitalize="none"
               autoCorrect="off"
+              autoComplete="off"
             />
             {query.length > 0 && (
               <button

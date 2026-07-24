@@ -54,6 +54,11 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response: AxiosResponse<GenericResponse>) => {
     const data = response.data;
+    // Skip binary responses (ArrayBuffer, Blob) — the interceptor
+    // would otherwise corrupt them by writing JSON properties onto the buffer.
+    if (data instanceof ArrayBuffer || data instanceof Blob) {
+      return response;
+    }
     if (data.returnCode === undefined) {
       data.returnCode = data.status ?? (data.success ? 200 : 400);
       data.returnMessage = data.returnMessage ?? data.message ?? "";

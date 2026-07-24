@@ -818,6 +818,7 @@ export default function LegacyLedgerPage() {
                     "h-9 text-sm rounded-xl bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800",
                     isRtl ? "pr-9" : "pl-9"
                   )}
+                  autoComplete="off"
                 />
                 {search && (
                   <button
@@ -893,6 +894,7 @@ export default function LegacyLedgerPage() {
                         value={strongsId}
                         onChange={(e) => setStrongsId(e.target.value)}
                         className="h-9 text-xs rounded-xl bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800"
+                        autoComplete="off"
                       />
                     </div>
                   )}
@@ -905,6 +907,7 @@ export default function LegacyLedgerPage() {
                       value={startDate}
                       onChange={(e) => setStartDate(e.target.value)}
                       className="h-9 text-xs rounded-xl bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800"
+                      autoComplete="off"
                     />
                   </div>
                   <div>
@@ -915,6 +918,7 @@ export default function LegacyLedgerPage() {
                       value={endDate}
                       onChange={(e) => setEndDate(e.target.value)}
                       className="h-9 text-xs rounded-xl bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800"
+                      autoComplete="off"
                     />
                   </div>
                 </div>

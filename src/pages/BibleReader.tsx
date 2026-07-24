@@ -13,21 +13,15 @@ import {
   X,
   Copy,
   Share2,
-  Volume2,
-  VolumeX,
-  Pause,
-  Play,
-  SkipBack,
-  SkipForward,
-  Repeat,
-  Repeat1,
   BookMarked,
-  Menu,
   ChevronUp as ArrowUp,
   PenLine,
   Lightbulb,
   Library,
   GraduationCap,
+  Volume2,
+  VolumeX,
+  Volume,
 } from "lucide-react";
 import {
   Select,
@@ -45,7 +39,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useToast } from "@/hooks/use-toast";
 import { sendPostRequest, TOKEN_KEY } from "@/services/api";
 import { bibleApi, mapTranslationId, mapFrontendId, getTranslationSettings } from "@/services/bibleApi";
@@ -63,6 +56,8 @@ import { getVerseWords } from "@/services/strongsApi";
 import WordDetailSheet from "@/components/WordDetailSheet";
 import StudyToolsSheet from "@/components/StudyToolsSheet";
 import HowToStudySheet from "@/components/HowToStudySheet";
+import VoicePlayerBar from "@/components/VoicePlayerBar";
+import MobileNavDrawer from "@/components/MobileNavDrawer";
 
 
 interface Highlight {
@@ -240,225 +235,7 @@ function TextContent({ text }: { text?: string | null }) {
   );
 }
 
-// ── Mobile Navigation Drawer ─────────────────────────────────────────────────
 
-function MobileNavDrawer({
-  selectedBook,
-  selectedChapter,
-  selectedVerse,
-  versionId,
-  maxChapter,
-  onBookChange,
-  onChapterChange,
-  onVerseChange,
-  onVersionChange,
-  books,
-  availableTranslations,
-  verseCount,
-}: {
-  selectedBook: string;
-  selectedChapter: number;
-  selectedVerse: number | null;
-  versionId: string;
-  maxChapter: number;
-  onBookChange: (b: string) => void;
-  onChapterChange: (c: number) => void;
-  onVerseChange: (v: string) => void;
-  onVersionChange: (v: string) => void;
-  books: string[];
-  availableTranslations: { id: string; name: string; shortName: string }[];
-  verseCount: number;
-}) {
-  const { t } = useLanguage();
-  const [open, setOpen] = useState(false);
-  const [bookFilter, setBookFilter] = useState("");
-  const [tab, setTab] = useState<"books" | "chapters" | "verses" | "version">("books");
-
-  const filtered = useMemo(
-    () =>
-      bookFilter
-        ? books.filter((b) =>
-            b.toLowerCase().includes(bookFilter.toLowerCase()),
-          )
-        : books,
-    [bookFilter, books],
-  );
-
-  return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        <button className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-muted/50 hover:bg-muted border border-border/40 transition-all active:scale-95">
-          <Menu className="w-4 h-4 text-muted-foreground" />
-          <span
-            className="text-sm font-medium text-foreground max-w-[100px] truncate"
-            style={{ fontFamily: "'Cinzel', serif" }}
-          >
-            {selectedBook}
-          </span>
-          <span className="text-xs text-muted-foreground">
-            {selectedChapter}
-          </span>
-        </button>
-      </SheetTrigger>
-
-      <SheetContent
-        side="bottom"
-        className="h-[85vh] rounded-t-2xl p-0 flex flex-col"
-      >
-        {/* Handle bar */}
-        <div className="flex justify-center pt-3 pb-1">
-          <div className="w-10 h-1 rounded-full bg-border" />
-        </div>
-
-        {/* Tab switcher */}
-        <div className="flex items-center gap-1 px-4 pb-3 pt-1 border-b border-border/40">
-          {(["books", "chapters", "verses", "version"] as const).map((tabKey) => (
-            <button
-              key={tabKey}
-              onClick={() => setTab(tabKey)}
-              className={cn(
-                "flex-1 min-h-[44px] py-2 rounded-xl text-xs font-semibold capitalize transition-all active:scale-[0.97] [touch-action:manipulation]",
-                tab === tabKey
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:bg-muted",
-              )}
-            >
-              {{
-                books: t.common.search,
-                chapters: t.bibleReader.selectChapter,
-                verses: t.bibleReader.selectVerse,
-                version: t.bibleReader.translation,
-              }[tabKey] || tabKey}
-            </button>
-          ))}
-        </div>
-
-        {/* Content */}
-        <div className="flex-1 overflow-hidden px-4 pb-safe">
-          {tab === "books" && (
-            <div className="flex flex-col h-full gap-3 pt-3">
-              <Input
-                placeholder={t.bibleReader.filterBooks}
-                value={bookFilter}
-                onChange={(e) => setBookFilter(e.target.value)}
-                className="h-9 text-sm"
-              />
-              <ScrollArea className="flex-1">
-                <div className="grid grid-cols-2 gap-1.5 pb-6">
-                  {filtered.map((book) => (
-                    <button
-                      key={book}
-                      onClick={() => {
-                        onBookChange(book);
-                        setOpen(false);
-                      }}                        className={cn(
-                          "text-left px-3 py-2.5 rounded-xl text-sm transition-all active:scale-95 [touch-action:manipulation]",
-                          selectedBook === book
-                            ? "bg-primary text-primary-foreground font-semibold"
-                            : "bg-muted/50 hover:bg-muted text-foreground",
-                        )}
-                    >
-                      {book}
-                    </button>
-                  ))}
-                </div>
-              </ScrollArea>
-            </div>
-          )}
-
-          {tab === "chapters" && (
-            <ScrollArea className="h-full pt-3">
-              <div className="grid grid-cols-5 gap-2 pb-6">
-                {Array.from({ length: maxChapter }, (_, i) => i + 1).map(
-                  (ch) => (
-                    <button
-                      key={ch}
-                      onClick={() => {
-                        onChapterChange(ch);
-                        setOpen(false);
-                      }}                        className={cn(
-                          "aspect-square rounded-xl text-sm font-semibold transition-all active:scale-95 flex items-center justify-center [touch-action:manipulation]",
-                          selectedChapter === ch
-                            ? "bg-primary text-primary-foreground"
-                            : "bg-muted/50 hover:bg-muted text-foreground",
-                        )}
-                    >
-                      {ch}
-                    </button>
-                  ),
-                )}
-              </div>
-            </ScrollArea>
-          )}
-
-          {tab === "verses" && (
-            <ScrollArea className="h-full pt-3">
-              <div className="grid grid-cols-5 gap-2 pb-6">
-                {verseCount > 0 ? (
-                  Array.from({ length: verseCount }, (_, i) => i + 1).map(
-                    (v) => (
-                      <button
-                        key={v}
-                        onClick={() => {
-                          onVerseChange(v.toString());
-                          setOpen(false);
-                        }}
-                        className={cn(
-                          "aspect-square rounded-xl text-sm font-semibold transition-all active:scale-95 flex items-center justify-center [touch-action:manipulation]",
-                          selectedVerse === v
-                            ? "bg-red-500 text-primary-foreground"
-                            : "bg-muted/50 hover:bg-muted text-foreground",
-                        )}
-                      >
-                        {v}
-                      </button>
-                    ),
-                  )
-                ) : (
-                  <div className="col-span-5 text-center text-xs text-muted-foreground py-8">
-                    {t.bibleReader.loadingBooks}
-                  </div>
-                )}
-              </div>
-            </ScrollArea>
-          )}
-
-          {tab === "version" && (
-            <div className="pt-3 space-y-2">
-              {availableTranslations.map((v) => (
-                <button
-                  key={v.id}
-                  onClick={() => {
-                    onVersionChange(v.id);
-                    setOpen(false);
-                  }}
-                  className={cn(
-                    "w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm transition-all active:scale-95 [touch-action:manipulation]",
-                    versionId === v.id
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted/50 hover:bg-muted text-foreground",
-                  )}
-                >
-                  <span className="font-semibold">{v.shortName}</span>
-                  <span
-                    className={cn(
-                      "text-xs",
-                      versionId === v.id
-                        ? "text-primary-foreground/70"
-                        : "text-muted-foreground",
-                    )}
-                  >
-                    {v.name}
-                  </span>
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      </SheetContent>
-    </Sheet>
-  );
-}
 
 // ── Toolbar button ────────────────────────────────────────────────────────────
 
@@ -482,316 +259,6 @@ function ToolbarBtn({
       {!compact && <span className="hidden sm:inline">{label}</span>}
       {compact && <span>{label}</span>}
     </button>
-  );
-}          // ── Voice Player Bar ──────────────────────────────────────────────────────────
-
-function playerBtnCn(base: string): string {
-  return `${base} before:absolute before:content-[''] before:-inset-2 before:rounded-full relative [touch-action:manipulation]`;
-}
-
-function VoicePlayerBar({
-  currentItem,
-  currentIndex,
-  total,
-  progress,
-  isPaused,
-  voiceMode,
-  displayBook,
-  displayChapter,
-  canSkipBack,
-  canSkipForward,
-  repeatMode,
-  afterPlay,
-  speechRate,
-  sleepTimerRemaining,
-  voices,
-  selectedVoice,
-  onPauseResume,
-  onStop,
-  onSkipBack,
-  onSkipForward,
-  onToggleRepeat,
-  onToggleAfterPlay,
-  onSpeechRateChange,
-  onSleepTimerChange,
-  onVoiceChange,
-}: {
-  currentItem: SpeechItem | null;
-  currentIndex: number;
-  total: number;
-  progress: number;
-  isPaused: boolean;
-  voiceMode: "chapter" | "selected" | null;
-  displayBook: string;
-  displayChapter: number;
-  canSkipBack: boolean;
-  canSkipForward: boolean;
-  repeatMode: "none" | "one" | "all";
-  afterPlay: "continue" | "stop";
-  speechRate: number;
-  sleepTimerRemaining: number;
-  voices: TTSVoice[];
-  selectedVoice: TTSVoice | null;
-  onPauseResume: () => void;
-  onStop: () => void;
-  onSkipBack: () => void;
-  onSkipForward: () => void;
-  onToggleRepeat: () => void;
-  onToggleAfterPlay: () => void;
-  onSpeechRateChange: (rate: number) => void;
-  onSleepTimerChange: (minutes: number | null) => void;
-  onVoiceChange: (voice: TTSVoice) => void;
-}) {
-  const [showVoicePicker, setShowVoicePicker] = useState(false);
-  const [voiceSearch, setVoiceSearch] = useState("");
-  const { t } = useLanguage();
-  return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 px-3 pb-3 sm:px-4 sm:pb-4 pointer-events-none">
-      <div
-        className="max-w-2xl mx-auto rounded-2xl border border-border/70 shadow-2xl overflow-hidden pointer-events-auto"
-        style={{
-          background: "hsl(var(--background) / 0.96)",
-          backdropFilter: "blur(20px)",
-          WebkitBackdropFilter: "blur(20px)",
-        }}
-      >
-        {/* Progress */}
-        <div className="h-[3px] w-full bg-muted/50">
-          <div
-            className="h-full bg-primary transition-all duration-700 ease-out"
-            style={{ width: `${progress}%` }}
-          />
-        </div>
-
-        <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 px-3 sm:px-4 py-3 sm:py-3.5">
-          {/* Left Section: Info */}
-          <div className="flex items-center gap-3 min-w-0 flex-1 w-full sm:w-auto">
-            <div
-              className={cn(
-                "w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors",
-                isPaused ? "bg-muted" : "bg-primary/10",
-              )}
-            >
-              {isPaused ? (
-                <Pause className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-muted-foreground" />
-              ) : (
-                <Volume2 className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-primary" />
-              )}
-            </div>
-
-            <div className="min-w-0 flex-1">
-              <p className="text-[10px] sm:text-[11px] font-medium text-muted-foreground uppercase tracking-wider leading-none mb-1 truncate">
-                {voiceMode === "chapter"
-                  ? `${displayBook} · ${t.bibleReader.chShort} ${displayChapter}`
-                  : t.bibleReader.selectedVerses}
-              </p>
-              <div className="flex items-center gap-2 overflow-hidden">
-                <p
-                  className="text-sm sm:text-base font-semibold text-foreground truncate leading-tight"
-                  style={{ fontFamily: "'Cinzel', serif" }}
-                >
-                  {currentItem ? t.bibleReader.verseNum.replace('{n}', String(currentItem.verseNum)) : "—"}
-                </p>
-                <button
-                  onClick={onToggleAfterPlay}
-                  className={cn(
-                    "flex-shrink-0 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-tighter transition-colors",
-                    afterPlay === "continue"
-                      ? "bg-primary/10 text-primary border border-primary/20"
-                      : "bg-muted text-muted-foreground border border-transparent",
-                  )}
-                >
-                  {afterPlay === "continue" ? t.bibleReader.continueOn : t.bibleReader.autoStop}
-                </button>
-              </div>
-            </div>
-
-            {/* Counter */}
-            <div className="flex-shrink-0 tabular-nums text-xs text-muted-foreground min-w-[40px] text-center bg-muted/30 py-1 px-2 rounded-lg">
-              <span className="font-medium text-foreground">
-                {currentIndex + 1}
-              </span>
-              <span className="opacity-40 mx-0.5">/</span>
-              {total}
-            </div>
-          </div>
-
-          {/* Right Section: Controls */}
-          <div className="flex items-center justify-between sm:justify-end gap-1 sm:gap-1.5 w-full sm:w-auto">
-            <div className="flex items-center gap-0.5 sm:gap-1">
-              <button
-                onClick={onToggleRepeat}
-                title={t.bibleReader.repeatModeLabel.replace('{mode}', repeatMode)}
-                className={cn(
-                  playerBtnCn("w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all active:scale-95"),
-                  repeatMode !== "none"
-                    ? "text-primary bg-primary/10"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted/60",
-                )}
-              >
-                {repeatMode === "one" ? (
-                  <Repeat1 className="w-4 h-4" />
-                ) : (
-                  <Repeat className="w-4 h-4" />
-                )}
-                {repeatMode === "all" && (
-                  <span className="absolute text-[8px] font-bold mt-3">
-                    {t.bibleReader.repeatAll}
-                  </span>
-                )}
-              </button>
-
-              {/* Speed Control */}
-              <button
-                onClick={() => {
-                  const speeds = [0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0];
-                  const currentIdx = speeds.indexOf(speechRate);
-                  const nextIdx = (currentIdx + 1) % speeds.length;
-                  onSpeechRateChange(speeds[nextIdx]);
-                }}
-                title={`${t.bibleReader.speedX.replace('{rate}', String(speechRate))}`}
-                className={playerBtnCn("w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/60 active:scale-95 transition-all font-bold text-xs")}
-              >
-                {t.bibleReader.speedX.replace('{rate}', String(speechRate))}
-              </button>
-
-              {/* Sleep Timer */}
-              <button
-                onClick={() => {
-                  const options: (number | null)[] = [null, 5, 15, 30, 60];
-                  const currentIdx =
-                    sleepTimerRemaining > 0
-                      ? options.findIndex(
-                          (o) => o !== null && o * 60 === sleepTimerRemaining,
-                        )
-                      : 0;
-                  const nextIdx =
-                    currentIdx === -1 ? 1 : (currentIdx + 1) % options.length;
-                  onSleepTimerChange(options[nextIdx]);
-                }}
-                title={
-                  sleepTimerRemaining > 0
-                    ? `${t.bibleReader.setSleepTimer}: ${Math.floor(sleepTimerRemaining / 60)}m ${sleepTimerRemaining % 60}s`
-                    : t.bibleReader.setSleepTimer
-                }
-                className={cn(
-                  playerBtnCn("w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center active:scale-95 transition-all font-bold text-xs"),
-                  sleepTimerRemaining > 0
-                    ? "text-amber-500 bg-amber-500/10"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted/60",
-                )}
-              >
-                {sleepTimerRemaining > 0 ? (
-                  <span>{t.bibleReader.sleepMins.replace('{n}', String(Math.ceil(sleepTimerRemaining / 60)))}</span>
-                ) : (
-                  <span>💤</span>
-                )}
-              </button>
-
-              {/* Voice Selector */}
-              <Popover open={showVoicePicker} onOpenChange={(open) => { setShowVoicePicker(open); if (!open) setVoiceSearch(""); }}>
-                <PopoverTrigger asChild>
-                  <button
-                    title={selectedVoice?.name || 'Voice'}
-                    className={playerBtnCn("w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/60 active:scale-95 transition-all text-[9px] font-semibold truncate max-w-[50px]")}
-                  >
-                    {selectedVoice
-                      ? selectedVoice.name.substring(0, 6)
-                      : 'V'}
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent
-                  align="center"
-                  side="top"
-                  className="w-64 p-1"
-                >
-                  <div className="p-1.5 border-b border-border/40 mb-1">
-                    <Input
-                      placeholder="Search voices…"
-                      value={voiceSearch}
-                      onChange={(e) => setVoiceSearch(e.target.value)}
-                      className="h-7 text-xs"
-                      autoFocus
-                    />
-                  </div>
-                  <div className="max-h-48 overflow-y-auto">
-                  {(() => {
-                    const filtered = voices.filter((v) =>
-                      v.name.toLowerCase().includes(voiceSearch.toLowerCase()) ||
-                      (v.category || "").toLowerCase().includes(voiceSearch.toLowerCase())
-                    );
-                    return filtered.length === 0 ? (
-                      <p className="text-xs text-muted-foreground p-2 text-center">No voices found</p>
-                    ) : filtered.map((v) => (
-                      <button
-                        key={v.voiceId}
-                        onClick={() => {
-                          onVoiceChange(v);
-                          setShowVoicePicker(false);
-                          setVoiceSearch("");
-                        }}
-                        className={cn(
-                          "w-full text-left px-3 py-1.5 rounded-md text-sm transition-colors",
-                          selectedVoice?.name === v.name
-                            ? "bg-primary/10 text-primary font-medium"
-                            : "text-foreground/80 hover:bg-muted",
-                        )}
-                      >
-                        <span className="block leading-tight">{v.name}</span>
-                        <span className="block text-[10px] text-muted-foreground">
-                          {v.category || 'Neural'} {v.source === 'edge' ? '(free)' : v.source === 'builtin' ? '(built-in)' : '(cloud)'}
-                        </span>
-                      </button>
-                    ));
-                  })()}
-                  </div>
-                </PopoverContent>
-              </Popover>
-
-              <button
-                onClick={onSkipBack}
-                disabled={!canSkipBack}
-                title={t.bibleReader.previousVerse}
-                className={playerBtnCn("w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/60 disabled:opacity-25 disabled:cursor-not-allowed active:scale-95 transition-all")}
-              >
-                <SkipBack className="w-4 h-4" />
-              </button>
-
-              <button
-                onClick={onPauseResume}
-                title={isPaused ? t.bibleReader.resumeAudio : t.bibleReader.pauseAudio}
-                className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-primary text-primary-foreground flex items-center justify-center hover:opacity-90 active:scale-95 shadow-lg shadow-primary/20 transition-all mx-0.5"
-              >
-                {isPaused ? (
-                  <Play className="w-4.5 h-4.5 ml-0.5" />
-                ) : (
-                  <Pause className="w-4.5 h-4.5" />
-                )}
-              </button>
-
-              <button
-                onClick={onSkipForward}
-                disabled={!canSkipForward && afterPlay !== "continue"}
-                title={t.bibleReader.nextVerse}
-                className={playerBtnCn("w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/60 disabled:opacity-25 disabled:cursor-not-allowed active:scale-95 transition-all")}
-              >
-                <SkipForward className="w-4 h-4" />
-              </button>
-            </div>
-
-            <div className="w-px h-5 bg-border/50 mx-1 hidden sm:block" />
-
-            <button
-              onClick={onStop}
-              title={t.bibleReader.stopAudio}
-              className={playerBtnCn("w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-destructive/70 hover:text-destructive hover:bg-destructive/10 active:scale-95 transition-all")}
-            >
-              <VolumeX className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
   );
 }
 
@@ -912,6 +379,9 @@ export default function BibleReader() {
   const repeatModeRef = useRef<"none" | "one" | "all">("none");
   const afterPlayRef = useRef<"continue" | "stop">("continue");
   const voiceModeRef = useRef<"chapter" | "selected" | null>(null);
+  const [volume, setVolume] = useState(1);
+  const volumeRef = useRef(1);
+  const previousVolumeRef = useRef(1);
   const speechRateRef = useRef(0.92);
   const displayBookRef = useRef(displayBook);
   const displayChapterRef = useRef(displayChapter);
@@ -946,6 +416,10 @@ export default function BibleReader() {
   }, [speechRate]);
 
   useEffect(() => {
+    volumeRef.current = volume;
+  }, [volume]);
+
+  useEffect(() => {
     voiceIdRef.current = selectedVoice?.voiceId || "en-US-AriaNeural";
     voiceRef.current = selectedVoice?.voiceId || null;
   }, [selectedVoice]);
@@ -964,6 +438,35 @@ export default function BibleReader() {
     }).catch(() => {});
   }, []);
 
+  // ── Shared audio teardown helper ──
+  // Cancels any active playback without resolving the speakOne promise.
+  // Use cancelSpeaking() when the promise also needs resolution.
+  const cancelAllAudio = useCallback(() => {
+    isReadingRef.current = false;
+    isPausedRef.current = false;
+    if (elevenLabsEnabled) {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = "";
+        audioRef.current = null;
+      }
+    } else {
+      if (window.speechSynthesis) {
+        if (window.speechSynthesis.paused) window.speechSynthesis.resume();
+        window.speechSynthesis.cancel();
+      }
+    }
+    skipRef.current = null;
+    activeUtteranceRef.current = null;
+  }, [elevenLabsEnabled]);
+
+  // Cleanup audio when component unmounts (user navigates away)
+  useEffect(() => {
+    return () => {
+      cancelAllAudio();
+    };
+  }, [cancelAllAudio]);
+
   // Sleep timer countdown effect
   useEffect(() => {
     if (sleepTimer && sleepTimer > 0) {
@@ -971,19 +474,9 @@ export default function BibleReader() {
         setSleepTimerRemaining((prev) => {
           if (prev <= 1) {
             // Timer expired - stop speaking
-            if (elevenLabsEnabled) {
-              if (audioRef.current) {
-                audioRef.current.pause();
-                audioRef.current.src = "";
-                audioRef.current = null;
-              }
-            } else {
-              if (window.speechSynthesis.paused) window.speechSynthesis.resume();
-              window.speechSynthesis.cancel();
-            }
-            skipRef.current?.();
-            skipRef.current = null;
-            isReadingRef.current = false;
+            const skip = skipRef.current;
+            cancelAllAudio();
+            skip?.();
             setIsSpeaking(false);
             setIsPaused(false);
             setSleepTimer(null);
@@ -995,7 +488,7 @@ export default function BibleReader() {
 
       return () => clearInterval(interval);
     }
-  }, [sleepTimer, elevenLabsEnabled]);
+  }, [sleepTimer, cancelAllAudio]);
 
   const [showSearchModal, setShowSearchModal] = useState(false);
   const [showHighlightPicker, setShowHighlightPicker] = useState(false);
@@ -1547,6 +1040,7 @@ export default function BibleReader() {
             const audio = new Audio(url);
             audioRef.current = audio;
             audio.playbackRate = speechRateRef.current;
+            audio.volume = volumeRef.current;
 
             skipRef.current = () => {
               audio.pause();
@@ -1593,6 +1087,7 @@ export default function BibleReader() {
 
       const u = new SpeechSynthesisUtterance(text);
       u.rate = speechRateRef.current;
+      u.volume = volumeRef.current;
       u.pitch = 0.92 + (idx % 5) * 0.04;
       if (voiceRef.current) {
         const match = window.speechSynthesis.getVoices().find((v) => v.name === voiceRef.current);
@@ -1767,20 +1262,11 @@ export default function BibleReader() {
   };
 
   const stopSpeaking = useCallback(() => {
-    isReadingRef.current = false;
-    isPausedRef.current = false;
-    if (elevenLabsEnabled) {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.src = "";
-        audioRef.current = null;
-      }
-    } else {
-      if (window.speechSynthesis.paused) window.speechSynthesis.resume();
-      window.speechSynthesis.cancel();
-    }
-    skipRef.current?.();
-    skipRef.current = null;
+    // Save a local reference to skip before cancelAllAudio nullifies it,
+    // because the cancel callbacks may nullify skipRef.current.
+    const skip = skipRef.current;
+    cancelAllAudio();
+    skip?.();
     setIsSpeaking(false);
     setIsPaused(false);
     setCurrentSpeechIdx(0);
@@ -2679,7 +2165,7 @@ export default function BibleReader() {
 
         {/* ─── Desktop book + chapter row (hidden on mobile) ─── */}
         <div className="hidden sm:flex items-center gap-3 px-4 sm:px-6 py-3 border-b border-border/40">
-          <div className="relative flex-1 max-w-[200px]">
+          {/* <div className="relative flex-1 max-w-[200px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
             <Input
               placeholder={t.bibleReader.filterBooks}
@@ -2687,7 +2173,7 @@ export default function BibleReader() {
               onChange={(e) => setDesktopBookFilter(e.target.value)}
               className="pl-8 h-8 text-xs border-border/50 bg-muted/30"
             />
-          </div>
+          </div> */}
           <Select
             value={selectedBook}
             onValueChange={handleBookChange}
@@ -2797,6 +2283,7 @@ export default function BibleReader() {
                books={backendBooks.map((b) => b.bookName)}
                availableTranslations={effectiveTranslations}
               verseCount={currentChapterVerseCount}
+              onOpenStudyTools={() => setShowStudyTools(true)}
             />
           </div>
 
@@ -3521,6 +3008,7 @@ export default function BibleReader() {
         onOpenChange={setShowStudyTools}
         bookName={displayBook}
         chapter={displayChapter}
+        verseNumber={selectedVerse}
         onOpenHowToStudy={() => setShowHowToStudy(true)}
         onGoToVerse={(vk) => {
           // vk might be a range like "1-3" or "1,2,3" — take the first verse
@@ -3551,8 +3039,7 @@ export default function BibleReader() {
       />
 
       {/* ══════════════════ VOICE PLAYER ══════════════════ */}
-      {isSpeaking && (
-        <VoicePlayerBar
+      {isSpeaking && (          <VoicePlayerBar
           currentItem={currentItem}
           currentIndex={currentSpeechIdx}
           total={speechItems.length}
@@ -3565,18 +3052,32 @@ export default function BibleReader() {
           canSkipForward={canSkipForward}
           repeatMode={repeatMode}
           afterPlay={afterPlay}
+          speechRate={speechRate}
+          sleepTimerRemaining={sleepTimerRemaining}
+          voices={voices}
+          selectedVoice={selectedVoice}
+          voice={volume}
           onPauseResume={pauseResume}
           onStop={stopSpeaking}
           onSkipBack={skipBack}
           onSkipForward={skipForward}
           onToggleRepeat={toggleRepeatMode}
           onToggleAfterPlay={toggleAfterPlay}
-          speechRate={speechRate}
           onSpeechRateChange={handleSpeedChange}
-          sleepTimerRemaining={sleepTimerRemaining}
           onSleepTimerChange={setSleepTimerMinutes}
-          voices={voices}
-          selectedVoice={selectedVoice}
+          onToggleMute={() => {
+            setVolume((prev) => {
+              if (prev > 0) {
+                previousVolumeRef.current = prev;
+                return 0;
+              }
+              return previousVolumeRef.current || 1;
+            });
+          }}
+          onVolumeChange={(v) => {
+            if (v > 0) previousVolumeRef.current = v;
+            setVolume(v);
+          }}
           onVoiceChange={setSelectedVoice}
         />
       )}

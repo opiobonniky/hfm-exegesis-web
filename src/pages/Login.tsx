@@ -432,6 +432,7 @@ const Login = () => {
                   <input
                     type="text"
                     id="email"
+                    autoComplete="username"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     onFocus={() => setEmailFocused(true)}
@@ -463,11 +464,12 @@ const Login = () => {
                   <input
                     type={showPassword ? "text" : "password"}
                     id="password"
+                    autoComplete="current-password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     onFocus={() => setPasswordFocused(true)}
                     onBlur={() => setPasswordFocused(false)}
-                    className={`w-full h-full px-4 pt-4 ${isRtl ? 'pe-12' : 'pr-12'} bg-white border border-slate-200 ${isRtl ? 'rounded-l-xl' : 'rounded-r-xl'} focus:outline-none focus:border-primary transition-all text-[15px] shadow-sm`}
+                    className={`w-full h-full px-4 pt-4 ${isRtl ? 'pe-12' : 'pr-12'} bg-white border border-slate-200 ${isRtl ? 'rounded-l-xl' : 'rounded-r-xl'} focus:outline-none focus:border-primary transition-all text-[15px] text-sm shadow-sm`}
                     required
                   />
                   <label

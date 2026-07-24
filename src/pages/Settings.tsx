@@ -535,6 +535,7 @@ export default function Settings() {
                         value={profile.username}
                         disabled
                         className="bg-muted/50 border-dashed"
+                        autoComplete="username"
                       />
                     </div>
 
@@ -548,6 +549,7 @@ export default function Settings() {
                           value={profile.email}
                           disabled
                           className={cn("bg-muted/50 border-dashed", isRtl ? "pr-10" : "pl-10")}
+                          autoComplete="email"
                         />
                       </div>
                     </div>
@@ -560,6 +562,7 @@ export default function Settings() {
                         value={profile.firstName}
                         onChange={(e) => handleProfileChange("firstName", e.target.value)}
                         required
+                        autoComplete="given-name"
                       />
                     </div>
 
@@ -571,6 +574,7 @@ export default function Settings() {
                         value={profile.lastName}
                         onChange={(e) => handleProfileChange("lastName", e.target.value)}
                         required
+                        autoComplete="family-name"
                       />
                     </div>
 
@@ -581,6 +585,7 @@ export default function Settings() {
                         placeholder={t.settings?.optionalPlaceholder}
                         value={profile.middleName}
                         onChange={(e) => handleProfileChange("middleName", e.target.value)}
+                        autoComplete="additional-name"
                       />
                     </div>
 
@@ -595,6 +600,7 @@ export default function Settings() {
                           value={profile.phoneNumber}
                           onChange={(e) => handleProfileChange("phoneNumber", e.target.value)}
                           className={isRtl ? "pr-10" : "pl-10"}
+                          autoComplete="tel"
                         />
                       </div>
                     </div>
@@ -609,6 +615,7 @@ export default function Settings() {
                           value={profile.dateOfBirth}
                           onChange={(e) => handleProfileChange("dateOfBirth", e.target.value)}
                           className={isRtl ? "pr-10" : "pl-10"}
+                          autoComplete="bday"
                         />
                       </div>
                     </div>
@@ -772,6 +779,7 @@ export default function Settings() {
                         placeholder={t.settings?.phonePlaceholder}
                         value={profile.alternativePhone}
                         onChange={(e) => handleProfileChange("alternativePhone", e.target.value)}
+                        autoComplete="tel"
                       />
                     </div>
 
@@ -782,6 +790,7 @@ export default function Settings() {
                         value={profile.ministryGroup}
                         onChange={(e) => handleProfileChange("ministryGroup", e.target.value)}
                         placeholder={t.settings?.ministryGroupPlaceholder}
+                        autoComplete="organization"
                       />
                     </div>
 
@@ -792,6 +801,7 @@ export default function Settings() {
                         value={profile.servicePosition}
                         onChange={(e) => handleProfileChange("servicePosition", e.target.value)}
                         placeholder={t.settings?.servicePositionPlaceholder}
+                        autoComplete="organization-title"
                       />
                     </div>
 
@@ -802,6 +812,7 @@ export default function Settings() {
                         value={profile.spiritualGifts}
                         onChange={(e) => handleProfileChange("spiritualGifts", e.target.value)}
                         placeholder={t.settings?.spiritualGiftsPlaceholder}
+                        autoComplete="off"
                       />
                     </div>
                   </div>
@@ -826,6 +837,7 @@ export default function Settings() {
                         placeholder={t.settings?.contactNamePlaceholder}
                         value={profile.emergencyContactName}
                         onChange={(e) => handleProfileChange("emergencyContactName", e.target.value)}
+                        autoComplete="off"
                       />
                     </div>
 
@@ -837,6 +849,7 @@ export default function Settings() {
                         placeholder={t.settings?.phonePlaceholder}
                         value={profile.emergencyContactPhone}
                         onChange={(e) => handleProfileChange("emergencyContactPhone", e.target.value)}
+                        autoComplete="tel"
                       />
                     </div>
 
@@ -847,6 +860,7 @@ export default function Settings() {
                         placeholder={t.settings?.relationshipPlaceholder}
                         value={profile.emergencyContactRelationship}
                         onChange={(e) => handleProfileChange("emergencyContactRelationship", e.target.value)}
+                        autoComplete="off"
                       />
                     </div>
                   </div>
@@ -1159,6 +1173,7 @@ export default function Settings() {
                           value={passwords.currentPassword}
                           onChange={(e) => setPasswords((prev) => ({ ...prev, currentPassword: e.target.value }))}
                           required
+                          autoComplete="current-password"
                         />
                         <Button
                           type="button"
@@ -1186,6 +1201,7 @@ export default function Settings() {
                           value={passwords.newPassword}
                           onChange={(e) => setPasswords((prev) => ({ ...prev, newPassword: e.target.value }))}
                           required
+                          autoComplete="new-password"
                         />
                         <Button
                           type="button"
@@ -1238,6 +1254,7 @@ export default function Settings() {
                           value={passwords.confirmPassword}
                           onChange={(e) => setPasswords((prev) => ({ ...prev, confirmPassword: e.target.value }))}
                           required
+                          autoComplete="new-password"
                         />
                         <Button
                           type="button"

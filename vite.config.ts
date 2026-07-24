@@ -9,14 +9,12 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "0.0.0.0",
     port: 8080,
+    overlay: false,
+    allowedHosts: ["localhost", "127.0.0.1", ".exegesisproject.org"],
     hmr: {
       host: "localhost",
-      overlay: false,
+      clientPort: 8080,
     },
-    headers: {
-      "Cross-Origin-Opener-Policy": "unsafe-none",
-    },
-    allowedHosts: ["localhost", "127.0.0.1", ".exegesisproject.org"],
   },
   plugins: [
     react(),
@@ -29,7 +27,13 @@ export default defineConfig(({ mode }) => ({
     dedupe: ["react", "react-dom"],
   },
   optimizeDeps: {
-    include: ["react", "react-dom", "cookie", "set-cookie-parser"],
-    exclude: ["react-router-dom", "@react-oauth/google"],
+    include: [
+      "react",
+      "react-dom",
+      "react-router-dom",
+      "@react-oauth/google",
+      "cookie",
+      "set-cookie-parser",
+    ],
   },
 }));

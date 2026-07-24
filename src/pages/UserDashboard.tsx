@@ -474,10 +474,10 @@ export default function UserDashboard() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-7 space-y-8">
         {/* ── Stats ── */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-both">
-          {statCards.map((s) => {
+          {statCards.map((s, idx) => {
             const Icon = s.icon;
             return (
-              <DashboardCard key={s.label} className="flex flex-col gap-3" hover={false}>
+              <DashboardCard key={`stat-${s.label}-${idx}`} className="flex flex-col gap-3" hover={false}>
                 <div className={cn("w-9 h-9 rounded-xl flex items-center justify-center border", s.bg, s.border)}>
                   <Icon className={cn("w-4 h-4", s.accent)} />
                 </div>
@@ -592,11 +592,11 @@ export default function UserDashboard() {
                   }}
                 />
                 <div className="space-y-3">
-                  {readingPlans.map((plan) => {
+                  {readingPlans.map((plan, idx) => {
                     const pct = Math.min(100, Math.round((plan.completedDays / plan.totalDays) * 100));
                     const done = pct >= 70;
                     return (
-                      <DashboardCard key={plan.id} className="hover:border-border">
+                      <DashboardCard key={plan.id || `plan-${plan.planName}-${idx}`} className="hover:border-border">
                         <div className="flex items-start gap-3 mb-4">
                           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/10 flex items-center justify-center shrink-0">
                             <CalendarDays className="w-5 h-5 text-primary/80" />

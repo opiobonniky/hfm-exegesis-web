@@ -350,10 +350,12 @@ export default function MyActivity() {
           <div className="relative flex-1 w-full sm:max-w-xs">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/40" />
             <Input
+              id="activity-search"
               placeholder="Search verses or notes..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-9 h-9 text-sm rounded-xl bg-muted/30 border-muted-foreground/20"
+              autoComplete="off"
             />
             {searchQuery && (
               <button

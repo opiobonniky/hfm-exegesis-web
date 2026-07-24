@@ -88,6 +88,7 @@ export default function WordDetailSheet({
   verseRef,
   verseText,
   translationBadge,
+  translations,
   onEdit,
   verseAttachments,
 }: WordDetailSheetProps) {

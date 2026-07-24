@@ -1,8 +1,5 @@
 import PlanDetail from "@/pages/ReadingPlan/Plandetail";
 import UsersPage from "@/pages/UserManagement/UsersPage";
-import { Component } from "lucide-react";
-import path from "path";
-import { title } from "process";
 import { ComponentType, lazy } from "react";
 
 // Lazy load components for code splitting
