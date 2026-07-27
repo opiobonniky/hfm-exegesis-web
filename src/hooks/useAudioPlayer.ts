@@ -9,8 +9,10 @@ export interface AudioPlayerState {
   selectedVoice: TTSVoice | null;
   currentVerseIdx: number;
   totalVerses: number;
-  /** Passage finished playing (all verses read) */
   passageComplete: boolean;
+  volume: number;
+  ttsEnabled: boolean;
+  repeatMode: "none" | "one" | "all";
 }
 
 export interface AudioPlayerActions {
@@ -24,6 +26,9 @@ export interface AudioPlayerActions {
   setVoice: (voice: TTSVoice) => void;
   skipForward: () => void;
   skipBackward: () => void;
+  setVolume: (vol: number) => void;
+  setRepeatMode: (mode: "none" | "one" | "all") => void;
+  cycleRepeatMode: () => void;
 }
 
 const SPEED_OPTIONS = [0.75, 1.0, 1.25, 1.5, 1.75, 2.0];
@@ -31,6 +36,7 @@ const SPEED_OPTIONS = [0.75, 1.0, 1.25, 1.5, 1.75, 2.0];
 const STORAGE_KEYS = {
   speechRate: "exegesis-speech-rate",
   selectedVoiceId: "exegesis-selected-voice-id",
+  volume: "exegesis-volume",
 } as const;
 
 function loadSpeechRate(): number {
@@ -52,6 +58,17 @@ function loadVoiceId(): string | null {
   }
 }
 
+function loadVolume(): number {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEYS.volume);
+    if (saved !== null) {
+      const vol = parseFloat(saved);
+      if (vol >= 0 && vol <= 1) return vol;
+    }
+  } catch {}
+  return 1;
+}
+
 function saveSpeechRate(rate: number): void {
   try {
     localStorage.setItem(STORAGE_KEYS.speechRate, String(rate));
@@ -64,6 +81,12 @@ function saveVoiceId(voiceId: string): void {
   } catch {}
 }
 
+function saveVolume(vol: number): void {
+  try {
+    localStorage.setItem(STORAGE_KEYS.volume, String(vol));
+  } catch {}
+}
+
 export function useAudioPlayer(): AudioPlayerState & AudioPlayerActions {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -73,20 +96,30 @@ export function useAudioPlayer(): AudioPlayerState & AudioPlayerActions {
   const [currentVerseIdx, setCurrentVerseIdx] = useState(0);
   const [totalVerses, setTotalVerses] = useState(0);
   const [passageComplete, setPassageComplete] = useState(false);
+  const [volume, setVolume] = useState(loadVolume);
+  const [ttsEnabled, setTtsEnabled] = useState(false);
+  const [repeatMode, setRepeatMode] = useState<"none" | "one" | "all">("none");
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
   const isReadingRef = useRef(false);
   const isPausedRef = useRef(false);
   const versesRef = useRef<{ text: string }[]>([]);
   const currentIdxRef = useRef(0);
   const speechRateRef = useRef(1.0);
+  const volumeRef = useRef(1.0);
   const skipRef = useRef<(() => void) | null>(null);
+  const repeatModeRef = useRef<"none" | "one" | "all">("none");
 
-  // Sync refs and persist speech rate
+  // Sync refs and persist
+  useEffect(() => { speechRateRef.current = speechRate; saveSpeechRate(speechRate); }, [speechRate]);
+  useEffect(() => { volumeRef.current = volume; saveVolume(volume); }, [volume]);
+  useEffect(() => { repeatModeRef.current = repeatMode; }, [repeatMode]);
+
+  // Check whether TTS API is enabled
   useEffect(() => {
-    speechRateRef.current = speechRate;
-    saveSpeechRate(speechRate);
-  }, [speechRate]);
+    ttsService.isEnabled().then(setTtsEnabled).catch(() => setTtsEnabled(false));
+  }, []);
 
   // Load voices on mount
   useEffect(() => {
@@ -95,17 +128,33 @@ export function useAudioPlayer(): AudioPlayerState & AudioPlayerActions {
       const savedVoiceId = loadVoiceId();
       if (savedVoiceId) {
         const saved = available.find((v) => v.voiceId === savedVoiceId);
-        if (saved) {
-          setSelectedVoice(saved);
-          return;
-        }
+        if (saved) { setSelectedVoice(saved); return; }
       }
       const preferred = available.find((v) => /aria|jenny|guy|davis|emma/i.test(v.name));
       setSelectedVoice(preferred || available[0] || null);
     }).catch(() => {});
   }, []);
 
-  const playVerse = useCallback(async (text: string, idx: number): Promise<void> => {
+  // ── Playback engines ──
+
+  const cancelAllAudio = useCallback(() => {
+    isReadingRef.current = false;
+    isPausedRef.current = false;
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.src = "";
+      audioRef.current = null;
+    }
+    if (utteranceRef.current) {
+      if (window.speechSynthesis?.paused) window.speechSynthesis.resume();
+      window.speechSynthesis?.cancel();
+      utteranceRef.current = null;
+    }
+    skipRef.current = null;
+  }, []);
+
+  // TTS API path (backed by Edge TTS / ElevenLabs)
+  const playTTS = useCallback(async (text: string): Promise<void> => {
     return new Promise((resolve) => {
       const doSpeak = async () => {
         try {
@@ -119,6 +168,7 @@ export function useAudioPlayer(): AudioPlayerState & AudioPlayerActions {
           const audio = new Audio(url);
           audioRef.current = audio;
           audio.playbackRate = speechRateRef.current;
+          audio.volume = volumeRef.current;
 
           skipRef.current = () => {
             audio.pause();
@@ -147,24 +197,75 @@ export function useAudioPlayer(): AudioPlayerState & AudioPlayerActions {
         } catch {
           audioRef.current = null;
           skipRef.current = null;
-          resolve();
+          // Fallback to Web Speech
+          resolve(await playWebSpeech(text));
         }
       };
       doSpeak();
     });
   }, [selectedVoice]);
 
+  // Web Speech API fallback
+  const playWebSpeech = useCallback((text: string): Promise<void> => {
+    return new Promise((resolve) => {
+      if (!("speechSynthesis" in window)) { resolve(); return; }
+
+      const u = new SpeechSynthesisUtterance(text);
+      u.rate = speechRateRef.current;
+      u.volume = volumeRef.current;
+      u.pitch = 1.0;
+
+      // Match selected voice to browser voices
+      if (selectedVoice?.voiceId && window.speechSynthesis.getVoices().length > 0) {
+        const voices = window.speechSynthesis.getVoices();
+        const svn = selectedVoice.name.toLowerCase();
+        const match = voices.find((v) => {
+          const vn = v.name.toLowerCase();
+          const shortName = svn.split("(")[0].trim();
+          return vn.includes(shortName) || shortName.includes(vn);
+        });
+        if (match) u.voice = match;
+      }
+      utteranceRef.current = u;
+
+      skipRef.current = () => { utteranceRef.current = null; resolve(); };
+
+      u.onend = () => { utteranceRef.current = null; skipRef.current = null; resolve(); };
+      u.onerror = (e) => {
+        if (e.error === "interrupted") return;
+        utteranceRef.current = null;
+        skipRef.current = null;
+        resolve();
+      };
+
+      window.speechSynthesis.speak(u);
+    });
+  }, [selectedVoice]);
+
+  const playVerse = useCallback(async (text: string): Promise<void> => {
+    if (ttsEnabled) {
+      await playTTS(text);
+    } else {
+      await playWebSpeech(text);
+    }
+  }, [ttsEnabled, playTTS, playWebSpeech]);
+
+  // ── Playback loop ──
+
   const runPlayback = useCallback(async () => {
     while (isReadingRef.current) {
       const idx = currentIdxRef.current;
+
       if (idx >= versesRef.current.length) {
         setPassageComplete(true);
         break;
       }
-      setCurrentVerseIdx(idx);
-      await playVerse(versesRef.current[idx].text, idx);
 
-      if (currentIdxRef.current === idx) {
+      setCurrentVerseIdx(idx);
+      await playVerse(versesRef.current[idx].text);
+
+      // Advance to next verse (unless repeat-one mode)
+      if (currentIdxRef.current === idx && repeatModeRef.current !== "one") {
         currentIdxRef.current = idx + 1;
       }
     }
@@ -177,14 +278,12 @@ export function useAudioPlayer(): AudioPlayerState & AudioPlayerActions {
     }
   }, [playVerse]);
 
+  // ── Public actions ──
+
   const startPlayback = useCallback((verses: { text: string }[], startIdx = 0) => {
-    // Stop any existing playback
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.src = "";
-      audioRef.current = null;
-    }
+    cancelAllAudio();
     skipRef.current?.();
+    skipRef.current = null;
 
     versesRef.current = verses;
     currentIdxRef.current = startIdx;
@@ -196,16 +295,10 @@ export function useAudioPlayer(): AudioPlayerState & AudioPlayerActions {
     setIsPaused(false);
     setPassageComplete(false);
     runPlayback();
-  }, [runPlayback]);
+  }, [runPlayback, cancelAllAudio]);
 
   const stopPlayback = useCallback(() => {
-    isReadingRef.current = false;
-    isPausedRef.current = false;
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.src = "";
-      audioRef.current = null;
-    }
+    cancelAllAudio();
     skipRef.current?.();
     skipRef.current = null;
     setIsPlaying(false);
@@ -213,26 +306,30 @@ export function useAudioPlayer(): AudioPlayerState & AudioPlayerActions {
     setCurrentVerseIdx(0);
     setTotalVerses(0);
     setPassageComplete(false);
-  }, []);
+  }, [cancelAllAudio]);
 
   const pausePlayback = useCallback(() => {
     isPausedRef.current = true;
     setIsPaused(true);
-    audioRef.current?.pause();
+    if (audioRef.current) {
+      audioRef.current.pause();
+    } else if (window.speechSynthesis) {
+      window.speechSynthesis.pause();
+    }
   }, []);
 
   const resumePlayback = useCallback(() => {
     isPausedRef.current = false;
     setIsPaused(false);
-    audioRef.current?.play().catch(() => {});
+    if (audioRef.current) {
+      audioRef.current.play().catch(() => {});
+    } else if (window.speechSynthesis) {
+      window.speechSynthesis.resume();
+    }
   }, []);
 
   const togglePause = useCallback(() => {
-    if (isPaused) {
-      resumePlayback();
-    } else {
-      pausePlayback();
-    }
+    if (isPaused) { resumePlayback(); } else { pausePlayback(); }
   }, [isPaused, pausePlayback, resumePlayback]);
 
   const cycleSpeed = useCallback(() => {
@@ -258,27 +355,34 @@ export function useAudioPlayer(): AudioPlayerState & AudioPlayerActions {
       return;
     }
     currentIdxRef.current = next;
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.src = "";
-      audioRef.current = null;
-    }
+    cancelAllAudio();
     skipRef.current?.();
     skipRef.current = null;
-  }, [isPaused, resumePlayback, stopPlayback]);
+  }, [isPaused, resumePlayback, stopPlayback, cancelAllAudio]);
 
   const skipBackward = useCallback(() => {
     if (isPaused) resumePlayback();
     const prev = Math.max(0, currentIdxRef.current - 1);
     currentIdxRef.current = prev;
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.src = "";
-      audioRef.current = null;
-    }
+    cancelAllAudio();
     skipRef.current?.();
     skipRef.current = null;
-  }, [isPaused, resumePlayback]);
+  }, [isPaused, resumePlayback, cancelAllAudio]);
+
+  const handleSetVolume = useCallback((vol: number) => {
+    setVolume(Math.max(0, Math.min(1, vol)));
+  }, []);
+
+  const cycleRepeatMode = useCallback(() => {
+    setRepeatMode((prev) => {
+      if (prev === "none") return "one";
+      if (prev === "one") return "all";
+      return "none";
+    });
+  }, []);
+
+  // Cleanup on unmount
+  useEffect(() => () => { cancelAllAudio(); }, [cancelAllAudio]);
 
   return {
     isPlaying,
@@ -289,6 +393,9 @@ export function useAudioPlayer(): AudioPlayerState & AudioPlayerActions {
     currentVerseIdx,
     totalVerses,
     passageComplete,
+    volume,
+    ttsEnabled,
+    repeatMode,
     startPlayback,
     stopPlayback,
     pausePlayback,
@@ -299,5 +406,8 @@ export function useAudioPlayer(): AudioPlayerState & AudioPlayerActions {
     setVoice,
     skipForward,
     skipBackward,
+    setVolume: handleSetVolume,
+    setRepeatMode,
+    cycleRepeatMode,
   };
 }

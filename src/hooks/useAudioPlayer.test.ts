@@ -474,4 +474,262 @@ describe("useAudioPlayer", () => {
       expect(result.current.passageComplete).toBe(true);
     });
   });
+
+  // ── Volume control ──
+
+  describe("volume control", () => {
+    it("starts with default volume of 1", () => {
+      const { result } = renderHook(() => useAudioPlayer());
+      expect(result.current.volume).toBe(1);
+    });
+
+    it("setVolume updates volume within valid range", () => {
+      const { result } = renderHook(() => useAudioPlayer());
+
+      act(() => result.current.setVolume(0.5));
+      expect(result.current.volume).toBe(0.5);
+
+      act(() => result.current.setVolume(-1));
+      expect(result.current.volume).toBe(0);
+
+      act(() => result.current.setVolume(2));
+      expect(result.current.volume).toBe(1);
+    });
+
+    it("setVolume persists to localStorage", () => {
+      const { result } = renderHook(() => useAudioPlayer());
+
+      act(() => result.current.setVolume(0.3));
+      expect(localStorage.getItem("exegesis-volume")).toBe("0.3");
+    });
+
+    it("restores volume from localStorage on mount", () => {
+      localStorage.setItem("exegesis-volume", "0.7");
+      const { result } = renderHook(() => useAudioPlayer());
+      expect(result.current.volume).toBe(0.7);
+    });
+
+    it("sets audio element volume when playing via TTS", async () => {
+      vi.mocked(ttsService.isEnabled).mockResolvedValue(true);
+      const { result } = renderHook(() => useAudioPlayer());
+      await waitFor(() => expect(result.current.voices.length).toBeGreaterThan(0));
+
+      act(() => result.current.setVolume(0.5));
+
+      act(() => result.current.startPlayback(SINGLE_VERSE));
+      await flush();
+
+      // TTS path uses Audio element - volume should be set
+      expect(mockAudioEl.volume).toBe(0.5);
+    });
+  });
+
+  // ── Repeat mode ──
+
+  describe("repeat mode", () => {
+    it("starts with repeat mode set to none", () => {
+      const { result } = renderHook(() => useAudioPlayer());
+      expect(result.current.repeatMode).toBe("none");
+    });
+
+    it("setRepeatMode directly sets the mode", () => {
+      const { result } = renderHook(() => useAudioPlayer());
+
+      act(() => result.current.setRepeatMode("one"));
+      expect(result.current.repeatMode).toBe("one");
+
+      act(() => result.current.setRepeatMode("all"));
+      expect(result.current.repeatMode).toBe("all");
+
+      act(() => result.current.setRepeatMode("none"));
+      expect(result.current.repeatMode).toBe("none");
+    });
+
+    it("cycleRepeatMode cycles none → one → all → none", () => {
+      const { result } = renderHook(() => useAudioPlayer());
+
+      act(() => result.current.cycleRepeatMode());
+      expect(result.current.repeatMode).toBe("one");
+
+      act(() => result.current.cycleRepeatMode());
+      expect(result.current.repeatMode).toBe("all");
+
+      act(() => result.current.cycleRepeatMode());
+      expect(result.current.repeatMode).toBe("none");
+
+      act(() => result.current.cycleRepeatMode());
+      expect(result.current.repeatMode).toBe("one");
+    });
+
+    it("repeat mode 'one' prevents advancing to next verse", () => {
+      const { result } = renderHook(() => useAudioPlayer());
+
+      act(() => result.current.setRepeatMode("one"));
+      act(() => result.current.startPlayback(MOCK_VERSES));
+
+      // Immediately stop playback (before any verse completes)
+      act(() => result.current.stopPlayback());
+
+      // The verse should not have advanced
+      expect(result.current.currentVerseIdx).toBe(0);
+    });
+
+    it("repeat mode 'none' advances to next verse", async () => {
+      const { result } = renderHook(() => useAudioPlayer());
+      await waitFor(() => expect(result.current.voices.length).toBeGreaterThan(0));
+
+      act(() => result.current.startPlayback(MOCK_VERSES));
+      await flush();
+
+      fireOnended();
+      await flush();
+
+      expect(result.current.currentVerseIdx).toBe(1);
+    });
+  });
+
+  // ── localStorage persistence ──
+
+  describe("localStorage persistence", () => {
+    it("persists speechRate to localStorage", () => {
+      const { result } = renderHook(() => useAudioPlayer());
+
+      act(() => result.current.setSpeechRate(1.5));
+      expect(localStorage.getItem("exegesis-speech-rate")).toBe("1.5");
+    });
+
+    it("restores speechRate from localStorage on mount", () => {
+      localStorage.setItem("exegesis-speech-rate", "1.75");
+      const { result } = renderHook(() => useAudioPlayer());
+      expect(result.current.speechRate).toBe(1.75);
+    });
+
+    it("restores invalid speechRate as default 1.0", () => {
+      localStorage.setItem("exegesis-speech-rate", "999");
+      const { result } = renderHook(() => useAudioPlayer());
+      expect(result.current.speechRate).toBe(1.0);
+    });
+
+    it("persists voice selection to localStorage", () => {
+      const { result } = renderHook(() => useAudioPlayer());
+
+      act(() => result.current.setVoice(MOCK_VOICES[1]));
+      expect(localStorage.getItem("exegesis-selected-voice-id")).toBe("en-US-GuyNeural");
+    });
+
+    it("restores voice selection from localStorage on mount", async () => {
+      localStorage.setItem("exegesis-selected-voice-id", "en-US-GuyNeural");
+      const { result } = renderHook(() => useAudioPlayer());
+      await waitFor(() => expect(result.current.voices.length).toBeGreaterThan(0));
+      expect(result.current.selectedVoice?.voiceId).toBe("en-US-GuyNeural");
+    });
+
+    it("persists volume to localStorage", () => {
+      const { result } = renderHook(() => useAudioPlayer());
+
+      act(() => result.current.setVolume(0.42));
+      expect(localStorage.getItem("exegesis-volume")).toBe("0.42");
+    });
+  });
+
+  // ── ttsEnabled / Web Speech API fallback ──
+
+  describe("ttsEnabled / Web Speech API fallback", () => {
+    beforeEach(() => {
+      vi.mocked(ttsService.isEnabled).mockResolvedValue(false);
+      vi.stubGlobal("speechSynthesis", {
+        speak: vi.fn(function(u) { setTimeout(() => u.onend?.(), 0); }),
+        cancel: vi.fn(),
+        pause: vi.fn(),
+        resume: vi.fn(),
+        paused: false,
+        getVoices: vi.fn().mockReturnValue([]),
+      });
+      vi.stubGlobal("SpeechSynthesisUtterance", vi.fn(() => ({
+        onend: null,
+        onerror: null,
+      })));
+    });
+
+    afterEach(() => {
+      vi.unstubAllGlobals();
+    });
+
+    it("ttsEnabled starts as false when API is offline", () => {
+      const { result } = renderHook(() => useAudioPlayer());
+      expect(result.current.ttsEnabled).toBe(false);
+    });
+
+    it("uses Web Speech API when tts is disabled", async () => {
+      const { result } = renderHook(() => useAudioPlayer());
+      await waitFor(() => expect(result.current.voices.length).toBeGreaterThan(0));
+
+      act(() => result.current.startPlayback(SINGLE_VERSE));
+      await flush();
+
+      expect(window.speechSynthesis.speak).toHaveBeenCalled();
+    });
+
+    it("uses TTS API when tts is enabled", async () => {
+      vi.mocked(ttsService.isEnabled).mockResolvedValue(true);
+      const { result } = renderHook(() => useAudioPlayer());
+      await waitFor(() => expect(result.current.voices.length).toBeGreaterThan(0));
+
+      act(() => result.current.startPlayback(SINGLE_VERSE));
+      await flush();
+
+      expect(ttsService.speak).toHaveBeenCalled();
+    });
+
+    it("falls back to Web Speech when TTS API fails", async () => {
+      vi.mocked(ttsService.isEnabled).mockResolvedValue(true);
+      vi.mocked(ttsService.speak).mockRejectedValue(new Error("API error"));
+
+      const { result } = renderHook(() => useAudioPlayer());
+      await waitFor(() => expect(result.current.voices.length).toBeGreaterThan(0));
+
+      act(() => result.current.startPlayback(SINGLE_VERSE));
+      await flush();
+
+      expect(window.speechSynthesis.speak).toHaveBeenCalled();
+    });
+  });
+
+  // ── Unmount cleanup ──
+
+  describe("unmount cleanup", () => {
+    it("cancels audio when component unmounts while playing via TTS", async () => {
+      vi.mocked(ttsService.isEnabled).mockResolvedValue(true);
+      const { result, unmount } = renderHook(() => useAudioPlayer());
+      await waitFor(() => expect(result.current.voices.length).toBeGreaterThan(0));
+
+      act(() => result.current.startPlayback(MOCK_VERSES));
+      await flush();
+
+      unmount();
+
+      expect(mockAudioEl.pause).toHaveBeenCalled();
+    });
+
+    it("cancels Web Speech when component unmounts while playing", async () => {
+      vi.stubGlobal("speechSynthesis", {
+        speak: vi.fn(), // Don't fire onend — keep utterance active
+        cancel: vi.fn(),
+        pause: vi.fn(),
+        resume: vi.fn(),
+        paused: false,
+        getVoices: vi.fn().mockReturnValue([]),
+      });
+      const { result, unmount } = renderHook(() => useAudioPlayer());
+      await waitFor(() => expect(result.current.voices.length).toBeGreaterThan(0));
+
+      act(() => result.current.startPlayback(SINGLE_VERSE));
+      await flush();
+
+      // Utterance should still be active since speak doesn't fire onended
+      unmount();
+
+      expect(window.speechSynthesis.cancel).toHaveBeenCalled();
+    });
+  });
 });

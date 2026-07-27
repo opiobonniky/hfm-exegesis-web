@@ -50,6 +50,7 @@ interface VoicePlayerBarProps {
   onSpeechRateChange: (rate: number) => void;
   onToggleMute: () => void;
   onVoiceChange: (voice: TTSVoice) => void;
+  extraControls?: React.ReactNode;
 }
 
 function ControlBtn({
@@ -118,6 +119,7 @@ export default function VoicePlayerBar({
   onSpeechRateChange,
   onToggleMute,
   onVoiceChange,
+  extraControls,
 }: VoicePlayerBarProps) {
   const [showVoicePicker, setShowVoicePicker] = useState(false);
   const [voiceSearch, setVoiceSearch] = useState("");
@@ -336,6 +338,9 @@ export default function VoicePlayerBar({
             >
               <X className="w-4 h-4" />
             </ControlBtn>
+
+            {/* Extra controls (sleep timer, afterPlay, etc.) */}
+            {extraControls}
           </div>
         </div>
       </div>

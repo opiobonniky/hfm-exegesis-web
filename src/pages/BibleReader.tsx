@@ -7,21 +7,14 @@ import {
   ChevronDown,
   ChevronUp,
   Loader2,
-  BookOpen,
   Star,
-  Highlighter,
   X,
   Copy,
-  Share2,
-  BookMarked,
-  ChevronUp as ArrowUp,
-  PenLine,
   Lightbulb,
-  Library,
   GraduationCap,
   Volume2,
   VolumeX,
-  Volume,
+  BookOpen,
 } from "lucide-react";
 import {
   Select,
@@ -51,221 +44,33 @@ import {
 import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/components/languages/languageProvider";
-import { ttsService, type TTSVoice } from "@/services/ttsService";
 import { getVerseWords } from "@/services/strongsApi";
 import WordDetailSheet from "@/components/WordDetailSheet";
 import StudyToolsSheet from "@/components/StudyToolsSheet";
 import HowToStudySheet from "@/components/HowToStudySheet";
-import VoicePlayerBar from "@/components/VoicePlayerBar";
+import AudioPlayerControls from "@/components/AudioPlayerControls";
 import MobileNavDrawer from "@/components/MobileNavDrawer";
-
-
-interface Highlight {
-  id?: number;
-  verseKey: string;
-  color: string;
-  colorId: number;
-  note?: string;
-}
-
-interface VerseData {
-  verseNumber: number;
-  text: string;
-}
-
-interface ChapterData {
-  book: string;
-  chapter: number;
-  verses: { key: string; text: string; num: number }[];
-}
-
-interface SpeechItem {
-  verseKey: string;
-  verseNum: number;
-  text: string;
-}
-
-interface TranslationOption {
-  id: string;
-  name: string;
-  shortName: string;
-  year?: string | null;
-}
-
-const FREE_TRANSLATION_IDS = new Set(["Berean", "KJV", "NIV", "ESV", "GW", "ASV", "YLT"]);
-
-const HIGHLIGHT_COLORS = [
-  { id: 1, name: "Red", color: "#F87171" },
-  { id: 3, name: "Yellow", color: "#FACC15" },
-  { id: 4, name: "Orange", color: "#F97316" },
-  { id: 13, name: "Pink", color: "#EC4899" },
-  { id: 14, name: "Rose", color: "#FB7185" },
-  { id: 15, name: "Amber", color: "#F59E0B" },
-  { id: 2, name: "Blue", color: "#3B82F6" },
-  { id: 7, name: "Cyan", color: "#06B6D4" },
-  { id: 8, name: "Teal", color: "#0D9488" },
-  { id: 9, name: "Sky", color: "#38BDF8" },
-  { id: 10, name: "Indigo", color: "#6366F1" },
-  { id: 5, name: "Green", color: "#22C55E" },
-  { id: 6, name: "Purple", color: "#A855F7" },
-  { id: 11, name: "Lime", color: "#84CC16" },
-  { id: 12, name: "Mint", color: "#2DD4BF" },
-];
-
-// ── Helpers ──────────────────────────────────────────────────────────────────
-
-function renderVerseText(text: string) {
-  return text.split("[").map((part, idx) => {
-    if (idx === 0) return part;
-    const close = part.indexOf("]");
-    if (close === -1) return part;
-    return (
-      <span key={idx} className="italic text-muted-foreground">
-        {part.substring(0, close)}
-      </span>
-    );
-  });
-}
-
-/**
- * Render verse text with Strong's Concordance word-level markup.
- * Words that have Strong's data get a subtle dotted underline and become tappable.
- */
-function renderVerseWithStrongs(
-  text: string,
-  verseKey: string,
-  strongsWords: { text: string; strongsId: string | null; hasData: boolean }[],
-  onWordTap: (strongsId: string, wordText: string) => void,
-) {
-  // If no Strong's data for this verse, fall back to plain rendering
-  const wordsWithStrongs = strongsWords.filter((w) => w.strongsId && w.hasData);
-  if (wordsWithStrongs.length === 0) {
-    return renderVerseText(text);
-  }
-
-
-  // Split the verse text into words and render with markup
-  const parts = text.split(/(\s+)/);
-  return parts.map((part, idx) => {
-    // Check if this word has a Strong's entry
-    const cleanWord = part.replace(/[^a-zA-ZÀ-ÿ'\-]+/g, "").toLowerCase();
-    const match = wordsWithStrongs.find(
-      (w) => w.text.toLowerCase() === cleanWord,
-    );
-    if (match && match.strongsId) {
-      return (
-        <button
-          key={idx}
-          onClick={(e) => {
-            e.stopPropagation();
-            onWordTap(match.strongsId!, match.text);
-          }}
-          className="inline border-b border-dotted border-primary/40 hover:border-primary hover:text-primary cursor-help transition-colors focus:outline-none focus:ring-1 focus:ring-primary/20 rounded-sm"
-          title={'Tap to study this word'}
-        >
-          {part}
-        </button>
-      );
-    }
-    return <span key={idx}>{part}</span>;
-  });
-}
-
-function truncateText(text: string, maxLength: number): string {
-  if (text.length <= maxLength) return text;
-  return text.substring(0, maxLength).trim() + "…";
-}
-
-function parseVerseKey(key: string) {
-  const match = key.match(/^(.+)\s+(\d+):(\d+)$/);
-  if (!match) return null;
-  return {
-    book: match[1],
-    chapter: parseInt(match[2]),
-    verse: parseInt(match[3]),
-  };
-}
-
-function cleanTextForSpeech(text: string): string {
-  return text
-    .replace(/\[[^\]]*\]/g, "")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function TextContent({ text }: { text?: string | null }) {
-  if (!text) return null;
-  const paragraphs = text.replace(/\r/g, "").split(/\n\s*\n/).filter(Boolean);
-  return (
-    <div className="text-sm sm:text-base leading-relaxed text-foreground/80">
-      {paragraphs.map((para, pi) => {
-        const lines = para.split("\n").map((s) => s.trim()).filter(Boolean);
-        const isBulletList = lines.some((l) => /^(\-|\*|•|\d+\.)\s+/.test(l));
-        if (isBulletList) {
-          return (
-            <div key={pi} className="space-y-2 mb-4">
-              {lines.map((line, li) => {
-                const isBullet = /^(\-|\*|•|\d+\.)\s+/.test(line);
-                if (isBullet) {
-                  return (
-                    <div key={li} className="flex gap-3 items-start">
-                      <span className="w-2 h-2 rounded-full bg-primary mt-2 shrink-0" />
-                      <span className="leading-7 sm:leading-8">
-                        {line.replace(/^(\-|\*|•|\d+\.)\s+/, "")}
-                      </span>
-                    </div>
-                  );
-                }
-                return (
-                  <p key={li} className="leading-7 sm:leading-8">
-                    {line}
-                  </p>
-                );
-              })}
-            </div>
-          );
-        }
-        return (
-          <p key={pi} className="leading-7 sm:leading-8 mb-4 last:mb-0">
-            {lines.join(" ")}
-          </p>
-        );
-      })}
-    </div>
-  );
-}
-
-
-
-// ── Toolbar button ────────────────────────────────────────────────────────────
-
-function ToolbarBtn({
-  onClick,
-  icon,
-  label,
-  compact,
-}: {
-  onClick: () => void;
-  icon?: React.ReactNode;
-  label: string;
-  compact?: boolean;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground min-h-[44px] px-2 py-1.5 rounded-full hover:bg-muted/50 active:bg-muted transition-colors whitespace-nowrap [touch-action:manipulation]"
-    >
-      {icon}
-      {!compact && <span className="hidden sm:inline">{label}</span>}
-      {compact && <span>{label}</span>}
-    </button>
-  );
-}
-
-// ── Main Component ────────────────────────────────────────────────────────────
+import VerseDisplay from "@/components/VerseDisplay";
+import SelectionActionBar from "@/components/SelectionActionBar";
+import BibleReaderHeader from "@/components/BibleReaderHeader";
+import {
+  type Highlight,
+  type ChapterData,
+  type SpeechItem,
+  type StrongsWord,
+  type TranslationOption,
+  FREE_TRANSLATION_IDS,
+  HIGHLIGHT_COLORS,
+  renderVerseWithStrongs,
+  parseVerseKey,
+  cleanTextForSpeech,
+  TextContent,
+} from "@/lib/bibleHelpers";
+import { useAudioPlayer } from "@/hooks/useAudioPlayer";
 
 export default function BibleReader() {
   const { t, isRtl } = useLanguage();
+  const audio = useAudioPlayer();
   const { toast } = useToast();
   const navigate = useNavigate();
   const isAuthenticated = !!localStorage.getItem(TOKEN_KEY);
@@ -363,50 +168,15 @@ export default function BibleReader() {
   const [voiceMode, setVoiceMode] = useState<"chapter" | "selected" | null>(
     null,
   );
-  const [isSpeaking, setIsSpeaking] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
-  const [currentSpeechIdx, setCurrentSpeechIdx] = useState(0);
   const [speechItems, setSpeechItems] = useState<SpeechItem[]>([]);
-  const [repeatMode, setRepeatMode] = useState<"none" | "one" | "all">("none");
   const [afterPlay, setAfterPlay] = useState<"continue" | "stop">("continue");
-  const [speechRate, setSpeechRate] = useState<number>(0.92);
   const [sleepTimer, setSleepTimer] = useState<number | null>(null);
   const [sleepTimerRemaining, setSleepTimerRemaining] = useState<number>(0);
-  const [voices, setVoices] = useState<TTSVoice[]>([]);
-  const [selectedVoice, setSelectedVoice] = useState<TTSVoice | null>(null);
-  const [elevenLabsEnabled, setElevenLabsEnabled] = useState(false);
 
-  const speechItemsRef = useRef<SpeechItem[]>([]);
-  const currentIdxRef = useRef(0);
-  const isReadingRef = useRef(false);
-  const isPausedRef = useRef(false);
-  const skipRef = useRef<(() => void) | null>(null);
-  const repeatModeRef = useRef<"none" | "one" | "all">("none");
-  const afterPlayRef = useRef<"continue" | "stop">("continue");
-  const voiceModeRef = useRef<"chapter" | "selected" | null>(null);
-  const [volume, setVolume] = useState(1);
-  const volumeRef = useRef(1);
   const previousVolumeRef = useRef(1);
-  const speechRateRef = useRef(0.92);
   const displayBookRef = useRef(displayBook);
   const displayChapterRef = useRef(displayChapter);
-  const sleepTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const voiceIdRef = useRef<string>("21m00Tcm4TlvDq8ikWAM");
-  const activeUtteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
-  const voiceRef = useRef<string | null>(null);
-
-  useEffect(() => {
-    repeatModeRef.current = repeatMode;
-  }, [repeatMode]);
-
-  useEffect(() => {
-    afterPlayRef.current = afterPlay;
-  }, [afterPlay]);
-
-  useEffect(() => {
-    voiceModeRef.current = voiceMode;
-  }, [voiceMode]);
+  const afterPlayRef = useRef<"continue" | "stop">("continue");
 
   useEffect(() => {
     displayBookRef.current = displayBook;
@@ -417,67 +187,19 @@ export default function BibleReader() {
   }, [displayChapter]);
 
   useEffect(() => {
+    afterPlayRef.current = afterPlay;
+  }, [afterPlay]);
+
+  useEffect(() => {
     localStorage.setItem(
       "exegesis_last_bible",
       JSON.stringify({ book: selectedBook, chapter: selectedChapter }),
     );
   }, [selectedBook, selectedChapter]);
 
-  useEffect(() => {
-    speechRateRef.current = speechRate;
-  }, [speechRate]);
 
-  useEffect(() => {
-    volumeRef.current = volume;
-  }, [volume]);
 
-  useEffect(() => {
-    voiceIdRef.current = selectedVoice?.voiceId || "en-US-AriaNeural";
-    voiceRef.current = selectedVoice?.voiceId || null;
-  }, [selectedVoice]);
 
-  // Check whether ElevenLabs is enabled
-  useEffect(() => {
-    ttsService.isEnabled().then(setElevenLabsEnabled).catch(() => setElevenLabsEnabled(false));
-  }, []);
-
-  // Load available voices from backend (Edge TTS, always free)
-  useEffect(() => {
-    ttsService.getVoices().then((available) => {
-      setVoices(available);
-      const preferred = available.find((v) => /aria|jenny|guy|davis|emma|brian/i.test(v.name));
-      setSelectedVoice(preferred || available[0] || null);
-    }).catch(() => {});
-  }, []);
-
-  // ── Shared audio teardown helper ──
-  // Cancels any active playback without resolving the speakOne promise.
-  // Use cancelSpeaking() when the promise also needs resolution.
-  const cancelAllAudio = useCallback(() => {
-    isReadingRef.current = false;
-    isPausedRef.current = false;
-    if (elevenLabsEnabled) {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.src = "";
-        audioRef.current = null;
-      }
-    } else {
-      if (window.speechSynthesis) {
-        if (window.speechSynthesis.paused) window.speechSynthesis.resume();
-        window.speechSynthesis.cancel();
-      }
-    }
-    skipRef.current = null;
-    activeUtteranceRef.current = null;
-  }, [elevenLabsEnabled]);
-
-  // Cleanup audio when component unmounts (user navigates away)
-  useEffect(() => {
-    return () => {
-      cancelAllAudio();
-    };
-  }, [cancelAllAudio]);
 
   // Sleep timer countdown effect
   useEffect(() => {
@@ -486,11 +208,7 @@ export default function BibleReader() {
         setSleepTimerRemaining((prev) => {
           if (prev <= 1) {
             // Timer expired - stop speaking
-            const skip = skipRef.current;
-            cancelAllAudio();
-            skip?.();
-            setIsSpeaking(false);
-            setIsPaused(false);
+            audio.stopPlayback();
             setSleepTimer(null);
             return 0;
           }
@@ -500,7 +218,7 @@ export default function BibleReader() {
 
       return () => clearInterval(interval);
     }
-  }, [sleepTimer, cancelAllAudio]);
+  }, [sleepTimer, audio.stopPlayback]);
 
   const [showSearchModal, setShowSearchModal] = useState(false);
   const [showHighlightPicker, setShowHighlightPicker] = useState(false);
@@ -516,7 +234,7 @@ export default function BibleReader() {
 
   // Desktop-only book filter
   const [verseWordsMap, setVerseWordsMap] = useState<
-  Record<string, { text: string; strongsId: string | null; hasData: boolean }[]>
+  Record<string, StrongsWord[]>
 >({});
   const [strongsWordModalOpen, setStrongsWordModalOpen] = useState(false);
   const [selectedStrongsId, setSelectedStrongsId] = useState<string | null>(null);
@@ -546,7 +264,7 @@ export default function BibleReader() {
         // Group words by verse number
         const grouped: Record<
           string,
-          { text: string; strongsId: string | null; hasData: boolean }[]
+          StrongsWord[]
         > = {};
         for (const w of words) {
           const vNum = w.verseNumber || 1;
@@ -1024,16 +742,17 @@ export default function BibleReader() {
   }, [chapters]);
 
   useEffect(() => {
-    if (!isSpeaking || speechItems.length === 0) return;
-    const item = speechItems[currentSpeechIdx];
+    if (!audio.isPlaying || speechItems.length === 0) return;
+    const item = speechItems[audio.currentVerseIdx];
     if (!item) return;
     verseRefs.current[item.verseKey]?.scrollIntoView({
       behavior: "smooth",
       block: "center",
     });
-  }, [currentSpeechIdx, isSpeaking, speechItems]);
+  }, [audio.currentVerseIdx, audio.isPlaying, speechItems]);
 
   // ── Derived ──
+  const isSpeaking = audio.isPlaying;
   const bookNames = backendBooks.map((b) => b.bookName);
   const isAtVeryStart =
     bookNames.length > 0 &&
@@ -1046,96 +765,6 @@ export default function BibleReader() {
 
   // ── Speech ──
 
-  const speakOne = (text: string, idx: number): Promise<void> => {
-    if (elevenLabsEnabled) {
-      return new Promise((resolve) => {
-        const doSpeak = async () => {
-          try {
-            const arrayBuffer = await ttsService.speak(
-              text,
-              voiceIdRef.current,
-            );
-            const blob = new Blob([arrayBuffer], { type: "audio/mpeg" });
-            const url = URL.createObjectURL(blob);
-            const audio = new Audio(url);
-            audioRef.current = audio;
-            audio.playbackRate = speechRateRef.current;
-            audio.volume = volumeRef.current;
-
-            skipRef.current = () => {
-              audio.pause();
-              audio.src = "";
-              URL.revokeObjectURL(url);
-              audioRef.current = null;
-              resolve();
-            };
-
-            audio.onended = () => {
-              URL.revokeObjectURL(url);
-              audioRef.current = null;
-              skipRef.current = null;
-              resolve();
-            };
-
-            audio.onerror = () => {
-              URL.revokeObjectURL(url);
-              audioRef.current = null;
-              skipRef.current = null;
-              resolve();
-            };
-
-            await audio.play();
-            // Honour a pause that was requested while the API was still fetching
-            if (isPausedRef.current) audio.pause();
-          } catch (err) {
-            console.error("TTS speak error:", err);
-            audioRef.current = null;
-            skipRef.current = null;
-            resolve();
-          }
-        };
-        doSpeak();
-      });
-    }
-
-    // Web Speech API fallback
-    return new Promise((resolve) => {
-      if (!("speechSynthesis" in window)) {
-        resolve();
-        return;
-      }
-
-      const u = new SpeechSynthesisUtterance(text);
-      u.rate = speechRateRef.current;
-      u.volume = volumeRef.current;
-      u.pitch = 0.92 + (idx % 5) * 0.04;
-      if (voiceRef.current) {
-        const match = window.speechSynthesis.getVoices().find((v) => v.name === voiceRef.current);
-        if (match) u.voice = match;
-      }
-      activeUtteranceRef.current = u;
-
-      skipRef.current = () => {
-        activeUtteranceRef.current = null;
-        resolve();
-      };
-
-      u.onend = () => {
-        activeUtteranceRef.current = null;
-        skipRef.current = null;
-        resolve();
-      };
-
-      u.onerror = (e) => {
-        if (e.error === "interrupted") return;
-        activeUtteranceRef.current = null;
-        skipRef.current = null;
-        resolve();
-      };
-
-      window.speechSynthesis.speak(u);
-    });
-  };
 
   const advanceToNextChapter = async (): Promise<boolean> => {
     const bookNames = backendBooks.map((b) => b.bookName);
@@ -1166,9 +795,8 @@ export default function BibleReader() {
       }));
       const nextChapterData = { book: nextBook, chapter: nextChapter, verses };
       const nextItems = buildChapterItems(nextChapterData);
-      speechItemsRef.current = nextItems;
       setSpeechItems(nextItems);
-      currentIdxRef.current = 0;
+      audio.startPlayback(nextItems.map(i => ({ text: i.text })), 0);
       setDisplayBook(nextBook);
       setDisplayChapter(nextChapter);
       setSelectedBook(nextBook);
@@ -1185,42 +813,6 @@ export default function BibleReader() {
     }
   };
 
-  const runLoop = async () => {
-    while (isReadingRef.current) {
-      const i = currentIdxRef.current;
-
-      if (i >= speechItemsRef.current.length) {
-        if (
-          afterPlayRef.current === "continue" &&
-          voiceModeRef.current === "chapter"
-        ) {
-          const advanced = await advanceToNextChapter();
-          if (!advanced) break;
-          continue;
-        }
-        break;
-      }
-
-      setCurrentSpeechIdx(i);
-      await speakOne(speechItemsRef.current[i].text, i);
-
-      // Advance to next verse (unless a skip already changed the index).
-      if (currentIdxRef.current === i) {
-        if (repeatModeRef.current !== "one") {
-          currentIdxRef.current = i + 1;
-        }
-      }
-    }
-
-    if (isReadingRef.current) {
-      isReadingRef.current = false;
-      isPausedRef.current = false;
-      setIsSpeaking(false);
-      setIsPaused(false);
-      setCurrentSpeechIdx(0);
-      setVoiceMode(null);
-    }
-  };
 
   const buildChapterItems = (cd: ChapterData): SpeechItem[] =>
     cd.verses.map((v) => ({
@@ -1256,74 +848,24 @@ export default function BibleReader() {
     mode: "chapter" | "selected",
     startIdx = 0,
   ) => {
-    // Cancel any existing playback
-    if (elevenLabsEnabled) {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.src = "";
-        audioRef.current = null;
-      }
-    } else {
-      if (window.speechSynthesis.paused) window.speechSynthesis.resume();
-      window.speechSynthesis.cancel();
-    }
-    skipRef.current?.();
-    skipRef.current = null;
-    speechItemsRef.current = items;
-    currentIdxRef.current = startIdx;
-    isReadingRef.current = true;
-    isPausedRef.current = false;
     setSpeechItems(items);
-    setCurrentSpeechIdx(startIdx);
-    setIsSpeaking(true);
-    setIsPaused(false);
     setVoiceMode(mode);
-    runLoop();
+    audio.startPlayback(items.map(i => ({ text: i.text })), startIdx);
   };
 
   const stopSpeaking = useCallback(() => {
-    // Save a local reference to skip before cancelAllAudio nullifies it,
-    // because the cancel callbacks may nullify skipRef.current.
-    const skip = skipRef.current;
-    cancelAllAudio();
-    skip?.();
-    setIsSpeaking(false);
-    setIsPaused(false);
-    setCurrentSpeechIdx(0);
+    audio.stopPlayback();
     setSpeechItems([]);
     setVoiceMode(null);
-  }, [elevenLabsEnabled]);
+    audio.setRepeatMode("none");
+  }, []);
 
   const pauseResume = () => {
-    if (elevenLabsEnabled) {
-      if (isPausedRef.current) {
-        isPausedRef.current = false;
-        setIsPaused(false);
-        audioRef.current?.play().catch(() => {});
-      } else {
-        isPausedRef.current = true;
-        setIsPaused(true);
-        audioRef.current?.pause();
-      }
-    } else {
-      if (isPausedRef.current) {
-        isPausedRef.current = false;
-        setIsPaused(false);
-        window.speechSynthesis.resume();
-      } else {
-        isPausedRef.current = true;
-        setIsPaused(true);
-        window.speechSynthesis.pause();
-      }
-    }
+    audio.togglePause();
   };
 
   const toggleRepeatMode = () => {
-    setRepeatMode((prev) => {
-      if (prev === "none") return "one";
-      if (prev === "one") return "all";
-      return "none";
-    });
+    audio.cycleRepeatMode();
   };
 
   const toggleAfterPlay = () => {
@@ -1343,89 +885,29 @@ export default function BibleReader() {
   };
 
   const handleSpeedChange = (newRate: number) => {
-    setSpeechRate(newRate);
-    speechRateRef.current = newRate;
-    if (!isReadingRef.current) return;
-    if (elevenLabsEnabled) {
-      if (audioRef.current) audioRef.current.playbackRate = newRate;
-    } else {
-      // Web Speech API: re-speak current verse at new rate
-      if (isPausedRef.current) {
-        isPausedRef.current = false;
-        setIsPaused(false);
-        window.speechSynthesis.resume();
-      }
-      const idx = currentIdxRef.current;
-      window.speechSynthesis.cancel();
-      skipRef.current?.();
-      skipRef.current = null;
-      currentIdxRef.current = idx; // re-speak same verse, not the next one
-    }
+    audio.setSpeechRate(newRate);
   };
 
   const skipForward = () => {
-    if (isPausedRef.current) {
-      isPausedRef.current = false;
-      setIsPaused(false);
-      if (elevenLabsEnabled) {
-        audioRef.current?.play().catch(() => {});
-      } else {
-        window.speechSynthesis.resume();
-      }
-    }
-    const next = currentIdxRef.current + 1;
-    if (next >= speechItemsRef.current.length) {
-      if (afterPlay === "continue" && voiceMode === "chapter") {
-        currentIdxRef.current = next;
-        cancelCurrentAudio();
-        skipRef.current?.();
-        skipRef.current = null;
-      } else {
-        stopSpeaking();
-      }
-      return;
-    }
-    currentIdxRef.current = next;
-    cancelCurrentAudio();
-    skipRef.current?.();
-    skipRef.current = null;
+    audio.skipForward();
   };
 
   const skipBack = () => {
-    if (isPausedRef.current) {
-      isPausedRef.current = false;
-      setIsPaused(false);
-      if (elevenLabsEnabled) {
-        audioRef.current?.play().catch(() => {});
-      } else {
-        window.speechSynthesis.resume();
-      }
-    }
-    const prev = Math.max(0, currentIdxRef.current - 1);
-    currentIdxRef.current = prev;
-    cancelCurrentAudio();
-    skipRef.current?.();
-    skipRef.current = null;
+    audio.skipBackward();
   };
 
-  const cancelCurrentAudio = () => {
-    if (elevenLabsEnabled) {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.src = "";
-        audioRef.current = null;
-      }
-    } else {
-      window.speechSynthesis.cancel();
-    }
-  };
 
   const readChapter = () => {
-    if (isSpeaking && voiceMode === "chapter") {
-      stopSpeaking();
+    if (audio.isPlaying && voiceMode === "chapter") {
+      audio.stopPlayback();
+      setSpeechItems([]);
+      setVoiceMode(null);
       return;
     }
-    if (isSpeaking) stopSpeaking();
+    if (audio.isPlaying) {
+      audio.stopPlayback();
+      setVoiceMode(null);
+    }
     const cd = chapters.find(
       (c) => c.book === displayBook && c.chapter === displayChapter,
     );
@@ -1455,11 +937,16 @@ export default function BibleReader() {
 
   const readSelectedVerses = () => {
     if (selectedVerses.length === 0) return;
-    if (isSpeaking && voiceMode === "selected") {
-      stopSpeaking();
+    if (audio.isPlaying && voiceMode === "selected") {
+      audio.stopPlayback();
+      setSpeechItems([]);
+      setVoiceMode(null);
       return;
     }
-    if (isSpeaking) stopSpeaking();
+    if (audio.isPlaying) {
+      audio.stopPlayback();
+      setVoiceMode(null);
+    }
     if (isAuthenticated) {
       for (const vk of selectedVerses) {
         const p = parseVerseKey(vk);
@@ -1681,7 +1168,7 @@ export default function BibleReader() {
   // ── Navigation ──
   const handleBookChange = (book: string) => {
     if (book === selectedBook) return;
-    if (isSpeaking) stopSpeaking();
+    if (audio.isPlaying) audio.stopPlayback();
     clearSelection();
     setSelectedVerse(null);
     chapterRefs.current = {};
@@ -1701,7 +1188,7 @@ export default function BibleReader() {
   };
 
   const handleChapterChange = (ch: number) => {
-    if (isSpeaking) stopSpeaking();
+    if (audio.isPlaying) audio.stopPlayback();
     clearSelection();
     setSelectedVerse(null);
     setSelectedChapter(ch);
@@ -1741,7 +1228,7 @@ export default function BibleReader() {
       if (idx > 0) {
         const prevBook = bookNames[idx - 1];
         const lastCh = getMaxChapter(prevBook);
-        if (isSpeaking) stopSpeaking();
+        if (audio.isPlaying) audio.stopPlayback();
         clearSelection();
         setSelectedVerse(null);
         chapterRefs.current = {};
@@ -2058,14 +1545,22 @@ export default function BibleReader() {
     }
   };
 
+  // ── Auto-advance to next chapter when passage completes ──
+  useEffect(() => {
+    if (!audio.passageComplete) return;
+    if (afterPlay === "continue" && voiceMode === "chapter") {
+      advanceToNextChapter();
+    }
+  }, [audio.passageComplete]);
+
   // ── Player derived ──
-  const currentItem = speechItems[currentSpeechIdx] ?? null;
+  const currentItem = speechItems[audio.currentVerseIdx] ?? null;
   const progressPct =
     speechItems.length > 0
-      ? ((currentSpeechIdx + 1) / speechItems.length) * 100
+      ? ((audio.currentVerseIdx + 1) / speechItems.length) * 100
       : 0;
-  const canSkipBack = currentSpeechIdx > 0;
-  const canSkipForward = currentSpeechIdx < speechItems.length - 1;
+  const canSkipBack = audio.currentVerseIdx > 0;
+  const canSkipForward = audio.currentVerseIdx < speechItems.length - 1;
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
@@ -2401,115 +1896,29 @@ export default function BibleReader() {
         </div>
       </header>
 
-      {/* ══════════════════ SELECTION TOOLBAR ══════════════════ */}
-      {selectedVerses.length > 0 && (
-        <div className="sticky top-0 z-40 flex justify-center px-3 sm:px-4 pt-2 pb-1 pointer-events-none">
-          <div className="pointer-events-auto flex items-center gap-0.5 sm:gap-1 bg-background/95 backdrop-blur border border-border/60 rounded-full px-2 sm:px-3 py-1.5 shadow-lg overflow-x-auto max-w-full">
-            {/* Count + clear */}
-            <button
-              onClick={clearSelection}
-              className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground min-h-[44px] px-2 py-1 rounded-full hover:bg-muted/50 active:scale-[0.97] transition-all shrink-0 [touch-action:manipulation]"
-            >
-              <X className="w-3 h-3" />
-              <span>{selectedVerses.length}</span>
-            </button>
-
-            <div className="w-px h-4 bg-border/60 mx-0.5 sm:mx-1 shrink-0" />
-
-            {/* Listen */}
-            <button
-              onClick={readSelectedVerses}
-              className={cn(
-                "flex items-center gap-1 text-xs min-h-[44px] px-2 py-1 rounded-full transition-colors whitespace-nowrap shrink-0 active:scale-[0.97] [touch-action:manipulation]",
-                isSpeaking && voiceMode === "selected"
-                  ? "bg-primary text-white"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
-              )}
-            >
-              {isSpeaking && voiceMode === "selected" ? (
-                <>
-                  <VolumeX className="w-3 h-3" />
-                  <span className="hidden sm:inline">{t.bibleReader.stop}</span>
-                </>
-              ) : (
-                <>
-                  <Volume2 className="w-3 h-3" />
-                  <span className="hidden sm:inline">{t.bibleReader.listen}</span>
-                </>
-              )}
-            </button>
-
-            <ToolbarBtn
-              onClick={() => setShowHighlightPicker(true)}
-              icon={<Highlighter className="w-3 h-3" />}
-              label={t.bibleReader.highlight}
-            />
-            <ToolbarBtn
-              onClick={() => setShowNoteModal(true)}
-              icon={<BookMarked className="w-3 h-3" />}
-              label={t.bibleReader.addNote}
-            />
-            <ToolbarBtn
-              onClick={() => {
-                if (selectedVerses.length > 0 && !isConsecutiveSelection()) {
-                  addFavorite();
-                } else {
-                  setShowFavoriteModal(true);
-                }
-              }}
-              icon={<Star className="w-3 h-3" />}
-              label={t.bibleReader.fav}
-              compact
-            />
-            <ToolbarBtn
-              onClick={() => {
-                if (selectedVerses.length > 0 && !isConsecutiveSelection()) {
-                  copyVersesRange();
-                } else {
-                  setShowCopyModal(true);
-                }
-              }}
-              icon={<Copy className="w-3 h-3" />}
-              label={t.common.copy}
-              compact
-            />
-            <ToolbarBtn
-              onClick={() => {
-                let verseNum = "1";
-                if (selectedVerses.length > 0) {
-                  const parts = selectedVerses[0].split(":");
-                  if (parts.length > 1) verseNum = parts[1];
-                }
-                window.open(
-                  `/journal/new?book=${selectedBook}&chapter=${selectedChapter}&verse=${verseNum}`,
-                  "_blank",
-                );
-              }}
-              icon={<PenLine className="w-3 h-3" />}
-              label={t.bibleReader.journal}
-              compact
-            />
-            <ToolbarBtn
-              onClick={() => {
-                if (selectedVerses.length > 0 && !isConsecutiveSelection()) {
-                  shareVersesRange();
-                } else {
-                  setShowShareModal(true);
-                }
-              }}
-              icon={<Share2 className="w-3 h-3" />}
-              label={t.common.share}
-              compact
-            />
-            <ToolbarBtn
-              onClick={() => navigate(`/verse-resources?book=${encodeURIComponent(displayBook)}&chapter=${displayChapter}&verse=${selectedVerse || 1}`)}
-              icon={<Library className="w-3 h-3" />}
-              label={"Study"}
-              compact
-            />
-          </div>
-        </div>
-      )}
+      <SelectionActionBar
+        selectedVerses={selectedVerses}
+        isSpeaking={audio.isPlaying}
+        voiceMode={voiceMode}
+        selectedBook={selectedBook}
+        selectedChapter={selectedChapter}
+        selectedVerse={selectedVerse}
+        displayBook={displayBook}
+        displayChapter={displayChapter}
+        onClearSelection={clearSelection}
+        onReadSelectedVerses={readSelectedVerses}
+        onOpenHighlightPicker={() => setShowHighlightPicker(true)}
+        onOpenNoteModal={() => setShowNoteModal(true)}
+        onAddFavorite={addFavorite}
+        onOpenFavoriteModal={() => setShowFavoriteModal(true)}
+        onCopyVerses={copyVersesRange}
+        onOpenCopyModal={() => setShowCopyModal(true)}
+        onShareVerses={shareVersesRange}
+        onOpenShareModal={() => setShowShareModal(true)}
+        onNavigateToJournal={(verseNum) => window.open(`/journal/new?book=${selectedBook}&chapter=${selectedChapter}&verse=${verseNum}`, "_blank")}
+        onNavigateToStudy={() => navigate(`/verse-resources?book=${encodeURIComponent(displayBook)}&chapter=${displayChapter}&verse=${selectedVerse || 1}`)}
+        isConsecutiveSelection={isConsecutiveSelection}
+      />
 
       {/* ══════════════════ READING AREA ══════════════════ */}
       <div className="flex-1 overflow-hidden">
@@ -3076,42 +2485,42 @@ export default function BibleReader() {
         }}
       />
 
-      {/* ══════════════════ VOICE PLAYER ══════════════════ */}
-      {isSpeaking && (
-        <VoicePlayerBar
-          currentItem={currentItem}
-          currentIndex={currentSpeechIdx}
-          total={speechItems.length}
-          progress={progressPct}
-          isPaused={isPaused}
-          voiceMode={voiceMode}
-          displayBook={displayBook}
-          displayChapter={displayChapter}
-          canSkipBack={canSkipBack}
-          canSkipForward={canSkipForward}
-          repeatMode={repeatMode}
-          speechRate={speechRate}
-          voices={voices}
-          selectedVoice={selectedVoice}
-          voice={volume}
-          onPauseResume={pauseResume}
-          onStop={stopSpeaking}
-          onSkipBack={skipBack}
-          onSkipForward={skipForward}
-          onToggleRepeat={toggleRepeatMode}
-          onSpeechRateChange={handleSpeedChange}
-          onToggleMute={() => {
-            setVolume((prev) => {
-              if (prev > 0) {
-                previousVolumeRef.current = prev;
-                return 0;
-              }
-              return previousVolumeRef.current || 1;
-            });
-          }}
-          onVoiceChange={setSelectedVoice}
-        />
-      )}
+      <AudioPlayerControls
+        isPlaying={audio.isPlaying}
+        isPaused={audio.isPaused}
+        currentItem={currentItem}
+        currentIndex={audio.currentVerseIdx}
+        total={speechItems.length}
+        progress={progressPct}
+        voiceMode={voiceMode}
+        displayBook={displayBook}
+        displayChapter={displayChapter}
+        canSkipBack={canSkipBack}
+        canSkipForward={canSkipForward}
+        repeatMode={audio.repeatMode}
+        speechRate={audio.speechRate}
+        voices={audio.voices}
+        selectedVoice={audio.selectedVoice}
+        volume={audio.volume}
+        afterPlay={afterPlay}
+        onPauseResume={audio.togglePause}
+        onStop={stopSpeaking}
+        onSkipBack={audio.skipBackward}
+        onSkipForward={audio.skipForward}
+        onToggleRepeat={audio.cycleRepeatMode}
+        onSpeechRateChange={audio.setSpeechRate}
+        onToggleMute={() => {
+          if (audio.volume > 0) {
+            previousVolumeRef.current = audio.volume;
+            audio.setVolume(0);
+          } else {
+            audio.setVolume(previousVolumeRef.current || 1);
+          }
+        }}
+        onVoiceChange={audio.setVoice}
+        onSetVolume={audio.setVolume}
+        onAfterPlayChange={setAfterPlay}
+      />
     </div>
   );
 }
