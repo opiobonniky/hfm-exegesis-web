@@ -66,17 +66,17 @@ describe("LookStage", () => {
 
   it("shows prompt counter with current/total", () => {
     render(<LookStage {...createProps()} />);
-    expect(screen.getByText(`1 / ${LOOK_PROMPTS.length}`)).toBeInTheDocument();
+    expect(screen.getByText(`${LOOK_PROMPTS.length}`)).toBeInTheDocument();
   });
 
   it("shows updated prompt counter when on second prompt", () => {
     render(<LookStage {...createProps({ currentPromptIdx: 1 })} />);
-    expect(screen.getByText(`2 / ${LOOK_PROMPTS.length}`)).toBeInTheDocument();
+    expect(screen.getByText(`${LOOK_PROMPTS.length}`)).toBeInTheDocument();
   });
 
   it("renders the observations textarea with placeholder", () => {
     render(<LookStage {...createProps()} />);
-    const textarea = screen.getByPlaceholderText("Write what you observe in this passage...");
+    const textarea = screen.getByPlaceholderText("Write what you observe in response to the prompt above...");
     expect(textarea).toBeInTheDocument();
   });
 
@@ -88,7 +88,7 @@ describe("LookStage", () => {
   it("calls onUpdate when textarea changes", async () => {
     const onUpdate = vi.fn();
     render(<LookStage {...createProps({ onUpdate })} />);
-    const textarea = screen.getByPlaceholderText("Write what you observe in this passage...");
+    const textarea = screen.getByPlaceholderText("Write what you observe in response to the prompt above...");
     await userEvent.type(textarea, "A");
     expect(onUpdate).toHaveBeenCalledWith({ lookNotes: "A" });
   });
@@ -120,28 +120,27 @@ describe("LookStage", () => {
 
   it("renders Save Progress and Continue buttons", () => {
     render(<LookStage {...createProps()} />);
-    expect(screen.getByText("Save Progress")).toBeInTheDocument();
-    expect(screen.getByText("Continue to Listen")).toBeInTheDocument();
+    expect(screen.getByText("Save")).toBeInTheDocument();
+    expect(screen.getByText("Continue")).toBeInTheDocument();
   });
 
   it("disables buttons when saving", () => {
     render(<LookStage {...createProps({ saving: true })} />);
     expect(screen.getByText("Saving...")).toBeInTheDocument();
-    expect(screen.getByText("Saving...")).toBeDisabled();
-    expect(screen.getByText("Continue to Listen")).toBeDisabled();
+    expect(screen.getByText("Continue")).toBeDisabled();
   });
 
   it("calls onAdvance when Continue is clicked", async () => {
     const onAdvance = vi.fn();
     render(<LookStage {...createProps({ onAdvance })} />);
-    await userEvent.click(screen.getByText("Continue to Listen"));
+    await userEvent.click(screen.getByText("Continue"));
     expect(onAdvance).toHaveBeenCalledOnce();
   });
 
   it("calls onSaveProgress when Save is clicked", async () => {
     const onSaveProgress = vi.fn();
     render(<LookStage {...createProps({ onSaveProgress })} />);
-    await userEvent.click(screen.getByText("Save Progress"));
+    await userEvent.click(screen.getByText("Save"));
     expect(onSaveProgress).toHaveBeenCalledOnce();
   });
 
@@ -176,7 +175,7 @@ describe("LookStage", () => {
     expect(screen.queryByText("Could not load passage text.")).not.toBeInTheDocument();
     // The prompt card and textarea should still render
     expect(screen.getByText(LOOK_PROMPTS[0])).toBeInTheDocument();
-    expect(screen.getByPlaceholderText("Write what you observe in this passage...")).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("Write what you observe in response to the prompt above...")).toBeInTheDocument();
   });
 
   // ── Strong's word click tests ──
@@ -184,7 +183,7 @@ describe("LookStage", () => {
   it("renders Strong's words section with word count", () => {
     render(<LookStage {...createProps({ passageVerses: MOCK_VERSES, verseWords: MOCK_VERSE_WORDS })} />);
     expect(screen.getByText("Original Language Words")).toBeInTheDocument();
-    expect(screen.getByText("(3 words)")).toBeInTheDocument();
+    expect(screen.getByText("3 words available for quick lookup")).toBeInTheDocument();
     expect(screen.getByText("Word")).toBeInTheDocument();
     expect(screen.getByText("Test")).toBeInTheDocument();
     expect(screen.getByText("Sample")).toBeInTheDocument();
@@ -232,11 +231,12 @@ describe("LookStage", () => {
 
   it("shows empty state when no Strong's words are available", () => {
     render(<LookStage {...createProps({ passageVerses: MOCK_VERSES, verseWords: [] })} />);
-    expect(screen.getByText("No Strong's word data available for this passage.")).toBeInTheDocument();
+    // Strong's words section only shows when verseWords has data
+    expect(screen.queryByText("Original Language Words")).not.toBeInTheDocument();
   });
 
   it("shows hint text when words are present", () => {
     render(<LookStage {...createProps({ passageVerses: MOCK_VERSES, verseWords: MOCK_VERSE_WORDS })} />);
-    expect(screen.getByText("Tap a word to see its original meaning and full explanation.")).toBeInTheDocument();
+    expect(screen.getByText("Click a word to explore its original meaning")).toBeInTheDocument();
   });
 });

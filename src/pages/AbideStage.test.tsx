@@ -61,7 +61,7 @@ describe("AbideStage", () => {
     it("renders reflection label and placeholder", () => {
       render(<AbideStage {...createProps()} />);
       expect(screen.getByText("My Reflection")).toBeInTheDocument();
-      const textarea = screen.getByPlaceholderText("What has God shown you through this passage?");
+      const textarea = screen.getByPlaceholderText("Write what God has revealed to you through this study...");
       expect(textarea).toBeInTheDocument();
     });
 
@@ -73,7 +73,7 @@ describe("AbideStage", () => {
     it("calls onUpdate when reflection changes", async () => {
       const onUpdate = vi.fn();
       render(<AbideStage {...createProps({ onUpdate })} />);
-      const textarea = screen.getByPlaceholderText("What has God shown you through this passage?");
+      const textarea = screen.getByPlaceholderText("Write what God has revealed to you through this study...");
       await userEvent.type(textarea, "G");
       expect(onUpdate).toHaveBeenCalledWith({ reflection: "G" });
     });
@@ -83,7 +83,7 @@ describe("AbideStage", () => {
     it("renders prayer label and placeholder", () => {
       render(<AbideStage {...createProps()} />);
       expect(screen.getByText("My Prayer")).toBeInTheDocument();
-      const textarea = screen.getByPlaceholderText("Write your prayer response...");
+      const textarea = screen.getByPlaceholderText("Write your prayer response to what you've read...");
       expect(textarea).toBeInTheDocument();
     });
 
@@ -95,7 +95,7 @@ describe("AbideStage", () => {
     it("calls onUpdate when prayer changes", async () => {
       const onUpdate = vi.fn();
       render(<AbideStage {...createProps({ onUpdate })} />);
-      const textarea = screen.getByPlaceholderText("Write your prayer response...");
+      const textarea = screen.getByPlaceholderText("Write your prayer response to what you've read...");
       await userEvent.type(textarea, "L");
       expect(onUpdate).toHaveBeenCalledWith({ prayer: "L" });
     });
@@ -105,7 +105,7 @@ describe("AbideStage", () => {
     it("renders application label and placeholder", () => {
       render(<AbideStage {...createProps()} />);
       expect(screen.getByText("Practical Step")).toBeInTheDocument();
-      const textarea = screen.getByPlaceholderText("What will you do in response to God's Word?");
+      const textarea = screen.getByPlaceholderText("Write one concrete action you will take in response to God's Word...");
       expect(textarea).toBeInTheDocument();
     });
 
@@ -117,7 +117,7 @@ describe("AbideStage", () => {
     it("calls onUpdate when application changes", async () => {
       const onUpdate = vi.fn();
       render(<AbideStage {...createProps({ onUpdate })} />);
-      const textarea = screen.getByPlaceholderText("What will you do in response to God's Word?");
+      const textarea = screen.getByPlaceholderText("Write one concrete action you will take in response to God's Word...");
       await userEvent.type(textarea, "I");
       expect(onUpdate).toHaveBeenCalledWith({ appText: "I" });
     });
@@ -127,7 +127,7 @@ describe("AbideStage", () => {
     it("renders tags label and input", () => {
       render(<AbideStage {...createProps()} />);
       expect(screen.getByText("Tags")).toBeInTheDocument();
-      const input = screen.getByPlaceholderText("#John #Believe #EternalLife");
+      const input = screen.getByPlaceholderText("#Faith #Grace #John #EternalLife");
       expect(input).toBeInTheDocument();
     });
 
@@ -139,7 +139,7 @@ describe("AbideStage", () => {
     it("calls onUpdate when tags change", async () => {
       const onUpdate = vi.fn();
       render(<AbideStage {...createProps({ onUpdate })} />);
-      const input = screen.getByPlaceholderText("#John #Believe #EternalLife");
+      const input = screen.getByPlaceholderText("#Faith #Grace #John #EternalLife");
       await userEvent.type(input, "#");
       expect(onUpdate).toHaveBeenCalledWith({ tags: "#" });
     });
@@ -148,34 +148,34 @@ describe("AbideStage", () => {
   describe("privacy toggle", () => {
     it('shows "Private" text by default', () => {
       render(<AbideStage {...createProps({ isPublic: false })} />);
-      expect(screen.getByText("Private — only you can see this")).toBeInTheDocument();
+      expect(screen.getByText("Private Study")).toBeInTheDocument();
     });
 
     it('shows "Public" text when isPublic is true', () => {
       render(<AbideStage {...createProps({ isPublic: true })} />);
-      expect(screen.getByText("Public — anyone can read this")).toBeInTheDocument();
+      expect(screen.getByText("Public Study")).toBeInTheDocument();
     });
 
     it("calls onUpdate with isPublic toggle on click", async () => {
       const onUpdate = vi.fn();
       render(<AbideStage {...createProps({ onUpdate, isPublic: false })} />);
-      await userEvent.click(screen.getByText("Private — only you can see this"));
+      await userEvent.click(screen.getByText("Private Study"));
       expect(onUpdate).toHaveBeenCalledWith({ isPublic: true });
     });
 
     it("calls onUpdate to make private when clicking public", async () => {
       const onUpdate = vi.fn();
       render(<AbideStage {...createProps({ onUpdate, isPublic: true })} />);
-      await userEvent.click(screen.getByText("Public — anyone can read this"));
+      await userEvent.click(screen.getByText("Public Study"));
       expect(onUpdate).toHaveBeenCalledWith({ isPublic: false });
     });
   });
 
   describe("action buttons", () => {
-    it("renders Save Progress and Save to Legacy Ledger buttons", () => {
+    it("renders Save and Save Ledger buttons", () => {
       render(<AbideStage {...createProps()} />);
-      expect(screen.getByText("Save Progress")).toBeInTheDocument();
-      expect(screen.getByText("Save to Legacy Ledger")).toBeInTheDocument();
+      expect(screen.getByText("Save")).toBeInTheDocument();
+      expect(screen.getByText("Save Ledger")).toBeInTheDocument();
     });
 
     it("disables buttons when saving", () => {
@@ -185,17 +185,17 @@ describe("AbideStage", () => {
       savingButtons.forEach((btn) => expect(btn).toBeDisabled());
     });
 
-    it("calls onSaveProgress when Save Progress is clicked", async () => {
+    it("calls onSaveProgress when Save is clicked", async () => {
       const onSaveProgress = vi.fn();
       render(<AbideStage {...createProps({ onSaveProgress })} />);
-      await userEvent.click(screen.getByText("Save Progress"));
+      await userEvent.click(screen.getByText("Save"));
       expect(onSaveProgress).toHaveBeenCalledOnce();
     });
 
-    it("calls onSaveAbide when Save to Legacy Ledger is clicked", async () => {
+    it("calls onSaveAbide when Save Ledger is clicked", async () => {
       const onSaveAbide = vi.fn();
       render(<AbideStage {...createProps({ onSaveAbide })} />);
-      await userEvent.click(screen.getByText("Save to Legacy Ledger"));
+      await userEvent.click(screen.getByText("Save Ledger"));
       expect(onSaveAbide).toHaveBeenCalledOnce();
     });
   });

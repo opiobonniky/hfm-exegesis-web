@@ -69,7 +69,7 @@ describe("ListenStage", () => {
   describe("repeat selection", () => {
     it("renders the heading asking how many times", () => {
       render(<ListenStage {...createProps()} />);
-      expect(screen.getByText("How many times would you like to hear the passage?")).toBeInTheDocument();
+      expect(screen.getByText("Number of Readings")).toBeInTheDocument();
     });
 
     it("renders all repeat options", () => {
@@ -82,7 +82,7 @@ describe("ListenStage", () => {
     it("shows selected repeats with active styling class", () => {
       render(<ListenStage {...createProps({ selectedRepeats: 300 })} />);
       const btn = screen.getByText("5 min");
-      expect(btn.className).toContain("bg-primary");
+      expect(btn.className).toContain("bg-blue-500");
     });
 
     it("calls onUpdate when a repeat count is clicked", async () => {
@@ -109,7 +109,7 @@ describe("ListenStage", () => {
     it("shows listening message when audio is playing", () => {
       render(<ListenStage {...createProps({ selectedRepeats: 3 })} />);
       // Before starting, the repeat selection is shown
-      expect(screen.getByText(/How many times/)).toBeInTheDocument();
+      expect(screen.getByText(/Number of Readings/)).toBeInTheDocument();
     });
 
     it("renders speed and voice controls area", () => {
