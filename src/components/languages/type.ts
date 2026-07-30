@@ -99,6 +99,7 @@ export interface Translations {
     time: string;
     like: string;
     liked: string;
+    refresh: string;
   };
 
   /** Landing / Home page */
@@ -131,6 +132,7 @@ export interface Translations {
     menu: string;
     signIn: string;
     getStartedBtn: string;
+    signInDesc: string;
     // ── Hero stats ──
     statVerses: string;
     statSacredBooks: string;
@@ -443,6 +445,8 @@ export interface Translations {
     enterSixDigitCode: string;
     /** Register - toast */
     correctErrorsBeforeContinuing: string;
+    enterUsername: string;
+    signUpWith: string;
   };
 
   /** Dashboard / Index / UserDashboard */
@@ -517,6 +521,11 @@ export interface Translations {
     daysAgo: string;
     recentUsers: string;
     daysShort: string;
+    systemSettings: string;
+    freeTranslationsOnly: string;
+    freeTranslationsDesc: string;
+    defaultTranslation: string;
+    defaultTranslationDesc: string;
   };
 
   /** User Dashboard page */
@@ -530,7 +539,6 @@ export interface Translations {
     verseOfTheDay: string;
     chapters: string;
     chaptersRead: string;
-    highlights: string;
     notes: string;
     journalEntries: string;
     favorites: string;
@@ -544,7 +552,6 @@ export interface Translations {
     journal: string;
     history: string;
     highlights: string;
-    favorites: string;
     keepItUp: string;
     chaptersTotal: string;
     motivationText: string;
@@ -569,6 +576,18 @@ export interface Translations {
     minutesAgo: string;
     hoursAgo: string;
     daysAgo: string;
+    dailyVerse: string;
+    resumeStudy: string;
+    open: string;
+    inProgress: string;
+    active: string;
+    readNow: string;
+    lastRead: string;
+    latestEntry: string;
+    journalEntry: string;
+    today: string;
+    yesterday: string;
+    public: string;
   };
 
   /** Bible Reader page */
@@ -658,16 +677,30 @@ export interface Translations {
     // ── Modal-specific keys ──
     verseRange: string;
     versesSelected: string;
-    selectedVerses: string;
     searchBible: string;
     searchPlaceholder: string;
     searching: string;
     searchHint: string;
     saveNote: string;
+    saving: string;
     notePlaceholder: string;
     note: string;
     favorite: string;
     clearSelection: string;
+    verses: string;
+    reflections: string;
+    dailyVerse: string;
+    hideExplanation: string;
+    setAsDaily: string;
+    endOfReading: string;
+    chapter: string;
+    verse: string;
+  };
+
+  /** Daily Exegesis */
+  dailyExegesis: {
+    title: string;
+    subtitle: string;
   };
 
   /** Daily Verse pages */
@@ -792,6 +825,9 @@ export interface Translations {
     expandContinueReading: string;
     ctaGuideText: string;
     ctaMeditateText: string;
+    openInBible: string;
+    copy: string;
+    footer: string;
   };
 
   /** Devotion pages */
@@ -848,9 +884,31 @@ export interface Translations {
     toastDevotionLiked: string;
     toastCopied: string;
     toastCopiedDesc: string;
+    failedToFetch: string;
     todayBadge: string;
     pastBadge: string;
     reflectOnThis: string;
+    missingFields: string;
+    fillAllRequired: string;
+    fillRequiredFields: string;
+    filteredDevotions: string;
+    success: string;
+    devotionSaved: string;
+    failedToAdd: string;
+    addPageSubtitle: string;
+    devotionDetails: string;
+    devotionDetailsDesc: string;
+    titlePlaceholder: string;
+    contentPlaceholder: string;
+    optionalBibleReference: string;
+    testament: string;
+    selectTestament: string;
+    verseNumber: string;
+    referenceFormat: string;
+    displayDate: string;
+    pickDate: string;
+    displayTime: string;
+    saveDevotion: string;
   };
 
   /** Journal pages */
@@ -884,7 +942,6 @@ export interface Translations {
     journalPrompts: string;
     addPrompt: string;
     promptCategory: string;
-    noPromptsAvailable: string;
     /** Journal main page */
     pageSubtitle: string;
     totalEntries: string;
@@ -966,6 +1023,15 @@ export interface Translations {
     entryCreated: string;
     failedToSave: string;
     failedToLoadEntry: string;
+    learnSubtitle: string;
+    applySubtitle: string;
+    gratitudeSubtitle: string;
+    prayerSubtitle: string;
+    privacy: string;
+    publicDesc: string;
+    privateDesc: string;
+    chapter: string;
+    verse: string;
     /** Categories */
     categoryAll: string;
     categoryGeneral: string;
@@ -1041,7 +1107,6 @@ export interface Translations {
     explanation: string;
     addedBy: string;
     verseReference: string;
-    addExplanation: string;
     editExplanation: string;
     /** AddExplanation page keys */
     addPageTitle: string;
@@ -1118,7 +1183,6 @@ export interface Translations {
     noExplanationsYet: string;
     noSearchMatch: string;
     addFirstExplanation: string;
-    learnMoreBadge: string;
     updatedLabel: string;
     showingCount: string;
     showingCountPlural: string;
@@ -1186,11 +1250,7 @@ export interface Translations {
     details: string;
     catAll: string;
     catIntro: string;
-    catWholeBible: string;
-    catNT: string;
-    catOT: string;
     catBookByBook: string;
-    catTopical: string;
     diffBeginner: string;
     diffIntermediate: string;
     diffAdvanced: string;
@@ -1477,7 +1537,8 @@ export interface Translations {
     willSave: string;
     reflectionsShort: string;
     quizShort: string;
-    chapterShort: string
+    chapterShort: string;
+    proTipContent: string;
   };
 
   /** My Activity page (user's own highlights/notes/favorites/history) */
@@ -1825,6 +1886,7 @@ export interface Translations {
     langGroupEuropean: string;
     langGroupIndian: string;
     langGroupOther: string;
+    saveChanges: string;
   };
 
   /** App brand identity */

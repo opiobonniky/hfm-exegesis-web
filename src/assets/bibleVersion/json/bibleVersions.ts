@@ -7,24 +7,31 @@
  *
  *   "<Book> <chapter>:<verse>"  →  "<verse text>"
  *
+ * IMPORTANT: Data is loaded lazily via getVersionData() so importing this
+ * module does NOT block the main thread with 35MB of JSON parsing.
  * --------------------------------------------------------------------
  * HOW TO ADD A NEW VERSION
  * --------------------------------------------------------------------
  * 1. Place its JSON file in  assets/bibleVersion/json/
- * 2. Add an entry to BIBLE_VERSIONS below.
+ * 2. Add an entry to BIBLE_VERSIONS below with a loader function.
  * 3. That's it – the rest of the app picks it up automatically.
  * --------------------------------------------------------------------
  */
 
-// Static imports for all Bible versions (web version)
-import versesBsb from '../json/verses-bsb.json';
-import versesKjv from '../json/verses-kjv.json';
-import versesWeb from '../json/verses-web.json';
-import versesAsv from '../json/verses-asv.json';
-import versesYlt from '../json/verses-ylt.json';
-import versesDarby from '../json/verses-darby.json';
-import versesWebster from '../json/verses-webster.json';
-import versesBbe from '../json/verses-bbe.json';
+// Lazy loaders — each version's data is imported only on first access
+const lazyLoaders: Record<string, () => Promise<Record<string, string>>> = {
+  BSB: () => import('../json/verses-bsb.json').then(m => m.default ?? m),
+  KJV: () => import('../json/verses-kjv.json').then(m => m.default ?? m),
+  WEB: () => import('../json/verses-web.json').then(m => m.default ?? m),
+  ASV: () => import('../json/verses-asv.json').then(m => m.default ?? m),
+  YLT: () => import('../json/verses-ylt.json').then(m => m.default ?? m),
+  DARBY: () => import('../json/verses-darby.json').then(m => m.default ?? m),
+  WEBSTER: () => import('../json/verses-webster.json').then(m => m.default ?? m),
+  BBE: () => import('../json/verses-bbe.json').then(m => m.default ?? m),
+};
+
+// Synchronous cache populated on first access for each version
+const dataCache: Record<string, Record<string, string>> = {};
 
 export interface BibleVersion {
   /** Short identifier stored in AsyncStorage / state */
@@ -37,89 +44,92 @@ export interface BibleVersion {
   description: string;
   /** Year of publication / translation */
   year: number;
-  /** Data accessor – returns the verse data for this version */
-  data: Record<string, string>|any;
+  /**
+   * Backward-compatible synchronous data accessor.
+   * Returns the cached data if loaded, or undefined if not yet loaded.
+   * @deprecated Use getData() for guaranteed async loading.
+   */
+  readonly data?: Record<string, string>;
+  /** Lazy data accessor – loads the JSON on first call */
+  getData(): Promise<Record<string, string>>;
 }
 
 /**
  * All bundled free versions, ordered by popularity.
  *
- * Static imports ensure all versions are available in the bundle.
- * The active version system in bibleUtils.ts manages memory usage.
+ * Each version has a `getData()` method that lazily loads the JSON
+ * data on first call, avoiding 35MB of synchronous imports at startup.
  */
+/** Create a BibleVersion with a lazy `data` getter for backward compatibility */
+function makeVersion(
+  fields: Omit<BibleVersion, 'data' | 'getData'> & { id: string },
+): BibleVersion {
+  return {
+    ...fields,
+    get data() {
+      return dataCache[fields.id];
+    },
+    getData: () => loadVersionData(fields.id),
+  };
+}
+
 export const BIBLE_VERSIONS: BibleVersion[] = [
-  // 1. BSB — default; fast-growing modern translation, highly accurate
-  {
+  makeVersion({
     id: 'BSB',
     name: 'Berean Standard Bible',
     abbreviation: 'BSB',
     description: 'A 2022 revision combining readability with accuracy (CC BY 4.0).',
     year: 2022,
-    data: versesBsb,
-  },
-  // 2. KJV — most historically beloved and widely memorised English Bible
-  {
+  }),
+  makeVersion({
     id: 'KJV',
     name: 'King James Version',
     abbreviation: 'KJV',
     description: 'The classic 1769 authorised English translation.',
     year: 1769,
-    data: versesKjv,
-  },
-  // 3. WEB — modern public-domain translation for contemporary readers
-  {
+  }),
+  makeVersion({
     id: 'WEB',
     name: 'World English Bible',
     abbreviation: 'WEB',
     description: 'A modern public-domain translation in contemporary English.',
     year: 2000,
-    data: versesWeb,
-  },
-  // 4. ASV — respected scholarly revision, foundation for many later versions
-  {
+  }),
+  makeVersion({
     id: 'ASV',
     name: 'American Standard Version',
     abbreviation: 'ASV',
     description: 'The 1901 American revision of the KJV.',
     year: 1901,
-    data: versesAsv,
-  },
-  // 5. YLT — beloved by word-for-word study readers
-  {
+  }),
+  makeVersion({
     id: 'YLT',
     name: "Young's Literal Translation",
     abbreviation: 'YLT',
     description: "Robert Young's highly literal 1862 word-for-word translation.",
     year: 1862,
-    data: versesYlt,
-  },
-  // 6. DARBY — popular with Plymouth Brethren and prophecy/dispensation students
-  {
+  }),
+  makeVersion({
     id: 'DARBY',
     name: 'Darby Translation',
     abbreviation: 'DBY',
     description: "J. N. Darby's precise 1890 literal translation from Hebrew and Greek.",
     year: 1890,
-    data: versesDarby,
-  },
-  // 7. WEBSTER — Noah Webster's KJV revision with modernised vocabulary
-  {
+  }),
+  makeVersion({
     id: 'WEBSTER',
     name: 'Webster Bible',
     abbreviation: 'WBS',
     description: "Noah Webster's 1833 revision of the KJV with modernised language.",
     year: 1833,
-    data: versesWebster,
-  },
-  // 8. BBE — simple ~1 000-word vocabulary; great for new readers and ESL
-  {
+  }),
+  makeVersion({
     id: 'BBE',
     name: 'Bible in Basic English',
     abbreviation: 'BBE',
     description: 'Uses a vocabulary of ~1 000 common words for clarity.',
     year: 1949,
-    data: versesBbe,
-  },
+  }),
 ];
 
 /** Default version id used on first launch */
@@ -129,3 +139,25 @@ export const DEFAULT_VERSION_ID = 'BSB';
 export const getVersionById = (id: string): BibleVersion =>
   BIBLE_VERSIONS.find(v => v.id === id) ??
   BIBLE_VERSIONS.find(v => v.id === DEFAULT_VERSION_ID)!;
+
+/**
+ * Lazy load and cache a version's data.
+ * Called automatically by getData() on each BibleVersion.
+ */
+async function loadVersionData(id: string): Promise<Record<string, string>> {
+  if (dataCache[id]) return dataCache[id];
+  const loader = lazyLoaders[id];
+  if (!loader) throw new Error(`Unknown Bible version: ${id}`);
+  const data = await loader();
+  dataCache[id] = data;
+  return data;
+}
+
+/**
+ * Preload a version's data into the cache.
+ * Call this early (e.g. in a splash screen or app init) to avoid
+ * loading delay later.
+ */
+export const preloadVersion = async (id: string): Promise<void> => {
+  await loadVersionData(id);
+};

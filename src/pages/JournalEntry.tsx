@@ -100,6 +100,7 @@ interface JournalEntry {
   learnings: string;
   application: string;
   isFavorite: boolean;
+  isPublished: boolean;
   tags: string;
 }
 
@@ -116,21 +117,22 @@ const DEFAULT_ENTRY: JournalEntry = {
   learnings: "",
   application: "",
   isFavorite: false,
+  isPublished: false,
   tags: "",
 };
 
 /* ── Reusable warm card wrapper (matches JournalDetail heading style) ── */
 function FormCard({ title, icon: Icon, subtitle, children }: { title: string; icon: ComponentType<{ className?: string }>; subtitle?: string; children: ReactNode }) {
   return (
-    <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900/80 p-6 shadow-sm">
-      <div className="flex items-start gap-4 mb-4 pb-4 border-b border-stone-100 dark:border-stone-800/60">
-        <div className="w-10 h-10 rounded-xl bg-stone-100 dark:bg-stone-800 flex items-center justify-center shrink-0 ring-1 ring-stone-200/50 dark:ring-stone-700/50">
-          <Icon className="w-5 h-5 text-stone-600 dark:text-stone-400" />
+    <div className="rounded-2xl border border-border dark:border-stone-800 bg-card dark:bg-stone-900/80 p-6 shadow-sm">
+      <div className="flex items-start gap-4 mb-4 pb-4 border-b border-border/50 dark:border-stone-800/60">
+        <div className="w-10 h-10 rounded-xl bg-muted dark:bg-stone-800 flex items-center justify-center shrink-0 ring-1 ring-stone-200/50 dark:ring-stone-700/50">
+          <Icon className="w-5 h-5 text-muted-foreground dark:text-muted-foreground/70" />
         </div>
         <div>
-          <h2 className="text-base font-bold text-stone-800 dark:text-stone-200 leading-tight">{title}</h2>
+          <h2 className="text-base font-bold text-foreground dark:text-stone-200 leading-tight">{title}</h2>
           {subtitle && (
-            <p className="text-[11px] text-stone-400 dark:text-stone-500 mt-0.5">{subtitle}</p>
+            <p className="text-[11px] text-muted-foreground/70 dark:text-muted-foreground mt-0.5">{subtitle}</p>
           )}
         </div>
       </div>
@@ -213,7 +215,7 @@ const JournalEntryPage = () => {
 
   useEffect(() => {
     if (testament) {
-      setBooks(getBooksByTestament(testament));
+      setBooks(getBooksByTestament(testament as "Old" | "New"));
     } else {
       setBooks(allBooks);
     }
@@ -342,6 +344,7 @@ const JournalEntryPage = () => {
           learnings: data.learnings || "",
           application: data.application || "",
           isFavorite: data.isFavorite || false,
+          isPublished: data.isPublished || false,
           tags: data.tags || "",
         });
       }
@@ -368,10 +371,11 @@ const JournalEntryPage = () => {
 
     setSaving(true);
     try {
-      const payload = {
+      const payload: Record<string, unknown> = {
         ...entry,
         chapter: entry.chapter ? parseInt(entry.chapter) : null,
         verseNumber: entry.verseNumber ? parseInt(entry.verseNumber) : null,
+        isPublished: entry.isPublished,
       };
 
       const endpoint = isEditing ? "update" : "create";
@@ -448,7 +452,7 @@ const JournalEntryPage = () => {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-amber-50/30 dark:bg-stone-950" dir={isRtl ? 'rtl' : 'ltr'}>
-        <Loader2 className="w-8 h-8 animate-spin text-stone-500" />
+        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
       </div>
     );
   }
@@ -456,12 +460,12 @@ const JournalEntryPage = () => {
   return (
     <div className="min-h-screen bg-amber-50/30 dark:bg-stone-950" dir={isRtl ? 'rtl' : 'ltr'}>
       {/* ═══════ Top Bar ═══════ */}
-      <div className="border-b border-stone-200/60 dark:border-stone-800/60 bg-white/50 dark:bg-stone-900/50">
+      <div className="border-b border-border/60 dark:border-stone-800/60 bg-card/50 dark:bg-stone-900/50">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <button
               onClick={() => navigate(routes.journal.path)}
-              className="inline-flex items-center gap-1.5 text-xs font-medium text-stone-500 hover:text-stone-800 dark:text-stone-400 dark:hover:text-stone-200 transition-colors"
+              className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground dark:text-muted-foreground/70 dark:hover:text-stone-200 transition-colors"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               {t.journal?.backToJournal || "Back to Journal"}
@@ -469,7 +473,7 @@ const JournalEntryPage = () => {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setShowTemplates(true)}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border border-border dark:border-stone-800 bg-card dark:bg-stone-900 text-muted-foreground dark:text-muted-foreground/70 hover:bg-muted dark:hover:bg-stone-800 transition-colors"
               >
                 <Sparkles className="w-3.5 h-3.5" />
                 {t.journal?.templates || "Templates"}
@@ -477,7 +481,7 @@ const JournalEntryPage = () => {
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-xs font-bold bg-stone-800 hover:bg-stone-700 text-white dark:bg-stone-200 dark:hover:bg-stone-300 dark:text-stone-900 transition-all disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-xs font-bold bg-stone-800 hover:bg-stone-700 text-white dark:bg-stone-200 dark:hover:bg-stone-300 dark:text-foreground transition-all disabled:opacity-50"
               >
                 {saving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                 <Save className="w-3.5 h-3.5" />
@@ -499,20 +503,20 @@ const JournalEntryPage = () => {
             <FormCard title={t.journal?.journalEntry || "Journal Entry"} icon={BookOpen}>
               <div className="space-y-4">
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-medium text-stone-700 dark:text-stone-300">{t.journal?.titleOptional || "Title (optional)"}</Label>
+                  <Label className="text-xs font-medium text-foreground/80 dark:text-muted-foreground/50">{t.journal?.titleOptional || "Title (optional)"}</Label>
                   <Input
                     aria-label={t.journal?.titleOptional || "Entry title"}
                     placeholder={t.journal?.titlePlaceholder || "Give your entry a title..."}
                     value={entry.title}
                     onChange={(e) => updateField("title", e.target.value)}
-                    className="rounded-xl border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-sm text-stone-800 dark:text-stone-200"
+                    className="rounded-xl border-border dark:border-stone-800 bg-card dark:bg-stone-900 text-sm text-foreground dark:text-stone-200"
                   />
                 </div>
 
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <Label className="text-xs font-medium text-stone-700 dark:text-stone-300">{t.journal?.whatOnMind || "What's on your mind?"}</Label>
-                    <span className="text-[11px] text-stone-400">
+                    <Label className="text-xs font-medium text-foreground/80 dark:text-muted-foreground/50">{t.journal?.whatOnMind || "What's on your mind?"}</Label>
+                    <span className="text-[11px] text-muted-foreground/70">
                       <FileText className="w-3 h-3 inline mr-1" />
                       {wordCount} {wordCount === 1
                         ? (t.journal?.word || "word")
@@ -524,22 +528,22 @@ const JournalEntryPage = () => {
                     placeholder={t.journal?.contentPlaceholder || "Write your thoughts, feelings, or reflections..."}
                     value={entry.content}
                     onChange={(e) => updateField("content", e.target.value)}
-                    className="min-h-[200px] rounded-xl border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-sm text-stone-800 dark:text-stone-200"
+                    className="min-h-[200px] rounded-xl border-border dark:border-stone-800 bg-card dark:bg-stone-900 text-sm text-foreground dark:text-stone-200"
                     style={{ fontFamily: "'Georgia', 'Times New Roman', serif" }}
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-medium text-stone-700 dark:text-stone-300">{t.journal?.promptCategory || "Category"}</Label>
+                    <Label className="text-xs font-medium text-foreground/80 dark:text-muted-foreground/50">{t.journal?.promptCategory || "Category"}</Label>
                     <Select
                       value={entry.category}
                       onValueChange={(v) => updateField("category", v)}
                     >
-                      <SelectTrigger aria-label={t.journal?.promptCategory || "Select category"} className="rounded-xl border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-sm h-9">
+                      <SelectTrigger aria-label={t.journal?.promptCategory || "Select category"} className="rounded-xl border-border dark:border-stone-800 bg-card dark:bg-stone-900 text-sm h-9">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="rounded-xl border-stone-200 dark:border-stone-800">
+                      <SelectContent className="rounded-xl border-border dark:border-stone-800">
                         {CATEGORIES.map((cat) => (
                           <SelectItem key={cat.value} value={cat.value}>
                             {getCategoryLabel(t, cat.value)}
@@ -549,12 +553,12 @@ const JournalEntryPage = () => {
                     </Select>
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-medium text-stone-700 dark:text-stone-300">{t.journal?.howFeeling || "How are you feeling?"}</Label>
+                    <Label className="text-xs font-medium text-foreground/80 dark:text-muted-foreground/50">{t.journal?.howFeeling || "How are you feeling?"}</Label>
                     <Select
                       value={entry.mood}
                       onValueChange={(v) => updateField("mood", v)}
                     >
-                      <SelectTrigger aria-label={t.journal?.howFeeling || "Select mood"} className="rounded-xl border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-sm h-9">
+                      <SelectTrigger aria-label={t.journal?.howFeeling || "Select mood"} className="rounded-xl border-border dark:border-stone-800 bg-card dark:bg-stone-900 text-sm h-9">
                         <SelectValue placeholder={t.journal?.selectMood || "Select mood"}>
                           {entry.mood && MOOD_MAP[entry.mood] ? (
                             <span>
@@ -565,7 +569,7 @@ const JournalEntryPage = () => {
                           )}
                         </SelectValue>
                       </SelectTrigger>
-                      <SelectContent className="rounded-xl border-stone-200 dark:border-stone-800">
+                      <SelectContent className="rounded-xl border-border dark:border-stone-800">
                         {MOODS.map((mood) => (
                           <SelectItem key={mood.value} value={mood.value}>
                             <span className="flex items-center gap-2">
@@ -584,13 +588,13 @@ const JournalEntryPage = () => {
             {/* ── What I Learned ── */}
             <FormCard title={t.journal?.whatILearned || "What I Learned"} icon={Lightbulb} subtitle={t.journal?.learnSubtitle || "Insights & revelations from this reading"}>
               <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-stone-700 dark:text-stone-300">{t.journal?.whatDidYouLearn || "What did you learn?"}</Label>
+                <Label className="text-xs font-medium text-foreground/80 dark:text-muted-foreground/50">{t.journal?.whatDidYouLearn || "What did you learn?"}</Label>
                 <Textarea
                   aria-label={t.journal?.whatDidYouLearn || "What did you learn"}
                   placeholder={t.journal?.learnPlaceholder || "Key insights or revelations from your reading..."}
                   value={entry.learnings}
                   onChange={(e) => updateField("learnings", e.target.value)}
-                  className="min-h-[100px] rounded-xl border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-sm text-stone-800 dark:text-stone-200"
+                  className="min-h-[100px] rounded-xl border-border dark:border-stone-800 bg-card dark:bg-stone-900 text-sm text-foreground dark:text-stone-200"
                   style={{ fontFamily: "'Georgia', 'Times New Roman', serif" }}
                 />
               </div>
@@ -599,13 +603,13 @@ const JournalEntryPage = () => {
             {/* ── How I'll Apply ── */}
             <FormCard title={t.journal?.howIllApply || "How I'll Apply"} icon={Pencil} subtitle={t.journal?.applySubtitle || "Practical steps to live out this truth"}>
               <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-stone-700 dark:text-stone-300">{t.journal?.howApply || "How will you apply this?"}</Label>
+                <Label className="text-xs font-medium text-foreground/80 dark:text-muted-foreground/50">{t.journal?.howApply || "How will you apply this?"}</Label>
                 <Textarea
                   aria-label={t.journal?.howApply || "How will you apply this"}
                   placeholder={t.journal?.applyPlaceholder || "How will this change your life or actions?"}
                   value={entry.application}
                   onChange={(e) => updateField("application", e.target.value)}
-                  className="min-h-[100px] rounded-xl border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-sm text-stone-800 dark:text-stone-200"
+                  className="min-h-[100px] rounded-xl border-border dark:border-stone-800 bg-card dark:bg-stone-900 text-sm text-foreground dark:text-stone-200"
                   style={{ fontFamily: "'Georgia', 'Times New Roman', serif" }}
                 />
               </div>
@@ -615,13 +619,13 @@ const JournalEntryPage = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormCard title={t.journal?.gratitude || "Gratitude"} icon={Heart} subtitle={t.journal?.gratitudeSubtitle || "Counting blessings and gifts"}>
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-medium text-stone-700 dark:text-stone-300">{t.journal?.whatGrateful || "What are you grateful for?"}</Label>
+                  <Label className="text-xs font-medium text-foreground/80 dark:text-muted-foreground/50">{t.journal?.whatGrateful || "What are you grateful for?"}</Label>
                   <Textarea
                     aria-label={t.journal?.whatGrateful || "What are you grateful for"}
                     placeholder={t.journal?.gratPlaceholder || "List your gratitude..."}
                     value={entry.gratitude}
                     onChange={(e) => updateField("gratitude", e.target.value)}
-                    className="min-h-[120px] rounded-xl border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-sm text-stone-800 dark:text-stone-200"
+                    className="min-h-[120px] rounded-xl border-border dark:border-stone-800 bg-card dark:bg-stone-900 text-sm text-foreground dark:text-stone-200"
                     style={{ fontFamily: "'Georgia', 'Times New Roman', serif" }}
                   />
                 </div>
@@ -629,13 +633,13 @@ const JournalEntryPage = () => {
 
               <FormCard title={t.journal?.prayers || "Prayers"} icon={Star} subtitle={t.journal?.prayerSubtitle || "Conversations with the Father"}>
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-medium text-stone-700 dark:text-stone-300">{t.journal?.yourPrayers || "Your prayers"}</Label>
+                  <Label className="text-xs font-medium text-foreground/80 dark:text-muted-foreground/50">{t.journal?.yourPrayers || "Your prayers"}</Label>
                   <Textarea
                     aria-label={t.journal?.yourPrayers || "Your prayers"}
                     placeholder={t.journal?.prayerPlaceholder || "Prayers and requests..."}
                     value={entry.prayers}
                     onChange={(e) => updateField("prayers", e.target.value)}
-                    className="min-h-[120px] rounded-xl border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-sm text-stone-800 dark:text-stone-200"
+                    className="min-h-[120px] rounded-xl border-border dark:border-stone-800 bg-card dark:bg-stone-900 text-sm text-foreground dark:text-stone-200"
                     style={{ fontFamily: "'Georgia', 'Times New Roman', serif" }}
                   />
                 </div>
@@ -649,7 +653,7 @@ const JournalEntryPage = () => {
             <FormCard title={t.journal?.linkToScripture || "Link to Scripture"} icon={BookOpen}>
               <div className="space-y-3">
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-medium text-stone-700 dark:text-stone-300">{t.dailyVerse?.testament || "Testament"}</Label>
+                  <Label className="text-xs font-medium text-foreground/80 dark:text-muted-foreground/50">{t.dailyVerse?.testament || "Testament"}</Label>
                   <Select
                     value={testament}
                     onValueChange={(v) => {
@@ -662,10 +666,10 @@ const JournalEntryPage = () => {
                       }));
                     }}
                   >
-                    <SelectTrigger aria-label={t.dailyVerse?.testament || "Select testament"} className="rounded-xl border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-sm h-9">
+                    <SelectTrigger aria-label={t.dailyVerse?.testament || "Select testament"} className="rounded-xl border-border dark:border-stone-800 bg-card dark:bg-stone-900 text-sm h-9">
                       <SelectValue placeholder={t.journal?.selectTestament || "Select testament"} />
                     </SelectTrigger>
-                    <SelectContent className="rounded-xl border-stone-200 dark:border-stone-800">
+                    <SelectContent className="rounded-xl border-border dark:border-stone-800">
                       <SelectItem value="all">{t.journal?.allBooks || "All Books"}</SelectItem>
                       {TESTAMENTS.map((tst) => (
                         <SelectItem key={tst.value} value={tst.value}>
@@ -677,7 +681,7 @@ const JournalEntryPage = () => {
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-medium text-stone-700 dark:text-stone-300">{t.dailyVerse?.book || "Book"}</Label>
+                  <Label className="text-xs font-medium text-foreground/80 dark:text-muted-foreground/50">{t.dailyVerse?.book || "Book"}</Label>
                   <Select
                     value={entry.bookName}
                     onValueChange={(v) => {
@@ -690,10 +694,10 @@ const JournalEntryPage = () => {
                     }}
                     disabled={!testament}
                   >
-                    <SelectTrigger aria-label={t.dailyVerse?.book || "Select book"} className="rounded-xl border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-sm h-9">
+                    <SelectTrigger aria-label={t.dailyVerse?.book || "Select book"} className="rounded-xl border-border dark:border-stone-800 bg-card dark:bg-stone-900 text-sm h-9">
                       <SelectValue placeholder={t.dailyVerse?.selectBook || "Select book"} />
                     </SelectTrigger>
-                    <SelectContent className="rounded-xl border-stone-200 dark:border-stone-800">
+                    <SelectContent className="rounded-xl border-border dark:border-stone-800">
                       {books.map((book) => (
                         <SelectItem key={book} value={book}>
                           {book}
@@ -706,7 +710,7 @@ const JournalEntryPage = () => {
                 {entry.bookName && chapters.length > 0 && (
                   <>
                     <div className="space-y-1.5">
-                      <Label className="text-xs font-medium text-stone-700 dark:text-stone-300">{t.dailyVerse?.chapter || "Chapter"}</Label>
+                      <Label className="text-xs font-medium text-foreground/80 dark:text-muted-foreground/50">{t.dailyVerse?.chapter || "Chapter"}</Label>
                       <Select
                         value={entry.chapter}
                         onValueChange={(v) => {
@@ -717,10 +721,10 @@ const JournalEntryPage = () => {
                           }));
                         }}
                       >
-                        <SelectTrigger aria-label={t.dailyVerse?.chapter || "Select chapter"} className="rounded-xl border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-sm h-9">
+                        <SelectTrigger aria-label={t.dailyVerse?.chapter || "Select chapter"} className="rounded-xl border-border dark:border-stone-800 bg-card dark:bg-stone-900 text-sm h-9">
                           <SelectValue placeholder={t.dailyVerse?.selectChapter || "Select chapter"} />
                         </SelectTrigger>
-                        <SelectContent className="rounded-xl border-stone-200 dark:border-stone-800">
+                        <SelectContent className="rounded-xl border-border dark:border-stone-800">
                           {chapters.map((ch) => (
                             <SelectItem key={ch} value={String(ch)}>
                               {`${t.dailyVerse?.chapter || "Chapter"} ${ch}`}
@@ -732,15 +736,15 @@ const JournalEntryPage = () => {
 
                     {entry.chapter && verses.length > 0 && (
                       <div className="space-y-1.5">
-                        <Label className="text-xs font-medium text-stone-700 dark:text-stone-300">{t.dailyVerse?.verse || "Verse"}</Label>
+                        <Label className="text-xs font-medium text-foreground/80 dark:text-muted-foreground/50">{t.dailyVerse?.verse || "Verse"}</Label>
                         <Select
                           value={entry.verseNumber}
                           onValueChange={(v) => updateField("verseNumber", v)}
                         >
-                          <SelectTrigger aria-label={t.dailyVerse?.verse || "Select verse"} className="rounded-xl border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-sm h-9">
+                          <SelectTrigger aria-label={t.dailyVerse?.verse || "Select verse"} className="rounded-xl border-border dark:border-stone-800 bg-card dark:bg-stone-900 text-sm h-9">
                             <SelectValue placeholder={t.dailyVerse?.selectVerse || "Select verse"} />
                           </SelectTrigger>
-                          <SelectContent className="rounded-xl border-stone-200 dark:border-stone-800">
+                          <SelectContent className="rounded-xl border-border dark:border-stone-800">
                             {verses.map((v) => (
                               <SelectItem key={v} value={String(v)}>
                                 {`${t.dailyVerse?.verse || "Verse"} ${v}`}
@@ -753,12 +757,12 @@ const JournalEntryPage = () => {
 
                     {verseText && (
                       <div className="space-y-1.5">
-                        <Label className="text-xs font-medium text-stone-700 dark:text-stone-300">{t.journal?.versePreview || "Verse Preview"}</Label>
-                        <div className="rounded-xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 border-l-[3px] border-l-amber-400 dark:border-l-amber-600 p-3">
-                          <p className="text-sm font-serif italic text-stone-700 dark:text-stone-300 leading-relaxed">
+                        <Label className="text-xs font-medium text-foreground/80 dark:text-muted-foreground/50">{t.journal?.versePreview || "Verse Preview"}</Label>
+                        <div className="rounded-xl bg-card dark:bg-stone-900 border border-border dark:border-stone-800 border-l-[3px] border-l-amber-400 dark:border-l-amber-600 p-3">
+                          <p className="text-sm font-serif italic text-foreground/80 dark:text-muted-foreground/50 leading-relaxed">
                             &ldquo;{verseText}&rdquo;
                           </p>
-                          <p className="text-xs text-stone-400 dark:text-stone-500 mt-1.5">
+                          <p className="text-xs text-muted-foreground/70 dark:text-muted-foreground mt-1.5">
                             &mdash; {entry.bookName} {entry.chapter}:{entry.verseNumber}
                           </p>
                         </div>
@@ -775,7 +779,7 @@ const JournalEntryPage = () => {
                       }
                     }}
                     disabled={!entry.bookName || !entry.chapter}
-                    className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors disabled:opacity-40"
+                    className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium border border-border dark:border-stone-800 bg-card dark:bg-stone-900 text-muted-foreground dark:text-muted-foreground/70 hover:bg-muted dark:hover:bg-stone-800 transition-colors disabled:opacity-40"
                   >
                     <BookOpen className="w-3.5 h-3.5" />
                     {t.journal?.openBibleReader || "Open in Bible Reader"}
@@ -787,22 +791,38 @@ const JournalEntryPage = () => {
             <FormCard title={t.journal?.additional || "Additional"} icon={Tag}>
               <div className="space-y-4">
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-medium text-stone-700 dark:text-stone-300">{t.journal?.tags || "Tags"}</Label>
+                  <Label className="text-xs font-medium text-foreground/80 dark:text-muted-foreground/50">{t.journal?.tags || "Tags"}</Label>
                   <Input
                     aria-label={t.journal?.tags || "Tags"}
                     placeholder={t.journal?.tagsPlaceholder || "comma, separated, tags"}
                     value={entry.tags}
                     onChange={(e) => updateField("tags", e.target.value)}
-                    className="rounded-xl border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-sm text-stone-800 dark:text-stone-200"
+                    className="rounded-xl border-border dark:border-stone-800 bg-card dark:bg-stone-900 text-sm text-foreground dark:text-stone-200"
                   />
                 </div>
 
                 <div className="flex items-center justify-between pt-1">
-                  <Label className="text-xs font-medium text-stone-700 dark:text-stone-300">{t.journal?.addToFavorites || "Add to favorites"}</Label>
+                  <Label className="text-xs font-medium text-foreground/80 dark:text-muted-foreground/50">{t.journal?.addToFavorites || "Add to favorites"}</Label>
                   <Switch
                     checked={entry.isFavorite}
                     onCheckedChange={(v) => updateField("isFavorite", v)}
                     className="data-[state=checked]:bg-stone-800 dark:data-[state=checked]:bg-stone-200"
+                  />
+                </div>
+
+                <div className="flex items-center justify-between pt-1">
+                  <div>
+                    <Label className="text-xs font-medium text-foreground/80 dark:text-muted-foreground/50">{t.journal?.privacy || "Privacy"}</Label>
+                    <p className="text-[10px] text-muted-foreground/60 dark:text-muted-foreground/50 mt-0.5">
+                      {entry.isPublished
+                        ? (t.journal?.publicDesc || "Visible in Community")
+                        : (t.journal?.privateDesc || "Only you can see this")}
+                    </p>
+                  </div>
+                  <Switch
+                    checked={entry.isPublished}
+                    onCheckedChange={(v) => updateField("isPublished", v)}
+                    className="data-[state=checked]:bg-emerald-600 dark:data-[state=checked]:bg-emerald-500"
                   />
                 </div>
               </div>
@@ -813,9 +833,9 @@ const JournalEntryPage = () => {
 
       {/* ═══════ Templates Dialog ═══════ */}
       <Dialog open={showTemplates} onOpenChange={setShowTemplates}>
-        <DialogContent className="rounded-2xl border-stone-200 dark:border-stone-800">
+        <DialogContent className="rounded-2xl border-border dark:border-stone-800">
           <DialogHeader>
-            <DialogTitle className="text-stone-800 dark:text-stone-200">{t.journal?.chooseTemplate || "Choose a Template"}</DialogTitle>
+            <DialogTitle className="text-foreground dark:text-stone-200">{t.journal?.chooseTemplate || "Choose a Template"}</DialogTitle>
           </DialogHeader>
           <div className="grid gap-3 max-h-[60vh] overflow-y-auto">
             {templates.length > 0 ? (
@@ -826,10 +846,10 @@ const JournalEntryPage = () => {
                     handleApplyTemplate(template.id);
                     setShowTemplates(false);
                   }}
-                  className="w-full text-left px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
+                  className="w-full text-left px-4 py-3 rounded-xl border border-border dark:border-stone-800 bg-card dark:bg-stone-900 hover:bg-muted dark:hover:bg-stone-800 transition-colors"
                 >
-                  <p className="font-semibold text-sm text-stone-800 dark:text-stone-200">{template.name}</p>
-                  <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
+                  <p className="font-semibold text-sm text-foreground dark:text-stone-200">{template.name}</p>
+                  <p className="text-xs text-muted-foreground dark:text-muted-foreground/70 mt-0.5">
                     {(t.journal?.promptsLabel || "{n} prompts").replace("{n}", String(template.prompts.length))}
                   </p>
                 </button>
@@ -845,12 +865,12 @@ const JournalEntryPage = () => {
                   <button
                     key={tpl.id}
                     onClick={() => applyTemplate(tpl.id)}
-                    className="w-full text-left px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
+                    className="w-full text-left px-4 py-3 rounded-xl border border-border dark:border-stone-800 bg-card dark:bg-stone-900 hover:bg-muted dark:hover:bg-stone-800 transition-colors"
                   >
-                    <p className="font-semibold text-sm text-stone-800 dark:text-stone-200">
+                    <p className="font-semibold text-sm text-foreground dark:text-stone-200">
                       {tpl.emoji} {tpl.title}
                     </p>
-                    <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">{tpl.desc}</p>
+                    <p className="text-xs text-muted-foreground dark:text-muted-foreground/70 mt-0.5">{tpl.desc}</p>
                   </button>
                 ))}
               </>

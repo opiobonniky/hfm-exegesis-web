@@ -1139,6 +1139,7 @@
     "bible": "Lettore Biblico",
     "dailyVerse": "Versetto Quotidiano",
     "dashboard": "La Mia Dashboard",
+    "adminDashboard": "Admin Console",
     "devotions": "Devozionali",
     "explanations": "Spiegazioni dei Versetti",
     "home": "Vai alla Home",
@@ -1153,7 +1154,11 @@
     "profile": "Profilo",
     "readingPlans": "Piani di Lettura",
     "settings": "Impostazioni",
-    "userActivity": "Attività Utente"
+    "userActivity": "Attività Utente",
+    "triviaAdmin": "Trivia Management",
+    "dailyContentAdmin": "Daily Content",
+    "subscriptionsAdmin": "Subscriptions",
+    "adminTools": "Admin Tools"
   },
   "userActivity": {
     "action": "Azione",

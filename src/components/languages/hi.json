@@ -1139,6 +1139,7 @@
     "bible": "बाइबिल पाठक",
     "dailyVerse": "दैनिक आयत",
     "dashboard": "डैशबोर्ड",
+    "adminDashboard": "Admin Console",
     "devotions": "भक्ति",
     "explanations": "आयत व्याख्याएं",
     "home": "होम",
@@ -1153,7 +1154,11 @@
     "profile": "प्रोफ़ाइल",
     "readingPlans": "पठन योजनाएं",
     "settings": "सेटिंग्स",
-    "userActivity": "उपयोगकर्ता गतिविधि"
+    "userActivity": "उपयोगकर्ता गतिविधि",
+    "triviaAdmin": "Trivia Management",
+    "dailyContentAdmin": "Daily Content",
+    "subscriptionsAdmin": "Subscriptions",
+    "adminTools": "Admin Tools"
   },
   "userActivity": {
     "action": "कार्रवाई",

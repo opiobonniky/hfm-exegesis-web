@@ -5,8 +5,9 @@ import { useLanguage } from '@/components/languages/languageProvider';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import MobileBottomNav from '@/components/MobileBottomNav';
-import { Menu } from 'lucide-react';
+import { Menu, Sun, Moon } from 'lucide-react';
 import { Button } from './ui/button';
+import { useTheme } from '@/hooks/useTheme';
 import { routes } from './Routes/routes';
 
 /**
@@ -38,6 +39,7 @@ function matchRouteTitle(pathname: string): string | null {
 export function AppLayout() {
   const { isAuthenticated, userInfo } = useAuth();
   const { t, isRtl } = useLanguage();
+  const { themeMode, setThemeMode } = useTheme();
   const location = useLocation();
 
   if (!isAuthenticated) {
@@ -75,6 +77,17 @@ export function AppLayout() {
             <h1 className="text-base md:text-lg font-semibold text-foreground">
               {pageTitle}
             </h1>
+            <button
+              onClick={() => setThemeMode(themeMode === "dark" ? "light" : "dark")}
+              className="ms-auto flex items-center justify-center w-8 h-8 rounded-lg hover:bg-muted transition-all active:scale-95"
+              title={themeMode === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+            >
+              {themeMode === "dark" ? (
+                <Sun className="w-4 h-4 text-muted-foreground" />
+              ) : (
+                <Moon className="w-4 h-4 text-muted-foreground" />
+              )}
+            </button>
           </header>
           <div className="flex-1 overflow-auto pb-16 md:pb-0">
             <Outlet />

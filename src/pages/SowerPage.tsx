@@ -278,7 +278,7 @@ export default function SowerPage() {
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-10 left-10 w-64 h-64 rounded-full bg-violet-500/10 blur-3xl" />
           <div className="absolute bottom-10 right-10 w-96 h-96 rounded-full bg-amber-500/5 blur-3xl" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-white/[0.02] blur-2xl" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-card/[0.02] blur-2xl" />
         </div>
 
         <div className="relative max-w-6xl mx-auto px-5 sm:px-6 py-12 sm:py-24">
@@ -293,7 +293,7 @@ export default function SowerPage() {
             </button>
 
             {isPaying && (
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm self-start sm:self-auto">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-card/10 border border-white/20 backdrop-blur-sm self-start sm:self-auto">
                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
                 <span className="text-xs font-bold text-white whitespace-nowrap">
                   You are a {currentTierLabel}
@@ -308,7 +308,7 @@ export default function SowerPage() {
           </div>
 
           <div className="flex flex-col items-center justify-center text-center">
-            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-white/10 backdrop-blur-sm flex items-center justify-center mb-5 sm:mb-6 border border-white/20">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-card/10 backdrop-blur-sm flex items-center justify-center mb-5 sm:mb-6 border border-white/20">
               <Sparkles className="w-7 h-7 sm:w-8 sm:h-8 text-amber-300" />
             </div>
 
@@ -338,8 +338,8 @@ export default function SowerPage() {
               className={cn(
                 "px-5 py-2 rounded-full text-sm font-bold transition-all",
                 billingInterval === "month"
-                  ? "bg-white text-violet-900 shadow-lg"
-                  : "bg-white/10 text-violet-200 hover:bg-white/20",
+                  ? "bg-card text-violet-900 shadow-lg"
+                  : "bg-card/10 text-violet-200 hover:bg-card/20",
               )}
             >
               Monthly
@@ -349,8 +349,8 @@ export default function SowerPage() {
               className={cn(
                 "px-5 py-2 rounded-full text-sm font-bold transition-all",
                 billingInterval === "year"
-                  ? "bg-white text-violet-900 shadow-lg"
-                  : "bg-white/10 text-violet-200 hover:bg-white/20",
+                  ? "bg-card text-violet-900 shadow-lg"
+                  : "bg-card/10 text-violet-200 hover:bg-card/20",
               )}
             >
               Yearly
@@ -381,7 +381,7 @@ export default function SowerPage() {
               <div
                 key={tier.id}
                 className={cn(
-                  "relative flex flex-col rounded-2xl border bg-white dark:bg-card shadow-sm transition-all duration-200",
+                  "relative flex flex-col rounded-2xl border bg-card dark:bg-card shadow-sm transition-all duration-200",
                   "hover:shadow-lg hover:-translate-y-0.5",
                   isCurrentTier && "ring-2 ring-offset-2",
                   tier.id === "legacy_sower" && "ring-violet-500",
@@ -428,7 +428,7 @@ export default function SowerPage() {
                         isCovenantSower &&
                           "bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-200",
                         !isPaying &&
-                          "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300",
+                          "bg-muted text-muted-foreground dark:bg-slate-800 dark:text-slate-300",
                       )}
                     >
                       <Check className="w-2.5 h-2.5" />
@@ -442,7 +442,7 @@ export default function SowerPage() {
                   <div
                     className={cn(
                       "w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center mb-3 sm:mb-4",
-                      tier.id === "free" && "bg-slate-100 dark:bg-slate-800",
+                      tier.id === "free" && "bg-muted dark:bg-slate-800",
                       tier.id === "legacy_sower" &&
                         "bg-violet-100 dark:bg-violet-900",
                       tier.id === "covenant_sower" &&
@@ -453,7 +453,7 @@ export default function SowerPage() {
                       className={cn(
                         "w-5 h-5",
                         tier.id === "free" &&
-                          "text-slate-600 dark:text-slate-300",
+                          "text-muted-foreground dark:text-slate-300",
                         tier.id === "legacy_sower" &&
                           "text-violet-600 dark:text-violet-300",
                         tier.id === "covenant_sower" &&
@@ -518,7 +518,7 @@ export default function SowerPage() {
                               tier.id === "covenant_sower" &&
                                 "bg-amber-100 dark:bg-amber-900",
                               tier.id === "free" &&
-                                "bg-slate-100 dark:bg-slate-800",
+                                "bg-muted dark:bg-slate-800",
                             )}
                           >
                             <Check
@@ -527,7 +527,7 @@ export default function SowerPage() {
                                 tier.id === "legacy_sower" && "text-violet-600",
                                 tier.id === "covenant_sower" &&
                                   "text-amber-600",
-                                tier.id === "free" && "text-slate-500",
+                                tier.id === "free" && "text-muted-foreground",
                               )}
                               strokeWidth={3}
                             />
@@ -783,7 +783,7 @@ export default function SowerPage() {
       {/* ══════════════════ PRINCIPLE BANNER ══════════════════ */}
       <section className="bg-gradient-to-r from-violet-600 to-purple-700 py-10">
         <div className="max-w-4xl mx-auto px-5 sm:px-6 text-center">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-white/15 mb-4">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-card/15 mb-4">
             <Heart className="w-7 h-7 text-white" />
           </div>
           <h2 className="text-xl sm:text-2xl font-black text-white mb-2">

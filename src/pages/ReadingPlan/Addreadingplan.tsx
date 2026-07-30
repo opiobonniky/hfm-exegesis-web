@@ -151,13 +151,13 @@ const BIBLE_BOOKS = [
   "Revelation",
 ];
 const DIFF_BADGE: Record<string, string> = {
-  easy: "bg-emerald-50 text-emerald-700 border-emerald-200",
-  medium: "bg-amber-50 text-amber-700 border-amber-200",
-  hard: "bg-red-50 text-red-700 border-red-200",
+  easy: "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/40",
+  medium: "bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800/40",
+  hard: "bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800/40",
 };
 
 const inputCls =
-  "w-full px-3 py-2.5 rounded-xl border border-stone-200 bg-white text-sm text-stone-800 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-teal-400/40 focus:border-teal-400 transition-all shadow-sm";
+  "w-full px-3 py-2.5 rounded-xl border border-border bg-card text-sm text-foreground placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-teal-400/40 focus:border-teal-400 transition-all shadow-sm";
 const textareaCls = inputCls + " resize-none";
 
 const emptyQuiz = (): QuizQuestion => ({
@@ -261,19 +261,19 @@ const DayCard = ({
       className={cn(
         "rounded-xl border overflow-hidden transition-all",
         isOpen
-          ? "border-teal-300 bg-white shadow-[0_2px_8px_rgba(20,184,166,0.12)]"
+          ? "border-teal-300 bg-card shadow-[0_2px_8px_rgba(20,184,166,0.12)]"
           : complete
             ? "border-emerald-200 bg-emerald-50/30"
             : partial
               ? "border-amber-200 bg-amber-50/30"
-              : "border-stone-100 bg-white",
+              : "border-border/50 bg-card",
       )}
     >
       {/* ── Header ── */}
       <button
         type="button"
         onClick={onToggle}
-        className="w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-stone-50/60 transition-colors"
+        className="w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-muted/60 transition-colors"
       >
         <div
           className={cn(
@@ -282,7 +282,7 @@ const DayCard = ({
               ? "bg-emerald-100 text-emerald-700"
               : partial
                 ? "bg-amber-100 text-amber-700"
-                : "bg-stone-100 text-stone-500",
+                : "bg-muted text-muted-foreground",
           )}
         >
           {complete ? <CheckCircle2 className="w-4 h-4" /> : day.dayNumber}
@@ -291,13 +291,13 @@ const DayCard = ({
           <p
             className={cn(
               "text-sm font-semibold",
-              complete ? "text-stone-800" : "text-stone-500",
+              complete ? "text-foreground" : "text-muted-foreground",
             )}
           >
             {day.title || `Day ${day.dayNumber}`}
           </p>
           {complete && (
-            <p className="text-xs text-stone-400 truncate">
+            <p className="text-xs text-muted-foreground/70 truncate">
               {day.chapters
                 .filter((c) => c.book)
                 .map((c) => `${c.book} ${c.chapter}`)
@@ -317,19 +317,19 @@ const DayCard = ({
             </span>
           )}
           {isOpen ? (
-            <ChevronUp className="w-4 h-4 text-stone-400" />
+            <ChevronUp className="w-4 h-4 text-muted-foreground/70" />
           ) : (
-            <ChevronDown className="w-4 h-4 text-stone-400" />
+            <ChevronDown className="w-4 h-4 text-muted-foreground/70" />
           )}
         </div>
       </button>
 
       {/* ── Expanded body ── */}
       {isOpen && (
-        <div className="border-t border-stone-100 p-4 space-y-5">
+        <div className="border-t border-border/50 p-4 space-y-5">
           {/* Title */}
           <div className="space-y-1.5">
-            <label className="text-sm font-semibold text-stone-700">
+            <label className="text-sm font-semibold text-foreground/80">
               {t.readingPlan.dayTitle} <span className="text-red-500">*</span>
             </label>
             <input
@@ -342,7 +342,7 @@ const DayCard = ({
 
           {/* Chapters */}
           <div className="space-y-2">
-            <label className="text-sm font-semibold text-stone-700">
+            <label className="text-sm font-semibold text-foreground/80">
               {t.readingPlan.chapters} <span className="text-red-500">*</span>
             </label>
             {day.chapters.map((ch, ci) => (
@@ -351,7 +351,7 @@ const DayCard = ({
                   value={ch.book}
                   onValueChange={(v) => updateChapter(ci, { book: v })}
                 >
-                  <SelectTrigger className="flex-1 rounded-xl border-stone-200 bg-white text-sm focus:ring-teal-400/30">
+                  <SelectTrigger className="flex-1 rounded-xl border-border bg-card text-sm focus:ring-teal-400/30">
                     <SelectValue placeholder={t.readingPlan.bookPlaceholder} />
                   </SelectTrigger>
                   <SelectContent className="max-h-60">
@@ -378,7 +378,7 @@ const DayCard = ({
                   <button
                     type="button"
                     onClick={() => removeChapter(ci)}
-                    className="p-1.5 rounded-lg hover:bg-red-50 text-stone-400 hover:text-red-500 transition-colors shrink-0"
+                    className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 text-muted-foreground/70 hover:text-red-500 dark:hover:text-red-400 transition-colors shrink-0"
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -397,7 +397,7 @@ const DayCard = ({
 
           {/* Reflections */}
           <div className="space-y-2">
-            <label className="text-sm font-semibold text-stone-700">
+            <label className="text-sm font-semibold text-foreground/80">
               {t.readingPlan.reflectionQuestions}
             </label>
             {day.reflectionQuestions.map((q, ri) => (
@@ -412,7 +412,7 @@ const DayCard = ({
                   <button
                     type="button"
                     onClick={() => removeReflection(ri)}
-                    className="p-1.5 rounded-lg hover:bg-red-50 text-stone-400 hover:text-red-500 transition-colors shrink-0"
+                    className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 text-muted-foreground/70 hover:text-red-500 dark:hover:text-red-400 transition-colors shrink-0"
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -432,23 +432,23 @@ const DayCard = ({
           {/* Quiz questions */}
           {questionsEnabled && (
             <div className="space-y-3">
-              <label className="text-sm font-semibold text-stone-700 flex items-center gap-1.5">
+              <label className="text-sm font-semibold text-foreground/80 flex items-center gap-1.5">
                 <HelpCircle className="w-4 h-4 text-violet-500" />
                 {t.readingPlan.quizQuestions}
               </label>
               {day.quizQuestions.map((quiz, qi) => (
                 <div
                   key={qi}
-                  className="rounded-xl border border-stone-100 bg-stone-50 p-4 space-y-3"
+                  className="rounded-xl border border-border/50 bg-muted p-4 space-y-3"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-stone-500 uppercase tracking-wide">
+                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-wide">
                       Q{qi + 1}
                     </span>
                     <button
                       type="button"
                       onClick={() => removeQuiz(qi)}
-                      className="p-1 rounded-lg hover:bg-red-50 text-stone-400 hover:text-red-500 transition-colors"
+                      className="p-1 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 text-muted-foreground/70 hover:text-red-500 dark:hover:text-red-400 transition-colors"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
@@ -472,7 +472,7 @@ const DayCard = ({
                             "w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors",
                             quiz.correctAnswer === oi
                               ? "border-teal-500 bg-teal-500"
-                              : "border-stone-300 hover:border-teal-400",
+                              : "border-border hover:border-teal-400",
                           )}
                         >
                           {quiz.correctAnswer === oi && (
@@ -673,7 +673,7 @@ const AddReadingPlan = () => {
   // ────────────────────────────────────────────
   return (
     <div
-      className="min-h-screen bg-[#f7f5f2]"
+      className="min-h-screen bg-background"
       style={{ fontFamily: "'DM Sans', 'Inter', system-ui, sans-serif" }}
     >
       <div className="h-1 bg-gradient-to-r from-teal-400 via-emerald-400 to-cyan-400" />
@@ -683,7 +683,7 @@ const AddReadingPlan = () => {
         <div className="flex items-center gap-4">
           <Link
             to="/reading-plans"
-            className="text-stone-400 hover:text-stone-700 inline-flex items-center gap-1.5 text-sm font-medium transition-colors"
+            className="text-muted-foreground/70 hover:text-foreground/80 inline-flex items-center gap-1.5 text-sm font-medium transition-colors"
           >
             <ArrowLeft className={cn("h-4 w-4", isRtl && "rotate-180")} />
             {t.common.back}
@@ -694,12 +694,12 @@ const AddReadingPlan = () => {
             </div>
             <div>
               <h1
-                className="text-2xl font-bold text-stone-800 tracking-tight leading-none"
+                className="text-2xl font-bold text-foreground tracking-tight leading-none"
                 style={{ fontFamily: "'Fraunces', Georgia, serif" }}
               >
                 {t.readingPlan.createPlanTitle}
               </h1>
-              <p className="text-stone-400 text-xs mt-0.5 font-medium">
+              <p className="text-muted-foreground/70 text-xs mt-0.5 font-medium">
                 {t.readingPlan.adminPlanBuilder}
               </p>
             </div>
@@ -723,17 +723,17 @@ const AddReadingPlan = () => {
                       ? "bg-teal-600 text-white shadow-sm shadow-teal-600/20"
                       : done
                         ? "text-emerald-600"
-                        : "text-stone-400",
+                        : "text-muted-foreground/70",
                   )}
                 >
                   <div
                     className={cn(
                       "w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0",
                       active
-                        ? "bg-white/20"
+                        ? "bg-card/20"
                         : done
                           ? "bg-emerald-100"
-                          : "bg-stone-100",
+                          : "bg-muted",
                     )}
                   >
                     {done ? <CheckCircle2 className="w-3.5 h-3.5" /> : s.id}
@@ -755,19 +755,19 @@ const AddReadingPlan = () => {
 
         {/* ══ STEP 1 ══ */}
         {step === 1 && (
-          <div className="bg-white rounded-2xl border border-stone-100 shadow-[0_1px_3px_rgba(0,0,0,0.05)] overflow-hidden">
-            <div className="px-6 py-4 border-b border-stone-100 bg-stone-50/50">
-              <h2 className="font-bold text-stone-800 flex items-center gap-2">
+          <div className="bg-card rounded-2xl border border-border/50 shadow-[0_1px_3px_rgba(0,0,0,0.05)] overflow-hidden">
+            <div className="px-6 py-4 border-b border-border/50 bg-muted/50">
+              <h2 className="font-bold text-foreground flex items-center gap-2">
                 <BookOpen className="w-4 h-4 text-teal-600" />
                 {t.readingPlan.planDetails}
               </h2>
-              <p className="text-xs text-stone-400 mt-0.5">
+              <p className="text-xs text-muted-foreground/70 mt-0.5">
                 {t.readingPlan.planDetailsDesc}
               </p>
             </div>
             <div className="p-6 space-y-5">
               <div className="space-y-1.5">
-                <label className="text-sm font-semibold text-stone-700">
+                <label className="text-sm font-semibold text-foreground/80">
                   {t.common.title} <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -779,7 +779,7 @@ const AddReadingPlan = () => {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-sm font-semibold text-stone-700">
+                <label className="text-sm font-semibold text-foreground/80">
                   {t.readingPlan.description}
                 </label>
                 <textarea
@@ -792,7 +792,7 @@ const AddReadingPlan = () => {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-sm font-semibold text-stone-700">
+                <label className="text-sm font-semibold text-foreground/80">
                   {t.readingPlan.totalDays} <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -812,12 +812,12 @@ const AddReadingPlan = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-sm font-semibold text-stone-700">
+                  <label className="text-sm font-semibold text-foreground/80">
                     {t.readingPlan.category}
                   </label>                  <Select value={meta.category}
                     onValueChange={(v) => updateMeta("category", v)}
                   >
-                    <SelectTrigger className="rounded-xl border-stone-200 focus:ring-teal-400/30 bg-white">
+                    <SelectTrigger className="rounded-xl border-border focus:ring-teal-400/30 bg-card">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -830,12 +830,12 @@ const AddReadingPlan = () => {
                   </Select>
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-sm font-semibold text-stone-700">
+                  <label className="text-sm font-semibold text-foreground/80">
                     {t.readingPlan.difficulty}
                   </label>                  <Select value={meta.difficulty}
                     onValueChange={(v) => updateMeta("difficulty", v)}
                   >
-                    <SelectTrigger className="rounded-xl border-stone-200 focus:ring-teal-400/30 bg-white">
+                    <SelectTrigger className="rounded-xl border-border focus:ring-teal-400/30 bg-card">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -849,12 +849,12 @@ const AddReadingPlan = () => {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between p-4 rounded-xl border border-stone-100 bg-stone-50">
+              <div className="flex items-center justify-between p-4 rounded-xl border border-border/50 bg-muted">
                 <div>
-                  <p className="text-sm font-semibold text-stone-700">
+                  <p className="text-sm font-semibold text-foreground/80">
                     {t.readingPlan.quizQuestions}
                   </p>
-                  <p className="text-xs text-stone-400 mt-0.5">
+                  <p className="text-xs text-muted-foreground/70 mt-0.5">
                     {t.readingPlan.quizDesc}
                   </p>
                 </div>
@@ -880,14 +880,14 @@ const AddReadingPlan = () => {
         {/* ══ STEP 2 ══ */}
         {step === 2 && (
           <div className="space-y-4">
-            <div className="bg-white rounded-2xl border border-stone-100 shadow-[0_1px_3px_rgba(0,0,0,0.05)] overflow-hidden">
-              <div className="px-6 py-4 border-b border-stone-100 bg-stone-50/50 flex items-center justify-between">
+            <div className="bg-card rounded-2xl border border-border/50 shadow-[0_1px_3px_rgba(0,0,0,0.05)] overflow-hidden">
+              <div className="px-6 py-4 border-b border-border/50 bg-muted/50 flex items-center justify-between">
                 <div>
-                  <h2 className="font-bold text-stone-800 flex items-center gap-2">
+                  <h2 className="font-bold text-foreground flex items-center gap-2">
                     <Calendar className="w-4 h-4 text-teal-600" />
                     {t.readingPlan.dailyContentTitle} — {meta.totalDays} {t.readingPlan.days}
                   </h2>
-                  <p className="text-xs text-stone-400 mt-0.5">
+                  <p className="text-xs text-muted-foreground/70 mt-0.5">
                     {t.readingPlan.dailyContentDesc}
                   </p>
                 </div>
@@ -920,7 +920,7 @@ const AddReadingPlan = () => {
           <button
             type="button"
             onClick={() => setStep(1)}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-stone-200 bg-white text-stone-600 hover:bg-stone-50 text-sm font-semibold transition-all"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-border bg-card text-muted-foreground hover:bg-muted text-sm font-semibold transition-all"
           >
             <ArrowLeft className={cn("w-4 h-4", isRtl && "rotate-180")} />
             {t.common.back}
@@ -939,26 +939,26 @@ const AddReadingPlan = () => {
         {/* ══ STEP 3 ══ */}
         {step === 3 && (
           <div className="space-y-4">
-            <div className="bg-white rounded-2xl border border-stone-100 shadow-[0_1px_3px_rgba(0,0,0,0.05)] overflow-hidden">
-              <div className="px-6 py-4 border-b border-stone-100 bg-stone-50/50">
-                <h2 className="font-bold text-stone-800 flex items-center gap-2">
+            <div className="bg-card rounded-2xl border border-border/50 shadow-[0_1px_3px_rgba(0,0,0,0.05)] overflow-hidden">
+              <div className="px-6 py-4 border-b border-border/50 bg-muted/50">
+                <h2 className="font-bold text-foreground flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-teal-600" />
                   {t.readingPlan.reviewConfirm}
                 </h2>
               </div>
               <div className="p-6 space-y-6">
-                <div className="rounded-xl border border-stone-100 bg-stone-50 p-4 space-y-3">
-                  <h3 className="font-bold text-stone-800 text-base">
+                <div className="rounded-xl border border-border/50 bg-muted p-4 space-y-3">
+                  <h3 className="font-bold text-foreground text-base">
                     {meta.title}
                   </h3>
                   {meta.description && (
-                    <p className="text-sm text-stone-500">{meta.description}</p>
+                    <p className="text-sm text-muted-foreground">{meta.description}</p>
                   )}
                   <div className="flex flex-wrap gap-2 pt-1">
-                    <span className="text-[11px] border border-stone-200 bg-white text-stone-600 rounded-lg px-2 py-0.5 font-semibold">
+                    <span className="text-[11px] border border-border bg-card text-muted-foreground rounded-lg px-2 py-0.5 font-semibold">
                       {meta.totalDays} {t.readingPlan.days}
                     </span>
-                    <span className="text-[11px] border border-stone-200 bg-white text-stone-600 rounded-lg px-2 py-0.5 font-semibold">
+                    <span className="text-[11px] border border-border bg-card text-muted-foreground rounded-lg px-2 py-0.5 font-semibold">
                       {t.readingPlan[(CATEGORIES.find((c) => c.value === meta.category)?.labelKey ?? 'catIntroduction') as keyof typeof t.readingPlan] as string}
                     </span>
                     <span
@@ -979,11 +979,11 @@ const AddReadingPlan = () => {
 
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <p className="text-xs font-bold text-stone-500 uppercase tracking-wider">
+                    <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
                       {t.readingPlan.dailyAssignments}
                     </p>
                     {days.filter(isDayComplete).length < meta.totalDays && (
-                      <p className="text-xs text-stone-400">
+                      <p className="text-xs text-muted-foreground/70">
                         <span className="text-teal-600 font-bold">
                           {days.filter(isDayComplete).length}
                         </span>
@@ -995,7 +995,7 @@ const AddReadingPlan = () => {
                       </p>
                     )}
                   </div>
-                  <div className="rounded-xl border border-stone-100 overflow-hidden divide-y divide-stone-50">
+                  <div className="rounded-xl border border-border/50 overflow-hidden divide-y divide-stone-50">
                     {days.map((day) => {
                       const ok = isDayComplete(day);
                       return (
@@ -1003,7 +1003,7 @@ const AddReadingPlan = () => {
                           key={day.dayNumber}
                           className={cn(
                             "flex items-start gap-3 p-3",
-                            ok ? "bg-white" : "bg-stone-50",
+                            ok ? "bg-card" : "bg-muted",
                           )}
                         >
                           <div
@@ -1011,7 +1011,7 @@ const AddReadingPlan = () => {
                               "w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0",
                               ok
                                 ? "bg-teal-100 text-teal-700"
-                                : "bg-stone-100 text-stone-400",
+                                : "bg-muted text-muted-foreground/70",
                             )}
                           >
                             {day.dayNumber}
@@ -1019,10 +1019,10 @@ const AddReadingPlan = () => {
                           <div className="flex-1 min-w-0">
                             {ok ? (
                               <>
-                                <p className="font-semibold text-sm text-stone-800">
+                                <p className="font-semibold text-sm text-foreground">
                                   {day.title}
                                 </p>
-                                <p className="text-xs text-stone-400 mt-0.5">
+                                <p className="text-xs text-muted-foreground/70 mt-0.5">
                                   {day.chapters
                                     .filter((c) => c.book)
                                     .map((c) => `${c.book} ${c.chapter}`)
@@ -1030,7 +1030,7 @@ const AddReadingPlan = () => {
                                 </p>
                               </>
                             ) : (
-                              <p className="text-xs text-stone-400 italic">
+                              <p className="text-xs text-muted-foreground/70 italic">
                                 {t.readingPlan.notConfiguredEdit}
                               </p>
                             )}
@@ -1054,7 +1054,7 @@ const AddReadingPlan = () => {
                               </span>
                             )}
                             {!ok && (
-                              <span className="text-[10px] border border-stone-200 text-stone-400 rounded px-1.5 py-0.5 font-semibold">
+                              <span className="text-[10px] border border-border text-muted-foreground/70 rounded px-1.5 py-0.5 font-semibold">
                                 {t.readingPlan.partialLabel.toLowerCase()}
                               </span>
                             )}
@@ -1072,7 +1072,7 @@ const AddReadingPlan = () => {
                 type="button"
                 onClick={() => setStep(2)}
                 disabled={submitting}
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-stone-200 bg-white text-stone-600 hover:bg-stone-50 text-sm font-semibold transition-all disabled:opacity-50"
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-border bg-card text-muted-foreground hover:bg-muted text-sm font-semibold transition-all disabled:opacity-50"
               >
                 <ArrowLeft className={cn("w-4 h-4", isRtl && "rotate-180")} />
                 {t.common.back}

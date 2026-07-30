@@ -122,7 +122,7 @@ const timeAgo = (ts: string, t?: any) => {
 // Micro-components
 // ─────────────────────────────────────────────
 const Shimmer = ({ className }: { className?: string }) => (
-  <div className={cn("animate-pulse rounded-lg bg-stone-100", className)} />
+  <div className={cn("animate-pulse rounded-lg bg-muted", className)} />
 );
 
 const PALETTE = [
@@ -173,7 +173,7 @@ const KPI = ({
   return (
     <div
       className={cn(
-        "relative bg-white rounded-xl sm:rounded-2xl overflow-hidden border border-stone-100 shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] hover:-translate-y-0.5 transition-all duration-200",
+        "relative bg-card rounded-xl sm:rounded-2xl overflow-hidden border border-border/50 shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] hover:-translate-y-0.5 transition-all duration-200",
       )}
     >
       <div
@@ -207,16 +207,16 @@ const KPI = ({
             </div>
             <div className="flex-1 min-w-0">
               <p
-                className="text-xl sm:text-[26px] font-bold text-stone-800 tracking-tight leading-none"
+                className="text-xl sm:text-[26px] font-bold text-foreground tracking-tight leading-none"
                 style={{ fontFamily: "'Fraunces', Georgia, serif" }}
               >
                 {n.toLocaleString()}
               </p>
-              <p className="text-[11px] sm:text-sm text-stone-500 mt-0.5 sm:mt-1.5 font-medium leading-tight truncate">
+              <p className="text-[11px] sm:text-sm text-muted-foreground mt-0.5 sm:mt-1.5 font-medium leading-tight truncate">
                 {label}
               </p>
               {sub && (
-                <p className="text-[10px] sm:text-xs text-stone-400 mt-0.5 truncate hidden sm:block">
+                <p className="text-[10px] sm:text-xs text-muted-foreground/70 mt-0.5 truncate hidden sm:block">
                   {sub}
                 </p>
               )}
@@ -241,14 +241,14 @@ const RateBar = ({
 }) => (
   <div className="space-y-1.5">
     <div className="flex items-center justify-between text-xs sm:text-sm">
-      <span className="text-stone-500 font-medium">{label}</span>
+      <span className="text-muted-foreground font-medium">{label}</span>
       {loading ? (
         <Shimmer className="w-8 sm:w-10 h-3 sm:h-3.5" />
       ) : (
-        <span className="font-bold text-stone-700">{value}%</span>
+        <span className="font-bold text-foreground/80">{value}%</span>
       )}
     </div>
-    <div className="h-1.5 sm:h-2 rounded-full bg-stone-100 overflow-hidden">
+    <div className="h-1.5 sm:h-2 rounded-full bg-muted overflow-hidden">
       {!loading && (
         <div
           className={cn(
@@ -263,9 +263,9 @@ const RateBar = ({
 );
 
 const DIFF: Record<string, string> = {
-  easy: "bg-emerald-50 text-emerald-700 border-emerald-200",
-  medium: "bg-amber-50 text-amber-700 border-amber-200",
-  hard: "bg-red-50 text-red-700 border-red-200",
+  easy: "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/40",
+  medium: "bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800/40",
+  hard: "bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800/40",
 };
 
 // ─────────────────────────────────────────────
@@ -310,21 +310,21 @@ const Dashboard = () => {
         sendPostRequest("reading-plans", "get-all", {}),
         sendPostRequest("bible", "get-todays-verse", {}),
       ]);
-      if (sR.status === "fulfilled" && (sR.value as any)?.returnCode === 200)
-        setStats((sR.value as any).returnData);
-      if (uR.status === "fulfilled" && (uR.value as any)?.returnCode === 200) {
-        const usersData = (uR.value as any).returnData;
+      if (sR.status === "fulfilled" && sR.value?.returnCode === 200)
+        setStats(sR.value.returnData);
+      if (uR.status === "fulfilled" && uR.value?.returnCode === 200) {
+        const usersData = uR.value.returnData;
         const usersArray = Array.isArray(usersData)
           ? usersData
           : (usersData?.users ?? []);
         setRecentUsers(usersArray.slice(0, 6));
       }
-      if (pR.status === "fulfilled" && (pR.value as any)?.returnCode === 200) {
-        const plansData = (pR.value as any).returnData;
+      if (pR.status === "fulfilled" && pR.value?.returnCode === 200) {
+        const plansData = pR.value.returnData;
         const plansArray = plansData?.plans ?? plansData ?? [];
         const plansWithDefaults = (
           Array.isArray(plansArray) ? plansArray : []
-        ).map((p: any) => ({
+        ).map((p) => ({
           ...p,
           totalDays: p.totalDays ?? p.total_days ?? 0,
           isActive: p.isActive ?? p.is_active ?? true,
@@ -336,8 +336,8 @@ const Dashboard = () => {
         }));
         setPlans(plansWithDefaults);
       }
-      if (vR.status === "fulfilled" && (vR.value as any)?.returnCode === 200)
-        setVerse((vR.value as any).returnData);
+      if (vR.status === "fulfilled" && vR.value?.returnCode === 200)
+        setVerse(vR.value.returnData);
 
       // Load site settings
       try {
@@ -362,8 +362,8 @@ const Dashboard = () => {
       } catch (e) {
         console.error("Failed to load translations:", e);
       }
-    } catch (e: any) {
-      setError(e?.message ?? (t.dashboard?.failedToLoad || 'Failed to load'));
+    } catch (e) {
+      setError((e as Error)?.message ?? (t.dashboard?.failedToLoad || 'Failed to load'));
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -414,7 +414,7 @@ const Dashboard = () => {
   return (
     <div
       dir={isRtl ? 'rtl' : 'ltr'}
-      className="min-h-screen bg-[#f7f5f2]"
+      className="min-h-screen bg-background"
       style={{ fontFamily: "'DM Sans', 'Inter', system-ui, sans-serif" }}
     >
       {/* top accent bar */}
@@ -424,17 +424,17 @@ const Dashboard = () => {
         {/* ── Header ───────────────────────────── */}
         <div className="flex items-start justify-between gap-3">
           <div>
-            <div className="inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-amber-100 border border-amber-200 text-amber-700 text-[10px] sm:text-[11px] font-bold tracking-widest uppercase mb-1.5 sm:mb-2">
+            <div className="inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-amber-100 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/40 text-amber-700 dark:text-amber-400 text-[10px] sm:text-[11px] font-bold tracking-widest uppercase mb-1.5 sm:mb-2">
               <ShieldCheck className="w-2.5 h-2.5 sm:w-3 sm:h-3" /> {t.dashboard?.adminConsole || 'Admin Console'}
             </div>
             <h1
-              className="text-xl sm:text-2xl lg:text-3xl font-bold text-stone-800 tracking-tight leading-none"
+              className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground tracking-tight leading-none"
               style={{ fontFamily: "'Fraunces', Georgia, serif" }}
             >
               {t.dashboard?.myDashboard || 'Platform Overview'}
             </h1>
             {/* date hidden on smallest screens to save space */}
-            <p className="text-stone-400 text-xs sm:text-sm mt-1 sm:mt-1.5 items-center gap-1.5 font-medium hidden xs:flex sm:flex">
+            <p className="text-muted-foreground/70 text-xs sm:text-sm mt-1 sm:mt-1.5 items-center gap-1.5 font-medium hidden xs:flex sm:flex">
               <Calendar className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
               <span className="hidden sm:inline">{today}</span>
               <span className="sm:hidden">
@@ -451,7 +451,7 @@ const Dashboard = () => {
               fetchAll(true);
             }}
             disabled={refreshing}
-            className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 text-stone-500 hover:text-stone-700 text-xs sm:text-sm shadow-sm transition-all shrink-0 font-medium"
+            className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-xl border border-border bg-card hover:bg-muted text-muted-foreground hover:text-foreground/80 text-xs sm:text-sm shadow-sm transition-all shrink-0 font-medium"
           >
             <RefreshCw
               className={cn("w-3.5 h-3.5", refreshing && "animate-spin")}
@@ -461,7 +461,7 @@ const Dashboard = () => {
         </div>
 
         {error && (
-          <div className="rounded-xl border border-red-200 bg-red-50 px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm text-red-700 font-medium">
+          <div className="rounded-xl border border-red-200 dark:border-red-800/40 bg-red-50 dark:bg-red-950/30 px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm text-red-700 dark:text-red-400 font-medium">
             ⚠ {error}
           </div>
         )}
@@ -526,8 +526,8 @@ const Dashboard = () => {
             value={stats?.memberCount ?? 0}
             icon={Shield}
             accent="bg-stone-400"
-            iconBg="bg-stone-100"
-            iconColor="text-stone-600"
+            iconBg="bg-muted"
+            iconColor="text-muted-foreground"
             loading={loading}
           />
           <KPI
@@ -554,12 +554,12 @@ const Dashboard = () => {
         {/* ── Health + Verse — stacked on mobile ── */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4">
           {/* Platform Health */}
-          <div className="bg-white rounded-xl sm:rounded-2xl border border-stone-100 shadow-[0_1px_3px_rgba(0,0,0,0.05)] overflow-hidden">
-            <div className="flex items-center gap-2 px-3.5 sm:px-5 py-3 sm:py-4 border-b border-stone-100">
+          <div className="bg-card rounded-xl sm:rounded-2xl border border-border/50 shadow-[0_1px_3px_rgba(0,0,0,0.05)] overflow-hidden">
+            <div className="flex items-center gap-2 px-3.5 sm:px-5 py-3 sm:py-4 border-b border-border/50">
               <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-indigo-50 flex items-center justify-center">
                 <Activity className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-indigo-500" />
               </div>
-              <h3 className="text-xs sm:text-sm font-bold text-stone-700">
+              <h3 className="text-xs sm:text-sm font-bold text-foreground/80">
                 {t.dashboard?.platformHealth || 'Platform Health'}
               </h3>
             </div>
@@ -583,7 +583,7 @@ const Dashboard = () => {
                 loading={loading}
               />
               {!loading && (
-                <div className="pt-3 sm:pt-4 border-t border-stone-100 grid grid-cols-3 gap-2 text-center">
+                <div className="pt-3 sm:pt-4 border-t border-border/50 grid grid-cols-3 gap-2 text-center">
                   {[
                     {
                       pct: stats?.activeRate ?? 0,
@@ -608,7 +608,7 @@ const Dashboard = () => {
                       >
                         {pct}%
                       </p>
-                      <p className="text-[9px] sm:text-[10px] text-stone-400 uppercase tracking-widest mt-0.5 font-semibold">
+                      <p className="text-[9px] sm:text-[10px] text-muted-foreground/70 uppercase tracking-widest mt-0.5 font-semibold">
                         {label}
                       </p>
                     </div>
@@ -619,7 +619,7 @@ const Dashboard = () => {
           </div>
 
           {/* Daily Verse */}
-          <div className="lg:col-span-2 relative bg-white rounded-xl sm:rounded-2xl border border-amber-100 shadow-[0_1px_3px_rgba(0,0,0,0.05)] overflow-hidden">
+          <div className="lg:col-span-2 relative bg-card rounded-xl sm:rounded-2xl border border-amber-100 shadow-[0_1px_3px_rgba(0,0,0,0.05)] overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-amber-50/60 via-orange-50/20 to-white pointer-events-none" />
             <div
               className="absolute top-1 end-3 sm:top-2 sm:end-4 text-[60px] sm:text-[90px] leading-none text-amber-100 select-none pointer-events-none"
@@ -632,7 +632,7 @@ const Dashboard = () => {
                 <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-amber-100 flex items-center justify-center">
                   <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-600" />
                 </div>
-                <h3 className="text-xs sm:text-sm font-bold text-stone-700">
+                <h3 className="text-xs sm:text-sm font-bold text-foreground/80">
                   {t.dailyVerse?.verseOfDay || t.dashboard?.todaysDailyVerse || "Today's Daily Verse"}
                 </h3>
                 {verse && (
@@ -640,8 +640,8 @@ const Dashboard = () => {
                     className={cn(
                       "ms-auto px-1.5 sm:px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-bold border",
                       verse.published
-                        ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                        : "bg-amber-50 text-amber-700 border-amber-200",
+                        ? "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/40"
+                        : "bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800/40",
                     )}
                   >
                     {verse.published ? (t.dashboard?.published || 'Published') : (t.dashboard?.draft || 'Draft')}
@@ -663,7 +663,7 @@ const Dashboard = () => {
                         `${verse.bookName ?? ""} ${verse.chapter ?? ""}:${verse.verseNumber ?? ""}`}
                     </p>
                     <blockquote
-                      className="text-stone-700 text-sm sm:text-base leading-relaxed italic mb-2 sm:mb-3 border-s-2 border-amber-300 ps-3 sm:ps-4"
+                      className="text-foreground/80 text-sm sm:text-base leading-relaxed italic mb-2 sm:mb-3 border-s-2 border-amber-300 ps-3 sm:ps-4"
                       style={{ fontFamily: "'Fraunces', Georgia, serif" }}
                     >
                       {getVerseText(
@@ -673,7 +673,7 @@ const Dashboard = () => {
                       )}
                     </blockquote>
                     {verse.reflection && (
-                      <p className="text-stone-400 text-[11px] sm:text-xs leading-relaxed line-clamp-2">
+                      <p className="text-muted-foreground/70 text-[11px] sm:text-xs leading-relaxed line-clamp-2">
                         {verse.reflection}
                       </p>
                     )}
@@ -681,7 +681,7 @@ const Dashboard = () => {
                 ) : (
                   <div className="flex flex-col items-center py-6 sm:py-8 text-center">
                     <ScrollText className="w-8 h-8 sm:w-10 sm:h-10 text-amber-200 mb-2" />
-                    <p className="text-stone-400 text-xs sm:text-sm font-medium">
+                    <p className="text-muted-foreground/70 text-xs sm:text-sm font-medium">
                       {t.dailyVerse?.noVersesYet || t.dashboard?.todaysDailyVerse || 'No verse scheduled for today'}
                     </p>
                   </div>
@@ -694,12 +694,12 @@ const Dashboard = () => {
         {/* ── System Settings ── */}
         <div>
           {/* System Settings */}
-          <div className="bg-white rounded-xl sm:rounded-2xl border border-stone-100 shadow-[0_1px_3px_rgba(0,0,0,0.05)] overflow-hidden">
-            <div className="flex items-center gap-2 px-3.5 sm:px-5 py-3 sm:py-4 border-b border-stone-100">
-              <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-stone-100 flex items-center justify-center">
-                <Settings className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-stone-600" />
+          <div className="bg-card rounded-xl sm:rounded-2xl border border-border/50 shadow-[0_1px_3px_rgba(0,0,0,0.05)] overflow-hidden">
+            <div className="flex items-center gap-2 px-3.5 sm:px-5 py-3 sm:py-4 border-b border-border/50">
+              <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-muted flex items-center justify-center">
+                <Settings className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground" />
               </div>
-              <h3 className="text-xs sm:text-sm font-bold text-stone-700">
+              <h3 className="text-xs sm:text-sm font-bold text-foreground/80">
                 {t.dashboard?.systemSettings || 'System Settings'}
               </h3>
             </div>
@@ -710,10 +710,10 @@ const Dashboard = () => {
                 <>
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <p className="text-xs sm:text-sm font-semibold text-stone-700">
+                    <p className="text-xs sm:text-sm font-semibold text-foreground/80">
                       {t.dashboard?.freeTranslationsOnly || 'Free Translations Only'}
                     </p>
-                    <p className="text-[10px] sm:text-[11px] text-stone-400 mt-0.5">
+                    <p className="text-[10px] sm:text-[11px] text-muted-foreground/70 mt-0.5">
                       {t.dashboard?.freeTranslationsDesc || 'Limit Bible readers to free translations only'}
                     </p>
                   </div>
@@ -724,12 +724,12 @@ const Dashboard = () => {
                   />
                 </div>
 
-                <div className="flex items-center justify-between gap-3 pt-3 border-t border-stone-100">
+                <div className="flex items-center justify-between gap-3 pt-3 border-t border-border/50">
                   <div>
-                    <p className="text-xs sm:text-sm font-semibold text-stone-700">
+                    <p className="text-xs sm:text-sm font-semibold text-foreground/80">
                       {t.dashboard?.defaultTranslation || 'Default Bible Translation'}
                     </p>
-                    <p className="text-[10px] sm:text-[11px] text-stone-400 mt-0.5">
+                    <p className="text-[10px] sm:text-[11px] text-muted-foreground/70 mt-0.5">
                       {t.dashboard?.defaultTranslationDesc || 'Translation to use by default in the Bible reader'}
                     </p>
                   </div>
@@ -737,7 +737,7 @@ const Dashboard = () => {
                     value={defaultTranslationId}
                     onChange={(e) => handleChangeDefaultTranslation(e.target.value)}
                     disabled={settingLoading || translationOptions.length === 0}
-                    className="h-8 text-xs rounded-lg border border-stone-200 bg-white px-2 text-stone-700 font-medium focus:outline-none focus:ring-2 focus:ring-amber-300 disabled:opacity-50"
+                    className="h-8 text-xs rounded-lg border border-border bg-card px-2 text-foreground/80 font-medium focus:outline-none focus:ring-2 focus:ring-amber-300 disabled:opacity-50"
                   >
                     {translationOptions.map((t) => (
                       <option key={t.id} value={t.id}>
@@ -755,22 +755,22 @@ const Dashboard = () => {
         {/* ── Reading Plans + Recent Users — stacked on mobile ── */}
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-3 sm:gap-4">
           {/* Reading Plans */}
-          <div className="lg:col-span-3 bg-white rounded-xl sm:rounded-2xl border border-stone-100 shadow-[0_1px_3px_rgba(0,0,0,0.05)] overflow-hidden">
-            <div className="flex items-center gap-2 px-3.5 sm:px-5 py-3 sm:py-4 border-b border-stone-100">
+          <div className="lg:col-span-3 bg-card rounded-xl sm:rounded-2xl border border-border/50 shadow-[0_1px_3px_rgba(0,0,0,0.05)] overflow-hidden">
+            <div className="flex items-center gap-2 px-3.5 sm:px-5 py-3 sm:py-4 border-b border-border/50">
               <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-teal-50 flex items-center justify-center">
                 <BookOpen className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-teal-600" />
               </div>
-              <h3 className="text-xs sm:text-sm font-bold text-stone-700">
+              <h3 className="text-xs sm:text-sm font-bold text-foreground/80">
                 {t.dashboard?.readingPlans || 'Reading Plans'}
               </h3>
               {!loading && (
-                <span className="ms-1 px-1.5 py-0.5 rounded-md bg-stone-100 text-stone-500 text-[10px] font-bold">
+                <span className="ms-1 px-1.5 py-0.5 rounded-md bg-muted text-muted-foreground text-[10px] font-bold">
                   {plans.length}
                 </span>
               )}
               <a
                 href={routes.readingPlans.path}
-                className="ms-auto text-[11px] sm:text-xs text-stone-400 hover:text-teal-600 flex items-center gap-0.5 sm:gap-1 font-medium transition-colors"
+                className="ms-auto text-[11px] sm:text-xs text-muted-foreground/70 hover:text-teal-600 flex items-center gap-0.5 sm:gap-1 font-medium transition-colors"
               >
                 {t.dashboard?.viewAll || 'View all'} <ChevronRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
               </a>
@@ -791,7 +791,7 @@ const Dashboard = () => {
                   </div>
                 ))
               ) : plans.length === 0 ? (
-                <div className="flex flex-col items-center py-10 sm:py-12 text-stone-300">
+                <div className="flex flex-col items-center py-10 sm:py-12 text-muted-foreground/50">
                   <BookOpen className="w-7 h-7 sm:w-8 sm:h-8 mb-2" />
                   <p className="text-xs sm:text-sm">{t.dashboard?.noReadingPlans || 'No reading plans yet'}</p>
                 </div>
@@ -803,31 +803,31 @@ const Dashboard = () => {
                       : 0;
                   const diffStyle =
                     DIFF[plan.difficulty] ??
-                    "bg-stone-50 text-stone-600 border-stone-200";
+                    "bg-muted text-muted-foreground border-border";
                   return (
                     <div
                       key={plan.planId}
-                      className="flex items-center gap-2.5 sm:gap-3 px-3.5 sm:px-5 py-3 hover:bg-stone-50/70 transition-colors"
+                      className="flex items-center gap-2.5 sm:gap-3 px-3.5 sm:px-5 py-3 hover:bg-muted/70 transition-colors"
                     >
                       <div
                         className={cn(
                           "w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center shrink-0",
-                          plan.isActive ? "bg-teal-50" : "bg-stone-100",
+                          plan.isActive ? "bg-teal-50" : "bg-muted",
                         )}
                       >
                         <BookOpen
                           className={cn(
                             "w-3.5 h-3.5 sm:w-4 sm:h-4",
-                            plan.isActive ? "text-teal-600" : "text-stone-400",
+                            plan.isActive ? "text-teal-600" : "text-muted-foreground/70",
                           )}
                         />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs sm:text-sm font-semibold text-stone-700 truncate">
+                        <p className="text-xs sm:text-sm font-semibold text-foreground/80 truncate">
                           {plan.title}
                         </p>
                         <div className="flex items-center gap-1 sm:gap-1.5 mt-0.5 flex-wrap">
-                          <span className="text-[10px] sm:text-[11px] text-stone-400 flex items-center gap-0.5">
+                          <span className="text-[10px] sm:text-[11px] text-muted-foreground/70 flex items-center gap-0.5">
                             <Clock className="w-2.5 h-2.5" />
                             {(t.dashboard?.daysShort || '{n}d').replace('{n}', String(plan.totalDays))}
                           </span>
@@ -857,10 +857,10 @@ const Dashboard = () => {
                             </div>
                           ) : (
                             <div className="space-y-1">
-                              <p className="text-[11px] sm:text-xs text-stone-500 font-bold">
+                              <p className="text-[11px] sm:text-xs text-muted-foreground font-bold">
                                 {pct}%
                               </p>
-                              <div className="w-12 sm:w-16 h-1.5 rounded-full bg-stone-100 overflow-hidden">
+                              <div className="w-12 sm:w-16 h-1.5 rounded-full bg-muted overflow-hidden">
                                 <div
                                   className="h-full bg-teal-500 rounded-full"
                                   style={{ width: `${pct}%` }}
@@ -875,7 +875,7 @@ const Dashboard = () => {
                             </div>
                           )
                         ) : (
-                          <span className="text-[10px] sm:text-[11px] text-stone-300 font-medium">
+                          <span className="text-[10px] sm:text-[11px] text-muted-foreground/50 font-medium">
                             {t.dashboard?.notStarted || 'Not started'}
                           </span>
                         )}
@@ -888,12 +888,12 @@ const Dashboard = () => {
           </div>
 
           {/* Recent Users */}
-          <div className="lg:col-span-2 bg-white rounded-xl sm:rounded-2xl border border-stone-100 shadow-[0_1px_3px_rgba(0,0,0,0.05)] overflow-hidden flex flex-col">
-            <div className="flex items-center gap-2 px-3.5 sm:px-5 py-3 sm:py-4 border-b border-stone-100">
+          <div className="lg:col-span-2 bg-card rounded-xl sm:rounded-2xl border border-border/50 shadow-[0_1px_3px_rgba(0,0,0,0.05)] overflow-hidden flex flex-col">
+            <div className="flex items-center gap-2 px-3.5 sm:px-5 py-3 sm:py-4 border-b border-border/50">
               <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-indigo-50 flex items-center justify-center">
                 <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-indigo-500" />
               </div>
-              <h3 className="text-xs sm:text-sm font-bold text-stone-700">
+              <h3 className="text-xs sm:text-sm font-bold text-foreground/80">
                 {t.dashboard?.recentUsers || 'Recent Users'}
               </h3>
             </div>
@@ -915,14 +915,14 @@ const Dashboard = () => {
                 : recentUsers.map((u) => (
                     <div
                       key={u.username}
-                      className="flex items-center gap-2.5 sm:gap-3 px-3.5 sm:px-5 py-2.5 sm:py-3 hover:bg-stone-50/70 transition-colors"
+                      className="flex items-center gap-2.5 sm:gap-3 px-3.5 sm:px-5 py-2.5 sm:py-3 hover:bg-muted/70 transition-colors"
                     >
                       <Av f={u.firstName} l={u.lastName} u={u.username} />
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs sm:text-sm font-semibold text-stone-700 truncate">
+                        <p className="text-xs sm:text-sm font-semibold text-foreground/80 truncate">
                           {u.firstName} {u.lastName}
                         </p>
-                        <p className="text-[10px] sm:text-[11px] text-stone-400 font-mono truncate">
+                        <p className="text-[10px] sm:text-[11px] text-muted-foreground/70 font-mono truncate">
                           @{u.username}
                         </p>
                       </div>
@@ -957,7 +957,7 @@ const Dashboard = () => {
             {!loading && recentUsers.length > 0 && (
               <a
                 href={routes.systemUsers.path}
-                className="flex items-center justify-center gap-1.5 px-3.5 sm:px-5 py-2.5 sm:py-3 border-t border-stone-100 text-[11px] sm:text-xs text-stone-400 hover:text-indigo-600 hover:bg-stone-50 transition-colors font-semibold"
+                className="flex items-center justify-center gap-1.5 px-3.5 sm:px-5 py-2.5 sm:py-3 border-t border-border/50 text-[11px] sm:text-xs text-muted-foreground/70 hover:text-indigo-600 hover:bg-muted transition-colors font-semibold"
               >
                 {t.dashboard?.viewAllUsers || 'View all users'}{" "}
                 <ChevronRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />

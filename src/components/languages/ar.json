@@ -1139,6 +1139,7 @@
     "bible": "قارئ الكتاب المقدس",
     "dailyVerse": "آية اليوم",
     "dashboard": "لوحة التحكم",
+    "adminDashboard": "Admin Console",
     "devotions": "التأملات",
     "explanations": "شروحات الآيات",
     "home": "الرئيسية",
@@ -1153,7 +1154,11 @@
     "profile": "الملف الشخصي",
     "readingPlans": "خطط القراءة",
     "settings": "الإعدادات",
-    "userActivity": "نشاط المستخدمين"
+    "userActivity": "نشاط المستخدمين",
+    "triviaAdmin": "Trivia Management",
+    "dailyContentAdmin": "Daily Content",
+    "subscriptionsAdmin": "Subscriptions",
+    "adminTools": "Admin Tools"
   },
   "userActivity": {
     "action": "الإجراء",

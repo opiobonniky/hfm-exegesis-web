@@ -115,7 +115,7 @@ function getInitialLanguage(): Language {
   if (typeof navigator !== 'undefined') {
     const browserLang = navigator.language?.split('-')[0] ?? '';
     const supported = Object.keys(ALL_TRANSLATIONS) as Language[];
-    if (supported.includes(browserLang)) return browserLang as Language;
+    if ((supported as string[]).includes(browserLang)) return browserLang as Language;
   }
 
   return 'en';

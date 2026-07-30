@@ -187,7 +187,7 @@ export default function BibleLibrary() {
                 <BookOpen className="w-6 h-6 text-primary" />
               </div>
               <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-emerald-500 border-2 border-background flex items-center justify-center">
-                <div className="w-1.5 h-1.5 rounded-full bg-white" />
+                <div className="w-1.5 h-1.5 rounded-full bg-card" />
               </div>
             </div>
             <div>

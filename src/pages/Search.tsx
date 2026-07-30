@@ -37,8 +37,9 @@ import type {
   LemmaResult,
   CrossTranslationResult,
   SearchScope,
-  SearchResultItem,
 } from "@/services/searchApi";
+
+type SearchResultItem = SearchResult | JournalSearchResult | TopicResult | LemmaResult | CrossTranslationResult;
 
 /* ── Helpers ─────────────────────────────────────────────────────────────── */
 
@@ -185,7 +186,7 @@ export default function SearchPage() {
   const handleSelect = useCallback(
     (item: SearchResult) => {
       navigate(
-        `${routes.bibleReader.path}?book=${encodeURIComponent(item.book_name)}&chapter=${item.chapter}&translation=${encodeURIComponent(translation)}`,
+        `${routes.bibleReader.path}?book=${encodeURIComponent(item.book_name)}&chapter=${item.chapter}&verse=${item.verse}&translation=${encodeURIComponent(translation)}`,
       );
     },
     [navigate, translation],
@@ -194,10 +195,10 @@ export default function SearchPage() {
   const handleStudy = useCallback(
     (item: SearchResult) => {
       navigate(
-        `${routes.bibleReader.path}?book=${encodeURIComponent(item.book_name)}&chapter=${item.chapter}&verse=${item.verse}&translation=${encodeURIComponent(translation)}`,
+        `${routes.labFlow.path}?book=${encodeURIComponent(item.book_name)}&chapter=${item.chapter}&verseStart=${item.verse}`,
       );
     },
-    [navigate, translation],
+    [navigate],
   );
 
   const handleSave = useCallback(
@@ -296,7 +297,7 @@ export default function SearchPage() {
     (item: JournalSearchResult, idx: number) => (
       <div
         key={`journal-${idx}`}
-        className="rounded-xl border border-border/40 bg-card p-4 hover:border-emerald-200/50 hover:shadow-sm transition-all duration-200 cursor-pointer"
+        className="rounded-xl border border-border/40 bg-card p-4 hover:border-emerald-200/50 dark:hover:border-emerald-700/50 hover:shadow-sm transition-all duration-200 cursor-pointer"
         onClick={() => navigate(`${routes.journal.path}/view/${item.id}`)}
       >
         <p className="text-sm font-bold text-foreground">{item.title || "Untitled"}</p>
@@ -317,7 +318,7 @@ export default function SearchPage() {
       return (
         <div
           key={`topic-${idx}`}
-          className="rounded-xl border border-border/40 bg-card p-4 hover:border-amber-200/50 hover:shadow-sm transition-all duration-200 cursor-pointer"
+          className="rounded-xl border border-border/40 bg-card p-4 hover:border-amber-200/50 dark:hover:border-amber-700/50 hover:shadow-sm transition-all duration-200 cursor-pointer"
           onClick={() => setQuery(item.topicName, "bible")}
         >
           <p className="text-sm font-bold text-primary capitalize">{item.topicName}</p>
@@ -335,7 +336,7 @@ export default function SearchPage() {
     (item: LemmaResult, idx: number) => (
       <div
         key={`lemma-${idx}`}
-        className="rounded-xl border border-border/40 bg-card p-4 hover:border-blue-200/50 hover:shadow-sm transition-all duration-200"
+        className="rounded-xl border border-border/40 bg-card p-4 hover:border-blue-200/50 dark:hover:border-blue-700/50 hover:shadow-sm transition-all duration-200"
       >
         <p className="text-sm font-bold text-foreground">{item.originalWord || item.strongsId}</p>
         <p className="text-xs font-semibold text-primary mt-0.5">{item.strongsId} · {item.transliteration}</p>

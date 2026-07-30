@@ -1139,6 +1139,7 @@
     "bible": "வேதாகம வாசிப்பி",
     "dailyVerse": "தினசரி வசனம்",
     "dashboard": "डैशबोर्ड",
+    "adminDashboard": "Admin Console",
     "devotions": "தினசரி தியானம்",
     "explanations": "வசன விளக்கங்கள்",
     "home": "முகப்பு",
@@ -1153,7 +1154,11 @@
     "profile": "சுயவிவரம்",
     "readingPlans": "வாசிப்புத் திட்டம்",
     "settings": "அமைப்புகள்",
-    "userActivity": "பயனர் செயல்பாடு"
+    "userActivity": "பயனர் செயல்பாடு",
+    "triviaAdmin": "Trivia Management",
+    "dailyContentAdmin": "Daily Content",
+    "subscriptionsAdmin": "Subscriptions",
+    "adminTools": "Admin Tools"
   },
   "userActivity": {
     "action": "செயல்",

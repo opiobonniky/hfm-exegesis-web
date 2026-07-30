@@ -177,7 +177,7 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="min-h-screen flex bg-slate-50 overflow-hidden relative" dir={isRtl ? 'rtl' : 'ltr'}>
+    <div className="min-h-screen flex bg-muted overflow-hidden relative" dir={isRtl ? 'rtl' : 'ltr'}>
       {/* ── Entrance Overlay (Unified Background) ── */}
       <motion.div
         initial={{ opacity: 1 }}
@@ -219,7 +219,7 @@ const ForgotPassword = () => {
           transition={{ duration: 0.6, delay: 1 }}
           className="w-full max-w-[440px] z-10"
         >
-          <div className="bg-white rounded-[2.5rem] shadow-[0_40px_100px_-20px_rgba(0,0,0,0.1)] border border-slate-100 p-8 lg:p-10 space-y-8 relative overflow-hidden group/card">
+          <div className="bg-card rounded-[2.5rem] shadow-[0_40px_100px_-20px_rgba(0,0,0,0.1)] border border-border/50 p-8 lg:p-10 space-y-8 relative overflow-hidden group/card">
             {/* Visual Flare */}
             <div className="absolute -top-24 -right-24 w-48 h-48 bg-primary/5 rounded-full blur-3xl group-hover/card:bg-primary/10 transition-colors duration-700" />
 
@@ -251,12 +251,12 @@ const ForgotPassword = () => {
                   ? (t.auth?.accountRecovery || 'Account Recovery')
                   : (t.auth?.securityUpdate || 'Security Update')}
               </div>
-              <h1 className="text-3xl font-black tracking-tight text-slate-900 font-[family-name:var(--font-heading)] leading-none">
+              <h1 className="text-3xl font-black tracking-tight text-foreground font-[family-name:var(--font-heading)] leading-none">
                 {step === "email"
                   ? (t.auth?.forgotPassword || 'Forgot Password?')
                   : (t.auth?.resetPassword || 'Reset Password')}
               </h1>
-              <p className="text-slate-500 text-[15px] font-medium leading-relaxed">
+              <p className="text-muted-foreground text-[15px] font-medium leading-relaxed">
                 {step === "email"
                   ? (t.auth?.enterEmailForRecovery || 'Enter your email to receive a recovery code.')
                   : (t.auth?.enterCodeAndPassword || 'Enter the 6-digit code and your new password.')}
@@ -391,7 +391,7 @@ const ForgotPassword = () => {
               transition={{ delay: 1.5 }}
               className="text-center space-y-6"
             >
-              <p className="text-slate-500 text-sm font-medium">
+              <p className="text-muted-foreground text-sm font-medium">
                 {t.auth?.rememberPassword || 'Remember your password?'}{" "}
                 <Link
                   to="/login"
@@ -401,10 +401,10 @@ const ForgotPassword = () => {
                 </Link>
               </p>
 
-              <div className="pt-6 border-t border-slate-50">
+              <div className="pt-6 border-t border-border/50">
                 <Link
                   to="/login"
-                  className="inline-flex items-center gap-2 text-[10px] text-slate-400 font-black uppercase tracking-widest hover:text-primary transition-colors group"
+                  className="inline-flex items-center gap-2 text-[10px] text-muted-foreground/70 font-black uppercase tracking-widest hover:text-primary transition-colors group"
                 >
                   <ArrowLeft className="w-3 h-3 group-hover:-translate-x-1 transition-transform" />
                   {t.auth?.backToLogin || 'Back to Login'}
@@ -469,7 +469,7 @@ const ForgotPassword = () => {
               <div className="absolute inset-0 bg-primary/20 blur-[80px] rounded-full group-hover:bg-primary/30 transition-colors duration-500" />
               <motion.div
                 whileHover={{ rotate: 0, scale: 1.05 }}
-                className="relative w-56 h-56 rounded-[3.5rem] bg-white/5 backdrop-blur-3xl border border-white/10 flex items-center justify-center p-10 shadow-2xl transition-all duration-700"
+                className="relative w-56 h-56 rounded-[3.5rem] bg-card/5 backdrop-blur-3xl border border-white/10 flex items-center justify-center p-10 shadow-2xl transition-all duration-700"
               >
                 <img
                   src={logoImage}
@@ -498,12 +498,12 @@ const ForgotPassword = () => {
                 />
               </div>
 
-              <blockquote className="text-2xl text-slate-300 font-medium italic leading-relaxed px-4">
+              <blockquote className="text-2xl text-white/70 font-medium italic leading-relaxed px-4">
                 "{t.auth?.lampToMyFeet || 'Your word is a lamp for my feet, a light on my path.'}"
               </blockquote>
 
               <div className="flex flex-col items-center gap-2">
-                <p className="text-slate-500 font-black uppercase tracking-[0.3em] text-xs">
+                <p className="text-muted-foreground font-black uppercase tracking-[0.3em] text-xs">
                   {t.auth?.psalmReference || 'Psalm 119:105'}
                 </p>
                 <div className="flex gap-1.5">
@@ -513,7 +513,7 @@ const ForgotPassword = () => {
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
                       transition={{ delay: 1.8 + i * 0.1 }}
-                      className={`h-1.5 rounded-full transition-all duration-500 ${step === (i === 1 ? "email" : "reset") ? "w-8 bg-primary" : "w-2 bg-slate-700"}`}
+                      className={`h-1.5 rounded-full transition-all duration-500 ${step === (i === 1 ? "email" : "reset") ? "w-8 bg-primary" : "w-2 bg-white/20"}`}
                     />
                   ))}
                 </div>
@@ -548,12 +548,12 @@ const FloatingInput = ({
   <div className="space-y-1 w-full text-left">
     <div className="flex group h-14 relative">
       <div
-        className={`w-12 flex items-center justify-center bg-white border border-r-0 rounded-l-2xl transition-all duration-300 shadow-sm ${
+        className={`w-12 flex items-center justify-center bg-card border border-r-0 rounded-l-2xl transition-all duration-300 shadow-sm ${
           error && touched
             ? "border-red-500 bg-red-50/10"
             : focused
               ? "border-primary"
-              : "border-slate-200"
+              : "border-border"
         }`}
       >
         <Icon
@@ -562,7 +562,7 @@ const FloatingInput = ({
               ? "text-red-500"
               : focused
                 ? "text-primary scale-110"
-                : "text-slate-400"
+                : "text-muted-foreground/70"
           }`}
         />
       </div>
@@ -576,12 +576,12 @@ const FloatingInput = ({
           onFocus={() => setFocused(id)}
           onBlur={handleBlur}
           autoComplete={autoComplete}
-          className={`w-full h-full px-4 pt-4 bg-white border rounded-r-2xl focus:outline-none transition-all duration-300 text-[15px] font-medium shadow-sm ${
+          className={`w-full h-full px-4 pt-4 bg-card border rounded-r-2xl focus:outline-none transition-all duration-300 text-[15px] font-medium shadow-sm ${
             error && touched
               ? "border-red-500 ring-4 ring-red-500/5"
               : focused
                 ? "border-primary ring-4 ring-primary/5"
-                : "border-slate-200"
+                : "border-border"
           }`}
         />
         <label
@@ -589,7 +589,7 @@ const FloatingInput = ({
           className={`absolute left-4 transition-all duration-300 pointer-events-none font-bold ${
             focused || value
               ? `top-2 text-[10px] uppercase tracking-widest ${error && touched ? "text-red-500" : "text-primary"}`
-              : "top-4 text-[15px] text-slate-400"
+              : "top-4 text-[15px] text-muted-foreground/70"
           }`}
         >
           {label}
@@ -598,7 +598,7 @@ const FloatingInput = ({
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors p-1.5"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/70 hover:text-muted-foreground transition-colors p-1.5"
           >
             {showPassword ? (
               <EyeOff className="w-5 h-5" />

@@ -132,6 +132,7 @@ const GoogleRegister = () => {
         const userInfo: any = {
           token: returnData.token,
           tokenType: returnData.tokenType,
+          id: returnData.id,
           username: returnData.username,
           email: returnData.email,
           firstName: returnData.firstName,

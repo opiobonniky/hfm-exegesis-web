@@ -105,10 +105,10 @@ export const searchApi = {
       offset: options?.offset ?? 0,
     });
     if (response.returnCode === 200 && response.returnData) {
-      const rd = response.returnData as any;
+      const rd = response.returnData;
       return {
         success: true,
-        query: rd.query || query,
+        query: rd?.query || query,
         total: rd.total ?? 0,
         page: rd.page ?? 1,
         limit: rd.limit ?? 50,
@@ -129,8 +129,8 @@ export const searchApi = {
         offset: _options?.offset ?? 0,
       });
       if (response.returnCode === 200 && response.returnData) {
-        const rd = response.returnData as any;
-        return { data: rd.data ?? [], total: rd.total ?? (rd.data?.length ?? 0) };
+        const rd = response.returnData;
+        return { data: rd?.data ?? [], total: rd?.total ?? (rd?.data?.length ?? 0) };
       }
       return { data: [], total: 0 };
     } catch {
@@ -150,18 +150,18 @@ export const searchApi = {
       pageSize,
     });
     if (res.returnCode === 200 && res.returnData) {
-      const rd = res.returnData as any;
-      const entries = (rd.entries ?? []).map((e: any) => ({
-        id: e.id,
-        title: e.title || "",
-        content: e.content || e.reflection || "",
-        bookName: e.bookName,
-        chapter: e.chapter,
-        verseNumber: e.verseNumber,
-        tags: e.tags,
-        createdAt: e.createdAt || e.createdOn || "",
+      const rd = res.returnData;
+      const entries = (rd.entries ?? []).map((e: Record<string, unknown>) => ({
+        id: e.id as number,
+        title: (e.title as string) || "",
+        content: (e.content as string) || (e.reflection as string) || "",
+        bookName: e.bookName as string | undefined,
+        chapter: e.chapter as number | undefined,
+        verseNumber: e.verseNumber as number | undefined,
+        tags: e.tags as string | undefined,
+        createdAt: (e.createdAt as string) || (e.createdOn as string) || "",
       }));
-      return { data: entries, total: rd.totalCount ?? entries.length };
+      return { data: entries, total: rd?.totalCount ?? entries.length };
     }
     return { data: [], total: 0 };
   },
@@ -176,8 +176,8 @@ export const searchApi = {
         limit: options?.limit ?? 50,
       });
       if (response.returnCode === 200 && response.returnData) {
-        const rd = response.returnData as any;
-        return { data: rd.data ?? [], total: rd.total ?? (rd.data?.length ?? 0) };
+        const rd = response.returnData;
+        return { data: rd?.data ?? [], total: rd?.total ?? (rd?.data?.length ?? 0) };
       }
       return { data: [], total: 0 };
     } catch {
@@ -209,10 +209,10 @@ export const searchApi = {
       offset: options?.offset ?? 0,
     });
     if (response.returnCode === 200 && response.returnData) {
-      const rd = response.returnData as any;
+      const rd = response.returnData;
       return {
         success: true,
-        query: rd.query || query,
+        query: rd?.query || query,
         total: rd.total ?? 0,
         page: rd.page ?? 1,
         limit: rd.limit ?? 50,

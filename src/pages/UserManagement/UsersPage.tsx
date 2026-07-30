@@ -121,7 +121,7 @@ const DEFAULT_PAGE_SIZE = 10;
 // ─────────────────────────────────────────────
 // Helpers
 // ─────────────────────────────────────────────
-const safeTrim = (v: any) => String(v ?? "").trim();
+const safeTrim = (v: unknown) => String(v ?? "").trim();
 const getInitials = (f: string, l: string) =>
   `${f?.charAt(0) ?? "?"}${l?.charAt(0) ?? "?"}`.toUpperCase();
 
@@ -618,7 +618,7 @@ const UsersPage = () => {
     async (query: string, pg: number, pgSize: number) => {
       setLoading(true);
       try {
-        const res: any = await sendPostRequest("admin", "get-users-by-admin", {
+        const res = await sendPostRequest("admin", "get-users-by-admin", {
           search: query.trim() || null,
           page: pg,
           pageSize: pgSize,
@@ -631,27 +631,27 @@ const UsersPage = () => {
             rawUsers = data.users;
           else rawUsers = [];
 
-          const sanitizeDate = (val: any) => {
+          const sanitizeDate = (val: unknown) => {
             if (!val) return "";
             if (typeof val === "string") return val;
             if (val instanceof Date) return val.toISOString();
-            if (typeof val === "object" && val.toISOString) {
+            if (typeof val === "object" && (val as Record<string, unknown>).toISOString) {
               try {
-                return val.toISOString();
+                return (val as Date).toISOString();
               } catch {
                 return "";
               }
             }
             return "";
           };
-          const safeString = (val: any, fallback = "") => {
+          const safeString = (val: unknown, fallback = "") => {
             if (val === null || val === undefined) return fallback;
             if (typeof val === "string") return val;
             if (typeof val === "number") return String(val);
             return fallback;
           };
 
-          const usersWithVerified = rawUsers.map((u: any) => ({
+          const usersWithVerified = rawUsers.map((u: Record<string, unknown>) => ({
             ...u,
             isVerified: u.emailVerified ?? false,
             createdOn: safeString(u.createdOn),
@@ -660,7 +660,7 @@ const UsersPage = () => {
             roleName: u.userRole === 1n || u.userRole === 1 ? "admin" : "user",
             roleId: u.userRole === 1n || u.userRole === 1 ? 1 : 2,
           }));
-          setUsers(usersWithVerified);
+          setUsers(usersWithVerified as unknown as User[]);
           setTotalCount(data?.totalCount ?? rawUsers.length);
           setTotalPages(
             data?.totalPages ?? Math.ceil(rawUsers.length / pageSize),
@@ -675,10 +675,10 @@ const UsersPage = () => {
           setTotalCount(0);
           setTotalPages(1);
         }
-      } catch (e: any) {
+      } catch (e) {
         toast({
           title: t.userManagement.networkError,
-          description: e?.message ?? t.userManagement.unknownError,
+          description: (e as Error)?.message ?? t.userManagement.unknownError,
           variant: "destructive",
         });
         setUsers([]);
@@ -807,7 +807,7 @@ const UsersPage = () => {
     }
     setDeleting(true);
     try {
-      const res: any = await sendPostRequest("admin", "delete-user", {
+      const res = await sendPostRequest("admin", "delete-user", {
         username: deleteTarget.username,
       });
       if (res?.returnCode === 200) {
@@ -824,10 +824,10 @@ const UsersPage = () => {
           variant: "destructive",
         });
       }
-    } catch (e: any) {
+    } catch (e) {
       toast({
         title: t.userManagement.networkError,
-        description: e?.message ?? t.userManagement.unknownError,
+        description: (e as Error)?.message ?? t.userManagement.unknownError,
         variant: "destructive",
       });
     } finally {
@@ -866,7 +866,7 @@ const UsersPage = () => {
     }
     setSaving(true);
     try {
-      const res: any = await sendPostRequest("admin", "update-user", {
+      const res = await sendPostRequest("admin", "update-user", {
         username: editTarget.username,
         ...editForm,
       });
@@ -884,7 +884,7 @@ const UsersPage = () => {
           variant: "destructive",
         });
       }
-    } catch (e: any) {
+    } catch (e) {
       toast({                      title: t.userManagement.networkError,
         description: e?.message ?? t.userManagement.unknownError,
         variant: "destructive",
@@ -902,7 +902,7 @@ const UsersPage = () => {
       ),
     );
     try {
-      const res: any = await sendPostRequest("admin", "toggle-user-status", {
+      const res = await sendPostRequest("admin", "toggle-user-status", {
         username: user.username,
         status: !user.status,
         email: user.email.trim(),
@@ -926,7 +926,7 @@ const UsersPage = () => {
           variant: "destructive",
         });
       }
-    } catch (e: any) {
+    } catch (e) {
       setUsers((prev) =>
         prev.map((u) =>
           u.username === user.username ? { ...u, status: user.status } : u,
@@ -934,7 +934,7 @@ const UsersPage = () => {
       );
       toast({
         title: t.userManagement.networkError,
-        description: e?.message ?? t.userManagement.unknownError,
+        description: (e as Error)?.message ?? t.userManagement.unknownError,
         variant: "destructive",
       });
     }
@@ -950,7 +950,7 @@ const UsersPage = () => {
       ),
     );
     try {
-      const res: any = await sendPostRequest(
+      const res = await sendPostRequest(
         "admin",
         "toggle-user-verification",
         { username: user.username, isVerified: next },
@@ -976,7 +976,7 @@ const UsersPage = () => {
           variant: "destructive",
         });
       }
-    } catch (e: any) {
+    } catch (e) {
       setUsers((prev) =>
         prev.map((u) =>
           u.username === user.username
@@ -986,7 +986,7 @@ const UsersPage = () => {
       );
       toast({
         title: t.userManagement.networkError,
-        description: e?.message ?? t.userManagement.unknownError,
+        description: (e as Error)?.message ?? t.userManagement.unknownError,
         variant: "destructive",
       });
     } finally {
@@ -1630,7 +1630,7 @@ const UsersPage = () => {
                   <Input
                     value={editForm.firstName ?? ""}
                     onChange={(e) =>
-                      updateField("firstName", e.target.value as any)
+                      updateField("firstName", e.target.value)
                     }
                   />
                 </div>
@@ -1641,7 +1641,7 @@ const UsersPage = () => {
                   <Input
                     value={editForm.lastName ?? ""}
                     onChange={(e) =>
-                      updateField("lastName", e.target.value as any)
+                      updateField("lastName", e.target.value)
                     }
                   />
                 </div>
@@ -1651,7 +1651,7 @@ const UsersPage = () => {
                 <Input
                   value={editForm.middleName ?? ""}
                   onChange={(e) =>
-                    updateField("middleName", e.target.value as any)
+                    updateField("middleName", e.target.value)
                   }
                   placeholder={t.userManagement.optional}
                 />
@@ -1673,7 +1673,7 @@ const UsersPage = () => {
                   <Input
                     value={editForm.phoneNumber ?? ""}
                     onChange={(e) =>
-                      updateField("phoneNumber", e.target.value as any)
+                      updateField("phoneNumber", e.target.value)
                     }
                   />
                 </div>
@@ -1686,7 +1686,7 @@ const UsersPage = () => {
                     onValueChange={(v) =>
                       updateField(
                         "gender",
-                        (v === NONE ? "Not Specified" : v) as any,
+                        v === NONE ? "Not Specified" : v,
                       )
                     }
                   >
@@ -1710,7 +1710,7 @@ const UsersPage = () => {
                     onValueChange={(v) =>
                       updateField(
                         "maritalStatus",
-                        (v === NONE ? null : v) as any,
+                        v === NONE ? null : v,
                       )
                     }
                   >
@@ -1733,8 +1733,8 @@ const UsersPage = () => {
                 <Select
                   value={(editForm.roleName ?? "user") as string}
                   onValueChange={(v) => {
-                    updateField("roleName", v as any);
-                    updateField("roleId", (v === "admin" ? 1 : 2) as any);
+                    updateField("roleName", v);
+                    updateField("roleId", v === "admin" ? 1 : 2);
                   }}
                 >
                   <SelectTrigger>
@@ -1755,7 +1755,7 @@ const UsersPage = () => {
                 </div>
                 <Switch
                   checked={editForm.status ?? true}
-                  onCheckedChange={(v) => updateField("status", v as any)}
+                  onCheckedChange={(v) => updateField("status", v)}
                 />
               </div>
             </div>

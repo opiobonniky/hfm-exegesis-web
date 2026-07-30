@@ -1463,6 +1463,7 @@
     "readingPlans": "Планы",
     "settings": "Настройки",
     "dashboard": "Панель",
+    "adminDashboard": "Admin Console",
     "activity": "Активность",
     "logout": "Выйти",
     "profile": "Профиль",
@@ -1473,7 +1474,11 @@
     "userActivity": "Активность",
     "journalPrompts": "Темы",
     "journalTemplates": "Шаблоны",
-    "myDashboard": "Моя панель"
+    "myDashboard": "Моя панель",
+    "triviaAdmin": "Trivia Management",
+    "dailyContentAdmin": "Daily Content",
+    "subscriptionsAdmin": "Subscriptions",
+    "adminTools": "Admin Tools"
   },
   "settings": {
     "pageTitle": "Настройки",

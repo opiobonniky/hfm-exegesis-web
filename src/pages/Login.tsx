@@ -69,6 +69,7 @@ const Login = () => {
         const userInfo: any = {
           token: returnData.token,
           tokenType: returnData.tokenType,
+          id: returnData.id,
           username: returnData.username,
           email: returnData.email,
           firstName: returnData.firstName,
@@ -295,7 +296,7 @@ const Login = () => {
             {/* Logo Section */}
             <div className="relative inline-block">
               <div className="absolute inset-0 bg-primary/20 blur-[60px] rounded-full" />
-              <Link to="/" className="relative w-48 h-48 md:w-64 md:h-64 rounded-[3rem] bg-white/5 backdrop-blur-2xl border border-white/10 flex items-center justify-center p-8 shadow-2xl hover:border-white/20 transition-colors">
+              <Link to="/" className="relative w-48 h-48 md:w-64 md:h-64 rounded-[3rem] bg-card/5 backdrop-blur-2xl border border-white/10 flex items-center justify-center p-8 shadow-2xl hover:border-white/20 transition-colors">
                 <img
                   src={logoImage}
                   alt="Exegesis Logo"
@@ -313,10 +314,10 @@ const Login = () => {
                 })()}
               </h2>
               <div className="h-1.5 w-20 bg-primary mx-auto rounded-full" />
-              <blockquote className="text-xl md:text-2xl text-slate-300 font-medium italic leading-relaxed">
+              <blockquote className="text-xl md:text-2xl text-white/70 font-medium italic leading-relaxed">
                 "{t.auth?.lampToMyFeet || 'Your word is a lamp for my feet, a light on my path.'}"
               </blockquote>
-              <p className="text-slate-500 font-bold uppercase tracking-[0.2em] text-sm">
+              <p className="text-muted-foreground font-bold uppercase tracking-[0.2em] text-sm">
                 {t.auth?.psalmReference || 'Psalm 119:105'}
               </p>
             </div>
@@ -325,7 +326,7 @@ const Login = () => {
 
         {/* Bottom bar */}
         <div
-          className="absolute bottom-10 start-0 w-full px-16 flex justify-between items-center text-slate-500 text-xs font-bold uppercase tracking-widest anim-fade"
+          className="absolute bottom-10 start-0 w-full px-16 flex justify-between items-center text-muted-foreground text-xs font-bold uppercase tracking-widest anim-fade"
           style={{ animationDelay: "0.5s" }}
         >
           <span>{t.auth?.loginCopyright || '© 2026 Exegesis Bible'}</span>
@@ -359,24 +360,24 @@ const Login = () => {
             className="anim-fade text-center"
             style={{ animationDelay: "0.1s" }}
           >
-            <h1 className="text-[26px] font-bold tracking-tight text-slate-900 leading-tight">
+            <h1 className="text-[26px] font-bold tracking-tight text-foreground leading-tight">
               {t.auth?.signIn || 'Welcome Back!'}
             </h1>
-            <p className="text-slate-500 mt-2 text-sm">
+            <p className="text-muted-foreground mt-2 text-sm">
               {t.auth?.dontHaveAccount || 'Sign in to continue your journey.'}
             </p>
           </div>
 
           {/* Language Selector */}
           <div className="flex justify-center anim-fade" style={{ animationDelay: "0.15s" }}>
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-slate-50 rounded-full border border-slate-100">
-              <Globe className="w-3.5 h-3.5 text-slate-400" />
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-muted rounded-full border border-border/50">
+              <Globe className="w-3.5 h-3.5 text-muted-foreground/70" />
               <Select
                 value={currentLang}
                 onValueChange={(value) => setLanguage(value as Language)}
                 disabled={langLoading}
               >
-                <SelectTrigger className="h-7 text-xs border-0 bg-transparent shadow-none p-0 gap-1 text-slate-500 hover:text-slate-700 focus:ring-0 [&>svg]:hidden">
+                <SelectTrigger className="h-7 text-xs border-0 bg-transparent shadow-none p-0 gap-1 text-muted-foreground hover:text-foreground/80 focus:ring-0 [&>svg]:hidden">
                   <SelectValue>
                     <span>{LANGUAGE_NAMES[currentLang]}</span>
                   </SelectValue>
@@ -425,8 +426,8 @@ const Login = () => {
             {/* Email input */}
             <div className="space-y-1">
               <div className="flex group h-14">
-                <div className={`w-12 flex items-center justify-center bg-white border ${isRtl ? 'border-l-0 border-slate-200 rounded-r-xl' : 'border-r-0 border-slate-200 rounded-l-xl'} group-focus-within:border-primary transition-colors shadow-sm`}>
-                  <Mail className="w-[18px] h-[18px] text-slate-400 group-focus-within:text-primary" />
+                <div className={`w-12 flex items-center justify-center bg-card border ${isRtl ? 'border-l-0 border-border rounded-r-xl' : 'border-r-0 border-border rounded-l-xl'} group-focus-within:border-primary transition-colors shadow-sm`}>
+                  <Mail className="w-[18px] h-[18px] text-muted-foreground/70 group-focus-within:text-primary" />
                 </div>
                 <div className="flex-1 relative">
                   <input
@@ -437,7 +438,7 @@ const Login = () => {
                     onChange={(e) => setEmail(e.target.value)}
                     onFocus={() => setEmailFocused(true)}
                     onBlur={() => setEmailFocused(false)}
-                    className={`w-full h-full px-4 pt-4 bg-white border border-slate-200 ${isRtl ? 'rounded-l-xl' : 'rounded-r-xl'} focus:outline-none focus:border-primary transition-all text-[15px] shadow-sm`}
+                    className={`w-full h-full px-4 pt-4 bg-card border border-border ${isRtl ? 'rounded-l-xl' : 'rounded-r-xl'} focus:outline-none focus:border-primary transition-all text-[15px] shadow-sm`}
                     required
                   />
                   <label
@@ -445,7 +446,7 @@ const Login = () => {
                     className={`absolute ${isRtl ? 'right-4' : 'left-4'} transition-all pointer-events-none ${
                       emailFocused || email
                         ? "top-1.5 text-[12px] text-primary"
-                        : "top-4 text-[15px] text-slate-400"
+                        : "top-4 text-[15px] text-muted-foreground/70"
                     }`}
                   >
                     {t.common?.email || 'Email Address'}
@@ -457,8 +458,8 @@ const Login = () => {
             {/* Password input */}
             <div className="space-y-1">
               <div className="flex group h-14">
-                <div className={`w-12 flex items-center justify-center bg-white border ${isRtl ? 'border-l-0 border-slate-200 rounded-r-xl' : 'border-r-0 border-slate-200 rounded-l-xl'} group-focus-within:border-primary transition-colors shadow-sm`}>
-                  <Lock className="w-[18px] h-[18px] text-slate-400 group-focus-within:text-primary" />
+                <div className={`w-12 flex items-center justify-center bg-card border ${isRtl ? 'border-l-0 border-border rounded-r-xl' : 'border-r-0 border-border rounded-l-xl'} group-focus-within:border-primary transition-colors shadow-sm`}>
+                  <Lock className="w-[18px] h-[18px] text-muted-foreground/70 group-focus-within:text-primary" />
                 </div>
                 <div className="flex-1 relative">
                   <input
@@ -469,7 +470,7 @@ const Login = () => {
                     onChange={(e) => setPassword(e.target.value)}
                     onFocus={() => setPasswordFocused(true)}
                     onBlur={() => setPasswordFocused(false)}
-                    className={`w-full h-full px-4 pt-4 ${isRtl ? 'pe-12' : 'pr-12'} bg-white border border-slate-200 ${isRtl ? 'rounded-l-xl' : 'rounded-r-xl'} focus:outline-none focus:border-primary transition-all text-[15px] text-sm shadow-sm`}
+                    className={`w-full h-full px-4 pt-4 ${isRtl ? 'pe-12' : 'pr-12'} bg-card border border-border ${isRtl ? 'rounded-l-xl' : 'rounded-r-xl'} focus:outline-none focus:border-primary transition-all text-[15px] text-sm shadow-sm`}
                     required
                   />
                   <label
@@ -477,7 +478,7 @@ const Login = () => {
                     className={`absolute ${isRtl ? 'right-4' : 'left-4'} transition-all pointer-events-none ${
                       passwordFocused || password
                         ? "top-1.5 text-[12px] text-primary"
-                        : "top-4 text-[15px] text-slate-400"
+                        : "top-4 text-[15px] text-muted-foreground/70"
                     }`}
                   >
                     {t.common?.password || 'Password'}
@@ -485,7 +486,7 @@ const Login = () => {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className={`absolute ${isRtl ? 'left-3' : 'right-3'} top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors p-1`}
+                    className={`absolute ${isRtl ? 'left-3' : 'right-3'} top-1/2 -translate-y-1/2 text-muted-foreground/70 hover:text-muted-foreground transition-colors p-1`}
                   >
                     {showPassword ? (
                       <EyeOff className="w-5 h-5" />
@@ -523,7 +524,7 @@ const Login = () => {
             {/* Create Account button */}
             <button
               type="button"
-              className="w-full h-14 bg-white border-2 border-slate-100 rounded-2xl font-semibold text-[15px] text-slate-900 hover:bg-slate-50 hover:border-slate-300 hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 transition-all duration-200"
+              className="w-full h-14 bg-card border-2 border-border/50 rounded-2xl font-semibold text-[15px] text-foreground hover:bg-muted hover:border-border hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 transition-all duration-200"
               onClick={() => navigate("/register")}
             >
               {t.auth?.createAccount || 'Create New Account'}
@@ -531,52 +532,55 @@ const Login = () => {
 
             {/* Divider */}
             <div className="flex items-center gap-4 py-1">
-              <div className="flex-1 h-[1px] bg-slate-100" />
-              <span className="text-xs text-slate-400 font-medium">
+              <div className="flex-1 h-[1px] bg-muted" />
+              <span className="text-xs text-muted-foreground/70 font-medium">
                 {t.common?.orContinueWith || 'or continue with'}
               </span>
-              <div className="flex-1 h-[1px] bg-slate-100" />
+              <div className="flex-1 h-[1px] bg-muted" />
             </div>
 
-            {/* Google button */}
-            <button
-              type="button"
-              className="w-full h-14 bg-white border-2 border-slate-100 rounded-2xl flex items-center justify-center gap-3 hover:bg-slate-50 hover:border-slate-300 hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 transition-all duration-200 font-semibold text-slate-900 relative"
-              onClick={() => handleGoogleLogin()}
-              disabled={isGoogleLoading}
-            >
-              {isGoogleLoading ? (
-                <div className="w-5 h-5 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin" />
-              ) : (
-                <>
-                  <img
-                    src={googleIcon}
-                    alt="Google"
-                    className={`w-5 h-5 absolute ${isRtl ? 'right-6' : 'left-6'}`}
-                  />
-                  <span>{t.auth?.signInWithGoogle || 'Continue with Google'}</span>
-                </>
-              )}
-            </button>
+            {/* Social buttons — side by side */}
+            <div className="grid grid-cols-2 gap-3">
+              {/* Google button */}
+              <button
+                type="button"
+                className="h-12 bg-card border-2 border-border/50 rounded-xl flex items-center justify-center gap-2 hover:bg-muted hover:border-border hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 transition-all duration-200 font-semibold text-foreground relative"
+                onClick={() => handleGoogleLogin()}
+                disabled={isGoogleLoading}
+              >
+                {isGoogleLoading ? (
+                  <div className="w-4 h-4 border-2 border-border border-t-slate-600 rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <img
+                      src={googleIcon}
+                      alt="Google"
+                      className="w-4 h-4 shrink-0"
+                    />
+                    <span className="text-xs font-medium truncate">{t.auth?.signInWithGoogle || 'Google'}</span>
+                  </>
+                )}
+              </button>
 
-            {/* Lordsbook button */}
-            <button
-              type="button"
-              className="w-full h-14 bg-white border-2 border-slate-100 rounded-2xl flex items-center justify-center gap-3 hover:bg-slate-50 hover:border-slate-300 hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 transition-all duration-200 font-semibold text-slate-900 relative"
-              onClick={handleLordsbookLogin}
-            >
-              <img
-                src={lordsbookLogo}
-                alt="Lordsbook"
-                className={`w-5 h-5 absolute ${isRtl ? 'right-6' : 'left-6'}`}
-              />
-              <span>{t.auth?.signInWithLordsbook || 'Continue with Lordsbook'}</span>
-            </button>
+              {/* Lordsbook button */}
+              <button
+                type="button"
+                className="h-12 bg-card border-2 border-border/50 rounded-xl flex items-center justify-center gap-2 hover:bg-muted hover:border-border hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 transition-all duration-200 font-semibold text-foreground relative"
+                onClick={handleLordsbookLogin}
+              >
+                <img
+                  src={lordsbookLogo}
+                  alt="Lordsbook"
+                  className="w-4 h-4 shrink-0"
+                />
+                <span className="text-xs font-medium truncate">{t.auth?.signInWithLordsbook || 'Lordsbook'}</span>
+              </button>
+            </div>
           </form>
 
           {/* Terms */}
           <div className="space-y-3">
-            <p className="text-[11px] text-center text-slate-400 leading-relaxed max-w-[300px] mx-auto">
+            <p className="text-[11px] text-center text-muted-foreground/70 leading-relaxed max-w-[300px] mx-auto">
               {t.auth?.agreeToTerms || 'By continuing, you agree to our'}{" "}
               <Link to="/terms" className="text-primary font-bold underline">
                 {t.auth?.terms || 'Terms of Service'}
@@ -586,7 +590,7 @@ const Login = () => {
                 {t.auth?.privacyPolicy || 'Privacy Policy'}
               </Link>
             </p>
-            <p className="text-[11px] text-center text-slate-400 font-medium">
+            <p className="text-[11px] text-center text-muted-foreground/70 font-medium">
               {t.auth?.fullVersionComing || 'Full version arriving with public launch.'}
             </p>
           </div>

@@ -3,7 +3,6 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import LearnStage from "./LearnStage";
 import {
-  LEARN_TABS,
   MOCK_PASSAGE_REF,
   MOCK_BOOK,
   MOCK_CHAPTER,
@@ -28,15 +27,12 @@ Object.assign(navigator, {
   },
 });
 
-// ── Shared test props ──
-
 function createProps(overrides: Record<string, any> = {}) {
   const onUpdate = vi.fn();
   const onAdvance = vi.fn();
   const onSaveProgress = vi.fn();
   const onWordTap = vi.fn();
   return {
-    learnTab: "exegesis",
     learnNotes: "",
     bookName: MOCK_BOOK,
     chapter: MOCK_CHAPTER,
@@ -52,17 +48,20 @@ function createProps(overrides: Record<string, any> = {}) {
     translations: MOCK_TRANSLATIONS,
     translationsLoading: false,
     translationsError: false,
+    isPublic: false,
     onUpdate,
     onAdvance,
     onSaveProgress,
     onWordTap,
     stageLabel: MOCK_STAGE_LABEL,
-    learnTabs: LEARN_TABS,
     ...overrides,
   };
 }
 
-// ── Tests ──
+async function expandCollapsible(sectionTitle: string) {
+  const trigger = screen.getByText(sectionTitle);
+  await userEvent.click(trigger.closest("button")!);
+}
 
 describe("LearnStage", () => {
   beforeEach(() => {
@@ -88,182 +87,92 @@ describe("LearnStage", () => {
     });
   });
 
-  describe("tab bar", () => {
-    it("renders all four tabs", () => {
+  describe("study notes", () => {
+    it("renders study notes textarea always visible with placeholder", () => {
       render(<LearnStage {...createProps()} />);
-      for (const tab of LEARN_TABS) {
-        expect(screen.getAllByText(tab.label).length).toBeGreaterThanOrEqual(1);
-      }
-    });
-
-    it("shows the current tab as active with primary styling", () => {
-      render(<LearnStage {...createProps({ learnTab: "language" })} />);
-      const languageTab = screen.getByText("Original Language");
-      expect(languageTab.className).toContain("bg-primary");
-      const exegesisTabs = screen.getAllByText("Study Notes");
-      // At least one tab element should have "bg-card" (non-active styling)
-      const nonActiveTab = exegesisTabs.find((el) => el.className.includes("bg-card"));
-      expect(nonActiveTab).toBeTruthy();
-    });
-
-    it("calls onUpdate when a different tab is clicked", async () => {
-      const onUpdate = vi.fn();
-      render(<LearnStage {...createProps({ onUpdate })} />);
-      const languageBtns = screen.getAllByText("Original Language");
-      await userEvent.click(languageBtns[0]);
-      expect(onUpdate).toHaveBeenCalledWith({ learnTab: "language" });
-    });
-  });
-
-  describe("exegesis tab", () => {
-    it("renders study notes textarea with placeholder", () => {
-      render(<LearnStage {...createProps({ learnTab: "exegesis" })} />);
       const textarea = screen.getByPlaceholderText("Write your study notes, observations, and insights...");
       expect(textarea).toBeInTheDocument();
     });
 
     it("displays existing notes", () => {
-      render(<LearnStage {...createProps({ learnTab: "exegesis", learnNotes: "Jesus is the Word." })} />);
+      render(<LearnStage {...createProps({ learnNotes: "Jesus is the Word." })} />);
       expect(screen.getByDisplayValue("Jesus is the Word.")).toBeInTheDocument();
     });
 
     it("calls onUpdate when notes change", async () => {
       const onUpdate = vi.fn();
-      render(<LearnStage {...createProps({ learnTab: "exegesis", onUpdate })} />);
+      render(<LearnStage {...createProps({ onUpdate })} />);
       const textarea = screen.getByPlaceholderText("Write your study notes, observations, and insights...");
       await userEvent.type(textarea, "J");
       expect(onUpdate).toHaveBeenCalledWith({ learnNotes: "J" });
     });
   });
 
-  describe("language tab", () => {
-    it("shows word count in the header", () => {
-      render(<LearnStage {...createProps({ learnTab: "language", verseWords: createMockVerseWords(3) })} />);
-      expect(screen.getByText("(3 words)")).toBeInTheDocument();
+  describe("original language words collapsible", () => {
+    it("shows collapsible trigger with word count", () => {
+      render(<LearnStage {...createProps({ verseWords: createMockVerseWords(3) })} />);
+      expect(screen.getByText("Original Language Words")).toBeInTheDocument();
     });
 
-    it("renders verse words with Strong's lemma text", () => {
-      render(<LearnStage {...createProps({ learnTab: "language", verseWords: createMockVerseWords(2) })} />);
+    it("shows loading spinner when wordsLoading", () => {
+      render(<LearnStage {...createProps({ wordsLoading: true, verseWords: [] })} />);
+      expect(screen.getByText("Original Language Words")).toBeInTheDocument();
+    });
+
+    it("does not render collapsible when no verse words", () => {
+      render(<LearnStage {...createProps({ verseWords: [] })} />);
+      expect(screen.queryByText("Original Language Words")).not.toBeInTheDocument();
+    });
+
+    it("renders verse word content when expanded", async () => {
+      render(<LearnStage {...createProps({ verseWords: createMockVerseWords(2) })} />);
+      await expandCollapsible("Original Language Words");
       expect(screen.getByText("Word")).toBeInTheDocument();
       expect(screen.getByText("Test")).toBeInTheDocument();
-      expect(screen.getByText("lemma1")).toBeInTheDocument();
-      expect(screen.getByText("lemma2")).toBeInTheDocument();
-    });
-
-    it("renders lemma text for words", () => {
-      render(<LearnStage {...createProps({ learnTab: "language" })} />);
-      expect(screen.getByText("lemma1")).toBeInTheDocument();
     });
 
     it("calls onWordTap when a word with Strong's is clicked", async () => {
       const onWordTap = vi.fn();
-      render(<LearnStage {...createProps({ learnTab: "language", onWordTap })} />);
+      render(<LearnStage {...createProps({ onWordTap })} />);
+      await expandCollapsible("Original Language Words");
       const wordEl = screen.getByText("Word");
       await userEvent.click(wordEl.closest("div")!);
       expect(onWordTap).toHaveBeenCalledWith("G01", "N-NSM");
     });
 
-    it("shows loading spinner when wordsLoading", () => {
-      render(<LearnStage {...createProps({ learnTab: "language", wordsLoading: true })} />);
-      // The Loader2 spinner should be rendered
-      expect(screen.getByText("Original Language Words")).toBeInTheDocument();
-    });
-
-    it("shows empty state when no verse words", () => {
-      render(<LearnStage {...createProps({ learnTab: "language", verseWords: [] })} />);
-      expect(screen.getByText("No Strong's word data available for this passage.")).toBeInTheDocument();
-    });
-
-    it("shows prompt to select passage when no book is set", () => {
-      render(<LearnStage {...createProps({ learnTab: "language", verseWords: [], bookName: "", chapter: "" })} />);
-      expect(screen.getByText("Select a passage to see original language word analysis.")).toBeInTheDocument();
-    });
-
-    it("shows hint text at bottom when words are present", () => {
-      render(<LearnStage {...createProps({ learnTab: "language" })} />);
-      expect(screen.getByText("Tap a word to see its original meaning and full explanation.")).toBeInTheDocument();
+    it("shows hint text at bottom when words are present and expanded", async () => {
+      render(<LearnStage {...createProps({ verseWords: createMockVerseWords(1) })} />);
+      await expandCollapsible("Original Language Words");
+      expect(screen.getByText("Tap a word to explore its original meaning")).toBeInTheDocument();
     });
   });
 
-  describe("history tab", () => {
-    it("renders the historical context header with counts", () => {
-      render(<LearnStage {...createProps({ learnTab: "history" })} />);
-      expect(screen.getAllByText("Historical Context").length).toBeGreaterThanOrEqual(1);
-      expect(screen.getByText(/(2 commentaries, 3 cross-refs, 2 word studies, 1 dictionary, 4 topics, 3 translations)/)).toBeInTheDocument();
-    });
-
-    it("renders translation comparison section", () => {
-      render(<LearnStage {...createProps({ learnTab: "history" })} />);
-      expect(screen.getByText(/Translation Comparison/)).toBeInTheDocument();
+  describe("translation comparison collapsible", () => {
+    it("renders translations when expanded", async () => {
+      render(<LearnStage {...createProps()} />);
+      await expandCollapsible("Translation Comparison");
       expect(screen.getByText("KJV")).toBeInTheDocument();
       expect(screen.getByText("NIV")).toBeInTheDocument();
       expect(screen.getByText("ESV")).toBeInTheDocument();
     });
+  });
 
-    it("renders commentaries with author and text", () => {
-      render(<LearnStage {...createProps({ learnTab: "history" })} />);
+  describe("commentaries collapsible", () => {
+    it("renders commentaries when expanded", async () => {
+      render(<LearnStage {...createProps()} />);
+      await expandCollapsible("Commentaries");
       expect(screen.getByText("Matthew Henry")).toBeInTheDocument();
       expect(screen.getByText("Commentary on the Whole Bible")).toBeInTheDocument();
       expect(screen.getByText("John Calvin")).toBeInTheDocument();
     });
 
-    it("renders cross-references with ref and text", () => {
-      render(<LearnStage {...createProps({ learnTab: "history" })} />);
-      expect(screen.getByText("Genesis 1:1")).toBeInTheDocument();
-      expect(screen.getByText("Colossians 1:15-20")).toBeInTheDocument();
-    });
-
-    it("renders word studies section", () => {
-      render(<LearnStage {...createProps({ learnTab: "history" })} />);
-      expect(screen.getByText("Λόγος")).toBeInTheDocument();
-      expect(screen.getByText("(Logos)")).toBeInTheDocument();
-      expect(screen.getByText("G3056")).toBeInTheDocument();
-      expect(screen.getByText("Θεός")).toBeInTheDocument();
-    });
-
-    it("renders dictionary terms", () => {
-      render(<LearnStage {...createProps({ learnTab: "history" })} />);
-      expect(screen.getByText("Beginning")).toBeInTheDocument();
-      expect(screen.getByText("bih-GIN-ing")).toBeInTheDocument();
-    });
-
-    it("renders related topics as badges", () => {
-      render(<LearnStage {...createProps({ learnTab: "history" })} />);
-      expect(screen.getByText("Deity of Christ")).toBeInTheDocument();
-      expect(screen.getByText("Creation")).toBeInTheDocument();
-    });
-
-    it("shows loading spinner when resourcesLoading", () => {
-      render(<LearnStage {...createProps({ learnTab: "history", resourcesLoading: true, verseResources: null, translations: null })} />);
-      expect(screen.getAllByText("Historical Context").length).toBeGreaterThanOrEqual(1);
-      // Should show the Loader2 spinner
-    });
-
-    it("shows empty state when no resources at all", () => {
-      render(<LearnStage {...createProps({
-        learnTab: "history",
-        verseResources: {
-          commentaries: [],
-          crossReferences: [],
-          wordStudies: [],
-          dictionaryTerms: [],
-          relatedTopics: [],
-        },
-        translations: null,
-        translationsLoading: false,
-      })} />);
-      expect(screen.getByText("No historical context resources available for this passage.")).toBeInTheDocument();
-    });
-  });
-
-  describe("history tab — copy commentary", () => {
     it("copies commentary text with attribution to clipboard", async () => {
       const writeText = vi.fn();
       Object.assign(navigator, { clipboard: { writeText } });
-      render(<LearnStage {...createProps({ learnTab: "history" })} />);
-      // Find copy buttons — they're the ones with title "Copy with attribution"
+      render(<LearnStage {...createProps()} />);
+      await expandCollapsible("Commentaries");
       const copyButtons = screen.getAllByTitle("Copy with attribution");
-      expect(copyButtons.length).toBe(2); // Two commentaries
+      expect(copyButtons.length).toBe(2);
       await userEvent.click(copyButtons[0]);
       expect(writeText).toHaveBeenCalledWith(
         expect.stringContaining("This verse shows the divine nature of Christ")
@@ -277,10 +186,17 @@ describe("LearnStage", () => {
     });
   });
 
-  describe("history tab — cross-reference navigation", () => {
+  describe("cross references collapsible", () => {
+    it("renders cross-references when expanded", async () => {
+      render(<LearnStage {...createProps()} />);
+      await expandCollapsible("Cross References");
+      expect(screen.getByText("Genesis 1:1")).toBeInTheDocument();
+      expect(screen.getByText("Colossians 1:15-20")).toBeInTheDocument();
+    });
+
     it("navigates to Bible Reader when a cross-ref is clicked", async () => {
-      render(<LearnStage {...createProps({ learnTab: "history" })} />);
-      // Cross references are rendered as buttons containing the ref text
+      render(<LearnStage {...createProps()} />);
+      await expandCollapsible("Cross References");
       const genesisRef = screen.getByText("Genesis 1:1");
       await userEvent.click(genesisRef.closest("button")!);
       expect(mockNavigate).toHaveBeenCalledWith(
@@ -289,7 +205,8 @@ describe("LearnStage", () => {
     });
 
     it("navigates to multi-word book references correctly", async () => {
-      render(<LearnStage {...createProps({ learnTab: "history" })} />);
+      render(<LearnStage {...createProps()} />);
+      await expandCollapsible("Cross References");
       const colRef = screen.getByText("Colossians 1:15-20");
       await userEvent.click(colRef.closest("button")!);
       expect(mockNavigate).toHaveBeenCalledWith(
@@ -298,46 +215,80 @@ describe("LearnStage", () => {
     });
   });
 
-  describe("prologue tab", () => {
-    it("renders book prologue with author, audience, date", () => {
-      render(<LearnStage {...createProps({ learnTab: "prologue" })} />);
-      expect(screen.getByText("Book Prologue — John")).toBeInTheDocument();
+  describe("word studies collapsible", () => {
+    it("renders word studies when expanded", async () => {
+      render(<LearnStage {...createProps()} />);
+      await expandCollapsible("Word Studies");
+      expect(screen.getByText("Λόγος")).toBeInTheDocument();
+      expect(screen.getByText("(Logos)")).toBeInTheDocument();
+      expect(screen.getByText("G3056")).toBeInTheDocument();
+      expect(screen.getByText("Θεός")).toBeInTheDocument();
+    });
+  });
+
+  describe("dictionary terms collapsible", () => {
+    it("renders dictionary terms when expanded", async () => {
+      render(<LearnStage {...createProps()} />);
+      await expandCollapsible("Dictionary Terms");
+      expect(screen.getByText("Beginning")).toBeInTheDocument();
+      expect(screen.getByText("bih-GIN-ing")).toBeInTheDocument();
+    });
+  });
+
+  describe("related topics collapsible", () => {
+    it("renders related topics as badges when expanded", async () => {
+      render(<LearnStage {...createProps()} />);
+      await expandCollapsible("Related Topics");
+      expect(screen.getByText("Deity of Christ")).toBeInTheDocument();
+      expect(screen.getByText("Creation")).toBeInTheDocument();
+    });
+  });
+
+  describe("book prologue collapsible", () => {
+    it("renders book prologue with author, audience, date when expanded", async () => {
+      render(<LearnStage {...createProps()} />);
+      await expandCollapsible("Book Prologue");
       expect(screen.getByText("John the Apostle")).toBeInTheDocument();
       expect(screen.getByText("Early Christians")).toBeInTheDocument();
       expect(screen.getByText("c. AD 90-95")).toBeInTheDocument();
     });
 
-    it("renders main themes as badges", () => {
-      render(<LearnStage {...createProps({ learnTab: "prologue" })} />);
+    it("renders main themes as badges when expanded", async () => {
+      render(<LearnStage {...createProps()} />);
+      await expandCollapsible("Book Prologue");
       expect(screen.getByText("Deity of Christ")).toBeInTheDocument();
       expect(screen.getByText("Belief")).toBeInTheDocument();
       expect(screen.getByText("The Holy Spirit")).toBeInTheDocument();
     });
 
-    it("renders connection to Christ section", () => {
-      render(<LearnStage {...createProps({ learnTab: "prologue" })} />);
+    it("renders connection to Christ section when expanded", async () => {
+      render(<LearnStage {...createProps()} />);
+      await expandCollapsible("Book Prologue");
       expect(screen.getByText("Connection to Christ")).toBeInTheDocument();
     });
 
     it("shows loading spinner when prologueLoading", () => {
-      render(<LearnStage {...createProps({ learnTab: "prologue", prologueLoading: true, bookPrologue: null })} />);
-      // Loading state: the section header is still shown but no content renders
-      expect(screen.getByText("Book Prologue — John")).toBeInTheDocument();
+      render(<LearnStage {...createProps({ prologueLoading: true, bookPrologue: null })} />);
+      // The collapsible trigger is still shown
+      expect(screen.getByText("Book Prologue")).toBeInTheDocument();
     });
 
-    it("shows empty state when no prologue is available", () => {
-      render(<LearnStage {...createProps({ learnTab: "prologue", bookPrologue: null, prologueLoading: false })} />);
+    it("shows empty state when no prologue is available and expanded", async () => {
+      render(<LearnStage {...createProps({ bookPrologue: null, prologueLoading: false })} />);
+      await expandCollapsible("Book Prologue");
       expect(screen.getByText(/No book prologue available for John/)).toBeInTheDocument();
     });
 
-    it("renders Open in Reader button in empty state", () => {
-      render(<LearnStage {...createProps({ learnTab: "prologue", bookPrologue: null, prologueLoading: false })} />);
+    it("renders Open in Reader button in empty state and expanded", async () => {
+      render(<LearnStage {...createProps({ bookPrologue: null, prologueLoading: false })} />);
+      await expandCollapsible("Book Prologue");
       const readerBtn = screen.getByText(/Open John 1 in Reader/);
       expect(readerBtn).toBeInTheDocument();
     });
 
     it("navigates to Bible Reader when Open in Reader is clicked", async () => {
-      render(<LearnStage {...createProps({ learnTab: "prologue", bookPrologue: null, prologueLoading: false })} />);
+      render(<LearnStage {...createProps({ bookPrologue: null, prologueLoading: false })} />);
+      await expandCollapsible("Book Prologue");
       await userEvent.click(screen.getByText(/Open John 1 in Reader/));
       expect(mockNavigate).toHaveBeenCalledWith(
         "/bible-reader?book=John&chapter=1&verse=1"
@@ -346,10 +297,27 @@ describe("LearnStage", () => {
   });
 
   describe("action buttons", () => {
-    it("renders Save Progress and Continue buttons", () => {
+    it("renders Save and Continue buttons", () => {
       render(<LearnStage {...createProps()} />);
-      expect(screen.getByText("Save Progress")).toBeInTheDocument();
+      expect(screen.getByText("Save")).toBeInTheDocument();
       expect(screen.getByText("Continue to Abide")).toBeInTheDocument();
+    });
+
+    it('shows "Private" text by default', () => {
+      render(<LearnStage {...createProps({ isPublic: false })} />);
+      expect(screen.getByText(/Private/)).toBeInTheDocument();
+    });
+
+    it('shows "Public" text when isPublic is true', () => {
+      render(<LearnStage {...createProps({ isPublic: true })} />);
+      expect(screen.getByText(/Public/)).toBeInTheDocument();
+    });
+
+    it("calls onUpdate with isPublic toggle on click", async () => {
+      const onUpdate = vi.fn();
+      render(<LearnStage {...createProps({ isPublic: false, onUpdate })} />);
+      await userEvent.click(screen.getByText(/Private/));
+      expect(onUpdate).toHaveBeenCalledWith({ isPublic: true });
     });
 
     it("disables buttons when saving", () => {
@@ -368,7 +336,7 @@ describe("LearnStage", () => {
     it("calls onSaveProgress when Save is clicked", async () => {
       const onSaveProgress = vi.fn();
       render(<LearnStage {...createProps({ onSaveProgress })} />);
-      await userEvent.click(screen.getByText("Save Progress"));
+      await userEvent.click(screen.getByText("Save"));
       expect(onSaveProgress).toHaveBeenCalledOnce();
     });
   });

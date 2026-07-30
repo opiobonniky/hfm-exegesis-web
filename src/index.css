@@ -108,6 +108,54 @@
     --sidebar-border: 240 4% 16%;
     --sidebar-ring: 217 91% 60%;
   }
+
+  .cathedral {
+    --background: 248 30% 5%;
+    --foreground: 40 30% 88%;
+
+    --card: 248 25% 9%;
+    --card-foreground: 40 30% 88%;
+
+    --popover: 248 25% 9%;
+    --popover-foreground: 40 30% 88%;
+
+    --primary: 42 70% 55%;
+    --primary-foreground: 248 30% 5%;
+
+    --secondary: 248 20% 12%;
+    --secondary-foreground: 40 20% 80%;
+
+    --muted: 248 20% 12%;
+    --muted-foreground: 40 20% 60%;
+
+    --accent: 42 70% 55%;
+    --accent-foreground: 248 30% 5%;
+
+    --destructive: 0 63% 40%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 142 60% 42%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 38 92% 50%;
+    --warning-foreground: 248 30% 5%;
+
+    --info: 212 63% 50%;
+    --info-foreground: 0 0% 100%;
+
+    --border: 42 20% 20%;
+    --input: 42 20% 20%;
+    --ring: 42 70% 55%;
+
+    --sidebar-background: 248 25% 7%;
+    --sidebar-foreground: 40 20% 80%;
+    --sidebar-primary: 42 70% 55%;
+    --sidebar-primary-foreground: 248 30% 5%;
+    --sidebar-accent: 248 20% 12%;
+    --sidebar-accent-foreground: 40 20% 80%;
+    --sidebar-border: 42 20% 18%;
+    --sidebar-ring: 42 70% 55%;
+  }
 }
 
 @layer base {
@@ -122,6 +170,11 @@
 
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-heading);
+  }
+
+  .cathedral h1, .cathedral h2, .cathedral h3,
+  .cathedral h4, .cathedral h5, .cathedral h6 {
+    font-family: 'Cinzel', var(--font-heading), serif;
   }
 }
 

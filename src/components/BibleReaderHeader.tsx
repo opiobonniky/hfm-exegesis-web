@@ -1,5 +1,6 @@
 import { type Dispatch, type SetStateAction } from "react";
 import {
+  ArrowLeft,
   BookOpen,
   Volume2,
   VolumeX,
@@ -49,6 +50,8 @@ export interface BibleReaderHeaderProps {
   onOpenSearch: () => void;
   onPrevChapter: () => void;
   onNextChapter: () => void;
+  showBackToQuiz?: boolean;
+  onBackToQuiz?: () => void;
 }
 
 // ── Component ──────────────────────────────────────────────────────────────────
@@ -81,6 +84,8 @@ export default function BibleReaderHeader({
   onOpenSearch,
   onPrevChapter,
   onNextChapter,
+  showBackToQuiz,
+  onBackToQuiz,
 }: BibleReaderHeaderProps) {
   const { t, isRtl } = useLanguage();
 
@@ -105,22 +110,32 @@ export default function BibleReaderHeader({
     <header className="flex-shrink-0 border-b bg-background/95 backdrop-blur-sm sticky top-0 z-30">
       {/* ─── Desktop top bar (hidden on mobile) ─── */}
       <div className="hidden sm:flex items-center justify-between px-4 sm:px-6 py-3 border-b border-border/40">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-            <BookOpen className="w-4 h-4 text-primary" />
+        {showBackToQuiz && onBackToQuiz ? (
+          <button
+            onClick={onBackToQuiz}
+            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors active:scale-95"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span className="hidden lg:inline">Back to Quiz</span>
+          </button>
+        ) : (
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+              <BookOpen className="w-4 h-4 text-primary" />
+            </div>
+            <div>
+              <h1
+                className="text-base sm:text-lg font-semibold tracking-wide text-foreground leading-none"
+                style={{ fontFamily: "'Cinzel', serif" }}
+              >
+                {t.bibleReader.scripture}
+              </h1>
+              <p className="text-[9px] sm:text-[10px] text-muted-foreground tracking-widest uppercase leading-none mt-0.5">
+                {t.bibleReader.title}
+              </p>
+            </div>
           </div>
-          <div>
-            <h1
-              className="text-base sm:text-lg font-semibold tracking-wide text-foreground leading-none"
-              style={{ fontFamily: "'Cinzel', serif" }}
-            >
-              {t.bibleReader.scripture}
-            </h1>
-            <p className="text-[9px] sm:text-[10px] text-muted-foreground tracking-widest uppercase leading-none mt-0.5">
-              {t.bibleReader.title}
-            </p>
-          </div>
-        </div>
+        )}
 
         <div className="flex items-center gap-2">
           <Button
@@ -152,6 +167,14 @@ export default function BibleReaderHeader({
             <Lightbulb className="w-3.5 h-3.5 text-amber-500" />
             <span className="hidden lg:inline">Tools</span>
           </Button>
+
+          <button
+            onClick={onOpenSearch}
+            className="relative w-8 h-8 before:absolute before:content-[''] before:-inset-2 before:rounded-xl rounded-xl bg-muted/50 flex items-center justify-center border border-border/40 active:scale-95 transition-all [touch-action:manipulation]"
+            title="Search"
+          >
+            <Search className="w-3.5 h-3.5 text-muted-foreground" />
+          </button>
 
           <Popover open={translationOpen} onOpenChange={setTranslationOpen}>
             <PopoverTrigger asChild>
@@ -305,10 +328,18 @@ export default function BibleReaderHeader({
 
       {/* ─── Mobile top bar ─── */}
       <div className="flex sm:hidden items-center gap-2 px-3 py-2.5 border-b border-border/40">
-        {/* Logo */}
-        <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-          <BookOpen className="w-3.5 h-3.5 text-primary" />
-        </div>
+        {showBackToQuiz && onBackToQuiz ? (
+          <button
+            onClick={onBackToQuiz}
+            className="flex items-center justify-center w-7 h-7 shrink-0 rounded-lg bg-muted/50 active:scale-95 transition-all"
+          >
+            <ArrowLeft className="w-4 h-4 text-muted-foreground" />
+          </button>
+        ) : (
+          <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+            <BookOpen className="w-3.5 h-3.5 text-primary" />
+          </div>
+        )}
 
         {/* Mobile nav drawer (book + chapter + version) */}
         <div className="flex-1 min-w-0">

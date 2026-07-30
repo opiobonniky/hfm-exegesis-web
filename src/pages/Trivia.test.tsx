@@ -141,12 +141,12 @@ describe("TriviaPage", () => {
 
     it("renders Start Quiz button", () => {
       renderPage();
-      expect(screen.getByText("Start Quiz")).toBeInTheDocument();
+      expect(screen.getByText("Begin Quest")).toBeInTheDocument();
     });
 
     it("calls startQuiz when Start Quiz is clicked", async () => {
       renderPage();
-      await userEvent.click(screen.getByText("Start Quiz"));
+      await userEvent.click(screen.getByText("Begin Quest"));
       expect(mockStartQuiz).toHaveBeenCalledOnce();
     });
 
@@ -416,9 +416,10 @@ describe("TriviaPage", () => {
       expect(threes.length).toBeGreaterThanOrEqual(1);
       expect(screen.getByText("Questions Answered")).toBeInTheDocument();
       // Accuracy (100% = elite tier)
-      expect(screen.getByText("Bright Start!")).toBeInTheDocument();
+      expect(screen.getByText("Bright Star!")).toBeInTheDocument();
       expect(screen.getByText("100%")).toBeInTheDocument();
-      expect(screen.getByText("3/3 correct")).toBeInTheDocument();
+      const threeThree = screen.getAllByText("3/3");
+      expect(threeThree.length).toBeGreaterThanOrEqual(1);
     });
 
     it("shows milestone at 5 questions (elite tier: On Fire!)", () => {
@@ -426,7 +427,7 @@ describe("TriviaPage", () => {
       renderPage();
       const fives = screen.getAllByText("5");
       expect(fives.length).toBeGreaterThanOrEqual(1);
-      expect(screen.getByText("On Fire!")).toBeInTheDocument();
+      expect(screen.getByText("Crown of Wisdom!")).toBeInTheDocument();
     });
 
     it("shows milestone at 10 questions (elite tier: Bible Scholar!)", () => {
@@ -434,7 +435,7 @@ describe("TriviaPage", () => {
       renderPage();
       const tens = screen.getAllByText("10");
       expect(tens.length).toBeGreaterThanOrEqual(1);
-      expect(screen.getByText("Bible Scholar!")).toBeInTheDocument();
+      expect(screen.getByText("Scripture Scholar!")).toBeInTheDocument();
     });
 
     it("shows milestone at 25 questions (elite tier: Scripture Master!)", () => {
@@ -442,7 +443,7 @@ describe("TriviaPage", () => {
       renderPage();
       const twentyFives = screen.getAllByText("25");
       expect(twentyFives.length).toBeGreaterThanOrEqual(1);
-      expect(screen.getByText("Scripture Master!")).toBeInTheDocument();
+      expect(screen.getByText("Master of the Word!")).toBeInTheDocument();
     });
 
     it("shows correct message tier for 70% accuracy (strong tier)", () => {
@@ -451,7 +452,7 @@ describe("TriviaPage", () => {
       // 70% = strong tier
       const tens = screen.getAllByText("10");
       expect(tens.length).toBeGreaterThanOrEqual(1);
-      expect(screen.getByText("Impressive!")).toBeInTheDocument();
+      expect(screen.getByText("Worthy Student!")).toBeInTheDocument();
       expect(screen.getByText("70%")).toBeInTheDocument();
     });
 
@@ -459,7 +460,7 @@ describe("TriviaPage", () => {
       mockScore = { correct: 5, total: 10 };
       renderPage();
       // 50% = solid tier, 10 questions milestone
-      expect(screen.getByText("Dedicated!")).toBeInTheDocument();
+      expect(screen.getByText("Faithful Seeker!")).toBeInTheDocument();
       expect(screen.getByText("50%")).toBeInTheDocument();
     });
 
@@ -467,7 +468,7 @@ describe("TriviaPage", () => {
       mockScore = { correct: 1, total: 5 };
       renderPage();
       // 20% = growing tier, 5 questions milestone
-      expect(screen.getByText("Nice Effort!")).toBeInTheDocument();
+      expect(screen.getByText("Persistent Heart!")).toBeInTheDocument();
       expect(screen.getByText("20%")).toBeInTheDocument();
     });
 
@@ -692,20 +693,21 @@ describe("TriviaPage", () => {
       const fives = screen.getAllByText("5");
       expect(fives.length).toBeGreaterThanOrEqual(1);
       expect(screen.getByText("80%")).toBeInTheDocument();
-      expect(screen.getByText("4/5 correct")).toBeInTheDocument();
+      const fourFive = screen.getAllByText("4/5");
+      expect(fourFive.length).toBeGreaterThanOrEqual(1);
     });
 
     it("shows correct tier message: elite (>=80%)", () => {
       mockScore = { correct: 4, total: 5 }; // 80% → elite
       renderPage();
-      expect(screen.getByText("On Fire!")).toBeInTheDocument();
+      expect(screen.getByText("Crown of Wisdom!")).toBeInTheDocument();
       expect(screen.getByText("80%")).toBeInTheDocument();
     });
 
     it("shows correct tier message: growing (<40%)", () => {
       mockScore = { correct: 1, total: 5 }; // 20% → growing
       renderPage();
-      expect(screen.getByText("Nice Effort!")).toBeInTheDocument();
+      expect(screen.getByText("Persistent Heart!")).toBeInTheDocument();
       expect(screen.getByText("20%")).toBeInTheDocument();
     });
 
@@ -714,7 +716,7 @@ describe("TriviaPage", () => {
       renderPage();
       const tens = screen.getAllByText("10");
       expect(tens.length).toBeGreaterThanOrEqual(1);
-      expect(screen.getByText("Bible Scholar!")).toBeInTheDocument();
+      expect(screen.getByText("Scripture Scholar!")).toBeInTheDocument();
       expect(screen.getByText("90%")).toBeInTheDocument();
     });
 
@@ -723,8 +725,9 @@ describe("TriviaPage", () => {
       renderPage();
       const twentyFives = screen.getAllByText("25");
       expect(twentyFives.length).toBeGreaterThanOrEqual(1);
-      expect(screen.getByText("Scripture Master!")).toBeInTheDocument();
-      expect(screen.getByText("22/25 correct")).toBeInTheDocument();
+      expect(screen.getByText("Master of the Word!")).toBeInTheDocument();
+      const twoTwoFive = screen.getAllByText("22/25");
+      expect(twoTwoFive.length).toBeGreaterThanOrEqual(1);
     });
 
   });

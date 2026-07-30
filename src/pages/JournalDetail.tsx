@@ -17,6 +17,8 @@ import {
   MoreHorizontal,
   FileDown,
   Quote,
+  Globe,
+  Lock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -34,6 +36,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 import { sendPostRequest } from "@/services/api";
 import { routes } from "@/components/Routes/routes";
 import { getVerseText } from "@/utilities/bibleUtils";
@@ -60,7 +63,7 @@ const MOOD_EMOJI: Record<string, { label: string; emoji: string }> = {
 interface StudiedWord { strongsId: string; surfaceText: string; lemma?: string }
 
 interface JournalEntryData {
-  id: number; title: string | null; content: string;
+  id: number; userId: string; title: string | null; content: string;
   bookName: string | null; chapter: number | null; verseNumber: number | null;
   category: string; mood: string | null;
   prayers: string | null; gratitude: string | null; learnings: string | null; application: string | null;
@@ -73,11 +76,10 @@ interface JournalEntryData {
 const PageSkeleton = () => (
   <div className="min-h-full bg-amber-50/30 dark:bg-stone-950">
     {[1, 2, 3].map((i) => (
-      <div key={i} className="max-w-2xl mx-auto px-5 py-4">
-        <div className="h-4 w-16 bg-stone-200 dark:bg-stone-800 rounded animate-pulse mb-3" />
-        <div className="h-6 w-3/4 bg-stone-200 dark:bg-stone-800 rounded animate-pulse mb-2" />
-        <div className="h-4 w-full bg-stone-100 dark:bg-stone-800/50 rounded animate-pulse mb-1" />
-        <div className="h-4 w-5/6 bg-stone-100 dark:bg-stone-800/50 rounded animate-pulse" />
+      <div key={i} className="max-w-2xl mx-auto px-5 py-4">            <div className="h-4 w-16 bg-muted rounded animate-pulse mb-3" />
+        <div className="h-6 w-3/4 bg-muted rounded animate-pulse mb-2" />
+        <div className="h-4 w-full bg-muted dark:bg-stone-800/50 rounded animate-pulse mb-1" />
+        <div className="h-4 w-5/6 bg-muted dark:bg-stone-800/50 rounded animate-pulse" />
       </div>
     ))}
   </div>
@@ -86,9 +88,9 @@ const PageSkeleton = () => (
 /* ── Decorative divider ── */
 const LeafDivider = () => (
   <div className="flex items-center gap-3 my-8 select-none">
-    <span className="flex-1 h-px bg-stone-200 dark:bg-stone-800" />
-    <span className="text-stone-300 dark:text-stone-700 text-xs tracking-[0.3em]">✦ ✦ ✦</span>
-    <span className="flex-1 h-px bg-stone-200 dark:bg-stone-800" />
+    <span className="flex-1 h-px bg-border" />
+    <span className="text-muted-foreground/50 dark:text-foreground/80 text-xs tracking-[0.3em]">✦ ✦ ✦</span>
+    <span className="flex-1 h-px bg-border" />
   </div>
 );
 
@@ -96,6 +98,7 @@ const JournalDetailPage = () => {
   const { entryId } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { userInfo } = useAuth();
   const { t, isRtl } = useLanguage();
 
   const [entry, setEntry] = useState<JournalEntryData | null>(null);
@@ -134,6 +137,18 @@ const JournalDetailPage = () => {
       if (res.returnCode === 200) {
         setEntry((p) => p ? { ...p, isFavorite: !p.isFavorite } : null);
         toast({ title: entry.isFavorite ? "Removed from favorites" : "Added to favorites" });
+      }
+    } catch { toast({ title: "Error", variant: "destructive" }); }
+  };
+
+  const handleTogglePublish = async () => {
+    if (!entry) return;
+    const next = !entry.isPublished;
+    try {
+      const res = await sendPostRequest("journal", "update", { id: entry.id, isPublished: next });
+      if (res.returnCode === 200) {
+        setEntry((p) => p ? { ...p, isPublished: next } : null);
+        toast({ title: next ? "Published to Community" : "Set to Private" });
       }
     } catch { toast({ title: "Error", variant: "destructive" }); }
   };
@@ -184,14 +199,14 @@ const JournalDetailPage = () => {
   if (!entry) return (
     <div className="min-h-full bg-amber-50/30 dark:bg-stone-950 flex items-center justify-center">
       <div className="text-center px-6">
-        <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-stone-100 dark:bg-stone-900 flex items-center justify-center">
-          <BookOpen className="w-7 h-7 text-stone-400" />
+        <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-muted dark:bg-stone-900 flex items-center justify-center">
+          <BookOpen className="w-7 h-7 text-muted-foreground/70" />
         </div>
-        <h2 className="text-lg font-semibold text-stone-800 dark:text-stone-200 mb-1">Journal entry not found</h2>
-        <p className="text-sm text-stone-500 dark:text-stone-400 mb-5">It may have been deleted or moved.</p>
+        <h2 className="text-lg font-semibold text-foreground dark:text-stone-200 mb-1">Journal entry not found</h2>
+        <p className="text-sm text-muted-foreground dark:text-muted-foreground/70 mb-5">It may have been deleted or moved.</p>
         <Button
           onClick={() => navigate(routes.journal.path)}
-          className="rounded-xl bg-stone-800 hover:bg-stone-700 text-white dark:bg-stone-200 dark:hover:bg-stone-300 dark:text-stone-900"
+          className="            rounded-xl bg-foreground/10 hover:bg-foreground/20 text-foreground"
         >
           ← Back to Journal
         </Button>
@@ -220,11 +235,11 @@ const JournalDetailPage = () => {
   return (
     <div className="min-h-full bg-amber-50/30 dark:bg-stone-950" dir={isRtl ? 'rtl' : 'ltr'}>
       {/* ═══════ Top Navigation Bar ═══════ */}
-      <div className="sticky top-0 z-20 border-b border-stone-200/60 dark:border-stone-800/60 bg-amber-50/80 dark:bg-stone-950/80 backdrop-blur-md">
+      <div className="sticky top-0 z-20 border-b border-border/60 dark:border-stone-800/60 bg-amber-50/80 dark:bg-stone-950/80 backdrop-blur-md">
         <div className="max-w-2xl mx-auto px-4 flex items-center justify-between h-12">
           <button
             onClick={() => navigate(routes.journal.path)}
-            className="flex items-center gap-1.5 text-xs font-medium text-stone-500 hover:text-stone-800 dark:text-stone-400 dark:hover:text-stone-200 transition-colors"
+            className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground dark:text-muted-foreground/70 dark:hover:text-stone-200 transition-colors"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             Journal
@@ -232,32 +247,34 @@ const JournalDetailPage = () => {
 
           <div className="flex items-center gap-0.5">
             <button onClick={handleToggleFavorite} className="p-1.5 rounded-lg hover:bg-stone-200/60 dark:hover:bg-stone-800/60 transition-colors" title="Favorite">
-              <Star className={cn("w-3.5 h-3.5", entry.isFavorite ? "text-amber-500 fill-amber-500" : "text-stone-400")} />
+              <Star className={cn("w-3.5 h-3.5", entry.isFavorite ? "text-amber-500 fill-amber-500" : "text-muted-foreground/70")} />
             </button>
             <button onClick={handleShare} className="p-1.5 rounded-lg hover:bg-stone-200/60 dark:hover:bg-stone-800/60 transition-colors" title="Share">
-              <Share2 className="w-3.5 h-3.5 text-stone-400" />
+              <Share2 className="w-3.5 h-3.5 text-muted-foreground/70" />
             </button>
             <button onClick={handleCopy} className="p-1.5 rounded-lg hover:bg-stone-200/60 dark:hover:bg-stone-800/60 transition-colors" title="Copy">
-              {copied ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5 text-stone-400" />}
+              {copied ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5 text-muted-foreground/70" />}
             </button>
             <button onClick={handleDownloadPDF} className="p-1.5 rounded-lg hover:bg-stone-200/60 dark:hover:bg-stone-800/60 transition-colors" title="Download PDF">
-              <FileDown className="w-3.5 h-3.5 text-stone-400" />
+              <FileDown className="w-3.5 h-3.5 text-muted-foreground/70" />
             </button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="p-1.5 rounded-lg hover:bg-stone-200/60 dark:hover:bg-stone-800/60 transition-colors">
-                  <MoreHorizontal className="w-3.5 h-3.5 text-stone-400" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="rounded-xl border-stone-200 dark:border-stone-800">
-                <DropdownMenuItem onClick={() => navigate(`/journal/entry/${entry.id}`)} className="text-xs">
-                  <Pencil className="w-3.5 h-3.5 mr-2" /> Edit
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setShowDeleteDialog(true)} className="text-xs text-red-600 dark:text-red-400">
-                  <Trash2 className="w-3.5 h-3.5 mr-2" /> Delete
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            {userInfo?.id && String(entry.userId) === String(userInfo.id) && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="p-1.5 rounded-lg hover:bg-stone-200/60 dark:hover:bg-stone-800/60 transition-colors">
+                    <MoreHorizontal className="w-3.5 h-3.5 text-muted-foreground/70" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="rounded-xl border-border dark:border-stone-800">
+                  <DropdownMenuItem onClick={() => navigate(`/journal/entry/${entry.id}`)} className="text-xs">
+                    <Pencil className="w-3.5 h-3.5 mr-2" /> Edit
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setShowDeleteDialog(true)} className="text-xs text-red-600 dark:text-red-400">
+                    <Trash2 className="w-3.5 h-3.5 mr-2" /> Delete
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
         </div>
       </div>
@@ -269,28 +286,40 @@ const JournalDetailPage = () => {
         <div className="flex items-center gap-3 flex-wrap mb-4">
           <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold tracking-wide uppercase">
             <span className={cn("w-2 h-2 rounded-full", catMeta.color)} />
-            <span className="text-stone-500 dark:text-stone-400">
+            <span className="text-muted-foreground dark:text-muted-foreground/70">
               {(t.journal as any)?.[catMeta.labelKey] || catMeta.label}
             </span>
           </span>
           {moodInfo && (
             <span className="text-sm leading-none">{moodInfo.emoji}</span>
           )}
-          <span className="text-[11px] text-stone-400 dark:text-stone-500">
+          <span className="text-[11px] text-muted-foreground/70 dark:text-muted-foreground">
             {formatDate(entry.createdOn)}
           </span>
+          <button
+            onClick={(e) => { e.stopPropagation(); handleTogglePublish(); }}
+            className={cn(
+              "inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full border transition-colors",
+              entry.isPublished
+                ? "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100 dark:hover:bg-emerald-950/50"
+                : "bg-stone-100 dark:bg-stone-800/50 text-stone-500 dark:text-stone-400 border-stone-200 dark:border-stone-700 hover:bg-stone-200 dark:hover:bg-stone-800"
+            )}
+          >
+            {entry.isPublished ? <Globe className="w-3 h-3" /> : <Lock className="w-3 h-3" />}
+            {entry.isPublished ? "Published" : "Private"}
+          </button>
         </div>
 
         {/* ── Title ── */}
         {entry.title && (
-          <h1 className="text-3xl sm:text-4xl font-bold text-stone-900 dark:text-stone-100 leading-tight mb-2 tracking-tight" style={{ fontFamily: "'Georgia', 'Times New Roman', serif" }}>
+          <h1 className="text-3xl sm:text-4xl font-bold text-foreground dark:text-stone-100 leading-tight mb-2 tracking-tight" style={{ fontFamily: "'Georgia', 'Times New Roman', serif" }}>
             {entry.title}
           </h1>
         )}
 
         {/* ── Chapter ref inline ── */}
         {entry.bookName && (
-          <div className="flex items-center gap-1.5 mt-1 mb-6 text-xs text-stone-400 dark:text-stone-500">
+          <div className="flex items-center gap-1.5 mt-1 mb-6 text-xs text-muted-foreground/70 dark:text-muted-foreground">
             <BookOpen className="w-3 h-3" />
             <span className="font-medium">{entry.bookName} {entry.chapter}:{entry.verseNumber}</span>
           </div>
@@ -300,14 +329,14 @@ const JournalDetailPage = () => {
         {verseText && (
           <div
             onClick={() => { if (entry.bookName && entry.chapter) navigate(`/bible-reader?book=${entry.bookName}&chapter=${entry.chapter}`); }}
-            className="group relative mb-10 p-5 sm:p-6 rounded-2xl bg-white dark:bg-stone-900/80 border border-stone-200 dark:border-stone-800 shadow-sm hover:shadow-md cursor-pointer transition-all active:scale-[0.99]"
+            className="group relative mb-10 p-5 sm:p-6 rounded-2xl bg-card dark:bg-stone-900/80 border border-border dark:border-stone-800 shadow-sm hover:shadow-md cursor-pointer transition-all active:scale-[0.99]"
             style={{ fontFamily: "'Georgia', 'Times New Roman', serif" }}
           >
-            <Quote className="absolute top-3 left-3 w-5 h-5 text-stone-200 dark:text-stone-700 group-hover:text-stone-300 transition-colors" />
-            <p className="text-base sm:text-lg leading-relaxed italic text-stone-700 dark:text-stone-300 pl-2">
+            <Quote className="absolute top-3 left-3 w-5 h-5 text-muted-foreground/20 group-hover:text-muted-foreground/50 transition-colors" />
+            <p className="text-base sm:text-lg leading-relaxed italic text-foreground/80 dark:text-muted-foreground/50 pl-2">
               &ldquo;{verseText}&rdquo;
             </p>
-            <div className="flex items-center gap-1 mt-3 text-xs text-stone-400 dark:text-stone-500 group-hover:text-stone-600 dark:group-hover:text-stone-400 transition-colors">
+            <div className="flex items-center gap-1 mt-3 text-xs text-muted-foreground/70 dark:text-muted-foreground group-hover:text-muted-foreground dark:group-hover:text-muted-foreground/70 transition-colors">
               <span>&mdash; {entry.bookName} {entry.chapter}:{entry.verseNumber}</span>
               <ExternalLink className="w-3 h-3 ml-0.5" />
             </div>
@@ -317,7 +346,7 @@ const JournalDetailPage = () => {
         {/* ── Main content ── */}
         {entry.content && (
           <div className="mb-6">
-            <p className="text-sm sm:text-base leading-[1.8] text-stone-700 dark:text-stone-300 whitespace-pre-line" style={{ fontFamily: "'Georgia', 'Times New Roman', serif" }}>
+            <p className="text-sm sm:text-base leading-[1.8] text-foreground/80 dark:text-muted-foreground/50 whitespace-pre-line" style={{ fontFamily: "'Georgia', 'Times New Roman', serif" }}>
               {entry.content}
             </p>
           </div>
@@ -329,25 +358,25 @@ const JournalDetailPage = () => {
             <LeafDivider />
             <div className="space-y-8 mb-6">
               {reflectionSections.map(({ key, icon: Icon, label, subtitle, content, iconColor }) => (
-                <div key={key} className="rounded-2xl bg-white/70 dark:bg-stone-900/50 border border-stone-200/70 dark:border-stone-800/70 p-6 hover:bg-white dark:hover:bg-stone-900/80 transition-colors shadow-sm">
+                <div key={key} className="rounded-2xl bg-card/70 dark:bg-stone-900/50 border border-border/70 dark:border-stone-800/70 p-6 hover:bg-card dark:hover:bg-stone-900/80 transition-colors shadow-sm">
                   {/* Section heading row */}
-                  <div className="flex items-start gap-4 mb-4 pb-4 border-b border-stone-100 dark:border-stone-800/60">
-                    <div className="w-10 h-10 rounded-xl bg-stone-100 dark:bg-stone-800 flex items-center justify-center shrink-0 ring-1 ring-stone-200/50 dark:ring-stone-700/50">
+                  <div className="flex items-start gap-4 mb-4 pb-4 border-b border-border/50 dark:border-stone-800/60">
+                    <div className="w-10 h-10 rounded-xl bg-muted dark:bg-stone-800 flex items-center justify-center shrink-0 ring-1 ring-stone-200/50 dark:ring-stone-700/50">
                       <Icon className={cn("w-5 h-5", iconColor)} />
                     </div>
                     <div>
-                      <h3 className="text-base font-bold text-stone-800 dark:text-stone-200 leading-tight">
+                      <h3 className="text-base font-bold text-foreground dark:text-stone-200 leading-tight">
                         {label}
                       </h3>
                       {subtitle && (
-                        <p className="text-[11px] text-stone-400 dark:text-stone-500 mt-0.5">
+                        <p className="text-[11px] text-muted-foreground/70 dark:text-muted-foreground mt-0.5">
                           {subtitle}
                         </p>
                       )}
                     </div>
                   </div>
                   {/* Content as flowing paragraphs */}
-                  <div className="text-sm sm:text-base leading-[1.9] text-stone-700 dark:text-stone-300" style={{ fontFamily: "'Georgia', 'Times New Roman', serif" }}>
+                  <div className="text-sm sm:text-base leading-[1.9] text-foreground/80 dark:text-muted-foreground/50" style={{ fontFamily: "'Georgia', 'Times New Roman', serif" }}>
                     {content.split('\n').filter(Boolean).map((paragraph, i) => (
                       <p key={i} className={i > 0 ? 'mt-4' : ''}>
                         {paragraph}
@@ -364,7 +393,7 @@ const JournalDetailPage = () => {
         {studiedWords.length > 0 && (
           <div className="mb-6">
             <LeafDivider />
-            <h3 className="text-[11px] font-semibold uppercase tracking-wider text-stone-500 dark:text-stone-400 mb-3 flex items-center gap-1.5">
+            <h3 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground dark:text-muted-foreground/70 mb-3 flex items-center gap-1.5">
               <BookOpen className="w-3 h-3" />
               Studied Words
             </h3>
@@ -373,11 +402,11 @@ const JournalDetailPage = () => {
                 <button
                   key={idx}
                   onClick={() => { setSelectedStudiedWord({ strongsId: w.strongsId, surfaceText: w.surfaceText }); setStudiedWordSheetOpen(true); }}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-xs font-medium text-stone-600 dark:text-stone-400 hover:border-amber-300 dark:hover:border-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950/20 hover:text-amber-700 dark:hover:text-amber-300 transition-all active:scale-[0.97]"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-border dark:border-stone-800 bg-card dark:bg-stone-900 text-xs font-medium text-muted-foreground dark:text-muted-foreground/70 hover:border-amber-300 dark:hover:border-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950/20 hover:text-amber-700 dark:hover:text-amber-300 transition-all active:scale-[0.97]"
                 >
                   <BookOpen className="w-3 h-3 shrink-0" />
                   <span>{w.surfaceText || w.strongsId}</span>
-                  <span className="text-[10px] font-mono text-stone-400/60">{w.strongsId}</span>
+                  <span className="text-[10px] font-mono text-muted-foreground/70/60">{w.strongsId}</span>
                 </button>
               ))}
             </div>
@@ -388,7 +417,7 @@ const JournalDetailPage = () => {
         {tagsArray.length > 0 && (
           <div className="mb-6">
             <LeafDivider />
-            <h3 className="text-[11px] font-semibold uppercase tracking-wider text-stone-500 dark:text-stone-400 mb-3 flex items-center gap-1.5">
+            <h3 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground dark:text-muted-foreground/70 mb-3 flex items-center gap-1.5">
               <Tag className="w-3 h-3" />
               Tags
             </h3>
@@ -396,7 +425,7 @@ const JournalDetailPage = () => {
               {tagsArray.map((tag, idx) => (
                 <span
                   key={idx}
-                  className="inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-medium bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400"
+                  className="inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-medium bg-muted dark:bg-stone-800 text-muted-foreground dark:text-muted-foreground/70"
                 >
                   # {tag}
                 </span>
@@ -408,10 +437,10 @@ const JournalDetailPage = () => {
         {/* ── Footer ── */}
         <LeafDivider />
         <div className="text-center space-y-0.5 pb-8">
-          <p className="text-[11px] text-stone-400 dark:text-stone-500">
+          <p className="text-[11px] text-muted-foreground/70 dark:text-muted-foreground">
             Written {formatDateShort(entry.createdOn)}
           </p>
-          <p className="text-[11px] text-stone-300 dark:text-stone-600">
+          <p className="text-[11px] text-muted-foreground/50 dark:text-muted-foreground">
             Last edited {formatDateShort(entry.updatedOn)}
           </p>
         </div>
@@ -427,10 +456,10 @@ const JournalDetailPage = () => {
       />
 
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <DialogContent className="rounded-2xl border-stone-200 dark:border-stone-800">
+        <DialogContent className="rounded-2xl border-border dark:border-stone-800">
           <DialogHeader><DialogTitle>Delete Entry</DialogTitle></DialogHeader>
-          <p className="text-sm text-stone-600 dark:text-stone-400">This cannot be undone.</p>
-          {entry.title && <p className="text-sm font-medium text-stone-800 dark:text-stone-200">&ldquo;{entry.title}&rdquo;</p>}
+          <p className="text-sm text-muted-foreground dark:text-muted-foreground/70">This cannot be undone.</p>
+          {entry.title && <p className="text-sm font-medium text-foreground dark:text-stone-200">&ldquo;{entry.title}&rdquo;</p>}
           <DialogFooter className="gap-2">
             <Button variant="outline" onClick={() => setShowDeleteDialog(false)} className="rounded-xl">Cancel</Button>
             <Button variant="destructive" onClick={handleDelete} disabled={deleting} className="rounded-xl">

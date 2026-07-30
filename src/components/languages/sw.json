@@ -491,7 +491,7 @@
   },
   "error": {
     "notFound": "Ukurasa haukupatikana",
-    "pageNotFound": "Page Not Found",
+    "pageNotFound": "Oops! Page not found",
     "pageNotFoundDesc": "Ukurasa unaotafuta haupo",
     "pleaseLogin": "Please login to access this page",
     "redirecting": "Redirecting..."
@@ -1139,6 +1139,7 @@
     "bible": "Msomaji wa Biblia",
     "dailyVerse": "Aya ya Siku",
     "dashboard": "Dashboard",
+    "adminDashboard": "Admin Console",
     "devotions": "Ibada ya Siku",
     "explanations": "Maelezo ya Aya",
     "home": "Nyumbani",
@@ -1153,7 +1154,11 @@
     "profile": "Wasifu",
     "readingPlans": "Mpango wa Kusoma",
     "settings": "Mipangilio",
-    "userActivity": "Shughuli za Mtumiaji"
+    "userActivity": "Shughuli za Mtumiaji",
+    "triviaAdmin": "Trivia Management",
+    "dailyContentAdmin": "Daily Content",
+    "subscriptionsAdmin": "Subscriptions",
+    "adminTools": "Admin Tools"
   },
   "userActivity": {
     "action": "Kitendo",

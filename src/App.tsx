@@ -1,4 +1,4 @@
-import { Suspense } from "react";
+import { useEffect, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -10,6 +10,8 @@ import PublicLayout from "@/components/PublicLayout";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import SplashScreen from "@/components/SplashScreen";
 import { Loader2 } from "lucide-react";
+import { useTheme } from "@/hooks/useTheme";
+import { preloadVersion } from "@/assets/bibleVersion/json/bibleVersions";
 import {
   getLayoutRoutes,
   getPublicRoutes,
@@ -36,6 +38,29 @@ const AuthLoader = ({ children }: { children: React.ReactNode }) => {
 
   return <>{children}</>;
 };
+
+/** Initialize theme on mount — reads localStorage and applies the class */
+function ThemeInitializer() {
+  // Calling useTheme here applies the stored theme to <html> on first render
+  useTheme();
+  return null;
+}
+
+/**
+ * Preload the default Bible version data (BSB) as early as possible
+ * so that pages like Dashboard (verse of the day) and BibleReader
+ * have the verse JSON ready before their first render, eliminating
+ * the brief shimmer/loading delay.
+ */
+function BibleDataPreloader() {
+  useEffect(() => {
+    preloadVersion('BSB').catch(() => {
+      // Preload failed — pages will fall back to ensureDataLoaded()
+      // on their first getVerseTextAsync() call, which retries.
+    });
+  }, []);
+  return null;
+}
 
 const AppRoutes = () => {
   const publicRoutes = getPublicRoutes();
@@ -116,6 +141,8 @@ const AppRoutes = () => {
 const App = () => {
   return (
     <BrowserRouter>
+      <ThemeInitializer />
+      <BibleDataPreloader />
       <AuthProvider>
         <LanguageProvider>
           <TooltipProvider>

@@ -163,9 +163,9 @@ const BIBLE_BOOKS = [
   "Revelation",
 ];
 const DIFF_STYLES: Record<string, string> = {
-  easy: "bg-emerald-50 text-emerald-700 border-emerald-200",
-  medium: "bg-amber-50 text-amber-700 border-amber-200",
-  hard: "bg-red-50 text-red-700 border-red-200",
+  easy: "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/40",
+  medium: "bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800/40",
+  hard: "bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800/40",
 };
 
 const emptyQuiz = (): QuizQuestion => ({
@@ -190,7 +190,7 @@ const emptyDay = (n: number): DayAssignment => ({
 // Input styles
 // ─────────────────────────────────────────────
 const inputCls =
-  "w-full px-3 py-2.5 rounded-xl border border-stone-200 bg-white text-sm text-stone-800 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-teal-400/40 focus:border-teal-400 transition-all shadow-sm";
+  "w-full px-3 py-2.5 rounded-xl border border-border bg-card text-sm text-foreground placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-teal-400/40 focus:border-teal-400 transition-all shadow-sm";
 const textareaCls = inputCls + " resize-none";
 const Field = ({
   label,
@@ -202,8 +202,8 @@ const Field = ({
   hint?: string;
 }) => (
   <div className="space-y-1.5">
-    <label className="text-sm font-semibold text-stone-700">{label}</label>
-    {hint && <p className="text-xs text-stone-400">{hint}</p>}
+    <label className="text-sm font-semibold text-foreground/80">{label}</label>
+    {hint && <p className="text-xs text-muted-foreground/70">{hint}</p>}
     {children}
   </div>
 );
@@ -615,19 +615,19 @@ const EditReadingPlan = () => {
   // ─────────────────────────────────────────────
   if (loading)
     return (
-      <div className="min-h-screen bg-[#f7f5f2] flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="w-8 h-8 animate-spin text-teal-500" />
-          <p className="text-stone-400 text-sm font-medium">{t.readingPlan.loadingPlan}</p>
+          <p className="text-muted-foreground/70 text-sm font-medium">{t.readingPlan.loadingPlan}</p>
         </div>
       </div>
     );
 
   if (!meta)
     return (
-      <div className="min-h-screen bg-[#f7f5f2] flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <p className="text-stone-400">{t.readingPlan.planNotFound}.</p>
+          <p className="text-muted-foreground/70">{t.readingPlan.planNotFound}.</p>
           <button
             onClick={() => navigate(-1)}
             className="text-teal-600 text-sm hover:underline mt-2"
@@ -640,7 +640,7 @@ const EditReadingPlan = () => {
 
   return (
     <div
-      className="min-h-screen bg-[#f7f5f2]"
+      className="min-h-screen bg-background"
       dir={isRtl ? 'rtl' : 'ltr'}
       style={{ fontFamily: "'DM Sans', 'Inter', system-ui, sans-serif" }}
     >
@@ -650,7 +650,7 @@ const EditReadingPlan = () => {
         <div className="flex items-center gap-4">
           <Link
             to="/reading-plans"
-            className="text-stone-400 hover:text-stone-700 inline-flex items-center gap-1.5 text-sm font-medium transition-colors"
+            className="text-muted-foreground/70 hover:text-foreground/80 inline-flex items-center gap-1.5 text-sm font-medium transition-colors"
           >
             <ArrowLeft className={cn("h-4 w-4", isRtl && "rotate-180")} />
             {t.common.back}
@@ -661,39 +661,39 @@ const EditReadingPlan = () => {
             </div>
             <div className="min-w-0">
               <h1
-                className="text-2xl font-bold text-stone-800 tracking-tight leading-none truncate"
+                className="text-2xl font-bold text-foreground tracking-tight leading-none truncate"
                 style={{ fontFamily: "'Fraunces', Georgia, serif" }}
               >
                 {t.readingPlan.editPlan}
               </h1>
-              <p className="text-stone-400 text-xs mt-0.5 font-mono truncate">
+              <p className="text-muted-foreground/70 text-xs mt-0.5 font-mono truncate">
                 {meta.planId}
               </p>
             </div>
           </div>
           <button
             onClick={loadPlan}
-            className="p-2 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 text-stone-400 hover:text-stone-700 transition-colors shadow-sm"
+            className="p-2 rounded-xl border border-border bg-card hover:bg-muted text-muted-foreground/70 hover:text-foreground/80 transition-colors shadow-sm"
           >
             <RefreshCw className="w-4 h-4" />
           </button>
         </div>
 
         {/* ══ PLAN INFO ══ */}
-        <div className="bg-white rounded-2xl border border-stone-100 shadow-[0_1px_3px_rgba(0,0,0,0.05)] overflow-hidden">
-          <div className="px-6 py-4 border-b border-stone-100 bg-stone-50/50 flex items-center justify-between">
+        <div className="bg-card rounded-2xl border border-border/50 shadow-[0_1px_3px_rgba(0,0,0,0.05)] overflow-hidden">
+          <div className="px-6 py-4 border-b border-border/50 bg-muted/50 flex items-center justify-between">
             <div>
-              <h2 className="font-bold text-stone-800 flex items-center gap-2 text-sm">
+              <h2 className="font-bold text-foreground flex items-center gap-2 text-sm">
                 <BookOpen className="w-4 h-4 text-teal-600" />
                 {t.readingPlan.planInfo}
               </h2>
-              <p className="text-xs text-stone-400 mt-0.5">
+              <p className="text-xs text-muted-foreground/70 mt-0.5">
                 {t.readingPlan.editPlanDesc}
               </p>
             </div>
             {/* Active badge */}
             <div className="flex items-center gap-2">
-              <span className="text-xs text-stone-500 font-medium">{t.common.active}</span>
+              <span className="text-xs text-muted-foreground font-medium">{t.common.active}</span>
               <Switch
                 checked={meta.isActive}
                 onCheckedChange={(v) => updateMeta("isActive", v)}
@@ -709,7 +709,7 @@ const EditReadingPlan = () => {
                   readOnly
                   className={cn(
                     inputCls,
-                    "bg-stone-50 text-stone-400 font-mono cursor-not-allowed",
+                    "bg-muted text-muted-foreground/70 font-mono cursor-not-allowed",
                   )}
                 />
               </Field>
@@ -719,7 +719,7 @@ const EditReadingPlan = () => {
                   readOnly
                   className={cn(
                     inputCls,
-                    "bg-stone-50 text-stone-400 cursor-not-allowed",
+                    "bg-muted text-muted-foreground/70 cursor-not-allowed",
                   )}
                 />
               </Field>
@@ -747,7 +747,7 @@ const EditReadingPlan = () => {
                   value={meta.category}
                   onValueChange={(v) => updateMeta("category", v)}
                 >
-                  <SelectTrigger className="rounded-xl border-stone-200 bg-white focus:ring-teal-400/30">
+                  <SelectTrigger className="rounded-xl border-border bg-card focus:ring-teal-400/30">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -767,7 +767,7 @@ const EditReadingPlan = () => {
                   value={meta.difficulty}
                   onValueChange={(v) => updateMeta("difficulty", v)}
                 >
-                  <SelectTrigger className="rounded-xl border-stone-200 bg-white focus:ring-teal-400/30">
+                  <SelectTrigger className="rounded-xl border-border bg-card focus:ring-teal-400/30">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -783,12 +783,12 @@ const EditReadingPlan = () => {
                 </Select>
               </Field>
             </div>
-            <div className="flex items-center justify-between p-4 rounded-xl border border-stone-100 bg-stone-50">
+            <div className="flex items-center justify-between p-4 rounded-xl border border-border/50 bg-muted">
               <div>
-                <p className="text-sm font-semibold text-stone-700">
+                <p className="text-sm font-semibold text-foreground/80">
                   {t.readingPlan.quizQuestions}
                 </p>
-                <p className="text-xs text-stone-400 mt-0.5">
+                <p className="text-xs text-muted-foreground/70 mt-0.5">
                   {t.readingPlan.quizDesc}
                 </p>
               </div>
@@ -820,13 +820,13 @@ const EditReadingPlan = () => {
         </div>
 
         {/* ══ DAY ASSIGNMENTS ══ */}
-        <div className="bg-white rounded-2xl border border-stone-100 shadow-[0_1px_3px_rgba(0,0,0,0.05)] overflow-hidden">
-          <div className="px-6 py-4 border-b border-stone-100 bg-stone-50/50 flex items-center justify-between">
-            <h2 className="font-bold text-stone-800 flex items-center gap-2 text-sm">
+        <div className="bg-card rounded-2xl border border-border/50 shadow-[0_1px_3px_rgba(0,0,0,0.05)] overflow-hidden">
+          <div className="px-6 py-4 border-b border-border/50 bg-muted/50 flex items-center justify-between">
+            <h2 className="font-bold text-foreground flex items-center gap-2 text-sm">
               <Calendar className="w-4 h-4 text-teal-600" />
               {t.readingPlan.dailyAssignments}
             </h2>
-            <span className="text-[11px] border border-stone-200 bg-white text-stone-500 rounded-lg px-2 py-0.5 font-bold">
+            <span className="text-[11px] border border-border bg-card text-muted-foreground rounded-lg px-2 py-0.5 font-bold">
               {meta.totalDays} {t.readingPlan.daysUnit}
             </span>
           </div>
@@ -844,21 +844,21 @@ const EditReadingPlan = () => {
                     isOpen
                       ? "border-teal-200 shadow-[0_2px_8px_rgba(20,184,166,0.10)]"
                       : day._exists
-                        ? "border-stone-100 bg-white"
-                        : "border-dashed border-stone-200 bg-stone-50/50",
+                        ? "border-border/50 bg-card"
+                        : "border-dashed border-border bg-muted/50",
                   )}
                 >
                   {/* Row header */}
                   <button
                     onClick={() => setExpandedDay(isOpen ? -1 : day.dayNumber)}
-                    className="w-full flex items-center gap-3 px-4 py-3.5 text-left bg-white group hover:bg-stone-50/60 transition-colors"
+                    className="w-full flex items-center gap-3 px-4 py-3.5 text-left bg-card group hover:bg-muted/60 transition-colors"
                   >
                     <div
                       className={cn(
                         "w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0",
                         day._exists
                           ? "bg-teal-100 text-teal-700"
-                          : "bg-stone-100 text-stone-400",
+                          : "bg-muted text-muted-foreground/70",
                       )}
                     >
                       {day._exists ? (
@@ -872,14 +872,14 @@ const EditReadingPlan = () => {
                         className={cn(
                           "text-sm font-semibold truncate",
                           day._exists
-                            ? "text-stone-800"
-                            : "text-stone-400 italic",
+                            ? "text-foreground"
+                            : "text-muted-foreground/70 italic",
                         )}
                       >
                         {day.title || `${t.readingPlan.day} ${day.dayNumber} — ${t.readingPlan.dayNotConfigured}`}
                       </p>
                       {day._exists && (
-                        <p className="text-xs text-stone-400 truncate">
+                        <p className="text-xs text-muted-foreground/70 truncate">
                           {day.chapters
                             .filter((c) => c.book)
                             .map((c) => `${c.book} ${c.chapter}`)
@@ -900,16 +900,16 @@ const EditReadingPlan = () => {
                           </span>
                         )}
                       {isOpen ? (
-                        <ChevronUp className="w-4 h-4 text-stone-400" />
+                        <ChevronUp className="w-4 h-4 text-muted-foreground/70" />
                       ) : (
-                        <ChevronDown className="w-4 h-4 text-stone-400" />
+                        <ChevronDown className="w-4 h-4 text-muted-foreground/70" />
                       )}
                     </div>
                   </button>
 
                   {/* Expanded body */}
                   {isOpen && (
-                    <div className="border-t border-stone-100 p-4 space-y-5 bg-white">
+                    <div className="border-t border-border/50 p-4 space-y-5 bg-card">
                       {/* Title */}
                       <Field label={t.readingPlan.dayTitle}>
                         <input
@@ -924,7 +924,7 @@ const EditReadingPlan = () => {
 
                       {/* Chapters */}
                       <div className="space-y-2">
-                        <p className="text-sm font-semibold text-stone-700">
+                        <p className="text-sm font-semibold text-foreground/80">
                           {t.readingPlan.chapters}
                         </p>
                         {day.chapters.map((ch, ci) => (
@@ -935,7 +935,7 @@ const EditReadingPlan = () => {
                                 updateChapter(dayIdx, ci, { book: v })
                               }
                             >
-                              <SelectTrigger className="flex-1 rounded-xl border-stone-200 bg-white text-sm focus:ring-teal-400/30">
+                              <SelectTrigger className="flex-1 rounded-xl border-border bg-card text-sm focus:ring-teal-400/30">
                                 <SelectValue placeholder={t.readingPlan.bookPlaceholder} />
                               </SelectTrigger>
                               <SelectContent className="max-h-60">
@@ -960,7 +960,7 @@ const EditReadingPlan = () => {
                             {day.chapters.length > 1 && (
                               <button
                                 onClick={() => removeChapter(dayIdx, ci)}
-                                className="p-1.5 rounded-lg hover:bg-red-50 text-stone-400 hover:text-red-500 transition-colors shrink-0"
+                                className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 text-muted-foreground/70 hover:text-red-500 dark:hover:text-red-400 transition-colors shrink-0"
                               >
                                 <X className="w-4 h-4" />
                               </button>
@@ -978,7 +978,7 @@ const EditReadingPlan = () => {
 
                       {/* Reflections */}
                       <div className="space-y-2">
-                        <p className="text-sm font-semibold text-stone-700">
+                        <p className="text-sm font-semibold text-foreground/80">
                           {t.readingPlan.reflectionQuestions}
                         </p>
                         {day.reflectionQuestions.map((q, ri) => (
@@ -994,7 +994,7 @@ const EditReadingPlan = () => {
                             {day.reflectionQuestions.length > 1 && (
                               <button
                                 onClick={() => removeReflection(dayIdx, ri)}
-                                className="p-1.5 rounded-lg hover:bg-red-50 text-stone-400 hover:text-red-500 transition-colors shrink-0"
+                                className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 text-muted-foreground/70 hover:text-red-500 dark:hover:text-red-400 transition-colors shrink-0"
                               >
                                 <X className="w-4 h-4" />
                               </button>
@@ -1013,7 +1013,7 @@ const EditReadingPlan = () => {
                       {/* Quiz questions */}
                       {meta.questionsEnabled && (
                         <div className="space-y-3">
-                          <p className="text-sm font-semibold text-stone-700 flex items-center gap-1.5">
+                          <p className="text-sm font-semibold text-foreground/80 flex items-center gap-1.5">
                             <HelpCircle className="w-4 h-4 text-violet-500" />
                             {t.readingPlan.quizQuestions}
                           </p>
@@ -1026,12 +1026,12 @@ const EditReadingPlan = () => {
                                   ? "border-teal-200 bg-teal-50/30"
                                   : quiz._dirty
                                     ? "border-amber-200 bg-amber-50/20"
-                                    : "border-stone-100 bg-stone-50/30",
+                                    : "border-border/50 bg-muted/30",
                               )}
                             >
                               <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2">
-                                  <span className="text-xs font-bold text-stone-500 uppercase tracking-wide">
+                                  <span className="text-xs font-bold text-muted-foreground uppercase tracking-wide">
                                     Q{qi + 1}
                                   </span>
                                   {quiz._new && (
@@ -1045,7 +1045,7 @@ const EditReadingPlan = () => {
                                     </span>
                                   )}
                                   {quiz.questionId && (
-                                    <span className="text-[10px] text-stone-400 font-mono">
+                                    <span className="text-[10px] text-muted-foreground/70 font-mono">
                                       #{quiz.questionId}
                                     </span>
                                   )}
@@ -1054,7 +1054,7 @@ const EditReadingPlan = () => {
                                   onClick={() =>
                                     openDeleteQuiz(dayIdx, qi, quiz.questionId)
                                   }
-                                  className="p-1 rounded-lg hover:bg-red-50 text-stone-400 hover:text-red-500 transition-colors"
+                                  className="p-1 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 text-muted-foreground/70 hover:text-red-500 dark:hover:text-red-400 transition-colors"
                                 >
                                   <Trash2 className="w-3.5 h-3.5" />
                                 </button>
@@ -1086,7 +1086,7 @@ const EditReadingPlan = () => {
                                         "w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors",
                                         quiz.correctAnswer === oi
                                           ? "border-teal-500 bg-teal-500"
-                                          : "border-stone-300 hover:border-teal-400",
+                                          : "border-border hover:border-teal-400",
                                       )}
                                     >
                                       {quiz.correctAnswer === oi && (
@@ -1138,7 +1138,7 @@ const EditReadingPlan = () => {
                       )}
 
                       {/* Save day */}
-                      <div className="flex justify-end pt-2 border-t border-stone-100">
+                      <div className="flex justify-end pt-2 border-t border-border/50">
                         <button
                           onClick={() => saveDay(dayIdx)}
                           disabled={isSaving}
@@ -1146,7 +1146,7 @@ const EditReadingPlan = () => {
                             "inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold shadow-sm transition-all hover:-translate-y-px disabled:opacity-50",
                             isDirty
                               ? "bg-teal-600 hover:bg-teal-700 text-white shadow-teal-600/20"
-                              : "bg-stone-100 text-stone-500 hover:bg-stone-200",
+                              : "bg-muted text-muted-foreground hover:bg-stone-200 dark:hover:bg-stone-700",
                           )}
                         >
                           {isSaving ? (
@@ -1176,7 +1176,7 @@ const EditReadingPlan = () => {
         open={!!deleteQuizTarget}
         onOpenChange={(o) => !o && setDeleteQuizTarget(null)}
       >
-        <DialogContent className="sm:max-w-sm rounded-2xl border-stone-100">
+        <DialogContent className="sm:max-w-sm rounded-2xl border-border/50">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-red-600">
               <AlertTriangle className="w-5 h-5" />

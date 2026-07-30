@@ -1,17 +1,13 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   BookOpen,
   Calendar,
-  Feather,
-  FileText,
-  Heart,
-  Layers,
-  PenLine,
+  ArrowLeft,
   RefreshCcw,
   Loader2,
-  ArrowLeft,
   Sparkles,
+  PenLine,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -107,23 +103,6 @@ const isCurrentOrFuture = (dateStr: string): boolean => {
   }
 };
 
-// ── Sections ───────────────────────────────────────────────────────────────────
-
-type SectionIcon = typeof Feather | typeof Layers | typeof FileText | typeof PenLine | typeof Heart;
-
-const SECTION_CONFIG: {
-  icon: SectionIcon;
-  title: string;
-  field: keyof Pick<DailyExegesis, "introduction" | "contextSummary" | "teachingBody" | "application" | "prayer">;
-  required?: boolean;
-}[] = [
-  { icon: Feather, title: "Introduction", field: "introduction" },
-  { icon: Layers, title: "Context Summary", field: "contextSummary" },
-  { icon: FileText, title: "Teaching", field: "teachingBody", required: true },
-  { icon: PenLine, title: "Application", field: "application" },
-  { icon: Heart, title: "Prayer", field: "prayer" },
-];
-
 // ── Main Component ─────────────────────────────────────────────────────────────
 
 export default function DailyExegesisPage() {
@@ -158,9 +137,7 @@ export default function DailyExegesisPage() {
       if (listRes.returnCode === 200 && listRes.returnData) {
         const data = listRes.returnData as ExegesisListResponse;
         const sorted = (data.content || []).sort(
-          (a, b) =>
-            new Date(a.displayDate).getTime() -
-            new Date(b.displayDate).getTime(),
+          (a, b) => new Date(a.displayDate).getTime() - new Date(b.displayDate).getTime()
         );
         setSeries(sorted);
       }
@@ -177,20 +154,26 @@ export default function DailyExegesisPage() {
     loadExegesis();
   }, [loadExegesis]);
 
+  // ── Derived data ────────────────────────────────────────────────────────
+
   const item = exegesis ?? fallbackExegesis;
-  const passage = parsePassage(item.passageReference);
+  const passage = useMemo(() => parsePassage(item.passageReference), [item.passageReference]);
   const displayDate = formatDisplayDate(item.displayDate);
   const isUpcoming = isCurrentOrFuture(item.displayDate);
 
   const openInBible = () => {
     if (!passage) return;
-    navigate(`/bible-reader?book=${encodeURIComponent(passage.bookName)}&chapter=${passage.chapter}&verse=${passage.verseNumber}`);
+    navigate(
+      `/bible-reader?book=${encodeURIComponent(passage.bookName)}&chapter=${passage.chapter}&verse=${passage.verseNumber}`
+    );
   };
 
   const saveToLedger = () => {
     const params = new URLSearchParams({
       title: item.title,
-      reflection: [item.introduction, item.contextSummary, item.teachingBody].filter(Boolean).join("\n\n"),
+      reflection: [item.introduction, item.contextSummary, item.teachingBody]
+        .filter(Boolean)
+        .join("\n\n"),
       prayer: item.prayer || "",
       application: item.application || "",
       tags: item.tags || "",
@@ -206,143 +189,145 @@ export default function DailyExegesisPage() {
     navigate(`/journal/new?${params.toString()}`);
   };
 
-  // ── Loading ──
+  // ── Render helpers ─────────────────────────────────────────────────────
+
+  const renderSections = () => (
+    <div className="space-y-6 mt-6">
+      {/* Introduction */}
+      <section>
+        <h2 className="text-lg font-semibold mb-2 text-foreground">Introduction</h2>
+        <p className="whitespace-pre-wrap text-muted-foreground leading-6">
+          {item.introduction || "No introduction provided."}
+        </p>
+      </section>
+      {/* Context */}
+      <section>
+        <h2 className="text-lg font-semibold mb-2 text-foreground">Context Summary</h2>
+        <p className="whitespace-pre-wrap text-muted-foreground leading-6">
+          {item.contextSummary || "No context provided."}
+        </p>
+      </section>
+      {/* Teaching */}
+      <section>
+        <h2 className="text-lg font-semibold mb-2 text-foreground">Teaching</h2>
+        <p className="whitespace-pre-wrap text-muted-foreground leading-6">
+          {item.teachingBody || "No teaching content provided."}
+        </p>
+      </section>
+      {/* Application */}
+      <section>
+        <h2 className="text-lg font-semibold mb-2 text-foreground">Application</h2>
+        <p className="whitespace-pre-wrap text-muted-foreground leading-6">
+          {item.application || "No application provided."}
+        </p>
+      </section>
+      {/* Prayer */}
+      <section>
+        <h2 className="text-lg font-semibold mb-2 text-foreground">Prayer</h2>
+        <p className="whitespace-pre-wrap text-muted-foreground leading-6">
+          {item.prayer || "No prayer provided."}
+        </p>
+      </section>
+    </div>
+  );
+
+  // ── Loading state ───────────────────────────────────────────────────────
+
   if (loading) {
     return (
-      <div
-        className="min-h-screen flex flex-col bg-background"
-        dir={isRtl ? "rtl" : "ltr"}
-      >
+      <div className="min-h-screen flex flex-col bg-background" dir={isRtl ? "rtl" : "ltr"}>
         <Header onBack={() => navigate(-1)} />
         <div className="flex-1 flex items-center justify-center">
           <div className="flex flex-col items-center gap-3">
             <Loader2 className="w-8 h-8 animate-spin text-primary" />
-            <p className="text-sm font-semibold text-muted-foreground">
-              Preparing today's teaching...
-            </p>
+            <p className="text-sm font-semibold text-muted-foreground">Preparing today's teaching…</p>
           </div>
         </div>
       </div>
     );
   }
 
+  // ── Main render ───────────────────────────────────────────────────────────
+
   return (
-    <div
-      className="min-h-screen flex flex-col bg-background"
-      dir={isRtl ? "rtl" : "ltr"}
-    >
+    <div className="min-h-screen flex flex-col bg-background" dir={isRtl ? "rtl" : "ltr"}>
       <Header onBack={() => navigate(-1)} />
 
-      {/* Content */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="max-w-3xl mx-auto w-full px-4 sm:px-6 py-6 pb-16">
-          {/* Error banner */}
-          {error && (
-            <button
-              onClick={loadExegesis}
-              className="w-full flex items-center gap-2 p-3 mb-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-xs font-bold hover:bg-amber-500/15 transition-colors"
-            >
-              <RefreshCcw className="w-3.5 h-3.5 shrink-0" />
-              <span className="flex-1 text-left">{error}</span>
-            </button>
-          )}
-
-          {/* Hero card */}
-          <div className="rounded-2xl bg-card border border-border p-5 sm:p-6 mb-4 shadow-sm">
-            <div className="flex items-center gap-1.5 mb-3">
-              <Calendar className="w-3.5 h-3.5 text-primary" />
-              <span className="text-xs font-extrabold text-primary tracking-wide">
-                {displayDate}
-              </span>
-              {isUpcoming && (
-                <Badge
-                  variant="outline"
-                  className="text-[10px] font-bold px-1.5 py-0 border-primary/30 text-primary ml-1"
-                >
-                  Upcoming
-                </Badge>
-              )}
-            </div>
-
-            <h1 className="text-xl sm:text-2xl font-black text-foreground leading-tight mb-4">
-              {item.title}
-            </h1>
-
-            <button
-              onClick={openInBible}
-              disabled={!passage}
-              className={cn(
-                "inline-flex items-center gap-2 px-3.5 py-2 rounded-full text-xs font-extrabold border transition-colors",
-                passage
-                  ? "bg-primary/10 border-primary/30 text-primary hover:bg-primary/15"
-                  : "bg-muted border-muted text-muted-foreground cursor-not-allowed",
-              )}
-            >
-              <BookOpen className="w-3.5 h-3.5" />
-              {item.passageReference}
-            </button>
+      {/* Hero */}
+      <section className="bg-gradient-to-r from-primary to-indigo-600 text-white py-10">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 flex flex-col gap-4">
+          <div className="flex items-center gap-2">
+            <Calendar className="w-4 h-4" />
+            <span className="text-sm font-medium">{displayDate}</span>
+            {isUpcoming && (
+              <Badge variant="secondary" className="text-xs font-bold px-2 py-0.5 ml-2">
+                Upcoming
+              </Badge>
+            )}
           </div>
+          <h1 className="text-2xl sm:text-3xl font-black leading-tight">{item.title}</h1>
+          <Button
+            variant="secondary"
+            onClick={openInBible}
+            disabled={!passage}
+            className="w-max gap-2"
+          >
+            <BookOpen className="w-4 h-4" />
+            {item.passageReference}
+          </Button>
+        </div>
+      </section>
 
-          {/* Series navigation */}
-          {series.length > 1 && (
-            <div className="mb-4">
-              <p className="text-xs font-black text-muted-foreground mb-2">
-                Daily Exegesis Series
-              </p>
-              <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
-                {series.map((entry) => {
-                  const active = entry.id === item.id;
-                  return (
-                    <button
-                      key={entry.id}
-                      onClick={() => setExegesis(entry)}
-                      className={cn(
-                        "px-3 py-1.5 rounded-full text-xs font-bold border whitespace-nowrap transition-all shrink-0",
-                        active
-                          ? "bg-primary text-primary-foreground border-primary"
-                          : "bg-card text-muted-foreground border-border hover:bg-muted",
-                      )}
-                    >
-                      {entry.passageReference}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Section cards */}
-          <div className="space-y-2.5">
-            {SECTION_CONFIG.map(({ icon: Icon, title, field, required }) => {
-              const text = item[field];
-              if (!text && !required) return null;
+      {/* Series navigation (carousel) */}
+      {series.length > 1 && (
+        <section className="bg-muted py-3">
+          <div className="max-w-3xl mx-auto px-4 sm:px-6 overflow-x-auto scrollbar-none flex gap-2">
+            {series.map((entry) => {
+              const active = entry.id === item.id;
               return (
-                <div
-                  key={field}
-                  className="rounded-xl bg-card border border-border p-4 sm:p-5"
+                <button
+                  key={entry.id}
+                  onClick={() => setExegesis(entry)}
+                  className={cn(
+                    "px-3 py-1.5 rounded-full text-xs font-medium border whitespace-nowrap transition-all shrink-0",
+                    active
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "bg-card text-muted-foreground border-border hover:bg-muted"
+                  )}
                 >
-                  <div className="flex items-center gap-2.5 mb-2.5">
-                    <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                      <Icon className="w-3.5 h-3.5 text-primary" />
-                    </div>
-                    <h3 className="text-sm font-black text-foreground">
-                      {title}
-                    </h3>
-                  </div>
-                  <p className="text-sm text-muted-foreground leading-6 font-medium whitespace-pre-wrap">
-                    {text || "No content added yet."}
-                  </p>
-                </div>
+                  {entry.passageReference}
+                </button>
               );
             })}
           </div>
+        </section>
+      )}
+
+      {/* Content */}
+      <main className="flex-1 overflow-y-auto">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6">
+          {/* Error banner */}
+          {error && (
+            <Button
+              variant="outline"
+              onClick={loadExegesis}
+              className="w-full mb-4 flex items-center gap-2 justify-center"
+            >
+              <RefreshCcw className="w-4 h-4" />
+              {error}
+            </Button>
+          )}
+
+          {/* Tabs with sections */}
+          {renderSections()}
 
           {/* Action buttons */}
-          <div className="flex flex-col gap-2.5 mt-6">
+          <div className="flex flex-col sm:flex-row gap-3 mt-8">
             <Button
               onClick={openInBible}
               disabled={!passage}
-              className="w-full gap-2 h-11"
+              className="flex-1 gap-2 h-11"
+              aria-label="Open passage in Bible reader"
             >
               <BookOpen className="w-4 h-4" />
               Open in Bible
@@ -350,28 +335,27 @@ export default function DailyExegesisPage() {
             <Button
               variant="outline"
               onClick={saveToLedger}
-              className="w-full gap-2 h-11"
+              className="flex-1 gap-2 h-11"
+              aria-label="Save this exegesis to your journal"
             >
               <PenLine className="w-4 h-4" />
-              Save to Ledger
+              Save to Journal
             </Button>
           </div>
-
-          {/* Footer */}
-          <div className="flex items-center justify-center gap-2 mt-8 pt-4 border-t border-border/30">
-            <Sparkles className="w-3 h-3 text-accent/50" />
-            <span className="text-[10px] text-muted-foreground/40 font-medium">
-              Lordsbook Daily Exegesis
-            </span>
-            <Sparkles className="w-3 h-3 text-accent/50" />
-          </div>
         </div>
-      </div>
+      </main>
+
+      {/* Footer */}
+      <footer className="flex items-center justify-center gap-2 py-4 border-t border-border/30 text-xs text-muted-foreground/60">
+        <Sparkles className="w-3 h-3 text-muted-foreground/40" />
+        <span>Lordsbook Daily Exegesis</span>
+        <Sparkles className="w-3 h-3 text-muted-foreground/40" />
+      </footer>
     </div>
   );
 }
 
-// ── Header Sub-component ───────────────────────────────────────────────────────
+// ── Header Sub‑component ───────────────────────────────────────────────────────
 
 function Header({ onBack }: { onBack: () => void }) {
   const { t, isRtl } = useLanguage();
@@ -379,25 +363,22 @@ function Header({ onBack }: { onBack: () => void }) {
   return (
     <header className="flex-shrink-0 border-b bg-background/95 backdrop-blur-sm sticky top-0 z-30">
       <div className="flex items-center justify-between px-4 sm:px-6 py-3">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={onBack}
-            className="w-8 h-8 rounded-full bg-muted/30 flex items-center justify-center hover:bg-muted/50 transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4 text-foreground" />
-          </button>
-          <div>
-            <h1
-              className="text-base sm:text-lg font-semibold tracking-wide text-foreground leading-none"
-              style={{ fontFamily: "'Cinzel', serif" }}
-            >
-              {t.dailyExegesis?.title || "Daily Exegesis"}
-            </h1>
-            <p className="text-[10px] text-muted-foreground tracking-widest uppercase leading-none mt-0.5">
-              {t.dailyExegesis?.subtitle || "Lordsbook teaching"}
-            </p>
-          </div>
+        <button
+          onClick={onBack}
+          className="w-8 h-8 rounded-full bg-muted/30 flex items-center justify-center hover:bg-muted/50 transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4 text-foreground" />
+        </button>
+        <div>
+          <h1 className="text-base sm:text-lg font-semibold tracking-wide text-foreground" style={{ fontFamily: "'Cinzel', serif" }}>
+            {t.dailyExegesis?.title || "Daily Exegesis"}
+          </h1>
+          <p className="text-[10px] text-muted-foreground uppercase tracking-widest mt-0.5">
+            {t.dailyExegesis?.subtitle || "Lordsbook teaching"}
+          </p>
         </div>
+        {/* placeholder for potential right‑side actions */}
+        <div className="w-8" />
       </div>
     </header>
   );

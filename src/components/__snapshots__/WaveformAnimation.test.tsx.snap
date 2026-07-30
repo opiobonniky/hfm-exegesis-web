@@ -1,0 +1,125 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`WaveformAnimation > snapshots > matches SSR snapshot for inactive state 1`] = `"<div class="flex items-end h-3 gap-[2px]" aria-hidden="true"><div class="waveform-bar-reusable paused" style="animation-delay:0.00s;background-color:rgb(156, 163, 175);opacity:0.4"></div><div class="waveform-bar-reusable paused" style="animation-delay:0.27s;background-color:rgb(156, 163, 175);opacity:0.4"></div><div class="waveform-bar-reusable paused" style="animation-delay:0.53s;background-color:rgb(156, 163, 175);opacity:0.4"></div></div>"`;
+
+exports[`WaveformAnimation > snapshots > matches SSR snapshot via renderToStaticMarkup 1`] = `"<div class="flex items-end h-3 gap-[2px]" aria-hidden="true"><div class="waveform-bar-reusable" style="animation-delay:0.00s;background-color:rgb(59, 130, 246);opacity:0.9"></div><div class="waveform-bar-reusable" style="animation-delay:0.27s;background-color:rgb(59, 130, 246);opacity:0.9"></div><div class="waveform-bar-reusable" style="animation-delay:0.53s;background-color:rgb(59, 130, 246);opacity:0.9"></div></div>"`;
+
+exports[`WaveformAnimation > snapshots > matches snapshot for default active state (10 bars) 1`] = `
+<div
+  aria-hidden="true"
+  class="flex items-end h-3 gap-[2px]"
+>
+  <div
+    class="waveform-bar-reusable"
+    style="animation-delay: 0.00s; background-color: rgb(59, 130, 246); opacity: 0.9;"
+  />
+  <div
+    class="waveform-bar-reusable"
+    style="animation-delay: 0.08s; background-color: rgb(59, 130, 246); opacity: 0.9;"
+  />
+  <div
+    class="waveform-bar-reusable"
+    style="animation-delay: 0.16s; background-color: rgb(59, 130, 246); opacity: 0.9;"
+  />
+  <div
+    class="waveform-bar-reusable"
+    style="animation-delay: 0.24s; background-color: rgb(59, 130, 246); opacity: 0.9;"
+  />
+  <div
+    class="waveform-bar-reusable"
+    style="animation-delay: 0.32s; background-color: rgb(59, 130, 246); opacity: 0.9;"
+  />
+  <div
+    class="waveform-bar-reusable"
+    style="animation-delay: 0.40s; background-color: rgb(59, 130, 246); opacity: 0.9;"
+  />
+  <div
+    class="waveform-bar-reusable"
+    style="animation-delay: 0.48s; background-color: rgb(59, 130, 246); opacity: 0.9;"
+  />
+  <div
+    class="waveform-bar-reusable"
+    style="animation-delay: 0.56s; background-color: rgb(59, 130, 246); opacity: 0.9;"
+  />
+  <div
+    class="waveform-bar-reusable"
+    style="animation-delay: 0.64s; background-color: rgb(59, 130, 246); opacity: 0.9;"
+  />
+  <div
+    class="waveform-bar-reusable"
+    style="animation-delay: 0.72s; background-color: rgb(59, 130, 246); opacity: 0.9;"
+  />
+</div>
+`;
+
+exports[`WaveformAnimation > snapshots > matches snapshot for default inactive state (paused) 1`] = `
+<div
+  aria-hidden="true"
+  class="flex items-end h-3 gap-[2px]"
+>
+  <div
+    class="waveform-bar-reusable paused"
+    style="animation-delay: 0.00s; background-color: rgb(156, 163, 175); opacity: 0.4;"
+  />
+  <div
+    class="waveform-bar-reusable paused"
+    style="animation-delay: 0.08s; background-color: rgb(156, 163, 175); opacity: 0.4;"
+  />
+  <div
+    class="waveform-bar-reusable paused"
+    style="animation-delay: 0.16s; background-color: rgb(156, 163, 175); opacity: 0.4;"
+  />
+  <div
+    class="waveform-bar-reusable paused"
+    style="animation-delay: 0.24s; background-color: rgb(156, 163, 175); opacity: 0.4;"
+  />
+  <div
+    class="waveform-bar-reusable paused"
+    style="animation-delay: 0.32s; background-color: rgb(156, 163, 175); opacity: 0.4;"
+  />
+  <div
+    class="waveform-bar-reusable paused"
+    style="animation-delay: 0.40s; background-color: rgb(156, 163, 175); opacity: 0.4;"
+  />
+  <div
+    class="waveform-bar-reusable paused"
+    style="animation-delay: 0.48s; background-color: rgb(156, 163, 175); opacity: 0.4;"
+  />
+  <div
+    class="waveform-bar-reusable paused"
+    style="animation-delay: 0.56s; background-color: rgb(156, 163, 175); opacity: 0.4;"
+  />
+  <div
+    class="waveform-bar-reusable paused"
+    style="animation-delay: 0.64s; background-color: rgb(156, 163, 175); opacity: 0.4;"
+  />
+  <div
+    class="waveform-bar-reusable paused"
+    style="animation-delay: 0.72s; background-color: rgb(156, 163, 175); opacity: 0.4;"
+  />
+</div>
+`;
+
+exports[`WaveformAnimation > snapshots > matches snapshot with custom barCount and colors 1`] = `
+<div
+  aria-hidden="true"
+  class="flex items-end h-5 gap-[3px] mx-auto"
+>
+  <div
+    class="waveform-bar-reusable"
+    style="animation-delay: 0.00s; background-color: rgb(34, 197, 94); opacity: 0.9;"
+  />
+  <div
+    class="waveform-bar-reusable"
+    style="animation-delay: 0.20s; background-color: rgb(34, 197, 94); opacity: 0.9;"
+  />
+  <div
+    class="waveform-bar-reusable"
+    style="animation-delay: 0.40s; background-color: rgb(34, 197, 94); opacity: 0.9;"
+  />
+  <div
+    class="waveform-bar-reusable"
+    style="animation-delay: 0.60s; background-color: rgb(34, 197, 94); opacity: 0.9;"
+  />
+</div>
+`;

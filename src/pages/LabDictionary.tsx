@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/select";
 
 import WordDetailSheet from "@/components/WordDetailSheet";
+import WordStudyDialog from "@/components/WordStudyDialog";
 import { sendGetRequest, sendPostRequest } from "@/services/api";
 import { cn } from "@/lib/utils";
 import TierBadge from "@/components/TierBadge";
@@ -81,10 +82,15 @@ export default function LabDictionary() {
   const [chartMode, setChartMode] = useState<ChartMode>("frequency");
   const [langFilter, setLangFilter] = useState("all");
 
-  // Word detail dialog
+  // Word detail sheet
   const [selectedWord, setSelectedWord] = useState<WordEntry | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
+
+  // Word study dialog (centered modal alternative)
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogStrongsId, setDialogStrongsId] = useState<string | null>(null);
+  const [dialogSurfaceText, setDialogSurfaceText] = useState("");
 
   // ── Search ──
 
@@ -114,16 +120,13 @@ export default function LabDictionary() {
     }
   }, []);
 
-  const handleSearch = useCallback(() => {
-    executeSearch(searchQuery);
-  }, [executeSearch, searchQuery]);
-
-  // Trigger search on Enter
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      handleSearch();
+  // ── Auto-search on 3+ chars ──
+  useEffect(() => {
+    if (searchQuery.trim().length >= 3) {
+      const timer = setTimeout(() => executeSearch(searchQuery), 300);
+      return () => clearTimeout(timer);
     }
-  };
+  }, [searchQuery, executeSearch]);
 
   // ── Browse by Book ──
 
@@ -331,6 +334,12 @@ export default function LabDictionary() {
   }, [browseWords, chartMode, langFilter]);
 
   // ── Word Detail ──
+
+  const openWordDialog = (strongsId: string, surfaceText?: string) => {
+    setDialogStrongsId(strongsId);
+    setDialogSurfaceText(surfaceText || "");
+    setDialogOpen(true);
+  };
 
   const openWordDetailById = (strongsId: string) => {
     const word = browseWords.find((w) => w.strongsId === strongsId);
@@ -589,6 +598,7 @@ export default function LabDictionary() {
     <WordCard
       word={word}
       onClick={() => openWordDetail(word)}
+      onOpenDialog={() => openWordDialog(word.strongsId, word.shortDefinition)}
       showGrammarCase={false}
       showFullDefinition={false}
     />
@@ -688,25 +698,11 @@ export default function LabDictionary() {
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
-                    placeholder="Search by word, transliteration, or meaning..."
+                    placeholder="Search by word, transliteration, or meaning... (min 3 characters)"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    onKeyDown={handleKeyDown}
                     className="pl-9 pr-4 h-11 text-sm rounded-xl border-border/60"
                   />
-                  <Button
-                    size="sm"
-                    onClick={handleSearch}
-                    disabled={loading || searchQuery.trim().length < 2}
-                    className="absolute right-1.5 top-1/2 -translate-y-1/2 h-8 text-xs gap-1"
-                  >
-                    {loading ? (
-                      <Loader2 className="w-3 h-3 animate-spin" />
-                    ) : (
-                      <Search className="w-3 h-3" />
-                    )}
-                    Search
-                  </Button>
                 </div>
 
                 {/* Quick tips */}
@@ -1197,6 +1193,14 @@ export default function LabDictionary() {
         strongsId={selectedWord?.strongsId || null}
         verseText={undefined}
         translations={undefined}
+      />
+
+      {/* ── Word Study Dialog (centered modal) ── */}
+      <WordStudyDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        strongsId={dialogStrongsId}
+        surfaceText={dialogSurfaceText || undefined}
       />
     </div>
   );

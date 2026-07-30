@@ -54,6 +54,7 @@ export interface VerseDisplayProps {
   expandedExplanation: string | null;
   expandedFullExplanation: Set<string>;
   explanationLoading: boolean;
+  explainedVerseKey: string | null;
   /** Selection */
   selectedVerses: string[];
   /** Speech */

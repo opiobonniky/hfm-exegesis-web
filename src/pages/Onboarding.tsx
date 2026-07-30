@@ -54,7 +54,7 @@ const SLIDES: Slide[] = [
     description:
       "Read the Bible in a clean, distraction-free space. Every translation, every chapter, every verse — always accessible.",
     bgGradient: "from-indigo-600 to-indigo-800",
-    iconBg: "bg-white/15",
+    iconBg: "bg-card/15",
     iconColor: "text-white",
   },
   {
@@ -64,7 +64,7 @@ const SLIDES: Slide[] = [
     description:
       "Tap verses and words to discover context, Strong's definitions, cross-references, and study helps. The Bible comes alive when you understand the original meaning.",
     bgGradient: "from-violet-600 to-violet-800",
-    iconBg: "bg-white/15",
+    iconBg: "bg-card/15",
     iconColor: "text-white",
   },
   {
@@ -74,7 +74,7 @@ const SLIDES: Slide[] = [
     description:
       "Learn to study Scripture through the 4-step Exegesis Lab: Look, Listen, Learn, and Abide. Each step draws you deeper into the Word.",
     bgGradient: "from-emerald-600 to-emerald-800",
-    iconBg: "bg-white/15",
+    iconBg: "bg-card/15",
     iconColor: "text-white",
   },
   {
@@ -84,7 +84,7 @@ const SLIDES: Slide[] = [
     description:
       "Save your reflections, prayers, and studies into your private journal. Build a lifelong archive of what God is teaching you through His Word.",
     bgGradient: "from-amber-500 to-amber-700",
-    iconBg: "bg-white/15",
+    iconBg: "bg-card/15",
     iconColor: "text-white",
   },
 ];
@@ -152,8 +152,8 @@ function DotIndicators({
           className={cn(
             "rounded-full transition-all duration-300",
             i === current
-              ? "w-6 h-2 bg-white"
-              : "w-2 h-2 bg-white/30",
+              ? "w-6 h-2 bg-card"
+              : "w-2 h-2 bg-card/30",
           )}
         />
       ))}
@@ -252,7 +252,7 @@ export default function OnboardingPage() {
             onClick={goNext}
             className={cn(
               "w-full h-14 text-base font-bold gap-2 rounded-2xl transition-all active:scale-[0.98]",
-              "bg-white text-gray-900 hover:bg-white/90 hover:shadow-xl",
+              "bg-card text-gray-900 hover:bg-card/90 hover:shadow-xl",
               "shadow-lg shadow-black/20",
             )}
           >

@@ -61,6 +61,7 @@ const VerifyAccount = () => {
         const userInfo: any = {
           token: returnData.token,
           tokenType: returnData.tokenType,
+          id: returnData.id,
           username: returnData.username,
           email: returnData.email,
           firstName: returnData.firstName,
@@ -173,7 +174,7 @@ const VerifyAccount = () => {
             style={{ animationDuration: "5s" }}
           />
           <div
-            className="absolute top-1/2 -right-24 w-[360px] h-[360px] bg-white/10 rounded-full blur-3xl animate-pulse"
+            className="absolute top-1/2 -right-24 w-[360px] h-[360px] bg-card/10 rounded-full blur-3xl animate-pulse"
             style={{ animationDuration: "7s", animationDelay: "1s" }}
           />
           <div
@@ -193,7 +194,7 @@ const VerifyAccount = () => {
         <div className="relative z-10 flex flex-col justify-between px-14 py-14 w-full">
           <div className="anim-fade" style={{ animationDelay: "0s" }}>
             <div className="flex items-center gap-3">
-              <div className="w-16 h-16 rounded-lg bg-white flex items-center justify-center shrink-0 overflow-hidden p-1.5">
+              <div className="w-16 h-16 rounded-lg bg-card flex items-center justify-center shrink-0 overflow-hidden p-1.5">
                 <img
                   src={logoImage}
                   alt="Exegesis"
@@ -221,7 +222,7 @@ const VerifyAccount = () => {
               <div className="absolute -top-4 -right-4 w-12 h-12 rounded-full bg-amber-400/90 flex items-center justify-center shadow-lg animate-pulse">
                 <Sparkles className="w-6 h-6 text-white" />
               </div>
-              <div className="absolute -bottom-3 -left-3 w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+              <div className="absolute -bottom-3 -left-3 w-8 h-8 rounded-full bg-card/20 flex items-center justify-center">
                 <Sparkles className="w-4 h-4 text-white/70" />
               </div>
             </div>

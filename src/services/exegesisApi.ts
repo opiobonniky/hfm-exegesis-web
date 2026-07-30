@@ -15,6 +15,8 @@ export interface ExegesisSession {
   lookNotes: string | null;
   listenDuration: number | null;
   listenElapsed: number | null;
+  listenRepeats: number | null;
+  listenRepeatCount: number | null;
   listenCompleted: boolean | null;
   learnNotes: string | null;
   abideReflection: string | null;

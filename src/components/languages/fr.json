@@ -1139,6 +1139,7 @@
     "bible": "Lecteur Biblique",
     "dailyVerse": "Verset du Jour",
     "dashboard": "Tableau de Bord",
+    "adminDashboard": "Admin Console",
     "devotions": "Dévorions",
     "explanations": "Explications de Versets",
     "home": "Accueil",
@@ -1153,7 +1154,11 @@
     "profile": "Profil",
     "readingPlans": "Plans de Lecture",
     "settings": "Paramètres",
-    "userActivity": "Activité des Utilisateurs"
+    "userActivity": "Activité des Utilisateurs",
+    "triviaAdmin": "Trivia Management",
+    "dailyContentAdmin": "Daily Content",
+    "subscriptionsAdmin": "Subscriptions",
+    "adminTools": "Admin Tools"
   },
   "userActivity": {
     "action": "Cela supprimera définitivement le verset. Cette action ne peut pas être annulée.",

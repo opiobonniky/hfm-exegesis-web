@@ -177,7 +177,7 @@ const GlassCard = ({
 }) => (
   <div
     className={cn(
-      "rounded-2xl border border-slate-200 bg-white shadow-sm",
+      "rounded-2xl border border-border bg-card shadow-sm",
       className,
     )}
   >
@@ -186,7 +186,7 @@ const GlassCard = ({
 );
 
 const SectionLabel = ({ children }: { children: React.ReactNode }) => (
-  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.18em] mb-3">
+  <p className="text-[10px] font-bold text-muted-foreground/70 uppercase tracking-[0.18em] mb-3">
     {children}
   </p>
 );
@@ -245,7 +245,7 @@ const StatCard = ({
   value: React.ReactNode;
   accent: string;
 }) => (
-  <GlassCard className="p-4 hover:bg-slate-50 transition-colors">
+  <GlassCard className="p-4 hover:bg-background transition-colors">
     <div
       className={cn(
         "w-8 h-8 rounded-xl flex items-center justify-center mb-2.5",
@@ -254,8 +254,8 @@ const StatCard = ({
     >
       {icon}
     </div>
-    <p className="text-xl font-bold text-slate-900 tracking-tight">{value}</p>
-    <p className="text-[10px] text-slate-500 uppercase tracking-wider mt-0.5">
+    <p className="text-xl font-bold text-foreground tracking-tight">{value}</p>
+    <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">
       {label}
     </p>
   </GlassCard>
@@ -289,7 +289,7 @@ const StatusBadge = ({
   }
 
   return (
-    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border border-slate-200 bg-slate-100 text-slate-600">
+    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border border-border bg-muted text-muted-foreground">
       <CircleOff className="w-3 h-3" />
       {t.common.inactive || "Inactive"}
     </span>
@@ -319,11 +319,11 @@ const DayCard = ({
 
   if (!exists) {
     return (
-      <div className="flex items-center gap-3 px-4 py-3 rounded-xl border border-slate-200 bg-slate-50">
-        <div className="w-7 h-7 rounded-full border border-slate-300 flex items-center justify-center text-xs font-bold text-slate-400 shrink-0">
+      <div className="flex items-center gap-3 px-4 py-3 rounded-xl border border-border bg-background">
+        <div className="w-7 h-7 rounded-full border border-border flex items-center justify-center text-xs font-bold text-muted-foreground/70 shrink-0">
           {day.dayNumber}
         </div>
-        <p className="text-xs text-slate-500 italic">
+        <p className="text-xs text-muted-foreground italic">
           {t.readingPlan.day} {day.dayNumber} — {t.readingPlan.dayNotConfigured}
         </p>
       </div>
@@ -333,12 +333,12 @@ const DayCard = ({
   return (
     <div
       className={cn(
-        "rounded-xl border overflow-hidden transition-colors duration-200 bg-white",
+        "rounded-xl border overflow-hidden transition-colors duration-200 bg-card",
         isCompleted
           ? "border-emerald-200 bg-emerald-50/60"
           : open
             ? "border-violet-200 bg-violet-50/50"
-            : "border-slate-200",
+            : "border-border",
       )}
     >
       <button
@@ -357,11 +357,11 @@ const DayCard = ({
         </div>
 
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-slate-700 truncate group-hover:text-slate-900 transition-colors">
+          <p className="text-sm font-semibold text-foreground/80 truncate group-hover:text-foreground transition-colors">
             {day.title || `Day ${day.dayNumber}`}
           </p>
           {hasChapters && (
-            <p className="text-[10px] text-slate-500 mt-0.5 truncate">
+            <p className="text-[10px] text-muted-foreground mt-0.5 truncate">
               {day.chapters
                 .filter((c) => c.book)
                 .map((c) => `${c.book} ${c.startChapter}`)
@@ -387,14 +387,14 @@ const DayCard = ({
 
         <ChevronDown
           className={cn(
-            "w-4 h-4 text-slate-400 transition-transform duration-200 shrink-0",
+            "w-4 h-4 text-muted-foreground/70 transition-transform duration-200 shrink-0",
             open && "rotate-180",
           )}
         />
       </button>
 
       {open && (
-        <div className="border-t border-slate-200 px-4 pb-4 pt-3 space-y-5">
+        <div className="border-t border-border px-4 pb-4 pt-3 space-y-5">
           {hasChapters && (
             <div>
               <SectionLabel>{t.readingPlan.scriptureReading}</SectionLabel>
@@ -425,7 +425,7 @@ const DayCard = ({
                       <span className="mt-0.5 w-5 h-5 rounded-full border border-sky-200 bg-sky-50 text-[10px] font-bold text-sky-700 flex items-center justify-center shrink-0">
                         {i + 1}
                       </span>
-                      <p className="text-sm text-slate-600 leading-relaxed">
+                      <p className="text-sm text-muted-foreground leading-relaxed">
                         {q}
                       </p>
                     </div>
@@ -443,7 +443,7 @@ const DayCard = ({
                 {day.quizQuestions.map((q, qi) => (
                   <div
                     key={qi}
-                    className="rounded-xl border border-slate-200 bg-slate-50/70 overflow-hidden"
+                    className="rounded-xl border border-border bg-muted/70 overflow-hidden"
                   >
                     <button
                       onClick={() => setQuizOpen(quizOpen === qi ? null : qi)}
@@ -452,19 +452,19 @@ const DayCard = ({
                       <span className="w-5 h-5 rounded-full border border-amber-200 bg-amber-50 text-[10px] font-bold text-amber-700 flex items-center justify-center shrink-0 mt-0.5">
                         {qi + 1}
                       </span>
-                      <p className="flex-1 text-sm text-slate-700 leading-snug">
+                      <p className="flex-1 text-sm text-foreground/80 leading-snug">
                         {q.question}
                       </p>
                       <ChevronDown
                         className={cn(
-                          "w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5 transition-transform",
+                          "w-3.5 h-3.5 text-muted-foreground/70 shrink-0 mt-0.5 transition-transform",
                           quizOpen === qi && "rotate-180",
                         )}
                       />
                     </button>
 
                     {quizOpen === qi && (
-                      <div className="border-t border-slate-200 px-3 pb-3 pt-2.5 space-y-2">
+                      <div className="border-t border-border px-3 pb-3 pt-2.5 space-y-2">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
                           {q.options.map((opt, oi) => (
                             <div
@@ -473,13 +473,13 @@ const DayCard = ({
                                 "flex items-center gap-2 px-2.5 py-2 rounded-lg border text-xs",
                                 oi === q.correctAnswer
                                   ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                                  : "border-slate-200 bg-white text-slate-500",
+                                  : "border-border bg-card text-muted-foreground",
                               )}
                             >
                               {oi === q.correctAnswer ? (
                                 <CheckCircle2 className="w-3 h-3 shrink-0" />
                               ) : (
-                                <div className="w-3 h-3 rounded-full border border-slate-300 shrink-0" />
+                                <div className="w-3 h-3 rounded-full border border-border shrink-0" />
                               )}
                               {opt}
                             </div>
@@ -490,7 +490,7 @@ const DayCard = ({
                             <p className="text-[10px] font-semibold text-indigo-700 mb-0.5 uppercase tracking-wider">
                               {t.readingPlan.explanation}
                             </p>
-                            <p className="text-xs text-slate-600 leading-relaxed">
+                            <p className="text-xs text-muted-foreground leading-relaxed">
                               {q.explanation}
                             </p>
                           </div>
@@ -625,10 +625,10 @@ const PlanDetail = () => {
 
   if (loadingPlan) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <div className="w-10 h-10 rounded-full border-2 border-violet-200 border-t-violet-600 animate-spin" />
-          <p className="text-slate-500 text-sm">{t.readingPlan.loadingPlan}</p>
+          <p className="text-muted-foreground text-sm">{t.readingPlan.loadingPlan}</p>
         </div>
       </div>
     );
@@ -636,10 +636,10 @@ const PlanDetail = () => {
 
   if (!plan) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center space-y-3">
-          <BookOpen className="w-10 h-10 text-slate-300 mx-auto" />
-          <p className="text-slate-500 text-sm">{t.readingPlan.planNotFound}</p>
+          <BookOpen className="w-10 h-10 text-muted-foreground/50 mx-auto" />
+          <p className="text-muted-foreground text-sm">{t.readingPlan.planNotFound}</p>
           <button
             onClick={() => navigate(-1)}
             className="text-violet-600 text-sm hover:underline"
@@ -701,7 +701,7 @@ const PlanDetail = () => {
 
   return (
     <div
-      className="min-h-screen bg-slate-50 text-slate-900 overflow-x-hidden"
+      className="min-h-screen bg-background text-foreground overflow-x-hidden"
       dir={isRtl ? 'rtl' : 'ltr'}
       style={{ fontFamily: "'Geist', 'Inter', system-ui, sans-serif" }}
     >
@@ -715,7 +715,7 @@ const PlanDetail = () => {
         <div className="flex flex-col gap-4">
           <button
             onClick={() => navigate(-1)}
-            className="flex items-center gap-1.5 text-slate-500 hover:text-slate-800 transition-colors text-sm group w-fit"
+            className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors text-sm group w-fit"
           >
             <ArrowLeft className={cn("w-4 h-4 transition-transform", isRtl ? "group-hover:translate-x-0.5" : "group-hover:-translate-x-0.5")} />
             {t.readingPlan.backToPlans}
@@ -738,12 +738,12 @@ const PlanDetail = () => {
               {diffLabel}
             </span>
 
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border border-slate-200 bg-white text-slate-600">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border border-border bg-card text-muted-foreground">
               <Layers className="w-3 h-3" />
               {catLabel}
             </span>
 
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border border-slate-200 bg-white text-slate-600">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border border-border bg-card text-muted-foreground">
               <Eye className="w-3 h-3" />
               {t.readingPlan.readOnly}
             </span>
@@ -818,10 +818,10 @@ const PlanDetail = () => {
                 <div className="relative shrink-0">
                   <Ring pct={pct} size={92} stroke={6} />
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className="text-lg font-bold text-slate-900">
+                    <span className="text-lg font-bold text-foreground">
                       {pct}%
                     </span>
-                    <span className="text-[8px] uppercase tracking-widest text-slate-500">
+                    <span className="text-[8px] uppercase tracking-widest text-muted-foreground">
                       {t.readingPlan.complete}
                     </span>
                   </div>
@@ -829,18 +829,18 @@ const PlanDetail = () => {
 
                 <div className="flex-1 space-y-2">
                   <div className="flex justify-between text-xs">
-                    <span className="text-slate-500">{t.readingPlan.daysCompleted}</span>
-                    <span className="font-semibold text-slate-800">
+                    <span className="text-muted-foreground">{t.readingPlan.daysCompleted}</span>
+                    <span className="font-semibold text-foreground">
                       {plan.completed_days_count} / {plan.total_days}
                     </span>
                   </div>
-                  <div className="h-2 rounded-full bg-slate-200 overflow-hidden">
+                  <div className="h-2 rounded-full bg-muted overflow-hidden">
                     <div
                       className="h-full rounded-full bg-gradient-to-r from-violet-500 to-indigo-500"
                       style={{ width: `${pct}%` }}
                     />
                   </div>
-                  <div className="text-xs text-slate-500 space-y-1">
+                  <div className="text-xs text-muted-foreground space-y-1">
                     <p>
                       {t.common.status}:{" "}
                       <span
@@ -850,7 +850,7 @@ const PlanDetail = () => {
                             ? "text-emerald-600"
                             : plan.started
                               ? "text-sky-600"
-                              : "text-slate-500",
+                              : "text-muted-foreground",
                         )}
                       >
                         {plan.is_completed
@@ -863,7 +863,7 @@ const PlanDetail = () => {
                     {plan.started && (
                       <p>
                         {t.readingPlan.startDate}:{" "}
-                        <span className="text-slate-700 font-medium">
+                        <span className="text-foreground/80 font-medium">
                           {formatDate(plan.start_date, lang)}
                         </span>
                       </p>
@@ -873,7 +873,7 @@ const PlanDetail = () => {
               </div>
 
               {isAdmin && adminStats && (
-                <div className="pt-4 border-t border-slate-100 grid grid-cols-2 gap-3">
+                <div className="pt-4 border-t border-border/50 grid grid-cols-2 gap-3">
                   <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-100">
                     <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider mb-1">
                       {t.readingPlan.globalCompleted}
@@ -902,18 +902,18 @@ const PlanDetail = () => {
             <SectionLabel>{t.readingPlan.contentReadiness}</SectionLabel>
             <div className="space-y-3">
               <div className="flex justify-between text-sm">
-                <span className="text-slate-500">{t.readingPlan.configuredDays}</span>
-                <span className="font-semibold text-slate-900">
+                <span className="text-muted-foreground">{t.readingPlan.configuredDays}</span>
+                <span className="font-semibold text-foreground">
                   {configuredDays} / {plan.total_days}
                 </span>
               </div>
-              <div className="h-2 rounded-full bg-slate-200 overflow-hidden">
+              <div className="h-2 rounded-full bg-muted overflow-hidden">
                 <div
                   className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-500"
                   style={{ width: `${configuredPct}%` }}
                 />
               </div>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-muted-foreground">
                 {configuredPct}% {t.readingPlan.of} {plan.total_days} {t.readingPlan.days}
               </p>
             </div>
@@ -923,20 +923,20 @@ const PlanDetail = () => {
             <SectionLabel>{t.readingPlan.quizCoverage}</SectionLabel>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-slate-500">{t.readingPlan.quizEnabled}</span>
-                <span className="font-semibold text-slate-900">
+                <span className="text-muted-foreground">{t.readingPlan.quizEnabled}</span>
+                <span className="font-semibold text-foreground">
                   {plan.questions_enabled ? t.readingPlan.yes : t.readingPlan.no}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">{t.readingPlan.quizDays}</span>
-                <span className="font-semibold text-slate-900">
+                <span className="text-muted-foreground">{t.readingPlan.quizDays}</span>
+                <span className="font-semibold text-foreground">
                   {allQuizDays.length}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">{t.readingPlan.totalQuestions}</span>
-                <span className="font-semibold text-slate-900">
+                <span className="text-muted-foreground">{t.readingPlan.totalQuestions}</span>
+                <span className="font-semibold text-foreground">
                   {totalQuizCount}
                 </span>
               </div>
@@ -949,24 +949,24 @@ const PlanDetail = () => {
             </SectionLabel>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-slate-500">{t.readingPlan.reflections}</span>
-                <span className="font-semibold text-slate-900">
+                <span className="text-muted-foreground">{t.readingPlan.reflections}</span>
+                <span className="font-semibold text-foreground">
                   {totalReflections}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">
+                <span className="text-muted-foreground">
                   {isAdmin ? t.readingPlan.globalAccuracy : t.readingPlan.quizAccuracy}
                 </span>
-                <span className="font-semibold text-slate-900">
+                <span className="font-semibold text-foreground">
                   {displayQuizAccuracy}%
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">
+                <span className="text-muted-foreground">
                   {isAdmin ? t.readingPlan.totalAnswers : t.readingPlan.answeredQuestions}
                 </span>
-                <span className="font-semibold text-slate-900">
+                <span className="font-semibold text-foreground">
                   {displayAnsweredQuestions}
                 </span>
               </div>
@@ -975,7 +975,7 @@ const PlanDetail = () => {
         </div>
 
         {/* Tabs */}
-        <div className="flex items-center gap-1 p-1 rounded-2xl border border-slate-200 bg-white w-fit shadow-sm">
+        <div className="flex items-center gap-1 p-1 rounded-2xl border border-border bg-card w-fit shadow-sm">
           {(["overview", "schedule", "quiz", "admin"] as const).map((tab) => {
             if (tab === "admin" && !isAdmin) return null;
             return (
@@ -986,7 +986,7 @@ const PlanDetail = () => {
                   "px-4 py-2 rounded-xl text-sm font-semibold capitalize transition-all duration-150",
                   activeTab === tab
                     ? "bg-violet-600 text-white shadow-sm"
-                    : "text-slate-500 hover:text-slate-800",
+                    : "text-muted-foreground hover:text-foreground",
                 )}
               >
                 {tab === "quiz"
@@ -1034,10 +1034,10 @@ const PlanDetail = () => {
               ].map(({ label, value }) => (
                 <div
                   key={label}
-                  className="flex items-center justify-between py-2.5 border-b border-slate-200 last:border-0"
+                  className="flex items-center justify-between py-2.5 border-b border-border last:border-0"
                 >
-                  <span className="text-xs text-slate-500">{label}</span>
-                  <span className="text-xs font-medium text-slate-800">
+                  <span className="text-xs text-muted-foreground">{label}</span>
+                  <span className="text-xs font-medium text-foreground">
                     {value}
                   </span>
                 </div>
@@ -1052,10 +1052,10 @@ const PlanDetail = () => {
                 <div className="relative shrink-0">
                   <Ring pct={displayQuizAccuracy} size={72} stroke={5} />
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className="text-sm font-bold text-slate-900">
+                    <span className="text-sm font-bold text-foreground">
                       {displayQuizAccuracy}%
                     </span>
-                    <span className="text-[7px] text-slate-500 uppercase">
+                    <span className="text-[7px] text-muted-foreground uppercase">
                       {t.readingPlan.quizAccuracyLabel}
                     </span>
                   </div>
@@ -1067,7 +1067,7 @@ const PlanDetail = () => {
                       value: isAdmin
                         ? displayAnsweredQuestions
                         : `${displayAnsweredQuestions} / ${plan.total_quiz_questions}`,
-                      color: "text-slate-800",
+                      color: "text-foreground",
                     },
                     {
                       label: t.readingPlan.correct,
@@ -1081,7 +1081,7 @@ const PlanDetail = () => {
                     },
                   ].map(({ label, value, color }) => (
                     <div key={label} className="flex justify-between text-xs">
-                      <span className="text-slate-500">{label}</span>
+                      <span className="text-muted-foreground">{label}</span>
                       <span className={cn("font-semibold", color)}>
                         {value}
                       </span>
@@ -1113,10 +1113,10 @@ const PlanDetail = () => {
               ].map(({ label, value }) => (
                 <div
                   key={label}
-                  className="flex justify-between py-2 border-b border-slate-200 last:border-0 text-xs"
+                  className="flex justify-between py-2 border-b border-border last:border-0 text-xs"
                 >
-                  <span className="text-slate-500">{label}</span>
-                  <span className="font-medium text-slate-800">{value}</span>
+                  <span className="text-muted-foreground">{label}</span>
+                  <span className="font-medium text-foreground">{value}</span>
                 </div>
               ))}
             </GlassCard>
@@ -1124,50 +1124,50 @@ const PlanDetail = () => {
             <GlassCard className="p-5 lg:col-span-2">
               <SectionLabel>{t.readingPlan.adminNotes}</SectionLabel>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <div className="rounded-xl border border-border bg-background p-4">
                   <div className="flex items-center gap-2 mb-2">
-                    <FileText className="w-4 h-4 text-slate-600" />
-                    <p className="text-sm font-semibold text-slate-800">
+                    <FileText className="w-4 h-4 text-muted-foreground" />
+                    <p className="text-sm font-semibold text-foreground">
                       {t.readingPlan.planContent}
                     </p>
                   </div>
-                  <p className="text-xs text-slate-600 leading-relaxed">
+                  <p className="text-xs text-muted-foreground leading-relaxed">
                     {t.readingPlan.reviewContent}
                   </p>
                 </div>
 
-                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <div className="rounded-xl border border-border bg-background p-4">
                   <div className="flex items-center gap-2 mb-2">
-                    <HelpCircle className="w-4 h-4 text-slate-600" />
-                    <p className="text-sm font-semibold text-slate-800">
+                    <HelpCircle className="w-4 h-4 text-muted-foreground" />
+                    <p className="text-sm font-semibold text-foreground">
                       {t.readingPlan.quizQuality}
                     </p>
                   </div>
-                  <p className="text-xs text-slate-600 leading-relaxed">
+                  <p className="text-xs text-muted-foreground leading-relaxed">
                     {t.readingPlan.reviewQuizQuality}
                   </p>
                 </div>
 
-                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <div className="rounded-xl border border-border bg-background p-4">
                   <div className="flex items-center gap-2 mb-2">
-                    <BarChart3 className="w-4 h-4 text-slate-600" />
-                    <p className="text-sm font-semibold text-slate-800">
+                    <BarChart3 className="w-4 h-4 text-muted-foreground" />
+                    <p className="text-sm font-semibold text-foreground">
                       {t.readingPlan.analyticsText}
                     </p>
                   </div>
-                  <p className="text-xs text-slate-600 leading-relaxed">
+                  <p className="text-xs text-muted-foreground leading-relaxed">
                     {t.readingPlan.reviewAnalytics}
                   </p>
                 </div>
 
-                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <div className="rounded-xl border border-border bg-background p-4">
                   <div className="flex items-center gap-2 mb-2">
-                    <ShieldCheck className="w-4 h-4 text-slate-600" />
-                    <p className="text-sm font-semibold text-slate-800">
+                    <ShieldCheck className="w-4 h-4 text-muted-foreground" />
+                    <p className="text-sm font-semibold text-foreground">
                       {t.common.status}
                     </p>
                   </div>
-                  <p className="text-xs text-slate-600 leading-relaxed">
+                  <p className="text-xs text-muted-foreground leading-relaxed">
                     {t.readingPlan.reviewStatus}
                   </p>
                 </div>
@@ -1220,30 +1220,30 @@ const PlanDetail = () => {
                       placeholder={t.readingPlan.searchUsers}
                       value={userSearchTerm}
                       onChange={(e) => setUserSearchFilter(e.target.value)}
-                      className="text-xs px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-violet-500/20 w-full sm:w-48 transition-all"
+                      className="text-xs px-3 py-1.5 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-violet-500/20 w-full sm:w-48 transition-all"
                     />
                   </div>
                 </div>
                 <div className="overflow-x-auto">  
                     <table className={cn("w-full", isRtl ? "text-right" : "text-left")}>
                         <thead>
-                          <tr className="border-b border-slate-100">
-                            <th className={cn("pb-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider", isRtl ? "text-right" : "text-left")}>
+                          <tr className="border-b border-border/50">
+                            <th className={cn("pb-3 text-[10px] font-bold text-muted-foreground/70 uppercase tracking-wider", isRtl ? "text-right" : "text-left")}>
                               {t.common.name}
                             </th>
-                            <th className="pb-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider text-center">
+                            <th className="pb-3 text-[10px] font-bold text-muted-foreground/70 uppercase tracking-wider text-center">
                               {t.readingPlan.progress}
                             </th>
-                            <th className="pb-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider text-center">
+                            <th className="pb-3 text-[10px] font-bold text-muted-foreground/70 uppercase tracking-wider text-center">
                               {t.readingPlan.streak}
                             </th>
-                            <th className="pb-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider text-center">
+                            <th className="pb-3 text-[10px] font-bold text-muted-foreground/70 uppercase tracking-wider text-center">
                               {t.readingPlan.quizCW}
                             </th>
-                            <th className="pb-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider text-center">
+                            <th className="pb-3 text-[10px] font-bold text-muted-foreground/70 uppercase tracking-wider text-center">
                               {t.readingPlan.lastActivity}
                             </th>
-                            <th className={cn("pb-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider", isRtl ? "text-left" : "text-right")}>
+                            <th className={cn("pb-3 text-[10px] font-bold text-muted-foreground/70 uppercase tracking-wider", isRtl ? "text-left" : "text-right")}>
                               {t.common.status}
                             </th>
                           </tr>
@@ -1253,11 +1253,11 @@ const PlanDetail = () => {
                         filteredUsers.map((u: any, i: number) => (
                           <tr
                             key={i}
-                            className="hover:bg-slate-50/50 transition-colors"
+                            className="hover:bg-background/50 transition-colors"
                           >
                             <td className="py-3 pr-4">
                               <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-full bg-slate-100 overflow-hidden flex-shrink-0">
+                                <div className="w-8 h-8 rounded-full bg-muted overflow-hidden flex-shrink-0">
                                   {u.photo && u.photo.replace(/[`\s]/g, "") ? (
                                     <img
                                       src={u.photo.replace(/[`\s]/g, "")}
@@ -1265,16 +1265,16 @@ const PlanDetail = () => {
                                       className="w-full h-full object-cover"
                                     />
                                   ) : (
-                                    <div className="w-full h-full flex items-center justify-center text-xs font-bold text-slate-400 bg-slate-200">
+                                    <div className="w-full h-full flex items-center justify-center text-xs font-bold text-muted-foreground/70 bg-muted">
                                       {u.name?.charAt(0) || "?"}
                                     </div>
                                   )}
                                 </div>
                                 <div className="min-w-0">
-                                  <p className="text-xs font-semibold text-slate-800 truncate">
+                                  <p className="text-xs font-semibold text-foreground truncate">
                                     {u.name}
                                   </p>
-                                  <p className="text-[10px] text-slate-500 truncate">
+                                  <p className="text-[10px] text-muted-foreground truncate">
                                     {u.email}
                                   </p>
                                 </div>
@@ -1282,7 +1282,7 @@ const PlanDetail = () => {
                             </td>
                             <td className="py-3 px-4">
                               <div className="flex flex-col items-center gap-1.5 min-w-[100px]">
-                                <div className="w-full h-1.5 rounded-full bg-slate-100 overflow-hidden">
+                                <div className="w-full h-1.5 rounded-full bg-muted overflow-hidden">
                                   <div
                                     className="h-full bg-violet-500 rounded-full"
                                     style={{
@@ -1290,7 +1290,7 @@ const PlanDetail = () => {
                                     }}
                                   />
                                 </div>
-                                <span className="text-[10px] font-medium text-slate-600">
+                                <span className="text-[10px] font-medium text-muted-foreground">
                                   {u.completedDaysCount} / {plan.total_days}{" "}
                                   {t.readingPlan.days}
                                 </span>
@@ -1308,18 +1308,18 @@ const PlanDetail = () => {
                                   <span className="text-emerald-600">
                                     {u.quizStats?.correct || 0}
                                   </span>
-                                  <span className="text-slate-300">/</span>
+                                  <span className="text-muted-foreground/50">/</span>
                                   <span className="text-rose-600">
                                     {u.quizStats?.wrong || 0}
                                   </span>
                                 </div>
-                                <span className="text-[9px] text-slate-400">
+                                <span className="text-[9px] text-muted-foreground/70">
                                   {u.quizStats?.accuracy || 0}%
                                 </span>
                               </div>
                             </td>
                             <td className="py-3 px-4 text-center">
-                              <span className="text-[10px] text-slate-500 whitespace-nowrap">
+                              <span className="text-[10px] text-muted-foreground whitespace-nowrap">
                                 {u.lastActivity
                                   ? new Date(
                                       u.lastActivity,
@@ -1335,7 +1335,7 @@ const PlanDetail = () => {
                                     ? "bg-emerald-50 border-emerald-100 text-emerald-700"
                                     : u.status === "inprogress"
                                       ? "bg-sky-50 border-sky-100 text-sky-700"
-                                      : "bg-slate-50 border-slate-100 text-slate-600",
+                                      : "bg-background border-border/50 text-muted-foreground",
                                 )}
                               >
                                 {u.status === "completed"
@@ -1351,7 +1351,7 @@ const PlanDetail = () => {
                         <tr>
                           <td
                             colSpan={5}
-                            className="py-8 text-center text-xs text-slate-400 italic"
+                            className="py-8 text-center text-xs text-muted-foreground/70 italic"
                           >
                             {userSearchTerm.trim()
                               ? t.readingPlan.noUsersMatching.replace("{term}", userSearchTerm)
@@ -1368,12 +1368,12 @@ const PlanDetail = () => {
                 <GlassCard className="p-5">
                   <SectionLabel>{t.readingPlan.engagementTrends}</SectionLabel>
                   <div className="space-y-4">
-                    <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100">
+                    <div className="flex items-center justify-between p-3 rounded-xl bg-background border border-border/50">
                       <div>
-                        <p className="text-xs text-slate-500 font-medium">
+                        <p className="text-xs text-muted-foreground font-medium">
                           {t.readingPlan.globalAccuracyLabel}
                         </p>
-                        <p className="text-2xl font-bold text-slate-900">
+                        <p className="text-2xl font-bold text-foreground">
                           {adminStats?.globalQuizAccuracy ?? 0}%
                         </p>
                       </div>
@@ -1383,7 +1383,7 @@ const PlanDetail = () => {
                     </div>
 
                     <div className="space-y-2">
-                      <p className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
+                      <p className="text-xs font-semibold text-foreground/80 uppercase tracking-wider">
                         {t.readingPlan.mostDifficultQuestions}
                       </p>
                       {adminStats?.difficultQuestions?.length > 0 ? (
@@ -1391,13 +1391,13 @@ const PlanDetail = () => {
                           (q: any, i: number) => (
                             <div
                               key={i}
-                              className="flex items-center justify-between p-2.5 rounded-lg border border-slate-200 bg-white"
+                              className="flex items-center justify-between p-2.5 rounded-lg border border-border bg-card"
                             >
                               <div className="flex-1 min-w-0 pr-4">
-                                <p className="text-xs font-medium text-slate-800 truncate">
+                                <p className="text-xs font-medium text-foreground truncate">
                                   {q.question}
                                 </p>
-                                <p className="text-[10px] text-slate-500">
+                                <p className="text-[10px] text-muted-foreground">
                                   {t.readingPlan.day} {q.dayNumber} · {q.totalAnswers} {t.readingPlan.quizAnswersCW.toLowerCase()}
                                 </p>
                               </div>
@@ -1415,7 +1415,7 @@ const PlanDetail = () => {
                           ),
                         )
                       ) : (
-                        <p className="text-xs text-slate-500 italic">
+                        <p className="text-xs text-muted-foreground italic">
                           {t.readingPlan.noQuizData}
                         </p>
                       )}
@@ -1426,27 +1426,27 @@ const PlanDetail = () => {
                 <GlassCard className="p-5">
                   <SectionLabel>{t.readingPlan.planStructureSummary}</SectionLabel>
                   <div className="space-y-3">
-                    <div className="flex justify-between items-center py-2 border-b border-slate-100">
-                      <span className="text-xs text-slate-500">
+                    <div className="flex justify-between items-center py-2 border-b border-border/50">
+                      <span className="text-xs text-muted-foreground">
                         {t.readingPlan.dailyAssignments}
                       </span>
-                      <span className="text-xs font-bold text-slate-900">
+                      <span className="text-xs font-bold text-foreground">
                         {adminStats?.assignmentsCount ?? 0}
                       </span>
                     </div>
-                    <div className="flex justify-between items-center py-2 border-b border-slate-100">
-                      <span className="text-xs text-slate-500">
+                    <div className="flex justify-between items-center py-2 border-b border-border/50">
+                      <span className="text-xs text-muted-foreground">
                         {t.readingPlan.quizQuestionsCount}
                       </span>
-                      <span className="text-xs font-bold text-slate-900">
+                      <span className="text-xs font-bold text-foreground">
                         {adminStats?.questionsCount ?? 0}
                       </span>
                     </div>
-                    <div className="flex justify-between items-center py-2 border-b border-slate-100">
-                      <span className="text-xs text-slate-500">
+                    <div className="flex justify-between items-center py-2 border-b border-border/50">
+                      <span className="text-xs text-muted-foreground">
                         {t.readingPlan.avgQsPerDay}
                       </span>
-                      <span className="text-xs font-bold text-slate-900">
+                      <span className="text-xs font-bold text-foreground">
                         {adminStats?.assignmentsCount > 0
                           ? (
                               adminStats.questionsCount /
@@ -1481,7 +1481,7 @@ const PlanDetail = () => {
               ? Array.from({ length: plan.total_days }).map((_, i) => (
                   <div
                     key={i}
-                    className="h-14 rounded-xl bg-white animate-pulse border border-slate-200"
+                    className="h-14 rounded-xl bg-card animate-pulse border border-border"
                   />
                 ))
               : days.map((day) => (
@@ -1500,8 +1500,8 @@ const PlanDetail = () => {
           <div>
             {!plan.questions_enabled ? (
               <div className="flex flex-col items-center py-16 text-center">
-                <HelpCircle className="w-10 h-10 text-slate-300 mb-3" />
-                <p className="text-slate-500 text-sm">
+                <HelpCircle className="w-10 h-10 text-muted-foreground/50 mb-3" />
+                <p className="text-muted-foreground text-sm">
                   {t.readingPlan.quizDisabled}
                 </p>
               </div>
@@ -1510,14 +1510,14 @@ const PlanDetail = () => {
                 {Array.from({ length: 5 }).map((_, i) => (
                   <div
                     key={i}
-                    className="h-20 rounded-xl bg-white animate-pulse border border-slate-200"
+                    className="h-20 rounded-xl bg-card animate-pulse border border-border"
                   />
                 ))}
               </div>
             ) : allQuizDays.length === 0 ? (
               <div className="flex flex-col items-center py-16 text-center">
-                <HelpCircle className="w-10 h-10 text-slate-300 mb-3" />
-                <p className="text-slate-500 text-sm">
+                <HelpCircle className="w-10 h-10 text-muted-foreground/50 mb-3" />
+                <p className="text-muted-foreground text-sm">
                   {t.readingPlan.noQuizFound}
                 </p>
               </div>
@@ -1527,22 +1527,22 @@ const PlanDetail = () => {
                   let runningIdx = 0;
                   return allQuizDays.map((day) => (
                     <GlassCard key={day.dayNumber} className="p-4">
-                      <div className="flex items-center gap-2 mb-3 pb-3 border-b border-slate-200">
+                      <div className="flex items-center gap-2 mb-3 pb-3 border-b border-border">
                         <div className="w-6 h-6 rounded-full bg-violet-100 border border-violet-200 flex items-center justify-center text-[10px] font-bold text-violet-700 shrink-0">
                           {day.dayNumber}
                         </div>
-                        <p className="text-xs font-semibold text-slate-700 flex-1">
+                        <p className="text-xs font-semibold text-foreground/80 flex-1">
                           {day.title || `Day ${day.dayNumber}`}
                         </p>
                         {day.chapters.filter((c) => c.book).length > 0 && (
-                          <span className="text-[10px] text-slate-500 hidden sm:block">
+                          <span className="text-[10px] text-muted-foreground hidden sm:block">
                             {day.chapters
                               .filter((c) => c.book)
                               .map((c) => `${c.book} ${c.chapter}`)
                               .join(" · ")}
                           </span>
                         )}
-                        <span className="text-[10px] text-slate-500">
+                        <span className="text-[10px] text-muted-foreground">
                           {day.quizQuestions.length}Q
                         </span>
                       </div>
@@ -1553,13 +1553,13 @@ const PlanDetail = () => {
                           return (
                             <div
                               key={qi}
-                              className="rounded-xl border border-slate-200 bg-slate-50 p-3 space-y-2.5"
+                              className="rounded-xl border border-border bg-background p-3 space-y-2.5"
                             >
                               <div className="flex gap-2.5 items-start">
                                 <span className="w-5 h-5 rounded-full border border-amber-200 bg-amber-50 text-[10px] font-bold text-amber-700 flex items-center justify-center shrink-0 mt-0.5">
                                   {idx}
                                 </span>
-                                <p className="text-sm text-slate-700 leading-snug">
+                                <p className="text-sm text-foreground/80 leading-snug">
                                   {q.question}
                                 </p>
                               </div>
@@ -1572,13 +1572,13 @@ const PlanDetail = () => {
                                       "flex items-center gap-2 px-2.5 py-1.5 rounded-lg border text-xs",
                                       oi === q.correctAnswer
                                         ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                                        : "border-slate-200 bg-white text-slate-500",
+                                        : "border-border bg-card text-muted-foreground",
                                     )}
                                   >
                                     {oi === q.correctAnswer ? (
                                       <CheckCircle2 className="w-3 h-3 shrink-0" />
                                     ) : (
-                                      <div className="w-3 h-3 rounded-full border border-slate-300 shrink-0" />
+                                      <div className="w-3 h-3 rounded-full border border-border shrink-0" />
                                     )}
                                     {opt}
                                   </div>
@@ -1587,7 +1587,7 @@ const PlanDetail = () => {
 
                               {q.explanation && (
                                 <div className="pl-7 border-l-2 border-indigo-200 ml-2">
-                                  <p className="text-xs text-slate-600 leading-relaxed">
+                                  <p className="text-xs text-muted-foreground leading-relaxed">
                                     {q.explanation}
                                   </p>
                                 </div>
@@ -1605,7 +1605,7 @@ const PlanDetail = () => {
         )}
 
         {/* Footer */}
-        <div className="flex flex-wrap gap-x-5 gap-y-1 pb-8 text-[10px] text-slate-400 font-mono">
+        <div className="flex flex-wrap gap-x-5 gap-y-1 pb-8 text-[10px] text-muted-foreground/70 font-mono">
           <span>{plan.plan_id}</span>
           <span>DB#{plan.plan_db_id}</span>
           <span>{formatDate(plan.plan_created_on, lang)}</span>

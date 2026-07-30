@@ -189,7 +189,7 @@ export default function MyActivity() {
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
       const ref = `${item.data.bookName} ${item.data.chapter}:${item.data.verseNumber}`.toLowerCase();
-      const noteMatch = item.data.note?.toLowerCase().includes(q);
+      const noteMatch = 'note' in item.data ? (item.data as any).note?.toLowerCase().includes(q) : false;
       if (!ref.includes(q) && !noteMatch) return false;
     }
     return true;

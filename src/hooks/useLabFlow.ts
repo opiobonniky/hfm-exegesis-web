@@ -288,6 +288,7 @@ export function useLabFlow() {
             break;
           case "learn":
             body.learnNotes = st.learnNotes;
+            body.isPublic = st.isPublic;
             break;
           case "abide":
             body.abideReflection = st.reflection;
@@ -351,8 +352,8 @@ export function useLabFlow() {
 
   // ── Learn stage actions ──
   const advanceLearn = useCallback(async () => {
-    const { learnNotes } = stateRef.current;
-    await saveAndAdvance("abide", { notes: learnNotes });
+    const { learnNotes, isPublic } = stateRef.current;
+    await saveAndAdvance("abide", { notes: learnNotes, isPublic });
   }, [saveAndAdvance]);
 
   // ── Abide stage: save to Legacy Ledger ──

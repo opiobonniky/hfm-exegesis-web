@@ -96,5 +96,11 @@ export default {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [
+    require("tailwindcss-animate"),
+    // @ts-ignore
+    ({ addVariant }) => {
+      addVariant("cathedral", ".cathedral &");
+    },
+  ],
 } satisfies Config;

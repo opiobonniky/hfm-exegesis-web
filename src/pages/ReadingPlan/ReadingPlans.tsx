@@ -94,13 +94,13 @@ const CATEGORY_KEY: Record<string, string> = {
 const DIFF_STYLES: Record<string, { bar: string; badge: string }> = {
   easy: {
     bar: "bg-emerald-500",
-    badge: "bg-emerald-50 text-emerald-700 border-emerald-200",
+    badge: "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/40",
   },
   medium: {
     bar: "bg-amber-500",
-    badge: "bg-amber-50 text-amber-700 border-amber-200",
+    badge: "bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800/40",
   },
-  hard: { bar: "bg-red-500", badge: "bg-red-50 text-red-700 border-red-200" },
+  hard: { bar: "bg-red-500", badge: "bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800/40" },
 };
 
 const DIFF_KEY: Record<string, string> = {
@@ -344,7 +344,7 @@ const ReadingPlans = () => {
   // ─────────────────────────────────────────────
   return (
     <div
-      className="min-h-screen bg-[#f7f5f2]"
+      className="min-h-screen bg-background"
       style={{ fontFamily: "'DM Sans', 'Inter', system-ui, sans-serif" }}
     >
      
@@ -356,7 +356,7 @@ const ReadingPlans = () => {
           <div className="flex items-center gap-4">
             <Link
               to="/dashboard"
-              className="text-stone-400 hover:text-stone-700 inline-flex items-center gap-1.5 text-sm font-medium transition-colors"
+              className="text-muted-foreground/70 hover:text-foreground/80 inline-flex items-center gap-1.5 text-sm font-medium transition-colors"
             >
               <ArrowLeft className={cn("h-4 w-4", isRtl && "rotate-180")} />
               {t.common.back}
@@ -367,12 +367,12 @@ const ReadingPlans = () => {
               </div>
               <div>
                 <h1
-                  className="text-2xl font-bold text-stone-800 tracking-tight leading-none"
+                  className="text-2xl font-bold text-foreground tracking-tight leading-none"
                   style={{ fontFamily: "'Fraunces', Georgia, serif" }}
                 >
                   {t.readingPlan.manageTitle}
                 </h1>
-                <p className="text-stone-400 text-xs mt-0.5 font-medium">
+                <p className="text-muted-foreground/70 text-xs mt-0.5 font-medium">
                   {isAdmin ? t.readingPlan.adminManagement : t.readingPlan.yourSubtitle}
                 </p>
               </div>
@@ -395,26 +395,26 @@ const ReadingPlans = () => {
             {
               label: t.readingPlan.statTotalPlans,
               value: stats.total,
-              color: "text-teal-700",
-              bg: "bg-teal-50 border-teal-100",
+              color: "text-teal-700 dark:text-teal-400",
+              bg: "bg-teal-50 dark:bg-teal-950/30 border-teal-100 dark:border-teal-800/40",
             },
             {
               label: t.readingPlan.quizEnabled,
               value: stats.withQuiz,
-              color: "text-emerald-700",
-              bg: "bg-emerald-50 border-emerald-100",
+              color: "text-emerald-700 dark:text-emerald-400",
+              bg: "bg-emerald-50 dark:bg-emerald-950/30 border-emerald-100 dark:border-emerald-800/40",
             },
             {
               label: t.readingPlan.statQuizEnabled,
               value: stats.active,
-              color: "text-violet-700",
-              bg: "bg-violet-50 border-violet-100",
+              color: "text-violet-700 dark:text-violet-400",
+              bg: "bg-violet-50 dark:bg-violet-950/30 border-violet-100 dark:border-violet-800/40",
             },
             {
               label: t.readingPlan.statEasy,
               value: stats.easy,
-              color: "text-amber-700",
-              bg: "bg-amber-50 border-amber-100",
+              color: "text-amber-700 dark:text-amber-400",
+              bg: "bg-amber-50 dark:bg-amber-950/30 border-amber-100 dark:border-amber-800/40",
             },
           ].map((s) => (
             <div
@@ -427,7 +427,7 @@ const ReadingPlans = () => {
               >
                 {s.value}
               </p>
-              <p className="text-xs text-stone-500 mt-1 font-semibold">
+              <p className="text-xs text-muted-foreground mt-1 font-semibold">
                 {s.label}
               </p>
             </div>
@@ -437,26 +437,26 @@ const ReadingPlans = () => {
         {/* ── Filters ── */}
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/70" />
             <input
               value={search}
               onChange={(e: { target: { value: any; }; }) => setSearch(e.target.value)}
               placeholder={t.readingPlan.searchPlanId}
-              className="w-full pl-9 pr-9 py-2.5 rounded-xl border border-stone-200 bg-white text-sm text-stone-700 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-teal-400/40 focus:border-teal-400 transition-all shadow-sm"
+              className="w-full pl-9 pr-9 py-2.5 rounded-xl border border-border bg-card text-sm text-foreground/80 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-teal-400/40 focus:border-teal-400 transition-all shadow-sm"
             />
             {search && (
               <button
                 onClick={() => setSearch("")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/70 hover:text-muted-foreground"
               >
                 <X className="w-4 h-4" />
               </button>
             )}
           </div>
           <div className="flex items-center gap-2">
-            <Filter className="w-4 h-4 text-stone-400 shrink-0" />
+            <Filter className="w-4 h-4 text-muted-foreground/70 shrink-0" />
             <Select value={catFilter} onValueChange={setCatFilter}>
-              <SelectTrigger className="w-44 rounded-xl border-stone-200 bg-white shadow-sm text-sm focus:ring-teal-400/40">
+              <SelectTrigger className="w-44 rounded-xl border-border bg-card shadow-sm text-sm focus:ring-teal-400/40">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -477,11 +477,11 @@ const ReadingPlans = () => {
               <Loader2 className="w-8 h-8 animate-spin text-teal-500" />
             </div>
           ) : filtered.length === 0 ? (
-            <div className="bg-white rounded-2xl border border-stone-100 shadow-sm flex flex-col items-center justify-center py-16 gap-3">
-              <div className="w-14 h-14 rounded-2xl bg-stone-100 flex items-center justify-center">
-                <BookOpen className="w-7 h-7 text-stone-300" />
+            <div className="bg-card rounded-2xl border border-border/50 shadow-sm flex flex-col items-center justify-center py-16 gap-3">
+              <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center">
+                <BookOpen className="w-7 h-7 text-muted-foreground/50" />
               </div>
-              <p className="text-stone-400 font-medium">
+              <p className="text-muted-foreground/70 font-medium">
                 {plans.length === 0
                   ? t.readingPlan.noPlansYet
                   : t.readingPlan.noSearchMatch}
@@ -500,16 +500,16 @@ const ReadingPlans = () => {
             filtered.map((plan) => {
               const ds = DIFF_STYLES[plan.difficulty] ?? {
                 bar: "bg-stone-400",
-                badge: "bg-stone-50 text-stone-600 border-stone-200",
+                badge: "bg-muted text-muted-foreground border-border",
               };
               return (
                 <div
                   key={plan.planId}
                   className={cn(
-                    "bg-white rounded-2xl border shadow-[0_1px_3px_rgba(0,0,0,0.05)] transition-all hover:shadow-md",
+                    "bg-card rounded-2xl border shadow-[0_1px_3px_rgba(0,0,0,0.05)] transition-all hover:shadow-md",
                     plan.isActive === false
-                      ? "border-stone-100 opacity-60"
-                      : "border-stone-100 hover:border-stone-200",
+                      ? "border-border/50 opacity-60"
+                      : "border-border/50 hover:border-border",
                   )}
                 >
                   {/* Coloured left bar */}
@@ -524,21 +524,21 @@ const ReadingPlans = () => {
                       {/* Content */}
                       <div className="flex-1 min-w-0">
                         <div className="flex flex-wrap items-center gap-2 mb-0.5">
-                          <h3 className="font-bold text-stone-800 text-base leading-tight">
+                          <h3 className="font-bold text-foreground text-base leading-tight">
                             {plan.title}
                           </h3>
                           {plan.isActive === false && (
-                            <span                              className="text-[10px] border border-stone-200 bg-stone-50 text-stone-400 rounded px-1.5 py-0.5 font-bold uppercase tracking-wide"
+                            <span                              className="text-[10px] border border-border bg-muted text-muted-foreground/70 rounded px-1.5 py-0.5 font-bold uppercase tracking-wide"
                             >
                               {t.readingPlan.inactiveBadge}
                             </span>
                           )}
                         </div>
-                        <p className="text-[11px] text-stone-400 font-mono mb-2">
+                        <p className="text-[11px] text-muted-foreground/70 font-mono mb-2">
                           {plan.planId}
                         </p>
                         {plan.description && (
-                          <p className="text-sm text-stone-500 line-clamp-1 mb-2.5">
+                          <p className="text-sm text-muted-foreground line-clamp-1 mb-2.5">
                             {plan.description}
                           </p>
                         )}
@@ -551,15 +551,15 @@ const ReadingPlans = () => {
                           >
                             {diffLabel(plan.difficulty, t)}
                           </span>
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-lg text-[11px] font-semibold border bg-stone-50 text-stone-600 border-stone-200">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-lg text-[11px] font-semibold border bg-muted text-muted-foreground border-border">
                             {catLabel(plan.category, t)}
                           </span>
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] font-semibold border bg-stone-50 text-stone-600 border-stone-200">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] font-semibold border bg-muted text-muted-foreground border-border">
                             <Calendar className="w-3 h-3" />
-                            {t.readingPlan.daysCount.replace('{n}', String(plan.totalDays))}
+                            {t.readingPlan.daysCount.replace('{n}', String(plan.total_days))}
                           </span>
                           {plan.questionsEnabled && (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] font-bold border bg-violet-50 text-violet-700 border-violet-200">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] font-bold border bg-violet-50 dark:bg-violet-950/30 text-violet-700 dark:text-violet-400 border-violet-200 dark:border-violet-800/40">
                               <HelpCircle className="w-3 h-3" />
                               {t.dashboard.quiz}
                             </span>
@@ -577,19 +577,19 @@ const ReadingPlans = () => {
                               title={
                                 plan.isActive !== false ? t.readingPlan.deactivateTitle : t.readingPlan.activateTitle
                               }
-                              className="p-1.5 rounded-lg hover:bg-stone-100 transition-colors"
+                              className="p-1.5 rounded-lg hover:bg-muted transition-colors"
                             >
                               {plan.isActive !== false ? (
                                 <ToggleRight className="w-6 h-6 text-emerald-500" />
                               ) : (
-                                <ToggleLeft className="w-6 h-6 text-stone-300" />
+                                <ToggleLeft className="w-6 h-6 text-muted-foreground/50" />
                               )}
                             </button>
                             {/* Edit */}
                             <button
                               onClick={() => openEdit(plan)}
                               title={t.readingPlan.editPlanTitle}
-                              className="p-1.5 rounded-lg hover:bg-teal-50 text-stone-400 hover:text-teal-600 transition-colors"
+                              className="p-1.5 rounded-lg hover:bg-teal-50 dark:hover:bg-teal-950/30 text-muted-foreground/70 hover:text-teal-600 dark:hover:text-teal-400 transition-colors"
                             >
                               <Edit2 className="w-4 h-4" />
                             </button>
@@ -600,7 +600,7 @@ const ReadingPlans = () => {
                                 setDeleteConfirmText("");
                               }}
                               title={t.readingPlan.deletePlanTitle}
-                              className="p-1.5 rounded-lg hover:bg-red-50 text-stone-400 hover:text-red-600 transition-colors"
+                              className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 text-muted-foreground/70 hover:text-red-600 dark:hover:text-red-400 transition-colors"
                             >
                               <Trash2 className="w-4 h-4" />
                             </button>
@@ -610,7 +610,7 @@ const ReadingPlans = () => {
                           <button
                             onClick={() => startPlan(plan)}
                             title={t.readingPlan.startPlanTitle}
-                            className="p-1.5 rounded-lg hover:bg-emerald-50 text-stone-400 hover:text-emerald-600 transition-colors"
+                            className="p-1.5 rounded-lg hover:bg-emerald-50 dark:hover:bg-emerald-950/30 text-muted-foreground/70 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
                           >
                             <Play className="w-4 h-4" />
                           </button>
@@ -618,7 +618,7 @@ const ReadingPlans = () => {
                         {/* View */}
                         <Link
                           to={routes.readingPlanDetail.path.replace(":planId", plan.planId)}
-                          className="p-1.5 rounded-lg hover:bg-stone-100 text-stone-400 hover:text-stone-700 transition-colors"
+                          className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground/70 hover:text-foreground/80 transition-colors"
                         >
                           <ChevronRight className={cn("w-4 h-4", isRtl && "rotate-180")} />
                         </Link>
@@ -632,7 +632,7 @@ const ReadingPlans = () => {
         </div>
 
         {!loading && filtered.length > 0 && (
-          <p className="text-xs text-stone-400 text-center pb-4 font-medium">
+          <p className="text-xs text-muted-foreground/70 text-center pb-4 font-medium">
             {plans.length === 1
               ? t.readingPlan.showingCount.replace('{filtered}', String(filtered.length)).replace('{total}', String(plans.length))
               : t.readingPlan.showingCountPlural.replace('{filtered}', String(filtered.length)).replace('{total}', String(plans.length))}
@@ -645,7 +645,7 @@ const ReadingPlans = () => {
         open={!!deleteTarget}
         onOpenChange={(o) => !o && setDeleteTarget(null)}
       >
-        <DialogContent className="sm:max-w-md rounded-2xl border-stone-100">
+        <DialogContent className="sm:max-w-md rounded-2xl border-border/50">
           <DialogHeader>              <DialogTitle className="flex items-center gap-2 text-red-600">
               <AlertTriangle className="w-5 h-5" />
               {t.readingPlan.deleteDialogTitle}
@@ -656,24 +656,24 @@ const ReadingPlans = () => {
           </DialogHeader>
           {deleteTarget && (
             <div className="space-y-4 py-2">
-              <div className="rounded-xl border border-stone-100 bg-stone-50 p-3 space-y-1">
-                <p className="font-bold text-sm text-stone-800">
+              <div className="rounded-xl border border-border/50 bg-muted p-3 space-y-1">
+                <p className="font-bold text-sm text-foreground">
                   {deleteTarget.title}
                 </p>
-                <p className="text-xs text-stone-400 font-mono">
+                <p className="text-xs text-muted-foreground/70 font-mono">
                   {deleteTarget.planId}
                 </p>
                 <div className="flex gap-1.5 pt-1">
-                  <span className="text-[10px] border border-stone-200 bg-white text-stone-600 rounded px-1.5 py-0.5 font-semibold">
-                    {t.readingPlan.daysCount.replace('{n}', String(deleteTarget.totalDays))}
+                  <span className="text-[10px] border border-border bg-card text-muted-foreground rounded px-1.5 py-0.5 font-semibold">
+                    {t.readingPlan.daysCount.replace('{n}', String(deleteTarget.total_days))}
                   </span>
-                  <span className="text-[10px] border border-stone-200 bg-white text-stone-600 rounded px-1.5 py-0.5 font-semibold">
+                  <span className="text-[10px] border border-border bg-card text-muted-foreground rounded px-1.5 py-0.5 font-semibold">
                     {catLabel(deleteTarget.category, t)}
                   </span>
                 </div>
               </div>
               <div className="space-y-2">
-                <Label className="text-sm text-stone-700">
+                <Label className="text-sm text-foreground/80">
                   {t.readingPlan.deleteConfirmLabel.replace('{planId}', deleteTarget.planId)}
                 </Label>
                 <Input
@@ -681,11 +681,11 @@ const ReadingPlans = () => {
                   onChange={(e) => setDeleteConfirmText(e.target.value)}
                   placeholder={t.readingPlan.deleteConfirmPlaceholder}
                   className={cn(
-                    "rounded-xl border-stone-200 focus:ring-teal-400/30",
+                    "rounded-xl border-border focus:ring-teal-400/30",
                     deleteConfirmText &&
                       (deleteConfirmText === deleteTarget.planId
                         ? "border-red-400"
-                        : "border-stone-200"),
+                        : "border-border"),
                   )}
                 />
               </div>

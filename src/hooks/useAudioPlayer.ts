@@ -281,8 +281,8 @@ export function useAudioPlayer(): AudioPlayerState & AudioPlayerActions {
   // ── Public actions ──
 
   const startPlayback = useCallback((verses: { text: string }[], startIdx = 0) => {
-    cancelAllAudio();
     skipRef.current?.();
+    cancelAllAudio();
     skipRef.current = null;
 
     versesRef.current = verses;
@@ -298,8 +298,8 @@ export function useAudioPlayer(): AudioPlayerState & AudioPlayerActions {
   }, [runPlayback, cancelAllAudio]);
 
   const stopPlayback = useCallback(() => {
-    cancelAllAudio();
     skipRef.current?.();
+    cancelAllAudio();
     skipRef.current = null;
     setIsPlaying(false);
     setIsPaused(false);
@@ -355,8 +355,8 @@ export function useAudioPlayer(): AudioPlayerState & AudioPlayerActions {
       return;
     }
     currentIdxRef.current = next;
-    cancelAllAudio();
     skipRef.current?.();
+    cancelAllAudio();
     skipRef.current = null;
   }, [isPaused, resumePlayback, stopPlayback, cancelAllAudio]);
 
@@ -364,8 +364,8 @@ export function useAudioPlayer(): AudioPlayerState & AudioPlayerActions {
     if (isPaused) resumePlayback();
     const prev = Math.max(0, currentIdxRef.current - 1);
     currentIdxRef.current = prev;
-    cancelAllAudio();
     skipRef.current?.();
+    cancelAllAudio();
     skipRef.current = null;
   }, [isPaused, resumePlayback, cancelAllAudio]);
 

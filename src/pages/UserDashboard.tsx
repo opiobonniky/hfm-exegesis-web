@@ -1,30 +1,23 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useLayoutEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Sun,
   Clock,
   ChevronRight,
-  Loader2,
   CalendarDays,
-  Globe,
-  Brain,
-  Mic2,
   BookMarked,
-  History,
   Heart,
   Star,
-  Flame,
   BookOpen,
   Sparkles,
   Settings,
-  TrendingUp,
-  ArrowRight,
   Quote,
   PenLine,
   BookText,
   Lightbulb,
   Trophy,
   Microscope,
+  History,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/components/languages/languageProvider";
@@ -32,16 +25,14 @@ import { sendPostRequest } from "@/services/api";
 import { getCurrentSession } from "@/services/exegesisApi";
 import { routes } from "@/components/Routes/routes";
 import { cn } from "@/lib/utils";
-import { getVerseText } from "@/utilities/bibleUtils";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { getVerseTextAsync } from "@/utilities/bibleUtils";
 
-// ─── Types ─────────────────────────────────────────────────────────────────
 interface DailyVerse {
   bookName: string;
   chapter: number;
   verseNumber: number;
   reflection: string;
+  title?: string;
 }
 
 interface ReadingPlan {
@@ -68,7 +59,6 @@ interface RecentActivity {
   updatedOn: string;
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────
 const getGreeting = (t: any) => {
   const h = new Date().getHours();
   if (h < 5) return t?.userDashboard?.goodNight || 'Good Night';
@@ -96,64 +86,98 @@ const getInitials = (first?: string, last?: string, username?: string) => {
   return "U";
 };
 
-/* ── Reusable Card Wrapper ─────────────────────────────────────────────── */
-
-function DashboardCard({
-  children,
-  className,
-  onClick,
-  hover = true,
-}: {
-  children: React.ReactNode;
-  className?: string;
-  onClick?: () => void;
-  hover?: boolean;
-}) {
+function Skeleton({ className }: { className?: string }) {
   return (
     <div
-      onClick={onClick}
       className={cn(
-        "rounded-2xl border bg-card p-4 sm:p-5 transition-all duration-200",
-        hover && onClick && "cursor-pointer hover:shadow-md hover:-translate-y-0.5 active:scale-[0.99]",
-        hover && !onClick && "hover:shadow-sm",
+        "animate-pulse rounded-xl bg-muted-foreground/[0.08]",
         className,
       )}
-    >
-      {children}
-    </div>
+      aria-hidden="true"
+    />
   );
 }
 
-/* ── Section Header ────────────────────────────────────────────────────── */
-
-function SectionHeader({
-  title,
-  action,
-}: {
-  title: string;
-  action?: { label: string; onClick: () => void };
-}) {
+function DashboardSkeleton({ isRtl }: { isRtl: boolean }) {
   return (
-    <div className="flex items-center justify-between mb-4">
-      <h2 className="text-[11px] font-bold tracking-[0.15em] uppercase text-muted-foreground/70">
-        {title}
-      </h2>
-      {action && (
-        <button
-          onClick={action.onClick}
-          className="flex items-center gap-1 text-xs font-semibold text-primary hover:text-primary/80 transition-colors"
-        >
-          {action.label}
-          <ArrowRight className="w-3 h-3" />
-        </button>
-      )}
+    <div
+      className="min-h-full bg-background pointer-events-none select-none"
+      dir={isRtl ? 'rtl' : 'ltr'}
+    >
+      {/* Hero skeleton */}
+      <div className="bg-gradient-to-b from-primary/[0.04] to-transparent pb-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <Skeleton className="w-10 h-10 rounded-xl" />
+              <div className="space-y-2">
+                <Skeleton className="w-20 h-3" />
+                <Skeleton className="w-36 h-5" />
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <Skeleton className="hidden sm:block w-32 h-7" />
+              <Skeleton className="w-8 h-8 rounded-lg" />
+            </div>
+          </div>
+          <Skeleton className="w-full h-[132px] rounded-2xl" />
+        </div>
+      </div>
+
+      {/* Body skeleton */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
+        {/* Stats row skeleton */}
+        <div className="flex flex-wrap gap-4 sm:gap-6">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="flex items-center gap-2.5">
+              <Skeleton className="w-4 h-4" />
+              <div className="flex items-baseline gap-1">
+                <Skeleton className="w-8 h-5" />
+                <Skeleton className="w-14 h-3" />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Two-column skeleton */}
+        <div className="grid grid-cols-1 xl:grid-cols-[1fr_340px] gap-8">
+          <div className="space-y-8">
+            {/* Explore grid skeleton */}
+            <div>
+              <Skeleton className="w-16 h-[14px] mb-4" />
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <Skeleton key={i} className="h-[116px] rounded-2xl" />
+                ))}
+              </div>
+            </div>
+            {/* Reading plans skeleton */}
+            <div>
+              <Skeleton className="w-24 h-[14px] mb-4" />
+              <div className="space-y-3">
+                {Array.from({ length: 2 }).map((_, i) => (
+                  <Skeleton key={i} className="h-[124px] rounded-2xl" />
+                ))}
+              </div>
+            </div>
+            {/* Challenge skeleton */}
+            <Skeleton className="h-[172px] rounded-2xl" />
+          </div>
+
+          {/* Right column skeleton */}
+          <div className="space-y-7">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i}>
+                <Skeleton className="w-20 h-[14px] mb-3" />
+                <Skeleton className="h-[68px] rounded-2xl" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
-
-/* ════════════════════════════════════════════════════════════════════════
-   MAIN DASHBOARD
-   ════════════════════════════════════════════════════════════════════════ */
 
 export default function UserDashboard() {
   const { userInfo } = useAuth();
@@ -161,6 +185,9 @@ export default function UserDashboard() {
   const navigate = useNavigate();
 
   const [dailyVerse, setDailyVerse] = useState<DailyVerse | null>(null);
+  const [verseText, setVerseText] = useState<string | null>(null);
+  const [verseTextLoading, setVerseTextLoading] = useState(false);
+  const [verseTextError, setVerseTextError] = useState(false);
   const [readingPlans, setReadingPlans] = useState<ReadingPlan[]>([]);
   const [stats, setStats] = useState<Stats>({
     chaptersRead: 0,
@@ -177,18 +204,12 @@ export default function UserDashboard() {
 
   const displayName =
     userInfo?.firstName || userInfo?.lastName || userInfo?.username || (t?.userDashboard?.friend || 'Friend');
-  const initials = getInitials(
-    userInfo?.firstName,
-    userInfo?.lastName,
-    userInfo?.username,
-  );
+  const initials = getInitials(userInfo?.firstName, userInfo?.lastName, userInfo?.username);
 
-  // ── Daily content state ──
   const [dailyExegesis, setDailyExegesis] = useState<any>(null);
   const [dailyDevotion, setDailyDevotion] = useState<any>(null);
   const [dailyTrivia, setDailyTrivia] = useState<any>(null);
 
-  // ── Data ──
   const exploreItems = useMemo(
     () => [
       {
@@ -243,54 +264,9 @@ export default function UserDashboard() {
     [navigate, t],
   );
 
-  const statCards = useMemo(
-    () => [
-      {
-        label: t?.userDashboard?.chaptersRead || 'Chapters Read',
-        value: stats.chaptersRead,
-        icon: BookOpen,
-        accent: "text-blue-600",
-        bg: "bg-blue-50 dark:bg-blue-950/40",
-        border: "border-blue-100 dark:border-blue-900/50",
-      },
-      {
-        label: t?.userDashboard?.highlights || 'Highlights',
-        value: stats.highlights,
-        icon: Star,
-        accent: "text-amber-600",
-        bg: "bg-amber-50 dark:bg-amber-950/40",
-        border: "border-amber-100 dark:border-amber-900/50",
-      },
-      {
-        label: t?.userDashboard?.notes || 'Notes',
-        value: stats.notes,
-        icon: BookMarked,
-        accent: "text-violet-600",
-        bg: "bg-violet-50 dark:bg-violet-950/40",
-        border: "border-violet-100 dark:border-violet-900/50",
-      },
-      {
-        label: t?.userDashboard?.journalEntries || 'Journal Entries',
-        value: stats.journalEntries,
-        icon: PenLine,
-        accent: "text-emerald-600",
-        bg: "bg-emerald-50 dark:bg-emerald-950/40",
-        border: "border-emerald-100 dark:border-emerald-900/50",
-      },
-      {
-        label: t?.userDashboard?.favorites || 'Favorites',
-        value: stats.favorites,
-        icon: Heart,
-        accent: "text-rose-600",
-        bg: "bg-rose-50 dark:bg-rose-950/40",
-        border: "border-rose-100 dark:border-rose-900/50",
-      },
-    ],
-    [stats, t],
-  );
+  useLayoutEffect(() => {
+    let cancelled = false;
 
-  // ── Fetch ──
-  useEffect(() => {
     (async () => {
       try {
         const [verseRes, statsRes, plansRes, journalRes, readHistoryRes, journalListRes] = await Promise.all([
@@ -301,21 +277,15 @@ export default function UserDashboard() {
           sendPostRequest("bible", "get-read-history", { page: 0, pageSize: 1 }),
           sendPostRequest("journal", "get-all", { page: 0, pageSize: 1 }),
         ]);
-        if (verseRes.returnCode === 200 && verseRes.returnData) {
-          const v = verseRes.returnData;
-          setDailyVerse({
-            verseNumber: v.verseNumber,
-            chapter: v.chapter,
-            bookName: v.bookName,
-            reflection: v.reflection,
-          });
-        }
+
+        if (cancelled) return;
+
         if (statsRes.returnCode === 200 && statsRes.returnData) {
           const d = statsRes.returnData;
           setStats({
             chaptersRead: d.chaptersRead ?? 0,
-            highlights: d.highlightCount ?? 0,
-            notes: d.noteCount ?? 0,
+            highlights: d.highlights ?? 0,
+            notes: d.notes ?? 0,
             favorites: d.favorites ?? 0,
             journalEntries: journalRes.returnData?.totalEntries ?? 0,
           });
@@ -330,177 +300,187 @@ export default function UserDashboard() {
         if (journalListRes.returnCode === 200 && journalListRes.returnData?.entries?.length > 0) {
           setLatestEntry(journalListRes.returnData.entries[0]);
         }
+
+        if (cancelled) return;
+        setLoading(false);
+
+        if (verseRes.returnCode === 200 && verseRes.returnData) {
+          const v = verseRes.returnData;
+          setDailyVerse({
+            verseNumber: v.verseNumber,
+            chapter: v.chapter,
+            bookName: v.bookName,
+            reflection: v.reflection,
+          });
+          setVerseTextLoading(true);
+          setVerseTextError(false);
+          getVerseTextAsync(v.bookName, v.chapter, v.verseNumber).then((text) => {
+            if (cancelled) return;
+            if (text !== null) {
+              setVerseText(text);
+            } else {
+              setVerseTextError(true);
+            }
+          }).catch(() => {
+            if (!cancelled) setVerseTextError(true);
+          }).finally(() => {
+            if (!cancelled) setVerseTextLoading(false);
+          });
+        }
+
+        await Promise.all([
+          (async () => {
+            try {
+              const session = await getCurrentSession();
+              if (!cancelled && session && !session.completed) setCurrentSession(session);
+            } catch {}
+          })(),
+          (async () => {
+            try {
+              const exegesisRes = await sendPostRequest("bible", "get-todays-exegesis", {});
+              if (!cancelled && exegesisRes.returnCode === 200 && exegesisRes.returnData) setDailyExegesis(exegesisRes.returnData);
+            } catch {}
+          })(),
+          (async () => {
+            try {
+              const devotionRes = await sendPostRequest("bible", "get-todays-devotion", {});
+              if (!cancelled && devotionRes.returnCode === 200 && devotionRes.returnData) setDailyDevotion(devotionRes.returnData);
+            } catch {}
+          })(),
+          (async () => {
+            try {
+              const triviaRes = await sendPostRequest("trivia", "get-todays-trivia", {});
+              if (!cancelled && triviaRes.returnCode === 200 && triviaRes.returnData) setDailyTrivia(triviaRes.returnData);
+            } catch {}
+          })(),
+        ]);
       } catch (e) {
         console.error(e);
+        if (!cancelled) setLoading(false);
       }
-
-      // Core data loaded — show the page immediately
-      setLoading(false);
-
-      // Fetch remaining sections in parallel (don't block the page render)
-      await Promise.all([
-        (async () => {
-          try {
-            const session = await getCurrentSession();
-            if (session && !session.completed) setCurrentSession(session);
-          } catch {}
-        })(),
-        (async () => {
-          try {
-            const exegesisRes = await sendPostRequest("bible", "get-todays-exegesis", {});
-            if (exegesisRes.returnCode === 200 && exegesisRes.returnData) setDailyExegesis(exegesisRes.returnData);
-          } catch {}
-        })(),
-        (async () => {
-          try {
-            const devotionRes = await sendPostRequest("bible", "get-todays-devotion", {});
-            if (devotionRes.returnCode === 200 && devotionRes.returnData) setDailyDevotion(devotionRes.returnData);
-          } catch {}
-        })(),
-        (async () => {
-          try {
-            const triviaRes = await sendPostRequest("trivia", "get-todays-trivia", {});
-            if (triviaRes.returnCode === 200 && triviaRes.returnData) setDailyTrivia(triviaRes.returnData);
-          } catch {}
-        })(),
-      ]);
     })();
+
+    return () => { cancelled = true; };
   }, []);
 
-  return (
-    <div className="min-h-full bg-background" dir={isRtl ? 'rtl' : 'ltr'}>
-      {/* ══════════════════ HERO ══════════════════ */}
-      <div className="relative overflow-hidden border-b bg-gradient-to-br from-primary/5 via-background to-accent/5 animate-in fade-in duration-700">
-        {/* Decorative blobs */}
-        <div className="absolute -top-24 -right-24 w-64 h-64 rounded-full bg-primary/5 blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-32 -left-32 w-80 h-80 rounded-full bg-accent/5 blur-3xl pointer-events-none" />
+  if (loading) {
+    return <DashboardSkeleton isRtl={isRtl} />;
+  }
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-          {/* Top bar */}
+  return (
+    <div className="min-h-full bg-background animate-in fade-in duration-300" dir={isRtl ? 'rtl' : 'ltr'}>
+      {/* ── Hero ── */}
+      <div className="bg-gradient-to-b from-primary/[0.04] to-transparent pb-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8">
           <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3.5">
-              {/* Avatar with ring */}
-              <div className="relative shrink-0">
-                <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center ring-4 ring-primary/10 shadow-sm">
-                  <span className="text-sm font-bold text-primary-foreground leading-none">
-                    {initials}
-                  </span>
-                </div>
-                <div className={cn(
-                  "absolute -bottom-0.5 w-3 h-3 rounded-full bg-emerald-400 border-2 border-background",
-                  isRtl ? "-left-0.5" : "-right-0.5",
-                )} />
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                <span className="text-sm font-bold text-primary">{initials}</span>
               </div>
               <div>
-                <p className="text-[10px] font-semibold tracking-[0.15em] uppercase text-muted-foreground/60">
-                  {getGreeting(t)}
-                </p>
-                <h1 className="text-lg font-bold text-foreground leading-tight truncate max-w-[180px] sm:max-w-xs">
-                  {displayName}
-                </h1>
+                <p className="text-xs text-muted-foreground/60 font-medium">{getGreeting(t)}</p>
+                <h1 className="text-lg font-bold text-foreground leading-tight">{displayName}</h1>
               </div>
             </div>
-
-            <div className="flex items-center gap-2">
-              <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/5 border border-primary/10">
-                <TrendingUp className="w-3.5 h-3.5 text-primary/70" />
-                <span className="text-xs text-primary font-semibold">
-                  {stats.chaptersRead} {t?.userDashboard?.chapters || 'chapters'}
-                </span>
+            <div className="flex items-center gap-3">
+              <div className="hidden sm:flex items-center gap-1.5 text-sm text-muted-foreground/60">
+                <BookOpen className="w-3.5 h-3.5" />
+                <span className="font-medium">{stats.chaptersRead} {t?.userDashboard?.chapters || 'chapters'}</span>
               </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="rounded-xl"
+              <button
                 onClick={() => navigate(routes.settings.path)}
+                className="w-8 h-8 rounded-lg bg-primary/5 flex items-center justify-center hover:bg-primary/10 transition-colors"
               >
-                <Settings className="w-4 h-4" />
-              </Button>
+                <Settings className="w-4 h-4 text-muted-foreground/60" />
+              </button>
             </div>
           </div>
 
-          {/* Daily verse card */}
           {dailyVerse && (
             <button
               onClick={() => navigate(routes.userDailyVerse.path)}
-              className="group relative w-full overflow-hidden rounded-2xl bg-gradient-to-br from-primary via-primary/90 to-primary/80 p-5 sm:p-6 text-start transition-all duration-200 hover:shadow-lg hover:shadow-primary/20 active:scale-[0.99]"
+              className="group relative w-full overflow-hidden rounded-2xl bg-gradient-to-br from-primary to-primary/80 p-5 sm:p-6 text-start transition-all duration-200 hover:shadow-lg active:scale-[0.99] animate-in fade-in slide-in-from-bottom-3 duration-500 fill-mode-both"
             >
-              {/* Decorative */}
-              <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-white/5 blur-xl pointer-events-none" />
-              <div className="absolute -bottom-4 -left-4 w-20 h-20 rounded-full bg-white/5 blur-lg pointer-events-none" />
-
               <div className="relative flex items-start gap-4">
-                <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center shrink-0 mt-0.5 backdrop-blur-sm">
+                <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center shrink-0 mt-0.5">
                   <Quote className="w-5 h-5 text-white/80" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[9px] font-bold tracking-[0.18em] uppercase text-white/50 mb-1.5">
+                  <p className="text-[10px] font-semibold tracking-wider uppercase text-white/50 mb-1.5">
                     {t?.userDashboard?.verseOfTheDay || 'Verse of the day'}
                   </p>
                   <p
                     className="text-sm sm:text-base text-white/90 italic leading-relaxed line-clamp-2"
                     style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}
                   >
-                    &ldquo;
-                    {getVerseText(
-                      dailyVerse.bookName,
-                      dailyVerse.chapter,
-                      dailyVerse.verseNumber,
+                    {verseTextLoading ? (
+                      <span className="inline-flex items-center gap-1.5 text-white/50 text-xs">
+                        <span className="inline-block w-3 h-3 rounded-full bg-white/30 animate-pulse" />
+                        Loading verse…
+                      </span>
+                    ) : verseText ? (
+                      <>&ldquo;{verseText}&rdquo;</>
+                    ) : (
+                      <span className="text-white/50 text-xs italic">
+                        Open to read today&rsquo;s verse
+                      </span>
                     )}
-                    &rdquo;
                   </p>
                   <div className="flex items-center gap-2 mt-3">
-                    <span className="text-[10px] font-semibold tracking-wide text-white/60">
-                      &mdash; {dailyVerse.bookName} {dailyVerse.chapter}:{dailyVerse.verseNumber}
+                    <span className="text-[10px] font-medium text-white/60">
+                      {dailyVerse.bookName} {dailyVerse.chapter}:{dailyVerse.verseNumber}
                     </span>
                     {dailyVerse.reflection && (
-                      <span className="text-[9px] px-2 py-0.5 rounded-full bg-white/10 text-white/70 border border-white/10">
+                      <span className="text-[9px] px-2 py-0.5 rounded-full bg-white/10 text-white/70">
                         Reflection available
                       </span>
                     )}
                   </div>
                 </div>
-                <div className="flex items-center gap-1 shrink-0 text-white/40 group-hover:text-white/70 transition-colors mt-2">
-                  <span className="text-[10px] font-semibold hidden sm:inline">Read</span>
-                  <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-                </div>
+                <ChevronRight className="w-4 h-4 text-white/30 group-hover:text-white/60 group-hover:translate-x-0.5 transition-all shrink-0 mt-2" />
               </div>
             </button>
           )}
         </div>
       </div>
 
-      {/* ══════════════════ BODY ══════════════════ */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-7 space-y-8">
-        {/* ── Stats ── */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3 animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-both">
-          {statCards.map((s, idx) => {
+      {/* ── Body ── */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
+        {/* Stats row */}
+        <div className="flex flex-wrap gap-4 sm:gap-6 animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-both">
+          {([
+            { label: t?.userDashboard?.chaptersRead || 'Chapters', value: stats.chaptersRead, icon: BookOpen, color: "text-blue-500" },
+            { label: t?.userDashboard?.highlights || 'Highlights', value: stats.highlights, icon: Star, color: "text-amber-500" },
+            { label: t?.userDashboard?.notes || 'Notes', value: stats.notes, icon: BookMarked, color: "text-violet-500" },
+            { label: t?.userDashboard?.journalEntries || 'Journal', value: stats.journalEntries, icon: PenLine, color: "text-emerald-500" },
+            { label: t?.userDashboard?.favorites || 'Favorites', value: stats.favorites, icon: Heart, color: "text-rose-500" },
+          ] as const).map((s) => {
             const Icon = s.icon;
             return (
-              <DashboardCard key={`stat-${s.label}-${idx}`} className="flex flex-col gap-3" hover={false}>
-                <div className={cn("w-9 h-9 rounded-xl flex items-center justify-center border", s.bg, s.border)}>
-                  <Icon className={cn("w-4 h-4", s.accent)} />
+              <div key={s.label} className="flex items-center gap-2.5">
+                <Icon className={cn("w-4 h-4", s.color)} />
+                <div className="flex items-baseline gap-1">
+                  <span className="text-lg font-bold text-foreground tabular-nums">{s.value.toLocaleString()}</span>
+                  <span className="text-xs text-muted-foreground/60">{s.label}</span>
                 </div>
-                <div>
-                  <p className="text-2xl font-bold text-foreground leading-none tabular-nums">
-                    {s.value.toLocaleString()}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1 font-medium">
-                    {s.label}
-                  </p>
-                </div>
-              </DashboardCard>
+              </div>
             );
           })}
         </div>
 
-        {/* ── Main grid ── */}
-        <div className="grid grid-cols-1 xl:grid-cols-[1fr_360px] gap-6 sm:gap-8">
-          {/* ============ LEFT COLUMN ============ */}
+        {/* Two-column layout */}
+        <div className="grid grid-cols-1 xl:grid-cols-[1fr_340px] gap-8">
+
+          {/* ── LEFT ── */}
           <div className="space-y-8">
+
             {/* Explore */}
-            <section className="animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-both" style={{ animationDelay: '50ms' }}>
-              <SectionHeader title={t?.userDashboard?.explore || 'Explore'} />
+            <section className="animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-both">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xs font-semibold text-muted-foreground/60 uppercase tracking-wider">
+                  {t?.userDashboard?.explore || 'Explore'}
+                </h2>
+              </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {exploreItems.map((item) => {
                   const Icon = item.icon;
@@ -514,21 +494,14 @@ export default function UserDashboard() {
                         `bg-gradient-to-br ${item.gradient}`,
                       )}
                     >
-                      {/* Inner glow */}
                       <div className="absolute inset-0 bg-gradient-to-b from-white/15 to-transparent pointer-events-none" />
-
                       <div className="relative">
-                        <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center mb-3 ring-1 ring-white/10">
+                        <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center mb-3">
                           <Icon className="w-5 h-5 text-white" strokeWidth={1.8} />
                         </div>
-                        <p className="font-bold text-sm text-white leading-tight">
-                          {item.label}
-                        </p>
-                        <p className="text-[11px] text-white/60 mt-0.5 hidden sm:block">
-                          {item.sub}
-                        </p>
+                        <p className="font-bold text-sm text-white leading-tight">{item.label}</p>
+                        <p className="text-[11px] text-white/60 mt-0.5 hidden sm:block">{item.sub}</p>
                       </div>
-
                       <ChevronRight className="absolute bottom-3 end-3 w-3.5 h-3.5 text-white/30 group-hover:text-white/60 group-hover:translate-x-0.5 transition-all" />
                     </button>
                   );
@@ -536,22 +509,26 @@ export default function UserDashboard() {
               </div>
             </section>
 
-            {/* Exegesis Lab Resume */}
+            {/* Study Session */}
             {currentSession && (
-              <section className="animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-both" style={{ animationDelay: '100ms' }}>
-                <SectionHeader
-                  title={t?.userDashboard?.resumeStudy || 'Resume Study'}
-                  action={{
-                    label: t?.userDashboard?.open || 'Open',
-                    onClick: () => navigate(`${routes.labFlow.path}?sessionId=${currentSession.id}`),
-                  }}
-                />
-                <DashboardCard
+              <section className="animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-both">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xs font-semibold text-muted-foreground/60 uppercase tracking-wider">
+                    {t?.userDashboard?.resumeStudy || 'Resume Study'}
+                  </h2>
+                  <button
+                    onClick={() => navigate(`${routes.labFlow.path}?sessionId=${currentSession.id}`)}
+                    className="text-xs font-medium text-primary hover:text-primary/80 transition-colors"
+                  >
+                    {t?.userDashboard?.open || 'Open'}
+                  </button>
+                </div>
+                <button
                   onClick={() => navigate(`${routes.labFlow.path}?sessionId=${currentSession.id}`)}
-                  className="border-violet-200/50 dark:border-violet-800/30 hover:border-violet-300 dark:hover:border-violet-700/50"
+                  className="w-full text-start group block"
                 >
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center shrink-0 shadow-sm">
+                  <div className="flex items-start gap-3 p-4 rounded-2xl bg-violet-50 dark:bg-violet-950/40 hover:bg-violet-100 dark:hover:bg-violet-900/50 transition-colors">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center shrink-0">
                       <Sparkles className="w-5 h-5 text-white" />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -559,277 +536,214 @@ export default function UserDashboard() {
                         {currentSession.passageRef || `${currentSession.bookName} ${currentSession.chapter}`}
                       </p>
                       <p className="text-xs text-muted-foreground mt-0.5">
-                        Study Session &middot; Stage {currentSession.currentStage
+                        Study Session &middot; {currentSession.currentStage
                           ? currentSession.currentStage.charAt(0).toUpperCase() + currentSession.currentStage.slice(1)
                           : (t?.userDashboard?.inProgress || 'In progress')}
                       </p>
-                      <div className="flex items-center gap-2 mt-2.5">
-                        <Badge variant="secondary" className="text-[10px] px-2 py-0.5 gap-1.5 font-semibold">
+                      <div className="flex items-center gap-2 mt-2">
+                        <span className="flex items-center gap-1.5 text-[10px] font-semibold text-violet-600 dark:text-violet-400">
                           <span className="w-1.5 h-1.5 rounded-full bg-violet-500 animate-pulse" />
                           {t?.userDashboard?.active || 'Active'}
-                        </Badge>
-                        {currentSession.listenCompleted && (
-                          <span className="text-[10px] text-muted-foreground">
-                            {t?.userDashboard?.stageCompleted || 'Listen completed'}
-                          </span>
-                        )}
+                        </span>
                       </div>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-muted-foreground/30 shrink-0 mt-1" />
+                    <ChevronRight className="w-4 h-4 text-muted-foreground/30 shrink-0 mt-1 group-hover:translate-x-0.5 transition-transform" />
                   </div>
-                </DashboardCard>
+                </button>
               </section>
             )}
 
             {/* Reading Plans */}
             {readingPlans.length > 0 && (
-              <section className="animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-both" style={{ animationDelay: '150ms' }}>
-                <SectionHeader
-                  title={t?.userDashboard?.readingPlans || 'Reading Plans'}
-                  action={{
-                    label: t?.userDashboard?.seeAll || 'See all',
-                    onClick: () => navigate(routes.userPlans.path),
-                  }}
-                />
+              <section className="animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-both">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xs font-semibold text-muted-foreground/60 uppercase tracking-wider">
+                    {t?.userDashboard?.readingPlans || 'Reading Plans'}
+                  </h2>
+                  <button
+                    onClick={() => navigate(routes.userPlans.path)}
+                    className="text-xs font-medium text-primary hover:text-primary/80 transition-colors"
+                  >
+                    {t?.userDashboard?.seeAll || 'See all'}
+                  </button>
+                </div>
                 <div className="space-y-3">
                   {readingPlans.map((plan, idx) => {
                     const pct = Math.min(100, Math.round((plan.completedDays / plan.totalDays) * 100));
-                    const done = pct >= 70;
                     return (
-                      <DashboardCard key={plan.id || `plan-${plan.planName}-${idx}`} className="hover:border-border">
-                        <div className="flex items-start gap-3 mb-4">
-                          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/10 flex items-center justify-center shrink-0">
-                            <CalendarDays className="w-5 h-5 text-primary/80" />
+                      <div key={plan.id || `plan-${plan.planName}-${idx}`} className="p-4 rounded-2xl bg-muted/40">
+                        <div className="flex items-start gap-3 mb-3">
+                          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                            <CalendarDays className="w-5 h-5 text-primary/70" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="font-semibold text-sm text-foreground line-clamp-1">
-                              {plan.planName}
-                            </p>
-                            <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">
-                              {plan.description}
-                            </p>
+                            <p className="font-semibold text-sm text-foreground line-clamp-1">{plan.planName}</p>
+                            <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{plan.description}</p>
                           </div>
-                          <Badge
-                            variant={done ? "default" : "secondary"}
-                            className={cn(
-                              "shrink-0 text-xs font-bold px-2.5",
-                              done && "bg-emerald-500 hover:bg-emerald-600",
-                            )}
-                          >
+                          <span className={cn(
+                            "text-xs font-bold shrink-0",
+                            pct >= 70 ? "text-emerald-500" : "text-muted-foreground",
+                          )}>
                             {pct}%
-                          </Badge>
+                          </span>
                         </div>
-
                         <div className="space-y-1.5">
-                          <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                          <div className="h-1.5 bg-muted-foreground/10 rounded-full overflow-hidden">
                             <div
                               className="h-full rounded-full transition-all duration-700 ease-out"
                               style={{
                                 width: `${pct}%`,
-                                background: done
+                                background: pct >= 70
                                   ? "linear-gradient(90deg, #10B981, #34D399)"
-                                  : "linear-gradient(90deg, hsl(var(--primary)), hsl(var(--primary))/0.7)",
+                                  : "linear-gradient(90deg, hsl(var(--primary)), hsl(var(--primary)/0.7))",
                               }}
                             />
                           </div>
-                          <div className="flex items-center justify-between">
-                            <p className="text-xs text-muted-foreground">
-                              {(t?.userDashboard?.daysOf || '{completed} of {total} days')
-                                .replace('{completed}', String(plan.completedDays))
-                                .replace('{total}', String(plan.totalDays))}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              {(t?.userDashboard?.left || '{remaining} left')
-                                .replace('{remaining}', String(plan.totalDays - plan.completedDays))}
-                            </p>
+                          <div className="flex items-center justify-between text-xs text-muted-foreground/60">
+                            <span>{(t?.userDashboard?.daysOf || '{completed} of {total} days')
+                              .replace('{completed}', String(plan.completedDays))
+                              .replace('{total}', String(plan.totalDays))}</span>
+                            <span>{(t?.userDashboard?.left || '{remaining} left')
+                              .replace('{remaining}', String(plan.totalDays - plan.completedDays))}</span>
                           </div>
                         </div>
-                      </DashboardCard>
+                      </div>
                     );
                   })}
                 </div>
               </section>
             )}
 
-            {/* Challenge Yourself — under Reading Plans */}
-            <section className="animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-both" style={{ animationDelay: '200ms' }}>
+            {/* Challenge */}
+            <section className="animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-both">
               <div
-                className="relative overflow-hidden rounded-2xl p-5 cursor-pointer transition-all duration-200 hover:shadow-md active:scale-[0.99] bg-gradient-to-br from-rose-50 via-rose-50/80 to-pink-50 dark:from-rose-950/30 dark:via-rose-900/20 dark:to-pink-950/30"
+                className="rounded-2xl p-5 cursor-pointer transition-all duration-200 hover:shadow-md active:scale-[0.99] bg-gradient-to-br from-rose-50 to-pink-50 dark:from-rose-950/30 dark:to-pink-950/30"
                 onClick={() => navigate(routes.trivia.path)}
               >
-                <div className={cn(
-                  "absolute -top-6 w-24 h-24 rounded-full bg-rose-200/50 dark:bg-rose-500/10 pointer-events-none",
-                  isRtl ? "-left-6" : "-right-6",
-                )} />
-                <div className={cn(
-                  "absolute -bottom-4 w-16 h-16 rounded-full bg-rose-200/30 dark:bg-rose-500/5 pointer-events-none",
-                  isRtl ? "-right-4" : "-left-4",
-                )} />
-
-                <div className="relative">
-                  <div className="flex items-center gap-2.5 mb-2.5">
-                    <div className="w-9 h-9 rounded-xl bg-white dark:bg-rose-950/50 shadow-sm flex items-center justify-center shrink-0">
-                      <Trophy className="w-4 h-4 text-rose-500" />
-                    </div>
-                    <div>
-                      <p className="font-bold text-sm text-rose-800 dark:text-rose-300">Challenge Yourself</p>
-                      <p className="text-[10px] text-rose-500 dark:text-rose-400">Bible Trivia Quiz</p>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-rose-300 dark:text-rose-600 shrink-0 ml-auto" />
+                <div className="flex items-center gap-2.5 mb-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-white/60 dark:bg-rose-950/50 flex items-center justify-center shrink-0">
+                    <Trophy className="w-4 h-4 text-rose-500" />
                   </div>
-                  <p className="text-xs text-rose-600/70 dark:text-rose-400/70 leading-relaxed mb-3">
-                    Test your knowledge of the Scriptures with fun trivia questions across all difficulty levels!
-                  </p>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); navigate(routes.trivia.path); }}
-                    className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold text-white transition-all active:scale-[0.98] hover:opacity-90 bg-gradient-to-r from-rose-600 to-rose-700 dark:from-rose-500 dark:to-rose-600"
-                  >
-                    Play Trivia
-                    <Sparkles className="w-3.5 h-3.5" />
-                  </button>
+                  <div>
+                    <p className="font-bold text-sm text-rose-800 dark:text-rose-300">Challenge Yourself</p>
+                    <p className="text-[10px] text-rose-500 dark:text-rose-400">Bible Trivia Quiz</p>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-rose-300 dark:text-rose-600 shrink-0 ml-auto" />
                 </div>
+                <p className="text-xs text-rose-600/70 dark:text-rose-400/70 leading-relaxed mb-3">
+                  Test your knowledge of the Scriptures with fun trivia questions across all difficulty levels!
+                </p>
+                <button
+                  onClick={(e) => { e.stopPropagation(); navigate(routes.trivia.path); }}
+                  className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold text-white transition-all active:scale-[0.98] hover:opacity-90 bg-gradient-to-r from-rose-600 to-rose-700 dark:from-rose-500 dark:to-rose-600"
+                >
+                  Play Trivia
+                  <Sparkles className="w-3.5 h-3.5" />
+                </button>
               </div>
             </section>
           </div>
 
-          {/* ============ RIGHT COLUMN ============ */}
-          <div className="space-y-6">
+          {/* ── RIGHT ── */}
+          <div className="space-y-7">
+
             {/* Continue Reading */}
             {lastRead && (
-              <section className="animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-both" style={{ animationDelay: '50ms' }}>
-                <SectionHeader
-                  title={t?.userDashboard?.continueReading || 'Continue Reading'}
-                  action={{
-                    label: t?.userDashboard?.readNow || 'Read now',
-                    onClick: () => navigate(
-                      `${routes.bibleReader.path}?book=${encodeURIComponent(lastRead.bookName)}&chapter=${lastRead.chapter}`
-                    ),
-                  }}
-                />
-                <DashboardCard
-                  onClick={() => navigate(
-                    `${routes.bibleReader.path}?book=${encodeURIComponent(lastRead.bookName)}&chapter=${lastRead.chapter}`
-                  )}
-                  className="border-primary/10 hover:border-primary/20"
+              <section className="animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-both">
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="text-xs font-semibold text-muted-foreground/60 uppercase tracking-wider">
+                    {t?.userDashboard?.continueReading || 'Continue Reading'}
+                  </h2>
+                  <button
+                    onClick={() => navigate(`${routes.bibleReader.path}?book=${encodeURIComponent(lastRead.bookName)}&chapter=${lastRead.chapter}`)}
+                    className="text-xs font-medium text-primary hover:text-primary/80 transition-colors"
+                  >
+                    {t?.userDashboard?.readNow || 'Read now'}
+                  </button>
+                </div>
+                <button
+                  onClick={() => navigate(`${routes.bibleReader.path}?book=${encodeURIComponent(lastRead.bookName)}&chapter=${lastRead.chapter}`)}
+                  className="w-full text-start group"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/10 flex items-center justify-center shrink-0">
-                      <BookOpen className="w-5 h-5 text-primary/80" />
+                  <div className="flex items-center gap-3 p-4 rounded-2xl bg-primary/5 hover:bg-primary/10 transition-colors">
+                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                      <BookOpen className="w-5 h-5 text-primary/70" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-sm text-foreground truncate">
                         {lastRead.bookName} {lastRead.chapter}
                       </p>
-                      <p className="text-xs text-muted-foreground mt-0.5">
+                      <p className="text-xs text-muted-foreground/60 mt-0.5">
                         {t?.userDashboard?.lastRead || 'Last read'} &middot; {lastRead.updatedOn ? formatTime(lastRead.updatedOn, t) : ''}
                       </p>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-muted-foreground/30 shrink-0" />
+                    <ChevronRight className="w-4 h-4 text-muted-foreground/30 shrink-0 group-hover:translate-x-0.5 transition-transform" />
                   </div>
-                </DashboardCard>
+                </button>
               </section>
             )}
 
             {/* Quick Access */}
-            <section className="animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-both" style={{ animationDelay: '100ms' }}>
-              <SectionHeader title={t?.userDashboard?.quickAccess || 'Quick Access'} />
+            <section className="animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-both">
+              <h2 className="text-xs font-semibold text-muted-foreground/60 uppercase tracking-wider mb-3">
+                {t?.userDashboard?.quickAccess || 'Quick Access'}
+              </h2>
               <div className="grid grid-cols-2 gap-2">
-                {[
-                  {
-                    label: t?.userDashboard?.myNotes || 'My Notes',
-                    icon: BookMarked,
-                    color: "text-violet-600",
-                    bg: "bg-violet-50 dark:bg-violet-950/40",
-                    border: "border-violet-100 dark:border-violet-900/50",
-                    onClick: () => navigate(routes.myActivity.path),
-                  },
-                  {
-                    label: t?.userDashboard?.journal || 'Journal',
-                    icon: PenLine,
-                    color: "text-emerald-600",
-                    bg: "bg-emerald-50 dark:bg-emerald-950/40",
-                    border: "border-emerald-100 dark:border-emerald-900/50",
-                    onClick: () => navigate(routes.journal.path),
-                  },
-                  {
-                    label: t?.userDashboard?.history || 'History',
-                    icon: History,
-                    color: "text-blue-600",
-                    bg: "bg-blue-50 dark:bg-blue-950/40",
-                    border: "border-blue-100 dark:border-blue-900/50",
-                    onClick: () => navigate(routes.myActivity.path),
-                  },
-                  {
-                    label: t?.userDashboard?.highlights || 'Highlights',
-                    icon: Star,
-                    color: "text-amber-600",
-                    bg: "bg-amber-50 dark:bg-amber-950/40",
-                    border: "border-amber-100 dark:border-amber-900/50",
-                    onClick: () => navigate(routes.myActivity.path),
-                  },
-                  {
-                    label: t?.userDashboard?.favorites || 'Favorites',
-                    icon: Heart,
-                    color: "text-rose-600",
-                    bg: "bg-rose-50 dark:bg-rose-950/40",
-                    border: "border-rose-100 dark:border-rose-900/50",
-                    onClick: () => navigate(routes.myActivity.path),
-                  },
-                ].map((link) => {
+                {([
+                  { label: t?.userDashboard?.myNotes || 'My Notes', icon: BookMarked, color: "text-violet-500", bg: "bg-violet-50 dark:bg-violet-950/40", onClick: () => navigate(routes.myActivity.path) },
+                  { label: t?.userDashboard?.journal || 'Journal', icon: PenLine, color: "text-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-950/40", onClick: () => navigate(routes.journal.path) },
+                  { label: t?.userDashboard?.history || 'History', icon: History, color: "text-blue-500", bg: "bg-blue-50 dark:bg-blue-950/40", onClick: () => navigate(routes.myActivity.path) },
+                  { label: t?.userDashboard?.highlights || 'Highlights', icon: Star, color: "text-amber-500", bg: "bg-amber-50 dark:bg-amber-950/40", onClick: () => navigate(routes.myActivity.path) },
+                  { label: t?.userDashboard?.favorites || 'Favorites', icon: Heart, color: "text-rose-500", bg: "bg-rose-50 dark:bg-rose-950/40", onClick: () => navigate(routes.myActivity.path) },
+                ] as const).map((link) => {
                   const Icon = link.icon;
                   return (
                     <button
                       key={link.label}
                       onClick={link.onClick}
                       className={cn(
-                        "flex flex-col items-center gap-2.5 p-3.5 rounded-xl border bg-card transition-all duration-200",
+                        "flex items-center gap-2.5 p-3 rounded-xl transition-all duration-200",
                         "hover:shadow-sm hover:-translate-y-0.5 active:scale-[0.97]",
-                        link.border,
+                        link.bg,
                       )}
                     >
-                      <div className={cn("w-9 h-9 rounded-lg flex items-center justify-center border", link.bg, link.border)}>
-                        <Icon className={cn("w-4 h-4", link.color)} />
-                      </div>
-                      <span className="text-[11px] font-semibold text-foreground/80">
-                        {link.label}
-                      </span>
+                      <Icon className={cn("w-4 h-4 shrink-0", link.color)} />
+                      <span className="text-xs font-medium text-foreground/80">{link.label}</span>
                     </button>
                   );
                 })}
               </div>
             </section>
 
-            
-
             {/* Recent Activity */}
             {recentActivity.length > 0 && (
-              <section className="animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-both" style={{ animationDelay: '150ms' }}>
-                <SectionHeader
-                  title={t?.userDashboard?.recentActivity || 'Recent Activity'}
-                  action={{
-                    label: t?.userDashboard?.allHistory || 'All history',
-                    onClick: () => navigate(routes.myActivity.path),
-                  }}
-                />
-                <div className="rounded-2xl border bg-card overflow-hidden divide-y divide-border/40">
+              <section className="animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-both">
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="text-xs font-semibold text-muted-foreground/60 uppercase tracking-wider">
+                    {t?.userDashboard?.recentActivity || 'Recent Activity'}
+                  </h2>
+                  <button
+                    onClick={() => navigate(routes.myActivity.path)}
+                    className="text-xs font-medium text-primary hover:text-primary/80 transition-colors"
+                  >
+                    {t?.userDashboard?.allHistory || 'All history'}
+                  </button>
+                </div>
+                <div className="space-y-0.5">
                   {recentActivity.slice(0, 5).map((act, idx) => (
                     <button
                       key={idx}
-                      onClick={() => navigate(
-                        `${routes.bibleReader.path}?book=${encodeURIComponent(act.bookName)}&chapter=${act.chapter}`
-                      )}
-                      className="group w-full flex items-center gap-3 px-4 py-3.5 text-start hover:bg-muted/30 active:bg-muted/50 transition-colors"
+                      onClick={() => navigate(`${routes.bibleReader.path}?book=${encodeURIComponent(act.bookName)}&chapter=${act.chapter}`)}
+                      className="group w-full flex items-center gap-3 px-4 py-3 rounded-xl text-start hover:bg-muted/40 active:bg-muted/60 transition-colors"
                     >
-                      <div className="w-8 h-8 rounded-lg bg-primary/5 border border-primary/10 flex items-center justify-center shrink-0">
+                      <div className="w-8 h-8 rounded-lg bg-primary/5 flex items-center justify-center shrink-0">
                         <Clock className="w-3.5 h-3.5 text-primary/60" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="font-semibold text-sm text-foreground truncate">
                           {act.bookName} {act.chapter}
                         </p>
-                        <p className="text-[11px] text-muted-foreground">
-                          {formatTime(act.updatedOn, t)}
-                        </p>
+                        <p className="text-xs text-muted-foreground/60">{formatTime(act.updatedOn, t)}</p>
                       </div>
                       <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/30 group-hover:text-muted-foreground/60 group-hover:translate-x-0.5 transition-all shrink-0" />
                     </button>
@@ -838,172 +752,141 @@ export default function UserDashboard() {
               </section>
             )}
 
-            {/* Lordsbook Daily Exegesis */}
+            {/* Daily Exegesis */}
             {dailyExegesis && (
-              <section className="animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-both" style={{ animationDelay: '200ms' }}>
-                <SectionHeader
-                  title="Daily Exegesis"
-                  action={{
-                    label: "Open study",
-                    onClick: () => navigate(routes.dailyExegesis.path),
-                  }}
-                />
-                <DashboardCard
-                  onClick={() => navigate(routes.dailyExegesis.path)}
-                  className="border-indigo-200/50 dark:border-indigo-800/30 hover:border-indigo-300 dark:hover:border-indigo-700/50"
-                >
-                  <div className="flex items-start gap-3 mb-2">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-blue-500 flex items-center justify-center shrink-0 shadow-sm">
-                      <BookText className="w-5 h-5 text-white" />
+              <section className="animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-both">
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="text-xs font-semibold text-muted-foreground/60 uppercase tracking-wider">Daily Exegesis</h2>
+                  <button onClick={() => navigate(routes.dailyExegesis.path)} className="text-xs font-medium text-primary hover:text-primary/80 transition-colors">Open study</button>
+                </div>
+                <button onClick={() => navigate(routes.dailyExegesis.path)} className="w-full text-start group">
+                  <div className="p-4 rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors">
+                    <div className="flex items-start gap-3 mb-2">
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-blue-500 flex items-center justify-center shrink-0">
+                        <BookText className="w-5 h-5 text-white" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-sm text-foreground line-clamp-1">{dailyExegesis.title || 'Daily Exegesis'}</p>
+                        {dailyExegesis.passageRef && (
+                          <p className="text-xs text-indigo-500 font-medium mt-0.5">{dailyExegesis.passageRef}</p>
+                        )}
+                      </div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-sm text-foreground line-clamp-1">
-                        {dailyExegesis.title || 'Daily Exegesis'}
+                    {dailyExegesis.introduction && (
+                      <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2 italic pl-3">
+                        &ldquo;{dailyExegesis.introduction}&rdquo;
                       </p>
-                      {dailyExegesis.passageRef && (
-                        <p className="text-xs text-indigo-500 font-medium mt-0.5">
-                          {dailyExegesis.passageRef}
-                        </p>
-                      )}
-                    </div>
+                    )}
                   </div>
-                  {dailyExegesis.introduction && (
-                    <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2 italic border-l-2 border-indigo-200 dark:border-indigo-800 pl-3">
-                      &ldquo;{dailyExegesis.introduction}&rdquo;
-                    </p>
-                  )}
-                </DashboardCard>
+                </button>
               </section>
             )}
 
             {/* Daily Devotion */}
             {dailyDevotion && (
-              <section className="animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-both" style={{ animationDelay: '250ms' }}>
-                <SectionHeader
-                  title="Daily Devotion"
-                  action={{
-                    label: "Read",
-                    onClick: () => navigate(routes.userDevotions.path),
-                  }}
-                />
-                <DashboardCard
-                  onClick={() => navigate(routes.userDevotions.path)}
-                  className="border-sky-200/50 dark:border-sky-800/30 hover:border-sky-300 dark:hover:border-sky-700/50"
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-500 to-cyan-500 flex items-center justify-center shrink-0 shadow-sm">
+              <section className="animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-both">
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="text-xs font-semibold text-muted-foreground/60 uppercase tracking-wider">Daily Devotion</h2>
+                  <button onClick={() => navigate(routes.userDevotions.path)} className="text-xs font-medium text-primary hover:text-primary/80 transition-colors">Read</button>
+                </div>
+                <button onClick={() => navigate(routes.userDevotions.path)} className="w-full text-start group">
+                  <div className="flex items-start gap-3 p-4 rounded-2xl bg-sky-50 dark:bg-sky-950/40 hover:bg-sky-100 dark:hover:bg-sky-900/50 transition-colors">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-500 to-cyan-500 flex items-center justify-center shrink-0">
                       <Lightbulb className="w-5 h-5 text-white" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-sm text-foreground line-clamp-1">
-                        {dailyDevotion.title || 'Daily Devotion'}
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">
-                        {dailyDevotion.theme || dailyDevotion.passageRef || ''}
-                      </p>
+                      <p className="font-semibold text-sm text-foreground line-clamp-1">{dailyDevotion.title || 'Daily Devotion'}</p>
+                      <p className="text-xs text-muted-foreground/60 mt-0.5 line-clamp-1">{dailyDevotion.theme || dailyDevotion.passageRef || ''}</p>
                     </div>
                   </div>
-                </DashboardCard>
+                </button>
               </section>
             )}
 
             {/* Daily Trivia */}
             {dailyTrivia && (
-              <section className="animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-both" style={{ animationDelay: '275ms' }}>
-                <SectionHeader
-                  title="Daily Trivia"
-                  action={{
-                    label: "Play",
-                    onClick: () => navigate(routes.trivia.path),
-                  }}
-                />
-                <DashboardCard
-                  onClick={() => navigate(routes.trivia.path)}
-                  className="border-amber-200/50 dark:border-amber-800/30 hover:border-amber-300 dark:hover:border-amber-700/50"
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shrink-0 shadow-sm">
+              <section className="animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-both">
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="text-xs font-semibold text-muted-foreground/60 uppercase tracking-wider">Daily Trivia</h2>
+                  <button onClick={() => navigate(routes.trivia.path)} className="text-xs font-medium text-primary hover:text-primary/80 transition-colors">Play</button>
+                </div>
+                <button onClick={() => navigate(routes.trivia.path)} className="w-full text-start group">
+                  <div className="flex items-start gap-3 p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/50 transition-colors">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shrink-0">
                       <Trophy className="w-5 h-5 text-white" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-sm text-foreground line-clamp-1">
-                        {dailyTrivia.question || "Today's Trivia"}
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-0.5">
+                      <p className="font-semibold text-sm text-foreground line-clamp-1">{dailyTrivia.question || "Today's Trivia"}</p>
+                      <p className="text-xs text-muted-foreground/60 mt-0.5">
                         {dailyTrivia.category ? `${dailyTrivia.category} · ` : ''}{dailyTrivia.difficulty || 'Mixed'} difficulty
                       </p>
                     </div>
                   </div>
-                </DashboardCard>
+                </button>
               </section>
             )}
 
-            {/* Journal Preview */}
+            {/* Latest Journal */}
             {latestEntry && (
-              <section className="animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-both" style={{ animationDelay: '300ms' }}>
-                <SectionHeader
-                  title={t?.userDashboard?.latestEntry || 'Latest Journal'}
-                  action={{
-                    label: t?.userDashboard?.open || 'Open',
-                    onClick: () => navigate(`/journal/view/${latestEntry.id}`),
-                  }}
-                />
-                <DashboardCard
-                  onClick={() => navigate(`/journal/view/${latestEntry.id}`)}
-                  className="border-emerald-200/50 dark:border-emerald-800/30 hover:border-emerald-300 dark:hover:border-emerald-700/50"
-                >
-                  <div className="flex items-start gap-3 mb-3">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-green-500 flex items-center justify-center shrink-0 shadow-sm">
-                      <PenLine className="w-5 h-5 text-white" />
+              <section className="animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-both">
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="text-xs font-semibold text-muted-foreground/60 uppercase tracking-wider">
+                    {t?.userDashboard?.latestEntry || 'Latest Journal'}
+                  </h2>
+                  <button onClick={() => navigate(`/journal/view/${latestEntry.id}`)} className="text-xs font-medium text-primary hover:text-primary/80 transition-colors">
+                    {t?.userDashboard?.open || 'Open'}
+                  </button>
+                </div>
+                <button onClick={() => navigate(`/journal/view/${latestEntry.id}`)} className="w-full text-start group">
+                  <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-colors">
+                    <div className="flex items-start gap-3 mb-3">
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-green-500 flex items-center justify-center shrink-0">
+                        <PenLine className="w-5 h-5 text-white" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-sm text-foreground line-clamp-1">
+                          {latestEntry.passageRef || latestEntry.title || (t?.userDashboard?.journalEntry || 'Journal entry')}
+                        </p>
+                        <p className="text-xs text-muted-foreground/60 mt-0.5">
+                          {latestEntry.createdOn
+                            ? (() => {
+                                const diff = Date.now() - new Date(latestEntry.createdOn).getTime();
+                                const d = Math.floor(diff / 86400000);
+                                if (d < 1) return t?.userDashboard?.today || 'Today';
+                                if (d === 1) return t?.userDashboard?.yesterday || 'Yesterday';
+                                return new Date(latestEntry.createdOn).toLocaleDateString();
+                              })()
+                            : ''}
+                        </p>
+                      </div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-sm text-foreground line-clamp-1">
-                        {latestEntry.passageRef || latestEntry.title || (t?.userDashboard?.journalEntry || 'Journal entry')}
-                      </p>
-                      <p className="text-[11px] text-muted-foreground mt-0.5">
-                        {latestEntry.createdOn
-                          ? (() => {
-                              const diff = Date.now() - new Date(latestEntry.createdOn).getTime();
-                              const d = Math.floor(diff / 86400000);
-                              if (d < 1) return t?.userDashboard?.today || 'Today';
-                              if (d === 1) return t?.userDashboard?.yesterday || 'Yesterday';
-                              return new Date(latestEntry.createdOn).toLocaleDateString();
-                            })()
-                          : ''}
-                      </p>
+                    {(latestEntry.reflection || latestEntry.lookNotes) && (
+                      <div className="rounded-xl bg-white/40 dark:bg-emerald-950/20 p-3">
+                        <p className="text-xs text-foreground/70 italic leading-relaxed line-clamp-2">
+                          &ldquo;{latestEntry.reflection || latestEntry.lookNotes}&rdquo;
+                        </p>
+                      </div>
+                    )}
+                    <div className="flex items-center gap-2 mt-3">
+                      {latestEntry.isPublic && (
+                        <span className="text-[10px] font-semibold text-emerald-500">
+                          {t?.userDashboard?.public || 'Public'}
+                        </span>
+                      )}
+                      {latestEntry.bookName && (
+                        <span className="text-xs text-muted-foreground/60">
+                          {latestEntry.bookName} {latestEntry.chapter || ''}
+                        </span>
+                      )}
                     </div>
                   </div>
-
-                  {/* Preview text */}
-                  {(latestEntry.reflection || latestEntry.lookNotes) && (
-                    <div className="rounded-lg bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-100/50 dark:border-emerald-900/50 p-3">
-                      <p className="text-xs text-foreground/70 italic leading-relaxed line-clamp-2">
-                        &ldquo;{latestEntry.reflection || latestEntry.lookNotes}&rdquo;
-                      </p>
-                    </div>
-                  )}
-
-                  <div className="flex items-center gap-2 mt-3">
-                    {latestEntry.isPublic && (
-                      <Badge variant="outline" className="text-[9px] font-semibold tracking-wider uppercase text-emerald-500 border-emerald-200 dark:border-emerald-800">
-                        {t?.userDashboard?.public || 'Public'}
-                      </Badge>
-                    )}
-                    {latestEntry.bookName && (
-                      <span className="text-[10px] text-muted-foreground">
-                        {latestEntry.bookName} {latestEntry.chapter || ''}
-                      </span>
-                    )}
-                  </div>
-                </DashboardCard>
+                </button>
               </section>
             )}
 
           </div>
         </div>
 
-        
-        
         <div className="h-6" />
       </div>
     </div>

@@ -1587,6 +1587,7 @@
     "readingPlans": "Reading Plans",
     "settings": "Settings",
     "dashboard": "Dashboard",
+    "adminDashboard": "Admin Console",
     "activity": "Users",
     "logout": "Sign Out",
     "profile": "Profile",
@@ -1604,7 +1605,11 @@
     "studyBible": "Study Bible",
     "sower": "Sower",
     "studyTools": "Study Tools",
-    "trivia": "Bible Trivia"
+    "trivia": "Bible Trivia",
+    "triviaAdmin": "Trivia Management",
+    "dailyContentAdmin": "Daily Content",
+    "subscriptionsAdmin": "Subscriptions",
+    "adminTools": "Admin Tools"
   },
   "settings": {
     "pageTitle": "Account Settings",
@@ -1617,7 +1622,7 @@
     "tabExtraShort": "EXTRA",
     "tabPassword": "Password",
     "tabPasswordShort": "PASS",
-    "tabLanguage": "Language",
+    "tabLanguage": "Theme & Language",
     "tabLanguageShort": "LANG",
     "personalInfo": "Personal Info",
     "personalInfoDesc": "Your basic account details",

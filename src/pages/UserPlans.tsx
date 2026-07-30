@@ -238,25 +238,25 @@ export default function UserPlans() {
                 const pct = getProgressPercentage(plan.completedDays, plan.totalDays);
                 
                 return (
-                  <Card key={plan.planId} className="border-l-4 border-l-emerald-500 overflow-hidden opacity-80">
+                  <Card key={plan.planId} className="border-l-4 border-l-emerald-500 dark:border-l-emerald-600 overflow-hidden opacity-80">
                     <CardHeader className="pb-3">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
                             <CardTitle className="text-lg">{plan.planName}</CardTitle>
-                            <span className="text-xs px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full font-medium">{t.readingPlan?.badgeDone || 'Done'}</span>
+                            <span className="text-xs px-2 py-1 bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 rounded-full font-medium">{t.readingPlan?.badgeDone || 'Done'}</span>
                           </div>
                           <p className="text-sm text-muted-foreground mt-1">
                             {t.readingPlan?.daysCompleted?.replace('{n}', String(plan.totalDays)) || `${plan.totalDays} days completed`}
                           </p>
                         </div>
                         <div className="w-14 h-14 relative">
-                          <svg className="w-14 h-14 -rotate-90">
-                            <circle cx="28" cy="28" r="24" stroke="currentColor" strokeWidth="4" fill="none" className="text-emerald-200" />
-                            <circle cx="28" cy="28" r="24" stroke="currentColor" strokeWidth="4" fill="none" 
-                              strokeDasharray="150.8" className="text-emerald-500" />
-                          </svg>
-                          <span className="absolute inset-0 flex items-center justify-center text-sm font-bold text-emerald-600">
+                        <svg className="w-14 h-14 -rotate-90">
+                          <circle cx="28" cy="28" r="24" stroke="currentColor" strokeWidth="4" fill="none" className="text-emerald-200 dark:text-emerald-900" />
+                          <circle cx="28" cy="28" r="24" stroke="currentColor" strokeWidth="4" fill="none" 
+                            strokeDasharray="150.8" className="text-emerald-500 dark:text-emerald-400" />
+                        </svg>
+                        <span className="absolute inset-0 flex items-center justify-center text-sm font-bold text-emerald-600 dark:text-emerald-400">
                             100%
                           </span>
                         </div>
@@ -289,7 +289,7 @@ export default function UserPlans() {
             key={value}
             onClick={() => setCatFilter(value)}
             className={`min-h-[44px] px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition-colors active:scale-[0.97] [touch-action:manipulation] ${
-              catFilter === value ? "bg-primary text-primary-foreground" : "bg-muted hover:bg-muted/80"
+              catFilter === value ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"
             }`}
           >
             {t.readingPlan?.[key] || key}
@@ -302,9 +302,9 @@ export default function UserPlans() {
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
       ) : filteredPlans.length === 0 ? (
-        <Card className="border-teal-200 bg-teal-50/50">
+        <Card className="border-teal-200 dark:border-teal-800/50 bg-teal-50/50 dark:bg-teal-950/20">
           <CardContent className="py-12 text-center">
-            <BookOpen className="w-16 h-16 mx-auto mb-4 text-teal-400" />
+            <BookOpen className="w-16 h-16 mx-auto mb-4 text-teal-400 dark:text-teal-500" />
             <h3 className="text-xl font-semibold mb-2">{t.readingPlan?.noPlansFound || 'No plans found'}</h3>
             <p className="text-muted-foreground">{t.readingPlan?.noPlansDesc || 'Check back later for new reading plans.'}</p>
           </CardContent>
@@ -321,17 +321,17 @@ export default function UserPlans() {
             return (
               <Card 
                 key={plan.planId} 
-                className={`overflow-hidden ${isActive ? "border-primary/50" : isCompleted ? "border-emerald-500/50" : ""}`}
+                className={`overflow-hidden ${isActive ? "border-primary/50" : isCompleted ? "border-emerald-500/50 dark:border-emerald-600/50" : ""}`}
               >
                 {(isActive || isCompleted) && (
-                  <div className={`h-1 ${isCompleted ? "bg-emerald-500" : "bg-primary"}`} />
+                  <div className={`h-1 ${isCompleted ? "bg-emerald-500 dark:bg-emerald-600" : "bg-primary"}`} />
                 )}
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 flex-wrap">
                         <CardTitle className="text-base">{plan.title}</CardTitle>
-                        {isCompleted && <span className="text-xs px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full">{t.readingPlan?.badgeDone || 'Done'}</span>}
+                        {isCompleted && <span className="text-xs px-2 py-1 bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 rounded-full">{t.readingPlan?.badgeDone || 'Done'}</span>}
                         {isActive && <span className="text-xs px-2 py-1 bg-primary text-primary-foreground rounded-full">{t.readingPlan?.badgeActive || 'Active'}</span>}
                       </div>
                       <CardDescription className="mt-1 line-clamp-2">{plan.description}</CardDescription>
@@ -348,7 +348,7 @@ export default function UserPlans() {
                     </span>
                     <span className="text-xs px-2 py-1 bg-muted rounded-lg font-medium">{catLabel(t, plan.category)}</span>
                     <span className="text-xs px-2 py-1 bg-muted rounded-lg font-medium">{plan.totalDays} {t.readingPlan?.days || 'days'}</span>
-                    {plan.questionsEnabled && <span className="text-xs px-2 py-1 bg-violet-100 text-violet-700 rounded-lg font-medium">{t.readingPlan?.badgeQA || 'Q&A'}</span>}
+                    {plan.questionsEnabled && <span className="text-xs px-2 py-1 bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300 rounded-lg font-medium">{t.readingPlan?.badgeQA || 'Q&A'}</span>}
                   </div>
 
                   {hasStarted && userPlan && (
@@ -358,7 +358,7 @@ export default function UserPlans() {
                       </div>
                       <div className="h-1.5 bg-muted rounded-full overflow-hidden">
                         <div 
-                          className={`h-full rounded-full ${isCompleted ? "bg-emerald-500" : "bg-primary"}`} 
+                          className={`h-full rounded-full ${isCompleted ? "bg-emerald-500 dark:bg-emerald-600" : "bg-primary"}`} 
                           style={{ width: `${pct}%` }} 
                         />
                       </div>
@@ -394,10 +394,10 @@ export default function UserPlans() {
 
   return (
     <div className="min-h-screen bg-background" dir={isRtl ? 'rtl' : 'ltr'}>
-      <div className="bg-gradient-to-b from-teal-50/50 to-background p-6 lg:p-8 pb-4">
+      <div className="bg-gradient-to-b from-teal-50/50 dark:from-teal-950/20 to-background p-6 lg:p-8 pb-4">
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-12 h-12 rounded-xl bg-teal-100 flex items-center justify-center">
-            <BookOpen className="w-6 h-6 text-teal-600" />
+          <div className="w-12 h-12 rounded-xl bg-teal-100 dark:bg-teal-900/50 flex items-center justify-center">
+            <BookOpen className="w-6 h-6 text-teal-600 dark:text-teal-400" />
           </div>
           <div>
             <h1 className="text-2xl font-bold">{t.readingPlan?.readingPlans || 'My Reading Plans'}</h1>

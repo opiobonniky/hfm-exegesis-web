@@ -1139,6 +1139,7 @@
     "bible": "بائبل قاری",
     "dailyVerse": "یومیہ آیت",
     "dashboard": "لوحة التحكم",
+    "adminDashboard": "Admin Console",
     "devotions": "یومیہ بھجن",
     "explanations": "آیات کی تشریحات",
     "home": "ہوم",
@@ -1153,7 +1154,11 @@
     "profile": "پروفائل",
     "readingPlans": "مطالعہ کا منصوبہ",
     "settings": "ترتیبات",
-    "userActivity": "صارف کی سرگرمی"
+    "userActivity": "صارف کی سرگرمی",
+    "triviaAdmin": "Trivia Management",
+    "dailyContentAdmin": "Daily Content",
+    "subscriptionsAdmin": "Subscriptions",
+    "adminTools": "Admin Tools"
   },
   "userActivity": {
     "action": "عمل",

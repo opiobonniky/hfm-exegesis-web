@@ -164,9 +164,9 @@ const ACTIONS: ActionItem[] = [
     icon: Share2,
     label: "Share Verse",
     description: "Share with others",
-    color: "text-slate-600 dark:text-slate-400",
-    bgColor: "bg-slate-50 dark:bg-slate-950/30",
-    borderColor: "border-slate-200/50 dark:border-slate-800/30",
+    color: "text-muted-foreground dark:text-muted-foreground/70",
+    bgColor: "bg-muted dark:bg-slate-950/30",
+    borderColor: "border-border/50 dark:border-slate-800/30",
     action: "share",
   },
 ];

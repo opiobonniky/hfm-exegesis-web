@@ -1,4 +1,4 @@
-import { ChevronRight, Edit2, BookOpen, Bookmark } from "lucide-react";
+import { ChevronRight, Edit2, BookOpen, Bookmark, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import type { StrongsWordEntry } from "@/data/staticData";
@@ -14,6 +14,7 @@ export interface WordCardProps {
   word: StrongsWordEntry;
   onClick: () => void;
   onEdit?: () => void;
+  onOpenDialog?: () => void;
   showChevron?: boolean;
   showEditButton?: boolean;
   showGrammarCase?: boolean;
@@ -27,6 +28,7 @@ export default function WordCard({
   word,
   onClick,
   onEdit,
+  onOpenDialog,
   showChevron = true,
   showEditButton = false,
   showGrammarCase = true,
@@ -146,11 +148,23 @@ export default function WordCard({
       {/* Right-side actions */}
       <div
         className={`flex items-center gap-0.5 shrink-0 mt-0.5 ${
-          showEditButton || showChevron
+          showEditButton || showChevron || onOpenDialog
             ? "opacity-0 group-hover:opacity-100 transition-all translate-x-1 group-hover:translate-x-0"
             : ""
         }`}
       >
+        {onOpenDialog && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onOpenDialog();
+            }}
+            title="Open in Word Study Dialog"
+            className="shrink-0 w-7 h-7 flex items-center justify-center rounded-md text-muted-foreground/30 hover:text-primary hover:bg-primary/10 transition-all"
+          >
+            <ExternalLink className="w-3.5 h-3.5" />
+          </button>
+        )}
         {showEditButton && onEdit && (
           <Button
             variant="ghost"

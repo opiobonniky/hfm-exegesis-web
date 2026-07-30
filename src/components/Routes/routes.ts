@@ -45,7 +45,13 @@ const Trivia = lazy(() => import("@/pages/Trivia"));
 const StudyBible = lazy(() => import("@/pages/LabDictionary"));
 const BibleStudyFlow = lazy(() => import("@/pages/LabFlow"));
 const LabHome = lazy(() => import("@/pages/LabHome"));
+const LabReview = lazy(() => import("@/pages/LabReview"));
+const AdminDashboard = lazy(() => import("@/pages/AdminDashboard"));
 const AdminStudyTools = lazy(() => import("@/pages/AdminStudyTools"));
+const AdminTrivia = lazy(() => import("@/pages/AdminTrivia"));
+const AdminDailyContent = lazy(() => import("@/pages/AdminDailyContent"));
+const AdminSubscriptions = lazy(() => import("@/pages/AdminSubscriptions"));
+const AdminActivityLog = lazy(() => import("@/pages/AdminActivityLog"));
 const DailyExegesis = lazy(() => import("@/pages/DailyExegesis"));
 const SowerPage = lazy(() => import("@/pages/SowerPage"));
 const BibleLibrary = lazy(() => import("@/pages/BibleLibrary"));
@@ -356,6 +362,13 @@ export const routes = {
     requiresLayout: true,
     title: "Study Bible",
   },
+  labReview: {
+    path: "/lab-review/:sessionId",
+    component: LabReview,
+    isProtected: true,
+    requiresLayout: true,
+    title: "Study Review",
+  },
   // Backwards-compat alias for BibleStudy accessed from bible reader
   // Backwards-compat alias for BibleStudy accessed from bible reader
   bibleStudyDirect: {
@@ -372,12 +385,47 @@ export const routes = {
     requiresLayout: true,
     title: "Bible Study",
   },
+  adminDashboard: {
+    path: "/admin",
+    component: AdminDashboard,
+    isProtected: true,
+    requiresLayout: true,
+    title: "Admin Console",
+  },
   adminStudyTools: {
     path: "/admin/study-tools",
     component: AdminStudyTools,
     isProtected: true,
     requiresLayout: true,
     title: "Study Tools Admin",
+  },
+  adminTrivia: {
+    path: "/admin/trivia",
+    component: AdminTrivia,
+    isProtected: true,
+    requiresLayout: true,
+    title: "Trivia Management",
+  },
+  adminDailyContent: {
+    path: "/admin/daily-content",
+    component: AdminDailyContent,
+    isProtected: true,
+    requiresLayout: true,
+    title: "Daily Content Manager",
+  },
+  adminSubscriptions: {
+    path: "/admin/subscriptions",
+    component: AdminSubscriptions,
+    isProtected: true,
+    requiresLayout: true,
+    title: "Subscription Manager",
+  },
+  adminActivityLog: {
+    path: "/admin/activity-log",
+    component: AdminActivityLog,
+    isProtected: true,
+    requiresLayout: true,
+    title: "Activity Log",
   },
   dailyExegesis: {
     path: "/daily-exegesis",

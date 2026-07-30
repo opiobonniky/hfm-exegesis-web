@@ -42,7 +42,6 @@ export function createMockVerseWords(count = 3): StrongsWordData[] {
 
 export function createMockBookPrologue(): BookPrologue {
   return {
-    id: "1",
     bookName: "John",
     author: "John the Apostle",
     audience: "Early Christians",
@@ -57,6 +56,12 @@ export function createMockBookPrologue(): BookPrologue {
 }
 
 export const MOCK_VERSE_RESOURCES: VerseResourceData = {
+  id: 0,
+  bookName: "John",
+  chapter: 1,
+  verseStart: 1,
+  verseEnd: null,
+  interlinearWords: [],
   commentaries: [
     {
       author: "Matthew Henry",
@@ -93,6 +98,7 @@ export const MOCK_VERSE_RESOURCES: VerseResourceData = {
       term: "Beginning",
       pronunciation: "bih-GIN-ing",
       definition: "The starting point of creation; the eternal moment before time.",
+      description: "The starting point of creation; the eternal moment before time.",
     },
   ],
   relatedTopics: [

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   BookText,
@@ -11,6 +11,9 @@ import {
   ExternalLink,
   Bookmark,
   ChevronRight,
+  Copy,
+  Check,
+  Shuffle,
 } from "lucide-react";
 import {
   Sheet,
@@ -25,6 +28,8 @@ import { Combobox } from "@/components/ui/combobox";
 import { getStrongsEntry } from "@/services/strongsApi";
 import type { StrongsEntry } from "@/services/strongsApi";
 import type { StrongsWordEntry, VerseRef } from "@/data/staticData";
+import WordStudyDialog from "@/components/WordStudyDialog";
+import WordComparisonDialog from "@/components/WordComparisonDialog";
 import { BIBLE_BOOKS, getLangColor, getLangLetter, getLangScript } from "@/data/staticData";
 import { getChaptersForBook, getVersesCountForChapter, getVerseText } from "@/utilities/bibleUtils";
 import { getVersionById } from "@/assets/bibleVersion/json/bibleVersions";
@@ -97,6 +102,95 @@ export default function WordDetailSheet({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
 
+  // ── Derive entry & display values (MUST be before any useCallback that references them) ──
+  const entry: (StrongsEntry & { adminExplanation?: string | null; verseCount?: number; verseReferences?: VerseRef[] | null }) | null =
+    wordEntry ?? fetchedEntry;
+
+  // Derive display values
+  const displayTitle =
+    entry?.shortDefinition || entry?.originalWord || surfaceText || "Word Study";
+  const displayWord = entry?.originalWord || "";
+  const displayTransliteration = entry?.transliteration || "";
+  const displayLanguage = entry?.language || "";
+  const displayShortDef = entry?.shortDefinition || "";
+  const displayFullDef = entry?.fullDefinition || "";
+  const displayPartOfSpeech = entry?.partOfSpeech || "";
+  const displayGrammaticalCase = entry?.grammaticalCase || "";
+  const displayGender = entry?.gender || "";
+  const displayNumber = entry?.number || "";
+  const displayUsageCount = entry?.usageCount;
+  const displayCrossReferences = entry?.crossReferences || "";
+  const displayAdminExplanation = entry?.adminExplanation || "";
+  const displayStrongsId = entry?.strongsId || strongsId || "";
+  const displayVerseCount = entry?.verseCount || verseAttachments?.length || 0;
+  const displayVerseReferences: VerseRef[] = entry?.verseReferences || verseAttachments || [];
+
+  // ── Dialog state ──
+  const [showWordDialog, setShowWordDialog] = useState(false);
+  const [showComparison, setShowComparison] = useState(false);
+  const [showShortcuts, setShowShortcuts] = useState(false);
+
+  // Reset shortcuts overlay when sheet closes
+  useEffect(() => {
+    if (!open) setShowShortcuts(false);
+  }, [open]);
+
+  // Keyboard shortcut: 'd' opens the Word Study Dialog when the sheet is open
+  useEffect(() => {
+    if (!open) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't trigger when typing in inputs, textareas, or comboboxes
+      const target = e.target as HTMLElement;
+      if (
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.isContentEditable
+      ) {
+        return;
+      }
+
+      if (e.key === "d" && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        e.preventDefault();
+        setShowWordDialog((prev) => !prev);
+      }
+
+      if (e.key === "?" && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        e.preventDefault();
+        setShowShortcuts((prev) => !prev);
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [open, displayStrongsId]);
+
+  // ── Copy state ──
+  const [copiedDefinition, setCopiedDefinition] = useState(false);
+  const [copiedStudyNote, setCopiedStudyNote] = useState(false);
+
+  const copyDefinition = useCallback(async () => {
+    if (!displayShortDef) return;
+    try {
+      await navigator.clipboard.writeText(displayShortDef);
+      setCopiedDefinition(true);
+      setTimeout(() => setCopiedDefinition(false), 2000);
+    } catch {
+      // Clipboard not available
+    }
+  }, [displayShortDef]);
+
+  const copyStudyNote = useCallback(async () => {
+    if (!entry?.adminExplanation) return;
+    try {
+      await navigator.clipboard.writeText(entry.adminExplanation);
+      setCopiedStudyNote(true);
+      setTimeout(() => setCopiedStudyNote(false), 2000);
+    } catch {
+      // Clipboard not available
+    }
+  }, [entry?.adminExplanation]);
+
   // ── Verse selector state ──
   const [wsBook, setWsBook] = useState("");
   const [wsChapter, setWsChapter] = useState(0);
@@ -138,10 +232,6 @@ export default function WordDetailSheet({
       setWsTransl(first.translation || translationBadge || "BSB");
     }
   }, [open, verseRef, translationBadge, wordEntry, fetchedEntry, verseAttachments]);
-
-  // Use pre-fetched entry if provided, otherwise fetch by strongsId
-  const entry: (StrongsEntry & { adminExplanation?: string | null; verseCount?: number; verseReferences?: VerseRef[] | null }) | null =
-    wordEntry ?? fetchedEntry;
 
   useEffect(() => {
     if (!open || !strongsId || wordEntry) return;
@@ -203,36 +293,26 @@ export default function WordDetailSheet({
   }, [wsBook, wsChapter]);
 
   useEffect(() => {
-    if (wsBook && wsChapter > 0 && wsVerse > 0 && wsTransl) {
-      const version = getVersionById(wsTransl);
-      const bibleData = version?.data;
-      const text = bibleData
-        ? getVerseText(wsBook, wsChapter, wsVerse, bibleData)
-        : getVerseText(wsBook, wsChapter, wsVerse);
-      setWsPreview(text);
-    } else {
-      setWsPreview(null);
-    }
+    let cancelled = false;
+    (async () => {
+      if (wsBook && wsChapter > 0 && wsVerse > 0 && wsTransl) {
+        try {
+          const version = getVersionById(wsTransl);
+          const bibleData = await version.getData();
+          if (cancelled) return;
+          const text = bibleData
+            ? getVerseText(wsBook, wsChapter, wsVerse, bibleData)
+            : getVerseText(wsBook, wsChapter, wsVerse);
+          setWsPreview(text);
+        } catch {
+          if (!cancelled) setWsPreview(null);
+        }
+      } else {
+        setWsPreview(null);
+      }
+    })();
+    return () => { cancelled = true; };
   }, [wsBook, wsChapter, wsVerse, wsTransl]);
-
-  // Derive display values
-  const displayTitle =
-    entry?.shortDefinition || entry?.originalWord || surfaceText || "Word Study";
-  const displayWord = entry?.originalWord || "";
-  const displayTransliteration = entry?.transliteration || "";
-  const displayLanguage = entry?.language || "";
-  const displayShortDef = entry?.shortDefinition || "";
-  const displayFullDef = entry?.fullDefinition || "";
-  const displayPartOfSpeech = entry?.partOfSpeech || "";
-  const displayGrammaticalCase = entry?.grammaticalCase || "";
-  const displayGender = entry?.gender || "";
-  const displayNumber = entry?.number || "";
-  const displayUsageCount = entry?.usageCount;
-  const displayCrossReferences = entry?.crossReferences || "";
-  const displayAdminExplanation = entry?.adminExplanation || "";
-  const displayStrongsId = entry?.strongsId || strongsId || "";
-  const displayVerseCount = entry?.verseCount || verseAttachments?.length || 0;
-  const displayVerseReferences: VerseRef[] = entry?.verseReferences || verseAttachments || [];
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -441,10 +521,23 @@ export default function WordDetailSheet({
 
               {/* Explanation (shortDefinition) */}
               <div className="rounded-lg bg-primary/5 border border-primary/20 p-4">
-                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">
-                  What It Means
-                </p>
-                <p className="text-sm font-medium text-foreground leading-6">
+                <div className="flex items-center justify-between mb-1.5">
+                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                    What It Means
+                  </p>
+                  <button
+                    onClick={copyDefinition}
+                    title={copiedDefinition ? "Copied!" : "Copy definition"}
+                    className="shrink-0 w-6 h-6 flex items-center justify-center rounded-md text-muted-foreground/30 hover:text-primary hover:bg-primary/10 transition-all -mr-1"
+                  >
+                    {copiedDefinition ? (
+                      <Check className="w-3.5 h-3.5 text-green-500" />
+                    ) : (
+                      <Copy className="w-3.5 h-3.5" />
+                    )}
+                  </button>
+                </div>
+                <p className="text-sm font-medium text-foreground leading-6 pr-6">
                   {displayShortDef}
                 </p>
               </div>
@@ -531,32 +624,49 @@ export default function WordDetailSheet({
                       const refStr = ref.verse
                         ? `${ref.bookName} ${ref.chapter}:${ref.verse}`
                         : `${ref.bookName} ${ref.chapter}`;
+                      const bibleReaderUrl = `/bible-reader?book=${encodeURIComponent(ref.bookName)}&chapter=${ref.chapter}${ref.verse ? `&verse=${ref.verse}` : ""}`;
                       return (
-                        <button
+                        <div
                           key={i}
-                          onClick={() => {
-                            onOpenChange(false);
-                            navigate(
-                              `/lab/dictionary?book=${encodeURIComponent(ref.bookName)}&chapter=${ref.chapter}${ref.verse ? `&verse=${ref.verse}` : ""}`,
-                            );
-                          }}
-                          className="w-full text-left flex items-center gap-2 border-l-2 border-emerald-300 dark:border-emerald-700 pl-3 py-1 hover:bg-muted/30 rounded-r-md transition-colors group"
+                          className="group flex items-center gap-1 border-l-2 border-emerald-300 dark:border-emerald-700 pl-3 py-1 hover:bg-muted/30 rounded-r-md transition-colors"
                         >
-                          <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 group-hover:text-emerald-700 dark:group-hover:text-emerald-300">
-                            {refStr}
-                          </span>
-                          {ref.surfaceText && (
-                            <span className="text-[10px] text-muted-foreground/60 italic">
-                              — {ref.surfaceText}
+                          <button
+                            onClick={() => {
+                              onOpenChange(false);
+                              navigate(
+                                `/lab/dictionary?book=${encodeURIComponent(ref.bookName)}&chapter=${ref.chapter}${ref.verse ? `&verse=${ref.verse}` : ""}`,
+                              );
+                            }}
+                            className="flex-1 text-left flex items-center gap-2 min-h-[32px]"
+                          >
+                            <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 group-hover:text-emerald-700 dark:group-hover:text-emerald-300">
+                              {refStr}
                             </span>
-                          )}
-                          {ref.adminExplanation && (
-                            <span className="text-[9px] text-muted-foreground/40 ml-auto truncate max-w-[120px]">
-                              {ref.adminExplanation}
-                            </span>
-                          )}
-                          <ChevronRight className="w-3 h-3 text-muted-foreground/20 group-hover:text-muted-foreground/50 shrink-0 transition-colors" />
-                        </button>
+                            {ref.surfaceText && (
+                              <span className="text-[10px] text-muted-foreground/60 italic truncate max-w-[80px] sm:max-w-[120px]">
+                                — {ref.surfaceText}
+                              </span>
+                            )}
+                            {ref.adminExplanation && (
+                              <span className="text-[9px] text-muted-foreground/40 ml-auto truncate max-w-[80px] hidden sm:inline">
+                                {ref.adminExplanation}
+                              </span>
+                            )}
+                          </button>
+
+                          {/* Read in Bible */}
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onOpenChange(false);
+                              navigate(bibleReaderUrl);
+                            }}
+                            title={`Read ${refStr} in Bible Reader`}
+                            className="shrink-0 w-7 h-7 flex items-center justify-center rounded-md text-muted-foreground/30 hover:text-primary hover:bg-primary/10 transition-all opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
+                          >
+                            <BookOpen className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
                       );
                     })}
                   </div>
@@ -566,10 +676,23 @@ export default function WordDetailSheet({
               {/* Admin Explanation (study note) */}
               {displayAdminExplanation && (
                 <div className="rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200/30 p-3">
-                  <p className="text-[10px] font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider mb-1">
-                    Study Note
-                  </p>
-                  <p className="text-xs text-amber-800/80 dark:text-amber-300/80">
+                  <div className="flex items-center justify-between mb-1">
+                    <p className="text-[10px] font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider">
+                      Study Note
+                    </p>
+                    <button
+                      onClick={copyStudyNote}
+                      title={copiedStudyNote ? "Copied!" : "Copy study note"}
+                      className="shrink-0 w-6 h-6 flex items-center justify-center rounded-md text-amber-500/50 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-500/10 transition-all"
+                    >
+                      {copiedStudyNote ? (
+                        <Check className="w-3.5 h-3.5" />
+                      ) : (
+                        <Copy className="w-3.5 h-3.5" />
+                      )}
+                    </button>
+                  </div>
+                  <p className="text-xs text-amber-800/80 dark:text-amber-300/80 pr-6">
                     {displayAdminExplanation}
                   </p>
                 </div>
@@ -590,12 +713,36 @@ export default function WordDetailSheet({
                 </div>
               )}
 
+              {/* Action: Open in Word Study Dialog */}
+              {displayStrongsId && (
+                <div className="pt-3 border-t border-border/40 space-y-1">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="w-full gap-2 text-xs text-muted-foreground hover:text-foreground"
+                    onClick={() => setShowWordDialog(true)}
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    Open in Word Study Dialog
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="w-full gap-2 text-xs text-muted-foreground hover:text-primary"
+                    onClick={() => setShowComparison(true)}
+                  >
+                    <Shuffle className="w-3.5 h-3.5" />
+                    Compare with Another Word
+                  </Button>
+                </div>
+              )}
+
               {/* View all words in verse — navigates to LabDictionary */}
               {verseRef && (() => {
                 const parsed = parseRef(verseRef);
                 if (!parsed) return null;
                 return (
-                  <div className="pt-3 border-t border-border/40">
+                  <div>
                     <Button
                       size="sm"
                       variant="ghost"
@@ -626,6 +773,59 @@ export default function WordDetailSheet({
           )}
         </div>
       </SheetContent>
+
+      {/* Word Study Dialog — opens as a centered modal on top of the sheet */}
+      <WordStudyDialog
+        open={showWordDialog}
+        onOpenChange={setShowWordDialog}
+        strongsId={displayStrongsId || null}
+        surfaceText={surfaceText || displayShortDef || undefined}
+        verseRef={verseRef || undefined}
+      />
+
+      {/* Word Comparison Dialog — compare two Strong's entries side by side */}
+      <WordComparisonDialog
+        open={showComparison}
+        onOpenChange={setShowComparison}
+        primaryStrongsId={displayStrongsId || null}
+        primaryLabel={surfaceText || displayShortDef || displayStrongsId || undefined}
+      />
+
+      {/* Keyboard shortcuts overlay */}
+      {showShortcuts && (
+        <div
+          className="fixed inset-0 z-[70] flex items-center justify-center"
+          onClick={() => setShowShortcuts(false)}
+        >
+          <div
+            className="bg-popover/95 backdrop-blur-sm border border-border/60 rounded-xl shadow-2xl p-4 w-64"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2.5">
+              Keyboard Shortcuts
+            </h4>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-foreground/70">Open Word Study Dialog</span>
+                <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono font-bold">D</kbd>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-foreground/70">Show shortcuts</span>
+                <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono font-bold">?</kbd>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-foreground/70">Close sheet</span>
+                <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono font-bold">Esc</kbd>
+              </div>
+            </div>
+            <div className="mt-2.5 pt-2 border-t border-border/40">
+              <p className="text-[10px] text-muted-foreground/50 text-center">
+                Press <kbd className="px-1 bg-muted rounded text-[9px] font-mono font-bold">?</kbd> or click outside to dismiss
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </Sheet>
   );
 }

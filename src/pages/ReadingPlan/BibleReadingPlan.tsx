@@ -84,13 +84,13 @@ const DIFFICULTY_KEYS: Record<string, string> = {
 const DIFFICULTY_COLOR: Record<string, { bar: string; badge: string }> = {
   easy: {
     bar: "bg-emerald-500",
-    badge: "bg-emerald-50 text-emerald-700 border-emerald-200",
+    badge: "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/40",
   },
   medium: {
     bar: "bg-amber-500",
-    badge: "bg-amber-50 text-amber-700 border-amber-200",
+    badge: "bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800/40",
   },
-  hard: { bar: "bg-red-500", badge: "bg-red-50 text-red-700 border-red-200" },
+  hard: { bar: "bg-red-500", badge: "bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800/40" },
 };
 
 type Tab = "progress" | "browse";
@@ -236,7 +236,7 @@ const BibleReadingPlan = () => {
         setMyPlans(startedPlans);
 
         // Active (in-progress) plans - not completed
-        const active = startedPlans.filter((p) => !(p.isCompleted || p.completed));
+        const active = startedPlans.filter((p) => !(p.is_completed || p.completed));
         setActivePlans(active);
 
         setUserProgress(Object.values(userProgressMap));
@@ -339,10 +339,10 @@ const BibleReadingPlan = () => {
           <div className="w-16 h-16 rounded-2xl bg-teal-50 flex items-center justify-center mb-4">
             <BookOpen className="w-8 h-8 text-teal-500" />
           </div>
-          <h3 className="text-xl font-bold text-stone-800 mb-2">
+          <h3 className="text-xl font-bold text-foreground mb-2">
             {t.readingPlan?.noActivePlan || 'No active plan yet'}
           </h3>
-          <p className="text-sm text-stone-500 text-center mb-6 max-w-xs">
+          <p className="text-sm text-muted-foreground text-center mb-6 max-w-xs">
             {t.readingPlan?.startPlanDesc || 'Head over to Browse Plans and start your first reading plan.'}
           </p>
           <button
@@ -408,7 +408,7 @@ const BibleReadingPlan = () => {
           <>
             <div className="flex items-center gap-2 pt-4">
               <Trophy className="w-4 h-4 text-emerald-500" />
-              <span className="text-sm font-semibold text-stone-600">
+              <span className="text-sm font-semibold text-muted-foreground">
                 {t.readingPlan?.completedPlans || 'Completed Plans'}
               </span>
             </div>
@@ -454,7 +454,7 @@ const BibleReadingPlan = () => {
   // ── Tab: Browse Plans ────────────────────────
   const renderBrowseTab = () => (
     <div className="space-y-3">
-      <p className="text-sm text-stone-500 mb-4">
+      <p className="text-sm text-muted-foreground mb-4">
         {t.readingPlan?.choosePlan || 'Choose a plan that fits your spiritual journey'}
       </p>
 
@@ -502,7 +502,7 @@ const BibleReadingPlan = () => {
   return (
     <Gate tier="legacy_sower" featureName="Reading Plans" featureDescription="Track your daily Bible reading progress with personalized reading plans.">
     <div
-      className="min-h-screen bg-[#f7f5f2]"
+      className="min-h-screen bg-background"
       dir={isRtl ? 'rtl' : 'ltr'}
       style={{ fontFamily: "'DM Sans', 'Inter', system-ui, sans-serif" }}
     >
@@ -517,12 +517,12 @@ const BibleReadingPlan = () => {
             </div>
             <div>
               <h1
-                className="text-2xl font-bold text-stone-800 tracking-tight leading-none"
+                className="text-2xl font-bold text-foreground tracking-tight leading-none"
                 style={{ fontFamily: "'Fraunces', Georgia, serif" }}
               >
                 {t.readingPlan?.readingPlans || 'Reading Plans'}
               </h1>
-              <p className="text-stone-400 text-xs mt-0.5 font-medium">
+              <p className="text-muted-foreground/70 text-xs mt-0.5 font-medium">
                 {t.readingPlan?.buildHabit || 'Build a daily Bible habit'}
               </p>
             </div>
@@ -535,20 +535,20 @@ const BibleReadingPlan = () => {
             {
               label: t.readingPlan?.totalPlans || 'Total Plans',
               value: stats.total,
-              color: "text-teal-700",
-              bg: "bg-teal-50 border-teal-100",
+              color: "text-teal-700 dark:text-teal-400",
+              bg: "bg-teal-50 dark:bg-teal-950/30 border-teal-100 dark:border-teal-800/40",
             },
             {
               label: t.readingPlan?.activeLabel || 'Active',
               value: stats.active,
-              color: "text-emerald-700",
-              bg: "bg-emerald-50 border-emerald-100",
+              color: "text-emerald-700 dark:text-emerald-400",
+              bg: "bg-emerald-50 dark:bg-emerald-950/30 border-emerald-100 dark:border-emerald-800/40",
             },
             {
               label: t.readingPlan?.quizEnabled || 'Quiz Enabled',
               value: stats.withQuiz,
-              color: "text-violet-700",
-              bg: "bg-violet-50 border-violet-100",
+              color: "text-violet-700 dark:text-violet-400",
+              bg: "bg-violet-50 dark:bg-violet-950/30 border-violet-100 dark:border-violet-800/40",
             },
           ].map((s) => (
             <div
@@ -561,7 +561,7 @@ const BibleReadingPlan = () => {
               >
                 {s.value}
               </p>
-              <p className="text-xs text-stone-500 mt-1 font-semibold">
+              <p className="text-xs text-muted-foreground mt-1 font-semibold">
                 {s.label}
               </p>
             </div>
@@ -569,14 +569,14 @@ const BibleReadingPlan = () => {
         </div>
 
         {/* Tab row */}
-        <div className="flex border-b border-stone-200">
+        <div className="flex border-b border-border">
           <button
             onClick={() => setActiveTab("progress")}
             className={cn(
               "flex-1 flex items-center justify-center gap-2 px-4 py-3 border-b-2 font-semibold transition-colors",
               activeTab === "progress"
                 ? "border-teal-500 text-teal-700"
-                : "border-transparent text-stone-500 hover:text-stone-700"
+                : "border-transparent text-muted-foreground hover:text-foreground/80"
             )}
           >
             <TrendingUp className="w-4 h-4" />
@@ -593,7 +593,7 @@ const BibleReadingPlan = () => {
               "flex-1 flex items-center justify-center gap-2 px-4 py-3 border-b-2 font-semibold transition-colors",
               activeTab === "browse"
                 ? "border-teal-500 text-teal-700"
-                : "border-transparent text-stone-500 hover:text-stone-700"
+                : "border-transparent text-muted-foreground hover:text-foreground/80"
             )}
           >
             <LayoutList className="w-4 h-4" />
@@ -616,11 +616,11 @@ const BibleReadingPlan = () => {
       {/* Start Plan Modal */}
       {startPlanModalVisible && pendingPlan && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl">
-            <h3 className="text-lg font-bold text-stone-800 mb-2">
+          <div className="bg-card rounded-2xl p-6 max-w-sm w-full shadow-xl">
+            <h3 className="text-lg font-bold text-foreground mb-2">
               {t.readingPlan?.startReadingPlan || 'Start Reading Plan'}
             </h3>
-            <p className="text-sm text-stone-500 mb-6">
+            <p className="text-sm text-muted-foreground mb-6">
               {(t.readingPlan?.startPlanConfirm || 'Do you want to start "{title}"? This will set your daily reading schedule and track your progress.').replace('{title}', pendingPlan.title)}
             </p>
             <div className="flex gap-3">
@@ -629,7 +629,7 @@ const BibleReadingPlan = () => {
                   setStartPlanModalVisible(false);
                   setPendingPlan(null);
                 }}
-                className="flex-1 px-4 py-2.5 rounded-xl border border-stone-200 text-stone-600 font-semibold hover:bg-stone-50 transition-colors"
+                className="flex-1 px-4 py-2.5 rounded-xl border border-border text-muted-foreground font-semibold hover:bg-muted transition-colors"
               >
                 {t.common?.cancel || 'Cancel'}
               </button>
@@ -652,12 +652,12 @@ const BibleReadingPlan = () => {
       {/* Remove Plan Modal */}
       {removePlanModalVisible && planToRemove && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl">
+          <div className="bg-card rounded-2xl p-6 max-w-sm w-full shadow-xl">
             <h3 className="text-lg font-bold text-red-600 mb-2 flex items-center gap-2">
               <Trash2 className="w-5 h-5" />
               {t.readingPlan?.removeTitle || 'Remove Plan'}
             </h3>
-            <p className="text-sm text-stone-500 mb-6">
+            <p className="text-sm text-muted-foreground mb-6">
               {(t.readingPlan?.removeConfirmDesc || 'Are you sure you want to remove "{title}"? Your progress will be lost.').replace('{title}', planToRemove.title)}
             </p>
             <div className="flex gap-3">
@@ -666,7 +666,7 @@ const BibleReadingPlan = () => {
                   setRemovePlanModalVisible(false);
                   setPlanToRemove(null);
                 }}
-                className="flex-1 px-4 py-2.5 rounded-xl border border-stone-200 text-stone-600 font-semibold hover:bg-stone-50 transition-colors"
+                className="flex-1 px-4 py-2.5 rounded-xl border border-border text-muted-foreground font-semibold hover:bg-muted transition-colors"
               >
                 {t.readingPlan?.keepIt || 'Keep It'}
               </button>
@@ -723,10 +723,10 @@ function ActivePlanCard({
   return (
     <div
       className={cn(
-        "bg-white rounded-2xl border shadow-sm overflow-hidden",
+        "bg-card rounded-2xl border shadow-sm overflow-hidden",
         isCompleted
-          ? "border-emerald-200"
-          : "border-stone-200 hover:border-stone-300"
+          ? "border-emerald-200 dark:border-emerald-800/40"
+          : "border-border hover:border-border"
       )}
     >
       {/* Colored left stripe */}
@@ -740,7 +740,7 @@ function ActivePlanCard({
           <div className="flex items-start justify-between gap-4 mb-4">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap mb-1">
-                <h3 className="font-bold text-stone-800 text-lg">
+                <h3 className="font-bold text-foreground text-lg">
                   {plan.title}
                 </h3>
                 {isCompleted && (
@@ -750,12 +750,12 @@ function ActivePlanCard({
                   </span>
                 )}
               </div>
-              <p className="text-sm text-stone-500">
+              <p className="text-sm text-muted-foreground">
                 {(t.readingPlan?.daysDone || '{completed} of {total} days done').replace('{completed}', String(done)).replace('{total}', String(totalDays))}
               </p>
               <button
                 onClick={onRemove}
-                className="mt-3 text-xs text-stone-400 hover:text-red-500 transition-colors"
+                className="mt-3 text-xs text-muted-foreground/70 hover:text-red-500 transition-colors"
               >
                 {t.readingPlan?.removePlanLink || 'Remove plan'}
               </button>
@@ -765,38 +765,38 @@ function ActivePlanCard({
           </div>
 
           {/* Progress bar */}
-          <div className="h-1.5 bg-stone-100 rounded-full overflow-hidden mb-2">
+          <div className="h-1.5 bg-muted rounded-full overflow-hidden mb-2">
             <div
               className="h-full rounded-full"
               style={{ width: `${pct}%`, backgroundColor: accentColor }}
             />
           </div>
-          <p className="text-xs text-stone-400 mb-4">{(t.readingPlan?.pctComplete || '{pct}% complete').replace('{pct}', String(pct))}</p>
+          <p className="text-xs text-muted-foreground/70 mb-4">{(t.readingPlan?.pctComplete || '{pct}% complete').replace('{pct}', String(pct))}</p>
 
           {/* Stats row */}
-          <div className="grid grid-cols-3 gap-4 bg-stone-50 rounded-xl p-3 mb-4">
+          <div className="grid grid-cols-3 gap-4 bg-muted rounded-xl p-3 mb-4">
             <div className="text-center">
               <div className="flex items-center justify-center gap-1 text-amber-500 mb-1">
                 <Flame className="w-4 h-4" />
-                <span className="font-bold text-stone-800">{streak}d</span>
+                <span className="font-bold text-foreground">{streak}d</span>
               </div>
-              <p className="text-xs text-stone-500">{t.readingPlan?.streak || 'Streak'}</p>
+              <p className="text-xs text-muted-foreground">{t.readingPlan?.streak || 'Streak'}</p>
             </div>
-            <div className={cn("text-center", isRtl ? "border-r border-stone-200" : "border-l border-stone-200")}>
+            <div className={cn("text-center", isRtl ? "border-r border-border" : "border-l border-border")}>
               <div className="flex items-center justify-center gap-1 text-emerald-500 mb-1">
                 <CheckCircle className="w-4 h-4" />
-                <span className="font-bold text-stone-800">{done}</span>
+                <span className="font-bold text-foreground">{done}</span>
               </div>
-              <p className="text-xs text-stone-500">{t.readingPlan?.done || 'Done'}</p>
+              <p className="text-xs text-muted-foreground">{t.readingPlan?.done || 'Done'}</p>
             </div>
-            <div className={cn("text-center", isRtl ? "border-r border-stone-200" : "border-l border-stone-200")}>
-              <div className="flex items-center justify-center gap-1 text-stone-500 mb-1">
+            <div className={cn("text-center", isRtl ? "border-r border-border" : "border-l border-border")}>
+              <div className="flex items-center justify-center gap-1 text-muted-foreground mb-1">
                 <BookOpen className="w-4 h-4" />
-                <span className="font-bold text-stone-800">
+                <span className="font-bold text-foreground">
                   {lastDay ? (t.readingPlan?.dayLabel || 'Day {day}').replace('{day}', String(lastDay)) : "—"}
                 </span>
               </div>
-              <p className="text-xs text-stone-500">{t.readingPlan?.lastRead || 'Last read'}</p>
+              <p className="text-xs text-muted-foreground">{t.readingPlan?.lastRead || 'Last read'}</p>
             </div>
           </div>
 
@@ -805,14 +805,14 @@ function ActivePlanCard({
             <div className="flex gap-3">
               <button
                 onClick={onSummary}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-stone-200 text-stone-700 font-semibold hover:bg-stone-50 transition-colors"
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-border text-foreground/80 font-semibold hover:bg-muted transition-colors"
               >
                 <Eye className="w-4 h-4" />
                 {t.readingPlan?.summary || 'Summary'}
               </button>
               <button
                 onClick={onRead}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-stone-100 text-stone-700 font-semibold hover:bg-stone-200 transition-colors"
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-muted text-foreground/80 font-semibold hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors"
               >
                 <Play className="w-4 h-4" />
                 {t.readingPlan?.revisit || 'Revisit'}
@@ -821,7 +821,7 @@ function ActivePlanCard({
           ) : (
             <button
               onClick={onRead}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-stone-100 text-stone-700 font-semibold hover:bg-stone-200 transition-colors"
+              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-muted text-foreground/80 font-semibold hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors"
             >
               <Play className="w-4 h-4" />
               {done === 0
@@ -858,16 +858,16 @@ function BrowsePlanCard({
   const { t, isRtl } = useLanguage();
   const totalDays = plan.totalDays || plan.total_days || 1;
   const diffColor =
-    DIFFICULTY_COLOR[plan.difficulty]?.badge || "bg-stone-100 text-stone-600";
+    DIFFICULTY_COLOR[plan.difficulty]?.badge || "bg-muted text-muted-foreground";
 
   return (
     <button
       onClick={onPress}
       className={cn(
-        "w-full bg-white rounded-2xl border transition-all hover:shadow-md", isRtl ? "text-right" : "text-left",
+        "w-full bg-card rounded-2xl border transition-all hover:shadow-md", isRtl ? "text-right" : "text-left",
         isActive || isCompleted
-          ? "border-teal-200"
-          : "border-stone-200 hover:border-stone-300"
+          ? "border-teal-200 dark:border-teal-800/40"
+          : "border-border hover:border-border"
       )}
     >
       {(isActive || isCompleted) && (
@@ -886,7 +886,7 @@ function BrowsePlanCard({
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap mb-1">
-            <h3 className="font-bold text-stone-800">{plan.title}</h3>
+            <h3 className="font-bold text-foreground">{plan.title}</h3>
             {isCompleted && (
               <span className="text-xs px-2 py-1 rounded-full bg-emerald-100 text-emerald-700 font-semibold">
                 {t.readingPlan?.badgeDone || 'Done'}
@@ -899,7 +899,7 @@ function BrowsePlanCard({
             )}
           </div>
 
-          <p className="text-sm text-stone-500 line-clamp-2 mb-3">
+          <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
             {plan.description}
           </p>
 
@@ -912,10 +912,10 @@ function BrowsePlanCard({
             >
               {t.readingPlan?.[DIFFICULTY_KEYS[plan.difficulty]] || plan.difficulty}
             </span>
-            <span className="text-xs px-2 py-1 rounded-lg font-medium bg-stone-100 text-stone-600">
+            <span className="text-xs px-2 py-1 rounded-lg font-medium bg-muted text-muted-foreground">
               {t.readingPlan?.[CATEGORY_KEYS[plan.category]] || plan.category}
             </span>
-            <span className="text-xs px-2 py-1 rounded-lg font-medium bg-stone-100 text-stone-600">
+            <span className="text-xs px-2 py-1 rounded-lg font-medium bg-muted text-muted-foreground">
               {totalDays} {t.readingPlan?.days || 'days'}
             </span>
             {plan.questionsEnabled && (
@@ -926,9 +926,9 @@ function BrowsePlanCard({
           </div>
 
           {hasStarted && (
-            <div className="bg-stone-50 rounded-lg p-3">
+            <div className="bg-muted rounded-lg p-3">
               <div className="flex justify-between text-sm mb-2">
-                <span className="text-stone-500">
+                <span className="text-muted-foreground">
                   {done}/{totalDays} · {pct}%
                 </span>
               </div>
@@ -945,7 +945,7 @@ function BrowsePlanCard({
           )}
         </div>
 
-        <ChevronRight className={cn("w-5 h-5 text-stone-400 shrink-0", isRtl && "rotate-180")} />
+        <ChevronRight className={cn("w-5 h-5 text-muted-foreground/70 shrink-0", isRtl && "rotate-180")} />
       </div>
     </button>
   );

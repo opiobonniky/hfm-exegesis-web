@@ -5,7 +5,6 @@ import {
   BookMarked,
   Plus,
   LogOut,
-  ChevronDown,
   Users,
   BookText,
   Home,
@@ -17,11 +16,13 @@ import {
   Search as SearchIcon,
   Sparkles,
   Microscope,
+  HelpCircle,
+  CalendarDays,
   CreditCard,
 } from "lucide-react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { useEffect, useState } from "react";
+
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/components/languages/languageProvider";
 import {
@@ -31,11 +32,7 @@ import {
   SidebarFooter,
   useSidebar,
 } from "@/components/ui/sidebar";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+
 import { routes } from "./Routes/routes";
 import logoImage from "@/assets/logos/exegesis_bg_rm.png";
 
@@ -56,14 +53,14 @@ const adminNavItems: NavItem[] = [
   { title: "sidebar.activity", url: routes.systemUsers.path, icon: Users },
   { title: "sidebar.bible", url: routes.bibleReader.path, icon: BookText },
   { title: "sidebar.dailyVerse", url: routes.dailyVerse.path, icon: Sun },
-  { title: "sidebar.devotions", url: routes.dailyDevotions.path, icon: SproutIcon },
+  // { title: "sidebar.devotions", url: routes.dailyDevotions.path, icon: SproutIcon },
   { title: "sidebar.explanations", url: routes.verseExplanations.path, icon: BookMarked },
-  { title: "sidebar.studyTools", url: routes.adminStudyTools.path, icon: BookText },
   { title: "sidebar.readingPlans", url: routes.readingPlans.path, icon: BookOpen },
   { title: "sidebar.myActivity", url: routes.myActivity.path, icon: Highlighter },
-];
-
-const journalSubItems: NavItem[] = [
+  { title: "sidebar.studyTools", url: routes.adminStudyTools.path, icon: BookText },
+  { title: "sidebar.triviaAdmin", url: routes.adminTrivia.path, icon: HelpCircle },
+  { title: "sidebar.dailyContentAdmin", url: routes.adminDailyContent.path, icon: CalendarDays },
+  { title: "sidebar.subscriptionsAdmin", url: routes.adminSubscriptions.path, icon: CreditCard },
   { title: "sidebar.journal", url: routes.journal.path, icon: PenLine },
   { title: "sidebar.journalPrompts", url: routes.journalPrompts.path, icon: Lightbulb },
   { title: "sidebar.journalTemplates", url: routes.journalTemplates.path, icon: LayoutTemplate },
@@ -104,10 +101,12 @@ function PillNavItem({
   item,
   isActive,
   collapsed,
+  onNavClick,
 }: {
   item: NavItem;
   isActive: boolean;
   collapsed: boolean;
+  onNavClick?: () => void;
 }) {
   const label = getNavTitle(useLanguage().t, item.title);
   const Icon = item.icon;
@@ -115,6 +114,7 @@ function PillNavItem({
   return (
     <NavLink
       to={item.url}
+      onClick={onNavClick}
       className={cn(
         "group flex items-center gap-3 w-full transition-all duration-200",
         collapsed ? "justify-center px-0" : "px-1",
@@ -128,8 +128,8 @@ function PillNavItem({
               "flex items-center w-full transition-all duration-200 rounded-xl",
               collapsed ? "justify-center p-1" : "gap-3 p-2",
               active
-                ? "bg-accent/10 dark:bg-accent/15 shadow-sm"
-                : "hover:bg-accent/5 dark:hover:bg-accent/8",
+                ? "bg-accent/10 dark:bg-accent/15 shadow-sm cathedral:bg-primary/10 cathedral:dark:bg-primary/15"
+                : "hover:bg-accent/5 dark:hover:bg-accent/8 cathedral:hover:bg-primary/5 cathedral:dark:hover:bg-primary/8",
             )}
           >
             {/* Icon container */}
@@ -139,8 +139,8 @@ function PillNavItem({
                 "rounded-lg",
                 collapsed ? "w-9 h-9" : "w-8 h-8",
                 active
-                  ? "bg-accent text-accent-foreground shadow-[0_2px_8px_rgba(232,163,23,0.25)]"
-                  : "bg-transparent group-hover:bg-accent/10 dark:group-hover:bg-accent/15",
+                  ? "bg-accent text-accent-foreground shadow-[0_2px_8px_rgba(232,163,23,0.25)] cathedral:bg-primary cathedral:text-primary-foreground cathedral:shadow-[0_2px_8px_hsl(var(--primary)/0.25)]"
+                  : "bg-transparent group-hover:bg-accent/10 dark:group-hover:bg-accent/15 cathedral:group-hover:bg-primary/10 cathedral:dark:group-hover:bg-primary/15",
               )}
             >
               <Icon
@@ -148,8 +148,8 @@ function PillNavItem({
                   "transition-all duration-200",
                   collapsed ? "w-4 h-4" : "w-3.5 h-3.5",
                   active
-                    ? "text-accent-foreground"
-                    : "text-foreground/40 group-hover:text-accent/80 dark:group-hover:text-accent/70",
+                    ? "text-accent-foreground cathedral:text-primary-foreground"
+                    : "text-foreground/40 group-hover:text-accent/80 dark:group-hover:text-accent/70 cathedral:text-foreground/40 cathedral:group-hover:text-primary/80 cathedral:dark:group-hover:text-primary/70",
                   !active && collapsed && "group-hover:scale-110",
                 )}
               />
@@ -161,8 +161,8 @@ function PillNavItem({
                 className={cn(
                   "text-sm transition-all duration-200 truncate",
                   active
-                    ? "font-semibold text-foreground"
-                    : "font-normal text-foreground/60 group-hover:text-foreground/80",
+                    ? "font-semibold text-foreground cathedral:text-foreground"
+                    : "font-normal text-foreground/60 group-hover:text-foreground/80 cathedral:text-foreground/60 cathedral:group-hover:text-foreground/80",
                 )}
               >
                 {label}
@@ -171,7 +171,7 @@ function PillNavItem({
 
             {/* Active dot */}
             {active && !collapsed && (
-              <span className="ml-auto w-1 h-1 rounded-full bg-accent shrink-0 shadow-[0_0_4px_rgba(232,163,23,0.4)]" />
+              <span className="ml-auto w-1 h-1 rounded-full bg-accent shrink-0 shadow-[0_0_4px_rgba(232,163,23,0.4)] cathedral:bg-primary cathedral:shadow-[0_0_4px_hsl(var(--primary)/0.4)]" />
             )}
           </div>
         );
@@ -183,8 +183,8 @@ function PillNavItem({
 /* ── Section Divider ────────────────────────────────────────────────────── */
 
 function SectionDivider({ collapsed }: { collapsed: boolean }) {
-  if (collapsed) return <div className="mx-auto my-3 w-4 h-px bg-border/50" />;
-  return <div className="mx-3 my-3 h-px bg-gradient-to-r from-border/60 via-border/30 to-transparent" />;
+  if (collapsed) return <div className="mx-auto my-3 w-4 h-px bg-border/50 cathedral:bg-primary/30" />;
+  return <div className="mx-3 my-3 h-px bg-gradient-to-r from-border/60 via-border/30 to-transparent cathedral:from-primary/30 cathedral:via-primary/15 cathedral:to-transparent" />;
 }
 
 /* ── Collapsed Tooltip Button ───────────────────────────────────────────── */
@@ -225,7 +225,7 @@ function getBibleNavUrl(): string {
   return routes.bibleLibrary.path;
 }
 
-function BibleNavItem({ collapsed }: { collapsed: boolean }) {
+function BibleNavItem({ collapsed, onNavClick }: { collapsed: boolean; onNavClick?: () => void }) {
   const navigate = useNavigate();
   const location = useLocation();
   const t = useLanguage().t;
@@ -237,7 +237,7 @@ function BibleNavItem({ collapsed }: { collapsed: boolean }) {
 
   return (
     <button
-      onClick={() => navigate(targetUrl)}
+      onClick={() => { navigate(targetUrl); onNavClick?.(); }}
       className={cn(
         "group flex items-center gap-3 w-full transition-all duration-200",
         collapsed ? "justify-center px-0" : "px-1",
@@ -248,8 +248,8 @@ function BibleNavItem({ collapsed }: { collapsed: boolean }) {
           "flex items-center w-full transition-all duration-200 rounded-xl",
           collapsed ? "justify-center p-1" : "gap-3 p-2",
           active
-            ? "bg-accent/10 dark:bg-accent/15 shadow-sm"
-            : "hover:bg-accent/5 dark:hover:bg-accent/8",
+            ? "bg-accent/10 dark:bg-accent/15 shadow-sm cathedral:bg-primary/10 cathedral:dark:bg-primary/15"
+            : "hover:bg-accent/5 dark:hover:bg-accent/8 cathedral:hover:bg-primary/5 cathedral:dark:hover:bg-primary/8",
         )}
       >
         <div
@@ -258,8 +258,8 @@ function BibleNavItem({ collapsed }: { collapsed: boolean }) {
             "rounded-lg",
             collapsed ? "w-9 h-9" : "w-8 h-8",
             active
-              ? "bg-accent text-accent-foreground shadow-[0_2px_8px_rgba(232,163,23,0.25)]"
-              : "bg-transparent group-hover:bg-accent/10 dark:group-hover:bg-accent/15",
+              ? "bg-accent text-accent-foreground shadow-[0_2px_8px_rgba(232,163,23,0.25)] cathedral:bg-primary cathedral:text-primary-foreground cathedral:shadow-[0_2px_8px_hsl(var(--primary)/0.25)]"
+              : "bg-transparent group-hover:bg-accent/10 dark:group-hover:bg-accent/15 cathedral:group-hover:bg-primary/10 cathedral:dark:group-hover:bg-primary/15",
           )}
         >
           <BookText
@@ -267,8 +267,8 @@ function BibleNavItem({ collapsed }: { collapsed: boolean }) {
               "transition-all duration-200",
               collapsed ? "w-4 h-4" : "w-3.5 h-3.5",
               active
-                ? "text-accent-foreground"
-                : "text-foreground/40 group-hover:text-accent/80 dark:group-hover:text-accent/70",
+                ? "text-accent-foreground cathedral:text-primary-foreground"
+                : "text-foreground/40 group-hover:text-accent/80 dark:group-hover:text-accent/70 cathedral:text-foreground/40 cathedral:group-hover:text-primary/80 cathedral:dark:group-hover:text-primary/70",
               !active && collapsed && "group-hover:scale-110",
             )}
           />
@@ -279,8 +279,8 @@ function BibleNavItem({ collapsed }: { collapsed: boolean }) {
             className={cn(
               "text-sm transition-all duration-200 truncate",
               active
-                ? "font-semibold text-foreground"
-                : "font-normal text-foreground/60 group-hover:text-foreground/80",
+                ? "font-semibold text-foreground cathedral:text-foreground"
+                : "font-normal text-foreground/60 group-hover:text-foreground/80 cathedral:text-foreground/60 cathedral:group-hover:text-foreground/80",
             )}
           >
             {label}
@@ -288,7 +288,7 @@ function BibleNavItem({ collapsed }: { collapsed: boolean }) {
         )}
 
         {active && !collapsed && (
-          <span className="ml-auto w-1 h-1 rounded-full bg-accent shrink-0 shadow-[0_0_4px_rgba(232,163,23,0.4)]" />
+          <span className="ml-auto w-1 h-1 rounded-full bg-accent shrink-0 shadow-[0_0_4px_rgba(232,163,23,0.4)] cathedral:bg-primary cathedral:shadow-[0_0_4px_hsl(var(--primary)/0.4)]" />
         )}
       </div>
     </button>
@@ -300,22 +300,17 @@ function BibleNavItem({ collapsed }: { collapsed: boolean }) {
    ═══════════════════════════════════════════════════════════════════════════ */
 
 export function AppSidebar() {
-  const { state } = useSidebar();
+  const { state, isMobile, setOpenMobile } = useSidebar();
   const collapsed = state === "collapsed";
   const location = useLocation();
   const { userInfo, logout } = useAuth();
   const { t, isRtl } = useLanguage();
 
+  const closeMobileSidebar = () => { if (isMobile) setOpenMobile(false); };
+
   const isAdmin = userInfo?.userRole === 1;
   const mainNavItems = isAdmin ? adminNavItems : userNavItems;
   const isActive = (path: string) => location.pathname === path;
-
-  const anyJournalActive = isAdmin && journalSubItems.some((sub) => isActive(sub.url));
-  const [journalOpen, setJournalOpen] = useState(false);
-
-  useEffect(() => {
-    if (!anyJournalActive) setJournalOpen(false);
-  }, [anyJournalActive]);
 
   /* ── Render helper for nav list ── */
   const renderNavItems = (items: NavItem[]) =>
@@ -323,13 +318,13 @@ export function AppSidebar() {
       if (item.title === "sidebar.bible" && !isAdmin) {
         return (
           <li key={item.title}>
-            <BibleNavItem collapsed={collapsed} />
+            <BibleNavItem collapsed={collapsed} onNavClick={closeMobileSidebar} />
           </li>
         );
       }
       return (
         <li key={item.title}>
-          <PillNavItem item={item} isActive={isActive(item.url)} collapsed={collapsed} />
+          <PillNavItem item={item} isActive={isActive(item.url)} collapsed={collapsed} onNavClick={closeMobileSidebar} />
         </li>
       );
     });
@@ -342,7 +337,7 @@ export function AppSidebar() {
         return (
           <li key={item.title}>
             <CollapsedTooltipButton label={label}>
-              <BibleNavItem collapsed />
+              <BibleNavItem collapsed onNavClick={closeMobileSidebar} />
             </CollapsedTooltipButton>
           </li>
         );
@@ -350,7 +345,7 @@ export function AppSidebar() {
       return (
         <li key={item.title}>
           <CollapsedTooltipButton label={label}>
-            <PillNavItem item={item} isActive={isActive(item.url)} collapsed />
+            <PillNavItem item={item} isActive={isActive(item.url)} collapsed onNavClick={closeMobileSidebar} />
           </CollapsedTooltipButton>
         </li>
       );
@@ -360,7 +355,9 @@ export function AppSidebar() {
     <>
       <style>{`
         /* ── Sidebar core chrome ── */
-        [data-sidebar="sidebar"] {
+        /* Only override sidebar accent in cathedral mode (gold accents).
+           Light and dark modes use their own --sidebar-accent from index.css */
+        .cathedral [data-sidebar="sidebar"] {
           --sidebar-accent: hsl(var(--accent));
           --sidebar-accent-foreground: hsl(var(--accent-foreground));
         }
@@ -453,129 +450,6 @@ export function AppSidebar() {
               {collapsed ? renderCollapsedNavItems(mainNavItems) : renderNavItems(mainNavItems)}
             </ul>
           </nav>
-
-          {/* ── Journal (admin collapsible) ── */}
-          {isAdmin && (
-            <>
-              <SectionDivider collapsed={collapsed} />
-              <div className={collapsed ? "mb-2" : "mb-1"}>
-                {collapsed ? (
-                  <div className="flex flex-col items-center gap-1">
-                    <CollapsedTooltipButton label={getNavTitle(t, "sidebar.journal")}>
-                      <div
-                        onClick={() => setJournalOpen(!journalOpen)}
-                        className={cn(
-                          "flex items-center justify-center w-9 h-9 rounded-lg cursor-pointer transition-all duration-200",
-                          anyJournalActive
-                            ? "bg-accent text-accent-foreground shadow-[0_2px_8px_rgba(232,163,23,0.25)]"
-                            : "text-foreground/40 hover:bg-accent/10 hover:text-accent/80",
-                        )}
-                      >
-                        <PenLine className="w-4 h-4" />
-                      </div>
-                    </CollapsedTooltipButton>
-                    {journalOpen && (
-                      <div className="flex flex-col items-center gap-1 mt-1 animate-sub-menu">
-                        {journalSubItems.map((sub) => {
-                          const subLabel = getNavTitle(t, sub.title);
-                          const Icon = sub.icon;
-                          return (
-                            <CollapsedTooltipButton key={sub.title} label={subLabel}>
-                              <NavLink
-                                to={sub.url}
-                                className={cn(
-                                  "flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200",
-                                  isActive(sub.url)
-                                    ? "bg-accent/15 text-accent"
-                                    : "text-foreground/30 hover:text-foreground/60 hover:bg-accent/8",
-                                )}
-                              >
-                                <Icon className="w-3.5 h-3.5" />
-                              </NavLink>
-                            </CollapsedTooltipButton>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <Collapsible
-                    open={journalOpen}
-                    onOpenChange={setJournalOpen}
-                    className="group/collapsible"
-                  >
-                    <CollapsibleTrigger asChild>
-                      <button
-                        className={cn(
-                          "flex items-center gap-3 w-full p-2 rounded-xl transition-all duration-200",
-                          anyJournalActive
-                            ? "bg-accent/10 dark:bg-accent/15 shadow-sm"
-                            : "hover:bg-accent/5 dark:hover:bg-accent/8",
-                        )}
-                      >
-                        {/* Icon container */}
-                        <div
-                          className={cn(
-                            "flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-300 shrink-0",
-                            anyJournalActive
-                              ? "bg-accent text-accent-foreground shadow-[0_2px_8px_rgba(232,163,23,0.25)]"
-                              : "bg-transparent group-hover:bg-accent/10 dark:group-hover:bg-accent/15 text-foreground/40",
-                          )}
-                        >
-                          <PenLine className="w-3.5 h-3.5" />
-                        </div>
-
-                        <span
-                          className={cn(
-                            "text-sm flex-1 text-start transition-all duration-200 truncate",
-                            anyJournalActive
-                              ? "font-semibold text-foreground"
-                              : "font-normal text-foreground/60 group-hover:text-foreground/80",
-                          )}
-                        >
-                          {getNavTitle(t, "sidebar.journal")}
-                        </span>
-
-                        <ChevronDown
-                          className={cn(
-                            "w-3.5 h-3.5 shrink-0 transition-all duration-300",
-                            "group-data-[state=open]/collapsible:rotate-180",
-                            anyJournalActive
-                              ? "text-foreground/50"
-                              : "text-foreground/20 group-hover:text-foreground/40",
-                          )}
-                        />
-                      </button>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent className="animate-sub-menu">
-                      <ul className="ml-2 mt-0.5 space-y-0.5 border-l-2 border-accent/20 pl-3">
-                        {journalSubItems.map((sub) => {
-                          const subLabel = getNavTitle(t, sub.title);
-                          const Icon = sub.icon;
-                          return (
-                            <li key={sub.title}>
-                              <NavLink
-                                to={sub.url}
-                                className={cn(
-                                  "flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 text-sm",
-                                  isActive(sub.url)
-                                    ? "bg-accent/10 text-accent font-medium"
-                                    : "text-foreground/50 hover:text-foreground/80 hover:bg-accent/5",
-                                )}
-                              >
-                                <Icon className="w-3.5 h-3.5 shrink-0" />
-                                <span>{subLabel}</span>
-                              </NavLink>
-                            </li>
-                          );
-                        })}
-                      </ul>
-                    </CollapsibleContent>
-                  </Collapsible>
-                )}
-              </div>
-            </>
-          )}
 
           {/* ── Manage / Settings section for all users ── */}
           <SectionDivider collapsed={collapsed} />

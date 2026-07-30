@@ -396,7 +396,7 @@ export default function StudyToolsSheet({
                         toolType.bgColor,
                       )}
                     >
-                      <AccordionTrigger className="px-3 py-3 hover:no-underline hover:bg-black/5 dark:hover:bg-white/5">
+                      <AccordionTrigger className="px-3 py-3 hover:no-underline hover:bg-black/5 dark:hover:bg-card/5">
                         <div className="flex items-center gap-2.5">
                           <span className={cn("shrink-0", toolType.color)}>
                             {toolType.icon}

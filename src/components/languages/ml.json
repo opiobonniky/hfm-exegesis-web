@@ -1139,6 +1139,7 @@
     "bible": "ബൈബിൾ വായനക്കാരൻ",
     "dailyVerse": "ദൈനംദിന വാക്യം",
     "dashboard": "डैशबोर्ड",
+    "adminDashboard": "Admin Console",
     "devotions": "ദൈനംദിന ധ്യാനം",
     "explanations": "വാക്യ വിശദീകരണങ്ങൾ",
     "home": "ഹോം",
@@ -1153,7 +1154,11 @@
     "profile": "പ്രൊഫൈൽ",
     "readingPlans": "വായന പദ്ധതി",
     "settings": "ക്രമീകരണങ്ങൾ",
-    "userActivity": "ഉപയോക്തൃ പ്രവർത്തനം"
+    "userActivity": "ഉപയോക്തൃ പ്രവർത്തനം",
+    "triviaAdmin": "Trivia Management",
+    "dailyContentAdmin": "Daily Content",
+    "subscriptionsAdmin": "Subscriptions",
+    "adminTools": "Admin Tools"
   },
   "userActivity": {
     "action": "പ്രവർത്തനം",

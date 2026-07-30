@@ -829,6 +829,7 @@ const DevotionEditDialog = ({
   onSave,
   isSaving,
 }: DevotionEditDialogProps) => {
+  const { t } = useLanguage();
   const [localState, setLocalState] = useState<EditState | null>(null);
   const [safeDateValue, setSafeDateValue] = useState<Date>(new Date());
 

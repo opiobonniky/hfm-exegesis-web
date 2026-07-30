@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { BookText, Info, Loader2, Search, Languages, Hash, BookOpen } from "lucide-react";
+import { BookText, Info, Loader2, Search, Languages, Hash, BookOpen, Copy, Check } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -35,6 +35,18 @@ export default function WordStudyDialog({
   const [entry, setEntry] = useState<StrongsEntry | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
+  const [copiedStudyNote, setCopiedStudyNote] = useState(false);
+
+  const copyStudyNote = useCallback(async () => {
+    if (!entry?.adminExplanation) return;
+    try {
+      await navigator.clipboard.writeText(entry.adminExplanation);
+      setCopiedStudyNote(true);
+      setTimeout(() => setCopiedStudyNote(false), 2000);
+    } catch {
+      // Clipboard not available
+    }
+  }, [entry?.adminExplanation]);
 
   useEffect(() => {
     if (!open || !strongsId) return;
@@ -205,6 +217,31 @@ export default function WordStudyDialog({
                       </Badge>
                     )}
                   </div>
+                </div>
+              )}
+
+              {/* Study Note (admin explanation) */}
+              {entry.adminExplanation && (
+                <div className="rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200/30 p-3">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <p className="text-xs font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider">
+                      Study Note
+                    </p>
+                    <button
+                      onClick={copyStudyNote}
+                      title={copiedStudyNote ? "Copied!" : "Copy study note"}
+                      className="shrink-0 w-6 h-6 flex items-center justify-center rounded-md text-amber-500/50 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-500/10 transition-all"
+                    >
+                      {copiedStudyNote ? (
+                        <Check className="w-3.5 h-3.5" />
+                      ) : (
+                        <Copy className="w-3.5 h-3.5" />
+                      )}
+                    </button>
+                  </div>
+                  <p className="text-xs text-amber-800/80 dark:text-amber-300/80 leading-5">
+                    {entry.adminExplanation}
+                  </p>
                 </div>
               )}
 

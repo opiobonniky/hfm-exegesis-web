@@ -7,24 +7,45 @@ import {
 } from '../assets/bibleVersion/json/bibleVersions';
 
 /* ------------------------------------------------------------------ */
-/*  Active-version cache                                               */
+/*  Active-version cache (lazy-loaded)                                  */
 /* ------------------------------------------------------------------ */
 
 let _activeVersionId: string = DEFAULT_VERSION_ID;
-let _activeData: Record<string, string> =
-  getVersionById(DEFAULT_VERSION_ID).data;
+// _activeData is NO LONGER populated at module init – it's loaded on demand
+let _activeData: Record<string, string> | null = null;
+let _dataLoadPromise: Promise<void> | null = null;
 
 /**
- * Switch the active Bible version.
- * Call this whenever the user picks a different translation.
- * The search index is invalidated automatically.
+ * Ensure the active version's data is loaded.
+ * Safe to call multiple times – only loads if not already cached.
  */
-export const setActiveVersion = (versionId: string): void => {
-  if (versionId === _activeVersionId) return; // nothing to do
+export const ensureDataLoaded = async (): Promise<void> => {
+  if (_activeData) return;
+  if (_dataLoadPromise) return _dataLoadPromise;
+
+  _dataLoadPromise = (async () => {
+    const version = getVersionById(_activeVersionId);
+    _activeData = await version.getData();
+  })();
+
+  return _dataLoadPromise;
+};
+
+/** Synchronous peek – returns the cached data or null if not yet loaded */
+const getCachedData = (): Record<string, string> | null => _activeData;
+
+/**
+ * Switch the active Bible version (async – loads the new version's data).
+ * Call this whenever the user picks a different translation.
+ */
+export const setActiveVersion = async (versionId: string): Promise<void> => {
+  if (versionId === _activeVersionId && _activeData) return;
   const version = getVersionById(versionId);
   _activeVersionId = version.id;
-  _activeData = version.data;
-  // invalidate the search index so it gets rebuilt for the new version
+  _activeData = null; // will be loaded on next ensureDataLoaded call
+  _dataLoadPromise = null;
+  await ensureDataLoaded();
+  // invalidate search index
   indexBuilt = false;
   Object.keys(verseIndex).forEach(k => delete verseIndex[k]);
 };
@@ -32,9 +53,9 @@ export const setActiveVersion = (versionId: string): void => {
 /** Returns the currently active version id */
 export const getActiveVersionId = (): string => _activeVersionId;
 
-/** Helper – resolves the verse dataset to use */
-const data = (override?: Record<string, string>): Record<string, string> =>
-  override ?? _activeData;
+/** Helper – resolves the verse dataset to use. Returns null if not loaded. */
+const data = (override?: Record<string, string>): Record<string, string> | null =>
+  override ?? getCachedData();
 
 /* ---------------- TESTAMENT LISTS ---------------- */
 
@@ -129,12 +150,16 @@ export interface VerseSearchResult {
 /* ---------------- BOOKS METADATA ---------------- */
 
 /**
- * Builds metadata for all books by scanning the verses.json keys
+ * Builds metadata for all books by scanning the verses keys.
+ * Returns empty array if data not yet loaded.
  */
 export const getBibleBooks = (versionData?: Record<string, string>): Book[] => {
+  const d = data(versionData);
+  if (!d) return [];
+
   const bookMap: Record<string, { chapters: Set<number>; verses: number }> = {};
 
-  Object.keys(data(versionData)).forEach((key) => {
+  Object.keys(d).forEach((key) => {
     const lastSpace = key.lastIndexOf(" ");
     const book = key.substring(0, lastSpace);
     const [chapterStr] = key.substring(lastSpace + 1).split(":");
@@ -149,11 +174,11 @@ export const getBibleBooks = (versionData?: Record<string, string>): Book[] => {
   });
 
   return Object.entries(bookMap)
-    .map(([name, data]) => ({
+    .map(([name, bData]) => ({
       name,
-      chapters: data.chapters.size,
-      verses: data.verses,
-      testament: NEW_TESTAMENT_BOOKS.includes(name as typeof NEW_TESTAMENT_BOOKS[number]) ? "New" : "Old",
+      chapters: bData.chapters.size,
+      verses: bData.verses,
+      testament: NEW_TESTAMENT_BOOKS.includes(name as typeof NEW_TESTAMENT_BOOKS[number]) ? "New" as const : "Old" as const,
     }))
     .sort((a, b) => a.name.localeCompare(b.name));
 };
@@ -166,14 +191,16 @@ export const getVersesForChapter = (
   versionData?: Record<string, string>,
 ): Record<number, string> => {
   const verses: Record<number, string> = {};
+  const d = data(versionData);
+  if (!d) return verses;
 
-  Object.keys(data(versionData)).forEach((key) => {
+  Object.keys(d).forEach((key) => {
     const lastSpace = key.lastIndexOf(" ");
     const bookName = key.substring(0, lastSpace);
     const [chStr, vsStr] = key.substring(lastSpace + 1).split(":");
 
     if (bookName === book && Number(chStr) === chapter) {
-      verses[Number(vsStr)] = data(versionData)[key];
+      verses[Number(vsStr)] = d[key];
     }
   });
 
@@ -186,8 +213,27 @@ export const getVerseText = (
   verse: number,
   versionData?: Record<string, string>,
 ): string | null => {
+  const d = data(versionData);
+  if (!d) return null; // data not yet loaded
   const key = `${book} ${chapter}:${verse}`;
-  return data(versionData)[key] ?? null;
+  return d[key] ?? null;
+};
+
+/**
+ * Async version of getVerseText – ensures data is loaded before looking up.
+ * Returns null if the verse key is not found even after loading.
+ */
+export const getVerseTextAsync = async (
+  book: string,
+  chapter: number,
+  verse: number,
+  versionData?: Record<string, string>,
+): Promise<string | null> => {
+  if (versionData) {
+    return versionData[`${book} ${chapter}:${verse}`] ?? null;
+  }
+  await ensureDataLoaded();
+  return getVerseText(book, chapter, verse);
 };
 
 export const getVerseRange = (
@@ -198,10 +244,12 @@ export const getVerseRange = (
   versionData?: Record<string, string>,
 ): Record<number, string> => {
   const verses: Record<number, string> = {};
+  const d = data(versionData);
+  if (!d) return verses;
 
   for (let v = startVerse; v <= endVerse; v++) {
     const key = `${book} ${chapter}:${v}`;
-    const text = data(versionData)[key];
+    const text = d[key];
     if (text) verses[v] = text;
   }
 
@@ -235,11 +283,13 @@ export const getVersesCountForChapter = (
   versionData?: Record<string, string>,
 ): number => {
   if (!book || chapter < 1) return 0;
+  const d = data(versionData);
+  if (!d) return 0;
 
   let count = 0;
   const prefix = `${book} ${chapter}:`;
 
-  Object.keys(data(versionData)).forEach((key) => {
+  Object.keys(d).forEach((key) => {
     if (key.startsWith(prefix)) count++;
   });
 
@@ -254,13 +304,14 @@ export const searchVerses = (
   versionData?: Record<string, string>,
 ): VerseSearchResult[] => {
   if (!query.trim()) return [];
+  const d = data(versionData);
+  if (!d) return [];
 
   const results: VerseSearchResult[] = [];
   const q = query.toLowerCase();
 
-  Object.keys(data(versionData)).some((key) => {
-    const text = data(versionData)[key];
-
+  Object.keys(d).some((key) => {
+    const text = d[key];
     if (text.toLowerCase().includes(q)) {
       const lastSpace = key.lastIndexOf(" ");
       const book = key.substring(0, lastSpace);
@@ -271,7 +322,6 @@ export const searchVerses = (
 
       results.push({ book, chapter, verse, text });
     }
-
     return results.length >= limit;
   });
 
@@ -294,10 +344,14 @@ const tokenize = (text: string): string[] =>
 
 export const buildVerseIndex = (): void => {
   if (indexBuilt) return;
+  const d = getCachedData();
+  if (!d) {
+    // Data not loaded yet — will be built on demand via ensureDataLoaded
+    return;
+  }
 
-  const src = _activeData; // always index active version
-  Object.keys(src).forEach(key => {
-    const text = src[key];
+  Object.keys(d).forEach(key => {
+    const text = d[key];
     const lastSpace = key.lastIndexOf(' ');
     const book = key.substring(0, lastSpace);
     const [chapter, verse] = key
@@ -319,7 +373,6 @@ export const searchVersesIndexed = (
   limit = 100,
 ): VerseSearchResult[] => {
   if (!query.trim()) return [];
-
   buildVerseIndex();
 
   const tokens = tokenize(query);
@@ -341,3 +394,8 @@ export const searchVersesIndexed = (
 
   return results.slice(0, limit);
 };
+
+// Auto-load data on first import to maintain backward compatibility
+// for callers that rely on synchronous getVerseText.
+// This kicks off the async load immediately without blocking.
+ensureDataLoaded();

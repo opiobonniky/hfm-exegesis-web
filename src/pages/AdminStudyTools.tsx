@@ -64,7 +64,7 @@ import { useLanguage } from "@/components/languages/languageProvider";
 import { Skeleton } from "@/components/ui/skeleton";
 import { sendPostRequest } from "@/services/api";
 import { bibleApi } from "@/services/bibleApi";
-import { getChaptersForBook, getVersesCountForChapter, getVerseText } from "@/utilities/bibleUtils";
+import { getChaptersForBook, getVersesCountForChapter, getVerseText, ensureDataLoaded } from "@/utilities/bibleUtils";
 import { BIBLE_VERSIONS, getVersionById } from "@/assets/bibleVersion/json/bibleVersions";
 import { BIBLE_BOOKS, getLangColor, getLangLetter, getLangScript } from "@/data/staticData";
 import type { StrongsWordEntry } from "@/data/staticData";
@@ -251,8 +251,8 @@ export default function AdminStudyTools() {
         search: search || undefined,
       });
       if (res.returnCode === 200 && res.returnData) {
-        const rd = res.returnData as any;
-        setWords(rd.data || []);
+        const rd = res.returnData;
+        setWords(rd?.data || []);
       }
     } catch (e) {
       console.error("Failed to load words:", e);
@@ -276,11 +276,11 @@ export default function AdminStudyTools() {
         pageSize: wordVersePageSize,
       });
       if (res.returnCode === 200 && res.returnData) {
-        const rd = res.returnData as any;
-        const newData = rd.data || [];
+        const rd = res.returnData;
+        const newData = rd?.data || [];
         setWordVerseWords((prev) => (append ? [...prev, ...newData] : newData));
-        setWordVerseTotal(rd.total ?? newData.length);
-        setWordVerseHasNext(!!rd.hasNext);
+        setWordVerseTotal(rd?.total ?? newData.length);
+        setWordVerseHasNext(!!rd?.hasNext);
         setWordVersePage(page);
       } else {
         console.warn("Verse words API returned:", res.returnCode, res.returnMessage);
@@ -314,10 +314,10 @@ export default function AdminStudyTools() {
         verseNumber: verse,
       });
       if (res.returnCode === 200 && res.returnData) {
-        const rd = res.returnData as any;
+        const rd = res.returnData;
         const resource: VerseResource = {
-          id: rd.id,
-          bookName: rd.bookName,
+          id: rd?.id,
+          bookName: rd?.bookName,
           chapter: rd.chapter,
           verseStart: rd.verseStart,
           verseEnd: rd.verseEnd,
@@ -433,15 +433,14 @@ export default function AdminStudyTools() {
         clearTimeout(resourceLoadTimeoutRef.current);
       }
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab, verseBook, verseChapter, verseNum]);
+  }, [activeTab, verseBook, verseChapter, verseNum, loadResource]);
 
   // ── Load available translations on mount ──
   useEffect(() => {
     const loadTranslations = async () => {
       try {
         const apiTranslations = await bibleApi.getTranslations();
-        const mapped = apiTranslations.map((t: any) => ({
+        const mapped = apiTranslations.map((t) => ({
           value: t.id,
           label: `${t.name} (${t.shortName || t.id})`,
         }));
@@ -486,8 +485,7 @@ export default function AdminStudyTools() {
     setVersePreview(null);
     setResSearched(false);
     setCurrentResource(null);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [verseBook]);
+  }, [verseBook, getChaptersForBook]);
 
   // ── Update verse options when chapter changes (shared) ──
   useEffect(() => {
@@ -502,15 +500,17 @@ export default function AdminStudyTools() {
       setVerseNumList([]);
       setVerseNum(0);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [verseBook, verseChapter]);
+  }, [verseBook, verseChapter, getVersesCountForChapter]);
 
-  // Helper: get verse text for a given translation
+  // Helper: get verse text for a given translation (async, lazy-loads Bible data)
   const getTextForTranslation = useCallback(
-    (book: string, ch: number, vs: number, translationId?: string) => {
+    async (book: string, ch: number, vs: number, translationId?: string): Promise<string | null> => {
       if (translationId) {
-        return getVerseText(book, ch, vs, getVersionById(translationId).data);
+        const version = getVersionById(translationId);
+        const bibleData = await version.getData();
+        return getVerseText(book, ch, vs, bibleData);
       }
+      await ensureDataLoaded();
       return getVerseText(book, ch, vs);
     },
     [],
@@ -531,13 +531,17 @@ export default function AdminStudyTools() {
 
   // ── Fetch verse text preview when verse changes (shared) ──
   useEffect(() => {
-    if (verseBook && verseChapter > 0 && verseNum > 0) {
-      const text = getTextForTranslation(verseBook, verseChapter, verseNum, verseTranslation);
-      setVersePreview(text);
-    } else {
-      setVersePreview(null);
-    }
-  }, [verseBook, verseChapter, verseNum, verseTranslation, getTextForTranslation]);
+    let cancelled = false;
+    (async () => {
+      if (verseBook && verseChapter > 0 && verseNum > 0) {
+        const text = await getTextForTranslation(verseBook, verseChapter, verseNum, verseTranslation);
+        if (!cancelled) setVersePreview(text);
+      } else {
+        if (!cancelled) setVersePreview(null);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [verseBook, verseChapter, verseNum, verseTranslation]);
 
   // ── Words tab: auto-load Strong's words when verse selection changes (debounced) ──
   useEffect(() => {
@@ -584,8 +588,7 @@ export default function AdminStudyTools() {
         clearTimeout(wordLoadTimeoutRef.current);
       }
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [verseBook, verseChapter, verseNum, wordsTranslation, wordVersePageSize]);
+  }, [verseBook, verseChapter, verseNum, wordsTranslation, wordVersePageSize, loadWordsForVerse]);
 
 
   // ── Edit sheet: update chapter list when book changes ──
@@ -604,8 +607,7 @@ export default function AdminStudyTools() {
     setEditVerseChapter(0);
     setEditVerseNum(0);
     setEditVersePreview(null);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [editVerseBook]);
+  }, [editVerseBook, getChaptersForBook]);
 
   // ── Edit sheet: update verse list when chapter changes ──
   useEffect(() => {
@@ -618,19 +620,21 @@ export default function AdminStudyTools() {
       setEditVerList([]);
       setEditVerseNum(0);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [editVerseBook, editVerseChapter]);
+  }, [editVerseBook, editVerseChapter, getVersesCountForChapter]);
 
   // ── Edit sheet: fetch verse preview when verse changes ──
   useEffect(() => {
-    if (editVerseBook && editVerseChapter > 0 && editVerseNum > 0) {
-      const text = getTextForTranslation(editVerseBook, editVerseChapter, editVerseNum, editVerseTranslation);
-      setEditVersePreview(text);
-    } else {
-      setEditVersePreview(null);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [editVerseBook, editVerseChapter, editVerseNum, editVerseTranslation]);
+    let cancelled = false;
+    (async () => {
+      if (editVerseBook && editVerseChapter > 0 && editVerseNum > 0) {
+        const text = await getTextForTranslation(editVerseBook, editVerseChapter, editVerseNum, editVerseTranslation);
+        if (!cancelled) setEditVersePreview(text);
+      } else {
+        if (!cancelled) setEditVersePreview(null);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [editVerseBook, editVerseChapter, editVerseNum, editVerseTranslation, getTextForTranslation]);
 
   // ── Cross-reference: update chapter list when book changes ──
   useEffect(() => {
@@ -645,8 +649,7 @@ export default function AdminStudyTools() {
       setXrefRefChapList([]);
       setXrefRefVerList([]);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [xrefRefBook]);
+  }, [xrefRefBook, getChaptersForBook, getVersesCountForChapter]);
 
   // ── Cross-reference: update verse list when chapter changes ──
   useEffect(() => {
@@ -655,8 +658,7 @@ export default function AdminStudyTools() {
       const vCount = getVersesCountForChapter(xrefRefBook, xrefRefChap);
       setXrefRefVerList(Array.from({ length: vCount }, (_, i) => i + 1));
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [xrefRefBook, xrefRefChap]);
+  }, [xrefRefBook, xrefRefChap, getVersesCountForChapter]);
 
   // ── Cross-reference: update ref preview when verse selected ──
   useEffect(() => {
@@ -676,10 +678,10 @@ export default function AdminStudyTools() {
     // Parse existing ref to initialize verse selectors
     const match = item.ref.match(/^(.+?)\s+(\d+):(\d+)$/);
     if (match) {
-      const book = match[1];
+      const book:any = match[1];
       const ch = Number(match[2]);
       const vs = Number(match[3]);
-      if (BIBLE_BOOKS.includes(book as any)) {
+      if (BIBLE_BOOKS.includes(book)) {
         setXrefRefBook(book);
         setXrefRefChap(ch);
         setXrefRefVer(vs);
@@ -705,8 +707,7 @@ export default function AdminStudyTools() {
         clearTimeout(searchDebounceRef.current);
       }
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [wordSearch]);
+  }, [wordSearch, loadWords]);
 
   const handleClearSearch = () => {
     setWordSearch("");
@@ -760,6 +761,7 @@ export default function AdminStudyTools() {
       setEditVerseChapter(0);
       setEditVerseNum(0);
       setEditVerseTranslation(lastEditTranslationRef.current || "BSB");
+    }
     setEditWord(null);
     setEditSheetOpen(true);
   };
@@ -969,10 +971,10 @@ export default function AdminStudyTools() {
               try {
                 const res = await sendPostRequest("strongs", "admin/sync-all-verse-references", {});
                 if (res.returnCode === 200) {
-                  const rd = res.returnData as any;
+                  const rd = res.returnData;
                   toast({
                     title: "All verse references synced",
-                    description: `${rd.syncedCount} entries updated with ${rd.totalReferences} references`,
+                    description: `${rd?.syncedCount ?? 0} entries updated with ${rd?.totalReferences ?? 0} references`,
                   });
                   // Refresh the current view
                   loadWords(wordSearch);
@@ -1042,36 +1044,47 @@ export default function AdminStudyTools() {
           ))}
         </div>
       ) : !verseSearched && !wordSearchPerformed ? (
-        <div className="flex flex-col items-center py-16 text-center">
-          <BookText className="w-12 h-12 text-muted-foreground/30 mb-3" />
-          <p className="text-sm font-semibold text-muted-foreground">
-            Select a book to get started
-          </p>
-          <p className="text-xs text-muted-foreground/60 mt-1 max-w-sm">
-            Pick a book above to see all its unique words, then refine by
-            chapter and verse, or use the search bar to find a specific word.
-          </p>
+        <div className="relative flex flex-col items-center py-20 text-center overflow-hidden rounded-xl border border-dashed border-border/40 bg-gradient-to-b from-muted/10 to-muted/5">
+          <div className="absolute top-8 w-32 h-32 bg-primary/[0.03] rounded-full blur-3xl" />
+          <div className="relative">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-primary/5 ring-1 ring-primary/10">
+              <BookText className="w-7 h-7 text-primary/60" />
+            </div>
+            <p className="text-base font-bold text-foreground">Select a book to get started</p>
+            <p className="text-sm text-muted-foreground/70 mt-1.5 max-w-sm mx-auto">
+              Pick a book above to see all its unique words, then refine by
+              chapter and verse, or use the search bar to find a specific word.
+            </p>
+          </div>
         </div>
       ) : verseSearched && !wordVerseLoading && wordVerseWords.length === 0 && !wordSearchPerformed ? (
-        <div className="flex flex-col items-center py-16 text-center">
-          <BookText className="w-12 h-12 text-muted-foreground/30 mb-3" />
-          <p className="text-sm font-semibold text-muted-foreground">
-            No word entries found
-          </p>
-          <p className="text-xs text-muted-foreground/60 mt-1 max-w-sm">
-            No Strong's word data is available for {verseBook} {verseChapter}:{verseNum} in {wordsTranslation}.
-            Try a different translation or search for a word above.
-          </p>
+        <div className="relative flex flex-col items-center py-20 text-center overflow-hidden rounded-xl border border-dashed border-border/40 bg-gradient-to-b from-muted/10 to-muted/5">
+          <div className="absolute top-8 w-32 h-32 bg-amber-500/[0.04] rounded-full blur-3xl" />
+          <div className="relative">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-500/10 to-amber-500/5 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-amber-500/5 ring-1 ring-amber-500/10">
+              <BookText className="w-7 h-7 text-amber-500/60" />
+            </div>
+            <p className="text-base font-bold text-foreground">No word entries found</p>
+            <p className="text-sm text-muted-foreground/70 mt-1.5 max-w-sm mx-auto">
+              No Strong's word data is available for <span className="font-semibold text-foreground/80">{verseBook} {verseChapter}:{verseNum}</span> in <span className="font-semibold text-foreground/80">{wordsTranslation}</span>.
+            </p>
+            <p className="text-xs text-muted-foreground/50 mt-2">
+              Try a different translation or search for a word above.
+            </p>
+          </div>
         </div>
       ) : wordSearchPerformed && words.length === 0 && wordVerseWords.length === 0 ? (
-        <div className="flex flex-col items-center py-16 text-center">
-          <Search className="w-12 h-12 text-muted-foreground/30 mb-3" />
-          <p className="text-sm font-semibold text-muted-foreground">
-            No words match your search
-          </p>
-          <p className="text-xs text-muted-foreground/60 mt-1 max-w-sm">
-            Try a different search term or select a verse and click "Load Words".
-          </p>
+        <div className="relative flex flex-col items-center py-20 text-center overflow-hidden rounded-xl border border-dashed border-border/40 bg-gradient-to-b from-muted/10 to-muted/5">
+          <div className="absolute top-8 w-32 h-32 bg-sky-500/[0.04] rounded-full blur-3xl" />
+          <div className="relative">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-sky-500/10 to-sky-500/5 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-sky-500/5 ring-1 ring-sky-500/10">
+              <Search className="w-7 h-7 text-sky-500/60" />
+            </div>
+            <p className="text-base font-bold text-foreground">No words match your search</p>
+            <p className="text-sm text-muted-foreground/70 mt-1.5 max-w-sm mx-auto">
+              Try a different search term or select a verse above.
+            </p>
+          </div>
         </div>
       ) : (
         <div className="space-y-3">
@@ -1079,54 +1092,65 @@ export default function AdminStudyTools() {
           {wordVerseWords.length > 0 && (
             <>
               {/* Stats bar */}
-              <div className="flex items-center gap-3 flex-wrap rounded-lg bg-muted/20 border border-border/40 p-2.5">
-                <div className="flex items-center gap-1.5">
-                  <BookOpen className="w-3.5 h-3.5 text-primary" />
-                  <span className="text-xs font-bold text-foreground">
-                    {verseNum > 0
-                      ? `${verseBook} ${verseChapter}:${verseNum}`
-                      : verseChapter > 0
-                        ? `${verseBook} ${verseChapter}`
-                        : verseBook}
-                  </span>
-                </div>
-                <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
-                  <span className="tabular-nums font-semibold text-foreground">{wordVerseTotal || wordVerseWords.length}</span>
-                  <span>unique {verseNum > 0 ? 'verse' : verseChapter > 0 ? 'chapter' : 'book'} words</span>
-                </div>
-                {(() => {
-                  const greekCount = wordVerseWords.filter(w => w.language?.toLowerCase() === "greek").length;
-                  const hebrewCount = wordVerseWords.filter(w => w.language?.toLowerCase() === "hebrew").length;
-                  const aramaicCount = wordVerseWords.filter(w => w.language?.toLowerCase() === "aramaic").length;
-                  return (
-                    <div className="flex items-center gap-2 ml-auto">
-                      {greekCount > 0 && (
-                        <span className="inline-flex items-center gap-1 text-[10px]">
-                          <span className="w-2 h-2 rounded-full" style={{ backgroundColor: "#3b82f6" }} />
-                          <span className="tabular-nums font-semibold">{greekCount}</span>
-                          <span className="text-muted-foreground/60">Greek</span>
-                        </span>
-                      )}
-                      {hebrewCount > 0 && (
-                        <span className="inline-flex items-center gap-1 text-[10px]">
-                          <span className="w-2 h-2 rounded-full" style={{ backgroundColor: "#f59e0b" }} />
-                          <span className="tabular-nums font-semibold">{hebrewCount}</span>
-                          <span className="text-muted-foreground/60">Hebrew</span>
-                        </span>
-                      )}
-                      {aramaicCount > 0 && (
-                        <span className="inline-flex items-center gap-1 text-[10px]">
-                          <span className="w-2 h-2 rounded-full" style={{ backgroundColor: "#e11d48" }} />
-                          <span className="tabular-nums font-semibold">{aramaicCount}</span>
-                          <span className="text-muted-foreground/60">Aramaic</span>
-                        </span>
-                      )}
+              <div className="flex items-center gap-3 flex-wrap rounded-xl bg-gradient-to-r from-primary/[0.03] via-background to-background border border-border/40 shadow-sm p-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <BookOpen className="w-3.5 h-3.5 text-primary" />
+                  </div>
+                  <div>
+                    <span className="text-sm font-bold text-foreground">
+                      {verseNum > 0
+                        ? `${verseBook} ${verseChapter}:${verseNum}`
+                        : verseChapter > 0
+                          ? `${verseBook} ${verseChapter}`
+                          : verseBook}
+                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="tabular-nums font-semibold text-xs text-foreground">{wordVerseTotal || wordVerseWords.length}</span>
+                      <span className="text-[10px] text-muted-foreground">unique {verseNum > 0 ? 'verse' : verseChapter > 0 ? 'chapter' : 'book'} words</span>
                     </div>
-                  );
-                })()}
+                  </div>
+                </div>
+
+                <div className="hidden sm:flex items-center gap-1.5 h-6 w-px bg-border/40 mx-1" />
+
+                <div className="flex items-center gap-3 flex-wrap">
+                  {(() => {
+                    const greekCount = wordVerseWords.filter(w => w.language?.toLowerCase() === "greek").length;
+                    const hebrewCount = wordVerseWords.filter(w => w.language?.toLowerCase() === "hebrew").length;
+                    const aramaicCount = wordVerseWords.filter(w => w.language?.toLowerCase() === "aramaic").length;
+                    return (
+                      <>
+                        {greekCount > 0 && (
+                          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/20 text-[10px] font-medium text-blue-700 dark:text-blue-300 border border-blue-200/50 dark:border-blue-800/30">
+                            <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                            <span className="tabular-nums font-semibold">{greekCount}</span>
+                            <span>Greek</span>
+                          </span>
+                        )}
+                        {hebrewCount > 0 && (
+                          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950/20 text-[10px] font-medium text-amber-700 dark:text-amber-300 border border-amber-200/50 dark:border-amber-800/30">
+                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                            <span className="tabular-nums font-semibold">{hebrewCount}</span>
+                            <span>Hebrew</span>
+                          </span>
+                        )}
+                        {aramaicCount > 0 && (
+                          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-red-50 dark:bg-red-950/20 text-[10px] font-medium text-red-700 dark:text-red-300 border border-red-200/50 dark:border-red-800/30">
+                            <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
+                            <span className="tabular-nums font-semibold">{aramaicCount}</span>
+                            <span>Aramaic</span>
+                          </span>
+                        )}
+                      </>
+                    );
+                  })()}
+                </div>
+
+                <div className="flex-1" />
 
                 {/* Page size selector */}
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1.5 ml-auto">
                   <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">Page</span>
                   <Select
                     value={String(wordVersePageSize)}
@@ -1135,7 +1159,7 @@ export default function AdminStudyTools() {
                       setWordVersePageSize(newSize);
                     }}
                   >
-                    <SelectTrigger className="h-6 w-16 text-[10px] px-1.5 py-0 border-border/40">
+                    <SelectTrigger className="h-6 w-16 text-[10px] px-1.5 py-0 border-border/40 bg-background/50">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -1347,10 +1371,10 @@ export default function AdminStudyTools() {
               </div>
               <div className="flex items-center gap-1 shrink-0">
                 <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-primary" onClick={() => { setWsEditIdx(idx); setWsForm(ws); setWsSheetOpen(true); }}>
-                  <Edit2 className="w-3 h-3" />
+                  <Edit2 className="w-3 h-3 text-foreground/60" />
                 </Button>
                 <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-destructive" onClick={() => setWordStudies((prev) => prev.filter((_, i) => i !== idx))}>
-                  <Trash2 className="w-3 h-3" />
+                  <Trash2 className="w-3 h-3 text-foreground/60" />
                 </Button>
               </div>
             </div>
@@ -1393,10 +1417,10 @@ export default function AdminStudyTools() {
               </div>
               <div className="flex items-center gap-1 shrink-0">
                 <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-primary" onClick={() => { setCommEditIdx(idx); setCommForm(c); setCommSheetOpen(true); }}>
-                  <Edit2 className="w-3 h-3" />
+                  <Edit2 className="w-3 h-3 text-foreground/60" />
                 </Button>
                 <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-destructive" onClick={() => setCommentaries((prev) => prev.filter((_, i) => i !== idx))}>
-                  <Trash2 className="w-3 h-3" />
+                  <Trash2 className="w-3 h-3 text-foreground/60" />
                 </Button>
               </div>
             </div>
@@ -1436,7 +1460,7 @@ export default function AdminStudyTools() {
         <div className="space-y-1.5">
           {crossRefs.map((x, idx) => {
             const refParts = parseRef(x.ref);
-            const refText = refParts ? getTextForTranslation(refParts.book, refParts.chapter, refParts.verse, verseTranslation) : null;
+            const refText = refParts ? getVerseText(refParts.book, refParts.chapter, refParts.verse, getVersionById(verseTranslation).data) : null;
             return (
               <div key={idx} className="flex items-start gap-2 px-3 py-2 rounded-lg border border-border/50 bg-card">
                 <div className="flex-1 min-w-0">
@@ -1454,10 +1478,10 @@ export default function AdminStudyTools() {
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
                   <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-primary" onClick={() => openXrefEdit(idx, x)}>
-                    <Edit2 className="w-3 h-3" />
+                    <Edit2 className="w-3 h-3 text-foreground/60" />
                   </Button>
                   <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-destructive" onClick={() => setCrossRefs((prev) => prev.filter((_, i) => i !== idx))}>
-                    <Trash2 className="w-3 h-3" />
+                    <Trash2 className="w-3 h-3 text-foreground/60" />
                   </Button>
                 </div>
               </div>
@@ -1499,10 +1523,10 @@ export default function AdminStudyTools() {
               </div>
               <div className="flex items-center gap-1 shrink-0">
                 <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-primary" onClick={() => { setDictEditIdx(idx); setDictForm(d); setDictSheetOpen(true); }}>
-                  <Edit2 className="w-3 h-3" />
+                  <Edit2 className="w-3 h-3 text-foreground/60" />
                 </Button>
                 <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-destructive" onClick={() => setDictTerms((prev) => prev.filter((_, i) => i !== idx))}>
-                  <Trash2 className="w-3 h-3" />
+                  <Trash2 className="w-3 h-3 text-foreground/60" />
                 </Button>
               </div>
             </div>
@@ -1580,7 +1604,7 @@ export default function AdminStudyTools() {
               onClick={deleteResource}
               className="h-8 gap-1 text-xs text-destructive border-destructive/30 hover:bg-destructive/10"
             >
-              <Trash2 className="w-3 h-3" />
+              <Trash2 className="w-3 h-3 text-foreground/60" />
               Delete
             </Button>
           )}
@@ -1593,10 +1617,10 @@ export default function AdminStudyTools() {
                 try {
                   const res = await sendPostRequest("strongs", "admin/sync-all-verse-references", {});
                   if (res.returnCode === 200) {
-                    const rd = res.returnData as any;
+                    const rd = res.returnData;
                     toast({
                       title: "All verse references synced",
-                      description: `${rd.syncedCount} entries updated with ${rd.totalReferences} references`,
+                      description: `${rd?.syncedCount ?? 0} entries updated with ${rd?.totalReferences ?? 0} references`,
                     });
                     // Refresh resource view
                     if (verseBook && verseChapter > 0 && verseNum > 0) {
@@ -1763,8 +1787,8 @@ export default function AdminStudyTools() {
         search: prologueSearch || undefined,
       });
       if (res.returnCode === 200 && res.returnData) {
-        const rd = res.returnData as any;
-        setPrologues(rd.data || []);
+        const rd = res.returnData;
+        setPrologues(rd?.data || []);
       }
     } catch (e) {
       console.error("Failed to load prologues:", e);
@@ -2064,11 +2088,11 @@ export default function AdminStudyTools() {
         search: search || undefined,
       });
       if (res.returnCode === 200 && res.returnData) {
-        const rd = res.returnData as any;
-        setStudies(rd.data || []);
-        setStudiesTotal(rd.total || 0);
+        const rd = res.returnData;
+        setStudies(rd?.data || []);
+        setStudiesTotal(rd?.total || 0);
         setStudiesPage(page);
-        setStudiesHasNext(!!rd.hasNext);
+        setStudiesHasNext(!!rd?.hasNext);
       }
     } catch (e) {
       console.error("Failed to load studies:", e);
@@ -2109,10 +2133,10 @@ export default function AdminStudyTools() {
               try {
                 const res = await sendPostRequest("strongs", "admin/sync-all-verse-references", {});
                 if (res.returnCode === 200) {
-                  const rd = res.returnData as any;
+                  const rd = res.returnData;
                   toast({
                     title: "All verse references synced",
-                    description: `${rd.syncedCount} entries updated with ${rd.totalReferences} references`,
+                    description: `${rd?.syncedCount ?? 0} entries updated with ${rd?.totalReferences ?? 0} references`,
                   });
                   loadStudies(0, studiesSearch);
                 } else {
@@ -2459,7 +2483,7 @@ export default function AdminStudyTools() {
                       className="h-7 w-7 text-muted-foreground hover:text-primary"
                       onClick={() => openEditPrologue(prologue)}
                     >
-                      <Edit2 className="w-3.5 h-3.5" />
+                      <Edit2 className="w-3.5 h-3.5 text-foreground/60" />
                     </Button>
                     <Button
                       variant="ghost"
@@ -2467,7 +2491,7 @@ export default function AdminStudyTools() {
                       className="h-7 w-7 text-muted-foreground hover:text-destructive"
                       onClick={() => deletePrologue(prologue.bookName)}
                     >
-                      <Trash2 className="w-3.5 h-3.5" />
+                      <Trash2 className="w-3.5 h-3.5 text-foreground/60" />
                     </Button>
                   </div>
                 </div>
@@ -2490,44 +2514,58 @@ export default function AdminStudyTools() {
   // ============================================================
 
   return (
-    <div className="min-h-screen bg-background p-4 sm:p-6 lg:p-8">
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="flex items-center gap-4">
-          <button
-            onClick={() => navigate(-1)}
-            className="w-8 h-8 rounded-full bg-muted/30 flex items-center justify-center hover:bg-muted/50 transition-all"
-          >
-            <ArrowLeft className="w-4 h-4 text-foreground" />
-          </button>
-          <div>
-            <h1 className="text-xl font-bold text-foreground">Study Tools Admin</h1>
-            <p className="text-sm text-muted-foreground">
-              Manage word studies, verse resources, and book prologues
-            </p>
+    <div className="min-h-screen bg-background">
+      {/* Top gradient header */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-primary/[0.04] via-background to-background border-b border-border/50">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-primary/[0.03] rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-primary/[0.02] rounded-full blur-2xl -translate-x-1/2 translate-y-1/2" />
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => navigate(-1)}
+              className="w-9 h-9 rounded-xl bg-background/80 backdrop-blur-sm border border-border/40 flex items-center justify-center hover:bg-accent/10 hover:border-accent/30 transition-all duration-200 shadow-sm"
+            >
+              <ArrowLeft className="w-4 h-4 text-foreground" />
+            </button>
+            <div className="flex-1">
+              <div className="flex items-center gap-3">
+                <h1 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">Study Tools Admin</h1>
+                <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-primary/10 border border-primary/20 text-[10px] font-semibold text-primary">
+                  <Sparkles className="w-3 h-3" />
+                  Admin Panel
+                </div>
+              </div>
+              <p className="text-sm text-muted-foreground/80 mt-0.5">
+                Manage Strong's dictionary entries, verse resources, word studies, and book prologues
+              </p>
+            </div>
           </div>
         </div>
+      </div>
 
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid grid-cols-4 w-full max-w-lg">
-            <TabsTrigger value="words" className="gap-1.5">
-              <BookText className="w-3.5 h-3.5" />
-              Words
-            </TabsTrigger>
-            <TabsTrigger value="resources" className="gap-1.5">
-              <FileText className="w-3.5 h-3.5" />
-              Resources
-            </TabsTrigger>
-            <TabsTrigger value="studies" className="gap-1.5">
-              <BookOpen className="w-3.5 h-3.5" />
-              Studies
-            </TabsTrigger>
-            <TabsTrigger value="prologues" className="gap-1.5">
-              <BookOpen className="w-3.5 h-3.5" />
-              Prologues
+          <div className="overflow-x-auto pb-0.5 -mx-1 px-1">
+            <TabsList className="inline-flex w-auto gap-1 rounded-xl bg-muted/30 border border-border/40 p-1 backdrop-blur-sm">
+              <TabsTrigger value="words" className="gap-1.5 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border/50 rounded-lg px-3 py-1.5 text-xs transition-all">
+                <BookText className="w-3.5 h-3.5 text-foreground/60" />
+                Words
+              </TabsTrigger>
+              <TabsTrigger value="resources" className="gap-1.5 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border/50 rounded-lg px-3 py-1.5 text-xs transition-all">
+                <FileText className="w-3.5 h-3.5 text-foreground/60" />
+                Resources
+              </TabsTrigger>
+              <TabsTrigger value="studies" className="gap-1.5 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border/50 rounded-lg px-3 py-1.5 text-xs transition-all">
+                <BookOpen className="w-3.5 h-3.5 text-foreground/60" />
+                Studies
+              </TabsTrigger>
+              <TabsTrigger value="prologues" className="gap-1.5 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border/50 rounded-lg px-3 py-1.5 text-xs transition-all">
+                <BookOpen className="w-3.5 h-3.5 text-foreground/60" />
+                Prologues
             </TabsTrigger>
           </TabsList>
+          </div>
 
           <div className="mt-6">
             <TabsContent value="words">{renderWordsTab()}</TabsContent>
@@ -3251,5 +3289,4 @@ export default function AdminStudyTools() {
       </AlertDialog>
     </div>
   );
-}
 }

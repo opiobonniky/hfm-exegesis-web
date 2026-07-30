@@ -778,7 +778,7 @@ const AddVerseExplanation = () => {
                               );
                             }}
                             className={cn(
-                              "bg-white dark:bg-background rounded-lg p-3 border text-sm cursor-pointer transition-all",
+                              "bg-card dark:bg-background rounded-lg p-3 border text-sm cursor-pointer transition-all",
                               isSelected
                                 ? "border-amber-500 bg-amber-50/50 dark:bg-amber-950/30"
                                 : "border-amber-100/50 dark:border-amber-900/30 hover:border-amber-300"

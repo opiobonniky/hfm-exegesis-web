@@ -6,739 +6,40 @@ import {
   PartyPopper,
   BookOpen,
   Zap,
-  Award,
   Target,
   Sparkles,
   Trophy,
-  Check,
-  X,
   ArrowLeft,
-  CheckCircle2,
   XCircle,
-  Lightbulb,
-  ExternalLink,
-  Loader2,
-  ChevronRight,
+  Star,
+  Timer,
+  Medal,
+  Sun,
+  Flame,
 } from "lucide-react";
 import { useLanguage } from "@/components/languages/languageProvider";
-import { useTrivia, DifficultyFilter } from "@/hooks/useTrivia";
+import { useTrivia, DifficultyFilter, type TriviaState } from "@/hooks/useTrivia";
+import { useDailyChallenge, DAILY_QUESTIONS_COUNT, type DailyChallengeSession } from "@/hooks/useDailyChallenge";
 import { routes } from "@/components/Routes/routes";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { parseOptions } from "@/services/triviaApi";
+import StarBurst from "@/components/trivia/StarBurst";
+import SanctuarySeal, {
+  MILESTONE_THRESHOLDS,
+} from "@/components/trivia/SanctuarySeal";
+import StainedGlassQuestion from "@/components/trivia/StainedGlassQuestion";
+import GlassResult from "@/components/trivia/GlassResult";
+import AnimatedNumber from "@/components/trivia/AnimatedNumber";
+import BadgeCrest from "@/components/trivia/BadgeCrest";
+import BadgeUnlockPanel from "@/components/trivia/BadgeUnlockPanel";
+import { useBadges, BADGE_DEFINITIONS } from "@/hooks/useBadges";
+
+import { useLeaderboard } from "@/hooks/useLeaderboard";
+import StreakCalendar from "@/components/trivia/StreakCalendar";
+import SessionLeaderboard from "@/components/trivia/SessionLeaderboard";
 import type { TriviaAnswerResult } from "@/services/triviaApi";
 
 // ── Constants ──
-
-const MILESTONE_THRESHOLDS = [3, 5, 10, 25];
-
-const MILESTONE_CONFIGS: Record<number, { icon: any; color: string }> = {
-  3: { icon: Sparkles, color: "#60A5FA" },
-  5: { icon: Zap, color: "#F59E0B" },
-  10: { icon: Award, color: "#8B5CF6" },
-  25: { icon: PartyPopper, color: "#EC4899" },
-};
-
-const MILESTONE_MESSAGES: Record<
-  number,
-  Record<string, { title: string; subtitle: string }>
-> = {
-  3: {
-    elite: { title: "Bright Start!", subtitle: "You're a natural!" },
-    strong: { title: "Great Start!", subtitle: "Off to a solid beginning!" },
-    solid: { title: "Good Start!", subtitle: "Keep learning and growing!" },
-    growing: {
-      title: "First Steps!",
-      subtitle: "Every expert was once a beginner!",
-    },
-  },
-  5: {
-    elite: { title: "On Fire!", subtitle: "Unstoppable!" },
-    strong: { title: "Solid Work!", subtitle: "You're getting the hang of it!" },
-    solid: { title: "Half Dozen!", subtitle: "Keep pushing forward!" },
-    growing: { title: "Nice Effort!", subtitle: "Practice makes progress!" },
-  },
-  10: {
-    elite: { title: "Bible Scholar!", subtitle: "Double digits with style!" },
-    strong: { title: "Impressive!", subtitle: "Double digits and going strong!" },
-    solid: { title: "Dedicated!", subtitle: "10 questions in — keep going!" },
-    growing: { title: "Persistent!", subtitle: "Learning takes time and you are!" },
-  },
-  25: {
-    elite: {
-      title: "Scripture Master!",
-      subtitle: "A true Bible expert in the making!",
-    },
-    strong: {
-      title: "Well Versed!",
-      subtitle: "Quarter century of questions — wow!",
-    },
-    solid: {
-      title: "Committed!",
-      subtitle: "25 questions deep — dedication!",
-    },
-    growing: {
-      title: "Determined!",
-      subtitle: "Steady persistence wins the race!",
-    },
-  },
-};
-
-function getMessageTier(percentage: number): string {
-  if (percentage >= 80) return "elite";
-  if (percentage >= 60) return "strong";
-  if (percentage >= 40) return "solid";
-  return "growing";
-}
-
-// ── ConfettiOverlay ──
-
-const PARTICLE_COUNT = 48;
-const CONFETTI_COLORS = [
-  "#FF6B6B", "#FECA57", "#48DBFB", "#FF9FF3",
-  "#54A0FF", "#5F27CD", "#1DD1A1", "#EE5A24",
-  "#FFD93D", "#6BCB77", "#4D96FF", "#FF6B6B",
-];
-
-interface ConfettiParticle {
-  id: number;
-  x: number;
-  color: string;
-  size: number;
-  delay: number;
-  duration: number;
-  rotation: number;
-  drift: number;
-}
-
-function ConfettiOverlay({
-  visible,
-  onFinish,
-}: {
-  visible: boolean;
-  onFinish: () => void;
-}) {
-  const [particles] = useState<ConfettiParticle[]>(() =>
-    Array.from({ length: PARTICLE_COUNT }, (_, i) => ({
-      id: i,
-      x: Math.random() * 100,
-      color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
-      size: 5 + Math.random() * 10,
-      delay: Math.random() * 400,
-      duration: 2500 + Math.random() * 1500,
-      rotation: Math.random() * 360,
-      drift: (Math.random() - 0.5) * 40,
-    })),
-  );
-  const finishedRef = useRef(0);
-  const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
-
-  useEffect(() => {
-    if (!visible) {
-      finishedRef.current = 0;
-      timersRef.current.forEach(clearTimeout);
-      timersRef.current = [];
-      return;
-    }
-
-    finishedRef.current = 0;
-
-    particles.forEach((p) => {
-      const timer = setTimeout(() => {
-        finishedRef.current += 1;
-        if (finishedRef.current >= PARTICLE_COUNT) {
-          onFinish();
-        }
-      }, p.delay + p.duration);
-      timersRef.current.push(timer);
-    });
-
-    return () => {
-      timersRef.current.forEach(clearTimeout);
-      timersRef.current = [];
-    };
-  }, [visible, particles, onFinish]);
-
-  if (!visible) return null;
-
-  return (
-    <div className="fixed inset-0 pointer-events-none z-[100] overflow-hidden">
-      <style>{`
-        @keyframes confettiFall {
-          0% { transform: translateY(-10px) rotate(0deg) translateX(0); opacity: 1; }
-          100% { transform: translateY(105vh) rotate(720deg) translateX(var(--drift)); opacity: 0; }
-        }
-        @keyframes confettiShimmer {
-          0%, 100% { filter: brightness(1); }
-          50% { filter: brightness(1.3); }
-        }
-      `}</style>
-      {particles.map((p) => (
-        <div
-          key={p.id}
-          className="absolute"
-          style={{
-            left: `${p.x}%`,
-            top: "-20px",
-            width: p.size,
-            height: p.size * 1.3,
-            backgroundColor: p.color,
-            borderRadius: p.size * 0.12,
-            animation: `confettiFall ${p.duration}ms cubic-bezier(0.25, 0.46, 0.45, 0.94) ${p.delay}ms forwards`,
-            "--drift": `${p.drift}px`,
-            boxShadow: `0 0 2px ${p.color}40`,
-          } as React.CSSProperties}
-        />
-      ))}
-    </div>
-  );
-}
-
-// ── MilestoneOverlay ──
-
-function MilestoneOverlay({
-  visible,
-  total,
-  correct,
-  percentage,
-  onFinish,
-}: {
-  visible: boolean;
-  total: number;
-  correct: number;
-  percentage: number;
-  onFinish: () => void;
-}) {
-  const [closing, setClosing] = useState(false);
-
-  const milestone = useMemo(() => {
-    for (const m of MILESTONE_THRESHOLDS) {
-      if (total === m) return m;
-    }
-    return null;
-  }, [total]);
-
-  const config = milestone ? MILESTONE_CONFIGS[milestone] : null;
-  const tier = getMessageTier(percentage);
-  const msg = milestone
-    ? MILESTONE_MESSAGES[milestone]?.[tier] ?? {
-        title: "Great Job!",
-        subtitle: "Keep it up!",
-      }
-    : { title: "", subtitle: "" };
-  const IconComp = config?.icon || Sparkles;
-  const accentColor = config?.color || "#60A5FA";
-
-  const handleClose = useCallback(() => {
-    setClosing(true);
-    setTimeout(() => {
-      setClosing(false);
-      onFinish();
-    }, 200);
-  }, [onFinish]);
-
-  if (!visible || !milestone) return null;
-
-  return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
-      <div
-        className={cn(
-          "relative w-[82%] max-w-[360px] rounded-2xl p-7 flex flex-col items-center shadow-2xl transition-all duration-200",
-          "bg-white dark:bg-gray-900 border border-white/10",
-          "dark:shadow-gray-950/50",
-          closing ? "opacity-0 scale-[0.96] translate-y-3" : "opacity-100 scale-100 translate-y-0",
-        )}
-      >
-        {/* Close */}
-        <button
-          onClick={handleClose}
-          className="absolute top-3 right-3 w-7 h-7 before:absolute before:content-[''] before:-inset-2 before:rounded-full rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-700 active:scale-[0.92] transition-all z-10 [touch-action:manipulation]"
-        >
-          <X className="w-3.5 h-3.5 text-gray-400" />
-        </button>
-
-        {/* Badge with glow */}
-        <div className="relative -mt-12 mb-3">
-          <div
-            className="absolute inset-0 rounded-full blur-xl opacity-40"
-            style={{ backgroundColor: accentColor }}
-          />
-          <div
-            className="relative w-16 h-16 rounded-full flex items-center justify-center shadow-lg"
-            style={{
-              backgroundColor: accentColor,
-              boxShadow: `0 0 20px ${accentColor}60`,
-            }}
-          >
-            <IconComp className="w-8 h-8 text-white" />
-          </div>
-        </div>
-
-        {/* Milestone number */}
-        <p className="text-4xl font-black text-gray-900 dark:text-white leading-none mt-1">
-          {milestone}
-        </p>
-        <p className="text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-[0.15em] mb-5 mt-1.5">
-          Questions Answered
-        </p>
-
-        {/* Message */}
-        <p
-          className="text-xl font-black text-center mb-1"
-          style={{ color: accentColor }}
-        >
-          {msg.title}
-        </p>
-        <p className="text-sm text-gray-500 dark:text-gray-400 font-semibold text-center leading-5 mb-6">
-          {msg.subtitle}
-        </p>
-
-        {/* Accuracy ring */}
-        <div className="relative mb-2">
-          <svg className="w-20 h-20 -rotate-90" viewBox="0 0 72 72">
-            <circle
-              cx="36"
-              cy="36"
-              r="30"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="4"
-              className="text-gray-200 dark:text-gray-700"
-            />
-            <circle
-              cx="36"
-              cy="36"
-              r="30"
-              fill="none"
-              strokeWidth="4"
-              strokeLinecap="round"
-              strokeDasharray={`${(percentage / 100) * 188.5} 188.5`}
-              stroke={accentColor}
-              className="transition-all duration-700"
-            />
-          </svg>
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <p className="text-xl font-black" style={{ color: accentColor }}>
-              {percentage}%
-            </p>
-            <p className="text-[8px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider">
-              accuracy
-            </p>
-          </div>
-        </div>
-
-        <p className="text-[11px] text-gray-400 dark:text-gray-500 font-semibold mb-4">
-          {correct}/{total} correct
-        </p>
-
-        <button
-          onClick={handleClose}
-          className="px-10 py-2.5 rounded-full text-white text-sm font-extrabold transition-all hover:opacity-90 active:scale-[0.97] shadow-lg [touch-action:manipulation]"
-          style={{
-            backgroundColor: accentColor,
-            boxShadow: `0 4px 14px ${accentColor}50`,
-          }}
-        >
-          Continue
-        </button>
-      </div>
-    </div>
-  );
-}
-
-// ── AnimatedScoreRing ──
-
-function AnimatedScoreRing({
-  correct,
-  total,
-  size = 100,
-}: {
-  correct: number;
-  total: number;
-  size?: number;
-}) {
-  const percentage = total > 0 ? Math.round((correct / total) * 100) : 0;
-  const radius = 38;
-  const circumference = 2 * Math.PI * radius;
-  const offset = circumference - (percentage / 100) * circumference;
-
-  return (
-    <div className="relative inline-flex items-center justify-center">
-      <svg
-        width={size}
-        height={size}
-        viewBox="0 0 88 88"
-        className="-rotate-90"
-      >
-        <circle
-          cx="44"
-          cy="44"
-          r={radius}
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="6"
-          className="text-muted/20"
-        />
-        <circle
-          cx="44"
-          cy="44"
-          r={radius}
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="6"
-          strokeLinecap="round"
-          strokeDasharray={circumference}
-          strokeDashoffset={offset}
-          className="text-primary transition-all duration-1000 ease-out"
-        />
-      </svg>
-      <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <p className="text-lg font-black text-foreground">{percentage}%</p>
-        <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-wider -mt-0.5">
-          accuracy
-        </p>
-      </div>
-    </div>
-  );
-}
-
-// ── Trivia Question Card ──
-
-function TriviaQuestionCard({
-  question,
-  selectedAnswer,
-  disabled,
-  isRtl,
-  correctAnswerIndex,
-  onSelect,
-  onReferencePress,
-}: {
-  question: any;
-  selectedAnswer: number | null;
-  disabled: boolean;
-  isRtl: boolean;
-  correctAnswerIndex?: number | null;
-  onSelect: (index: number) => void;
-  onReferencePress?: (
-    bookName: string,
-    chapter: number,
-    verseNumber?: number | null,
-  ) => void;
-}) {
-  const options = useMemo(
-    () => parseOptions(question.optionsJson),
-    [question.optionsJson],
-  );
-
-  const optionLetters = useMemo(
-    () => (isRtl ? "א,ב,ג,ד,ה,ו,ז,ח" : "A,B,C,D,E,F,G,H").split(","),
-    [isRtl],
-  );
-
-  return (
-    <div className="w-full rounded-2xl bg-card border border-border/60 shadow-sm hover:shadow-md transition-shadow">
-      {/* Category + Difficulty badges */}
-      <div className="flex items-center gap-2 px-5 pt-4 pb-2">
-        {question.category && (
-          <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold tracking-wider bg-primary/12 text-primary border border-primary/20">
-            {question.category.toUpperCase()}
-          </span>
-        )}
-        {question.difficulty && (
-          <span
-            className={cn(
-              "px-2.5 py-1 rounded-full text-[10px] font-extrabold tracking-wider border",
-              question.difficulty === "easy" &&
-                "bg-green-500/12 text-green-600 dark:text-green-400 border-green-500/25",
-              question.difficulty === "hard" &&
-                "bg-red-500/12 text-red-600 dark:text-red-400 border-red-500/25",
-              question.difficulty === "medium" &&
-                "bg-blue-500/12 text-blue-600 dark:text-blue-400 border-blue-500/25",
-            )}
-          >
-            {question.difficulty.toUpperCase()}
-          </span>
-        )}
-      </div>
-
-      {/* Question text */}
-      <div className="mx-5 mb-3 p-4 rounded-xl bg-gradient-to-br from-primary/[0.07] to-primary/[0.03] border border-primary/15">
-        <p className="text-[10px] font-black text-primary uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-          <Lightbulb className="w-3 h-3" />
-          Question
-        </p>
-        <p
-          className={cn(
-            "text-base sm:text-lg font-bold text-foreground leading-relaxed",
-            isRtl && "text-right",
-          )}
-        >
-          {question.question}
-        </p>
-      </div>
-
-      {/* Scripture reference */}
-      {question.bookName && (
-        <button
-          onClick={() =>
-            onReferencePress?.(
-              question.bookName,
-              question.chapter ?? 1,
-              question.verseNumber,
-            )
-          }
-          className={cn(
-            "flex items-center gap-3 mx-5 mb-3 px-3.5 py-2.5 rounded-xl border border-primary/20 bg-gradient-to-r from-primary/[0.06] to-primary/[0.02] hover:from-primary/[0.12] hover:to-primary/[0.06] active:scale-[0.99] transition-all [touch-action:manipulation] group",
-            isRtl && "flex-row-reverse",
-          )}
-        >
-          <div className="w-8 h-8 rounded-full bg-primary/12 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
-            <BookOpen className="w-4 h-4 text-primary" />
-          </div>
-          <div className="flex-1 text-left">
-            <p className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-wider">
-              Read passage
-            </p>
-            <p className={cn("text-xs font-black text-primary", isRtl && "text-right")}>
-              {question.bookName} {question.chapter ?? ""}
-              {question.verseNumber ? `:${question.verseNumber}` : ""}
-            </p>
-          </div>
-          <ExternalLink className="w-3.5 h-3.5 text-primary/60 shrink-0 group-hover:text-primary transition-colors" />
-        </button>
-      )}
-
-      {/* Options */}
-      <div className="px-5 pb-5">
-        <p className="text-[11px] font-black text-muted-foreground uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
-          <Target className="w-3 h-3" />
-          Choose an answer
-        </p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-          {options.map((option, index) => {
-            const isSelected = selectedAnswer === index;
-            const isCorrectAnswer =
-              disabled &&
-              correctAnswerIndex != null &&
-              correctAnswerIndex === index;
-            const isWrongSelection =
-              disabled &&
-              isSelected &&
-              correctAnswerIndex != null &&
-              !isCorrectAnswer;
-            let isDimmed = disabled && !isCorrectAnswer && !isWrongSelection;
-            const letter = optionLetters[index] || `${index + 1}`;
-
-            let borderClass = "border-border/60 hover:border-primary/40 hover:bg-primary/[0.03]";
-            let bgClass = "bg-card";
-            let letterBgClass = "bg-muted/40";
-            let letterTextClass = "text-muted-foreground";
-            let textClass = "text-foreground";
-
-            if (disabled) {
-              if (isCorrectAnswer) {
-                borderClass = "border-green-500/70";
-                bgClass = "bg-gradient-to-br from-green-500/12 to-green-500/05";
-                letterBgClass = "bg-green-500";
-                letterTextClass = "text-white";
-                textClass = "text-green-600 dark:text-green-400";
-              } else if (isWrongSelection) {
-                borderClass = "border-red-500/70";
-                bgClass = "bg-gradient-to-br from-red-500/12 to-red-500/05";
-                letterBgClass = "bg-red-500";
-                letterTextClass = "text-white";
-                textClass = "text-red-600 dark:text-red-400";
-              } else if (isSelected) {
-                borderClass = "border-primary/60";
-                bgClass = "bg-primary/[0.06]";
-                letterBgClass = "bg-primary";
-                letterTextClass = "text-white";
-              } else {
-                isDimmed = true;
-                borderClass = "border-border/40";
-                bgClass = "bg-card";
-              }
-            } else if (isSelected) {
-              borderClass = "border-primary/60 bg-primary/[0.06]";
-              bgClass = "bg-primary/[0.06]";
-              letterBgClass = "bg-primary";
-              letterTextClass = "text-white";
-            }
-
-            return (
-              <button
-                key={index}
-                onClick={() => onSelect(index)}
-                disabled={disabled}
-                className={cn(
-                  "relative flex items-start gap-3 p-3.5 rounded-xl border-2 transition-all group",
-                  borderClass,
-                  bgClass,
-                  isDimmed && "opacity-35",
-                  !disabled &&
-                    "cursor-pointer hover:shadow-sm active:scale-[0.98]",
-                  "[touch-action:manipulation]",
-                )}
-              >
-                {/* Status icon */}
-                {disabled && isCorrectAnswer && (
-                  <div className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-green-500 flex items-center justify-center shadow-lg shadow-green-500/30">
-                    <Check className="w-3.5 h-3.5 text-white stroke-[3]" />
-                  </div>
-                )}
-                {disabled && isWrongSelection && (
-                  <div className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-red-500 flex items-center justify-center shadow-lg shadow-red-500/30">
-                    <X className="w-3.5 h-3.5 text-white stroke-[3]" />
-                  </div>
-                )}
-
-                {/* Letter badge */}
-                <div
-                  className={cn(
-                    "w-8 h-8 rounded-xl flex items-center justify-center border text-sm font-black shrink-0 mt-0.5 transition-all",
-                    letterBgClass,
-                    letterTextClass,
-                    borderClass,
-                    !disabled && !isSelected && "group-hover:bg-primary group-hover:text-white group-hover:border-primary",
-                  )}
-                >
-                  {letter}
-                </div>
-
-                {/* Option text */}
-                <p
-                  className={cn(
-                    "text-sm font-semibold leading-relaxed text-left flex-1",
-                    textClass,
-                    isRtl && "text-right",
-                  )}
-                >
-                  {option}
-                </p>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ── Result Card ──
-
-function TriviaResultCard({
-  result,
-  isRtl,
-  onDismiss,
-}: {
-  result: TriviaAnswerResult;
-  isRtl: boolean;
-  onDismiss: () => void;
-}) {
-  const [animState, setAnimState] = useState<"entering" | "visible" | "exiting">("entering");
-  const [visible, setVisible] = useState(true);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setAnimState("visible"), 20);
-    return () => clearTimeout(timer);
-  }, []);
-
-  const handleDismiss = useCallback(() => {
-    setAnimState("exiting");
-    setTimeout(() => {
-      setVisible(false);
-      onDismiss();
-    }, 200);
-  }, [onDismiss]);
-
-  const accentColor = result.isCorrect
-    ? "rgb(34, 197, 94)"
-    : "rgb(239, 68, 68)";
-  const accentBg = result.isCorrect
-    ? "from-green-500/12 to-green-500/05"
-    : "from-red-500/12 to-red-500/05";
-  const accentBorder = result.isCorrect
-    ? "border-green-500/50"
-    : "border-red-500/50";
-
-  if (!visible) return null;
-
-  return (
-    <div
-      className={cn(
-        "relative rounded-2xl border-2 p-4 sm:p-5 mb-3 transition-all duration-200 bg-gradient-to-br shadow-sm",
-        accentBg,
-        accentBorder,
-        animState === "entering" && "opacity-0 scale-95 translate-y-2",
-        animState === "visible" && "opacity-100 scale-100 translate-y-0",
-        animState === "exiting" && "opacity-0 scale-95 translate-y-2",
-      )}
-    >
-      {/* Close */}
-      <button
-        onClick={handleDismiss}
-        className={cn(
-          "absolute top-3 w-7 h-7 before:absolute before:content-[''] before:-inset-2 before:rounded-full rounded-full bg-black/[0.06] dark:bg-white/[0.08] flex items-center justify-center hover:bg-black/[0.1] dark:hover:bg-white/[0.12] active:scale-[0.92] transition-all z-10 [touch-action:manipulation]",
-          isRtl ? "left-3" : "right-3",
-        )}
-      >
-        <X className="w-3.5 h-3.5 text-muted-foreground" />
-      </button>
-
-      {/* Header */}
-      <div className={cn("flex items-center gap-3 mb-2", isRtl && "flex-row-reverse")}>
-        <div
-          className={cn(
-            "w-10 h-10 rounded-xl flex items-center justify-center",
-            result.isCorrect ? "bg-green-500/15" : "bg-red-500/15",
-          )}
-        >
-          {result.isCorrect ? (
-            <CheckCircle2 className="w-6 h-6 text-green-500" />
-          ) : (
-            <XCircle className="w-6 h-6 text-red-500" />
-          )}
-        </div>
-        <div className={cn("flex-1", isRtl && "text-right")}>
-          <p className="text-base font-black" style={{ color: accentColor }}>
-            {result.isCorrect ? "Correct!" : "Incorrect"}
-          </p>
-          {!result.isCorrect && (
-            <p className={cn("text-xs font-semibold text-muted-foreground mt-0.5", isRtl && "text-right")}>
-              {result.correctAnswerText}
-            </p>
-          )}
-        </div>
-      </div>
-
-      {/* Explanation */}
-      {result.explanation && (
-        <div className={cn(
-          "flex items-start gap-2.5 p-3 rounded-xl bg-gradient-to-br from-blue-500/10 to-blue-500/05 border border-blue-500/15 mb-3",
-          isRtl && "flex-row-reverse"
-        )}>
-          <Lightbulb className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
-          <p className={cn("text-xs sm:text-sm text-muted-foreground leading-6 flex-1", isRtl && "text-right")}>
-            {result.explanation}
-          </p>
-        </div>
-      )}
-
-      {/* Dismiss */}
-      <button
-        onClick={handleDismiss}
-        className="w-full py-3 rounded-xl text-white text-xs font-extrabold text-center transition-all hover:opacity-90 active:scale-[0.98] shadow-lg [touch-action:manipulation]"
-        style={{
-          backgroundColor: accentColor,
-          boxShadow: `0 4px 12px ${accentColor}40`,
-        }}
-      >
-        Continue
-      </button>
-    </div>
-  );
-}
 
 // ═══════════════════════════════════════════════════════════════════════════════
 //  DIFFICULTY OPTIONS
@@ -748,41 +49,36 @@ const DIFFICULTY_OPTIONS: {
   value: DifficultyFilter;
   label: string;
   desc: string;
-  icon: any;
+  icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
   color: string;
-  gradient: string;
 }[] = [
   {
     value: null,
     label: "All",
-    desc: "Mixed difficulty levels",
+    desc: "Mixed challenges",
     icon: Target,
     color: "#6366F1",
-    gradient: "from-indigo-500/20 to-indigo-600/10",
   },
   {
     value: "easy",
     label: "Easy",
-    desc: "Beginner friendly",
+    desc: "Gentle start",
     icon: Sparkles,
     color: "#22C55E",
-    gradient: "from-green-500/20 to-emerald-600/10",
   },
   {
     value: "medium",
     label: "Medium",
-    desc: "Balanced challenge",
+    desc: "Balanced path",
     icon: BookOpen,
     color: "#3B82F6",
-    gradient: "from-blue-500/20 to-sky-600/10",
   },
   {
     value: "hard",
     label: "Hard",
-    desc: "Expert level",
+    desc: "Deep waters",
     icon: Zap,
     color: "#EF4444",
-    gradient: "from-red-500/20 to-rose-600/10",
   },
 ];
 
@@ -806,6 +102,7 @@ export default function TriviaPage() {
     difficulty,
     totalCount,
     streak,
+    questionIdsSeen,
     fetchQuestion,
     answer,
     nextQuestion,
@@ -813,14 +110,45 @@ export default function TriviaPage() {
     reset,
     setDifficulty,
     startQuiz,
+    restoreState,
   } = useTrivia();
 
   const prevDifficultyRef = useRef(difficulty);
+
+  // ── Session storage keys for state persistence across navigation ──
+  const TRIVIA_STORAGE_KEY = "exegesis_trivia_state";
+  const DAILY_STORAGE_KEY = "exegesis_daily_session";
+
+  // Refs to hold values from useDailyChallenge / gameMode (avoids TDZ since those hooks are called later)
+  const dcRestoreRef = useRef<(s: DailyChallengeSession) => void>(() => {});
+  const setGameModeRef = useRef<(m: "normal" | "daily") => void>(() => {});
+  const gameModeRef = useRef<"normal" | "daily">("normal");
+  const dcSessionRef = useRef<DailyChallengeSession>(null!);
 
   // Fetch stats on mount
   useEffect(() => {
     fetchStats();
   }, [fetchStats]);
+
+  // Restore saved state when returning from BibleReader
+  useEffect(() => {
+    const savedTrivia = sessionStorage.getItem(TRIVIA_STORAGE_KEY);
+    const savedDaily = sessionStorage.getItem(DAILY_STORAGE_KEY);
+    if (savedTrivia) {
+      sessionStorage.removeItem(TRIVIA_STORAGE_KEY);
+      try {
+        const parsed = JSON.parse(savedTrivia) as TriviaState;
+        restoreState(parsed);
+      } catch { /* ignore corrupt data */ }
+    } else if (savedDaily) {
+      sessionStorage.removeItem(DAILY_STORAGE_KEY);
+      try {
+        const parsed = JSON.parse(savedDaily) as DailyChallengeSession;
+        dcRestoreRef.current(parsed);
+        setGameModeRef.current("daily");
+      } catch { /* ignore corrupt data */ }
+    }
+  }, [restoreState]);
 
   // Re-fetch when difficulty changes during game
   useEffect(() => {
@@ -843,11 +171,23 @@ export default function TriviaPage() {
 
   const handleReferencePress = useCallback(
     (bookName: string, chapter: number, verseNumber?: number | null) => {
+      const gm = gameModeRef.current;
+      const dcs = dcSessionRef.current;
+      if (gm === "normal" && phase !== "plan") {
+        const triviaState: TriviaState = {
+          phase, question, selectedAnswer, result, score, stats,
+          loading, error, questionIdsSeen, difficulty, totalCount, streak,
+        };
+        sessionStorage.setItem(TRIVIA_STORAGE_KEY, JSON.stringify(triviaState));
+      } else if (gm === "daily") {
+        sessionStorage.setItem(DAILY_STORAGE_KEY, JSON.stringify(dcs));
+      }
       navigate(
-        `${routes.bibleReader.path}?book=${encodeURIComponent(bookName)}&chapter=${chapter}&verse=${verseNumber ?? 1}`,
+        `${routes.bibleReader.path}?book=${encodeURIComponent(bookName)}&chapter=${chapter}&verse=${verseNumber ?? 1}&ref=trivia`,
       );
     },
-    [navigate],
+    // Only stable / early-declared deps; gameMode/dcSession via refs to avoid TDZ
+    [navigate, phase, question, selectedAnswer, result, score, stats, loading, error, difficulty, totalCount, streak, questionIdsSeen],
   );
 
   // ── Result dismissed state ──
@@ -863,8 +203,100 @@ export default function TriviaPage() {
     }
   }, [phase]);
 
-  // ── Confetti state ──
-  const [showConfetti, setShowConfetti] = useState(false);
+  // ── Auto-advance timer ──
+  const [autoAdvanceProgress, setAutoAdvanceProgress] = useState<number | null>(null);
+  const autoAdvanceRef = useRef<{
+    startTime: number;
+    duration: number;
+    rafId: number;
+    timeoutId?: ReturnType<typeof setTimeout>;
+  } | null>(null);
+  const cancelledRef = useRef(false);
+
+  const cleanupAutoAdvance = useCallback(() => {
+    cancelledRef.current = true;
+    if (autoAdvanceRef.current) {
+      cancelAnimationFrame(autoAdvanceRef.current.rafId);
+      clearTimeout(autoAdvanceRef.current.timeoutId);
+      autoAdvanceRef.current = null;
+    }
+    setAutoAdvanceProgress(null);
+  }, []);
+
+  const startAutoAdvance = useCallback(() => {
+    cleanupAutoAdvance();
+
+    const isCorrect = result?.isCorrect;
+    // Correct: 3s auto-advance, Incorrect: 4s auto-advance (give time to read explanation)
+    const duration = isCorrect ? 3000 : 4500;
+
+    cancelledRef.current = false;
+    const startTime = performance.now();
+
+    const tick = (now: number) => {
+      // If manually cancelled, don't do anything
+      if (cancelledRef.current) return;
+
+      const elapsed = now - startTime;
+      const progress = Math.min((elapsed / duration) * 100, 100);
+      setAutoAdvanceProgress(progress);
+
+      if (progress >= 100) {
+        // Auto-dismiss, then auto-advance for correct answers
+        setResultDismissed(true);
+        setAutoAdvanceProgress(null);
+
+        if (isCorrect) {
+          // Brief pause, then auto-advance to next question
+          const tid = setTimeout(() => {
+            // Guard: only advance if user hasn't already dismissed
+            if (!cancelledRef.current) {
+              nextQuestion();
+            }
+          }, 600);
+          if (autoAdvanceRef.current) {
+            autoAdvanceRef.current.timeoutId = tid;
+          }
+        }
+
+        // Clear the ref after scheduling
+        if (autoAdvanceRef.current) {
+          autoAdvanceRef.current.rafId = 0;
+        }
+      } else {
+        autoAdvanceRef.current = {
+          startTime,
+          duration,
+          rafId: requestAnimationFrame(tick),
+        };
+      }
+    };
+
+    autoAdvanceRef.current = {
+      startTime,
+      duration,
+      rafId: requestAnimationFrame(tick),
+    };
+  }, [result, cleanupAutoAdvance, nextQuestion]);
+
+  // Start auto-advance when answer result appears
+  useEffect(() => {
+    if (phase === "answered" && result && !resultDismissed) {
+      startAutoAdvance();
+    }
+    return () => {
+      cleanupAutoAdvance();
+    };
+  }, [phase, result, resultDismissed, startAutoAdvance, cleanupAutoAdvance]);
+
+  // Override handleDismissResult to also cancel auto-advance
+  const handleDismissWithCancel = useCallback(() => {
+    cleanupAutoAdvance();
+    handleDismissResult();
+  }, [cleanupAutoAdvance, handleDismissResult]);
+
+  // ── Starburst state (was confetti) ──
+  const [showStarBurst, setShowStarBurst] = useState(false);
   const prevStreakRef = useRef(0);
 
   useEffect(() => {
@@ -874,12 +306,12 @@ export default function TriviaPage() {
       phase === "answered" &&
       result?.isCorrect
     ) {
-      setShowConfetti(true);
+      setShowStarBurst(true);
     }
     prevStreakRef.current = streak;
   }, [streak, phase, result]);
 
-  const handleConfettiFinish = useCallback(() => setShowConfetti(false), []);
+  const handleStarBurstFinish = useCallback(() => setShowStarBurst(false), []);
 
   // ── Milestone state ──
   const [showMilestone, setShowMilestone] = useState(false);
@@ -901,52 +333,190 @@ export default function TriviaPage() {
 
   const handleMilestoneFinish = useCallback(() => setShowMilestone(false), []);
 
-  // ── Score badge (used in header) ──
-  const scoreBadge =
-    score.total > 0 ? (
-      <span className="px-3 py-1 rounded-full text-[11px] font-black bg-primary/12 text-primary border border-primary/20">
-        <span className="text-green-500">{score.correct}</span>
-        <span className="mx-0.5 opacity-40">/</span>
-        {score.total}
-      </span>
-    ) : undefined;
+  // ── Badge system ──
+  const {
+    state: badgeState,
+    justUnlocked,
+    checkNewBadges,
+    clearUnlocked,
+    getProgress,
+  } = useBadges();
+
+  // Check badges after each answer
+  const prevResultRef = useRef<TriviaAnswerResult | null>(null);
+  useEffect(() => {
+    if (phase === "answered" && result && result !== prevResultRef.current) {
+      prevResultRef.current = result;
+      checkNewBadges({
+        totalAnswered: score.total,
+        totalCorrect: score.correct,
+        streak,
+        bookName: question?.bookName || null,
+        difficulty: question?.difficulty || null,
+        isCorrect: result.isCorrect,
+      });
+    }
+  }, [phase, result, score, streak, question, checkNewBadges]);
+
+  // Badge categories for the plan screen
+  const badgeCategories = [
+    { label: "Milestones", key: "milestone", color: "#6366F1" },
+    { label: "Streak", key: "streak", color: "#F59E0B" },
+    { label: "Exploration", key: "exploration", color: "#10B981" },
+    { label: "Difficulty", key: "difficulty", color: "#EC4899" },
+  ] as const;
+
+  const badgesByCategory = badgeCategories.map((cat) => ({
+    ...cat,
+    badges: BADGE_DEFINITIONS.filter((b) => b.category === cat.key),
+  }));
+
+  // ── Daily Challenge ──
+  const {
+    session: dcSession,
+    isTodayCompleted,
+    consecutiveDays,
+    todayKey,
+    startChallenge,
+    submitAnswer: dcSubmitAnswer,
+    nextQuestion: dcNextQuestion,
+    reset: dcReset,
+    getWeekHistory,
+    restoreSession: dcRestoreSession,
+  } = useDailyChallenge();
+  const [gameMode, setGameMode] = useState<"normal" | "daily">("normal");
+  gameModeRef.current = gameMode;
+
+  dcRestoreRef.current = dcRestoreSession;
+  setGameModeRef.current = setGameMode;
+  dcSessionRef.current = dcSession;
+
+  const handleSelectDaily = useCallback(
+    (index: number) => {
+      if (dcSession.selectedAnswer !== null) return;
+      dcSubmitAnswer(index);
+    },
+    [dcSession.selectedAnswer, dcSubmitAnswer],
+  );
+
+  const handleDismissDaily = useCallback(() => {
+    dcNextQuestion();
+  }, [dcNextQuestion]);
+
+  const startDailyChallenge = useCallback(() => {
+    setGameMode("daily");
+    startChallenge();
+  }, [startChallenge]);
+
+  // Reset daily challenge on return to plan
+  useEffect(() => {
+    if (dcSession.phase === "finished") {
+      // Stay on finish screen until user clicks back
+    }
+  }, [dcSession.phase]);
+
+  const handleDailyBackToPlan = useCallback(() => {
+    setGameMode("normal");
+    dcReset();
+  }, [dcReset]);
+
+  const weekHistory = getWeekHistory();
+
+  // ── Leaderboard ──
+  const {
+    state: leaderboardState,
+    recordSession,
+    getComparison,
+    resetLeaderboard,
+  } = useLeaderboard();
+
+  // Record session when quiz finishes
+  const prevPhaseRef = useRef(phase);
+  useEffect(() => {
+    if (
+      phase === "finished" &&
+      prevPhaseRef.current !== "finished" &&
+      score.total > 0
+    ) {
+      recordSession(score.correct, score.total, streak);
+    }
+    prevPhaseRef.current = phase;
+  }, [phase, score, streak, recordSession]);
+
+  const leaderboardComparison = getComparison();
 
   return (
+    <>
+      <BadgeUnlockPanel badges={justUnlocked} onClose={clearUnlocked} />
     <div
-      className="min-h-screen flex flex-col bg-gradient-to-b from-background via-background to-muted/30"
+      className="min-h-screen flex flex-col bg-background"
       dir={isRtl ? "rtl" : "ltr"}
     >
+      {/* Subtle dot texture */}
+      <div
+        className="fixed inset-0 pointer-events-none opacity-[0.03]"
+        style={{
+          backgroundImage: `radial-gradient(circle at 1px 1px, hsl(var(--primary)) 1px, transparent 0)`,
+          backgroundSize: "40px 40px",
+        }}
+      />
+
       {/* Header */}
-      <header className="flex-shrink-0 border-b border-border/50 bg-background/80 backdrop-blur-lg sticky top-0 z-30">
+      <header
+        className="flex-shrink-0 sticky top-0 z-30"
+        style={{
+          background: "linear-gradient(180deg, hsl(var(--background)/0.95), hsl(var(--background)/0.8))",
+          borderBottom: "1px solid hsl(var(--primary)/0.1)",
+          backdropFilter: "blur(12px)",
+        }}
+      >
         <div className="max-w-5xl mx-auto flex items-center justify-between px-4 sm:px-8 py-3.5">
           <div className="flex items-center gap-3">
             <button
               onClick={() => navigate(-1)}
-              className="relative w-9 h-9 before:absolute before:content-[''] before:-inset-2 before:rounded-full rounded-xl bg-muted/40 flex items-center justify-center hover:bg-muted/60 active:scale-[0.93] transition-all border border-border/40 [touch-action:manipulation] group"
+              className="relative w-9 h-9 before:absolute before:content-[''] before:-inset-2 before:rounded-full rounded-xl flex items-center justify-center active:scale-[0.93] transition-all [touch-action:manipulation] group"
+              style={{
+                backgroundColor: "hsl(var(--primary)/0.08)",
+                border: "1px solid hsl(var(--primary)/0.2)",
+              }}
             >
-              <ArrowLeft className="w-4 h-4 text-foreground group-hover:text-primary transition-colors" />
+              <ArrowLeft className="w-4 h-4 text-primary" />
             </button>
             <div>
               <h1
-                className="text-base sm:text-lg font-bold tracking-wide text-foreground leading-none"
+                className="text-base sm:text-lg font-bold tracking-wide leading-none text-foreground"
                 style={{ fontFamily: "'Cinzel', serif" }}
               >
                 Bible Trivia
               </h1>
-              <p className="text-[10px] text-muted-foreground tracking-widest uppercase leading-none mt-0.5">
+              <p className="text-[10px] tracking-widest uppercase leading-none mt-0.5 text-primary/50">
                 {difficulty
                   ? `${difficulty.charAt(0).toUpperCase() + difficulty.slice(1)} questions`
                   : "All levels"}
               </p>
             </div>
           </div>
-          {scoreBadge}
+          {score.total > 0 && (
+            <span
+              className="px-3 py-1 rounded-full text-[11px] font-black tracking-wider text-primary inline-flex items-center gap-0.5"
+              style={{
+                backgroundColor: "hsl(var(--primary)/0.1)",
+                border: "1px solid hsl(var(--primary)/0.25)",
+              }}
+            >
+              <span className="text-green-400">
+                <AnimatedNumber value={score.correct} springConfig={{ stiffness: 70, damping: 15 }} />
+              </span>
+              <span className="mx-0.5 text-primary/30">/</span>
+              <AnimatedNumber value={score.total} springConfig={{ stiffness: 70, damping: 15 }} />
+            </span>
+          )}
         </div>
       </header>
 
-      {/* Confetti + Milestone overlays */}
-      <ConfettiOverlay visible={showConfetti} onFinish={handleConfettiFinish} />
-      <MilestoneOverlay
+      {/* StarBurst + SanctuarySeal overlays */}
+      <StarBurst visible={showStarBurst} onFinish={handleStarBurstFinish} />
+      <SanctuarySeal
         visible={showMilestone}
         total={score.total}
         correct={score.correct}
@@ -961,108 +531,401 @@ export default function TriviaPage() {
       {/* ── Content ── */}
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-3xl mx-auto w-full px-4 sm:px-8 py-6 sm:py-8 pb-20">
-          {phase === "plan" ? (
-            /* ══════════════════════════════════════════════
-                PLAN SCREEN
-               ══════════════════════════════════════════════ */
-            <div className="flex flex-col gap-6 sm:gap-8">
-              {/* Hero section */}
-              <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-br from-primary/[0.12] via-primary/[0.06] to-primary/[0.02] border border-primary/15 p-6 sm:p-10">
-                {/* Decorative elements */}
-                <div className="absolute -top-20 -right-20 w-40 h-40 rounded-full bg-primary/10 blur-3xl" />
-                <div className="absolute -bottom-10 -left-10 w-24 h-24 rounded-full bg-primary/8 blur-2xl" />
-                <div className="absolute top-1/2 right-1/4 w-px h-32 bg-gradient-to-b from-primary/20 to-transparent" />
+          {/* ══════════════════════════════════════════════
+              DAILY CHALLENGE GAME
+             ══════════════════════════════════════════════ */}
+          {gameMode === "daily" && (
+            <div className="max-w-2xl mx-auto">
+              {/* Back button */}
+              <button
+                onClick={handleDailyBackToPlan}
+                className="inline-flex items-center gap-1.5 mb-4 px-3 py-1.5 rounded-lg text-[10px] font-extrabold uppercase tracking-wider transition-all hover:bg-muted active:scale-[0.98]"
+                style={{
+                  color: "hsl(var(--primary)/0.7)",
+                  border: "1px solid hsl(var(--primary)/0.15)",
+                }}
+              >
+                <ArrowLeft className="w-3 h-3" />
+                Back
+              </button>
 
-                <div className="relative flex flex-col sm:flex-row items-center gap-5 sm:gap-8">
-                  <div className="w-[72px] h-[72px] sm:w-[88px] sm:h-[88px] rounded-2xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-xl shadow-primary/30 shrink-0">
-                    <BookOpen className="w-9 h-9 sm:w-11 sm:h-11 text-white" />
-                  </div>
-                  <div className="text-center sm:text-left">
-                    <h2 className="text-xl sm:text-2xl font-black text-foreground mb-1.5">
-                      Bible Knowledge Quiz
-                    </h2>
-                    <p className="text-sm sm:text-base text-muted-foreground max-w-md leading-relaxed">
-                      Test your knowledge of the Scriptures with fun trivia
-                      questions drawn from across the Bible.
+              {/* Daily progress header */}
+              <div
+                className="p-3 rounded-xl mb-4"
+                style={{
+                  background: "linear-gradient(135deg, rgba(251,191,36,0.08), rgba(251,191,36,0.03))",
+                  border: "1px solid rgba(251,191,36,0.2)",
+                }}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <Sun className="w-3.5 h-3.5" style={{ color: "#F59E0B" }} />
+                    <p className="text-[10px] font-extrabold uppercase tracking-[0.15em]" style={{ color: "#F59E0B" }}>
+                      Daily Challenge
                     </p>
                   </div>
+                  <p className="text-[10px] font-bold text-muted-foreground/70">
+                    {dcSession.currentQuestion
+                      ? `${dcSession.currentIndex + 1} of ${dcSession.questions.length}`
+                      : ""}
+                  </p>
                 </div>
+
+                {/* Progress dots */}
+                <div className="flex items-center gap-1.5">
+                  {Array.from({ length: Math.max(dcSession.questions.length || DAILY_QUESTIONS_COUNT, 0) }, (_, i) => {
+                    const isDone = i < dcSession.answers.length;
+                    const isCurrent = i === dcSession.currentIndex && dcSession.phase !== "finished";
+                    const isCorrect = dcSession.answers[i]?.isCorrect;
+                    return (
+                      <div
+                        key={i}
+                        className="flex-1 h-1.5 rounded-full transition-all duration-300"
+                        style={{
+                          backgroundColor: isDone
+                            ? isCorrect
+                              ? "rgba(34,197,94,0.6)"
+                              : "rgba(239,68,68,0.6)"
+                            : isCurrent
+                              ? "rgba(251,191,36,0.5)"
+                              : "hsl(var(--foreground)/0.08)",
+                          boxShadow: isCurrent ? "0 0 6px rgba(251,191,36,0.3)" : "none",
+                        }}
+                      />
+                    );
+                  })}
+                </div>
+
+                {/* Streak indicator */}
+                {consecutiveDays > 0 && (
+                  <div className="flex items-center gap-1 mt-2">
+                    <Flame className="w-3 h-3" style={{ color: consecutiveDays >= 3 ? "#F59E0B" : "#F59E0B99" }} />
+                    <span className="text-[10px] font-bold" style={{ color: consecutiveDays >= 3 ? "#F59E0B" : "#F59E0B99" }}>
+                      {consecutiveDays}-day streak
+                    </span>
+                  </div>
+                )}
               </div>
 
-              {/* Stats card */}
-              {stats && stats.totalAnswered > 0 ? (
-                <div className="rounded-2xl border border-border/60 bg-card shadow-sm hover:shadow-md transition-shadow p-5 sm:p-6">
+              {/* Loading */}
+              {dcSession.loading && !dcSession.currentQuestion && (
+                <div className="flex flex-col items-center justify-center py-16">
                   <div
-                    className={cn(
-                      "flex items-center gap-2 mb-4",
-                      isRtl && "flex-row-reverse",
-                    )}
-                  >
-                    <Trophy className="w-4 h-4 text-amber-500" />
-                    <p className="text-xs font-bold text-foreground uppercase tracking-wider">
-                      Your Performance
-                    </p>
-                  </div>
-                  <div className="flex items-center justify-center gap-6 sm:gap-10">
-                    <div className="flex flex-col items-center">
-                      <AnimatedScoreRing
-                        correct={stats.correct}
-                        total={stats.totalAnswered}
-                        size={100}
-                      />
-                    </div>
-                    <div className="flex flex-col gap-4">
-                      <div className="text-center sm:text-left">
-                        <p className="text-2xl font-black text-green-500">
-                          {stats.correct}
-                        </p>
-                        <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mt-0.5">
-                          Correct
-                        </p>
-                      </div>
-                      <div className="text-center sm:text-left">
-                        <p className="text-2xl font-black text-foreground">
-                          {stats.totalAnswered}
-                        </p>
-                        <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mt-0.5">
-                          Total
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="rounded-2xl border border-border/60 bg-card shadow-sm p-6 sm:p-8 flex flex-col items-center gap-2.5">
-                  <div className="w-14 h-14 rounded-full bg-muted/30 flex items-center justify-center">
-                    <Trophy className="w-7 h-7 text-muted-foreground/40" />
-                  </div>
-                  <p className="text-sm font-bold text-foreground">
-                    No stats yet
-                  </p>
-                  <p className="text-xs text-muted-foreground text-center max-w-xs">
-                    Complete your first quiz to see your performance here!
+                    className="w-12 h-12 rounded-full border-4 animate-spin mb-4"
+                    style={{
+                      borderColor: "rgba(251,191,36,0.15)",
+                      borderTopColor: "#F59E0B",
+                    }}
+                  />
+                  <p className="text-sm font-semibold text-muted-foreground/60">
+                    Preparing your daily challenge...
                   </p>
                 </div>
               )}
 
-              {/* Difficulty selection */}
-              <div>
-                <div className="flex items-end justify-between mb-3 sm:mb-4">
-                  <div>
-                    <p className="text-[10px] font-black text-primary uppercase tracking-wider mb-0.5 flex items-center gap-1.5">
-                      <Target className="w-3 h-3" />
-                      Question Level
+              {/* Error */}
+              {dcSession.error && (
+                <div className="flex flex-col items-center justify-center py-12 gap-3">
+                  <p className="text-sm font-semibold text-center max-w-sm text-red-500">
+                    {dcSession.error}
+                  </p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={startDailyChallenge}
+                    className="gap-1.5 rounded-xl border-primary/30 text-primary"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5" />
+                    Retry
+                  </Button>
+                </div>
+              )}
+
+              {/* Question phase */}
+              {dcSession.phase === "question" && dcSession.currentQuestion && (
+                <StainedGlassQuestion
+                  question={dcSession.currentQuestion}
+                  selectedAnswer={dcSession.selectedAnswer}
+                  disabled={false}
+                  isRtl={isRtl}
+                  onSelect={handleSelectDaily}
+                  onReferencePress={handleReferencePress}
+                />
+              )}
+
+              {/* Answered phase */}
+              {dcSession.phase === "answered" && dcSession.currentQuestion && dcSession.currentResult && (
+                <div>
+                  <div className="mb-2">
+                    <StainedGlassQuestion
+                      question={dcSession.currentQuestion}
+                      selectedAnswer={dcSession.selectedAnswer}
+                      disabled={true}
+                      isRtl={isRtl}
+                      correctAnswerIndex={dcSession.currentResult.correctAnswer}
+                      onSelect={() => {}}
+                      onReferencePress={handleReferencePress}
+                    />
+                  </div>
+                  <GlassResult
+                    result={dcSession.currentResult}
+                    isRtl={isRtl}
+                    onDismiss={handleDismissDaily}
+                  />
+                </div>
+              )}
+
+              {/* Finished phase */}
+              {dcSession.phase === "finished" && (
+                <div className="flex flex-col items-center pt-4 gap-4 sm:gap-5">
+                  {/* Completion icon */}
+                  <div className="relative">
+                    <div
+                      className="absolute inset-0 rounded-full blur-2xl opacity-30"
+                      style={{ backgroundColor: "#F59E0B" }}
+                    />
+                    <div
+                      className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center shadow-xl"
+                      style={{
+                        background: "linear-gradient(135deg, #F59E0B, #D97706)",
+                        boxShadow: "0 0 30px rgba(251,191,36,0.3)",
+                      }}
+                    >
+                      <PartyPopper className="w-9 h-9 sm:w-11 sm:h-11 text-white" />
+                    </div>
+                  </div>
+
+                  <h2
+                    className="text-xl sm:text-2xl font-black text-center text-foreground"
+                    style={{ fontFamily: "'Cinzel', serif" }}
+                  >
+                    Daily Challenge Complete!
+                  </h2>
+
+                  {/* Score card */}
+                  <div
+                    className="w-full max-w-xs p-5 sm:p-6 rounded-2xl flex flex-col items-center gap-1"
+                    style={{
+                      background: "linear-gradient(135deg, rgba(251,191,36,0.06), rgba(251,191,36,0.02))",
+                      border: "1px solid rgba(251,191,36,0.2)",
+                    }}
+                  >
+                    <p className="text-[9px] font-semibold uppercase tracking-[0.2em]" style={{ color: "#F59E0B80" }}>
+                      Today's Score
                     </p>
-                    <p className="text-base sm:text-lg font-black text-foreground">
-                      Choose your challenge
+                    <p className="text-2xl sm:text-3xl font-black" style={{ color: "#F59E0B" }}>
+                      {dcSession.score.correct}/{dcSession.score.total}
+                    </p>
+                    <p className="text-xs font-semibold text-muted-foreground/60">
+                      {dcSession.score.total > 0
+                        ? Math.round((dcSession.score.correct / dcSession.score.total) * 100)
+                        : 0}
+                      %
                     </p>
                   </div>
-                  <p className="text-xs font-bold text-muted-foreground pb-0.5 hidden sm:block">
-                    Select one
+
+                  {/* Streak calendar */}
+                  <div
+                    className="w-full p-4 rounded-xl"
+                    style={{
+                      background: "hsl(var(--foreground)/0.02)",
+                      border: "1px solid hsl(var(--foreground)/0.06)",
+                    }}
+                  >
+                    <StreakCalendar
+                      weekHistory={getWeekHistory()}
+                      todayKey={todayKey}
+                      isTodayCompleted={true}
+                      consecutiveDays={consecutiveDays}
+                    />
+                  </div>
+
+                  {/* Back to plan */}
+                  <button
+                    onClick={handleDailyBackToPlan}
+                    className="group inline-flex items-center gap-2.5 px-8 py-3 rounded-2xl text-sm font-bold text-card transition-all hover:brightness-110 active:scale-[0.98] mt-2 overflow-hidden relative uppercase tracking-wider [touch-action:manipulation] bg-gradient-to-br from-primary to-primary/80"
+                    style={{
+                      boxShadow: "0 0 20px hsl(var(--primary)/0.3), 0 4px 15px hsl(var(--primary)/0.2)",
+                    }}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+                    <RotateCcw className="w-4 h-4" />
+                    Back to Menu
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {gameMode !== "daily" && phase === "plan" ? (
+            /* ══════════════════════════════════════════════
+                PLAN SCREEN — Cathedral Atrium
+               ══════════════════════════════════════════════ */
+            <div className="flex flex-col gap-5 sm:gap-6">
+              {/* Hero section — Illuminated Manuscript Header */}
+<div className="flex items-center gap-3 p-3 bg-background rounded-xl border">
+  <BookOpen className="w-10 h-10 text-primary" />
+  <div>
+    <h2 className="text-lg font-bold" style={{ fontFamily: "'Cinzel', serif" }}>Bible Trivia</h2>
+    <p className="text-sm text-muted-foreground">Test your knowledge of the Scriptures.</p>
+  </div>
+</div>
+
+              {/* Stats section — Compact Record Badge */}
+              {stats && stats.totalAnswered > 0 && (
+                <div
+                  className="rounded-xl border border-primary/10 p-3"
+                  style={{
+                    background: "linear-gradient(135deg, hsl(var(--primary)/0.04), hsl(var(--primary)/0.01))",
+                  }}
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div
+                        className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                        style={{ backgroundColor: "hsl(var(--primary)/0.1)" }}
+                      >
+                        <Trophy className="w-3.5 h-3.5 text-primary" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-[9px] font-extrabold uppercase tracking-[0.15em] text-primary/60 leading-none mb-0.5">
+                          Your Record
+                        </p>
+                        <p className="text-xs font-semibold text-muted-foreground/80 truncate">
+                          {stats.correct}<span className="text-muted-foreground/40">/</span>{stats.totalAnswered} correct
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <div
+                        className="w-px h-6"
+                        style={{ backgroundColor: "hsl(var(--primary)/0.1)" }}
+                      />
+                      <div className="text-right">
+                        <p className="text-lg font-black text-primary leading-none">
+                          {stats.totalAnswered > 0
+                            ? Math.round((stats.correct / stats.totalAnswered) * 100)
+                            : 0}
+                          <span className="text-[8px] font-bold text-primary/50 ml-0.5">%</span>
+                        </p>
+                        <p className="text-[7px] font-bold text-primary/40 uppercase tracking-[0.2em] leading-none mt-0.5">
+                          acc
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* ── Badges Section ── */}
+              {/* <div
+                className="rounded-xl border border-primary/10 p-3"
+              >
+                <div className="flex items-center gap-2.5 mb-2">
+                  <div
+                    className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                    style={{ backgroundColor: "hsl(var(--primary)/0.1)" }}
+                  >
+                    <Medal className="w-3.5 h-3.5 text-primary" />
+                  </div>
+                  <p className="text-[9px] font-extrabold uppercase tracking-[0.15em] text-primary/60 leading-none">
+                    Badges
+                  </p>
+                </div>
+                <div className="flex flex-wrap items-start gap-2">
+                  {badgesByCategory.map((cat) => (
+                    <div key={cat.key} className="flex items-center gap-1">
+                      {cat.badges.map((badge) => {
+                        const unlocked = !!badgeState.badges[badge.id]?.unlocked;
+                        const progress = getProgress(badge.id);
+                        return (
+                          <BadgeCrest
+                            key={badge.id}
+                            badge={badge}
+                            unlocked={unlocked}
+                            current={progress.current}
+                            target={progress.target}
+                            size="xs"
+                          />
+                        );
+                      })}
+                    </div>
+                  ))}
+                </div>
+              </div> */}
+
+              {/* ── Performance Leaderboard ── */}
+              {leaderboardState.bestSession.total > 0 && (
+                <SessionLeaderboard
+                  comparison={leaderboardComparison!}
+                  onReset={resetLeaderboard}
+                />
+              )}
+
+              {/* ── Daily Challenge ── */}
+              <div
+                className="rounded-xl border border-primary/10 p-3"
+              >
+                <div className="flex items-center justify-between gap-3 mb-2">
+                  <div className="flex items-center gap-2.5">
+                    <div
+                      className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                      style={{ backgroundColor: "rgba(251,191,36,0.12)" }}
+                    >
+                      <Sun className="w-3.5 h-3.5" style={{ color: "#F59E0B" }} />
+                    </div>
+                    <p className="text-[9px] font-extrabold uppercase tracking-[0.15em] text-primary/60 leading-none">
+                      Daily Challenge
+                    </p>
+                  </div>
+                  <div className="flex-shrink-0">
+                    {isTodayCompleted ? (
+                      <span
+                        className="px-2.5 py-1 rounded-full text-[9px] font-extrabold uppercase tracking-wider inline-block"
+                        style={{
+                          backgroundColor: "rgba(34,197,94,0.12)",
+                          color: "#22C55E",
+                          border: "1px solid rgba(34,197,94,0.25)",
+                        }}
+                      >
+                        Done
+                      </span>
+                    ) : (
+                      <button
+                        onClick={startDailyChallenge}
+                        className="flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-lg text-[10px] font-extrabold uppercase tracking-wider transition-all hover:brightness-110 active:scale-[0.97] whitespace-nowrap"
+                        style={{
+                          background: "linear-gradient(135deg, #F59E0B, #D97706)",
+                          color: "#FFF",
+                          boxShadow: "0 2px 8px rgba(251,191,36,0.3)",
+                        }}
+                      >
+                        <Sun className="w-3 h-3" />
+                        Start
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                <StreakCalendar
+                  weekHistory={weekHistory}
+                  todayKey={todayKey}
+                  isTodayCompleted={isTodayCompleted}
+                  consecutiveDays={consecutiveDays}
+                />
+              </div>
+
+              {/* Difficulty selection — "Choose Your Path" */}
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <Target className="w-3 h-3 text-primary/50" />
+                  <p className="text-[10px] font-black uppercase tracking-[0.15em] text-foreground/70"
+                    style={{ fontFamily: "'Cinzel', serif" }}>
+                    Choose your path
                   </p>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   {DIFFICULTY_OPTIONS.map((opt) => {
                     const IconComp = opt.icon;
                     const isSelected = difficulty === opt.value;
@@ -1071,88 +934,32 @@ export default function TriviaPage() {
                       <button
                         key={opt.value ?? "all"}
                         onClick={() => setDifficulty(opt.value)}
-                        className={cn(
-                          "relative group min-h-[120px] sm:min-h-[140px] flex flex-col justify-between p-4 sm:p-5 rounded-2xl border-2 transition-all text-left overflow-hidden [touch-action:manipulation]",
-                          isSelected
-                            ? "border-[var(--opt-color)] shadow-lg"
-                            : "border-border/60 bg-card hover:border-[var(--opt-color)]/40 hover:shadow-md",
-                        )}
-                        style={
-                          {
-                            "--opt-color": opt.color,
-                            "--opt-glow": `${opt.color}30`,
-                          } as React.CSSProperties
-                        }
+                        className="flex items-center gap-2 px-3 py-2 rounded-xl border transition-all active:scale-[0.97] [touch-action:manipulation]"
+                        style={{
+                          borderColor: isSelected ? opt.color : "hsl(var(--foreground)/0.06)",
+                          backgroundColor: isSelected ? `${opt.color}15` : "hsl(var(--foreground)/0.02)",
+                          boxShadow: isSelected ? `0 0 12px ${opt.color}12` : "none",
+                        }}
                       >
-                        {/* Background gradient */}
                         <div
-                          className={cn(
-                            "absolute inset-0 transition-opacity duration-300",
-                            isSelected
-                              ? "opacity-100"
-                              : "opacity-0 group-hover:opacity-60",
-                          )}
+                          className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
                           style={{
-                            background: `linear-gradient(135deg, ${opt.color}15, ${opt.color}08)`,
+                            backgroundColor: isSelected ? opt.color : `${opt.color}12`,
                           }}
-                        />
-
-                        {/* Decorative dot pattern */}
-                        <div className="absolute top-3 right-3 flex gap-1">
-                          {[0, 1, 2].map((i) => (
-                            <span
-                              key={i}
-                              className="w-1 h-1 rounded-full transition-all duration-300"
-                              style={{
-                                backgroundColor: isSelected
-                                  ? `${opt.color}60`
-                                  : `${opt.color}20`,
-                                opacity: isSelected ? 0.8 : 0.3,
-                              }}
-                            />
-                          ))}
+                        >
+                          <IconComp
+                            className="w-3.5 h-3.5"
+                            style={(opt as any).color !== undefined ? { color: isSelected ? "#0f0f2e" : (opt as any).color } : undefined}
+                          />
                         </div>
-
-                        <div className="relative z-10">
-                          <div
-                            className={cn(
-                              "w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center border-2 transition-all duration-300",
-                              isSelected
-                                ? "shadow-lg"
-                                : "group-hover:scale-110",
-                            )}
-                            style={{
-                              backgroundColor: isSelected
-                                ? opt.color
-                                : `${opt.color}12`,
-                              borderColor: isSelected
-                                ? opt.color
-                                : `${opt.color}30`,
-                              boxShadow: isSelected
-                                ? `0 4px 20px ${opt.color}40`
-                                : "none",
-                            }}
-                          >
-                            <IconComp
-                              className="w-[18px] h-[18px] sm:w-[20px] sm:h-[20px] transition-transform duration-300"
-                              color={isSelected ? "#FFFFFF" : opt.color}
-                              style={!isSelected ? {} : { transform: "scale(1.1)" }}
-                            />
-                          </div>
-                        </div>
-
-                        <div className="relative z-10 flex flex-col gap-0.5 mt-2">
+                        <div className="text-left min-w-0">
                           <p
-                            className={cn(
-                              "text-sm sm:text-base font-black transition-colors",
-                              isSelected
-                                ? "text-[var(--opt-color)]"
-                                : "text-foreground",
-                            )}
+                            className="text-[10px] font-extrabold leading-tight"
+                            style={{ color: isSelected ? opt.color : "hsl(var(--foreground))" }}
                           >
                             {opt.label}
                           </p>
-                          <p className="text-[10px] sm:text-[11px] font-bold text-muted-foreground">
+                          <p className="text-[8px] font-semibold text-muted-foreground/50 leading-tight truncate">
                             {opt.desc}
                           </p>
                         </div>
@@ -1162,30 +969,40 @@ export default function TriviaPage() {
                 </div>
               </div>
 
-              {/* Start Quiz */}
+              {/* Start Quiz — Gilded Seal */}
               <button
                 onClick={startQuiz}
-                className="relative group w-full flex items-center justify-center gap-2.5 py-4 sm:py-4.5 rounded-2xl bg-gradient-to-r from-primary to-primary/80 text-primary-foreground font-extrabold text-sm sm:text-base transition-all hover:opacity-90 active:scale-[0.98] shadow-xl shadow-primary/30 overflow-hidden [touch-action:manipulation]"
+                className="relative w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl text-xs sm:text-sm font-extrabold text-card transition-all hover:brightness-110 active:scale-[0.98] overflow-hidden [touch-action:manipulation] tracking-wider uppercase bg-gradient-to-br from-primary to-primary/80"
+                style={{
+                  boxShadow: "0 0 30px hsl(var(--primary)/0.3), 0 4px 20px hsl(var(--primary)/0.2)",
+                }}
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
-                <Play className="w-[18px] h-[18px] sm:w-[20px] sm:h-[20px] fill-current" />
-                Start Quiz
-                <ChevronRight className="w-4 h-4 opacity-70" />
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+                <Play className="w-[16px] h-[16px] sm:w-[18px] sm:h-[18px] fill-current" />
+                Begin Quest
               </button>
 
-              <p className="text-[11px] sm:text-xs text-muted-foreground text-center leading-6 px-4 sm:px-8 pb-2">
-                Questions are drawn from across the Bible. You can tap a
-                scripture reference to read the passage before answering.
+              <p
+                className="text-[10px] sm:text-[11px] text-center leading-5 px-4 sm:px-8 pb-2 text-muted-foreground/40"
+              >
+                Questions are drawn from across the Bible. Tap a scripture
+                reference to read the passage before answering.
               </p>
             </div>
           ) : (
             /* ══════════════════════════════════════════════
-                GAME SCREEN
+                GAME SCREEN — Chapter Room
                ══════════════════════════════════════════════ */
             <div className="max-w-2xl mx-auto">
-              {/* Difficulty filter chips */}
-              <div className="p-2 rounded-2xl bg-card border border-border/60 shadow-sm mb-4">
-                <p className="px-3 pt-1 pb-2 text-[10px] font-extrabold text-muted-foreground uppercase tracking-wider">
+              {/* Difficulty filter chips — Stained Glass Tabs */}
+              <div
+                className="p-2 rounded-xl mb-4"
+                style={{
+                  background: "hsl(var(--foreground)/0.02)",
+                  border: "1px solid hsl(var(--foreground)/0.06)",
+                }}
+              >
+                <p className="px-3 pt-1 pb-2 text-[9px] font-extrabold uppercase tracking-[0.15em] text-primary/50">
                   Difficulty
                 </p>
                 <div
@@ -1197,26 +1014,14 @@ export default function TriviaPage() {
                   {(["all", "easy", "medium", "hard"] as const).map((d) => {
                     const isActive =
                       d === "all" ? difficulty === null : difficulty === d;
-                    const chipColors =
+                    const chipColor =
                       d === "easy"
-                        ? {
-                            bg: "bg-green-500/15 border-green-500/30",
-                            text: "text-green-600 dark:text-green-400",
-                          }
+                        ? "#22C55E"
                         : d === "hard"
-                          ? {
-                              bg: "bg-red-500/15 border-red-500/30",
-                              text: "text-red-600 dark:text-red-400",
-                            }
+                          ? "#EF4444"
                           : d === "medium"
-                            ? {
-                                bg: "bg-blue-500/15 border-blue-500/30",
-                                text: "text-blue-600 dark:text-blue-400",
-                              }
-                            : {
-                                bg: "bg-primary/12 border-primary/25",
-                                text: "text-primary",
-                              };
+                            ? "#3B82F6"
+                            : "hsl(var(--primary))";
 
                     return (
                       <button
@@ -1225,22 +1030,23 @@ export default function TriviaPage() {
                           setDifficulty(d === "all" ? null : d)
                         }
                         className={cn(
-                          "flex-1 min-h-[40px] py-2 rounded-xl text-[11px] font-extrabold text-center transition-all border active:scale-[0.97] [touch-action:manipulation]",
-                          isActive
-                            ? `${chipColors.bg} ${chipColors.text} border`
-                            : "bg-muted/20 text-muted-foreground hover:bg-muted/40 border-transparent",
+                          "flex-1 min-h-[40px] py-2 rounded-xl text-[10px] font-extrabold text-center transition-all border active:scale-[0.97] uppercase tracking-wider [touch-action:manipulation]",
                         )}
+                        style={{
+                          backgroundColor: isActive ? `${chipColor}18` : "hsl(var(--foreground)/0.03)",
+                          borderColor: isActive ? `${chipColor}40` : "hsl(var(--foreground)/0.06)",
+                          color: isActive ? chipColor : "hsl(var(--muted-foreground)/0.5)",
+                          boxShadow: isActive ? `0 0 15px ${chipColor}15` : "none",
+                        }}
                       >
-                        {d === "all"
-                          ? "All"
-                          : d.charAt(0).toUpperCase() + d.slice(1)}
+                        {d === "all" ? "All" : d.charAt(0).toUpperCase() + d.slice(1)}
                       </button>
                     );
                   })}
                 </div>
               </div>
 
-              {/* Progress bar */}
+              {/* Progress — Pilgrim's Path */}
               {totalCount > 0 && (
                 <div className="mb-4">
                   <div
@@ -1250,26 +1056,33 @@ export default function TriviaPage() {
                     )}
                   >
                     <div className="flex items-center gap-2">
-                      <p className="text-[11px] font-bold text-foreground">
+                      <p className="text-[10px] font-bold text-muted-foreground/70">
                         Question {score.total + 1} of {totalCount}
                       </p>
-                      <span className="w-1 h-1 rounded-full bg-border" />
-                      <p className="text-[11px] font-medium text-muted-foreground">
+                      <span className="w-1 h-1 rounded-full bg-primary/30" />
+                      <p className="text-[10px] font-medium text-muted-foreground/50">
                         {difficulty
-                          ? difficulty.charAt(0).toUpperCase() +
-                            difficulty.slice(1)
+                          ? difficulty.charAt(0).toUpperCase() + difficulty.slice(1)
                           : "All"}
                       </p>
                     </div>
-                    <p className="text-[11px] font-extrabold text-primary">
+                    <p className="text-[10px] font-extrabold text-primary">
                       {Math.round((score.total / totalCount) * 100)}%
                     </p>
                   </div>
-                  <div className="w-full h-2.5 rounded-full bg-muted/30 border border-border/30 overflow-hidden">
+                  {/* Progress bar — Guilded path */}
+                  <div
+                    className="w-full h-2 rounded-full overflow-hidden"
+                    style={{
+                      backgroundColor: "hsl(var(--foreground)/0.04)",
+                      border: "1px solid hsl(var(--primary)/0.1)",
+                    }}
+                  >
                     <div
-                      className="h-full rounded-full bg-gradient-to-r from-primary to-primary/70 transition-all duration-500 ease-out"
+                      className="h-full rounded-full transition-all duration-500 ease-out bg-gradient-to-r from-primary to-primary/80"
                       style={{
                         width: `${(score.total / totalCount) * 100}%`,
+                        boxShadow: "0 0 8px hsl(var(--primary)/0.3)",
                       }}
                     />
                   </div>
@@ -1280,9 +1093,15 @@ export default function TriviaPage() {
               {loading && !question && (
                 <div className="flex flex-col items-center justify-center py-16 sm:py-24">
                   <div className="relative">
-                    <div className="w-12 h-12 rounded-full border-4 border-primary/20 border-t-primary animate-spin mb-4" />
+                    <div
+                      className="w-12 h-12 rounded-full border-4 animate-spin mb-4"
+                      style={{
+                        borderColor: "hsl(var(--primary)/0.15)",
+                        borderTopColor: "hsl(var(--primary))",
+                      }}
+                    />
                   </div>
-                  <p className="text-sm font-semibold text-muted-foreground">
+                  <p className="text-sm font-semibold text-muted-foreground/60">
                     Loading question...
                   </p>
                 </div>
@@ -1291,17 +1110,20 @@ export default function TriviaPage() {
               {/* Error */}
               {error && (
                 <div className="flex flex-col items-center justify-center py-12 gap-3">
-                  <div className="w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center">
-                    <XCircle className="w-6 h-6 text-destructive" />
+                  <div
+                    className="w-12 h-12 rounded-full flex items-center justify-center"
+                    style={{ backgroundColor: "rgba(239,68,68,0.1)" }}
+                  >
+                    <XCircle className="w-6 h-6 text-red-500" />
                   </div>
-                  <p className="text-sm font-semibold text-destructive text-center max-w-sm">
+                  <p className="text-sm font-semibold text-center max-w-sm text-red-500">
                     {error}
                   </p>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={fetchQuestion}
-                    className="gap-1.5 rounded-xl"
+                    className="gap-1.5 rounded-xl border-primary/30 text-primary"
                   >
                     <RotateCcw className="w-3.5 h-3.5" />
                     Retry
@@ -1312,7 +1134,7 @@ export default function TriviaPage() {
               {/* Playing */}
               {phase === "playing" && question && (
                 <div>
-                  <TriviaQuestionCard
+                  <StainedGlassQuestion
                     question={question}
                     selectedAnswer={selectedAnswer}
                     disabled={false}
@@ -1321,9 +1143,15 @@ export default function TriviaPage() {
                     onReferencePress={handleReferencePress}
                   />
                   <div className="flex items-center justify-center mt-3">
-                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted/30 border border-border/40">
-                      <Target className="w-3.5 h-3.5 text-muted-foreground" />
-                      <p className="text-[10px] font-semibold text-muted-foreground">
+                    <div
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full"
+                      style={{
+                        backgroundColor: "hsl(var(--foreground)/0.03)",
+                        border: "1px solid hsl(var(--foreground)/0.06)",
+                      }}
+                    >
+                      <Target className="w-3 h-3 text-primary/40" />
+                      <p className="text-[9px] font-semibold text-muted-foreground/50">
                         Tap an option to answer
                       </p>
                     </div>
@@ -1335,7 +1163,7 @@ export default function TriviaPage() {
               {phase === "answered" && question && result && (
                 <div>
                   <div className="mb-2">
-                    <TriviaQuestionCard
+                    <StainedGlassQuestion
                       question={question}
                       selectedAnswer={selectedAnswer}
                       disabled={true}
@@ -1346,31 +1174,39 @@ export default function TriviaPage() {
                     />
                   </div>
 
-                  {/* Streak */}
+                  {/* Streak — Spark indicator */}
                   {streak >= 2 && (
                     <div
                       className={cn(
-                        "flex items-center justify-center gap-1.5 mb-3 py-2 px-4 rounded-xl self-center mx-auto w-fit border shadow-sm",
-                        streak >= 3
-                          ? "bg-gradient-to-r from-amber-500/12 to-amber-500/05 border-amber-500/30"
-                          : "bg-primary/[0.06] border-primary/20",
+                        "flex items-center justify-center gap-1.5 mb-3 py-2 px-4 rounded-xl self-center mx-auto w-fit border",
                         isRtl && "flex-row-reverse",
                       )}
+                      style={{
+                        backgroundColor: streak >= 3
+                          ? "hsl(var(--primary)/0.08)"
+                          : "hsl(var(--primary)/0.04)",
+                        borderColor: streak >= 3
+                          ? "hsl(var(--primary)/0.3)"
+                          : "hsl(var(--primary)/0.15)",
+                        boxShadow: streak >= 3
+                          ? "0 0 15px hsl(var(--primary)/0.15)"
+                          : "none",
+                      }}
                     >
-                      <Zap
-                        className={cn(
-                          "w-4 h-4",
-                          streak >= 3 ? "text-amber-500" : "text-primary",
-                        )}
-                        fill={streak >= 3 ? "#F59E0B" : "transparent"}
+                      <Star
+                        className="w-4 h-4"
+                        style={{
+                          color: streak >= 3 ? "hsl(var(--primary))" : "hsl(var(--primary)/0.6)",
+                        }}
+                        fill={streak >= 3 ? "hsl(var(--primary))" : "transparent"}
                       />
                       <p
-                        className={cn(
-                          "text-xs font-extrabold",
-                          streak >= 3 ? "text-amber-500" : "text-primary",
-                        )}
+                        className="text-xs font-extrabold"
+                        style={{
+                          color: streak >= 3 ? "hsl(var(--primary))" : "hsl(var(--primary)/0.7)",
+                        }}
                       >
-                        {streak} in a row{streak >= 3 ? " 🔥" : ""}
+                        {streak} in a row{streak >= 3 ? " ✦" : ""}
                       </p>
                     </div>
                   )}
@@ -1378,23 +1214,36 @@ export default function TriviaPage() {
                   {/* Result area */}
                   <div className="min-h-[160px]">
                     {!resultDismissed && (
-                      <TriviaResultCard
+                      <GlassResult
                         result={result}
                         isRtl={isRtl}
-                        onDismiss={handleDismissResult}
+                        autoAdvanceProgress={autoAdvanceProgress}
+                        onDismiss={handleDismissWithCancel}
                       />
                     )}
 
-                    {/* Next button */}
+                    {/* Next button — shown after dismiss */}
                     {resultDismissed && (
-                      <button
-                        onClick={nextQuestion}
-                        className="group w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-gradient-to-r from-primary to-primary/80 text-primary-foreground font-extrabold text-sm transition-all hover:opacity-90 active:scale-[0.98] shadow-lg shadow-primary/30 mb-3 [touch-action:manipulation] overflow-hidden relative"
-                      >
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
-                        <Play className="w-4 h-4 fill-current" />
-                        Next Question
-                      </button>
+                      <div className="space-y-2">
+                        {/* Auto-advance countdown indicator (after dismiss, before next question) */}
+                        {result?.isCorrect && autoAdvanceProgress != null && autoAdvanceProgress >= 100 && (
+                          <div className="flex items-center justify-center gap-1.5 text-xs font-semibold text-muted-foreground/50 animate-pulse">
+                            <Timer className="w-3 h-3" />
+                            Advancing to next question...
+                          </div>
+                        )}
+                        <button
+                          onClick={nextQuestion}
+                          className="group w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl text-sm font-extrabold text-card transition-all hover:brightness-110 active:scale-[0.98] overflow-hidden relative uppercase tracking-wider [touch-action:manipulation] bg-gradient-to-br from-primary to-primary/80"
+                          style={{
+                            boxShadow: "0 0 20px hsl(var(--primary)/0.3), 0 4px 15px hsl(var(--primary)/0.2)",
+                          }}
+                        >
+                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+                          <Play className="w-4 h-4 fill-current" />
+                          Next Question
+                        </button>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -1403,29 +1252,49 @@ export default function TriviaPage() {
               {/* Finished */}
               {phase === "finished" && (
                 <div className="flex flex-col items-center pt-6 sm:pt-10 gap-4 sm:gap-5">
+                  {/* Illuminated finish crest */}
                   <div className="relative">
-                    <div className="absolute inset-0 rounded-full blur-2xl opacity-30 bg-primary/50" />
-                    <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-xl shadow-primary/30">
-                      <PartyPopper className="w-9 h-9 sm:w-11 sm:h-11 text-white" />
+                    <div className="absolute inset-0 rounded-full blur-2xl opacity-30"
+                      style={{ backgroundColor: "hsl(var(--primary))" }}
+                    />
+                    <div
+                      className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center shadow-xl bg-gradient-to-br from-primary to-primary/80"
+                      style={{
+                        boxShadow: "0 0 30px hsl(var(--primary)/0.3)",
+                      }}
+                    >
+                      <PartyPopper className="w-9 h-9 sm:w-11 sm:h-11 text-card" />
                     </div>
                   </div>
-                  <h2 className="text-xl sm:text-2xl font-black text-foreground text-center">
+                  <h2
+                    className="text-xl sm:text-2xl font-black text-center text-foreground"
+                    style={{ fontFamily: "'Cinzel', serif" }}
+                  >
                     All Questions Completed!
                   </h2>
-                  <p className="text-sm text-muted-foreground text-center max-w-sm leading-relaxed">
+                  <p
+                    className="text-sm text-center max-w-sm leading-relaxed text-muted-foreground/70"
+                  >
                     You've answered every available question. Come back later for
                     more!
                   </p>
 
                   {/* Final score */}
-                  <div className="w-full max-w-xs p-5 sm:p-6 rounded-2xl bg-card border border-border/60 shadow-sm flex flex-col items-center gap-1">
-                    <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">
+                  <div
+                    className="w-full max-w-xs p-5 sm:p-6 rounded-2xl flex flex-col items-center gap-1 border-primary/15"
+                    style={{
+                      background: "linear-gradient(135deg, hsl(var(--primary)/0.06), hsl(var(--primary)/0.02))",
+                    }}
+                  >
+                    <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-primary/50">
                       Final Score
                     </p>
-                    <p className="text-2xl sm:text-3xl font-black text-primary">
-                      {score.correct}/{score.total}
+                    <p className="text-2xl sm:text-3xl font-black text-primary inline-flex items-center gap-1">
+                      <AnimatedNumber value={score.correct} springConfig={{ stiffness: 60, damping: 15 }} />
+                      <span className="text-primary/40">/</span>
+                      <AnimatedNumber value={score.total} springConfig={{ stiffness: 60, damping: 15 }} />
                     </p>
-                    <p className="text-xs font-semibold text-muted-foreground">
+                    <p className="text-xs font-semibold text-muted-foreground/60">
                       {score.total > 0
                         ? Math.round((score.correct / score.total) * 100)
                         : 0}
@@ -1433,11 +1302,27 @@ export default function TriviaPage() {
                     </p>
                   </div>
 
+                  {/* Leaderboard comparison */}
+                  {leaderboardComparison &&
+                    leaderboardState.bestSession.total > 0 && (
+                      <div className="w-full max-w-xs">
+                        <SessionLeaderboard
+                          comparison={leaderboardComparison}
+                        />
+                      </div>
+                    )}
+
                   {/* Lifetime stats */}
                   {stats && stats.totalAnswered > score.total && (
-                    <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-muted/30 border border-border/40">
-                      <BookOpen className="w-3.5 h-3.5 text-muted-foreground" />
-                      <p className="text-[11px] font-semibold text-muted-foreground">
+                    <div
+                      className="flex items-center gap-2 px-4 py-2 rounded-full"
+                      style={{
+                        backgroundColor: "hsl(var(--foreground)/0.03)",
+                        border: "1px solid hsl(var(--foreground)/0.06)",
+                      }}
+                    >
+                      <BookOpen className="w-3.5 h-3.5 text-primary/40" />
+                      <p className="text-[10px] font-semibold text-muted-foreground/60">
                         Lifetime: {stats.correct}/{stats.totalAnswered} (
                         {stats.percentage}%)
                       </p>
@@ -1446,9 +1331,12 @@ export default function TriviaPage() {
 
                   <button
                     onClick={reset}
-                    className="group inline-flex items-center gap-2.5 px-8 py-3 rounded-2xl bg-gradient-to-r from-primary to-primary/80 text-primary-foreground font-bold text-sm transition-all hover:opacity-90 active:scale-[0.98] shadow-lg shadow-primary/30 mt-2 [touch-action:manipulation] overflow-hidden relative"
+                    className="group inline-flex items-center gap-2.5 px-8 py-3 rounded-2xl text-sm font-bold text-card transition-all hover:brightness-110 active:scale-[0.98] mt-2 overflow-hidden relative uppercase tracking-wider [touch-action:manipulation] bg-gradient-to-br from-primary to-primary/80"
+                    style={{
+                      boxShadow: "0 0 20px hsl(var(--primary)/0.3), 0 4px 15px hsl(var(--primary)/0.2)",
+                    }}
                   >
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
                     <RotateCcw className="w-4 h-4" />
                     Play Again
                   </button>
@@ -1459,5 +1347,6 @@ export default function TriviaPage() {
         </div>
       </div>
     </div>
+    </>
   );
 }

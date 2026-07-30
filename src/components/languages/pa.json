@@ -1139,6 +1139,7 @@
     "bible": "ਬਾਈਬਲ ਰੀਡਰ",
     "dailyVerse": "ਰੋਜ਼ਾਨਾ ਆਇਤ",
     "dashboard": "डैशबोर्ड",
+    "adminDashboard": "Admin Console",
     "devotions": "ਰੋਜ਼ਾਨਾ ਧਿਆਨ",
     "explanations": "ਆਇਤ ਵਿਆਖਿਆਵਾਂ",
     "home": "ਮੁੱਖ ਪੰਨਾ",
@@ -1153,7 +1154,11 @@
     "profile": "ਪ੍ਰੋਫਾਈਲ",
     "readingPlans": "ਪੜ੍ਹਨ ਦੀ ਯੋਜਨਾ",
     "settings": "ਸੈਟਿੰਗਾਂ",
-    "userActivity": "ਵਰਤੋਂਕਾਰ ਸਰਗਰਮੀ"
+    "userActivity": "ਵਰਤੋਂਕਾਰ ਸਰਗਰਮੀ",
+    "triviaAdmin": "Trivia Management",
+    "dailyContentAdmin": "Daily Content",
+    "subscriptionsAdmin": "Subscriptions",
+    "adminTools": "Admin Tools"
   },
   "userActivity": {
     "action": "ਕਾਰਵਾਈ",

@@ -29,7 +29,6 @@ import {
   Bell,
   Sun,
   Moon,
-  Monitor,
   BookOpen,
   Sliders,
   Type
@@ -53,6 +52,7 @@ import { sendPostRequest, TOKEN_KEY } from "@/services/api";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { useSubscription } from "@/hooks/useSubscription";
+import { useTheme } from "@/hooks/useTheme";
 import { routes } from "@/components/Routes/routes";
 import { LANGUAGE_NAMES, type Language } from "@/components/languages/type";
 import { getLanguageName } from "@/components/languages/localeUtils";
@@ -181,9 +181,7 @@ export default function Settings() {
   const [readingFontSize, setReadingFontSize] = useState(() => {
     return parseInt(localStorage.getItem("reading_font_size") || "18", 10);
   });
-  const [themeMode, setThemeMode] = useState(() => {
-    return localStorage.getItem("theme_mode") || "system";
-  });
+  const { themeMode, setThemeMode: handleThemeChange } = useTheme();
   const [preferredTranslation, setPreferredTranslation] = useState(() => {
     return localStorage.getItem("preferred_translation") || "BSB";
   });
@@ -192,26 +190,6 @@ export default function Settings() {
     const val = size[0];
     setReadingFontSize(val);
     localStorage.setItem("reading_font_size", String(val));
-  };
-
-  const handleThemeChange = (mode: string) => {
-    setThemeMode(mode);
-    localStorage.setItem("theme_mode", mode);
-    // Apply theme class to html element
-    const root = document.documentElement;
-    if (mode === "dark") {
-      root.classList.add("dark");
-      root.classList.remove("light");
-    } else if (mode === "light") {
-      root.classList.add("light");
-      root.classList.remove("dark");
-    } else {
-      root.classList.remove("light", "dark");
-    }
-    toast({
-      title: "Theme Updated",
-      description: mode === "dark" ? "Dark mode enabled" : mode === "light" ? "Light mode enabled" : "System theme",
-    });
   };
 
   const handleTranslationChange = (id: string) => {
@@ -439,11 +417,11 @@ export default function Settings() {
   return (
 
     <div className="min-h-full bg-background">
-      <div className="relative bg-slate-450 overflow-hidden">
+      <div className="relative bg-card overflow-hidden">
         <div
           className="absolute inset-0 pointer-events-none opacity-[0.06]"
           style={{
-            backgroundImage: "radial-gradient(circle, #ffffff 1px, transparent 1px)",
+            backgroundImage: "radial-gradient(circle, hsl(var(--foreground)/0.08) 1px, transparent 1px)",
             backgroundSize: "22px 22px",
           }}
         />
@@ -673,7 +651,7 @@ export default function Settings() {
                             "inline-block w-2 h-2 rounded-full",
                             isPayingUser
                               ? "bg-emerald-500"
-                              : "bg-slate-400",
+                              : "bg-muted-foreground/40",
                           )}
                         />
                       </div>
@@ -924,15 +902,17 @@ export default function Settings() {
                   {/* Theme */}
                   <div className="space-y-3">
                     <Label className="text-xs font-medium text-muted-foreground">Theme</Label>
-                    <div className="grid grid-cols-3 gap-2">
+                    <div className="grid grid-cols-2 gap-2">
                       {[
-                        { value: "light", icon: Sun, label: "Light" },
-                        { value: "dark", icon: Moon, label: "Dark" },
-                        { value: "system", icon: Monitor, label: "System" },
+                        { value: "light" as const, icon: Sun, label: "Light" },
+                        { value: "dark" as const, icon: Moon, label: "Dark" },
                       ].map(({ value, icon: Icon, label }) => (
                         <button
                           key={value}
-                          onClick={() => handleThemeChange(value)}
+                          onClick={() => {
+                            handleThemeChange(value);
+                            toast({ title: "Theme Updated", description: `${label} mode enabled` });
+                          }}
                           className={cn(
                             "flex flex-col items-center gap-1.5 py-3 rounded-xl border-2 transition-all",
                             themeMode === value

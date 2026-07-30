@@ -152,6 +152,11 @@ export function useTrivia() {
     [update],
   );
 
+  /** Restore a previously-saved state (from sessionStorage after navigation) */
+  const restoreState = useCallback((saved: TriviaState) => {
+    setState({ ...saved });
+  }, []);
+
   /** Reset the game — return to plan screen */
   const reset = useCallback(() => {
     setState({
@@ -179,5 +184,6 @@ export function useTrivia() {
     reset,
     setDifficulty,
     startQuiz,
+    restoreState,
   };
 }

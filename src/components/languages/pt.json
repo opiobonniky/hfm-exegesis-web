@@ -1463,6 +1463,7 @@
     "readingPlans": "Planos de Leitura",
     "settings": "Configurações",
     "dashboard": "Painel",
+    "adminDashboard": "Admin Console",
     "activity": "Atividade",
     "logout": "Sair",
     "profile": "Perfil",
@@ -1473,7 +1474,11 @@
     "userActivity": "Atividade do Usuário",
     "journalPrompts": "Sugestões de Diário",
     "journalTemplates": "Modelos de Diário",
-    "myDashboard": "Meu Painel"
+    "myDashboard": "Meu Painel",
+    "triviaAdmin": "Trivia Management",
+    "dailyContentAdmin": "Daily Content",
+    "subscriptionsAdmin": "Subscriptions",
+    "adminTools": "Admin Tools"
   },
   "settings": {
     "pageTitle": "Configurações",

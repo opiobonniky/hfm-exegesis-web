@@ -22,6 +22,7 @@ type AuthContextType = {
   setUserInfo: (user: UserInfo | null) => void;
   isAuthenticated: boolean;
   loading: boolean;
+  authLoading: boolean;
   logout: () => void;
   subscriptionTier: string;
   accessExpiresAt: string | null;
@@ -162,6 +163,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     setUserInfo,
     isAuthenticated: !!userInfo?.token,
     loading,
+    authLoading: loading,
     logout,
     subscriptionTier,
     accessExpiresAt,

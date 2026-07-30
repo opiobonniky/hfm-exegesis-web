@@ -27,6 +27,7 @@ export const CROSS_TRANSLATION_OPTIONS = [
 
 export const SUGGESTIONS: Record<SearchScope, string[]> = {
   bible: ["love", "faith", "hope", "peace", "joy", "grace", "mercy", "truth"],
+  strongs: ["agape", "logos", "charis","pistis", "doxa", "zoe"],
   journal: ["prayer", "thanksgiving", "healing", "wisdom", "faith", "peace"],
   topics: [
     "love",
@@ -69,6 +70,7 @@ const BOOK_NAMES = [
 
 export const SCOPE_LABELS: Record<SearchScope, string> = {
   bible: "Bible",
+  strongs: "Strong's",
   journal: "Journal",
   topics: "Topics",
   lemma: "Lemma",

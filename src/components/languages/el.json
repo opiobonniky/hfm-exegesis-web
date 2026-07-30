@@ -1139,6 +1139,7 @@
     "bible": "Αναγνώστης Βίβλου",
     "dailyVerse": "Καθημερινός Στίχος",
     "dashboard": "Dashboard",
+    "adminDashboard": "Admin Console",
     "devotions": "Καθημερινό Αφιέρωμα",
     "explanations": "Επεξηγήσεις Στίχων",
     "home": "Αρχική",
@@ -1153,7 +1154,11 @@
     "profile": "Προφίλ",
     "readingPlans": "Πρόγραμμα Μελέτης",
     "settings": "Ρυθμίσεις",
-    "userActivity": "Δραστηριότητα Χρήστη"
+    "userActivity": "Δραστηριότητα Χρήστη",
+    "triviaAdmin": "Trivia Management",
+    "dailyContentAdmin": "Daily Content",
+    "subscriptionsAdmin": "Subscriptions",
+    "adminTools": "Admin Tools"
   },
   "userActivity": {
     "action": "Ενέργεια",

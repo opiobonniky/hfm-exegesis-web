@@ -4,6 +4,7 @@ import { useLanguage } from "@/components/languages/languageProvider";
 import { ToolbarBtn } from "@/lib/bibleHelpers";
 
 export interface SelectionActionBarProps {
+  onExplainLocal: (selectedVerses: string[]) => void;
   selectedVerses: string[];
   isSpeaking: boolean;
   voiceMode: "chapter" | "selected" | null;

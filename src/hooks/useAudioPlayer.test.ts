@@ -42,6 +42,7 @@ function createMockAudio() {
     pause: vi.fn(),
     src: "",
     playbackRate: 1,
+    volume: 1,
     get onended() { return onendedCb; },
     set onended(fn) { onendedCb = fn; },
     get onerror() { return onerrorCb; },

@@ -142,7 +142,7 @@ export const sendPostRequest = async <T = any>(
       serverResponse?.returnMessage ?? serverResponse?.message ?? error.message;
     const serverCode = serverResponse?.returnCode ?? serverResponse?.status;
     console.error(`❌ POST ${controller}/${request} failed`, serverMessage);
-    return { returnCode: serverCode || 500, returnMessage: serverMessage };
+    return { returnCode: serverCode || 500, returnMessage: serverMessage, success: false };
   }
 };
 
