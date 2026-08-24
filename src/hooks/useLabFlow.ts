@@ -339,8 +339,8 @@ export function useLabFlow() {
   }, [update]);
 
   // ── Look stage actions ──
-  const advanceLook = useCallback(async () => {
-    const { lookNotes } = stateRef.current;
+  const advanceLook = useCallback(async (notesOverride?: string) => {
+    const lookNotes = notesOverride ?? stateRef.current.lookNotes;
     await saveAndAdvance("listen", { notes: lookNotes });
   }, [saveAndAdvance]);
 

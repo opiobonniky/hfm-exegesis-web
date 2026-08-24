@@ -1,68 +1,78 @@
-import PlanDetail from "@/pages/ReadingPlan/Plandetail";
-import UsersPage from "@/pages/UserManagement/UsersPage";
 import { ComponentType, lazy } from "react";
 
 // Lazy load components for code splitting
-const Landing = lazy(() => import("@/pages/Landing"));
-const Login = lazy(() => import("@/pages/Login"));
-const GoogleRegister = lazy(() => import("@/pages/GoogleRegister"));
-const Register = lazy(() => import("@/pages/Register"));
-const VerifyAccount = lazy(() => import("@/pages/VerifyAccount"));
-const ForgotPassword = lazy(() => import("@/pages/ForgotPassword"));
-const Dashboard = lazy(() => import("@/pages/Dashboard"));
-const HomeDashboard = lazy(() => import("@/pages/Index"));
-const DailyVerse = lazy(() => import("@/pages/DailyVerse"));
-const VerseExplanations = lazy(() => import("@/pages/VerseExplanations"));
-const AddDailyVerse = lazy(() => import("@/pages/AddDailyVerse"));
-const DailyDevotions = lazy(() => import("@/pages/DailyDevotions"));
-const AddDailyDevotion = lazy(() => import("@/pages/AddDailyDevotion"));
-const AddExplanation = lazy(() => import("@/pages/AddExplanation"));
+const Landing = lazy(() => import("@/features/Auth/pages/Landing"));
+const Login = lazy(() => import("@/features/Auth/pages/Login"));
+const GoogleRegister = lazy(() => import("@/features/Auth/pages/GoogleRegister"));
+const Register = lazy(() => import("@/features/Auth/pages/Register"));
+const VerifyAccount = lazy(() => import("@/features/Auth/pages/VerifyAccount"));
+const ForgotPassword = lazy(() => import("@/features/Auth/pages/ForgotPassword"));
+const Dashboard = lazy(() => import("@/features/Admin/pages/AdminDashboard"));
+const HomeDashboard = lazy(() => import("@/features/Home/pages/Index"));
+const DailyVerse = lazy(() => import("@/features/DailyContent/pages/DailyVerse"));
+const VerseExplanations = lazy(() => import("@/features/Bible/pages/VerseExplanations"));
+const AddDailyVerse = lazy(() => import("@/features/DailyContent/pages/AddDailyVerse"));
+const DailyDevotions = lazy(() => import("@/features/DailyContent/pages/DailyDevotions"));
+const AddDailyDevotion = lazy(() => import("@/features/DailyContent/pages/AddDailyDevotion"));
+const AddExplanation = lazy(() => import("@/features/DailyContent/pages/AddExplanation"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
-const AddReadingPlan = lazy(() => import("@/pages/ReadingPlan/Addreadingplan"));
-const ReadingPlans = lazy(() => import("@/pages/ReadingPlan/ReadingPlans"));
-const EditReadingPlan = lazy(
-  () => import("@/pages/ReadingPlan/EditReadingPlan"),
-);
+const PlanDetail = lazy(() => import("@/features/ReadingPlan/pages/PlanDetail"));
+const AddReadingPlan = lazy(() => import("@/features/ReadingPlan/pages/AddReadingPlan"));
+const ReadingPlans = lazy(() => import("@/features/ReadingPlan/pages/ReadingPlans"));
+const EditReadingPlan = lazy(() => import("@/features/ReadingPlan/pages/EditReadingPlan"));
 
-const BibleReader = lazy(() => import("@/pages/BibleReader"));
-const UserDashboard = lazy(() => import("@/pages/UserDashboard"));
-const UserDailyVerse = lazy(() => import("@/pages/UserDailyVerse"));
-const UserPlans = lazy(() => import("@/pages/UserPlans"));
-const BibleReadingPlan = lazy(
-  () => import("@/pages/ReadingPlan/BibleReadingPlan"),
-);
-const DailyReading = lazy(() => import("@/pages/ReadingPlan/DailyReading"));
-const MyActivity = lazy(() => import("@/pages/MyActivity"));
-const Settings = lazy(() => import("@/pages/Settings"));
-const Journal = lazy(() => import("@/pages/Journal"));
-const JournalEntry = lazy(() => import("@/pages/JournalEntry"));
-const JournalDetail = lazy(() => import("@/pages/JournalDetail"));
-const JournalPrompts = lazy(() => import("@/pages/JournalPrompts"));
-const JournalTemplates = lazy(() => import("@/pages/JournalTemplates"));
-const UserDevotions = lazy(() => import("@/pages/UserDevotions"));
-const Search = lazy(() => import("@/pages/Search"));
-const Trivia = lazy(() => import("@/pages/Trivia"));
-const StudyBible = lazy(() => import("@/pages/LabDictionary"));
-const BibleStudyFlow = lazy(() => import("@/pages/LabFlow"));
-const LabHome = lazy(() => import("@/pages/LabHome"));
-const LabReview = lazy(() => import("@/pages/LabReview"));
-const AdminDashboard = lazy(() => import("@/pages/AdminDashboard"));
-const AdminStudyTools = lazy(() => import("@/pages/AdminStudyTools"));
-const AdminTrivia = lazy(() => import("@/pages/AdminTrivia"));
-const AdminDailyContent = lazy(() => import("@/pages/AdminDailyContent"));
-const AdminSubscriptions = lazy(() => import("@/pages/AdminSubscriptions"));
-const AdminActivityLog = lazy(() => import("@/pages/AdminActivityLog"));
-const DailyExegesis = lazy(() => import("@/pages/DailyExegesis"));
-const SowerPage = lazy(() => import("@/pages/SowerPage"));
-const BibleLibrary = lazy(() => import("@/pages/BibleLibrary"));
-const VerseResources = lazy(() => import("@/pages/VerseResources"));
-const Onboarding = lazy(() => import("@/pages/Onboarding"));
-const WhoWeAre = lazy(() => import("@/pages/HimFirstMedia/WhoWeAre"));
-const OurVision = lazy(() => import("@/pages/HimFirstMedia/OurVision"));
-const OurMission = lazy(() => import("@/pages/HimFirstMedia/OurMission"));
-const OurGoals = lazy(() => import("@/pages/HimFirstMedia/OurGoals"));
-const Leadership = lazy(() => import("@/pages/HimFirstMedia/Leadership"));
-const Founders = lazy(() => import("@/pages/HimFirstMedia/Founders"));
+const BibleReader = lazy(() => import("@/features/Bible/pages/BibleReader"));
+const BookOverview = lazy(() => import("@/features/Bible/pages/BookOverview"));
+const UserDashboard = lazy(() => import("@/features/Home/pages/UserDashboard"));
+const UserDailyVerse = lazy(() => import("@/features/DailyContent/pages/UserDailyVerse"));
+const UserPlans = lazy(() => import("@/features/ReadingPlan/pages/UserPlans"));
+const BibleReadingPlan = lazy(() => import("@/features/ReadingPlan/pages/BibleReadingPlan"));
+const DailyReading = lazy(() => import("@/features/ReadingPlan/pages/DailyReading"));
+const MyActivity = lazy(() => import("@/features/Bible/pages/MyActivity"));
+const Settings = lazy(() => import("@/features/Settings/pages/Settings"));
+const Journal = lazy(() => import("@/features/Journal/pages/Journal"));
+const JournalEntry = lazy(() => import("@/features/Journal/pages/JournalEntry"));
+const JournalDetail = lazy(() => import("@/features/Journal/pages/JournalDetail"));
+const JournalPrompts = lazy(() => import("@/features/Journal/pages/JournalPrompts"));
+const JournalTemplates = lazy(() => import("@/features/Journal/pages/JournalTemplates"));
+const UserDevotions = lazy(() => import("@/features/DailyContent/pages/UserDevotions"));
+const Search = lazy(() => import("@/features/Bible/pages/Search"));
+const Trivia = lazy(() => import("@/features/Trivia/pages/Trivia"));
+const StudyBible = lazy(() => import("@/features/Lab/pages/LabDictionary"));
+const BibleStudyFlow = lazy(() => import("@/features/Lab/pages/LabFlow"));
+const LabHome = lazy(() => import("@/features/Lab/pages/LabHome"));
+const LabReview = lazy(() => import("@/features/Lab/pages/LabReview"));
+const AdminDashboard = lazy(() => import("@/features/Admin/pages/AdminDashboard"));
+const AdminStudyTools = lazy(() => import("@/features/Admin/pages/AdminStudyTools"));
+const AdminTrivia = lazy(() => import("@/features/Admin/pages/AdminTrivia"));
+const AdminDailyContent = lazy(() => import("@/features/Admin/pages/AdminDailyContent"));
+const AdminSubscriptions = lazy(() => import("@/features/Admin/pages/AdminSubscriptions"));
+const AdminActivityLog = lazy(() => import("@/features/Admin/pages/AdminActivityLog"));
+const AdminBookPrologues = lazy(() => import("@/features/Admin/pages/AdminBookPrologues"));
+const AdminVerseExplanations = lazy(() => import("@/features/Admin/pages/AdminVerseExplanations"));
+const AdminTriviaPerformance = lazy(() => import("@/features/Admin/pages/AdminTriviaPerformance"));
+const DailyVerseDetail = lazy(() => import("@/features/DailyContent/pages/DailyVerseDetail"));
+const AdminDailyExegesis = lazy(() => import("@/features/Admin/pages/AdminDailyExegesis"));
+const AdminTriviaUserDetail = lazy(() => import("@/features/AdminTriviaUserDetail/pages/AdminTriviaUserDetail"));
+const AdminAddTriviaQuestion = lazy(() => import("@/features/AdminAddTriviaQuestion/pages/AdminAddTriviaQuestion"));
+const AdminJournalModeration = lazy(() => import("@/features/AdminJournalModeration/pages/AdminJournalModeration"));
+const ExtendedProfile = lazy(() => import("@/features/ExtendedProfile/pages/ExtendedProfile"));
+const VoiceSettings = lazy(() => import("@/features/VoiceSettings/pages/VoiceSettings"));
+const ReadingSettings = lazy(() => import("@/features/ReadingSettings/pages/ReadingSettings"));
+const NotificationSettings = lazy(() => import("@/features/NotificationSettings/pages/NotificationSettings"));
+const StrongsDictionary = lazy(() => import("@/features/StrongsDictionary/pages/StrongsDictionary"));
+const GuestEntry = lazy(() => import("@/features/GuestEntry/pages/GuestEntry"));
+const DailyExegesis = lazy(() => import("@/features/DailyContent/pages/DailyExegesis"));
+const SowerPage = lazy(() => import("@/features/Subscription/pages/SowerPage"));
+const BibleLibrary = lazy(() => import("@/features/Bible/pages/BibleLibrary"));
+const VerseResources = lazy(() => import("@/features/Bible/pages/VerseResources"));
+const Onboarding = lazy(() => import("@/features/Auth/pages/Onboarding"));
+const WhoWeAre = lazy(() => import("@/features/HimFirstMedia/pages/WhoWeAre"));
+const OurVision = lazy(() => import("@/features/HimFirstMedia/pages/OurVision"));
+const OurMission = lazy(() => import("@/features/HimFirstMedia/pages/OurMission"));
+const OurGoals = lazy(() => import("@/features/HimFirstMedia/pages/OurGoals"));
+const Leadership = lazy(() => import("@/features/HimFirstMedia/pages/Leadership"));
+const Founders = lazy(() => import("@/features/HimFirstMedia/pages/Founders"));
 
 // Route configuration interface
 export interface RouteConfig {
@@ -217,7 +227,7 @@ export const routes = {
   },
   systemUsers: {
     path: "/system-users",
-    component: UsersPage,
+    component: lazy(() => import("@/features/UserManagement/pages/UsersPage")),
     isProtected: true,
     requiresLayout: true,
     title: "System Users",
@@ -235,6 +245,13 @@ export const routes = {
     isProtected: true,
     requiresLayout: true,
     title: "Bible Reader",
+  },
+  bookOverview: {
+    path: "/book-overview",
+    component: BookOverview,
+    isProtected: true,
+    requiresLayout: true,
+    title: "Book Overview",
   },
   userDashboard: {
     path: "/user-dashboard",
@@ -426,6 +443,111 @@ export const routes = {
     isProtected: true,
     requiresLayout: true,
     title: "Activity Log",
+  },
+  adminBookPrologues: {
+    path: "/admin/book-prologues",
+    component: AdminBookPrologues,
+    isProtected: true,
+    requiresLayout: true,
+    title: "Book Prologues Manager",
+  },
+  adminVerseExplanations: {
+    path: "/admin/verse-explanations",
+    component: AdminVerseExplanations,
+    isProtected: true,
+    requiresLayout: true,
+    title: "Verse Explanations Manager",
+  },
+  adminDailyExegesis: {
+    path: "/admin/daily-exegesis",
+    component: AdminDailyExegesis,
+    isProtected: true,
+    requiresLayout: true,
+    title: "Daily Exegesis Manager",
+  },
+  adminTriviaUserDetail: {
+    path: "/admin/trivia/user/:userId",
+    component: AdminTriviaUserDetail,
+    isProtected: true,
+    requiresLayout: true,
+    title: "Trivia User Detail",
+  },
+  adminAddTriviaQuestion: {
+    path: "/admin/trivia/add",
+    component: AdminAddTriviaQuestion,
+    isProtected: true,
+    requiresLayout: true,
+    title: "Add Trivia Question",
+  },
+  adminEditTriviaQuestion: {
+    path: "/admin/trivia/edit/:questionId",
+    component: AdminAddTriviaQuestion,
+    isProtected: true,
+    requiresLayout: true,
+    title: "Edit Trivia Question",
+  },
+  adminTriviaPerformance: {
+    path: "/admin/trivia/performance",
+    component: AdminTriviaPerformance,
+    isProtected: true,
+    requiresLayout: true,
+    title: "Trivia Performance",
+  },
+  dailyVerseDetail: {
+    path: "/daily-verse-detail",
+    component: DailyVerseDetail,
+    isProtected: true,
+    requiresLayout: true,
+    title: "Daily Verse Detail",
+  },
+  adminJournalModeration: {
+    path: "/admin/journal-moderation",
+    component: AdminJournalModeration,
+    isProtected: true,
+    requiresLayout: true,
+    title: "Journal Moderation",
+  },
+  extendedProfile: {
+    path: "/extended-profile",
+    component: ExtendedProfile,
+    isProtected: true,
+    requiresLayout: true,
+    title: "Extended Profile",
+  },
+  voiceSettings: {
+    path: "/voice-settings",
+    component: VoiceSettings,
+    isProtected: true,
+    requiresLayout: true,
+    title: "Voice Settings",
+  },
+  readingSettings: {
+    path: "/reading-settings",
+    component: ReadingSettings,
+    isProtected: true,
+    requiresLayout: true,
+    title: "Reading Settings",
+  },
+  notificationSettings: {
+    path: "/notification-settings",
+    component: NotificationSettings,
+    isProtected: true,
+    requiresLayout: true,
+    title: "Notification Settings",
+  },
+  strongsDictionary: {
+    path: "/strongs-dictionary",
+    component: StrongsDictionary,
+    isProtected: true,
+    requiresLayout: true,
+    title: "Strong's Dictionary",
+  },
+  guestEntry: {
+    path: "/guest",
+    component: GuestEntry,
+    isProtected: false,
+    requiresLayout: false,
+    title: "Welcome",
   },
   dailyExegesis: {
     path: "/daily-exegesis",

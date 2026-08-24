@@ -42,10 +42,6 @@ export function AppLayout() {
   const { themeMode, setThemeMode } = useTheme();
   const location = useLocation();
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
-
   const pageTitle = useMemo(() => {
     // Try route-matching first
     const routeTitle = matchRouteTitle(location.pathname);
@@ -63,11 +59,15 @@ export function AppLayout() {
     document.title = pageTitle ? `${pageTitle} | Exegesis` : 'Exegesis';
   }, [pageTitle]);
 
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-background">
+      <div className="h-dvh flex w-full overflow-hidden bg-background">
         <AppSidebar />
-        <main className="flex-1 flex flex-col" dir={isRtl ? 'rtl' : 'ltr'}>
+        <main className="flex-1 min-w-0 min-h-0 flex flex-col overflow-hidden" dir={isRtl ? 'rtl' : 'ltr'}>
           <header className="h-14 md:h-16 border-b border-border flex items-center px-4 lg:px-6 bg-background/80 backdrop-blur-sm sticky top-0 z-50">
             <SidebarTrigger className="me-4">
               <Button variant="ghost" size="icon" className="h-8 w-8 md:h-10 md:w-10">
@@ -89,7 +89,7 @@ export function AppLayout() {
               )}
             </button>
           </header>
-          <div className="flex-1 overflow-auto pb-16 md:pb-0">
+          <div className="flex-1 min-h-0 overflow-auto pb-16 md:pb-0">
             <Outlet />
           </div>
         </main>

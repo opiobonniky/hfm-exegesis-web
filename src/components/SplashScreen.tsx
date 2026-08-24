@@ -6,7 +6,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { isOnboardingCompleted } from "@/pages/Onboarding";
+import { isOnboardingCompleted } from "@/features/Auth/pages/Onboarding";
 import { routes } from "@/components/Routes/routes";
 import { BookOpen } from "lucide-react";
 

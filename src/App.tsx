@@ -8,6 +8,8 @@ import { LanguageProvider } from "@/components/languages/languageProvider";
 import { AppLayout } from "@/components/AppLayout";
 import PublicLayout from "@/components/PublicLayout";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { RouteSuspense } from "@/components/RouteSuspense";
+import { PageSkeleton } from "@/components/ui/skeletons";
 import SplashScreen from "@/components/SplashScreen";
 import { Loader2 } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
@@ -20,8 +22,8 @@ import {
 } from "./components/Routes/routes";
 
 const RouteLoader = () => (
-  <div className="flex items-center justify-center min-h-screen">
-    <Loader2 className="w-8 h-8 animate-spin text-primary" />
+  <div className="min-h-screen bg-background">
+    <PageSkeleton />
   </div>
 );
 
@@ -83,7 +85,9 @@ const AppRoutes = () => {
                 key={route.path}
                 path={route.path}
                 element={
-                  <route.component />
+                  <RouteSuspense featureName={route.title || "Page"}>
+                    <route.component />
+                  </RouteSuspense>
                 }
               />
             ))}
@@ -95,7 +99,9 @@ const AppRoutes = () => {
                     key={route.path}
                     path={route.path}
                     element={
-                      <route.component />
+                      <RouteSuspense featureName={route.title || "Page"}>
+                        <route.component />
+                      </RouteSuspense>
                     }
                   />
                 ))}
@@ -109,7 +115,9 @@ const AppRoutes = () => {
                     key={route.path}
                     path={route.path}
                     element={
-                      <route.component />
+                      <RouteSuspense featureName={route.title || "Page"}>
+                        <route.component />
+                      </RouteSuspense>
                     }
                   />
                 ))}
@@ -120,7 +128,9 @@ const AppRoutes = () => {
                   key={route.path}
                   path={route.path}
                   element={
-                    <route.component />
+                    <RouteSuspense featureName={route.title || "Page"}>
+                      <route.component />
+                    </RouteSuspense>
                   }
                 />
               ))}

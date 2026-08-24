@@ -165,8 +165,8 @@ const ACTIONS: ActionItem[] = [
     label: "Share Verse",
     description: "Share with others",
     color: "text-muted-foreground dark:text-muted-foreground/70",
-    bgColor: "bg-muted dark:bg-slate-950/30",
-    borderColor: "border-border/50 dark:border-slate-800/30",
+    bgColor: "bg-muted dark:bg-background/50",
+    borderColor: "border-border/50 dark:border-border/50",
     action: "share",
   },
 ];
