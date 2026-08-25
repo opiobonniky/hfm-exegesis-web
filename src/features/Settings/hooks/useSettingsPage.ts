@@ -59,6 +59,7 @@ export function useSettingsPage() {
   }, [profile, toast, t]);
   const handlePasswordChange = useCallback(async (currentPassword: string, newPassword: string) => {
     setSavingPassword(true);
+    try {
       const res = await sendPostRequest("auth", "update-password", { currentPassword, newPassword });
       if (res.returnCode === 200) toast({ title: t.settings?.passwordUpdated || "Password updated" });
     } catch (e: any) { toast({ title: e?.response?.data?.returnMessage || "Error", variant: "destructive" }); }
@@ -73,6 +74,7 @@ export function useSettingsPage() {
   const handleSowerAction = useCallback(async () => {
     if (isPayingUser) {
       setSowerPortalLoading(true);
+      try {
         const res = await sendPostRequest("subscriptions", "create-portal-session", {});
         if (res.returnCode === 200 && res.returnData?.url) window.open(res.returnData.url, "_blank");
         else toast({ title: "Portal error", description: res.returnMessage, variant: "destructive" });

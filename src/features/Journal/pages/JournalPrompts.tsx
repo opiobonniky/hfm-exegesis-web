@@ -13,27 +13,35 @@ import { CATEGORIES, getCategoryLabel } from "../constants";
 import { JournalPromptForm } from "../components/JournalPromptForm";
 
 const ALL_BOOKS = getBooksByTestament("Old").concat(getBooksByTestament("New"));
+
 const JournalPrompts = () => {
   const { userInfo } = useAuth();
   const isAdmin = userInfo?.userRole === 1;
   const p = useJournalPrompts(isAdmin);
-  const { t, isRtl, prompts, loading, search, setSearch, category, setCategory, filterBook, setFilterBook, filterChapter, setFilterChapter, filterBookSearch, setFilterBookSearch, dialogOpen, setDialogOpen, editingPrompt, formData, setFormData, saving, handleSave, deleteDialog, setDeleteDialog, deleting, handleDelete, books, chapters, verses, setChapters, setVerses, bookSearch, setBookSearch, openEdit, refresh } = p;
+  const { t, isRtl, prompts, loading, search, setSearch, category, setCategory, filterBook, setFilterBook, filterChapter, setFilterChapter, filterBookSearch, setFilterBookSearch, dialogOpen, setDialogOpen, editingPrompt, formData, setFormData, saving, handleSave, deleteDialog, setDeleteDialog, deleting, handleDelete, chapters, verses, setChapters, setVerses, bookSearch, setBookSearch, openEdit } = p;
+
   const filteredBooks = ALL_BOOKS.filter((b) => !filterBookSearch || b.toLowerCase().includes(filterBookSearch.toLowerCase()));
-  const filteredPrompts = prompts.filter((p) => {
-    if (search && !p.prompt.toLowerCase().includes(search.toLowerCase())) return false;
-    if (category && p.category !== category) return false;
-    if (filterBook && p.bookName !== filterBook) return false;
-    if (filterChapter && p.chapter !== Number(filterChapter)) return false;
+
+  const filteredPrompts = prompts.filter((item) => {
+    if (search && !item.prompt.toLowerCase().includes(search.toLowerCase())) return false;
+    if (category && item.category !== category) return false;
+    if (filterBook && item.bookName !== filterBook) return false;
+    if (filterChapter && item.chapter !== Number(filterChapter)) return false;
     return true;
   });
+
   const handleBookChange = (v: string) => {
-    setFormData((p) => ({ ...p, bookName: v, chapter: "", verseNumber: "" }));
+    setFormData((prev) => ({ ...prev, bookName: v, chapter: "", verseNumber: "" }));
     if (v) { setChapters(getChaptersForBook(v)); } else { setChapters([]); setVerses([]); }
   };
+
   const handleChapterChange = (v: string) => {
-    setFormData((p) => ({ ...p, chapter: v, verseNumber: "" }));
+    setFormData((prev) => ({ ...prev, chapter: v, verseNumber: "" }));
     if (v && formData.bookName) { setVerses(getVersesCountForChapter(formData.bookName, Number(v))); } else { setVerses([]); }
+  };
+
   const handleOpenDialog = (prompt: any) => { openEdit(prompt); };
+
   return (
     <div className="min-h-screen bg-background" dir={isRtl ? "rtl" : "ltr"}>
       <div className="bg-gradient-to-r from-amber-500/10 via-yellow-500/5 to-orange-500/10 border-b">
@@ -50,11 +58,13 @@ const JournalPrompts = () => {
           </div>
         </div>
       </div>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col sm:flex-row gap-4 mb-6">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input placeholder={t.journal?.searchPrompts || "Search prompts..."} value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
+          </div>
           <Select value={filterBook} onValueChange={(v) => { setFilterBook(v); setFilterChapter(""); }}>
             <SelectTrigger className="w-full sm:w-36"><SelectValue placeholder="All Books" /></SelectTrigger>
             <SelectContent className="max-h-60">
@@ -65,10 +75,19 @@ const JournalPrompts = () => {
           </Select>
           <Select value={filterChapter} onValueChange={setFilterChapter} disabled={!filterBook}>
             <SelectTrigger className="w-full sm:w-28"><SelectValue placeholder="Ch" /></SelectTrigger>
-            <SelectContent><SelectItem value="">All</SelectItem>{filterBook && getChaptersForBook(filterBook).map((ch) => <SelectItem key={ch} value={String(ch)}>{ch}</SelectItem>)}</SelectContent>
+            <SelectContent>
+              <SelectItem value="">All</SelectItem>
+              {filterBook && getChaptersForBook(filterBook).map((ch) => <SelectItem key={ch} value={String(ch)}>{ch}</SelectItem>)}
+            </SelectContent>
+          </Select>
           <Select value={category} onValueChange={setCategory}>
             <SelectTrigger className="w-full sm:w-40"><SelectValue placeholder="Category" /></SelectTrigger>
-            <SelectContent>{CATEGORIES.filter((c) => c.value !== "all").map((c) => <SelectItem key={c.value} value={c.value}>{getCategoryLabel(t, c.value)}</SelectItem>)}</SelectContent>
+            <SelectContent>
+              {CATEGORIES.filter((c) => c.value !== "all").map((c) => <SelectItem key={c.value} value={c.value}>{getCategoryLabel(t, c.value)}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </div>
+
         {loading ? (
           <div className="flex items-center justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>
         ) : filteredPrompts.length === 0 ? (
@@ -77,6 +96,7 @@ const JournalPrompts = () => {
             <h3 className="text-lg font-semibold mb-2">{t.journal?.noPromptsAvailable || "No prompts available"}</h3>
             <p className="text-muted-foreground mb-4">{t.journal?.promptEmptyDesc || "Create prompts to help users journal"}</p>
             <Button onClick={() => setDialogOpen(true)}><Plus className={cn("w-4 h-4", isRtl ? "ml-2" : "mr-2")} />Create Prompt</Button>
+          </div>
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {filteredPrompts.map((prompt) => (
@@ -90,6 +110,7 @@ const JournalPrompts = () => {
                       </Button>
                       <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setDeleteDialog(prompt)}>
                         <Trash2 className="w-4 h-4 text-destructive" />
+                      </Button>
                     </div>
                   </div>
                 </CardHeader>
@@ -99,17 +120,23 @@ const JournalPrompts = () => {
                   {prompt.bookName && (
                     <div className="mt-3 flex items-center gap-2">
                       <Badge variant="outline" className="text-xs">{prompt.bookName} {prompt.chapter}{prompt.verseNumber ? `:${prompt.verseNumber}` : ""}</Badge>
+                    </div>
                   )}
                   <div className="flex items-center justify-between mt-4 text-xs text-muted-foreground">
                     <span>Order: {prompt.order}</span>
                     <Badge variant="outline" className={prompt.isActive ? "bg-green-50" : ""}>{prompt.isActive ? "Active" : "Inactive"}</Badge>
+                  </div>
                 </CardContent>
               </Card>
             ))}
+          </div>
         )}
+      </div>
+
       <JournalPromptForm open={dialogOpen} onOpenChange={setDialogOpen} editing={!!editingPrompt} formData={formData} setFormData={setFormData}
         saving={saving} handleSave={handleSave} t={t} bookSearch={bookSearch} setBookSearch={setBookSearch}
         dialogFilteredBooks={filteredBooks} handleBookChange={handleBookChange} chapters={chapters} handleChapterChange={handleChapterChange} verses={verses} />
+
       <Dialog open={!!deleteDialog} onOpenChange={() => setDeleteDialog(null)}>
         <DialogContent>
           <DialogHeader><DialogTitle>{t.journal?.deletePrompt || "Delete Prompt"}</DialogTitle></DialogHeader>
@@ -125,4 +152,5 @@ const JournalPrompts = () => {
     </div>
   );
 };
+
 export default JournalPrompts;

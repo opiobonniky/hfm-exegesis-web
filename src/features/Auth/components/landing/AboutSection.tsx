@@ -9,10 +9,13 @@ const VALUES = [
   { titleKey: "aboutValueSpiritTitle", descKey: "aboutValueSpiritDesc", icon: Sparkles, dt: "Spirit-Led Tech", dd: "Modern technology to illuminate ancient wisdom." },
   { titleKey: "aboutValueGrowingTitle", descKey: "aboutValueGrowingDesc", icon: Zap, dt: "Always Growing", dd: "Constant updates and fresh content." },
 ];
+
 const STATS = [
   { key: "aboutStatVerses", defaultStat: "31K+", labelKey: "aboutStatVersesLabel", defaultLabel: "Verses Explored" },
   { key: "aboutStatDaily", defaultStat: "150+", labelKey: "aboutStatDailyLabel", defaultLabel: "Daily Insights" },
   { key: "aboutStatGlobal", defaultStat: "Global", labelKey: "aboutStatGlobalLabel", defaultLabel: "Kingdom Reach" },
+];
+
 export function AboutSection() {
   const { t } = useLanguage();
   const L = t.landing as any;
@@ -37,6 +40,7 @@ export function AboutSection() {
               <p className="font-black text-brand-accent italic text-xl sm:text-2xl tracking-tight">
                 {L?.aboutMotto || "Quality, Service, & Integrity — Built for His Glory."}
               </p>
+            </div>
             <div className="grid grid-cols-3 gap-4 sm:gap-8 mt-10">
               {STATS.map((s) => (
                 <div key={s.key}>
@@ -44,6 +48,7 @@ export function AboutSection() {
                   <p className="text-[10px] sm:text-xs text-muted-foreground mt-1 font-bold uppercase tracking-widest">{L?.[s.labelKey] || s.defaultLabel}</p>
                 </div>
               ))}
+            </div>
           </motion.div>
           <motion.div variants={animStagger} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-60px" }} className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
             {VALUES.map((v) => {
@@ -59,6 +64,7 @@ export function AboutSection() {
                 </motion.div>
               );
             })}
+          </motion.div>
         </div>
       </div>
     </section>

@@ -38,6 +38,7 @@ export function useMyActivity() {
   useEffect(() => { loadData(); }, [loadData]);
   const deleteItem = useCallback(async (type: string, id: number, endpoint: string, field: string) => {
     setDeleting(id);
+    try {
       const res = await sendPostRequest("bible", endpoint, { [field]: id });
       if (res.returnCode === 200) {
         if (type === "highlights") setHighlights((p) => p.filter((x) => x.id !== id));
@@ -50,6 +51,7 @@ export function useMyActivity() {
   }, [toast]);
   const clearHistory = useCallback(async () => {
     setClearingAll(true);
+    try {
       const res = await sendPostRequest("bible", "delete-read-history", { readHistoryIds: readHistory.map((h) => h.id) });
       if (res.returnCode === 200) { setReadHistory([]); toast({ title: "History cleared" }); }
     } catch {} finally { setClearingAll(false); }
@@ -84,6 +86,7 @@ export function useMyActivity() {
         const ref = `${item.data.bookName} ${item.data.chapter}:${item.data.verseNumber}`.toLowerCase();
         const noteMatch = "note" in item.data ? item.data.note?.toLowerCase().includes(q) : false;
         if (!ref.includes(q) && !noteMatch) return false;
+      }
       return true;
     }).sort((a, b) => new Date(b.ts).getTime() - new Date(a.ts).getTime());
   }, [highlights, notes, favorites, readHistory, activeFilter, filterBook, searchQuery]);
@@ -99,4 +102,5 @@ export function useMyActivity() {
     filterBook, setFilterBook,
     feed, counts, deleting, clearingAll,
     deleteItem, clearHistory, goToReader, formatTimeAgo,
+  };
 }

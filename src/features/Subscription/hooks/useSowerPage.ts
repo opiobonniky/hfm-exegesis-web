@@ -44,9 +44,11 @@ export function useSowerPage() {
   }, [billingInterval, toast]);
   const handleManageSubscription = useCallback(async () => {
     setPortalLoading(true);
+    try {
       const res = await sendPostRequest("subscriptions", "create-portal-session", {});
       if (res.returnCode === 200 && res.returnData?.url) window.open(res.returnData.url, "_blank");
       else { toast({ title: "Error", variant: "destructive" }); }
+    } catch { toast({ title: "Error", variant: "destructive" }); }
     finally { setPortalLoading(false); }
   }, [toast]);
   const filteredPlans = plans.filter((p) => {

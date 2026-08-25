@@ -36,7 +36,11 @@ export function HeroSection() {
               <Button className="w-full bg-brand-accent text-white hover:bg-brand-accent-dark px-6 sm:px-8 py-6 rounded-[2rem] font-black text-sm sm:text-base shadow-2xl shadow-brand-accent/30 hover:scale-105 transition-all uppercase tracking-widest">
                 {t.landing?.getStarted || "Get Started"}
                 <ArrowRight className="ml-2 w-4 h-4 sm:w-5 sm:h-5" />
+              </Button>
+            </Link>
+          </div>
         </motion.div>
+      </div>
     </section>
   );
 }

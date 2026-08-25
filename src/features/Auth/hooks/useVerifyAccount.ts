@@ -9,6 +9,7 @@ export function useVerifyAccount() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+
   const handleCodeChange = useCallback((index: number, value: string) => {
     if (value.length > 1) value = value.slice(-1);
     const newCode = [...code];
@@ -19,6 +20,7 @@ export function useVerifyAccount() {
       next?.focus();
     }
   }, [code]);
+
   const handleVerify = useCallback(async () => {
     const verificationCode = code.join("");
     if (verificationCode.length !== 6) { setError("Please enter the 6-digit code"); return; }
@@ -30,10 +32,16 @@ export function useVerifyAccount() {
     } catch { setError("Network error. Please try again."); }
     finally { setLoading(false); }
   }, [code, toast]);
+
   const handleResend = useCallback(async () => {
+    setLoading(true);
+    try {
       const res = await sendPostRequest("auth", "resend-verification", {});
       if (res?.returnCode === 200) toast({ title: "Code resent!" });
+      else toast({ title: "Failed to resend", variant: "destructive" });
     } catch { toast({ title: "Failed to resend", variant: "destructive" }); }
+    finally { setLoading(false); }
   }, [toast]);
+
   return { code, handleCodeChange, loading, error, success, handleVerify, handleResend };
 }

@@ -42,6 +42,7 @@ export interface VerseFormFields {
   selectedDate: Date;
   selectedTime: string;
 }
+
 const EDITING_FIELDS: (keyof VerseFormFields)[] = [
   "testament", "book", "chapter", "verseNumber", "bibleVersion",
   "explanation", "learnMore", "application", "verseIntroduction",
@@ -49,6 +50,7 @@ const EDITING_FIELDS: (keyof VerseFormFields)[] = [
   "wordStudies", "practicalApplications", "keyThemes", "crossReferences",
   "finalThoughts", "takeaways",
 ];
+
 export function useAddDailyVerse() {
   const { toast } = useToast();
   const { t, isRtl } = useLanguage();
@@ -56,6 +58,7 @@ export function useAddDailyVerse() {
   const location = useLocation();
   const editingVerse = location.state?.verse as Record<string, any> | undefined;
   const isEditing = !!editingVerse;
+
   const [testament, setTestament] = useState(editingVerse?.testament || "");
   const [book, setBook] = useState(editingVerse?.bookName || "");
   const [chapter, setChapter] = useState(editingVerse?.chapter?.toString() || "");
@@ -73,6 +76,8 @@ export function useAddDailyVerse() {
       return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
     }
     return "08:00";
+  });
+
   // Content fields
   const [verseText, setVerseText] = useState(editingVerse?.verseText || "");
   const [isVerseEditing, setIsVerseEditing] = useState(false);
@@ -81,10 +86,12 @@ export function useAddDailyVerse() {
   const [learnMore, setLearnMore] = useState(editingVerse?.learnMore || "");
   const [application, setApplication] = useState(editingVerse?.application || "");
   const [verseIntroduction, setVerseIntroduction] = useState(editingVerse?.verseIntroduction || "");
+
   // Background fields
   const [backgroundAuthor, setBackgroundAuthor] = useState(editingVerse?.backgroundAuthor || "");
   const [backgroundBook, setBackgroundBook] = useState(editingVerse?.backgroundBook || "");
   const [backgroundContext, setBackgroundContext] = useState(editingVerse?.backgroundContext || "");
+
   // Structured fields
   const [wordStudies, setWordStudies] = useState(editingVerse?.wordStudies || "");
   const [practicalApplications, setPracticalApplications] = useState(editingVerse?.practicalApplications || "");
@@ -92,28 +99,34 @@ export function useAddDailyVerse() {
   const [crossReferences, setCrossReferences] = useState(editingVerse?.crossReferences || "");
   const [finalThoughts, setFinalThoughts] = useState(editingVerse?.finalThoughts || "");
   const [takeaways, setTakeaways] = useState(editingVerse?.takeaways || "");
+
   // Conflict dialog
   const [conflictDialog, setConflictDialog] = useState<{
     open: boolean;
     conflict: any;
     payload: any;
   }>({ open: false, conflict: null, payload: null });
+
   const books = useMemo(() => getBooksByTestament(testament as "Old" | "New"), [testament]);
   const chapters = useMemo(() => getChaptersForBook(book), [book]);
   const maxVerses = useMemo(
     () => (book && chapter ? getVersesCountForChapter(book, Number(chapter)) : 0),
     [book, chapter],
   );
+
   const TESTAMENTS = useMemo(
     () => [
       { value: "Old", label: t.dailyVerse.oldTestament },
       { value: "New", label: t.dailyVerse.newTestament },
     ],
     [t],
+  );
+
   useEffect(() => {
     if (!book || !chapter || !verseNumber || isVerseEditing) {
       if (!isVerseEditing) setVerseText("");
       return;
+    }
     setIsVerseLoading(true);
     setActiveVersion(bibleVersion).then(() => {
       const text = getVerseText(book, Number(chapter), Number(verseNumber));
@@ -121,11 +134,14 @@ export function useAddDailyVerse() {
       setIsVerseLoading(false);
     });
   }, [book, chapter, verseNumber, bibleVersion, isVerseEditing]);
+
   // Sync time with date
+  useEffect(() => {
     setSelectedTime(
       `${String(selectedDate.getHours()).padStart(2, "0")}:${String(selectedDate.getMinutes()).padStart(2, "0")}`,
     );
   }, [selectedDate]);
+
   const handleTimeChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const time = e.target.value;
@@ -138,15 +154,20 @@ export function useAddDailyVerse() {
       setSelectedDate(newDate);
     },
     [selectedDate],
+  );
+
   const saveDisabled =
     isVerseLoading ||
     !verseText.trim() ||
     !explanation.trim() ||
     !application.trim() ||
     !verseIntroduction.trim();
+
   const handleSave = useCallback(async () => {
     if (!book || !chapter || !verseNumber) {
       toast({ title: "Missing fields", description: "Please fill all required fields", variant: "destructive" });
+      return;
+    }
     const payload: DailyVersePayload = {
       bookName: book,
       chapter: Number(chapter),
@@ -184,22 +205,30 @@ export function useAddDailyVerse() {
     } catch (err) {
       toast({ title: t.dailyVerse.toastSaveErrorDesc, description: t.dailyVerse.toastSaveErrorDesc, variant: "destructive" });
       console.error(err);
+    }
   }, [
     book, chapter, verseNumber, bibleVersion, verseText, explanation, learnMore,
     application, verseIntroduction, backgroundAuthor, backgroundBook, backgroundContext,
     wordStudies, practicalApplications, keyThemes, crossReferences, finalThoughts,
-    takeaways, selectedDate, published, isEditing, editingVerse,
+    takeaways, selectedDate, published, isEditing, editingVerse, toast, t, navigate,
   ]);
+
   const handleConflictUpdate = useCallback(async () => {
     const c = conflictDialog.conflict;
     if (!c) return;
     setConflictDialog({ open: false, conflict: null, payload: null });
+    try {
       const res = await sendPostRequest("admin", "add-daily-verse", { id: c.existing.id, ...conflictDialog.payload });
+      if (res.returnCode === 200) {
         toast({ title: t.dailyVerse.toastUpdated, description: t.dailyVerse.toastUpdateSuccessDesc });
+      } else {
         toast({ title: t.dailyVerse.toastUpdateFailedDesc, description: res.returnMessage, variant: "destructive" });
+      }
     } catch {
       toast({ title: t.dailyVerse.toastUpdateFailedDesc, description: t.dailyVerse.toastUpdateFailedDesc, variant: "destructive" });
-  }, [conflictDialog]);
+    }
+  }, [conflictDialog, toast, t]);
+
   return {
     // State
     testament, setTestament,
@@ -234,3 +263,4 @@ export function useAddDailyVerse() {
     // Helpers
     t, isRtl, navigate,
   };
+}

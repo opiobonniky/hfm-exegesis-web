@@ -3,6 +3,7 @@
 import { cn } from "@/lib/utils";
 import VerseToolbar from "./VerseToolbar";
 import type { ChapterData, Highlight } from "../hooks/useBibleReader";
+
 interface ChapterContentProps {
   chapters: ChapterData[];
   selectedVerses: string[];
@@ -16,7 +17,7 @@ interface ChapterContentProps {
   chapterRefs: React.MutableRefObject<Record<string, HTMLDivElement>>;
   verseRefs: React.MutableRefObject<Record<string, HTMLButtonElement | null>>;
 }
-// Highlight background colors
+
 const HC: Record<number, { light: string; dark: string }> = {
   0: { light: "bg-yellow-100", dark: "dark:bg-yellow-950/30" },
   1: { light: "bg-green-100", dark: "dark:bg-green-950/30" },
@@ -24,19 +25,20 @@ const HC: Record<number, { light: string; dark: string }> = {
   3: { light: "bg-pink-100", dark: "dark:bg-pink-950/30" },
   4: { light: "bg-orange-100", dark: "dark:bg-orange-950/30" },
 };
+
 export default function ChapterContent({
   chapters, selectedVerses, highlights, favorites, verseNotes,
   onToggleVerse, onToggleHighlight, onToggleFavorite, onExplainVerse,
   chapterRefs, verseRefs,
 }: ChapterContentProps) {
   const selectedVerseSet = new Set(selectedVerses);
+
   return (
     <div className="space-y-10">
       {chapters.map((ch) => {
         const chapterKey = `${ch.book}-${ch.chapter}`;
         return (
           <div key={chapterKey} ref={(el) => { if (el) chapterRefs.current[chapterKey] = el; }}>
-            {/* Chapter heading */}
             <div className="flex items-center gap-3 mb-5 sticky top-0 bg-background/95 backdrop-blur-sm z-10 py-2">
               <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
                 <span className="text-sm font-bold text-primary">{ch.chapter}</span>
@@ -45,7 +47,6 @@ export default function ChapterContent({
                 {ch.book} {ch.chapter}
               </h2>
             </div>
-            {/* Continuous verse flow */}
             <div className="leading-[1.9] text-foreground/85 tracking-wide font-serif">
               {ch.verses.map((verse) => {
                 const key = `${chapterKey}-${verse.verse}`;
@@ -56,7 +57,6 @@ export default function ChapterContent({
                 const hc = highlight ? HC[highlight.colorId] : null;
                 return (
                   <span key={verse.verse} className="group relative">
-                    {/* Verse text */}
                     <button
                       ref={(el) => { verseRefs.current[key] = el; }}
                       type="button"
@@ -80,7 +80,6 @@ export default function ChapterContent({
                       {" "}
                       {verse.text}
                     </button>
-                    {/* Hover toolbar — floating card above the verse */}
                     <span className={cn(
                       "absolute -top-11 start-0 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-all duration-200 z-20 pointer-events-none translate-y-1 group-hover:translate-y-0 group-focus-within:translate-y-0",
                       isSelected && "max-sm:opacity-100 max-sm:translate-y-0",
@@ -99,17 +98,19 @@ export default function ChapterContent({
                         />
                       </span>
                     </span>
-                    {/* Note */}
                     {note && (
                       <span className="block text-xs text-muted-foreground mt-1 italic bg-muted/50 rounded px-2 py-1 ms-6">
                         📝 {note}
+                      </span>
                     )}
                     {" "}
                   </span>
                 );
               })}
+            </div>
           </div>
         );
       })}
     </div>
   );
+}

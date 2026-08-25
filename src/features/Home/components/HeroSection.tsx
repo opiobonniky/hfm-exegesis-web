@@ -35,7 +35,7 @@ export default function HeroSection({ userName, initial, verse }: HeroSectionPro
             <Settings className="w-4.5 h-4.5 text-muted-foreground" />
           </button>
         </div>
-        {verse && (
+        {verse &&  (
             onClick={() => navigate(routes.userDailyVerse.path)}
             className="group w-full text-start relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary via-primary to-primary/90 p-6 sm:p-7 transition-all hover:shadow-xl hover:shadow-primary/15 active:scale-[0.99]"
             <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNCI+PHBhdGggZD0iTTM2IDM0djItSDJ2LTJoMzR6TTIgMTBoMzR2MkgyVjEweiIvPjwvZz48L2c+PC9zdmc+')] opacity-30" />

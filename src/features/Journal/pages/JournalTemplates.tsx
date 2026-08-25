@@ -1,33 +1,19 @@
-import {
-  LayoutTemplate,
-  Plus,
-  Search,
-  Loader2,
-  Trash2,
-  ChevronLeft,
-  ChevronRight,
-  Star,
-} from "lucide-react";
+"use client";
+
+import { useState, useEffect, useCallback } from "react";
+import { Plus, Trash2, Loader2, BookOpen, FileText } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/components/languages/languageProvider";
+import { sendPostRequest } from "@/services/api";
 
 interface JournalTemplate {
   id: number;
@@ -37,120 +23,112 @@ interface JournalTemplate {
   prompts: string[];
   isActive: boolean;
   isDefault: boolean;
-  createdOn: string;
 }
+
 const CATEGORIES = [
   { value: "general", key: "categoryGeneral" },
   { value: "study", key: "categoryStudy" },
   { value: "prayer", key: "categoryPrayer" },
   { value: "gratitude", key: "categoryGratitude" },
   { value: "reflection", key: "categoryReflection" },
+  { value: "application", key: "categoryApplication" },
 ];
-function getCatLabel(t: any, catValue: string): string {
-  const cat = CATEGORIES.find((c) => c.value === catValue);
-  if (!cat) return catValue;
-  return (t.journal as any)?.[cat.key] || catValue;
-const JournalTemplates = () => {
-  const p = useJournalTemplates();
-  const { t, isRtl, templates, loading, category, setCategory, dialogOpen, setDialogOpen, formData, setFormData, saving, handleSave, deleteDialog, setDeleteDialog, deleting, handleDelete, refresh } = p;
+
+const getCatLabel = (t: any, v: string) => {
+  const c = CATEGORIES.find((x) => x.value === v);
+  return c ? (t.journal as any)?.[c.key] || v : v;
+};
+
+export default function JournalTemplates() {
+  const { t } = useLanguage();
+  const [templates, setTemplates] = useState<JournalTemplate[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [deleteDialog, setDeleteDialog] = useState<JournalTemplate | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [formData, setFormData] = useState({ name: "", description: "", category: "general", prompts: [""] as string[], isActive: true });
+
+  const loadTemplates = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await sendPostRequest("journal", "get-templates", {});
+      if (res.returnCode === 200 && res.returnData) setTemplates(res.returnData);
+    } catch {} finally { setLoading(false); }
+  }, []);
+
+  useEffect(() => { loadTemplates(); }, [loadTemplates]);
+
+  const handleSave = useCallback(async () => {
+    if (!formData.name.trim() || formData.prompts.filter(p => p.trim()).length === 0) return;
+    setSaving(true);
+    try {
+      const res = await sendPostRequest("journal", "save-template", {
+        ...formData, prompts: formData.prompts.filter(p => p.trim()),
+      });
+      if (res.returnCode === 200) { setDialogOpen(false); loadTemplates(); }
+    } catch {} finally { setSaving(false); }
+  }, [formData, loadTemplates]);
+
+  const handleDelete = useCallback(async () => {
+    if (!deleteDialog) return;
+    setDeleting(true);
+    try {
+      await sendPostRequest("journal", "delete-template", { id: deleteDialog.id });
+      setDeleteDialog(null); loadTemplates();
+    } catch {} finally { setDeleting(false); }
+  }, [deleteDialog, loadTemplates]);
+
+  if (loading) {
+    return <div className="flex items-center justify-center py-20"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>;
+  }
+
   return (
-    <div className="min-h-screen bg-background" dir={isRtl ? 'rtl' : 'ltr'}>
-      <div className="bg-gradient-to-r from-violet-500/10 via-purple-500/5 to-fuchsia-500/10 border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-violet-100 flex items-center justify-center">
-                <LayoutTemplate className="w-6 h-6 text-violet-600" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold">{t.journal?.templatePageTitle || "Journal Templates"}</h1>
-                <p className="text-muted-foreground text-sm">
-                  {t.journal?.templatePageSubtitle || "Create structured journaling templates for users"}
-                </p>
-            </div>
-            <Button onClick={() => setDialogOpen(true)} className="gap-2">
-              <Plus className="w-4 h-4" />
-              {t.journal?.addTemplate || "Add Template"}
-            </Button>
-          </div>
-        </div>
+    <div className="space-y-6 p-6 max-w-4xl mx-auto">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold">{t.journal?.templates || "Journal Templates"}</h1>
+        <Button onClick={() => setDialogOpen(true)} className="gap-2"><Plus className="w-4 h-4" />{t.journal?.addTemplate || "Add Template"}</Button>
       </div>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex flex-col sm:flex-row gap-4 mb-6">
-          <Select value={category} onValueChange={setCategory}>
-            <SelectTrigger className="w-full sm:w-48">
-              <SelectValue placeholder={t.journal?.promptCategory || 'Category'} />
-            </SelectTrigger>
-            <SelectContent>
-              {CATEGORIES.map((cat) => (
-                <SelectItem key={cat.value} value={cat.value}>
-                  {getCatLabel(t, cat.value)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        ) : templates.length === 0 ? (
-          <div className="text-center py-20">
-            <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-4">
-              <LayoutTemplate className="w-8 h-8 text-muted-foreground" />
-            <h3 className="text-lg font-semibold mb-2">{t.journal?.noTemplatesYet || "No templates yet"}</h3>
-            <p className="text-muted-foreground mb-4">
-              {t.journal?.templateEmptyDesc || "Create templates to help users journal consistently"}
-            </p>
-            <Button onClick={() => setDialogOpen(true)}>
-              <Plus className={cn("w-4 h-4", isRtl ? "ml-2" : "mr-2")} />
-              {t.journal?.createTemplate || "Create Template"}
-        ) : (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {templates.map((template) => (
-              <Card key={template.id} className="border-border/50">
-                <CardHeader className="pb-2">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Badge variant="secondary">{getCatLabel(t, template.category)}</Badge>
-                      {template.isDefault && (
-                        <Badge variant="outline" className="bg-amber-50 border-amber-200">
-                          <Star className={cn("w-3 h-3", isRtl ? "ml-1" : "mr-1")} />
-                          {t.journal?.defaultBadge || "Default"}
-                        </Badge>
-                      )}
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={() => setDeleteDialog(template)}
-                    >
+
+      {templates.length === 0 ? (
+        <div className="flex flex-col items-center py-16 text-center">
+          <BookOpen className="w-12 h-12 text-muted-foreground/40 mb-4" />
+          <p className="text-sm font-medium text-muted-foreground">No templates yet</p>
+          <p className="text-xs text-muted-foreground/60 mt-1">Create templates to speed up journaling</p>
+        </div>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2">
+          {templates.map((template) => (
+            <Card key={template.id} className="border-border/50">
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-base">{template.name}</CardTitle>
+                  <div className="flex items-center gap-1">
+                    <Badge variant="secondary" className="text-xs">{getCatLabel(t, template.category)}</Badge>
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setDeleteDialog(template)}>
                       <Trash2 className="w-4 h-4 text-destructive" />
                     </Button>
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <h3 className="font-semibold mb-1">{template.name}</h3>
-                  {template.description && (
-                    <p className="text-xs text-muted-foreground mb-3">
-                      {template.description}
-                    </p>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {template.description && <p className="text-xs text-muted-foreground mb-3">{template.description}</p>}
+                <div className="space-y-1">
+                  <p className="text-xs font-medium text-muted-foreground">Prompts: {template.prompts.length}</p>
+                  {template.prompts.slice(0, 3).map((prompt, idx) => (
+                    <p key={idx} className="text-xs line-clamp-1">• {prompt}</p>
+                  ))}
+                  {template.prompts.length > 3 && (
+                    <p className="text-xs text-muted-foreground">+{template.prompts.length - 3} more...</p>
                   )}
-                  <div className="space-y-1">
-                    <p className="text-xs font-medium text-muted-foreground">
-                      {(t.journal?.promptsColon || "Prompts:").replace("{n}", String(template.prompts.length))}
-                    {template.prompts.slice(0, 3).map((prompt, idx) => (
-                      <p key={idx} className="text-xs line-clamp-1">
-                        • {prompt}
-                      </p>
-                    ))}
-                    {template.prompts.length > 3 && (
-                      <p className="text-xs text-muted-foreground">
-                        {(t.journal?.morePrompts || "+{n} more...").replace("{n}", String(template.prompts.length - 3))}
-                    )}
-                </CardContent>
-              </Card>
-            ))}
-        )}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {/* Add Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
@@ -158,72 +136,69 @@ const JournalTemplates = () => {
           </DialogHeader>
           <div className="space-y-4 max-h-[60vh] overflow-y-auto">
             <div className="space-y-2">
-              <Label>{t.journal?.templateName || 'Template Name'}</Label>
-              <Input
-                placeholder={t.journal?.templateName || 'Template Name'}
-                value={formData.name}
-                onChange={(e) => setFormData((p) => ({ ...p, name: e.target.value }))}
-              />
-              <Label>{t.journal?.descriptionOptional || 'Description (optional)'}</Label>
-                placeholder={t.journal?.descriptionOptional || 'Brief description...'}
-                value={formData.description}
-                onChange={(e) => setFormData((p) => ({ ...p, description: e.target.value }))}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>{t.journal?.promptCategory || "Category"}</Label>
-                <Select
-                  value={formData.category}
-                  onValueChange={(v) => setFormData((p) => ({ ...p, category: v }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {CATEGORIES.map((cat) => (
-                      <SelectItem key={cat.value} value={cat.value}>
-                        {getCatLabel(t, cat.value)}
-                      </SelectItem>
-                  </SelectContent>
-                </Select>
-              <div className="flex items-center gap-2 pt-6">
-                <Switch
-                  checked={formData.isDefault}
-                  onCheckedChange={(v) => setFormData((p) => ({ ...p, isDefault: v }))}
-                />
-                <Label>{t.journal?.setAsDefault || "Set as default template"}</Label>
-              <Label>{t.journal?.promptsOnePerLine || "Prompts"}</Label>
+              <Label>{t.journal?.templateName || "Template Name"}</Label>
+              <Input placeholder={t.journal?.templateName || "Template Name"} value={formData.name}
+                onChange={(e) => setFormData((p) => ({ ...p, name: e.target.value }))} />
+            </div>
+            <div className="space-y-2">
+              <Label>{t.journal?.descriptionOptional || "Description (optional)"}</Label>
+              <Textarea placeholder={t.journal?.descriptionOptional || "Brief description..."} value={formData.description}
+                onChange={(e) => setFormData((p) => ({ ...p, description: e.target.value }))} rows={2} />
+            </div>
+            <div className="space-y-2">
+              <Label>{t.journal?.promptCategory || "Category"}</Label>
+              <Select value={formData.category} onValueChange={(v) => setFormData((p) => ({ ...p, category: v }))}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {CATEGORIES.map((cat) => (<SelectItem key={cat.value} value={cat.value}>{getCatLabel(t, cat.value)}</SelectItem>))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Prompts</Label>
               {formData.prompts.map((prompt, idx) => (
                 <div key={idx} className="flex gap-2">
-                  <Input
-                    placeholder={(t.journal?.promptNumber || "Prompt {n}").replace("{n}", String(idx + 1))}
-                    value={prompt}
-                    onChange={(e) => updatePrompt(idx, e.target.value)}
-                  />
+                  <Input value={prompt} placeholder={`Prompt ${idx + 1}`}
+                    onChange={(e) => setFormData((p) => ({ ...p, prompts: p.prompts.map((pr, i) => i === idx ? e.target.value : pr) }))} />
                   {formData.prompts.length > 1 && (
-                      onClick={() => removePromptField(idx)}
+                    <Button variant="ghost" size="icon" className="shrink-0"
+                      onClick={() => setFormData((p) => ({ ...p, prompts: p.prompts.filter((_, i) => i !== idx) }))}>
+                      <Trash2 className="w-4 h-4 text-destructive" />
+                    </Button>
+                  )}
                 </div>
-              <Button variant="outline" size="sm" onClick={addPromptField}>
-                <Plus className="w-4 h-4 mr-2" />
-                {t.journal?.addPrompt || "Add Prompt"}
+              ))}
+              <Button variant="outline" size="sm" onClick={() => setFormData((p) => ({ ...p, prompts: [...p.prompts, ""] }))}>
+                <Plus className="w-3 h-3 mr-1" /> Add Prompt
               </Button>
+            </div>
+            <div className="flex items-center justify-between">
+              <Label>Active</Label>
+              <Switch checked={formData.isActive} onCheckedChange={(c) => setFormData((p) => ({ ...p, isActive: c }))} />
+            </div>
+          </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDialogOpen(false)}>
-              {t.common?.cancel || "Cancel"}
-            <Button onClick={handleSave} disabled={saving}>
-              {saving && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
-              {t.journal?.createTemplate || "Create"}
+            <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleSave} disabled={saving || !formData.name.trim()}>
+              {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}Save
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Dialog */}
       <Dialog open={!!deleteDialog} onOpenChange={() => setDeleteDialog(null)}>
         <DialogContent>
-            <DialogTitle>{t.journal?.deleteTemplate || "Delete Template"}</DialogTitle>
-          <p>{t.journal?.deleteTemplateDesc || "Are you sure you want to delete this template?"}</p>
-            <Button variant="outline" onClick={() => setDeleteDialog(null)}>
+          <DialogHeader><DialogTitle>Delete Template</DialogTitle></DialogHeader>
+          <p className="text-sm text-muted-foreground">Are you sure you want to delete "{deleteDialog?.name}"?</p>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteDialog(null)}>Cancel</Button>
             <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
-              {deleting && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
-              {t.journal?.deleteTemplate || "Delete"}
+              {deleting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
-};
-export default JournalTemplates;
+}

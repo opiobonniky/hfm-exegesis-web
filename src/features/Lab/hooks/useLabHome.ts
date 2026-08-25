@@ -42,6 +42,7 @@ export function useLabHome() {
     if (chapter) params.set("chapter", String(chapter));
     if (verse) params.set("verseStart", String(verse));
     navigate(`/lab/flow?${params.toString()}`);
+  }, [navigate]);
   return {
     navigate, activeSession, history, loading, showOnboarding, onboardingStep, setOnboardingStep,
     dismissOnboarding, handleResumeStudy, handleReviewStudy, handleNewStudy, refresh: loadData,

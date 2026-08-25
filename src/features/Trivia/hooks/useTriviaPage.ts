@@ -1,3 +1,4 @@
+/**
  * useTriviaPage — comprehensive hook that wraps all trivia sub-hooks.
  * Provides ALL state + handlers needed by TriviaPage components.
  * The page should have zero useState/useEffect — only this hook.
@@ -21,7 +22,7 @@ export function useTriviaPage() {
     fetchQuestion, answer, nextQuestion, fetchStats, reset, setDifficulty, startQuiz, restoreState,
   } = useTrivia();
   const prevDifficultyRef = useRef(difficulty);
-    session: dcSession, isTodayCompleted, consecutiveDays, todayKey,
+  const { session: dcSession, isTodayCompleted, consecutiveDays, todayKey,
     startChallenge, submitAnswer: dcSubmitAnswer, nextQuestion: dcNextQuestion,
     reset: dcReset, getWeekHistory, restoreSession: dcRestoreSession,
   } = useDailyChallenge();
@@ -64,6 +65,7 @@ export function useTriviaPage() {
     }
   }, [restoreState, dcRestoreSession]);
   // Re-fetch when difficulty changes during game
+  useEffect(() => {
     if (prevDifficultyRef.current !== difficulty && phase !== "plan") { prevDifficultyRef.current = difficulty; fetchQuestion(); }
     if (phase === "plan") prevDifficultyRef.current = difficulty;
   }, [difficulty, fetchQuestion, phase]);

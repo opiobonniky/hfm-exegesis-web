@@ -17,11 +17,13 @@ interface BibleSidebarProps {
   onBookOverview?: () => void;
   loading: boolean;
 }
+
 export default function BibleSidebar({
   open, onClose, isRtl, books, selectedBook, selectedChapter, onSelect, onBookOverview, loading,
 }: BibleSidebarProps) {
   const { t } = useLanguage();
   const navigate = useNavigate();
+
   return (
     <Sheet open={open} onOpenChange={(nextOpen) => { if (!nextOpen) onClose(); }}>
       <SheetContent
@@ -56,6 +58,8 @@ export default function BibleSidebar({
             onSelect={(book, ch) => { onSelect(book, ch); onClose(); }}
             loading={loading}
           />
+        </div>
       </SheetContent>
     </Sheet>
   );
+}

@@ -47,13 +47,17 @@ export function useVerseExplanationsPage() {
   const confirmDelete = useCallback(async () => {
     if (!deleteTarget) return;
     setDeleting(true);
+    try {
       const res = await sendPostRequest("bible", "delete-verse-explanation", {
         bookName: deleteTarget.bookName, chapter: deleteTarget.chapter, verseNumber: deleteTarget.verseNumber,
+      });
       if (res.returnCode === 200) {
         setExplanations((p) => p.filter((e) => e.id !== deleteTarget.id));
         toast({ title: t.verseExplanations?.deleteSuccess || "Deleted" });
         setDeleteTarget(null);
+      } else {
         toast({ title: t.verseExplanations?.deleteFailed || "Failed to delete", variant: "destructive" });
+      }
     } catch { toast({ title: t.verseExplanations?.networkError || "Network error", variant: "destructive" }); }
     finally { setDeleting(false); }
   }, [deleteTarget, toast, t]);

@@ -7,8 +7,10 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogD
 import { useVerseExplanationsPage } from "../hooks/useVerseExplanationsPage";
 import ExplanationList from "../components/ExplanationList";
 import { PageHeader } from "@/components/PageHeader";
+
 const VerseExplanations = () => {
   const h = useVerseExplanationsPage();
+
   return (
     <div className="min-h-screen bg-background" dir={h.t.layoutDirection === "rtl" ? "rtl" : "ltr"}>
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4">
@@ -19,6 +21,7 @@ const VerseExplanations = () => {
           action={<Button size="sm" onClick={h.goToAdd} className="gap-1.5 text-xs">+ Add</Button>}
         />
       </div>
+
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6">
         <ExplanationList
           explanations={h.explanations} filtered={h.filtered} loading={h.loading}
@@ -27,6 +30,9 @@ const VerseExplanations = () => {
           onEdit={h.goToEdit}
           onDelete={h.setDeleteTarget}
           onAddFirst={h.goToAdd}
+        />
+      </div>
+
       {/* Delete dialog */}
       <Dialog open={!!h.deleteTarget} onOpenChange={(o) => !o && h.setDeleteTarget(null)}>
         <DialogContent className="sm:max-w-md">
@@ -55,4 +61,5 @@ const VerseExplanations = () => {
     </div>
   );
 };
+
 export default VerseExplanations;

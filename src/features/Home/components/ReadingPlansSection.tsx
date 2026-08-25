@@ -35,8 +35,10 @@ export default function ReadingPlansSection({ plans, onSeeAll, onPressPlan }: Re
               <div className="h-1.5 bg-muted/50 rounded-full overflow-hidden">
                 <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${pct}%` }} />
               <p className="text-[11px] text-muted-foreground/60 mt-1.5">{plan.completedDays}/{plan.totalDays} days</p>
+              </div>
             </button>
           );
         })}
+            </div>
     </section>
-  );
+  )}

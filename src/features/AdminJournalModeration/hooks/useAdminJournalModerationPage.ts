@@ -38,7 +38,9 @@ export function useAdminJournalModerationPage() {
   useEffect(() => { fetchEntries(); }, [fetchEntries]);
   const togglePublication = useCallback(async (entryId: number, published: boolean) => {
     setActionLoading(entryId);
+    try {
       const res = await sendPostRequest("journal", "set-publication", { entryId, isPublished: published });
+      if (res?.returnCode === 200) {
         setEntries((prev) => prev.map((e) => e.id === entryId ? { ...e, isPublished: published } : e));
         toast({ title: published ? "Published" : "Unpublished", description: `Journal entry ${published ? "published" : "unpublished"} successfully` });
       } else { throw new Error(res.data?.returnMessage || "Failed"); }
@@ -55,3 +57,4 @@ export function useAdminJournalModerationPage() {
     entries, loading, refreshing, search, setSearch, filter, setFilter,
     viewEntry, setViewEntry, actionLoading, fetchEntries, togglePublication, filteredEntries,
   };
+}

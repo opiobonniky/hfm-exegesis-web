@@ -42,6 +42,7 @@ export function useJournalPrompts(isAdmin: boolean) {
   const handleSave = useCallback(async () => {
     if (!formData.prompt.trim()) { toast({ title: "Prompt text is required", variant: "destructive" }); return; }
     setSaving(true);
+    try {
       const payload = { ...formData, id: editingPrompt?.id };
       const res = await sendPostRequest("journal", editingPrompt ? "prompts/update" : "prompts/create", payload);
       if (res?.returnCode === 200) { toast({ title: editingPrompt ? "Updated" : "Created" }); setDialogOpen(false); fetchPrompts(); }
@@ -52,6 +53,7 @@ export function useJournalPrompts(isAdmin: boolean) {
   const handleDelete = useCallback(async () => {
     if (!deleteDialog) return;
     setDeleting(true);
+    try {
       const res = await sendPostRequest("journal", "prompts/delete", { id: deleteDialog.id });
       if (res?.returnCode === 200) { toast({ title: "Deleted" }); setDeleteDialog(null); fetchPrompts(); }
       else { toast({ title: "Delete failed", variant: "destructive" }); }

@@ -20,6 +20,7 @@ export function useForgotPasswordPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({});
+
   const getFieldError = useCallback((name: string): string => {
     const value = name === "email" ? email : name === "code" ? code : name === "newPassword" ? newPassword : confirmPassword;
     switch (name) {
@@ -30,19 +31,25 @@ export function useForgotPasswordPage() {
       case "code":
         if (!value) return t.auth?.resetCodeRequired || "Reset code is required";
         if (value.length < 6) return t.auth?.enterSixDigitCode || "Enter 6-digit code";
+        return "";
       case "newPassword":
         if (!value) return t.auth?.passwordRequired || "Password is required";
         if (value.length < 8) return t.auth?.minCharacters || "Minimum 8 characters";
+        return "";
       case "confirmPassword":
         if (!value) return t.auth?.confirmPasswordRequired || "Confirm your password";
         if (value !== newPassword) return t.auth?.passwordsDoNotMatch || "Passwords do not match";
+        return "";
       default:
+        return "";
     }
   }, [email, code, newPassword, confirmPassword, t]);
+
   const handleBlur = useCallback((name: string) => {
     setFocusedField(null);
     setTouchedFields((prev) => ({ ...prev, [name]: true }));
   }, []);
+
   const handleRequestReset = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     const error = getFieldError("email");
@@ -59,11 +66,17 @@ export function useForgotPasswordPage() {
           description: t.auth?.codeSentDesc || "Please check your email for the reset code.",
         });
       } else if (returnCode === 404) {
+        toast({
           title: t.common?.error || "Error",
           description: returnMessage || t.auth?.accountNotFoundDesc || "No account found with this email address.",
           variant: "destructive",
+        });
       } else {
+        toast({
+          title: t.common?.error || "Error",
           description: returnMessage || t.auth?.tryAgainMessage || "Please try again.",
+          variant: "destructive",
+        });
       }
     } catch (error) {
       const message =
@@ -73,7 +86,9 @@ export function useForgotPasswordPage() {
       toast({ title: t.common?.error || "Error", description: message, variant: "destructive" });
     } finally { setIsLoading(false); }
   }, [email, getFieldError, toast, t]);
+
   const handleResetPassword = useCallback(async (e: React.FormEvent) => {
+    e.preventDefault();
     const fieldsToValidate = ["code", "newPassword", "confirmPassword"];
     let hasErrors = false;
     fieldsToValidate.forEach((f) => {
@@ -81,11 +96,31 @@ export function useForgotPasswordPage() {
       setTouchedFields((prev) => ({ ...prev, [f]: true }));
     });
     if (hasErrors) return;
+    setIsLoading(true);
+    try {
       const response = await sendPostRequest("auth", "reset-password", { email, code, newPassword });
+      if (response?.returnCode === 200) {
+        toast({
           title: t.auth?.resetPassword || "Password Reset",
           description: t.auth?.passwordResetDesc || "Your password has been reset successfully.",
+        });
         setTimeout(() => navigate("/login"), 2000);
+      } else {
+        toast({
+          title: t.common?.error || "Error",
+          description: response?.returnMessage || t.auth?.tryAgainMessage || "Please try again.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      const message =
+        error instanceof ApiError ? error.returnMessage
+        : error instanceof Error ? error.message
+        : t.common?.error || "An unexpected error occurred.";
+      toast({ title: t.common?.error || "Error", description: message, variant: "destructive" });
+    } finally { setIsLoading(false); }
   }, [email, code, newPassword, getFieldError, toast, t, navigate]);
+
   return {
     t, isRtl, navigate,
     email, setEmail, code, setCode, newPassword, setNewPassword,

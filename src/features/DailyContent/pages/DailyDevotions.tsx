@@ -11,11 +11,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, Loader2, Lightbulb } from "lucide-react";
 import { useLanguage } from "@/components/languages/languageProvider";
+
 const AdminDailyDevotions = () => {
   const h = useDailyDevotionsPage();
   const { userInfo } = useAuth();
   const { t } = useLanguage();
   const isAdmin = userInfo?.userRole === 1;
+
   const presets = (preset: string) => {
     const now = new Date();
     const toYMD = (d: Date) => d.toISOString().split("T")[0];
@@ -31,9 +33,11 @@ const AdminDailyDevotions = () => {
       default: return { from: "", to: "" };
     }
   };
+
   return (
     <div className="space-y-6">
       <DailyDevotionsHeader onAdd={() => h.openEdit()} />
+
       {isAdmin && (
         <DevotionFilterBar
           fromDate={h.fromDate} toDate={h.toDate} activePreset={h.activePreset}
@@ -47,6 +51,7 @@ const AdminDailyDevotions = () => {
           }}
         />
       )}
+
       {h.loading ? (
         <div className="flex items-center justify-center py-20">
           <Loader2 className="w-6 h-6 animate-spin text-primary" />
@@ -76,6 +81,9 @@ const AdminDailyDevotions = () => {
               isAdmin={isAdmin}
             />
           ))}
+        </div>
+      )}
+
       {h.totalPages > 1 && (
         <div className="flex items-center justify-between pt-4">
           <p className="text-sm text-muted-foreground">
@@ -87,7 +95,11 @@ const AdminDailyDevotions = () => {
             </Button>
             <Button variant="outline" size="sm" disabled={!h.hasNext} onClick={() => h.setPage(h.page + 1)}>
               <ChevronRight className="w-4 h-4" />
+            </Button>
           </div>
+        </div>
+      )}
+
       <DevotionEditDialog
         open={h.editOpen} onOpenChange={h.setEditOpen}
         editState={h.editState} onChange={h.setEditState}
@@ -97,7 +109,9 @@ const AdminDailyDevotions = () => {
         open={h.deleteOpen} onOpenChange={h.setDeleteOpen}
         target={h.deleteTarget} isDeleting={h.isDeleting}
         onConfirm={h.handleDelete}
+      />
     </div>
   );
 };
+
 export default AdminDailyDevotions;

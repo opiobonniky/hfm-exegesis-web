@@ -3,36 +3,14 @@
 import { useAdminDashboardPage } from "../hooks/useAdminDashboardPage";
 import { useNavigate } from "react-router-dom";
 import {
-  Users,
-  BookText,
-  Sparkles,
-  CalendarDays,
-  CreditCard,
-  Activity,
-  LayoutDashboard,
-  ShieldCheck,
-  BookOpen,
-  BookMarked,
-  Sun,
-  ArrowRight,
-  BarChart3,
+  Users, BookText, Sparkles, CalendarDays, CreditCard, Activity,
+  LayoutDashboard, ShieldCheck, BookOpen, BookMarked, Sun, ArrowRight, BarChart3,
 } from "lucide-react";
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-interface DashboardStats {
-  totalUsers?: number;
-  activeUsers?: number;
-  verifiedUsers?: number;
-  adminCount?: number;
-  newUsersToday?: number;
-}
+
 interface ToolCard {
   title: string;
   description: string;
@@ -40,8 +18,13 @@ interface ToolCard {
   path: string;
   color: string;
   stat?: string | number;
+}
+
 const AdminDashboard = () => {
   const h = useAdminDashboardPage();
+  const navigate = useNavigate();
+
+  const tools: ToolCard[] = [
     {
       title: "Trivia Management",
       description: "Create and manage Bible trivia questions and stats",
@@ -49,22 +32,29 @@ const AdminDashboard = () => {
       path: "/admin/trivia",
       color: "bg-amber-500/10 text-amber-600 dark:bg-amber-500/15",
     },
+    {
       title: "Daily Content",
       description: "Manage daily verses, devotions, and exegesis",
       icon: CalendarDays,
       path: "/admin/daily-content",
       color: "bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/15",
+    },
+    {
       title: "Subscriptions",
       description: "Manage subscription tiers and subscribers",
       icon: CreditCard,
       path: "/admin/subscriptions",
       color: "bg-rose-500/10 text-rose-600 dark:bg-rose-500/15",
+    },
+    {
       title: "Activity Log",
       description: "View all user login activity across the platform",
       icon: Activity,
       path: "/admin/activity-log",
       color: "bg-indigo-500/10 text-indigo-600 dark:bg-indigo-500/15",
+    },
   ];
+
   const StatCard = ({ label, value, icon: Icon, color }: any) => (
     <Card className="border-border/50">
       <CardContent className="p-4 sm:p-5">
@@ -74,33 +64,40 @@ const AdminDashboard = () => {
           </div>
           <div>
             <div className="text-xl sm:text-2xl font-bold font-[family-name:var(--font-heading)]">
-              {loading ? <Skeleton className="h-7 w-10 rounded inline-block" /> : value ?? "—"}
+              {h.loading ? <Skeleton className="h-7 w-10 rounded inline-block" /> : value ?? "—"}
             </div>
             <p className="text-xs sm:text-sm text-muted-foreground">{label}</p>
+          </div>
         </div>
       </CardContent>
     </Card>
   );
+
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-6" dir={isRtl ? 'rtl' : 'ltr'}>
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6" dir={h.isRtl ? "rtl" : "ltr"}>
       {/* Header */}
       <div className="flex items-center gap-3">
         <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
           <LayoutDashboard className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+        </div>
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold font-[family-name:var(--font-heading)]">
             Admin Console
           </h1>
           <p className="text-sm text-muted-foreground">
-            Welcome back, {userInfo?.firstName || "Admin"} — manage your platform from one place
+            Welcome back, {h.userInfo?.firstName || "Admin"} — manage your platform from one place
           </p>
+        </div>
       </div>
+
       {/* Stats Row */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <StatCard label="Total Users" value={stats?.totalUsers} icon={Users} color="bg-primary/10 text-primary" />
-        <StatCard label="Active Users" value={stats?.activeUsers} icon={ShieldCheck} color="bg-emerald-500/10 text-emerald-600" />
-        <StatCard label="Verified" value={stats?.verifiedUsers} icon={BarChart3} color="bg-sky-500/10 text-sky-600" />
-        <StatCard label="Admins" value={stats?.adminCount} icon={Users} color="bg-violet-500/10 text-violet-600" />
+        <StatCard label="Total Users" value={h.stats?.totalUsers} icon={Users} color="bg-primary/10 text-primary" />
+        <StatCard label="Active Users" value={h.stats?.activeUsers} icon={ShieldCheck} color="bg-emerald-500/10 text-emerald-600" />
+        <StatCard label="Verified" value={h.stats?.verifiedUsers} icon={BarChart3} color="bg-sky-500/10 text-sky-600" />
+        <StatCard label="Admins" value={h.stats?.adminCount} icon={Users} color="bg-violet-500/10 text-violet-600" />
+      </div>
+
       {/* Admin Tools Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {tools.map((tool) => {
@@ -129,6 +126,7 @@ const AdminDashboard = () => {
                       <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
                         {tool.description}
                       </p>
+                    </div>
                     <ArrowRight className="w-4 h-4 text-muted-foreground/40 group-hover:text-primary group-hover:translate-x-0.5 transition-all duration-200 shrink-0 mt-1" />
                   </div>
                 </CardContent>
@@ -136,6 +134,8 @@ const AdminDashboard = () => {
             </button>
           );
         })}
+      </div>
+
       {/* Quick Links Section */}
       <Card className="border-border/50">
         <CardHeader>
@@ -147,27 +147,51 @@ const AdminDashboard = () => {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <button
               onClick={() => navigate("/add-daily-verse")}
               className="flex items-center gap-3 p-3 rounded-xl border border-border/50 hover:border-primary/30 hover:bg-muted/20 transition-all text-left"
+            >
               <Sun className="w-5 h-5 text-amber-500 shrink-0" />
               <div className="min-w-0">
                 <p className="text-sm font-medium">Add Daily Verse</p>
                 <p className="text-xs text-muted-foreground">Schedule a new verse</p>
               </div>
+            </button>
+            <button
               onClick={() => navigate("/add-daily-devotion")}
+              className="flex items-center gap-3 p-3 rounded-xl border border-border/50 hover:border-primary/30 hover:bg-muted/20 transition-all text-left"
+            >
               <BookOpen className="w-5 h-5 text-emerald-500 shrink-0" />
+              <div className="min-w-0">
                 <p className="text-sm font-medium">Add Devotion</p>
                 <p className="text-xs text-muted-foreground">Create a new devotion</p>
+              </div>
+            </button>
+            <button
               onClick={() => navigate("/add-reading-plan")}
+              className="flex items-center gap-3 p-3 rounded-xl border border-border/50 hover:border-primary/30 hover:bg-muted/20 transition-all text-left"
+            >
               <BookText className="w-5 h-5 text-sky-500 shrink-0" />
+              <div className="min-w-0">
                 <p className="text-sm font-medium">Create Reading Plan</p>
                 <p className="text-xs text-muted-foreground">Build a new plan</p>
+              </div>
+            </button>
+            <button
               onClick={() => navigate("/add-explanation")}
+              className="flex items-center gap-3 p-3 rounded-xl border border-border/50 hover:border-primary/30 hover:bg-muted/20 transition-all text-left"
+            >
               <BookMarked className="w-5 h-5 text-violet-500 shrink-0" />
+              <div className="min-w-0">
                 <p className="text-sm font-medium">Add Explanation</p>
                 <p className="text-xs text-muted-foreground">Write verse explanation</p>
+              </div>
+            </button>
+          </div>
         </CardContent>
       </Card>
     </div>
+  );
 };
+
 export default AdminDashboard;

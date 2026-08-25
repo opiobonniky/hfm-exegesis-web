@@ -12,12 +12,12 @@ import { JournalSegmentControl } from "../components/JournalSegmentControl";
 import { JournalStatsCards } from "../components/JournalStatsCards";
 import { JournalFilterBar } from "../components/JournalFilterBar";
 import { JournalEmptyState } from "../components/JournalEmptyState";
-import { JournalListItem } from "../components/JournalListItem";
 import { ExportModal } from "../components/ExportModal";
 
 export default function LegacyLedgerPage() {
   const p = useJournalPageFull();
   const { t, isRtl, navigate, userInfo, handleTierBadgeClick, sowerPortalLoading, entries, stats, loading, page, setPage, totalPages, hasNext, hasPrevious, search, setSearch, category, setCategory, bookName, setBookName, source, setSource, strongsId, setStrongsId, startDate, setStartDate, endDate, setEndDate, viewMode, setViewMode, deleteDialog, setDeleteDialog, deleting, handleDelete, showExportModal, setShowExportModal, showFilters, setShowFilters, selectionMode, setSelectionMode, selectedIds, setSelectedIds, exitSelectionMode, refresh, setSearchDebounced, renderEntry, selectAll, clearSelection, hasActiveFilters, clearAllFilters } = p;
+
   return (
     <>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-3">
@@ -33,6 +33,7 @@ export default function LegacyLedgerPage() {
               showFilters={showFilters} viewMode={viewMode} bookName={bookName} setBookName={setBookName} source={source} setSource={setSource}
               strongsId={strongsId} setStrongsId={setStrongsId} startDate={startDate} setStartDate={setStartDate} endDate={endDate} setEndDate={setEndDate}
               hasActiveFilters={hasActiveFilters} clearAllFilters={clearAllFilters} />
+
             {selectionMode && entries.length > 0 && (
               <div className="sticky top-14 z-10 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-2 mb-4 bg-background/80 backdrop-blur-md border-b border-border">
                 <div className="flex items-center justify-between">
@@ -54,12 +55,15 @@ export default function LegacyLedgerPage() {
                 </div>
               </div>
             )}
+
             {loading ? (
               <div className="flex items-center justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-muted-foreground" /></div>
             ) : entries.length === 0 ? (
               <JournalEmptyState hasSearch={!!search} currentCategory={category} isDiscover={viewMode === "discover"} onCreateNew={() => navigate(routes.newJournalEntry.path)} />
             ) : (
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">{entries.map(renderEntry)}</div>
+            )}
+
             {totalPages > 1 && (
               <div className="flex items-center justify-between mt-6 pt-4 border-t border-border dark:border-stone-800">
                 <Button variant="outline" disabled={!hasPrevious} onClick={() => setPage((p) => Math.max(p - 1, 1))} className="rounded-xl border-border dark:border-stone-800">
@@ -68,7 +72,11 @@ export default function LegacyLedgerPage() {
                 <span className="text-sm text-muted-foreground dark:text-muted-foreground/70">Page {page} of {totalPages}</span>
                 <Button variant="outline" disabled={!hasNext} onClick={() => setPage((p) => p + 1)} className="rounded-xl border-border dark:border-stone-800">
                   Next<ChevronRight className={cn("w-4 h-4", isRtl ? "mr-2" : "ml-2")} />
+                </Button>
+              </div>
+            )}
           </div>
+
           <Dialog open={!!deleteDialog} onOpenChange={() => setDeleteDialog(null)}>
             <DialogContent className="rounded-2xl border-border dark:border-stone-800">
               <DialogHeader><DialogTitle className="text-foreground dark:text-stone-200">Delete Journal Entry</DialogTitle></DialogHeader>
@@ -78,13 +86,17 @@ export default function LegacyLedgerPage() {
                 <Button variant="outline" onClick={() => setDeleteDialog(null)} className="rounded-xl border-border dark:border-stone-800">Cancel</Button>
                 <Button variant="destructive" onClick={handleDelete} disabled={deleting} className="rounded-xl">
                   {deleting && <Loader2 className="w-4 h-4 animate-spin mr-2" />}{deleting ? "Deleting..." : "Delete"}
+                </Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
+
           <Dialog open={showExportModal} onOpenChange={(open) => { if (!open) { setShowExportModal(false); if (selectedIds.size > 0) exitSelectionMode(); } }}>
             <DialogContent className="rounded-2xl border-border dark:border-stone-800 max-w-lg">
               <DialogTitle className="sr-only">Export Journal Entries</DialogTitle>
               <ExportModal onClose={() => { setShowExportModal(false); if (selectedIds.size > 0) exitSelectionMode(); }} selectedIds={selectedIds.size > 0 ? Array.from(selectedIds) : undefined} />
+            </DialogContent>
+          </Dialog>
         </div>
       </Gate>
     </>

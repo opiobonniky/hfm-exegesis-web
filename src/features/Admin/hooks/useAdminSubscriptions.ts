@@ -21,6 +21,7 @@ export function useAdminSubscriptions() {
   const [syncing, setSyncing] = useState(false);
   const [suspendDialog, setSuspendDialog] = useState<SubscribedUser | null>(null);
   const [suspendLoading, setSuspendLoading] = useState(false);
+
   const loadTiers = useCallback(async () => {
     setTiersLoading(true);
     try {
@@ -29,23 +30,32 @@ export function useAdminSubscriptions() {
     } catch { toast({ title: "Failed to load tiers", variant: "destructive" }); }
     finally { setTiersLoading(false); }
   }, [toast]);
+
   const loadSubscribers = useCallback(async () => {
     setSubsLoading(true);
+    try {
       const res = await sendPostRequest("admin", "get-subscriptions-users", {});
       if (res?.returnCode === 200 && res?.returnData?.subscribedUsers) setSubscribers(res.returnData.subscribedUsers);
     } catch { toast({ title: "Failed to load subscribers", variant: "destructive" }); }
     finally { setSubsLoading(false); }
+  }, [toast]);
+
   useEffect(() => { loadTiers(); }, [loadTiers]);
   useEffect(() => { if (activeTab === "subscribers") loadSubscribers(); }, [activeTab, loadSubscribers]);
+
   const openCreateTier = useCallback(() => {
     setTierForm({ name: "", description: "", price: 0, currency: "usd", interval: "month", features: "", isActive: true, sortOrder: 0 });
     setTierDialog(true);
   }, []);
+
   const openEditTier = useCallback((tier: SubscriptionTier) => {
     setTierForm({ ...tier, features: Array.isArray(tier.features) ? tier.features.join("\n") : "" });
+  }, []);
+
   const saveTier = useCallback(async () => {
     if (!tierForm.name?.trim()) { toast({ title: "Name is required", variant: "destructive" }); return; }
     setTierSaving(true);
+    try {
       const payload = { ...tierForm, features: tierForm.features ? tierForm.features.split("\n").map((f: string) => f.trim()).filter(Boolean) : [] };
       const res = tierForm.id
         ? await sendPostRequest("admin", "subscription-tiers/update", payload)
@@ -55,40 +65,49 @@ export function useAdminSubscriptions() {
     } catch { toast({ title: "Error saving tier", variant: "destructive" }); }
     finally { setTierSaving(false); }
   }, [tierForm, toast, loadTiers]);
+
   const confirmDeleteTier = useCallback(async () => {
     if (!deleteTier) return;
+    try {
       const res = await sendPostRequest("admin", "subscription-tiers/delete", { id: deleteTier });
       if (res?.returnCode === 200) { toast({ title: "Tier deleted" }); setDeleteTier(null); loadTiers(); }
     } catch { toast({ title: "Delete failed", variant: "destructive" }); }
   }, [deleteTier, toast, loadTiers]);
+
   const handleSeed = useCallback(async () => {
     setSeeding(true);
+    try {
       const res = await sendPostRequest("admin", "subscription-tiers/seed", {});
       if (res?.returnCode === 200) { toast({ title: "Default tiers seeded" }); loadTiers(); }
     } catch { toast({ title: "Seed failed", variant: "destructive" }); }
     finally { setSeeding(false); }
   }, [toast, loadTiers]);
+
   const handleSyncStripe = useCallback(async () => {
     setSyncing(true);
+    try {
       const res = await sendPostRequest("admin", "sync-stripe-users", {});
       if (res?.returnCode === 200) { toast({ title: "Stripe sync completed", description: res.returnMessage }); loadSubscribers(); }
     } catch { toast({ title: "Sync failed", variant: "destructive" }); }
     finally { setSyncing(false); }
   }, [toast, loadSubscribers]);
+
   const toggleSuspend = useCallback(async () => {
     if (!suspendDialog) return;
     setSuspendLoading(true);
+    try {
       const res = await sendPostRequest("admin", "subscriptions/suspend", { userId: suspendDialog.id, suspend: !suspendDialog.isSuspended });
       if (res?.returnCode === 200) { toast({ title: suspendDialog.isSuspended ? "User unsuspended" : "User suspended" }); setSuspendDialog(null); loadSubscribers(); }
     } catch { toast({ title: "Failed to update", variant: "destructive" }); }
     finally { setSuspendLoading(false); }
   }, [suspendDialog, toast, loadSubscribers]);
+
   return {
     activeTab, setActiveTab, tiers, tiersLoading, tierDialog, setTierDialog, tierForm, setTierForm,
     tierSaving, deleteTier, setDeleteTier, seeding, subscribers, subsLoading, syncing,
     suspendDialog, setSuspendDialog, suspendLoading,
     openCreateTier, openEditTier, saveTier, confirmDeleteTier, handleSeed, handleSyncStripe, toggleSuspend,
     data: { tiers, subscribers },
-    actions: { loadTiers, loadSubscribers, openCreateTier, openEditTier, saveTier, confirmDeleteTier, handleSeed, handleSyncStripe, toggleSuspend },  
+    actions: { loadTiers, loadSubscribers, openCreateTier, openEditTier, saveTier, confirmDeleteTier, handleSeed, handleSyncStripe, toggleSuspend },
   };
 }

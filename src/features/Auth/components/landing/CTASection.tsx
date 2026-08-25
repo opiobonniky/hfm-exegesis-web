@@ -24,8 +24,11 @@ export function CTASection() {
                 <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
             </Link>
+            <Link to="/login" className="w-full sm:w-auto">
               <Button variant="outline" className="w-full border-border bg-transparent text-muted-foreground px-8 sm:px-12 py-6 sm:py-8 rounded-[2rem] font-black text-base sm:text-xl hover:bg-card hover:border-primary hover:text-primary transition-all uppercase tracking-widest">
                 {t.landing?.signIn || "Sign In"}
+              </Button>
+            </Link>
           </div>
         </motion.div>
       </div>

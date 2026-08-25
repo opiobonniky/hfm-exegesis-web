@@ -3,6 +3,7 @@
 import { Eye, EyeOff } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { LucideIcon } from "lucide-react";
+
 interface FloatingInputProps {
   id: string;
   label: string;
@@ -20,6 +21,7 @@ interface FloatingInputProps {
   showPassword?: boolean;
   setShowPassword?: (v: boolean) => void;
 }
+
 export default function FloatingInput({
   id, label, icon: Icon, value, onChange, focused, setFocused,
   handleBlur, error, touched, type = "text", autoComplete = "off",
@@ -58,15 +60,20 @@ export default function FloatingInput({
             onBlur={handleBlur}
             autoComplete={autoComplete}
             className={`w-full h-full px-4 pt-4 bg-card border rounded-r-2xl focus:outline-none transition-all duration-300 text-[15px] font-medium shadow-sm ${
+              error && touched
                 ? "border-red-500 ring-4 ring-red-500/5"
+                : focused
                   ? "border-primary ring-4 ring-primary/5"
                   : "border-border"
+            }`}
+          />
           <label
             htmlFor={id}
             className={`absolute left-4 transition-all duration-300 pointer-events-none font-bold ${
               focused || value
                 ? `top-2 text-[10px] uppercase tracking-widest ${error && touched ? "text-red-500" : "text-primary"}`
                 : "top-4 text-[15px] text-muted-foreground/70"
+            }`}
           >
             {label}
           </label>
@@ -79,6 +86,7 @@ export default function FloatingInput({
               {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
             </button>
           )}
+        </div>
       </div>
       <AnimatePresence>
         {error && touched && (
@@ -87,9 +95,11 @@ export default function FloatingInput({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             className="text-[10px] font-black text-red-500 uppercase tracking-widest pl-1"
+          >
             {error}
           </motion.p>
         )}
       </AnimatePresence>
     </div>
   );
+}

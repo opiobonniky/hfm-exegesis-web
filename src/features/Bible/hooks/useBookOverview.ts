@@ -19,6 +19,27 @@ const ORDINALS = [
   "Fifty-Third","Fifty-Fourth","Fifty-Fifth","Fifty-Sixth","Fifty-Seventh",
   "Fifty-Eighth","Fifty-Ninth","Sixtieth","Sixty-First","Sixty-Second",
 ];
+
+function getOTBooks(): string[] {
+  return [
+    "Genesis","Exodus","Leviticus","Numbers","Deuteronomy","Joshua","Judges",
+    "Ruth","1 Samuel","2 Samuel","1 Kings","2 Kings","1 Chronicles","2 Chronicles",
+    "Ezra","Nehemiah","Esther","Job","Psalms","Proverbs","Ecclesiastes",
+    "Song of Solomon","Isaiah","Jeremiah","Lamentations","Ezekiel","Daniel",
+    "Hosea","Joel","Amos","Obadiah","Jonah","Micah","Nahum","Habakkuk",
+    "Zephaniah","Haggai","Zechariah","Malachi",
+  ];
+}
+
+function getNTBooks(): string[] {
+  return [
+    "Matthew","Mark","Luke","John","Acts","Romans","1 Corinthians","2 Corinthians",
+    "Galatians","Ephesians","Philippians","Colossians","1 Thessalonians",
+    "2 Thessalonians","1 Timothy","2 Timothy","Titus","Philemon","Hebrews",
+    "James","1 Peter","2 Peter","1 John","2 John","3 John","Jude","Revelation",
+  ];
+}
+
 /** Get ordinal designation — "The First Book of the Bible" etc */
 export const getBookDesignation = (
   bookName: string,
@@ -33,25 +54,17 @@ export const getBookDesignation = (
   return (template || "The {ordinal} Book of the Bible").replace(
     "{ordinal}",
     ordinal,
+  );
 };
+
 export const getBookTestament = (bookName: string): "Old" | "New" => {
+  const allBooks = getOTBooks();
+  const index = allBooks.findIndex(
+    (b) => b.toLowerCase() === bookName.toLowerCase(),
+  );
   return index >= 0 && index < OT_COUNT ? "Old" : "New";
-// Bible book lists
-function getOTBooks(): string[] {
-  return [
-    "Genesis","Exodus","Leviticus","Numbers","Deuteronomy","Joshua","Judges",
-    "Ruth","1 Samuel","2 Samuel","1 Kings","2 Kings","1 Chronicles","2 Chronicles",
-    "Ezra","Nehemiah","Esther","Job","Psalms","Proverbs","Ecclesiastes",
-    "Song of Solomon","Isaiah","Jeremiah","Lamentations","Ezekiel","Daniel",
-    "Hosea","Joel","Amos","Obadiah","Jonah","Micah","Nahum","Habakkuk",
-    "Zephaniah","Haggai","Zechariah","Malachi",
-  ];
-}
-function getNTBooks(): string[] {
-    "Matthew","Mark","Luke","John","Acts","Romans","1 Corinthians","2 Corinthians",
-    "Galatians","Ephesians","Philippians","Colossians","1 Thessalonians",
-    "2 Thessalonians","1 Timothy","2 Timothy","Titus","Philemon","Hebrews",
-    "James","1 Peter","2 Peter","1 John","2 John","3 John","Jude","Revelation",
+};
+
 export function useBookOverview() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -60,6 +73,7 @@ export function useBookOverview() {
   const [loading, setLoading] = useState(true);
   const [resumeChapter, setResumeChapter] = useState<number | null>(null);
   const [resumeVerse, setResumeVerse] = useState<number | null>(null);
+
   // Fetch prologue
   useEffect(() => {
     let ignore = false;
@@ -76,7 +90,12 @@ export function useBookOverview() {
     })();
     return () => { ignore = true; };
   }, [bookName]);
+
   // Load saved reader position
+  useEffect(() => {
+    let ignore = false;
+    (async () => {
+      try {
         const res = await sendPostRequest<{ chapter?: number; verseNumber?: number }>(
           "bible",
           "get-last-read-position",
@@ -87,10 +106,17 @@ export function useBookOverview() {
           if (!ignore && pos.chapter) setResumeChapter(pos.chapter);
           if (!ignore && pos.verseNumber) setResumeVerse(pos.verseNumber);
         }
+      } catch {
         // ignore
+      }
+    })();
+    return () => { ignore = true; };
+  }, [bookName]);
+
   const isOt = getBookTestament(bookName) === "Old";
   const testamentLabel = isOt ? "Old Testament" : "New Testament";
   const designation = getBookDesignation(bookName);
+
   const onStartReading = useCallback(() => {
     const params = new URLSearchParams({
       book: bookName,
@@ -99,9 +125,11 @@ export function useBookOverview() {
     if (resumeVerse) params.set("verse", String(resumeVerse));
     navigate(`/bible-reader?${params.toString()}`);
   }, [bookName, resumeChapter, resumeVerse, navigate]);
+
   const onBack = useCallback(() => {
     navigate(-1);
   }, [navigate]);
+
   return {
     bookName,
     prologue,
@@ -114,3 +142,4 @@ export function useBookOverview() {
     onStartReading,
     onBack,
   };
+}

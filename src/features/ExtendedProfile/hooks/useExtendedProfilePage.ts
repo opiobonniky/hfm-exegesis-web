@@ -35,12 +35,14 @@ export function useExtendedProfilePage() {
   useEffect(() => { fetchProfile(); }, [fetchProfile]);
   const handleSave = useCallback(async () => {
     setSaving(true);
+    try {
       const res = await sendPostRequest("user", "update-extended-profile", form);
       if (res.returnCode === 200) {
         toast({ title: "Saved", description: "Profile updated" });
         navigate(-1);
       } else {
         toast({ title: "Error", description: res.returnMessage, variant: "destructive" });
+      }
     } catch {
       toast({ title: "Error", variant: "destructive" });
     } finally { setSaving(false); }

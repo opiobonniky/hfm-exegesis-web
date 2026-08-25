@@ -2,6 +2,7 @@
 
 import { ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+
 interface ContentCardProps {
   title?: string;
   subtitle?: string;
@@ -11,6 +12,7 @@ interface ContentCardProps {
   onClick?: () => void;
   onCta?: () => void;
 }
+
 export default function ContentCard({ title, subtitle, cta, children, className, onClick, onCta }: ContentCardProps) {
   return (
     <section>
@@ -36,6 +38,8 @@ export default function ContentCard({ title, subtitle, cta, children, className,
             {subtitle && <p className="text-xs text-muted-foreground/60 mt-1">{subtitle}</p>}
           </div>
           {onClick && <ChevronRight className="w-4 h-4 text-muted-foreground/40 shrink-0" />}
+        </div>
       </button>
     </section>
   );
+}

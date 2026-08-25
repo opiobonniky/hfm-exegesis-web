@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   ArrowLeft, Calendar, BookOpen, Edit3, Tag,
   MessageSquare, Lightbulb, Layers, BookMarked,
-  Clock, CheckCircle, XCircle, Loader2,
+  Clock, CheckCircle, XCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -22,10 +22,16 @@ function DetailSection({ label, value, icon: Icon }: { label: string; value?: st
     </div>
   );
 }
+
 // ── List block ──
 function DetailList({ label, items, icon: Icon }: { label: string; items: string[]; icon?: any }) {
   if (items.length === 0) return null;
+  return (
     <div className="space-y-2">
+      <div className="flex items-center gap-1.5">
+        {Icon && <Icon className="w-3.5 h-3.5 text-primary" />}
+        <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{label}</h3>
+      </div>
       <ul className="space-y-1">
         {items.map((item, i) => (
           <li key={i} className="flex items-start gap-2 text-sm text-foreground">
@@ -34,14 +40,32 @@ function DetailList({ label, items, icon: Icon }: { label: string; items: string
           </li>
         ))}
       </ul>
+    </div>
+  );
+}
+
+// ── Helpers ──
+const parseList = (val: any): string[] => {
+  if (!val) return [];
+  if (Array.isArray(val)) return val.map(String);
+  try { const p = JSON.parse(val); return Array.isArray(p) ? p.map(String) : []; } catch { return []; }
+};
+
+const fmtDate = (d: string | null) => {
+  if (!d) return null;
+  try { return new Date(d).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }); }
+  catch { return d; }
+};
+
 // ── Main page ──
 export default function DailyVerseDetail() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
-  // Parse verse data from URL params (JSON-encoded)
+
   const verseParam = params.get("verse");
   let verse: any = null;
   try { verse = verseParam ? JSON.parse(verseParam) : null; } catch { /* invalid */ }
+
   if (!verse) {
     return (
       <div className="min-h-full flex flex-col items-center justify-center bg-background gap-4 text-center px-6">
@@ -49,18 +73,13 @@ export default function DailyVerseDetail() {
         <h2 className="text-lg font-bold">Verse not found</h2>
         <p className="text-sm text-muted-foreground">No verse data was provided.</p>
         <Button variant="outline" onClick={() => navigate(-1)}>Go back</Button>
+      </div>
     );
   }
+
   const reference = `${verse.bookName || ""} ${verse.chapter || ""}:${verse.verseNumber || ""}`;
-  const parseList = (val: any): string[] => {
-    if (!val) return [];
-    if (Array.isArray(val)) return val.map(String);
-    try { const p = JSON.parse(val); return Array.isArray(p) ? p.map(String) : []; } catch { return []; }
-  };
-  const fmtDate = (d: string | null) => {
-    if (!d) return null;
-    try { return new Date(d).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }); }
-    catch { return d; }
+
+  return (
     <div className="min-h-full bg-background">
       {/* Header */}
       <header className="sticky top-0 z-30 bg-background/95 backdrop-blur-sm border-b border-border">
@@ -74,8 +93,10 @@ export default function DailyVerseDetail() {
           </div>
           <Button variant="outline" size="sm" onClick={() => navigate(`/add-daily-verse?id=${verse.id || ""}`)}>
             <Edit3 className="w-3.5 h-3.5 mr-1.5" /> Edit
+          </Button>
         </div>
       </header>
+
       <div className="px-4 sm:px-6 py-6 max-w-3xl mx-auto space-y-5">
         {/* Title + status */}
         <div className="space-y-2">
@@ -83,7 +104,10 @@ export default function DailyVerseDetail() {
           <Badge variant={verse.isPublished ? "default" : "secondary"}>
             {verse.isPublished ? <><CheckCircle className="w-3 h-3 mr-1" /> Published</> : <><XCircle className="w-3 h-3 mr-1" /> Draft</>}
           </Badge>
+        </div>
+
         <div className="h-px bg-border" />
+
         {/* Core fields */}
         <Card>
           <CardContent className="p-5 space-y-4">
@@ -95,13 +119,20 @@ export default function DailyVerseDetail() {
             <DetailSection label="Verse Introduction" value={verse.verseIntroduction} icon={BookMarked} />
           </CardContent>
         </Card>
+
         {/* Background */}
+        <Card>
+          <CardContent className="p-5 space-y-4">
             <h3 className="text-sm font-bold text-primary">Background</h3>
             <DetailSection label="Author" value={verse.backgroundAuthor} />
             <DetailSection label="Book" value={verse.backgroundBook} />
             <DetailSection label="Context" value={verse.backgroundContext} />
             <DetailSection label="Word Studies" value={verse.wordStudies} />
+          </CardContent>
+        </Card>
+
         {/* Lists */}
+        <Card>
           <CardContent className="p-5 space-y-5">
             <DetailList label="Practical Applications" items={parseList(verse.practicalApplications)} icon={Lightbulb} />
             <DetailList label="Key Themes" items={parseList(verse.keyThemes)} icon={Tag} />
@@ -109,7 +140,15 @@ export default function DailyVerseDetail() {
             <DetailSection label="Final Thoughts" value={verse.finalThoughts} />
             <DetailList label="Takeaways" items={parseList(verse.takeaways)} icon={BookMarked} />
             <DetailSection label="Learn More" value={verse.learnMore} />
+          </CardContent>
+        </Card>
+
         {/* Audit */}
         <div className="flex items-center gap-4 text-xs text-muted-foreground pt-2">
           <span><Clock className="w-3 h-3 inline mr-1" />Created {fmtDate(verse.createdOn) || "—"}</span>
           {verse.updatedOn && <span>Updated {fmtDate(verse.updatedOn)}</span>}
+        </div>
+      </div>
+    </div>
+  );
+}

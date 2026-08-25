@@ -7,21 +7,23 @@
 import {
   Sun, Save, BookOpen, AlertTriangle,
 } from "lucide-react";
-  Card, CardContent, CardDescription, CardHeader, CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
+import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
   DialogDescription, DialogFooter,
 } from "@/components/ui/dialog";
 import { useAddDailyVerse } from "../hooks/useAddDailyVerse";
+import {
   VerseReferenceSection, VerseTextArea, RequiredContentFields,
   BackgroundSection, StructuredContentSection,
 } from "../components";
 import { routes } from "@/components/Routes/routes";
+
 /** Collapsible section wrapper */
 function Section({
   title, defaultOpen = true, children,
@@ -36,16 +38,16 @@ function Section({
     </details>
   );
 }
+
 const AddDailyVerse = () => {
   const h = useAddDailyVerse();
+
+  return (
     <div dir={h.isRtl ? "rtl" : "ltr"} className="min-h-screen bg-gradient-to-b from-background to-muted/30 p-6 lg:p-10">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* ── Header ── */}
         <div className="fade-up flex items-center gap-4">
-          <Link
-            to={routes.dashboard.path}
-            className="text-muted-foreground hover:text-foreground inline-flex items-center gap-2"
-          >
+          <Link to={routes.dashboard.path} className="text-muted-foreground hover:text-foreground inline-flex items-center gap-2">
             ← {h.t.common.back}
           </Link>
           <div className="flex items-center gap-3">
@@ -57,8 +59,10 @@ const AddDailyVerse = () => {
                 {h.isEditing ? "Edit Daily Verse" : h.t.dailyVerse.addVerseTitle}
               </h1>
               <p className="text-muted-foreground">{h.t.dailyVerse.addVerseSubtitle}</p>
+            </div>
           </div>
         </div>
+
         {/* ── Form Card ── */}
         <Card className="fade-up stagger-1 border-border/40 shadow-md">
           <CardHeader className="bg-gradient-to-r from-primary/5 to-accent/5 pb-6">
@@ -83,6 +87,7 @@ const AddDailyVerse = () => {
                 TESTAMENTS={h.TESTAMENTS} t={h.t} isRtl={h.isRtl}
               />
             </Section>
+
             {/* 2. Verse text */}
             <Section title="Verse Text">
               <VerseTextArea
@@ -91,6 +96,9 @@ const AddDailyVerse = () => {
                 isVerseLoading={h.isVerseLoading}
                 book={h.book} chapter={h.chapter} verseNumber={h.verseNumber}
                 bibleVersion={h.bibleVersion} t={h.t}
+              />
+            </Section>
+
             {/* 3. Core content (required) */}
             <Section title="Verse Content">
               <RequiredContentFields
@@ -99,6 +107,9 @@ const AddDailyVerse = () => {
                 verseIntroduction={h.verseIntroduction} setVerseIntroduction={h.setVerseIntroduction}
                 learnMore={h.learnMore} setLearnMore={h.setLearnMore}
                 t={h.t} isRtl={h.isRtl}
+              />
+            </Section>
+
             {/* 4. Background */}
             <Section title="Background" defaultOpen={false}>
               <BackgroundSection
@@ -106,6 +117,9 @@ const AddDailyVerse = () => {
                 backgroundBook={h.backgroundBook} setBackgroundBook={h.setBackgroundBook}
                 backgroundContext={h.backgroundContext} setBackgroundContext={h.setBackgroundContext}
                 isRtl={h.isRtl}
+              />
+            </Section>
+
             {/* 5. Structured content */}
             <Section title="Rich Content" defaultOpen={false}>
               <StructuredContentSection
@@ -115,6 +129,9 @@ const AddDailyVerse = () => {
                 crossReferences={h.crossReferences} setCrossReferences={h.setCrossReferences}
                 finalThoughts={h.finalThoughts} setFinalThoughts={h.setFinalThoughts}
                 takeaways={h.takeaways} setTakeaways={h.setTakeaways}
+              />
+            </Section>
+
             {/* 6. Publish + Save */}
             <div className="space-y-4 pt-4 border-t">
               <div className="flex items-center justify-between">
@@ -135,9 +152,13 @@ const AddDailyVerse = () => {
                 >
                   <Save className="h-4 w-4 mr-2" />
                   {h.t.dailyVerse.saveDailyVerse}
+                </Button>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
+
       {/* ── Conflict Dialog ── */}
       <Dialog open={h.conflictDialog.open} onOpenChange={(o) => !o && h.setConflictDialog({ open: false, conflict: null, payload: null })}>
         <DialogContent>
@@ -164,11 +185,15 @@ const AddDailyVerse = () => {
             </Button>
             <Button variant="outline" onClick={() => { h.setConflictDialog({ open: false, conflict: null, payload: null }); h.navigate(routes.dailyVerse.path); }}>
               <BookOpen className="h-4 w-4 mr-2" /> {h.t.dailyVerse.viewExisting}
+            </Button>
             <Button onClick={h.handleConflictUpdate}>
               <Save className="h-4 w-4 mr-2" /> {h.t.dailyVerse.updateExisting}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
+  );
 };
+
 export default AddDailyVerse;

@@ -11,10 +11,13 @@ import { NotificationsTab } from "../components/NotificationsTab";
 import SettingsHeader from "../components/SettingsHeader";
 import SettingsLoading from "../components/SettingsLoading";
 import AdditionalDetailsTab from "../components/AdditionalDetailsTab";
+
 const TAB_ICONS = { profile: User, additional: Star, password: Lock, preferences: Sliders, notifications: Bell };
+
 export default function Settings() {
   const h = useSettingsPage();
   if (h.loading) return <SettingsLoading />;
+
   const tabs = [
     { value: "profile", label: "Profile", short: "Profile" },
     { value: "additional", label: "Details", short: "Details" },
@@ -22,6 +25,7 @@ export default function Settings() {
     { value: "preferences", label: "Reading", short: "Read" },
     { value: "notifications", label: "Notifications", short: "Notify" },
   ];
+
   return (
     <div dir={h.isRtl ? "rtl" : "ltr"} className="min-h-full bg-background">
       <SettingsHeader />
@@ -39,6 +43,7 @@ export default function Settings() {
               );
             })}
           </TabsList>
+
           <TabsContent value="profile">
             <Card className="border-none shadow-none bg-transparent">
               <CardContent className="p-0">
@@ -48,16 +53,40 @@ export default function Settings() {
               </CardContent>
             </Card>
           </TabsContent>
+
           <TabsContent value="additional">
+            <Card className="border-none shadow-none bg-transparent">
+              <CardContent className="p-0">
                 <AdditionalDetailsTab profile={h.profile} onFieldChange={h.handleProfileChange}
                   onSave={h.handleSaveProfile} saving={h.savingProfile} />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           <TabsContent value="password">
-              <CardContent className="p-0"><PasswordTab saving={h.savingPassword} onSave={h.handlePasswordChange} /></CardContent>
+            <Card className="border-none shadow-none bg-transparent">
+              <CardContent className="p-0">
+                <PasswordTab saving={h.savingPassword} onSave={h.handlePasswordChange} />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           <TabsContent value="preferences">
-              <CardContent className="p-0"><PreferencesTab fontSize={h.readingFontSize} onFontSizeChange={h.handleFontSizeChange}
-                translation={h.preferredTranslation} onTranslationChange={h.handleTranslationChange} /></CardContent>
+            <Card className="border-none shadow-none bg-transparent">
+              <CardContent className="p-0">
+                <PreferencesTab fontSize={h.readingFontSize} onFontSizeChange={h.handleFontSizeChange}
+                  translation={h.preferredTranslation} onTranslationChange={h.handleTranslationChange} />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           <TabsContent value="notifications">
-              <CardContent className="p-0"><NotificationsTab notifications={h.notifications} onToggle={h.handleNotificationChange} /></CardContent>
+            <Card className="border-none shadow-none bg-transparent">
+              <CardContent className="p-0">
+                <NotificationsTab notifications={h.notifications} onToggle={h.handleNotificationChange} />
+              </CardContent>
+            </Card>
+          </TabsContent>
         </Tabs>
         <div className="h-8" />
       </div>

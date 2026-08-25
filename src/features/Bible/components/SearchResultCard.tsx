@@ -12,6 +12,7 @@ interface SearchResultCardProps {
   onStudy: () => void;
   onSave: () => void;
 }
+
 /** Parse <mark> tags in headline into text + highlight segments */
 function parseHighlight(html: string): { text: string; highlight: boolean }[] {
   const parts: { text: string; highlight: boolean }[] = [];
@@ -25,10 +26,13 @@ function parseHighlight(html: string): { text: string; highlight: boolean }[] {
   }
   if (last < html.length) parts.push({ text: html.slice(last), highlight: false });
   return parts;
+}
+
 export default function SearchResultCard({
   ref_, headline, verseText, translationAbbr, onOpen, onStudy, onSave,
 }: SearchResultCardProps) {
   const parts = headline ? parseHighlight(headline) : null;
+
   return (
     <div className="group rounded-xl border border-border/40 bg-card p-4 hover:border-primary/20 hover:shadow-sm transition-all duration-200 cursor-pointer active:scale-[0.99]">
       {/* Reference */}
@@ -62,7 +66,11 @@ export default function SearchResultCard({
         </Button>
         <Button variant="ghost" size="sm" className="h-7 text-[11px] px-2.5 gap-1 hover:bg-primary/10 hover:text-primary" onClick={(e) => { e.stopPropagation(); onStudy(); }}>
           <BookMarked className="w-3 h-3" /> Study
+        </Button>
         <Button variant="ghost" size="sm" className="h-7 text-[11px] px-2.5 gap-1 hover:bg-emerald-500/10 hover:text-emerald-600" onClick={(e) => { e.stopPropagation(); onSave(); }}>
           <BookmarkCheck className="w-3 h-3" /> Save
+        </Button>
+      </div>
     </div>
   );
+}

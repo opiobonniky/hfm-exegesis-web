@@ -26,6 +26,7 @@ export function useRegisterPage() {
   const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({});
   const [dirtyFields, setDirtyFields] = useState<Record<string, boolean>>({});
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+
   const getFieldError = useCallback((name: string) => {
     const v = (formData as any)[name] || "";
     switch (name) {
@@ -38,15 +39,18 @@ export function useRegisterPage() {
       default: return "";
     }
   }, [formData]);
+
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
     setDirtyFields(prev => ({ ...prev, [name]: true }));
   }, []);
+
   const handleBlur = useCallback((name: string) => {
     setFocusedField(null);
     if (dirtyFields[name]) setTouchedFields(prev => ({ ...prev, [name]: true }));
   }, [dirtyFields]);
+
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     const step1Fields = ["firstName", "lastName", "email", "username"];
@@ -78,8 +82,10 @@ export function useRegisterPage() {
     } catch (err: any) { toast({ title: err?.message || "Error", variant: "destructive" }); }
     finally { setIsLoading(false); }
   }, [formData, step, toast, navigate, getFieldError]);
+
   const handleGoogleLogin = useCallback(async () => {
     setIsGoogleLoading(true);
+    try {
       const result = await signInWithPopup(auth, googleProvider);
       const credential = GoogleAuthProvider.credentialFromResult(result);
       const idToken = credential?.idToken;
@@ -87,16 +93,22 @@ export function useRegisterPage() {
       const res = await sendPostRequest("auth", "google-login", {
         idToken, email: user.email || "", firstName: user.displayName?.split(" ")[0] || "",
         lastName: user.displayName?.split(" ").slice(1).join(" ") || "", photoUrl: user.photoURL || "",
+      });
       if (res?.returnCode === 200 && res.returnData) {
         setUserInfo(res.returnData);
         navigate(res.returnData.userRole === 1 ? routes.dashboard.path : routes.userDashboard.path);
       } else if (res?.returnCode === 201 && res.returnData?.needsRegistration) {
+        navigate(routes.googleRegister.path, { state: res.returnData });
+      } else {
         toast({ title: res?.returnMessage || "Google login failed", variant: "destructive" });
+      }
     } catch (error: any) {
       if (error.code !== "auth/popup-closed-by-user") {
         toast({ title: "Google login failed", description: error.message, variant: "destructive" });
+      }
     } finally { setIsGoogleLoading(false); }
   }, [setUserInfo, navigate, toast]);
+
   return {
     t, isRtl, navigate, step, setStep, formData, showPassword, setShowPassword,
     isLoading, isGoogleLoading, focusedField, setFocusedField,

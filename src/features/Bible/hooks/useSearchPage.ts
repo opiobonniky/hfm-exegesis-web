@@ -29,6 +29,7 @@ export function useSearchPage() {
   }, [navigate]);
   const handleSave = useCallback((item: SearchResult) => {
     navigate(`${routes.journal.path}?book=${encodeURIComponent(item.book_name)}&chapter=${item.chapter}&verse=${item.verse}`);
+  }, [navigate]);
   const handleScopeChange = useCallback((s: any) => { switchScope(s); setCovenant("all"); inputRef.current?.focus(); }, [switchScope, setCovenant]);
   const handleBookFilter = useCallback((b: string | undefined) => setBookFilter(b || undefined), [setBookFilter]);
   const handleCovenantChange = useCallback((c: any) => { setCovenant(c); setBookFilter(undefined); }, [setCovenant, setBookFilter]);

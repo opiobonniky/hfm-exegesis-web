@@ -10,12 +10,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { BadgeCheck, BadgeX, Shield, Mail, Phone, Calendar } from "lucide-react";
 import type { User } from "../types";
+
 interface UserDetailSheetProps {
   user: User | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onToggleActive: (userId: string) => void;
 }
+
 export default function UserDetailSheet({
   user,
   open,
@@ -23,6 +25,7 @@ export default function UserDetailSheet({
   onToggleActive,
 }: UserDetailSheetProps) {
   if (!user) return null;
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="sm:max-w-md">
@@ -40,6 +43,7 @@ export default function UserDetailSheet({
             <div>
               <p className="text-lg font-bold">{user.name}</p>
               <p className="text-sm text-muted-foreground">@{user.email?.split("@")[0]}</p>
+            </div>
           </div>
           {/* Badges */}
           <div className="flex items-center gap-2">
@@ -53,13 +57,17 @@ export default function UserDetailSheet({
               ) : (
                 <><BadgeX className="w-3 h-3 mr-1" /> Unverified</>
               )}
+            </Badge>
             <Badge variant={user.isActive ? "default" : "outline"}>
               {user.isActive ? "Active" : "Inactive"}
+            </Badge>
+          </div>
           {/* Info */}
           <div className="space-y-3">
             <InfoRow icon={Mail} label="Email" value={user.email} />
             {user.phone && <InfoRow icon={Phone} label="Phone" value={user.phone} />}
             <InfoRow icon={Calendar} label="Joined" value={user.createdAt} />
+          </div>
           {/* Actions */}
           <div className="flex gap-2">
             <Button
@@ -69,11 +77,15 @@ export default function UserDetailSheet({
             >
               {user.isActive ? "Deactivate" : "Activate"}
             </Button>
+          </div>
         </div>
       </SheetContent>
     </Sheet>
   );
+}
+
 function InfoRow({ icon: Icon, label, value }: { icon: any; label: string; value?: string }) {
+  return (
     <div className="flex items-center gap-3">
       <Icon className="w-4 h-4 text-muted-foreground" />
       <div>
@@ -81,3 +93,5 @@ function InfoRow({ icon: Icon, label, value }: { icon: any; label: string; value
         <p className="text-sm font-medium">{value || "—"}</p>
       </div>
     </div>
+  );
+}

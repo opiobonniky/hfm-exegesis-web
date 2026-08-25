@@ -6,13 +6,17 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { sendPostRequest } from "@/services/api";
 import type { useStudyTools } from "../hooks/useStudyTools";
+
 type StudyToolsState = ReturnType<typeof useStudyTools>;
+
 interface StudiesTabProps {
   state: StudyToolsState;
 }
+
 export default function StudiesTab({ state }: StudiesTabProps) {
   const { studies, studiesLoading, studiesSearch, setStudiesSearch, loadStudies } = state;
   const { toast } = useToast();
+
   const handleDelete = async (id: number) => {
     try {
       const res = await sendPostRequest("admin", "delete-daily-exegesis", { id });
@@ -24,6 +28,7 @@ export default function StudiesTab({ state }: StudiesTabProps) {
       toast({ title: "Error", description: "Failed to delete", variant: "destructive" });
     }
   };
+
   return (
     <div className="space-y-4">
       {/* Search */}
@@ -50,10 +55,13 @@ export default function StudiesTab({ state }: StudiesTabProps) {
           {[1, 2, 3].map((i) => (
             <div key={i} className="h-20 rounded-xl bg-muted animate-pulse" />
           ))}
+        </div>
       ) : studies.length === 0 ? (
         <div className="text-center py-12 text-muted-foreground">
           <p className="text-sm">No studies found.</p>
+        </div>
       ) : (
+        <div className="space-y-2">
           {studies.map((study: any) => (
             <div key={study.id} className="p-4 rounded-xl border border-border bg-card">
               <div className="flex items-start justify-between">
@@ -78,6 +86,9 @@ export default function StudiesTab({ state }: StudiesTabProps) {
                 </Button>
               </div>
             </div>
+          ))}
+        </div>
       )}
     </div>
   );
+}

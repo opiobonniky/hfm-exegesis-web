@@ -60,15 +60,18 @@ export function useAdminTrivia() {
   const openCreateDialog = useCallback(() => {
     setEditForm({ question: "", correctAnswer: 0, explanation: "", bookName: "", chapter: null, verseNumber: null, category: "general", difficulty: "medium", isActive: true });
     setOptionsArray(["", "", "", ""]); setEditDialog(true);
+  }, []);
   const openEditDialog = useCallback((q: TriviaQuestion) => {
     setEditForm(q);
     try { setOptionsArray(JSON.parse(q.optionsJson || '["","","",""]')); } catch { setOptionsArray(["", "", "", ""]); }
     setEditDialog(true);
+  }, []);
   const handleSave = useCallback(async () => {
     if (!editForm.question?.trim()) { toast({ title: "Question is required", variant: "destructive" }); return; }
     const filteredOptions = optionsArray.filter(o => o.trim());
     if (filteredOptions.length < 2) { toast({ title: "At least 2 options required", variant: "destructive" }); return; }
     setSaving(true);
+    try {
       const payload = { ...editForm, optionsJson: JSON.stringify(filteredOptions) };
       const res = await sendPostRequest("trivia", editForm.id ? "admin/update" : "admin/create", payload);
       if (res?.returnCode === 200) { toast({ title: editForm.id ? "Updated" : "Created" }); setEditDialog(false); loadQuestions(questionPage); }
@@ -78,9 +81,11 @@ export function useAdminTrivia() {
   }, [editForm, optionsArray, toast, loadQuestions, questionPage]);
   const handleDelete = useCallback(async () => {
     if (!deleteTarget) return; setDeleting(true);
+    try {
       const res = await sendPostRequest("trivia", "admin/delete", { id: deleteTarget.id });
       if (res?.returnCode === 200) { toast({ title: "Deleted" }); setDeleteTarget(null); loadQuestions(questionPage); }
       else { toast({ title: "Delete failed", variant: "destructive" }); }
+    } catch { toast({ title: "Error", variant: "destructive" }); }
     finally { setDeleting(false); }
   }, [deleteTarget, toast, loadQuestions, questionPage]);
   return {

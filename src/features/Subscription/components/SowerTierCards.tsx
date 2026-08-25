@@ -30,7 +30,7 @@ export const TIERS: TierConfig[] = [
       { text: "Legacy Ledger (full journal)", included: false },
     ],
   },
-    id: "legacy_sower", name: "Legacy Sower", subtitle: "First 1,000 supporters",
+  { name: "Legacy Sower", subtitle: "First 1,000 supporters",
     description: "Unlock the full study toolkit and become part of the founding generation.",
     yearlyPrice: 3333, monthlyPrice: 333, color: "#7C3AED",
     gradient: "from-violet-500 to-purple-600", icon: Sparkles, badge: "Best Value",

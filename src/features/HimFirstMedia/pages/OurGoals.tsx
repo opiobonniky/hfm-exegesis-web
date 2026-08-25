@@ -6,19 +6,16 @@ import { useLanguage } from "@/components/languages/languageProvider";
 
 const OurGoals = () => {
   const { t } = useLanguage();
-  const animFadeUp:any = {
+  const animFadeUp: any = {
     hidden: { opacity: 0, y: 24 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.25, 0.1, 0.25, 1] } },
   };
+
   return (
     <div className="w-full bg-background text-foreground overflow-x-hidden">
       <section className="pt-16 sm:pt-20 pb-16 sm:pb-20 px-4 sm:px-6 lg:px-12 bg-brand-dark">
         <div className="w-full max-w-4xl mx-auto text-center">
           <motion.div variants={animFadeUp} initial="hidden" animate="visible">
-            {/* <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/20 mb-6">
-              <Flag className="w-3.5 h-3.5 text-brand-accent" />
-              <span className="text-[10px] sm:text-xs font-black text-white/70 uppercase tracking-widest">{t.himFirstMedia?.ourGoalsBadge || "Our Goals"}</span>
-            </div> */}
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-white font-[family-name:var(--font-heading)] tracking-tighter leading-none mb-6">
               {t.himFirstMedia?.ourGoalsTitle || "Our"} <span className="text-brand-accent">{t.himFirstMedia?.ourGoalsTitleHighlight || "Goals"}</span>
             </h1>
@@ -28,6 +25,7 @@ const OurGoals = () => {
           </motion.div>
         </div>
       </section>
+
       <section className="py-16 sm:py-24 px-4 sm:px-6 lg:px-12 bg-card">
         <div className="w-full max-w-4xl mx-auto">
           <motion.div variants={animFadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="space-y-8">
@@ -44,15 +42,22 @@ const OurGoals = () => {
                 <div>
                   <h3 className="text-xl font-black text-brand-primary mb-2 font-[family-name:var(--font-heading)]">{g.title}</h3>
                   <p className="text-base text-muted-foreground leading-relaxed font-medium">{g.desc}</p>
+                </div>
               </div>
             ))}
+          </motion.div>
+
           <motion.div variants={animFadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="mt-12 text-center">
             <Link to="/register">
               <Button className="bg-brand-primary text-white hover:bg-brand-primary-dark px-8 py-6 rounded-[2rem] font-black text-base shadow-2xl shadow-brand-primary/20 uppercase tracking-widest">
                 {t.himFirstMedia?.ourGoalsCta || "Join Us in Reaching These Goals"} <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
             </Link>
+          </motion.div>
+        </div>
+      </section>
     </div>
   );
 };
+
 export default OurGoals;

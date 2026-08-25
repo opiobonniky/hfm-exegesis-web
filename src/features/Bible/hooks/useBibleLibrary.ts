@@ -54,6 +54,7 @@ export function useBibleLibrary() {
   }, [navigate]);
   const goToBookOverview = useCallback((book: string) => {
     navigate(`/book-overview?book=${encodeURIComponent(book)}`);
+  }, [navigate]);
   const clearSearch = useCallback(() => { setSearchQuery(""); searchRef.current?.focus(); }, []);
   const selectCovenant = useCallback((v: CovenantFilter) => { setCovenant(v); setExpandedBook(null); }, []);
   const toggleExpand = useCallback((name: string) => setExpandedBook((prev) => prev === name ? null : name), []);

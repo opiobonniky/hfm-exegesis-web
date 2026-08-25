@@ -10,10 +10,13 @@ import { useDailyVersePage } from "../hooks/useDailyVersePage";
 
 export default function DailyVerse() {
   const p = useDailyVersePage();
+
   if (p.loading) return <DailyVerseLoadingSkeleton />;
+
   return (
     <div className="max-w-6xl mx-auto px-4 py-8 space-y-8" dir={p.isRtl ? "rtl" : "ltr"}>
       <DailyVerseHeader onAdd={() => p.navigate("/admin/daily-verse/add")} />
+
       <VerseFilterBar
         fromDate={p.fromDate}
         toDate={p.toDate}
@@ -27,6 +30,7 @@ export default function DailyVerse() {
         onClear={p.clearFilter}
         onPreset={p.applyPreset}
       />
+
       {p.selectedVerse && (
         <DailyVerseFeaturedVerse
           verse={p.selectedVerse}
@@ -34,6 +38,7 @@ export default function DailyVerse() {
           onWriteJournal={p.openInJournal}
         />
       )}
+
       <DailyVerseGrid
         verses={p.verses}
         selectedIndex={p.selectedIndex}
@@ -47,11 +52,16 @@ export default function DailyVerse() {
         hasNext={p.hasNext}
         hasPrevious={p.hasPrevious}
         onPageChange={p.setPage}
+      />
+
       {p.verses.length === 0 && !p.loading && (
         <DailyVerseEmptyState
           isFiltered={p.isFiltered}
           onClearFilter={p.clearFilter}
           onRefresh={p.refresh}
+        />
+      )}
+
       {p.editState && (
         <EditVerseDialog
           open={p.editOpen}
@@ -62,18 +72,24 @@ export default function DailyVerse() {
           onChange={p.setEditState}
           onVerseTextChange={p.setEditVerseText}
           onSave={p.handleSave}
+        />
+      )}
+
       <DeleteVerseDialog
         open={p.deleteOpen}
         onOpenChange={p.setDeleteOpen}
         target={p.deleteTarget}
         isDeleting={p.isDeleting}
         onConfirm={p.handleDelete}
+      />
+
       <ConflictVerseDialog
         open={p.conflictDialog.open}
         onOpenChange={(o) => p.setConflictDialog({ ...p.conflictDialog, open: o })}
         conflict={p.conflictDialog.conflict}
         t={p.t}
         onUpdate={p.handleConflictUpdate}
+      />
     </div>
   );
 }

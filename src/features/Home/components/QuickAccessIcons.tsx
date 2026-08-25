@@ -20,21 +20,25 @@ const QUICK_LINKS: QuickLink[] = [
 ];
 interface QuickAccessIconsProps {
   navigate: NavigateFunction;
-export default function QuickAccessIcons({ navigate }: QuickAccessIconsProps) {
+}
+export default function QuickAccessIcons({ navigate }: QuickAccessIconsProps)
+
+{
   return (
-    <section>
-      <h2 className="text-xs font-bold text-muted-foreground/50 uppercase tracking-[0.12em] mb-3">Quick Access</h2>
-      <div className="grid grid-cols-5 gap-2">
-        {QUICK_LINKS.map((link) => (
-          <button
-            key={link.label}
-            onClick={() => navigate(link.route)}
-            className={cn("flex flex-col items-center gap-1.5 p-2.5 rounded-xl transition-all hover:scale-105", link.bg)}
-          >
-            <link.icon className={cn("w-4 h-4", link.color)} />
-            <span className="text-[10px] font-medium text-muted-foreground/70">{link.label}</span>
-          </button>
-        ))}
-      </div>
-    </section>
-  );
+      <section>
+        <h2 className="text-xs font-bold text-muted-foreground/50 uppercase tracking-[0.12em] mb-3">Quick Access</h2>
+        <div className="grid grid-cols-5 gap-2">
+          {QUICK_LINKS.map((link) => (
+              <button
+                  key={link.label}
+                  onClick={() => navigate(link.route)}
+                  className={cn("flex flex-col items-center gap-1.5 p-2.5 rounded-xl transition-all hover:scale-105", link.bg)}
+              >
+                <link.icon className={cn("w-4 h-4", link.color)}/>
+                <span className="text-[10px] font-medium text-muted-foreground/70">{link.label}</span>
+              </button>
+          ))}
+        </div>
+      </section>
+  )
+}

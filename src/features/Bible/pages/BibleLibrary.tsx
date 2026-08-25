@@ -7,6 +7,7 @@ import BookCard from "../components/BookCard";
 
 export default function BibleLibrary() {
   const h = useBibleLibrary();
+
   if (h.loading) return (
     <div className="min-h-full flex items-center justify-center bg-background">
       <div className="flex flex-col items-center gap-4">
@@ -15,7 +16,9 @@ export default function BibleLibrary() {
       </div>
     </div>
   );
+
   const tabIcons = { all: Library, ot: Scroll, nt: Bookmark };
+
   return (
     <div className="min-h-full bg-gradient-to-b from-background via-background to-muted/20" dir={h.isRtl ? "rtl" : "ltr"}>
       {/* Header */}
@@ -28,6 +31,7 @@ export default function BibleLibrary() {
               </div>
               <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-emerald-500 border-2 border-background flex items-center justify-center">
                 <div className="w-1.5 h-1.5 rounded-full bg-card" />
+              </div>
             </div>
             <div>
               <h1 className="text-xl sm:text-2xl font-bold text-foreground leading-tight" style={{ fontFamily: "'Cinzel', serif" }}>The Bible</h1>
@@ -35,12 +39,16 @@ export default function BibleLibrary() {
                 <span className="text-indigo-500 font-semibold">66 books</span> · <span className="text-amber-500 font-semibold">{h.stats.chapters} chapters</span>
                 {h.stats.verses > 0 && <> · <span className="font-semibold">{h.stats.verses.toLocaleString()} verses</span></>}
               </p>
+            </div>
           </div>
+
           <div className="relative mb-3">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/60 pointer-events-none" />
             <Input ref={h.searchRef} placeholder="Search books..." value={h.searchQuery} onChange={(e) => h.setSearchQuery(e.target.value)}
               className="pl-10 pr-10 h-10 text-sm bg-muted/40 border-border/40 rounded-xl" />
             {h.searchQuery && <button onClick={h.clearSearch} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/60 hover:text-foreground"><X className="w-4 h-4" /></button>}
+          </div>
+
           <div className="flex items-center gap-1 p-1 rounded-xl bg-muted/60 border border-border/30">
             {h.tabs.map((tab) => {
               const Icon = tabIcons[tab.value];
@@ -55,8 +63,10 @@ export default function BibleLibrary() {
                 </button>
               );
             })}
+          </div>
         </div>
       </header>
+
       {/* Book list */}
       <div className="px-4 sm:px-6 py-4 pb-24 max-w-4xl mx-auto">
         {h.filteredBooks.length === 0 ? (
@@ -64,6 +74,7 @@ export default function BibleLibrary() {
             <ScrollText className="w-10 h-10 text-muted-foreground/40 mb-4" />
             <h3 className="text-base font-bold text-foreground mb-2">{h.searchQuery ? `No books for "${h.searchQuery}"` : "No books available"}</h3>
             {h.searchQuery && <button onClick={h.clearSearch} className="mt-4 px-5 py-2.5 rounded-xl bg-primary/10 text-primary text-sm font-bold hover:bg-primary/20 transition-colors">Clear search</button>}
+          </div>
         ) : (
           <div className="space-y-2">
             {h.filteredBooks.map((book) => (
@@ -73,9 +84,16 @@ export default function BibleLibrary() {
                 onChapterClick={(ch) => h.goToChapter(book.bookName, ch)}
                 onBookOverview={() => h.goToBookOverview(book.bookName)} isRtl={h.isRtl} />
             ))}
+          </div>
         )}
+
         {h.filteredBooks.length > 0 && (
           <div className="flex flex-col items-center gap-2 mt-10 pt-5 border-t border-border/20">
             <span className="text-[11px] text-muted-foreground/50 font-medium">{h.filteredBooks.length} of {h.books.length} books</span>
             <div className="h-0.5 w-12 rounded-full bg-gradient-to-r from-indigo-500/20 via-primary/20 to-amber-500/20" />
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }

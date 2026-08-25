@@ -39,6 +39,7 @@ export function useVerifyAccountPage() {
   }, [code, email, toast, setUserInfo, navigate]);
   const handleResend = useCallback(async () => {
     setIsResending(true);
+    try {
       const res = await sendPostRequest("auth", "resend-verification", { email });
       if (res?.returnCode === 200) toast({ title: "Code resent!" });
       else toast({ title: "Failed to resend", variant: "destructive" });

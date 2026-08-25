@@ -10,6 +10,7 @@ interface Props {
   updateField: (k: string, v: any) => void;
   t: any;
 }
+
 export function AdditionalSection({ entry, updateField, t }: Props) {
   return (
     <FormCard title={t.journal?.additional || "Additional"} icon={Tag}>
@@ -22,6 +23,8 @@ export function AdditionalSection({ entry, updateField, t }: Props) {
         <div className="flex items-center justify-between pt-1">
           <Label className="text-xs font-medium text-foreground/80 dark:text-muted-foreground/50">{t.journal?.addToFavorites || "Add to favorites"}</Label>
           <Switch checked={entry.isFavorite} onCheckedChange={(v) => updateField("isFavorite", v)} className="data-[state=checked]:bg-stone-800 dark:data-[state=checked]:bg-stone-200" />
+        </div>
+        <div className="flex items-center justify-between pt-1">
           <div>
             <Label className="text-xs font-medium text-foreground/80 dark:text-muted-foreground/50">{t.journal?.privacy || "Privacy"}</Label>
             <p className="text-[10px] text-muted-foreground/60 dark:text-muted-foreground/50 mt-0.5">
@@ -29,6 +32,8 @@ export function AdditionalSection({ entry, updateField, t }: Props) {
             </p>
           </div>
           <Switch checked={entry.isPublished} onCheckedChange={(v) => updateField("isPublished", v)} className="data-[state=checked]:bg-emerald-600 dark:data-[state=checked]:bg-emerald-500" />
+        </div>
       </div>
     </FormCard>
   );
+}

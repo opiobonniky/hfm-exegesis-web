@@ -15,9 +15,11 @@ interface BookCardProps {
   onBookOverview?: () => void;
   isRtl?: boolean;
 }
+
 export default function BookCard({ bookNumber, bookName, testament, chaptersCount, totalVerses, expanded, onToggle, onChapterClick, onBookOverview, isRtl }: BookCardProps) {
   const isOt = testament === "Old";
   const chapters = Array.from({ length: chaptersCount }, (_, i) => i + 1);
+
   return (
     <div className={cn("group rounded-xl border bg-card overflow-hidden transition-all duration-200",
       "hover:border-border/70 hover:shadow-sm",
@@ -43,9 +45,12 @@ export default function BookCard({ bookNumber, bookName, testament, chaptersCoun
               <span className="text-[8px] text-muted-foreground/30">·</span>
               <span className="text-[10px] font-semibold text-muted-foreground/60">{totalVerses} verses</span>
             </>}
+          </div>
+        </div>
         <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center transition-all",
           expanded ? "bg-primary/10 text-primary" : "text-muted-foreground/40")}>
           <ChevronDown className={cn("w-4 h-4 transition-transform", expanded && "rotate-180")} />
+        </div>
       </button>
       {/* Chapter grid */}
       <div className={cn("overflow-hidden transition-all duration-300", expanded ? "max-h-[900px] opacity-100" : "max-h-0 opacity-0")}>
@@ -57,6 +62,7 @@ export default function BookCard({ bookNumber, bookName, testament, chaptersCoun
           <div className="flex items-center justify-between">
             <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.15em]">{bookName} — Chapters</p>
             <span className="text-[9px] text-muted-foreground/40 font-medium">{chaptersCount} total</span>
+          </div>
           <div className={cn("grid gap-1.5",
             chaptersCount <= 10 ? "grid-cols-5 sm:grid-cols-10" : chaptersCount <= 22 ? "grid-cols-5 sm:grid-cols-11" : "grid-cols-6 sm:grid-cols-12")}>
             {chapters.map((ch) => (
@@ -65,6 +71,9 @@ export default function BookCard({ bookNumber, bookName, testament, chaptersCoun
                 {ch}
               </button>
             ))}
+          </div>
+        </div>
       </div>
     </div>
   );
+}

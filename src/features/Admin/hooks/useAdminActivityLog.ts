@@ -42,6 +42,7 @@ export function useAdminActivityLog() {
   const handleDelete = useCallback(async () => {
     if (!deleteTarget) return;
     setDeleting(true);
+    try {
       const res = await sendPostRequest("admin", "delete-session", { id: deleteTarget });
       if (res?.returnCode === 200) { toast({ title: "Session deleted" }); setDeleteTarget(null); loadActivity(page); }
       else { toast({ title: "Delete failed", variant: "destructive" }); }

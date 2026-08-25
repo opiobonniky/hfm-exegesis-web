@@ -4,6 +4,7 @@ import { sendPostRequest } from "@/services/api";
 import { getCurrentSession } from "@/services/exegesisApi";
 
 import type { UserDashboardVerse, UserDashboardPlan, UserDashboardStats, UserDashboardActivity } from "../types";
+
 export function useUserDashboard() {
   const [dailyVerse, setDailyVerse] = useState<UserDashboardVerse | null>(null);
   const [verseText, setVerseText] = useState<string | null>(null);
@@ -18,6 +19,7 @@ export function useUserDashboard() {
   const [dailyDevotion, setDailyDevotion] = useState<any>(null);
   const [latestEntry, setLatestEntry] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+
   const fetchAll = useCallback(async () => {
     setLoading(true);
     try {
@@ -44,29 +46,38 @@ export function useUserDashboard() {
       if (readHistoryRes.returnCode === 200 && readHistoryRes.returnData?.readHistories?.length > 0) {
         const hist = readHistoryRes.returnData.readHistories[0];
         setLastRead({ bookName: hist.bookName, chapter: hist.chapter, updatedOn: hist.updatedOn || hist.createdOn });
+      }
       if (journalListRes.returnCode === 200 && journalListRes.returnData?.entries?.length > 0) {
         setLatestEntry(journalListRes.returnData.entries[0]);
+      }
       if (verseRes.returnCode === 200 && verseRes.returnData) {
         const v = verseRes.returnData;
         setDailyVerse({ bookName: v.bookName, chapter: v.chapter, verseNumber: v.verseNumber, reflection: v.reflection });
+      }
       // Parallel background fetches
       const [sessionRes, exegesisRes, devotionRes] = await Promise.allSettled([
         getCurrentSession(),
         sendPostRequest("bible", "get-todays-exegesis", {}),
         sendPostRequest("bible", "get-todays-devotion", {}),
+      ]);
       if (sessionRes.status === "fulfilled" && sessionRes.value && !sessionRes.value.completed) {
         setCurrentSession(sessionRes.value);
+      }
       if (exegesisRes.status === "fulfilled" && exegesisRes.value.returnCode === 200) {
         setDailyExegesis(exegesisRes.value.returnData);
+      }
       if (devotionRes.status === "fulfilled" && devotionRes.value.returnCode === 200) {
         setDailyDevotion(devotionRes.value.returnData);
+      }
     } catch (e) {
       console.error(e);
     } finally {
       setLoading(false);
     }
   }, []);
+
   useEffect(() => { fetchAll(); }, [fetchAll]);
+
   return {
     dailyVerse, verseText, readingPlans, stats, recentActivity,
     lastRead, currentSession, dailyExegesis, dailyDevotion, latestEntry,

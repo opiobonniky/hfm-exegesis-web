@@ -17,6 +17,7 @@ export function useAddExplanation() {
   const qCh = params.chapter ? Number(params.chapter) : 1;
   const qVn = params.verseNumber ? Number(params.verseNumber) : 1;
   const isEditMode = !!params.bookName && !!params.chapter && !!params.verseNumber;
+
   const [bookName, setBookName] = useState(qBook);
   const [chapter, setChapter] = useState<number>(Number.isFinite(qCh) ? qCh : 1);
   const [verseNumber, setVerseNumber] = useState<number>(Number.isFinite(qVn) ? qVn : 1);
@@ -33,11 +34,13 @@ export function useAddExplanation() {
   const [promptsLoading, setPromptsLoading] = useState(false);
   const [selectedPromptIds, setSelectedPromptIds] = useState<number[]>([]);
   const NONE_VALUE = "__NONE__";
+
   const isValid =
     (bookName ?? "").trim() !== "" &&
     chapter >= 1 &&
     verseNumber >= 1 &&
     (explanation ?? "").trim().length >= 20;
+
   const fetchPrompts = async (bn: string, ch: number, vn?: number) => {
     if (!bn || !ch) return;
     setPromptsLoading(true);
@@ -52,12 +55,15 @@ export function useAddExplanation() {
       setPromptsLoading(false);
     }
   };
+
   const fetchExisting = async (bn: string, ch: number, vn: number) => {
     if (!bn || !ch || !vn) return;
     setLoadingExisting(true);
     setExistingFound(false);
     setExistingId(null);
+    try {
       const res = await sendPostRequest("bible", "get-verse-explanation", { bookName: bn, chapter: ch, verseNumber: vn });
+      if (res.returnCode === 200 && res.returnData) {
         const d = res.returnData;
         setBibleVersion(d.bibleVersion ?? "");
         setExplanation(d.explanation ?? "");
@@ -70,18 +76,25 @@ export function useAddExplanation() {
             if (Array.isArray(parsed)) setSelectedPromptIds(parsed.map(Number));
           } catch {}
         }
+      }
     } catch {} finally {
       setLoadingExisting(false);
+    }
+  };
+
   useEffect(() => { if (isEditMode) fetchExisting(qBook, qCh, qVn); }, [isEditMode]);
   useEffect(() => { setVerseText(getVerseText(bookName, Number(chapter), Number(verseNumber))); }, [bookName, chapter, verseNumber]);
   useEffect(() => { if (bookName && chapter) fetchPrompts(bookName, chapter, verseNumber); }, [bookName, chapter, verseNumber]);
+
   const handleVerseBlur = useCallback(() => {
     if (!isEditMode && bookName && chapter && verseNumber) fetchExisting(bookName, chapter, verseNumber);
   }, [isEditMode, bookName, chapter, verseNumber]);
+
   const handleSave = useCallback(async () => {
     if (!isValid) return;
     setSaving(true);
     setSaved(false);
+    try {
       const payload: any = { bookName, chapter, verseNumber, bibleVersion, explanation, learnMore, promptIds: selectedPromptIds };
       if (existingFound && existingId) payload.id = existingId;
       const res = await sendPostRequest("bible", "add-verse-explanation", payload);
@@ -94,13 +107,18 @@ export function useAddExplanation() {
         setTimeout(() => navigate(routes.verseExplanations.path), 1500);
       } else {
         toast({ title: t.verseExplanations.toastSaveFailed, description: res.returnMessage, variant: "destructive" });
+      }
     } catch (e: any) {
       toast({ title: t.verseExplanations.toastNetworkError, description: e.message, variant: "destructive" });
+    } finally {
       setSaving(false);
-  }, [isValid, bookName, chapter, verseNumber, bibleVersion, explanation, learnMore, selectedPromptIds, existingFound, existingId]);
+    }
+  }, [isValid, bookName, chapter, verseNumber, bibleVersion, explanation, learnMore, selectedPromptIds, existingFound, existingId, toast, t, navigate]);
+
   const togglePrompt = useCallback((id: number) => {
     setSelectedPromptIds((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]);
   }, []);
+
   return {
     // Form state
     bookName, setBookName, chapter, setChapter, verseNumber, setVerseNumber,
@@ -115,4 +133,5 @@ export function useAddExplanation() {
     qBook, qCh, qVn,
     // i18n
     t,
+  };
 }

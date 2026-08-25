@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 import type { VerseExplanation } from "../types";
+
 const BIBLE_BOOKS = [
   "All Books","Genesis","Exodus","Leviticus","Numbers","Deuteronomy","Joshua","Judges","Ruth",
   "1 Samuel","2 Samuel","1 Kings","2 Kings","1 Chronicles","2 Chronicles","Ezra","Nehemiah",
@@ -17,6 +18,7 @@ const BIBLE_BOOKS = [
   "Philippians","Colossians","1 Thessalonians","2 Thessalonians","1 Timothy","2 Timothy",
   "Titus","Philemon","Hebrews","James","1 Peter","2 Peter","1 John","2 John","3 John","Jude","Revelation",
 ];
+
 interface ExplanationListProps {
   explanations: VerseExplanation[];
   filtered: VerseExplanation[];
@@ -30,6 +32,7 @@ interface ExplanationListProps {
   onDelete: (item: VerseExplanation) => void;
   onAddFirst: () => void;
 }
+
 export default function ExplanationList({
   explanations, filtered, loading, search, bookFilter, isAdmin,
   onSearchChange, onBookFilterChange, onEdit, onDelete, onAddFirst,
@@ -78,10 +81,12 @@ export default function ExplanationList({
                       {item.learnMore && <Badge variant="outline" className="text-xs gap-1 border-amber-200 bg-amber-50 text-amber-700"><Sparkles className="w-3 h-3" /> Learn More</Badge>}
                     </div>
                     {item.updatedOn && <p className="text-xs text-muted-foreground/60 mb-2">Updated {new Date(item.updatedOn).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</p>}
+                  </div>
                   {isAdmin && (
                     <div className="flex items-center gap-1 shrink-0">
                       <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onEdit(item)}><Edit2 className="w-4 h-4" /></Button>
                       <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => onDelete(item)}><Trash2 className="w-4 h-4" /></Button>
+                    </div>
                   )}
                 </div>
                 {/* Content — always visible, no collapse */}
@@ -94,13 +99,17 @@ export default function ExplanationList({
                         <p className="text-sm text-foreground/70 leading-relaxed whitespace-pre-wrap">{item.learnMore}</p>
                       </div>
                     )}
+                  </div>
+                </div>
               </CardContent>
             </Card>
           ))
         )}
+      </div>
       {/* Count */}
       {!loading && filtered.length > 0 && (
         <p className="text-xs text-muted-foreground text-center pb-4">Showing {filtered.length} of {explanations.length} explanations</p>
       )}
     </div>
   );
+}

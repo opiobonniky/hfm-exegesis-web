@@ -76,6 +76,7 @@ export function useDailyDevotionsPage() {
   const handleSave = useCallback(async () => {
     if (!editState) return;
     setIsSaving(true);
+    try {
       const payload = {
         ...editState,
         chapter: editState.chapter ? Number(editState.chapter) : null,
@@ -86,12 +87,14 @@ export function useDailyDevotionsPage() {
         toast({ title: "Saved" }); setEditOpen(false); loadDevotions(page);
       } else {
         toast({ title: "Save failed", description: res?.returnMessage, variant: "destructive" });
+      }
     } catch { toast({ title: "Error saving", variant: "destructive" }); }
     finally { setIsSaving(false); }
   }, [editState, toast, loadDevotions, page]);
   const handleDelete = useCallback(async () => {
     if (!deleteTarget) return;
     setIsDeleting(true);
+    try {
       const res = await sendPostRequest("admin", "delete-daily-devotion", { id: deleteTarget.id });
       if (res?.returnCode === 200) { toast({ title: "Deleted" }); setDeleteOpen(false); setDeleteTarget(null); loadDevotions(page); }
       else { toast({ title: "Delete failed", variant: "destructive" }); }
@@ -106,3 +109,4 @@ export function useDailyDevotionsPage() {
     deleteOpen, setDeleteOpen, deleteTarget, setDeleteTarget, isDeleting, handleDelete,
     refresh: () => loadDevotions(page),
   };
+}

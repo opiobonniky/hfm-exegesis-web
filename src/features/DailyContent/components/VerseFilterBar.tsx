@@ -19,12 +19,14 @@ interface Props {
   onClear: () => void;
   onPreset: (preset: string) => void;
 }
+
 export default function VerseFilterBar({
   fromDate, toDate, activePreset, filterError, isFiltered, futureCount,
   onFromChange, onToChange, onApply, onClear, onPreset,
 }: Props) {
   const { t } = useLanguage();
   const presets = PRESETS(t);
+
   return (
     <div className="space-y-3">
       <div className="border border-border rounded-2xl p-5 space-y-4">
@@ -59,9 +61,13 @@ export default function VerseFilterBar({
               className="h-9 text-sm"
             />
             <Label className="text-xs">To</Label>
+            <Input
+              type="date"
               value={toDate}
               min={fromDate || undefined}
               onChange={(e) => onToChange(e.target.value)}
+              className="h-9 text-sm"
+            />
           </div>
           <div className="flex gap-2 shrink-0">
             <Button size="sm" onClick={onApply} className="gap-1.5">
@@ -72,6 +78,8 @@ export default function VerseFilterBar({
                 <X className="w-3.5 h-3.5" />Clear
               </Button>
             )}
+          </div>
+        </div>
         {filterError && <p className="text-sm text-destructive">{filterError}</p>}
       </div>
       {/* Filter status */}
@@ -82,12 +90,17 @@ export default function VerseFilterBar({
             <span>
               {fromDate && (
                 <>from <strong className="text-foreground">{formatDisplayDate(fromDate)}</strong></>
+              )}
               {toDate && (
                 <> to <strong className="text-foreground">{formatDisplayDate(toDate)}</strong></>
+              )}
             </span>
+            <button
               onClick={onClear}
               className="ml-1 rounded-full hover:text-destructive transition-colors"
+            >
               <X className="w-3.5 h-3.5" />
+            </button>
           </>
         ) : (
           <span>
@@ -100,5 +113,7 @@ export default function VerseFilterBar({
             + recent history
           </span>
         )}
+      </div>
     </div>
   );
+}

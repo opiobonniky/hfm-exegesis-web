@@ -22,6 +22,7 @@ export default function StudySessionCard({ session, onPress }: StudySessionCardP
           <p className="font-semibold text-sm text-foreground">Continue your study</p>
           <p className="text-xs text-muted-foreground/60 mt-0.5">Pick up where you left off</p>
         <ArrowRight className="w-4 h-4 text-muted-foreground/40" />
+            </div>
       </button>
     </div>
-  );
+  )}

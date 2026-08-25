@@ -27,6 +27,7 @@ interface SearchFiltersProps {
   covenant: string;
   onCovenantChange: (covenant: string) => void;
   locked?: boolean;
+}
 export default function SearchFilters({
   scope, onScopeChange, bookFilter, onBookFilterChange, books, covenant, onCovenantChange, locked,
 }: SearchFiltersProps) {
@@ -76,11 +77,14 @@ export default function SearchFilters({
             value={bookFilter}
             onChange={(e) => onBookFilterChange(e.target.value)}
             className="flex-1 h-8 px-2 rounded-lg border border-border bg-background text-xs text-foreground focus:ring-2 focus:ring-primary"
+          >
             <option value="">All Books</option>
             {filteredBooks.map((b) => (
               <option key={b} value={b}>{b}</option>
+            ))}
           </select>
         </div>
       )}
     </div>
   );
+}

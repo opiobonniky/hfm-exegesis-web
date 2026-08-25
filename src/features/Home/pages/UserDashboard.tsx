@@ -17,6 +17,7 @@ import {
   RecentActivityList,
   ContentCard,
 } from "../components";
+
 export default function UserDashboard() {
   const { userInfo } = useAuth();
   const { isRtl } = useRTL();
@@ -24,11 +25,14 @@ export default function UserDashboard() {
   const data = useUserDashboard();
   const name = userInfo?.firstName || userInfo?.lastName || userInfo?.username || "Friend";
   const initial = name.charAt(0).toUpperCase();
+
   if (data.loading) return <DashboardSkeleton />;
+
   return (
     <div dir={isRtl ? "rtl" : "ltr"} className="min-h-full bg-background">
       {/* Hero section with greeting + verse */}
       <HeroSection userName={name} initial={initial} verse={data.dailyVerse} />
+
       {/* Body */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
         {/* Stats row */}
@@ -39,6 +43,7 @@ export default function UserDashboard() {
           journalEntries={data.stats.journalEntries}
           favorites={data.stats.favorites}
         />
+
         {/* Two-column layout */}
         <div className="grid grid-cols-1 xl:grid-cols-[1fr_360px] gap-8">
           {/* Left column */}
@@ -57,6 +62,7 @@ export default function UserDashboard() {
             />
             <ChallengeCard onPress={() => navigate(routes.trivia.path)} />
           </div>
+
           {/* Right column */}
           <div className="space-y-6">
             {/* Continue reading */}
@@ -72,42 +78,64 @@ export default function UserDashboard() {
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-sm text-foreground">{data.lastRead.bookName}</p>
                     <p className="text-xs text-muted-foreground/60">Chapter {data.lastRead.chapter}</p>
+                  </div>
                 </div>
               </ContentCard>
+            )}
+
             {/* Quick access icons */}
             <QuickAccessIcons navigate={navigate} />
+
             {/* Recent activity */}
             <RecentActivityList
               activities={data.recentActivity}
               navigate={navigate}
               onSeeAll={() => navigate(routes.myActivity.path)}
+            />
+
             {/* Daily exegesis */}
             {data.dailyExegesis && (
+              <ContentCard
                 title="Daily Exegesis"
                 cta="Study"
                 onClick={() => navigate(routes.dailyExegesis.path)}
                 onCta={() => navigate(routes.dailyExegesis.path)}
+              >
                 <p className="font-semibold text-sm text-foreground line-clamp-1">{data.dailyExegesis.title || "Daily Exegesis"}</p>
                 {data.dailyExegesis.passageRef && <p className="text-xs text-muted-foreground/60 mt-1 font-mono">{data.dailyExegesis.passageRef}</p>}
+              </ContentCard>
+            )}
+
             {/* Daily devotion */}
             {data.dailyDevotion && (
+              <ContentCard
                 title="Daily Devotion"
                 cta="Read"
                 onClick={() => navigate(routes.userDevotions.path)}
                 onCta={() => navigate(routes.userDevotions.path)}
+              >
                 <p className="font-semibold text-sm text-foreground line-clamp-1">{data.dailyDevotion.title || "Daily Devotion"}</p>
                 {data.dailyDevotion.content && <p className="text-xs text-muted-foreground/60 mt-1 line-clamp-2">{data.dailyDevotion.content}</p>}
+              </ContentCard>
+            )}
+
             {/* Latest journal */}
             {data.latestEntry && (
+              <ContentCard
                 title="Latest Journal"
                 cta="Open"
                 onClick={() => navigate(`/journal/view/${data.latestEntry.id}`)}
                 onCta={() => navigate(`/journal/view/${data.latestEntry.id}`)}
+              >
                 <p className="font-semibold text-sm text-foreground line-clamp-1">{data.latestEntry.title || "Journal Entry"}</p>
                 {(data.latestEntry.passageRef || data.latestEntry.reflection) && (
                   <p className="text-xs text-muted-foreground/60 mt-1 line-clamp-1">{data.latestEntry.passageRef || data.latestEntry.reflection}</p>
                 )}
+              </ContentCard>
+            )}
+          </div>
         </div>
+
         <div className="h-6" />
       </div>
     </div>

@@ -12,6 +12,7 @@ const PRESETS = (t?: any) => [
   { label: t?.devotions?.presetThisMonth || "This month", value: "this_month" },
   { label: t?.devotions?.presetLastMonth || "Last month", value: "last_month" },
 ];
+
 interface Props {
   fromDate: string;
   toDate: string;
@@ -24,6 +25,7 @@ interface Props {
   onClear: () => void;
   onPreset: (v: string) => void;
 }
+
 export function DevotionFilterBar({
   fromDate, toDate, activePreset, filterError, isFiltered,
   onFromChange, onToChange, onApply, onClear, onPreset,
@@ -60,10 +62,14 @@ export function DevotionFilterBar({
             <Input id="from-date" type="date" value={fromDate} max={toDate || undefined} onChange={(e) => onFromChange(e.target.value)} />
             <Label htmlFor="to-date">{t.common?.to || "To"}</Label>
             <Input id="to-date" type="date" value={toDate} min={fromDate || undefined} onChange={(e) => onToChange(e.target.value)} />
+          </div>
           <div className="flex gap-2">
             <Button onClick={onApply} variant="secondary">{t.devotions?.apply || "Apply"}</Button>
             {isFiltered && <Button onClick={onClear} variant="ghost">{t.devotions?.clear || "Clear"}</Button>}
+          </div>
+        </div>
         {filterError && <p className="text-sm text-destructive">{filterError}</p>}
       </CardContent>
     </Card>
   );
+}

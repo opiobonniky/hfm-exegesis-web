@@ -36,6 +36,8 @@ export function NotificationsTab({ notifications, onToggle }: NotificationsTabPr
             </div>
           </div>
           <Switch checked={notifications[key] ?? false} onCheckedChange={(v) => onToggle(key, v)} />
+        </div>
       ))}
     </div>
   );
+}

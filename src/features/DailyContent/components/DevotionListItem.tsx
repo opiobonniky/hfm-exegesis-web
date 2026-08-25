@@ -12,11 +12,13 @@ interface Props {
   onDelete: () => void;
   isAdmin: boolean;
 }
+
 export function DevotionListItem({ item, isSelected, onSelect, onEdit, onDelete, isAdmin }: Props) {
   const { t } = useLanguage();
   const dateStr = item.displayDate && typeof item.displayDate === "string"
     ? new Date(item.displayDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
     : "—";
+
   return (
     <div
       onClick={onSelect}
@@ -39,6 +41,7 @@ export function DevotionListItem({ item, isSelected, onSelect, onEdit, onDelete,
             <p className="text-xs text-primary mt-1">
               {item.bookName} {item.chapter}:{item.verseNumber}
             </p>
+          )}
         </div>
         {isAdmin && (
           <div className="flex items-center gap-1 shrink-0">
@@ -47,11 +50,15 @@ export function DevotionListItem({ item, isSelected, onSelect, onEdit, onDelete,
             </Button>
             <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={(e) => { e.stopPropagation(); onDelete(); }}>
               <Trash2 className="w-3.5 h-3.5" />
+            </Button>
+          </div>
         )}
       </div>
       {item.isPublished && (
         <span className="inline-block mt-2 text-[10px] px-2 py-0.5 rounded-full bg-green-100 text-green-700 font-medium">
           {t.common?.published || "Published"}
         </span>
+      )}
     </div>
   );
+}

@@ -12,24 +12,35 @@ import type { StrongsWordEntry } from "@/data/staticData";
 
 // ── Types ──
 export type WordEntry = StrongsWordEntry;
+
 export interface WordStudyItem {
   word: string;
   transliteration: string;
   meaning: string;
 }
+
 export interface CommentaryItem {
   author: string;
   title: string;
   text: string;
+}
+
 export interface CrossReferenceItem {
   ref: string;
+  text: string;
+}
+
 export interface DictionaryTermItem {
   term: string;
   pronunciation: string;
   definition: string;
   description: string;
+}
+
 export interface TopicItem {
   name: string;
+}
+
 export interface VerseResource {
   id: number;
   bookName: string;
@@ -43,6 +54,8 @@ export interface VerseResource {
   interlinearWords: string[];
   relatedTopics: TopicItem[];
   createdOn?: string;
+}
+
 export function useStudyTools() {
   const [words, setWords] = useState<WordEntry[]>([]);
   const [wordsLoading, setWordsLoading] = useState(false);
@@ -80,6 +93,7 @@ export function useStudyTools() {
   const [confirmSyncDesc, setConfirmSyncDesc] = useState("");
   const [syncingAllRefs, setSyncingAllRefs] = useState(false);
   const confirmSyncActionRef = useRef<(() => Promise<void>) | null>(null);
+
   const searchWords = useCallback(async (query: string) => {
     if (!query.trim()) return;
     setWordsLoading(true);
@@ -89,8 +103,10 @@ export function useStudyTools() {
     } catch (e) { console.error(e); }
     finally { setWordsLoading(false); }
   }, []);
+
   const loadResource = useCallback(async (book: string, chapter: number, verse: number) => {
     setResourcesLoading(true);
+    try {
       const res = await sendPostRequest("strongs", "admin/get-verse-resource", { bookName: book, chapter, verseStart: verse });
       if (res.returnCode === 200 && res.returnData) {
         const r = res.returnData;
@@ -101,18 +117,28 @@ export function useStudyTools() {
         setDictTerms(r.dictionaryTerms || []);
         setTopics(r.relatedTopics || []);
       }
+    } catch (e) { console.error(e); }
     finally { setResourcesLoading(false); }
+  }, []);
+
   const loadPrologues = useCallback(async () => {
     setProloguesLoading(true);
+    try {
       const res = await sendPostRequest("book-prologues", "admin/get-all", { page: 0, size: 50, search: prologueSearch });
       if (res.returnCode === 200) setPrologues(res.returnData?.content || []);
+    } catch (e) { console.error(e); }
     finally { setProloguesLoading(false); }
   }, [prologueSearch]);
+
   const loadStudies = useCallback(async (page = 0, search = "") => {
     setStudiesLoading(true);
+    try {
       const res = await sendPostRequest("admin", "get-all-daily-exegesis", { page, size: 20, search });
       if (res.returnCode === 200) setStudies(res.returnData?.content || []);
+    } catch (e) { console.error(e); }
     finally { setStudiesLoading(false); }
+  }, []);
+
   const handleBookChange = useCallback((book: string) => {
     setVerseBook(book);
     setVerseChapter(0);
@@ -120,6 +146,8 @@ export function useStudyTools() {
     if (book) setVerseChapList(getChaptersForBook(book));
     else setVerseChapList([]);
     setVerseNumList([]);
+  }, []);
+
   const handleChapterChange = useCallback((chap: number) => {
     setVerseChapter(chap);
     if (verseBook && chap) {
@@ -127,6 +155,7 @@ export function useStudyTools() {
       setVerseNumList(max > 0 ? Array.from({ length: max }, (_, i) => i + 1) : []);
     } else setVerseNumList([]);
   }, [verseBook]);
+
   return {
     // Words
     words, setWords, wordsLoading, wordSearch, setWordSearch, editWord, setEditWord,
@@ -152,3 +181,4 @@ export function useStudyTools() {
     confirmSyncDesc, setConfirmSyncDesc, syncingAllRefs, setSyncingAllRefs,
     confirmSyncActionRef,
   };
+}

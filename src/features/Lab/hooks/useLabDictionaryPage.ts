@@ -67,6 +67,7 @@ export function useLabDictionaryPage() {
       } else { if (!append) { setBrowseWords([]); setBrowseTotal(0); } setBrowseHasNext(false); }
     } catch { if (!append) { setBrowseWords([]); setBrowseTotal(0); } setBrowseHasNext(false); }
     finally { setBrowseLoading(false); setBrowseLoaded(true); }
+  }, [book]);
   const loadVerseWords = useCallback(async (book: string, chapter: number, verse: number) => {
     if (!book || !chapter || !verse) return;
     setVerseWordsLoading(true); setVerseWordsLoaded(false);

@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useAdminDailyExegesis } from "../hooks/useAdminDailyExegesis";
-import { ExegesisCard, ExegesisFormDialog, AdminSearchBar } from "../components";
+import { ExegesisCard, ExegesisFormDialog } from "../components";
 
 export default function AdminDailyExegesis() {
   const navigate = useNavigate();
@@ -30,6 +30,7 @@ export default function AdminDailyExegesis() {
           </div>
         </div>
       </div>
+
       {/* Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="flex items-center gap-3 mb-6">
@@ -37,19 +38,24 @@ export default function AdminDailyExegesis() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input placeholder="Search by title or passage..." value={h.search}
               onChange={e => h.setSearch(e.target.value)} onKeyDown={e => e.key === "Enter" && h.handleSearch()} className="pl-9" />
+          </div>
           <Button variant="outline" onClick={h.handleSearch}>Search</Button>
+        </div>
+
         {h.loading && h.items.length === 0 ? (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 6 }).map((_, i) => (
               <Card key={i}><CardHeader className="pb-3"><Skeleton className="h-5 w-32" /><Skeleton className="h-4 w-48" /></CardHeader>
                 <CardContent><Skeleton className="h-16 w-full" /></CardContent></Card>
             ))}
+          </div>
         ) : h.items.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <Feather className="w-12 h-12 text-muted-foreground/50 mb-4" />
             <h3 className="text-lg font-semibold mb-1">No exegeses found</h3>
             <p className="text-sm text-muted-foreground mb-4">{h.search ? "Try a different search term" : "Create your first daily exegesis"}</p>
             {!h.search && <Button onClick={() => h.openEdit()} className="gap-2"><Plus className="w-4 h-4" /> Add Exegesis</Button>}
+          </div>
         ) : (
           <>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -58,14 +64,18 @@ export default function AdminDailyExegesis() {
                   displayDate={item.displayDate} teachingBody={item.teachingBody} isPublished={item.isPublished}
                   onEdit={() => h.openEdit(item)} onDelete={() => h.setDeleteTarget(item)} />
               ))}
+            </div>
             {h.hasMore && (
               <div className="flex justify-center mt-6">
                 <Button variant="outline" onClick={h.handleLoadMore} disabled={h.loading} className="gap-2">
                   {h.loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ChevronRight className="w-4 h-4" />} Load More
                 </Button>
+              </div>
             )}
           </>
         )}
+      </div>
+
       {/* Dialogs */}
       <ExegesisFormDialog open={h.dialogOpen} editItem={h.editItem} form={h.editForm}
         onFormChange={h.setEditForm} saving={h.saving} onSave={h.handleSave} onClose={h.closeDialog} />

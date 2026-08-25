@@ -20,9 +20,11 @@ interface ProfileTabProps {
   onSowerAction: () => void;
   sowerLoading: boolean;
 }
+
 export function ProfileTab({ profile, isPayingUser, tierLabel, expiresLabel, saving, onProfileChange, onSaveProfile, onSowerAction, sowerLoading }: ProfileTabProps) {
   const { t } = useLanguage();
   const { isRtl } = useRTL();
+
   return (
     <div className="space-y-4">
       <div className="rounded-2xl bg-card border border-border/50 p-4 sm:p-6 space-y-6">
@@ -33,6 +35,7 @@ export function ProfileTab({ profile, isPayingUser, tierLabel, expiresLabel, sav
           <div>
             <h3 className="font-semibold">{t.settings?.personalInfo}</h3>
             <p className="text-xs text-muted-foreground">{t.settings?.personalInfoDesc}</p>
+          </div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-2">
@@ -40,6 +43,8 @@ export function ProfileTab({ profile, isPayingUser, tierLabel, expiresLabel, sav
             <Input value={profile.username} disabled className="bg-muted/50 border-dashed" />
             <Label className="text-xs font-medium text-muted-foreground">{t.settings?.emailLabel}</Label>
             <Input type="email" value={profile.email} disabled className="bg-muted/50 border-dashed" />
+          </div>
+          <div className="space-y-2">
             <Label className="text-xs font-medium text-muted-foreground">{t.settings?.firstNameLabel}</Label>
             <Input value={profile.firstName} onChange={(e) => onProfileChange("firstName", e.target.value)} />
             <Label className="text-xs font-medium text-muted-foreground">{t.settings?.lastNameLabel}</Label>
@@ -60,6 +65,8 @@ export function ProfileTab({ profile, isPayingUser, tierLabel, expiresLabel, sav
                 <SelectItem value="Other">Other</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+        </div>
         <Button onClick={onSaveProfile} disabled={saving} className="bg-primary hover:bg-primary/90">
           {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
           {saving ? "Saving..." : t.settings?.saveProfile || "Save Profile"}
@@ -74,9 +81,14 @@ export function ProfileTab({ profile, isPayingUser, tierLabel, expiresLabel, sav
             <div>
               <h3 className="font-semibold text-violet-900 dark:text-violet-100">Sower Status</h3>
               <p className="text-xs text-violet-600/70 dark:text-violet-300/70">{isPayingUser ? "Supporting the mission" : "Support the Word, unlock tools"}</p>
+            </div>
+          </div>
           <Button variant={isPayingUser ? "outline" : "default"} size="sm" onClick={onSowerAction} disabled={sowerLoading}
             className={cn("gap-1.5 text-xs font-bold h-9", !isPayingUser && "bg-violet-600 hover:bg-violet-700 text-white")}>
             {sowerLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : isPayingUser ? "Manage" : "Upgrade"}
           </Button>
+        </div>
+      </div>
     </div>
   );
+}

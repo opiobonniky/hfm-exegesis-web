@@ -1,4 +1,4 @@
-"use client";
+
 
 import { Shield } from "lucide-react";
 import Gate from "@/components/Gate";

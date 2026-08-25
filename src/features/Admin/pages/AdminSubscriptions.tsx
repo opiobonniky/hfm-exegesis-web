@@ -16,6 +16,7 @@ import { SubscriptionTierCard, TierFormDialog } from "../components";
 const AdminSubscriptions = () => {
   const { isRtl } = useLanguage();
   const h = useAdminSubscriptions();
+
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6" dir={isRtl ? "rtl" : "ltr"}>
       {/* Header */}
@@ -27,6 +28,7 @@ const AdminSubscriptions = () => {
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold font-[family-name:var(--font-heading)]">Subscription Manager</h1>
             <p className="text-sm text-muted-foreground">Manage subscription tiers and subscribers</p>
+          </div>
         </div>
         {h.activeTab === "tiers" && (
           <div className="flex gap-2">
@@ -34,13 +36,16 @@ const AdminSubscriptions = () => {
               {h.seeding ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <RefreshCw className="w-4 h-4 mr-1" />} Seed Defaults
             </Button>
             <Button size="sm" onClick={h.openCreateTier}><Plus className="w-4 h-4 mr-1.5" />New Tier</Button>
+          </div>
         )}
       </div>
+
       <Tabs value={h.activeTab} onValueChange={h.setActiveTab}>
         <TabsList className="overflow-x-auto flex-nowrap w-full justify-start">
           <TabsTrigger value="tiers" className="whitespace-nowrap"><ShieldCheck className="w-4 h-4 mr-1.5 hidden sm:inline text-foreground/60" />Subscription Tiers</TabsTrigger>
           <TabsTrigger value="subscribers" className="whitespace-nowrap"><Users className="w-4 h-4 mr-1.5 hidden sm:inline text-foreground/60" />Subscribers</TabsTrigger>
         </TabsList>
+
         {/* Tiers Tab */}
         <TabsContent value="tiers" className="space-y-4">
           <Card className="border-border/50">
@@ -61,12 +66,15 @@ const AdminSubscriptions = () => {
                       interval={tier.interval} description={tier.description} features={tier.features}
                       isActive={tier.isActive} onEdit={() => h.openEditTier(tier)} onDelete={() => h.setDeleteTier(tier.id)} />
                   ))}
+                </div>
               )}
             </CardContent>
           </Card>
         </TabsContent>
+
         {/* Subscribers Tab */}
         <TabsContent value="subscribers" className="space-y-4">
+          <Card className="border-border/50">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-base">Subscribers ({h.subscribers.length})</CardTitle>
@@ -75,24 +83,35 @@ const AdminSubscriptions = () => {
                 </Button>
               </div>
             </CardHeader>
+            <CardContent className="p-0">
               {h.subsLoading ? (
                 <div className="p-4 space-y-3">{Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-16 w-full rounded-lg" />)}</div>
               ) : h.subscribers.length === 0 ? (
-                  <Users className="w-10 h-10 mb-3 text-muted-foreground/40" /><p className="font-medium">No subscribers yet</p>
+                <div className="flex flex-col items-center py-16 text-center px-4">
+                  <Users className="w-10 h-10 mb-3 text-muted-foreground/40" />
+                  <p className="font-medium">No subscribers yet</p>
+                </div>
+              ) : (
                 <div className="overflow-x-auto">
                   <Table>
-                    <TableHeader><TableRow className="bg-muted/30">
-                      <TableHead>User</TableHead><TableHead>Tier</TableHead><TableHead>Expires</TableHead><TableHead>Status</TableHead><TableHead>Source</TableHead><TableHead className="text-right">Actions</TableHead>
-                    </TableRow></TableHeader>
+                    <TableHeader>
+                      <TableRow className="bg-muted/30">
+                        <TableHead>User</TableHead><TableHead>Tier</TableHead><TableHead>Expires</TableHead><TableHead>Status</TableHead><TableHead>Source</TableHead><TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
                     <TableBody>
                       {h.subscribers.map(sub => (
                         <TableRow key={sub.id} className={cn("border-border/40", sub.outOfSync && "bg-amber-50/30 dark:bg-amber-950/10")}>
                           <TableCell><div className="font-medium text-sm">{sub.firstName} {sub.lastName}</div><div className="text-xs text-muted-foreground">{sub.email}</div></TableCell>
                           <TableCell><Badge variant="outline" className="text-[10px] capitalize">{sub.subscriptionTier}</Badge></TableCell>
                           <TableCell className="text-xs text-muted-foreground">{sub.accessExpiresAt ? new Date(sub.accessExpiresAt).toLocaleDateString() : "—"}</TableCell>
-                          <TableCell>{sub.isSuspended ? (
-                            <Badge variant="outline" className="text-[10px] bg-red-50 text-red-700 border-red-200 dark:bg-red-950/30 dark:text-red-400 dark:border-red-800/40">Suspended</Badge>
-                          ) : <Badge variant="outline" className="text-[10px] bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-800/40">Active</Badge>}</TableCell>
+                          <TableCell>
+                            {sub.isSuspended ? (
+                              <Badge variant="outline" className="text-[10px] bg-red-50 text-red-700 border-red-200 dark:bg-red-950/30 dark:text-red-400 dark:border-red-800/40">Suspended</Badge>
+                            ) : (
+                              <Badge variant="outline" className="text-[10px] bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-800/40">Active</Badge>
+                            )}
+                          </TableCell>
                           <TableCell><Badge variant="outline" className={cn("text-[10px]", sub.source === "stripe_only" ? "bg-amber-50 text-amber-700 border-amber-200" : "bg-muted")}>{sub.source}</Badge></TableCell>
                           <TableCell className="text-right">
                             <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => h.setSuspendDialog(sub)}>
@@ -103,10 +122,17 @@ const AdminSubscriptions = () => {
                       ))}
                     </TableBody>
                   </Table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
+
       {/* Dialogs */}
       <TierFormDialog open={h.tierDialog} onOpenChange={h.setTierDialog} form={h.tierForm}
         onFormChange={h.setTierForm} saving={h.tierSaving} onSave={h.saveTier} />
+
       <Dialog open={!!h.deleteTier} onOpenChange={o => !o && h.setDeleteTier(null)}>
         <DialogContent className="sm:max-w-md rounded-xl">
           <DialogHeader>
@@ -119,16 +145,32 @@ const AdminSubscriptions = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
       <Dialog open={!!h.suspendDialog} onOpenChange={o => !o && h.setSuspendDialog(null)}>
-            <DialogTitle className="flex items-center gap-2">{h.suspendDialog?.isSuspended ? <RotateCcw className="w-5 h-5" /> : <Ban className="w-5 h-5" />}
+        <DialogContent className="sm:max-w-md rounded-xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              {h.suspendDialog?.isSuspended ? <RotateCcw className="w-5 h-5" /> : <Ban className="w-5 h-5" />}
               {h.suspendDialog?.isSuspended ? "Unsuspend User" : "Suspend User"}
             </DialogTitle>
             <DialogDescription>{h.suspendDialog?.isSuspended ? "Restore access for this user." : "This will revoke access for the user immediately."}</DialogDescription>
-          {h.suspendDialog && <div className="py-2"><p className="font-medium">{h.suspendDialog.firstName} {h.suspendDialog.lastName}</p><p className="text-xs text-muted-foreground">{h.suspendDialog.email} · {h.suspendDialog.subscriptionTier}</p></div>}
+          </DialogHeader>
+          {h.suspendDialog && (
+            <div className="py-2">
+              <p className="font-medium">{h.suspendDialog.firstName} {h.suspendDialog.lastName}</p>
+              <p className="text-xs text-muted-foreground">{h.suspendDialog.email} · {h.suspendDialog.subscriptionTier}</p>
+            </div>
+          )}
+          <DialogFooter className="flex-col-reverse sm:flex-row gap-2">
             <Button variant="outline" onClick={() => h.setSuspendDialog(null)} disabled={h.suspendLoading} className="w-full sm:w-auto">Cancel</Button>
             <Button variant={h.suspendDialog?.isSuspended ? "default" : "destructive"} onClick={h.toggleSuspend} disabled={h.suspendLoading} className="gap-2 w-full sm:w-auto">
               {h.suspendLoading ? <><Loader2 className="w-4 h-4 animate-spin" /> Processing...</> : <>{h.suspendDialog?.isSuspended ? <RotateCcw className="w-4 h-4" /> : <Ban className="w-4 h-4" />} {h.suspendDialog?.isSuspended ? "Unsuspend" : "Suspend"}</>}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
+
 export default AdminSubscriptions;

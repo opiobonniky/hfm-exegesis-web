@@ -21,15 +21,19 @@ import { useAddExplanation } from "../hooks/useAddExplanation";
 import { CharCount, LivePreview, PromptSelector, ValidationChecklist, FormattingTips } from "../components";
 import { BIBLE_BOOKS } from "@/features/Bible/constants";
 import { routes } from "@/components/Routes/routes";
+
 const BIBLE_VERSIONS = ["KJV", "NIV", "ESV", "NASB", "NLT", "NKJV", "CSB", "RSV", "ASV", "AMP", "MSG", "WEB"];
+
 const AddVerseExplanation = () => {
   const h = useAddExplanation();
+
   const validationItems = [
     { label: h.t.verseExplanations.clBookSelected, ok: (h.bookName ?? "").trim() !== "" },
     { label: h.t.verseExplanations.clValidChapter, ok: h.chapter >= 1 },
     { label: h.t.verseExplanations.clValidVerse, ok: h.verseNumber >= 1 },
     { label: h.t.verseExplanations.clExplanationWords, ok: (h.explanation ?? "").trim().split(/\s+/).length >= 20 },
   ];
+
   return (
     <div dir={h.isRtl ? "rtl" : "ltr"} className="min-h-screen bg-gradient-to-b from-background to-muted/30 p-6 lg:p-10">
       <div className="mx-auto space-y-6">
@@ -51,6 +55,7 @@ const AddVerseExplanation = () => {
               <p className="text-muted-foreground text-sm">
                 {h.isEditMode ? h.t.verseExplanations.editPageSubtitle : h.t.verseExplanations.addPageSubtitle}
               </p>
+            </div>
           </div>
           {h.existingFound && (
             <Badge variant="outline" className="ml-auto gap-1.5 border-amber-300 bg-amber-50 text-amber-700">
@@ -58,6 +63,7 @@ const AddVerseExplanation = () => {
             </Badge>
           )}
         </div>
+
         {/* ── Two-column layout ── */}
         <div className="fade-up stagger-1 grid lg:grid-cols-[1fr_420px] gap-6 items-start">
           {/* LEFT: Form */}
@@ -89,9 +95,12 @@ const AddVerseExplanation = () => {
                       readOnly={h.isEditMode} className={cn(h.isEditMode && "bg-muted/40 text-muted-foreground")}
                       onChange={(e) => { h.setChapter(Math.max(1, parseInt(e.target.value) || 1)); }} onBlur={h.handleVerseBlur} />
                   </div>
+                  <div className="space-y-1.5">
                     <Label>{h.t.verseExplanations.verse}</Label>
                     <Input type="number" min={1} max={200} value={h.verseNumber}
                       onChange={(e) => { h.setVerseNumber(Math.max(1, parseInt(e.target.value) || 1)); }} onBlur={h.handleVerseBlur} />
+                  </div>
+                </div>
                 {h.verseText && (
                   <div className="space-y-2">
                     <Label>{h.t.verseExplanations.verseText} <span className="text-xs text-muted-foreground font-normal">{h.t.verseExplanations.verseTextHint}</span></Label>
@@ -99,25 +108,39 @@ const AddVerseExplanation = () => {
                       <Textarea value={h.verseText} readOnly className="min-h-[110px] resize-none bg-muted/40 font-serif leading-relaxed" />
                       <div className="absolute bottom-3 right-3 text-xs text-muted-foreground">{h.bookName} {h.chapter}:{h.verseNumber}</div>
                     </div>
+                  </div>
                 )}
+                <div className="space-y-1.5">
                   <Label>{h.t.verseExplanations.bibleVersion} <span className="text-xs text-muted-foreground font-normal">{h.t.verseExplanations.optionalLabel}</span></Label>
                   <Select value={h.bibleVersion || h.NONE_VALUE} onValueChange={(v) => h.setBibleVersion(v === h.NONE_VALUE ? "" : v)}>
                     <SelectTrigger><SelectValue placeholder={h.t.verseExplanations.bibleVersionPlaceholder} /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value={h.NONE_VALUE}>{h.t.verseExplanations.noneOption}</SelectItem>
                       {BIBLE_VERSIONS.map((v) => <SelectItem key={v} value={v}>{v}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
                 {h.loadingExisting && (
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
                     <Loader2 className="w-3.5 h-3.5 animate-spin" /> {h.t.verseExplanations.checkingExisting}
+                  </div>
+                )}
               </CardContent>
             </Card>
+
             {/* Explanation */}
+            <Card className="border-border/40 shadow-sm">
+              <CardHeader className="bg-gradient-to-r from-primary/5 to-accent/5 pb-4">
+                <CardTitle className="flex items-center gap-2 text-base">
                   <ScrollText className="w-4 h-4 text-primary" /> {h.t.verseExplanations.explanationTitle}
+                </CardTitle>
                 <CardDescription>{h.t.verseExplanations.explanationDesc}</CardDescription>
+              </CardHeader>
               <CardContent className="pt-5 space-y-2">
                 <div className="flex items-center justify-between">
                   <Label>{h.t.verseExplanations.explanationText}</Label>
                   <CharCount value={h.explanation} max={5000} />
+                </div>
                 <Textarea rows={8} placeholder={h.t.verseExplanations.explanationPlaceholder}
                   value={h.explanation} onChange={(e) => h.setExplanation(e.target.value)}
                   maxLength={5000} className="resize-y font-mono text-sm leading-relaxed" />
@@ -125,19 +148,34 @@ const AddVerseExplanation = () => {
                   <p className="text-xs text-amber-600 flex items-center gap-1.5">
                     <AlertCircle className="w-3.5 h-3.5" /> {h.t.verseExplanations.minCharsError}
                   </p>
+                )}
+              </CardContent>
+            </Card>
+
             {/* Learn More */}
+            <Card className="border-border/40 shadow-sm">
               <CardHeader className="bg-gradient-to-r from-amber-500/5 to-amber-400/5 pb-4">
+                <CardTitle className="flex items-center gap-2 text-base">
                   {h.t.verseExplanations.learnMoreTitle}
                   <Badge variant="outline" className="text-xs font-normal border-amber-200 text-amber-600">{h.t.verseExplanations.learnMoreBadge}</Badge>
+                </CardTitle>
                 <CardDescription className="mt-1">{h.t.verseExplanations.learnMoreDesc}</CardDescription>
+              </CardHeader>
+              <CardContent className="pt-5 space-y-2">
+                <div className="flex items-center justify-between">
                   <Label>{h.t.verseExplanations.learnMoreLabel}</Label>
                   <CharCount value={h.learnMore} max={8000} />
+                </div>
                 <Textarea rows={6} placeholder={h.t.verseExplanations.learnMorePlaceholder}
                   value={h.learnMore} onChange={(e) => h.setLearnMore(e.target.value)}
                   maxLength={8000} className="resize-y font-mono text-sm leading-relaxed" />
+              </CardContent>
+            </Card>
+
             {/* Prompts */}
             <PromptSelector prompts={h.prompts} loading={h.promptsLoading}
               selectedIds={h.selectedPromptIds} onToggle={h.togglePrompt} t={h.t} />
+
             {/* Save */}
             <div className="flex items-center justify-between pt-2 pb-6">
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -150,17 +188,24 @@ const AddVerseExplanation = () => {
                   : h.saving ? <><Loader2 className="w-4 h-4 animate-spin" /> {h.t.verseExplanations.savingLabel}</>
                     : <><Save className="w-4 h-4" /> {h.existingFound ? h.t.verseExplanations.updateExplanation : h.t.verseExplanations.saveExplanation}</>}
               </Button>
+            </div>
+          </div>
+
           {/* RIGHT: Preview */}
           <div className="space-y-4 lg:sticky lg:top-6">
             <div className="flex items-center gap-2 mb-1">
               <span className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">{h.t.verseExplanations.appPreview}</span>
               <div className="flex-1 h-px bg-border/50" />
+            </div>
             <LivePreview bookName={h.bookName} chapter={h.chapter} verseNumber={h.verseNumber}
               bibleVersion={h.bibleVersion} explanation={h.explanation} learnMore={h.learnMore} t={h.t} />
             <FormattingTips t={h.t} />
             <ValidationChecklist items={validationItems} valid={h.isValid} t={h.t} />
+          </div>
+        </div>
       </div>
     </div>
   );
 };
+
 export default AddVerseExplanation;

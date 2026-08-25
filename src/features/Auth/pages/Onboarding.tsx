@@ -8,6 +8,7 @@ export const ONBOARDING_KEY = "onboarding_completed";
 export function isOnboardingCompleted(): boolean { return localStorage.getItem(ONBOARDING_KEY) === "true"; }
 export function completeOnboarding(): void { localStorage.setItem(ONBOARDING_KEY, "true"); }
 export function resetOnboarding(): void { localStorage.removeItem(ONBOARDING_KEY); }
+
 interface Slide {
   icon: typeof BookOpen;
   title: string;
@@ -17,22 +18,30 @@ interface Slide {
   iconBg: string;
   iconColor: string;
 }
+
 const SLIDES: Slide[] = [
   {
     icon: BookOpen, title: "The Word", subtitle: "Read deeply. Study clearly.",
     description: "Read the Bible in a clean, distraction-free space. Every translation, every chapter, every verse — always accessible.",
     bgGradient: "from-indigo-600 to-indigo-800", iconBg: "bg-card/15", iconColor: "text-white",
   },
+  {
     icon: BookText, title: "The Tools", subtitle: "Discover the original languages",
     description: "Tap verses and words to discover context, Strong's definitions, cross-references, and study helps. The Bible comes alive when you understand the original meaning.",
     bgGradient: "from-violet-600 to-violet-800", iconBg: "bg-card/15", iconColor: "text-white",
+  },
+  {
     icon: Microscope, title: "The Lab", subtitle: "A guided study journey",
     description: "Learn to study Scripture through the 4-step Exegesis Lab: Look, Listen, Learn, and Abide. Each step draws you deeper into the Word.",
     bgGradient: "from-emerald-600 to-emerald-800", iconBg: "bg-card/15", iconColor: "text-white",
+  },
+  {
     icon: Heart, title: "The Legacy Ledger", subtitle: "Your private journal",
     description: "Save your reflections, prayers, and studies into your private journal. Build a lifelong archive of what God is teaching you through His Word.",
     bgGradient: "from-amber-500 to-amber-700", iconBg: "bg-card/15", iconColor: "text-white",
+  },
 ];
+
 function OnboardingSlide({ slide, isActive }: { slide: Slide; isActive: boolean }) {
   const Icon = slide.icon;
   return (
@@ -48,7 +57,10 @@ function OnboardingSlide({ slide, isActive }: { slide: Slide; isActive: boolean 
       <p className="text-sm text-white/60 text-center max-w-xs leading-relaxed">{slide.description}</p>
     </div>
   );
+}
+
 function DotIndicators({ total, current }: { total: number; current: number }) {
+  return (
     <div className="flex items-center gap-2">
       {Array.from({ length: total }, (_, i) => (
         <div key={i} className={cn(
@@ -56,12 +68,18 @@ function DotIndicators({ total, current }: { total: number; current: number }) {
           i === current ? "w-6 h-2 bg-card" : "w-2 h-2 bg-card/30",
         )} />
       ))}
+    </div>
+  );
+}
+
 export default function OnboardingPage() {
   const { slide, goNext, goPrev } = useOnboardingPage();
   const totalSlides = SLIDES.length;
   const isFirst = slide === 0;
   const isLast = slide === totalSlides - 1;
   const current = SLIDES[slide];
+
+  return (
     <div className={cn("min-h-screen flex flex-col bg-gradient-to-b transition-all duration-700", current.bgGradient)}>
       {/* Top bar */}
       <div className="flex items-center justify-between px-5 pt-6 pb-2">
@@ -74,12 +92,17 @@ export default function OnboardingPage() {
           <button onClick={() => { completeOnboarding(); window.location.href = routes.register.path; }}
             className="text-sm font-semibold text-white/40 hover:text-white/70 transition-colors">
             Skip
+          </button>
         )}
+      </div>
+
       {/* Slide area */}
       <div className="flex-1 relative flex items-center justify-center overflow-hidden">
         {SLIDES.map((s, i) => (
           <OnboardingSlide key={i} slide={s} isActive={i === slide} />
         ))}
+      </div>
+
       {/* Bottom controls */}
       <div className="px-6 pb-10 pt-4">
         <div className="flex items-center justify-between mb-6">
@@ -103,7 +126,13 @@ export default function OnboardingPage() {
               {isFirst ? "I already have an account" : "Sign in instead"}
             </button>
           )}
+        </div>
         <div className="flex items-center justify-center gap-1.5 mt-6">
           <span className="text-[10px] font-medium text-white/30 tracking-wider uppercase">Exegesis Project</span>
           <span className="text-[10px] text-white/20">&middot;</span>
           <span className="text-[10px] text-white/30 italic">The Living Text</span>
+        </div>
+      </div>
+    </div>
+  );
+}

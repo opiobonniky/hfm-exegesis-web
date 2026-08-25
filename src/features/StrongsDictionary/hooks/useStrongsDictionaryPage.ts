@@ -14,7 +14,9 @@ export interface StrongsWord {
   bdbEntry?: string;
   relatedWords?: string[];
 }
+
 const PAGE_SIZE = 20;
+
 export function useStrongsDictionaryPage() {
   const { toast } = useToast();
   const [mode, setMode] = useState<"search" | "browse" | "favorites">("search");
@@ -32,6 +34,7 @@ export function useStrongsDictionaryPage() {
   const [favorites, setFavorites] = useState<StrongsWord[]>([]);
   const [favLoading, setFavLoading] = useState(false);
   const [selectedWord, setSelectedWord] = useState<StrongsWord | null>(null);
+
   const executeSearch = useCallback(
     async (reset = true) => {
       if (!searchQuery.trim()) return;
@@ -56,23 +59,40 @@ export function useStrongsDictionaryPage() {
         setSearchLoading(false);
       }
     },
-    [searchQuery, langFilter, searchPage, searchResults, toast]
+    [searchQuery, langFilter, searchPage, searchResults, toast],
   );
+
   const browseByBook = useCallback(
+    async (reset = true) => {
       if (!selectedBook) return;
       const page = reset ? 0 : browsePage;
       setBrowseLoading(true);
+      try {
         const res = await sendPostRequest("strongs", "browse", {
           book: selectedBook,
+          language: langFilter,
+          page,
+          size: PAGE_SIZE,
+        });
+        if (res.data?.returnCode === 200) {
+          const data = res.data.returnData;
           setBrowseWords(reset ? data.words : [...browseWords, ...data.words]);
           setBrowseCount(data.total || 0);
           if (reset) setBrowsePage(0);
+        }
+      } catch {
         toast({ title: "Error", description: "Browse failed", variant: "destructive" });
+      } finally {
         setBrowseLoading(false);
-    [selectedBook, langFilter, browsePage, browseWords, toast]
+      }
+    },
+    [selectedBook, langFilter, browsePage, browseWords, toast],
+  );
+
   useEffect(() => {
     if (mode === "browse" && selectedBook) browseByBook(true);
   }, [mode, selectedBook, langFilter]);
+
   const loadFavorites = useCallback(async () => {
     setFavLoading(true);
     try {
@@ -82,26 +102,39 @@ export function useStrongsDictionaryPage() {
       setFavLoading(false);
     }
   }, []);
+
+  useEffect(() => {
     if (mode === "favorites") loadFavorites();
   }, [mode, loadFavorites]);
+
   const toggleFavorite = useCallback(
     async (word: StrongsWord) => {
+      try {
         await sendPostRequest("strongs", "toggle-favorite", {
           strongsNumber: word.strongsNumber,
+        });
         if (favorites.some((f) => f.strongsNumber === word.strongsNumber)) {
           setFavorites((prev) => prev.filter((f) => f.strongsNumber !== word.strongsNumber));
         } else {
           setFavorites((prev) => [...prev, word]);
+        }
       } catch { /* ignore */ }
-    [favorites]
+    },
+    [favorites],
+  );
+
   const isFavorited = (num: string) => favorites.some((f) => f.strongsNumber === num);
+
   const loadMoreSearch = () => {
     setSearchPage((p) => p + 1);
     executeSearch(false);
   };
+
   const loadMoreBrowse = () => {
     setBrowsePage((p) => p + 1);
     browseByBook(false);
+  };
+
   return {
     mode, setMode, langFilter, setLangFilter,
     searchQuery, setSearchQuery, searchResults, searchLoading, searchCount, executeSearch, loadMoreSearch,
@@ -109,3 +142,5 @@ export function useStrongsDictionaryPage() {
     favorites, favLoading,
     selectedWord, setSelectedWord,
     toggleFavorite, isFavorited,
+  };
+}

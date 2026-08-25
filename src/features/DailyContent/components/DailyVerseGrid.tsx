@@ -21,11 +21,13 @@ interface Props {
   hasPrevious: boolean;
   onPageChange: (page: number) => void;
 }
+
 export default function DailyVerseGrid({
   verses, selectedIndex, isAdmin, isFiltered, onSelect,
   onView, onEdit, onDelete, page, totalPages, hasNext, hasPrevious, onPageChange,
 }: Props) {
   if (verses.length === 0) return null;
+
   return (
     <div>
       <h2 className="text-lg font-bold mb-4">
@@ -80,13 +82,23 @@ export default function DailyVerseGrid({
                       >
                         <Eye className="w-3.5 h-3.5" />
                       </button>
+                      <button
                         onClick={(e) => { e.stopPropagation(); onEdit(verse); }}
+                        className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                        title="Edit"
+                      >
                         <Pencil className="w-3.5 h-3.5" />
+                      </button>
+                      <button
                         onClick={(e) => { e.stopPropagation(); onDelete(verse); }}
                         className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-destructive transition-colors"
+                        title="Delete"
+                      >
                         <Trash2 className="w-3.5 h-3.5" />
+                      </button>
                     </div>
                   )}
+                </div>
                 <p
                   className="text-sm font-serif leading-relaxed line-clamp-2 mb-1.5 text-foreground/85"
                   style={{ fontFamily: "'Georgia', 'Times New Roman', serif" }}
@@ -95,6 +107,7 @@ export default function DailyVerseGrid({
                 </p>
                 <p className="text-xs font-medium text-primary">
                   {verse.bookName} {verse.chapter}:{verse.verseNumber}
+                </p>
               </div>
             </div>
           );
@@ -113,10 +126,16 @@ export default function DailyVerseGrid({
           <span className="text-xs text-muted-foreground">
             Page {page + 1} of {Math.max(totalPages, 1)}
           </span>
+          <Button
+            variant="outline"
+            size="sm"
             disabled={!hasNext}
             onClick={() => onPageChange(page + 1)}
+          >
             Next
+          </Button>
         </div>
       )}
     </div>
   );
+}

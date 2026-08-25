@@ -32,6 +32,7 @@ export function useAddDailyDevotion() {
     const [h, m] = time.split(":").map(Number);
     if (isNaN(h) || isNaN(m)) return;
     const nd = new Date(selectedDate); nd.setHours(h, m, 0, 0); setSelectedDate(nd);
+  }, [selectedDate]);
   const handleSave = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim() || !content.trim()) {
@@ -53,6 +54,7 @@ export function useAddDailyDevotion() {
       }
     } catch {
       toast({ title: t.common.error, description: t.common.error, variant: "destructive" });
+    }
   }, [title, content, book, chapter, verseNumber, selectedDate]);
   return {
     title, setTitle, content, setContent,

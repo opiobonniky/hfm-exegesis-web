@@ -2,10 +2,11 @@ import { useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { useLandingPage } from "../hooks/useLandingPage";
 import { NavBar, HeroSection, FeaturesSection, BibleStatsSection, ExegesisSection, AboutSection, CTASection, FooterSection } from "../components/landing";
+import {Skeleton} from "@/components/ui/skeleton.tsx";
 
 const Landing = () => {
   const p = useLandingPage();
-  const { navigate, mobileMenuOpen, setMobileMenuOpen, menuPanelRef, scrolled, expandedMobileSection, setExpandedMobileSection, authLoading } = p;
+  const { navigate, mobileMenuOpen, setMobileMenuOpen, menuPanelRef, scrolled, expandedMobileSection, setExpandedMobileSection, authLoading }:any = p;
   const handleMenuClick = (href?: string) => {
     if (!href) return;
     setMobileMenuOpen(false);
@@ -18,9 +19,7 @@ const Landing = () => {
   };
   if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="w-10 h-10 animate-spin text-brand-primary" />
-      </div>
+      <Skeleton/>
     );
   }
   return (
@@ -51,7 +50,9 @@ const Landing = () => {
         <AboutSection />
         <CTASection />
         <FooterSection />
+      </div>
     </div>
   );
 };
+
 export default Landing;

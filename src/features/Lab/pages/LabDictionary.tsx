@@ -24,10 +24,12 @@ const MODE_TABS = [
   { id: "verse" as Mode, icon: BookText, label: "By Verse" },
 ];
 const SEARCH_HINTS = ["love", "faith", "grace", "word", "light", "logos", "agape"];
+
 export default function LabDictionary() {
   const p = useLabDictionaryPage();
   const { navigate, mode, setMode, searchQuery, setSearchQuery, results, loading, searched, resultTotal, selectedBook, handleBookChange, browseWords, browseLoading, browseLoaded, browseTotal, browsePage, browseHasNext, setBrowsePage, loadBookWords, verseBook, setVerseBook, verseChapter, setVerseChapter, verseNum, setVerseNum, verseWords, verseWordsLoading, verseWordsLoaded, verseWordsTotal, loadVerseWords, chartMode, setChartMode, langFilter, setLangFilter, langCounts, searchLangCounts, chartData, selectedWord, detailOpen, setDetailOpen, openWordDetailById, dialogOpen, setDialogOpen, dialogStrongsId, dialogSurfaceText } = p;
   const inputCls = "h-10 text-sm rounded-xl border-border/60";
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <header className="flex-shrink-0 border-b bg-background/95 backdrop-blur-sm sticky top-0 z-30">
@@ -44,6 +46,7 @@ export default function LabDictionary() {
           <TierBadge />
         </div>
       </header>
+
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-2xl mx-auto w-full px-4 sm:px-6 py-4 pb-16">
           <Gate featureName="Dictionary" featureDescription="The full word study dictionary with original language analysis is available for Legacy Sower and Covenant Sower subscribers.">
@@ -59,6 +62,8 @@ export default function LabDictionary() {
                   </button>
                 );
               })}
+            </div>
+
             {mode === "search" ? (
               <div className="space-y-4">
                 <div className="flex flex-col items-center pt-2 pb-1">
@@ -68,9 +73,11 @@ export default function LabDictionary() {
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input placeholder="Search by word, transliteration, or meaning... (min 3 characters)" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-9 pr-4 h-11 text-sm rounded-xl border-border/60" />
+                </div>
                 <div className="flex flex-wrap gap-2 text-[11px] text-muted-foreground">
                   <span className="font-semibold">Try:</span>
                   {SEARCH_HINTS.map((h) => <button key={h} onClick={() => setSearchQuery(h)} className="px-2 py-0.5 rounded-md bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground transition-colors">{h}</button>)}
+                </div>
                 {loading && <div className="flex items-center justify-center py-16"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>}
                 {!loading && searched && results.length === 0 && (
                   <div className="flex flex-col items-center py-16 text-center">
@@ -83,26 +90,46 @@ export default function LabDictionary() {
                   <div className="space-y-3 mt-4">
                     <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">{resultTotal} word{resultTotal !== 1 ? "s" : ""} found</p>
                     <LanguageStatsBar counts={searchLangCounts} label="Language Breakdown" />
-                    <ScrollArea className="max-h-[55vh] pr-1"><div className="space-y-1.5">{results.map((w) => <WordResultItem key={w.strongsId} word={w} onClick={() => openWordDetailById(w.strongsId)} />)}</div></ScrollArea>
-                {!loading && !searched && <div className="flex flex-col items-center py-12 text-center"><Search className="w-14 h-14 text-muted-foreground/20 mb-4" /><p className="text-sm text-muted-foreground max-w-sm leading-relaxed">Enter a word above to discover its original Greek or Hebrew meaning, usage across Scripture, and grammatical details.</p></div>}
+                    <ScrollArea className="max-h-[55vh] pr-1">
+                      <div className="space-y-1.5">{results.map((w) => <WordResultItem key={w.strongsId} word={w} onClick={() => openWordDetailById(w.strongsId)} />)}</div>
+                    </ScrollArea>
+                  </div>
+                )}
+                {!loading && !searched && (
+                  <div className="flex flex-col items-center py-12 text-center">
+                    <Search className="w-14 h-14 text-muted-foreground/20 mb-4" />
+                    <p className="text-sm text-muted-foreground max-w-sm leading-relaxed">Enter a word above to discover its original Greek or Hebrew meaning, usage across Scripture, and grammatical details.</p>
+                  </div>
+                )}
               </div>
             ) : mode === "verse" ? (
+              <div className="space-y-4">
+                <div className="flex flex-col items-center pt-2 pb-1">
                   <h2 className="text-lg font-black text-foreground text-center">Words in This Verse</h2>
                   <p className="text-sm text-muted-foreground text-center max-w-sm mt-1">Explore every original language word used in a specific verse, with definitions and grammar.</p>
+                </div>
                 <div className="flex flex-wrap items-end gap-2 justify-center">
                   <div className="space-y-1">
                     <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Book</label>
                     <Select value={verseBook} onValueChange={setVerseBook}><SelectTrigger className={cn(inputCls, "w-32")}><SelectValue placeholder="Book" /></SelectTrigger><SelectContent className="max-h-64">{BIBLE_BOOKS.map((b) => <SelectItem key={b} value={b}>{b}</SelectItem>)}</SelectContent></Select>
+                  </div>
+                  <div className="space-y-1">
                     <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Chapter</label>
                     <Input type="number" min={1} placeholder="Ch." value={verseChapter || ""} onChange={(e) => setVerseChapter(parseInt(e.target.value) || 0)} className={cn(inputCls, "w-20")} />
+                  </div>
+                  <div className="space-y-1">
                     <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Verse</label>
                     <Input type="number" min={1} placeholder="V." value={verseNum || ""} onChange={(e) => setVerseNum(parseInt(e.target.value) || 0)} className={cn(inputCls, "w-20")} />
+                  </div>
                   <Button size="sm" onClick={() => { if (verseBook && verseChapter && verseNum) loadVerseWords(verseBook, verseChapter, verseNum); }} disabled={verseWordsLoading || !verseBook || !verseChapter || !verseNum} className="h-10 mt-4 gap-1">
                     {verseWordsLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Search className="w-3.5 h-3.5" />}Load Words
                   </Button>
+                </div>
                 {verseWordsLoaded && verseBook && verseChapter && verseNum && (
                   <div className="flex items-center justify-center gap-2">
                     <Badge variant="outline" className="text-sm font-bold px-3 py-1.5 bg-primary/10 border-primary/30 text-primary"><BookText className="w-3.5 h-3.5 mr-1.5" />{verseBook} {verseChapter}:{verseNum}</Badge>
+                  </div>
+                )}
                 {verseWordsLoading && <div className="flex items-center justify-center py-16"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>}
                 {!verseWordsLoading && verseWordsLoaded && verseWords.length > 0 && (
                   <div className="space-y-3 mt-2">
@@ -110,22 +137,36 @@ export default function LabDictionary() {
                       <BookText className="w-3.5 h-3.5 text-primary" />
                       <span className="text-[10px] font-bold text-foreground">{verseBook} {verseChapter}:{verseNum} — {verseWordsTotal} unique word{verseWordsTotal !== 1 ? "s" : ""}</span>
                     </div>
-                    <ScrollArea className="max-h-[55vh] pr-1"><div className="space-y-1.5">{verseWords.map((w) => <WordResultItem key={w.strongsId} word={w} onClick={() => openWordDetailById(w.strongsId)} />)}</div></ScrollArea>
+                    <ScrollArea className="max-h-[55vh] pr-1">
+                      <div className="space-y-1.5">{verseWords.map((w) => <WordResultItem key={w.strongsId} word={w} onClick={() => openWordDetailById(w.strongsId)} />)}</div>
+                    </ScrollArea>
+                  </div>
+                )}
                 {!verseWordsLoading && verseWordsLoaded && verseWords.length === 0 && (
                   <div className="flex flex-col items-center py-12 text-center"><BookText className="w-12 h-12 text-muted-foreground/30 mb-3" /><p className="text-sm font-semibold text-muted-foreground">No word data for this verse</p></div>
-                {!verseWordsLoading && !verseWordsLoaded && <div className="flex flex-col items-center py-12 text-center"><BookText className="w-14 h-14 text-muted-foreground/20 mb-4" /><p className="text-sm text-muted-foreground max-w-sm leading-relaxed">Enter a book, chapter, and verse above to see all the original language words used in that verse.</p></div>}
+                )}
+                {!verseWordsLoading && !verseWordsLoaded && (
+                  <div className="flex flex-col items-center py-12 text-center"><BookText className="w-14 h-14 text-muted-foreground/20 mb-4" /><p className="text-sm text-muted-foreground max-w-sm leading-relaxed">Enter a book, chapter, and verse above to see all the original language words used in that verse.</p></div>
+                )}
+              </div>
             ) : (
+              <div className="space-y-4">
+                <div className="flex flex-col items-center pt-2 pb-1">
                   <h2 className="text-lg font-black text-foreground text-center">Browse Words by Book</h2>
                   <p className="text-sm text-muted-foreground text-center max-w-sm mt-1">Select a book of the Bible to see all the original language words used in it.</p>
+                </div>
                 <div className="max-w-xs mx-auto w-full">
                   <Select value={selectedBook} onValueChange={handleBookChange}><SelectTrigger className="h-11 text-sm rounded-xl border-border/60"><SelectValue placeholder="Choose a book..." /></SelectTrigger><SelectContent className="max-h-64">{BIBLE_BOOKS.map((b) => <SelectItem key={b} value={b} className="text-sm">{b}</SelectItem>)}</SelectContent></Select>
+                </div>
                 {browseLoading && <div className="flex items-center justify-center py-16"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>}
                 {!browseLoading && browseLoaded && browseWords.length > 0 && (
                   <div className="space-y-4 mt-2">
                     {chartData.length > 0 && <WordFrequencyChart data={chartData as any} onWordClick={openWordDetailById} mode={chartMode} onModeChange={setChartMode} langFilter={langFilter} onLangFilterChange={setLangFilter} langCounts={langCounts} />}
                     <LanguageStatsBar counts={langCounts} label={`${selectedBook} — ${browseTotal} unique book words`} icon={<LibraryBig className="w-3.5 h-3.5 text-primary" />} />
                     <div className="flex items-center justify-between"><p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">All Words ({browseWords.length} of {browseTotal})</p></div>
-                    <ScrollArea className="max-h-[45vh] pr-1"><div className="space-y-1.5">{browseWords.map((w) => <WordResultItem key={w.strongsId} word={w} onClick={() => openWordDetailById(w.strongsId)} />)}</div></ScrollArea>
+                    <ScrollArea className="max-h-[45vh] pr-1">
+                      <div className="space-y-1.5">{browseWords.map((w) => <WordResultItem key={w.strongsId} word={w} onClick={() => openWordDetailById(w.strongsId)} />)}</div>
+                    </ScrollArea>
                     {browseHasNext && (
                       <div className="flex items-center justify-center pt-1 pb-2">
                         <Button variant="outline" size="sm" onClick={() => loadBookWords(selectedBook, browsePage + 1, true)} disabled={browseLoading} className="gap-1.5 text-xs h-8">
@@ -134,12 +175,20 @@ export default function LabDictionary() {
                         </Button>
                       </div>
                     )}
+                  </div>
+                )}
                 {!browseLoading && browseLoaded && browseWords.length === 0 && (
                   <div className="flex flex-col items-center py-12 text-center"><BookText className="w-12 h-12 text-muted-foreground/30 mb-3" /><p className="text-sm font-semibold text-muted-foreground">No words found</p><p className="text-xs text-muted-foreground/60 mt-1 max-w-xs">No original language word data is available for {selectedBook}.</p></div>
-                {!browseLoading && !browseLoaded && <div className="flex flex-col items-center py-12 text-center"><LibraryBig className="w-14 h-14 text-muted-foreground/20 mb-4" /><p className="text-sm text-muted-foreground max-w-sm leading-relaxed">Select a book from the dropdown to explore all the original Greek and Hebrew words used in that book.</p></div>}
+                )}
+                {!browseLoading && !browseLoaded && (
+                  <div className="flex flex-col items-center py-12 text-center"><LibraryBig className="w-14 h-14 text-muted-foreground/20 mb-4" /><p className="text-sm text-muted-foreground max-w-sm leading-relaxed">Select a book from the dropdown to explore all the original Greek and Hebrew words used in that book.</p></div>
+                )}
+              </div>
             )}
           </Gate>
+        </div>
       </div>
+
       <WordDetailSheet open={detailOpen} onOpenChange={setDetailOpen} wordEntry={selectedWord as any || null} strongsId={selectedWord?.strongsId || null} verseText={undefined} translations={undefined} />
       <WordStudyDialog open={dialogOpen} onOpenChange={setDialogOpen} strongsId={dialogStrongsId} surfaceText={dialogSurfaceText || undefined} />
     </div>

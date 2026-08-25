@@ -12,6 +12,7 @@ interface FormData {
   prompt: string; category: string; description: string; order: number;
   bookName: string; chapter: string; verseNumber: string; isActive: boolean;
 }
+
 interface Props {
   open: boolean; onOpenChange: (v: boolean) => void;
   editing: boolean; formData: FormData; setFormData: (fn: (p: FormData) => FormData) => void;
@@ -20,6 +21,8 @@ interface Props {
   dialogFilteredBooks: string[]; handleBookChange: (v: string) => void;
   chapters: number[]; handleChapterChange: (v: string) => void;
   verses: number[];
+}
+
 export function JournalPromptForm({
   open, onOpenChange, editing, formData, setFormData, saving, handleSave, t,
   bookSearch, setBookSearch, dialogFilteredBooks, handleBookChange,
@@ -44,10 +47,15 @@ export function JournalPromptForm({
                 <SelectContent>{CATEGORIES.filter((c) => c.value !== "all").map((c) => <SelectItem key={c.value} value={c.value}>{getCategoryLabel(t, c.value)}</SelectItem>)}</SelectContent>
               </Select>
             </div>
+            <div className="space-y-2">
               <Label>{t.journal?.displayOrder || "Display Order"}</Label>
               <Input type="number" value={formData.order} onChange={(e) => setFormData((p) => ({ ...p, order: parseInt(e.target.value) || 0 }))} />
+            </div>
+          </div>
+          <div className="space-y-2">
             <Label>{t.journal?.descriptionOptional || "Description (optional)"}</Label>
             <Input placeholder="Brief description for this prompt..." value={formData.description} onChange={(e) => setFormData((p) => ({ ...p, description: e.target.value }))} />
+          </div>
           <div className="border-t pt-4">
             <Label className="mb-2 block">{t.journal?.scriptureReference || "Scripture Reference (optional)"}</Label>
             <div className="grid grid-cols-3 gap-3">
@@ -62,16 +70,26 @@ export function JournalPromptForm({
                   </SelectContent>
                 </Select>
               </div>
+              <div className="space-y-2">
                 <Label className="text-xs">Chapter</Label>
                 <Select value={formData.chapter} onValueChange={handleChapterChange} disabled={!formData.bookName}>
                   <SelectTrigger><SelectValue placeholder="Any" /></SelectTrigger>
                   <SelectContent><SelectItem value="">Any chapter</SelectItem>{chapters.map((ch) => <SelectItem key={ch} value={String(ch)}>{ch}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
                 <Label className="text-xs">Verse</Label>
                 <Select value={formData.verseNumber} onValueChange={(v) => setFormData((p) => ({ ...p, verseNumber: v }))} disabled={!formData.chapter}>
+                  <SelectTrigger><SelectValue placeholder="Any" /></SelectTrigger>
                   <SelectContent><SelectItem value="">Any verse</SelectItem>{verses.map((v) => <SelectItem key={v} value={String(v)}>{v}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
           <div className="flex items-center gap-2">
             <Switch checked={formData.isActive} onCheckedChange={(v) => setFormData((p) => ({ ...p, isActive: v }))} />
             <Label>{t.journal?.activeVisible || "Active (visible to users)"}</Label>
+          </div>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>{t.common?.cancel || "Cancel"}</Button>
@@ -83,3 +101,4 @@ export function JournalPromptForm({
       </DialogContent>
     </Dialog>
   );
+}

@@ -10,6 +10,7 @@ import type { ContentType } from "../constants";
 const CHAPTER_COUNTS: Record<string, number> = {
   Genesis:50,Exodus:40,Leviticus:27,Numbers:36,Deuteronomy:34,Joshua:24,Judges:21,Ruth:4,"1 Samuel":31,"2 Samuel":24,"1 Kings":22,"2 Kings":25,"1 Chronicles":29,"2 Chronicles":36,Ezra:10,Nehemiah:13,Esther:10,Job:42,Psalms:150,Proverbs:31,Ecclesiastes:12,"Song of Solomon":8,Isaiah:66,Jeremiah:52,Lamentations:5,Ezekiel:48,Daniel:12,Hosea:14,Joel:3,Amos:9,Obadiah:1,Jonah:4,Micah:7,Nahum:3,Habakkuk:3,Zephaniah:3,Haggai:2,Zechariah:14,Malachi:4,Matthew:28,Mark:16,Luke:24,John:21,Acts:28,Romans:16,"1 Corinthians":16,"2 Corinthians":13,Galatians:6,Ephesians:6,Philippians:4,Colossians:4,"1 Thessalonians":5,"2 Thessalonians":3,"1 Timothy":6,"2 Timothy":4,Titus:3,Philemon:1,Hebrews:13,James:5,"1 Peter":5,"2 Peter":3,"1 John":5,"2 John":1,"3 John":1,Jude:1,Revelation:22,
 };
+
 export function useAdminDailyContent() {
   const { t, isRtl } = useLanguage();
   const { toast } = useToast();
@@ -47,20 +48,26 @@ export function useAdminDailyContent() {
   const [conflictDialog, setConflictDialog] = useState<{ open: boolean; data: any; payload: Record<string, any> | null }>({ open: false, data: null, payload: null });
   const [deleteTarget, setDeleteTarget] = useState<DailyItem | null>(null);
   const [deleting, setDeleting] = useState(false);
+
   // Derived
   const formChapters = formBook ? (CHAPTER_COUNTS[formBook] ? Array.from({ length: CHAPTER_COUNTS[formBook] }, (_, i) => i + 1) : []) : [];
   const formMaxVerses = formBook && formChapter ? 31 : 0;
+
   // Sync time
   useEffect(() => {
     setFormTime(`${String(formDate.getHours()).padStart(2, "0")}:${String(formDate.getMinutes()).padStart(2, "0")}`);
   }, [formDate]);
+
   const handleTimeChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const time = e.target.value; setFormTime(time);
     if (!time) return;
     const [h, m] = time.split(":").map(Number);
     if (isNaN(h) || isNaN(m)) return;
     const nd = new Date(formDate); nd.setHours(h, m, 0, 0); setFormDate(nd);
+  }, [formDate]);
+
   // Auto-fetch verse text
+  useEffect(() => {
     if (!formBook || !formChapter || !formVerse) { setFormVerseText(""); return; }
     setFormVerseLoading(true);
     setActiveVersion(verseVersion).then(() => {
@@ -68,11 +75,13 @@ export function useAdminDailyContent() {
       setFormVerseLoading(false);
     });
   }, [formBook, formChapter, formVerse, verseVersion]);
+
   const getAction = useCallback((type: ContentType, action: string) => {
     if (type === "verse" && action === "get-all") return "get-all-daily-verses";
     const prefix = type === "verse" ? "daily-verse" : type === "devotion" ? "daily-devotion" : "daily-exegesis";
     return `${action}-${prefix}`;
   }, []);
+
   // Load content
   const loadContent = useCallback(async (type: ContentType, p: number) => {
     setLoading(true);
@@ -88,9 +97,12 @@ export function useAdminDailyContent() {
     } catch { toast({ title: "Failed to load content", variant: "destructive" }); }
     finally { setLoading(false); }
   }, [searchDate, getAction, toast]);
+
+  useEffect(() => {
     const typeMap: Record<string, ContentType> = { verses: "verse", devotions: "devotion", exegesis: "exegesis" };
     loadContent(typeMap[activeTab] || "verse", page);
   }, [activeTab, page, loadContent]);
+
   // Open/close form
   const openForm = useCallback((type: ContentType, item?: DailyItem) => {
     setFormMode(type); setEditItem(item || null);
@@ -104,10 +116,14 @@ export function useAdminDailyContent() {
     setFormTags(item?.tags || "");
     setFormDate(item?.displayDate ? new Date(item.displayDate) : (() => { const d = new Date(); d.setHours(8, 0, 0, 0); return d; })());
     setFormPublished(item?.isPublished ?? true);
+  }, []);
+
   const closeForm = useCallback(() => { setFormMode(null); setEditItem(null); }, []);
+
   // Save
   const handleSave = useCallback(async () => {
     setSaving(true);
+    try {
       const type = formMode!;
       const action = getAction(type, "add");
       const payload: Record<string, any> = { isPublished: formPublished, displayDate: formDate.toISOString().split("T")[0] };
@@ -122,10 +138,12 @@ export function useAdminDailyContent() {
     } catch { toast({ title: "Error saving", variant: "destructive" }); }
     finally { setSaving(false); }
   }, [formMode, formBook, formChapter, formVerse, formExplanation, formReflection, formLearnMore, formTitle, formContent, formPassageRef, formIntro, formContextSummary, formTeachingBody, formApplication, formPrayer, formTags, formDate, formPublished, editItem, getAction, toast, closeForm, loadContent]);
+
   // Delete
   const confirmDelete = useCallback(async () => {
     if (!deleteTarget) return;
     setDeleting(true);
+    try {
       const type: ContentType = activeTab === "verses" ? "verse" : activeTab === "devotions" ? "devotion" : "exegesis";
       const action = getAction(type, "delete");
       const idKey = type === "verse" ? "verseId" : type === "devotion" ? "devotionId" : "exegesisId";
@@ -135,7 +153,9 @@ export function useAdminDailyContent() {
     } catch { toast({ title: "Error deleting", variant: "destructive" }); }
     finally { setDeleting(false); }
   }, [deleteTarget, activeTab, getAction, toast, loadContent, page]);
+
   const typeLabel = activeTab === "verses" ? "Verse" : activeTab === "devotions" ? "Devotion" : "Exegesis";
+
   return {
     t, isRtl, activeTab, setActiveTab, content, total, page, setPage, loading, searchDate, setSearchDate,
     formMode, editItem, saving, formTitle, setFormTitle, formContent, setFormContent,

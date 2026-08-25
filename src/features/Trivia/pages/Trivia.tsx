@@ -1,3 +1,4 @@
+/**
  * TriviaPage — thin page composing extracted components.
  * Zero raw HTML tags — all UI in extracted components.
  */
@@ -30,9 +31,11 @@ export default function TriviaPage() {
             {/* Normal mode: Plan screen */}
             {p.gameMode !== "daily" && p.phase === "plan" && (
               <TriviaPlanScreen difficulty={p.difficulty} setDifficulty={p.setDifficulty} stats={p.stats} isTodayCompleted={p.isTodayCompleted} consecutiveDays={p.consecutiveDays} todayKey={p.todayKey} weekHistory={p.weekHistory} startDailyChallenge={p.startDailyChallenge} startQuiz={p.startQuiz} leaderboardState={p.leaderboardState} leaderboardComparison={p.leaderboardComparison} resetLeaderboard={p.resetLeaderboard} isRtl={p.isRtl} />
+            )}
             {/* Normal mode: Game screen */}
             {p.gameMode !== "daily" && p.phase !== "plan" && (
               <TriviaGameScreen phase={p.phase} question={p.question} selectedAnswer={p.selectedAnswer} result={p.result} score={p.score} streak={p.streak} difficulty={p.difficulty} totalCount={p.totalCount} loading={p.loading} error={p.error} resultDismissed={p.resultDismissed} autoAdvanceProgress={p.autoAdvanceProgress} isRtl={p.isRtl} onSelect={p.handleSelect} onDismiss={p.handleDismissWithCancel} onNext={p.nextQuestion} onReset={p.reset} onSetDifficulty={p.setDifficulty} onReferencePress={p.handleReferencePress} leaderboardComparison={p.leaderboardComparison} leaderboardState={p.leaderboardState} stats={p.stats} />
+            )}
           </div>
         </div>
       </div>

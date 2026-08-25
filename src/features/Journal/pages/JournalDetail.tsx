@@ -20,17 +20,21 @@ const CATEGORY_META: Record<string, { labelKey: string; label: string; color: st
   reflection: { labelKey: "categoryReflection", label: "Reflection", color: "bg-emerald-500" },
   application: { labelKey: "categoryApplication", label: "Application", color: "bg-indigo-500" },
 };
+
 const MOOD_EMOJI: Record<string, { label: string; emoji: string }> = {
   happy: { label: "Happy", emoji: "😊" }, grateful: { label: "Grateful", emoji: "🙏" },
   peaceful: { label: "Peaceful", emoji: "🕊️" }, thoughtful: { label: "Thoughtful", emoji: "🤔" },
   motivated: { label: "Motivated", emoji: "💪" }, hopeful: { label: "Hopeful", emoji: "🌟" },
   challenged: { label: "Challenged", emoji: "🧗" }, blessed: { label: "Blessed", emoji: "✨" },
+};
+
 const LeafDivider = () => (
   <div className="flex items-center gap-3 my-8 select-none">
     <span className="flex-1 h-px bg-border" />
     <span className="text-muted-foreground/50 dark:text-foreground/80 text-xs tracking-[0.3em]">✦ ✦ ✦</span>
   </div>
 );
+
 const JournalDetailPage = () => {
   const p = useJournalDetail();
   const { t, isRtl, navigate, entry, loading, deleting, showDeleteDialog, setShowDeleteDialog, copied, handleCopy, handleShare, handleDelete, studiedWordSheetOpen, setStudiedWordSheetOpen, selectedStudiedWord, openWordStudy } = p;
@@ -39,8 +43,6 @@ const JournalDetailPage = () => {
   if (!entry) return null;
   const catMeta = CATEGORY_META[entry.category] || CATEGORY_META.general;
   const moodInfo = entry.mood ? MOOD_EMOJI[entry.mood] : null;
-  const verseText = entry as any;
-  const studiedWords = entry as any;
   const tagsArray = entry.tags ? entry.tags.split(",").map((t: string) => t.trim()).filter(Boolean) : [];
   const reflectionSections = [
     { key: "learnings", icon: Lightbulb, label: "What I Learned", subtitle: "Insights & revelations", content: entry.learnings, iconColor: "text-amber-500" },
@@ -49,8 +51,10 @@ const JournalDetailPage = () => {
     { key: "prayers", icon: Star, label: "Prayers", subtitle: "Conversations with the Father", content: entry.prayers, iconColor: "text-violet-500" },
   ].filter((s) => s.content);
   const formatDateShort = (d: string) => new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+
   return (
     <div className="min-h-full bg-amber-50/30 dark:bg-stone-950" dir={isRtl ? "rtl" : "ltr"}>
+      {/* Top bar */}
       <div className="sticky top-0 z-20 border-b border-border/60 dark:border-stone-800/60 bg-amber-50/80 dark:bg-stone-950/80 backdrop-blur-md">
         <div className="max-w-2xl mx-auto px-4 flex items-center justify-between h-12">
           <button onClick={() => navigate(routes.journal.path)} className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors">
@@ -76,6 +80,8 @@ const JournalDetailPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Content */}
       <div className="max-w-2xl mx-auto px-5 py-8 sm:py-12">
         <div className="flex items-center gap-3 flex-wrap mb-4">
           <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold tracking-wide uppercase">
@@ -84,6 +90,7 @@ const JournalDetailPage = () => {
           </span>
           {moodInfo && <span className="text-sm leading-none">{moodInfo.emoji}</span>}
           <span className="text-[11px] text-muted-foreground/70 dark:text-muted-foreground">{formatDate(entry.createdOn)}</span>
+        </div>
         {entry.title && <h1 className="text-3xl sm:text-4xl font-bold text-foreground dark:text-stone-100 leading-tight mb-2 tracking-tight" style={{ fontFamily: "'Georgia', 'Times New Roman', serif" }}>{entry.title}</h1>}
         {entry.bookName && <div className="flex items-center gap-1.5 mt-1 mb-6 text-xs text-muted-foreground/70 dark:text-muted-foreground"><BookOpen className="w-3 h-3" /><span className="font-medium">{entry.bookName} {entry.chapter}:{entry.verseNumber}</span></div>}
         {entry.content && <div className="mb-6"><p className="text-sm sm:text-base leading-[1.8] text-foreground/80 dark:text-muted-foreground/50 whitespace-pre-line" style={{ fontFamily: "'Georgia', 'Times New Roman', serif" }}>{entry.content}</p></div>}
@@ -93,11 +100,16 @@ const JournalDetailPage = () => {
             <LeafDivider />
             <h3 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground dark:text-muted-foreground/70 mb-3 flex items-center gap-1.5"><Tag className="w-3 h-3" />Tags</h3>
             <div className="flex flex-wrap gap-1.5">{tagsArray.map((tag, i) => <span key={i} className="inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-medium bg-muted dark:bg-stone-800 text-muted-foreground dark:text-muted-foreground/70"># {tag}</span>)}</div>
+          </div>
         )}
         <LeafDivider />
         <div className="text-center space-y-0.5 pb-8">
           <p className="text-[11px] text-muted-foreground/70 dark:text-muted-foreground">Written {formatDateShort(entry.createdOn)}</p>
           <p className="text-[11px] text-muted-foreground/50 dark:text-muted-foreground">Last edited {formatDateShort(entry.updatedOn)}</p>
+        </div>
+      </div>
+
+      {/* Delete Dialog */}
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent className="rounded-2xl border-border dark:border-stone-800">
           <DialogHeader><DialogTitle>Delete Entry</DialogTitle></DialogHeader>
@@ -111,6 +123,11 @@ const JournalDetailPage = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Word Detail Sheet */}
+      <WordDetailSheet open={studiedWordSheetOpen} onOpenChange={setStudiedWordSheetOpen} wordEntry={selectedStudiedWord || null} strongsId={selectedStudiedWord?.strongsId || null} />
     </div>
   );
+};
+
 export default JournalDetailPage;

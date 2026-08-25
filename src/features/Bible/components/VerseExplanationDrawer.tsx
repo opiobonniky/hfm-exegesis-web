@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { sendPostRequest } from "@/services/api";
+import {
   Sheet, SheetClose, SheetContent, SheetDescription, SheetHeader, SheetTitle,
 } from "@/components/ui/sheet";
 import { useLanguage } from "@/components/languages/languageProvider";
@@ -18,14 +19,19 @@ interface VerseExplanationDrawerProps {
   chapter: number;
   verse: number;
 }
+
 /** Parse JSON-stringified list field */
 function parseList<T = string>(raw: string | undefined | null): T[] {
   if (!raw) return [];
   try { const p = JSON.parse(raw); return Array.isArray(p) ? p : []; } catch { return []; }
+}
+
 interface WordStudy {
   word?: string;
   strongs?: string;
   definition?: string;
+}
+
 interface ExplanationData {
   verseIntroduction?: string;
   explanation?: string;
@@ -40,6 +46,8 @@ interface ExplanationData {
   learnMore?: string;
   finalThoughts?: string;
   takeaways?: string;
+}
+
 /** Section header with icon + label */
 function Section({ icon: Icon, label, children }: { icon: LucideIcon; label: string; children: React.ReactNode }) {
   return (
@@ -51,11 +59,16 @@ function Section({ icon: Icon, label, children }: { icon: LucideIcon; label: str
       <div className="pl-1">{children}</div>
     </div>
   );
+}
+
 /** Sub-label for grouped content */
 function SubLabel({ label }: { label: string }) {
   return <p className="text-[10px] font-bold text-primary/70 uppercase tracking-wider mt-3 mb-1">{label}</p>;
+}
+
 /** Numbered list */
 function NumberedList({ items }: { items: string[] }) {
+  return (
     <div className="space-y-2">
       {items.map((item, i) => (
         <div key={i} className="flex gap-2.5 items-start">
@@ -63,13 +76,29 @@ function NumberedList({ items }: { items: string[] }) {
           <span className="text-sm text-foreground/80 leading-relaxed">{item}</span>
         </div>
       ))}
+    </div>
+  );
+}
+
 /** Bullet list */
 function BulletList({ items }: { items: string[] }) {
+  return (
+    <div className="space-y-2">
+      {items.map((item, i) => (
+        <div key={i} className="flex gap-2.5 items-start">
           <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0 mt-2" />
+          <span className="text-sm text-foreground/80 leading-relaxed">{item}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function VerseExplanationDrawer({ open, onClose, bookName, chapter, verse }: VerseExplanationDrawerProps) {
   const { isRtl, t } = useLanguage();
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<ExplanationData | null>(null);
+
   // Fetch explanation on open
   useEffect(() => {
     if (!open || !bookName) return;
@@ -86,12 +115,15 @@ export default function VerseExplanationDrawer({ open, onClose, bookName, chapte
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
   }, [open, bookName, chapter, verse]);
+
   // Parse structured fields
   const wordStudies = parseList<WordStudy>(data?.wordStudies);
   const practicalApps = parseList(data?.practicalApplications);
   const keyThemes = parseList(data?.keyThemes);
   const crossRefs = parseList(data?.crossReferences);
   const takeaways = parseList(data?.takeaways);
+
+  return (
     <Sheet open={open} onOpenChange={(nextOpen) => { if (!nextOpen) onClose(); }}>
       <SheetContent side={isRtl ? "left" : "right"} className="w-full sm:max-w-[420px] p-0 gap-0 flex flex-col">
         {/* Header */}
@@ -103,6 +135,7 @@ export default function VerseExplanationDrawer({ open, onClose, bookName, chapte
             <div>
               <SheetTitle className="text-sm font-bold text-foreground">{t.bibleReader.explanation}</SheetTitle>
               <SheetDescription className="text-[11px] text-muted-foreground">{bookName} {chapter}:{verse}</SheetDescription>
+            </div>
           </div>
         </SheetHeader>
         {/* Content */}
@@ -111,10 +144,12 @@ export default function VerseExplanationDrawer({ open, onClose, bookName, chapte
             <div className="flex flex-col items-center justify-center py-16 gap-3">
               <Loader2 className="w-6 h-6 animate-spin text-primary" />
               <p className="text-xs text-muted-foreground">{t.bibleReader.loadingExplanation}</p>
+            </div>
           ) : !data ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
               <BookOpen className="w-8 h-8 text-muted-foreground/30 mb-3" />
               <p className="text-sm text-muted-foreground">No explanation available for this verse.</p>
+            </div>
           ) : (
             <>
               {/* Verse Introduction */}
@@ -127,16 +162,22 @@ export default function VerseExplanationDrawer({ open, onClose, bookName, chapte
               {data.explanation && (
                 <Section icon={Lightbulb} label={t.bibleReader.explanation}>
                   <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">{data.explanation}</p>
+                </Section>
+              )}
               {/* Application */}
               {data.application && (
                 <Section icon={RefreshCcw} label="Application">
                   <p className="text-sm text-foreground/80 leading-relaxed">{data.application}</p>
+                </Section>
+              )}
               {/* Background */}
               {(data.backgroundAuthor || data.backgroundBook || data.backgroundContext) && (
                 <Section icon={Layers} label="Background">
                   {data.backgroundAuthor && <><SubLabel label="Author" /><p className="text-sm text-foreground/80">{data.backgroundAuthor}</p></>}
                   {data.backgroundBook && <><SubLabel label="Book" /><p className="text-sm text-foreground/80">{data.backgroundBook}</p></>}
                   {data.backgroundContext && <><SubLabel label="Context" /><p className="text-sm text-foreground/80">{data.backgroundContext}</p></>}
+                </Section>
+              )}
               {/* Strong's Word Study */}
               {wordStudies.length > 0 && (
                 <Section icon={GraduationCap} label="Word Study">
@@ -151,15 +192,21 @@ export default function VerseExplanationDrawer({ open, onClose, bookName, chapte
                       </div>
                     ))}
                   </div>
+                </Section>
+              )}
               {/* Practical Applications */}
               {practicalApps.length > 0 && (
                 <Section icon={ListChecks} label={`${practicalApps.length} Practical Applications`}>
                   <NumberedList items={practicalApps} />
+                </Section>
+              )}
               {/* Insights and Cross References */}
               {(keyThemes.length > 0 || crossRefs.length > 0) && (
                 <Section icon={Sparkles} label="Insights & Cross References">
                   {keyThemes.length > 0 && <><SubLabel label="Key Themes" /><BulletList items={keyThemes} /></>}
                   {crossRefs.length > 0 && <><SubLabel label="Cross References" /><BulletList items={crossRefs} /></>}
+                </Section>
+              )}
               {/* Learn More */}
               {data.learnMore && (
                 <Section icon={BookMarked} label="Learn More">
@@ -172,20 +219,30 @@ export default function VerseExplanationDrawer({ open, onClose, bookName, chapte
                       {data.learnMore}
                     </div>
                   </details>
+                </Section>
+              )}
               {/* Final Thoughts */}
               {data.finalThoughts && (
                 <Section icon={BookMarked} label="Final Thoughts">
                   <p className="text-sm text-foreground/80 leading-relaxed">{data.finalThoughts}</p>
+                </Section>
+              )}
               {/* Takeaways */}
               {takeaways.length > 0 && (
                 <Section icon={Sparkles} label={`${takeaways.length} Takeaways`}>
                   <NumberedList items={takeaways} />
+                </Section>
+              )}
             </>
           )}
+        </div>
         {/* Footer */}
         <div className="shrink-0 px-5 py-3 border-t border-border bg-muted/20">
           <SheetClose asChild>
             <button type="button" className="w-full py-2.5 rounded-xl bg-muted text-xs font-semibold text-muted-foreground hover:bg-muted/80 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{t.bibleReader.closeExplanation}</button>
           </SheetClose>
+        </div>
       </SheetContent>
     </Sheet>
+  );
+}

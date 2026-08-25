@@ -1,3 +1,4 @@
+/**
  * useLabFlowPage — comprehensive hook wrapping useLabFlow + all page-level state.
  * Extracts ALL useState/useEffect from LabFlow page.
  */
@@ -58,9 +59,12 @@ export function useLabFlowPage() {
     return () => { cancelled = true; };
   }, [lab.bookName, lab.chapter, lab.verseStart, lab.verseEnd, lab.stage, lab.versionId]);
   // Fetch verse words (Strong's) when entering Learn stage
+  useEffect(() => {
     if (lab.stage !== "learn" || !lab.passageRef || passageVerses.length === 0) return;
+    let cancelled = false;
     const fetchWords = async () => {
       setWordsLoading(true);
+      try {
         const text = passageVerses.map((v) => v.text).join(" ");
         const words = await getVerseWords(text);
         if (!cancelled) setVerseWords(words);

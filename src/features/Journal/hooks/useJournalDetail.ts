@@ -39,6 +39,7 @@ export function useJournalDetail() {
   }, [entry, handleCopy]);
   const handleDelete = useCallback(async () => {
     setDeleting(true);
+    try {
       const res = await sendPostRequest("journal", "delete", { id: entry.id });
       if (res?.returnCode === 200) { toast({ title: "Deleted" }); navigate("/journal"); }
       else { toast({ title: "Delete failed", variant: "destructive" }); }

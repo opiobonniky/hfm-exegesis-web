@@ -66,6 +66,7 @@ export function useJournalPageFull() {
     finally { setLoading(false); }
   }, [searchDebounced, category, bookName, source, strongsId, startDate, endDate, viewMode, toast]);
   const loadStats = useCallback(async () => {
+    try {
       const res = await sendPostRequest("journal", "get-stats", {});
       if (res?.returnCode === 200 && res?.returnData) setStats(res.returnData);
     } catch {}
@@ -76,6 +77,7 @@ export function useJournalPageFull() {
   const handleDelete = useCallback(async () => {
     if (!deleteDialog) return;
     setDeleting(true);
+    try {
       const res = await sendPostRequest("journal", "delete", { id: deleteDialog.id });
       if (res?.returnCode === 200) { toast({ title: "Deleted" }); setDeleteDialog(null); loadEntries(page); }
       else { toast({ title: "Delete failed", variant: "destructive" }); }

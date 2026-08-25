@@ -7,10 +7,12 @@ interface Props {
   word: StrongsWordEntry;
   onClick?: () => void;
 }
+
 export function WordResultItem({ word, onClick }: Props) {
   const lang = word.language?.toLowerCase() || "unknown";
   const langColor = getLangColor(lang);
   const langLetter = getLangLetter(lang);
+
   return (
     <button
       onClick={onClick}
@@ -27,7 +29,9 @@ export function WordResultItem({ word, onClick }: Props) {
           </div>
           <p className="text-sm font-medium text-foreground truncate mt-0.5">{word.surfaceForm || word.meaning}</p>
           {word.meaning && <p className="text-xs text-muted-foreground/70 mt-0.5 line-clamp-1">{word.meaning}</p>}
+        </div>
         <Info className="w-3.5 h-3.5 text-muted-foreground/30 group-hover:text-muted-foreground/60 shrink-0 mt-1" />
       </div>
     </button>
   );
+}

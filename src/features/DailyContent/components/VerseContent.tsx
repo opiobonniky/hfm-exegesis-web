@@ -15,6 +15,7 @@ interface VerseData {
 interface Props {
   verse: VerseData; accent?: string; liked: boolean;
   onCopy: () => void; onShare: () => void; onLike: () => void;
+}
 export function VerseContent({ verse, accent = "hsl(var(--primary))", liked, onCopy, onShare, onLike }: Props) {
   const wordStudies = parseList(verse.wordStudies);
   const practicalApps = parseList(verse.practicalApplications);
@@ -38,6 +39,7 @@ export function VerseContent({ verse, accent = "hsl(var(--primary))", liked, onC
           <Button variant={liked ? "default" : "outline"} size="sm" onClick={onLike} className={`h-8 gap-1.5 text-xs ${liked ? "text-rose-500" : ""}`}>
             <Heart className={`w-3.5 h-3.5 ${liked ? "fill-current" : ""}`} /> {liked ? "Liked" : "Like"}
           </Button>
+        </div>
       </div>
       <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
       {verse.verseIntroduction && <VerseSection label="Verse Introduction" icon={ScrollText} accent={accent}><p className="text-sm text-muted-foreground leading-relaxed">{verse.verseIntroduction}</p></VerseSection>}
@@ -58,3 +60,4 @@ export function VerseContent({ verse, accent = "hsl(var(--primary))", liked, onC
       <div className="text-center py-8"><p className="text-sm text-muted-foreground italic">Meditate on this verse today.</p></div>
     </div>
   );
+}

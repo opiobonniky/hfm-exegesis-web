@@ -11,6 +11,7 @@ interface Props {
   onOpenBible: (verse: DailyVerseItem) => void;
   onWriteJournal: (verse: DailyVerseItem) => void;
 }
+
 export default function DailyVerseFeaturedVerse({ verse, onOpenBible, onWriteJournal }: Props) {
   const { t } = useLanguage();
   return (
@@ -51,11 +52,16 @@ export default function DailyVerseFeaturedVerse({ verse, onOpenBible, onWriteJou
               {verse.learnMore}
             </p>
           </div>
+        )}
+      </div>
       <div className="flex flex-col sm:flex-row gap-3">
         <Button className="flex-1 gap-2 h-11" onClick={() => onOpenBible(verse)}>
           <BookOpen className="w-4 h-4" />Open in Bible
         </Button>
         <Button variant="outline" className="flex-1 gap-2 h-11" onClick={() => onWriteJournal(verse)}>
           <PenLine className="w-4 h-4" />Write in Journal
+        </Button>
+      </div>
     </section>
   );
+}

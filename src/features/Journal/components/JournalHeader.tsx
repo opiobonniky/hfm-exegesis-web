@@ -10,6 +10,7 @@ interface Props {
   selectedIds: Set<number>; setShowExportModal: (v: boolean) => void;
   exitSelectionMode: () => void;
 }
+
 export function JournalHeader({ t, isRtl, navigate, stats, viewMode, selectionMode, setSelectionMode, selectedIds, setShowExportModal, exitSelectionMode }: Props) {
   return (
     <div className="border-b border-border/60 dark:border-stone-800/60 bg-card/50 dark:bg-stone-900/50">
@@ -24,6 +25,7 @@ export function JournalHeader({ t, isRtl, navigate, stats, viewMode, selectionMo
               <p className="text-sm text-muted-foreground dark:text-muted-foreground/70">
                 {stats ? `${stats.totalEntries} entries · ${stats.entriesThisWeek} this week` : "Your study archive"}
               </p>
+            </div>
           </div>
           {viewMode === "my" && (
             <div className="flex items-center gap-2">
@@ -33,10 +35,14 @@ export function JournalHeader({ t, isRtl, navigate, stats, viewMode, selectionMo
               </Button>
               <Button variant="outline" size="sm" onClick={() => setShowExportModal(true)} className="rounded-xl border-border dark:border-stone-800 text-xs gap-1.5">
                 <Download className="w-4 h-4" />{selectedIds.size > 0 ? `Export (${selectedIds.size})` : "Export"}
+              </Button>
               <Button size="sm" onClick={() => navigate(routes.newJournalEntry.path)} className="rounded-xl bg-foreground/10 hover:bg-foreground/20 text-foreground gap-2 text-xs">
                 <Plus className="w-4 h-4" />New Entry
+              </Button>
+            </div>
           )}
         </div>
       </div>
     </div>
   );
+}

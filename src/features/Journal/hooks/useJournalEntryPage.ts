@@ -50,7 +50,8 @@ export function useJournalEntryPage() {
           setEntry((prev) => ({ ...prev, title: d.title || prev.title, content: [d.introduction, d.contextSummary, d.teachingBody].filter(Boolean).join("\n\n") || prev.content, prayers: d.prayer || prev.prayers, application: d.application || prev.application, learnings: d.contextSummary || d.introduction || prev.learnings, tags: d.tags || prev.tags }));
         }
       }).catch(() => {});
-  }, []);
+    }
+  }, [searchParams]);
   useEffect(() => { if (isNewEntry) fetchTemplates(); }, [isNewEntry]);
   const fetchEntry = useCallback(async () => {
     setLoading(true);
@@ -61,9 +62,11 @@ export function useJournalEntryPage() {
   }, [entryId]);
   const fetchTemplates = useCallback(async () => {
     try { const res = await sendPostRequest("journal", "templates/get-all", { isActive: true }); if (res.returnCode === 200 && res.returnData) setTemplates(res.returnData); } catch {}
+  }, []);
   const handleSave = useCallback(async () => {
     if (!entry.title.trim() && !entry.content.trim()) { toast({ title: "Title or content required", variant: "destructive" }); return; }
     setSaving(true);
+    try {
       const payload = { ...entry, id: isEditing ? entryId : undefined };
       const res = await sendPostRequest("journal", isEditing ? "update-entry" : "create-entry", payload);
       if (res?.returnCode === 200) { toast({ title: isEditing ? "Updated" : "Created" }); navigate("/journal"); }

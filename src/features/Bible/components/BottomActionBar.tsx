@@ -42,11 +42,16 @@ export default function BottomActionBar({
       <button type="button" onClick={onBookmark} aria-label={t.bibleReader.bookmark}
         className="w-10 h-10 rounded-xl flex items-center justify-center text-muted-foreground hover:bg-rose-500/10 hover:text-rose-500 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
         <Star className="w-4 h-4" />
+      </button>
       {/* Scroll bottom */}
       <button type="button" onClick={onScrollBottom} aria-label="Scroll down"
+        className="w-10 h-10 rounded-xl flex items-center justify-center text-muted-foreground hover:bg-muted transition-all">
         <ArrowDown className="w-4 h-4" />
+      </button>
       {/* Next chapter */}
       <button type="button" onClick={onNext} disabled={!canGoNext} aria-label={t.bibleReader.nextChapter}
+        className="w-10 h-10 rounded-xl flex items-center justify-center text-muted-foreground hover:bg-muted transition-all disabled:opacity-40">
         <SkipForward className="w-4 h-4" />
+      </button>
     </div>
   );

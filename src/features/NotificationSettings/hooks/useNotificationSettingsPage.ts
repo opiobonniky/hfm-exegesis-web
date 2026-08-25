@@ -33,6 +33,7 @@ export function useNotificationSettingsPage() {
     setSettings((s) => ({ ...s, ...patch }));
   const handleSave = useCallback(async () => {
     setSaving(true);
+    try {
       const res = await sendPostRequest("user", "update-notification-settings", settings);
       if (res.returnCode === 200) {
         toast({ title: "Saved", description: "Notification settings updated" });

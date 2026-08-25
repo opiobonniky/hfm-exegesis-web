@@ -11,12 +11,12 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogD
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { useAdminActivityLog } from "../hooks/useAdminActivityLog";
-import { ACTIVITY_PAGE_SIZE } from "../constants";
 
 const AdminActivityLog = () => {
   const { isRtl } = useLanguage();
   const h = useAdminActivityLog();
   const deviceIcon = (d: string) => d === "mobile" ? <Smartphone className="w-3.5 h-3.5" /> : <Monitor className="w-3.5 h-3.5" />;
+
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6" dir={isRtl ? "rtl" : "ltr"}>
       {/* Header */}
@@ -27,7 +27,9 @@ const AdminActivityLog = () => {
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold font-[family-name:var(--font-heading)]">Activity Log</h1>
           <p className="text-sm text-muted-foreground">Track user sessions and login activity</p>
+        </div>
       </div>
+
       {/* Summary cards */}
       {h.summary && (
         <div className="grid grid-cols-3 gap-3">
@@ -43,7 +45,9 @@ const AdminActivityLog = () => {
               </CardContent>
             </Card>
           ))}
+        </div>
       )}
+
       {/* Filters */}
       <Card className="border-border/50">
         <CardHeader className="pb-3">
@@ -67,7 +71,9 @@ const AdminActivityLog = () => {
               <Select value={h.statusFilter} onValueChange={h.setStatusFilter}>
                 <SelectTrigger className="h-9 w-32 text-sm"><SelectValue placeholder="Status" /></SelectTrigger>
                 <SelectContent><SelectItem value="all">All</SelectItem><SelectItem value="success">Success</SelectItem><SelectItem value="failed">Failed</SelectItem></SelectContent>
+              </Select>
               <Button variant="ghost" size="sm" onClick={h.handleClearFilters}><X className="w-3 h-3 mr-1" /> Clear</Button>
+            </div>
           )}
         </CardHeader>
         <CardContent className="p-0">
@@ -78,9 +84,11 @@ const AdminActivityLog = () => {
           ) : (
             <div className="overflow-x-auto">
               <Table>
-                <TableHeader><TableRow className="bg-muted/30">
-                  <TableHead>User</TableHead><TableHead>Device</TableHead><TableHead>IP</TableHead><TableHead>Login</TableHead><TableHead>Logout</TableHead><TableHead>Status</TableHead><TableHead className="text-right">Actions</TableHead>
-                </TableRow></TableHeader>
+                <TableHeader>
+                  <TableRow className="bg-muted/30">
+                    <TableHead>User</TableHead><TableHead>Device</TableHead><TableHead>IP</TableHead><TableHead>Login</TableHead><TableHead>Logout</TableHead><TableHead>Status</TableHead><TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
                 <TableBody>
                   {h.sessions.map(s => (
                     <TableRow key={s.id} className="border-border/40">
@@ -89,9 +97,13 @@ const AdminActivityLog = () => {
                       <TableCell className="text-xs text-muted-foreground font-mono">{s.ipAddress || "—"}</TableCell>
                       <TableCell className="text-xs text-muted-foreground">{s.loggedInAt ? new Date(s.loggedInAt).toLocaleString() : "—"}</TableCell>
                       <TableCell className="text-xs text-muted-foreground">{s.loggedOutAt ? new Date(s.loggedOutAt).toLocaleString() : "—"}</TableCell>
-                      <TableCell>{s.success ? (
-                        <Badge variant="outline" className="text-[10px] bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-800/40">Success</Badge>
-                      ) : <Badge variant="outline" className="text-[10px] bg-red-50 text-red-700 border-red-200">Failed</Badge>}</TableCell>
+                      <TableCell>
+                        {s.success ? (
+                          <Badge variant="outline" className="text-[10px] bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-800/40">Success</Badge>
+                        ) : (
+                          <Badge variant="outline" className="text-[10px] bg-red-50 text-red-700 border-red-200">Failed</Badge>
+                        )}
+                      </TableCell>
                       <TableCell className="text-right">
                         <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => h.setDeleteTarget(s.id)}>
                           <Trash2 className="w-4 h-4" />
@@ -101,15 +113,20 @@ const AdminActivityLog = () => {
                   ))}
                 </TableBody>
               </Table>
-          {h.totalPages > 1 && (
-            <div className="flex items-center justify-between px-4 py-3 border-t border-border/40">
-              <p className="text-xs text-muted-foreground">Page {h.page} of {h.totalPages} · {h.total} total</p>
-              <div className="flex gap-1">
-                <Button variant="outline" size="icon" className="h-7 w-7" disabled={h.page <= 1} onClick={() => h.setPage(p => p - 1)}><ChevronLeft className="w-3 h-3" /></Button>
-                <Button variant="outline" size="icon" className="h-7 w-7" disabled={h.page >= h.totalPages} onClick={() => h.setPage(p => p + 1)}><ChevronRight className="w-3 h-3" /></Button>
-              </div>
+              {h.totalPages > 1 && (
+                <div className="flex items-center justify-between px-4 py-3 border-t border-border/40">
+                  <p className="text-xs text-muted-foreground">Page {h.page} of {h.totalPages} · {h.total} total</p>
+                  <div className="flex gap-1">
+                    <Button variant="outline" size="icon" className="h-7 w-7" disabled={h.page <= 1} onClick={() => h.setPage(p => p - 1)}><ChevronLeft className="w-3 h-3" /></Button>
+                    <Button variant="outline" size="icon" className="h-7 w-7" disabled={h.page >= h.totalPages} onClick={() => h.setPage(p => p + 1)}><ChevronRight className="w-3 h-3" /></Button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </CardContent>
       </Card>
+
       {/* Delete dialog */}
       <Dialog open={!!h.deleteTarget} onOpenChange={o => !o && h.setDeleteTarget(null)}>
         <DialogContent className="sm:max-w-md rounded-xl">
@@ -121,10 +138,12 @@ const AdminActivityLog = () => {
             <Button variant="outline" onClick={() => h.setDeleteTarget(null)} disabled={h.deleting} className="w-full sm:w-auto">Cancel</Button>
             <Button variant="destructive" onClick={h.handleDelete} disabled={h.deleting} className="gap-2 w-full sm:w-auto">
               {h.deleting ? <><Loader2 className="w-4 h-4 animate-spin" /> Deleting...</> : <><Trash2 className="w-4 h-4" /> Delete</>}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
   );
 };
+
 export default AdminActivityLog;

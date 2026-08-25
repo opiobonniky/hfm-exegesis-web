@@ -17,15 +17,11 @@ import {
   DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import { Loader2 } from "lucide-react";
+
 export default function BibleReader() {
   const h = useBibleReaderPage();
+
   return (
-    /*
-     * h-full fills the AppLayout content area.
-     * overflow-hidden prevents the parent's overflow-auto from scrolling.
-     * The AppLayout header (sticky, z-50) stays visible above.
-     * Only <main> (overflow-y-auto) scrolls the verses.
-     */
     <div
       dir={h.dir}
       className="h-full bg-background flex flex-col overflow-hidden"
@@ -41,6 +37,7 @@ export default function BibleReader() {
         translationOpen={h.translationOpen} onTranslationOpenChange={h.setTranslationOpen}
         translationSearch={h.translationSearch} onTranslationSearchChange={h.setTranslationSearch}
       />
+
       {/* ── Body: fills remaining height, no overflow ── */}
       <div className="flex-1 min-h-0 flex relative overflow-hidden">
         {/* Sidebar: absolute overlay */}
@@ -49,6 +46,7 @@ export default function BibleReader() {
           books={h.reader.backendBooks} selectedBook={h.reader.selectedBook} selectedChapter={h.reader.selectedChapter}
           onSelect={(book, ch) => h.reader.navigateTo(book, ch)} onBookOverview={h.handleBookOverview} loading={h.reader.booksLoading}
         />
+
         {/* Content column: flex-col so main scrolls independently */}
         <div className="flex-1 flex flex-col min-h-0 min-w-0">
           {/* ── ONLY this element scrolls — verses ── */}
@@ -58,6 +56,7 @@ export default function BibleReader() {
             className="flex-1 overflow-y-auto [overflow-anchor:none] min-h-0 overscroll-contain px-4 sm:px-6 lg:px-8 py-4 sm:py-6"
           >
             <FontSizeControls fontSize={h.fontSize} onFontSizeChange={h.updateFontSize} className="sm:hidden mb-4" />
+
             {h.reader.loading && h.reader.chapters.length === 0 ? (
               <LoadingSkeleton />
             ) : h.reader.loadError && h.reader.chapters.length === 0 ? (
@@ -80,16 +79,25 @@ export default function BibleReader() {
                   chapterRefs={h.reader.chapterRefs}
                   verseRefs={h.reader.verseRefs}
                 />
+              </div>
             )}
+
             <div ref={h.reader.loadMoreRef} className="h-4" />
+
             {h.reader.loadingMore && (
               <div role="status" className="flex items-center justify-center gap-2 py-4 text-xs text-muted-foreground">
                 <Loader2 className="h-4 w-4 animate-spin" /> Loading more chapters
+              </div>
+            )}
+
             {h.reader.loadError && h.reader.chapters.length > 0 && (
               <div role="alert" className="flex items-center justify-center gap-3 py-4 text-sm text-muted-foreground">
                 <span>{h.reader.loadError}</span>
                 <Button variant="outline" size="sm" onClick={h.reader.loadMore}>Try again</Button>
+              </div>
+            )}
           </main>
+
           {/* ── Bottom bar: fixed height, never scrolls ── */}
           <div className="shrink-0">
             {h.audioActive ? (
@@ -105,6 +113,7 @@ export default function BibleReader() {
                 onListen={h.handleListenSelected}
                 onClear={h.handleMultiClear}
               />
+            ) : (
               <BottomActionBar
                 onPrev={h.handlePrevChapter} onNext={h.handleNextChapter}
                 onScrollTop={h.scrollToTop} onScrollBottom={h.scrollToBottom}
@@ -113,13 +122,19 @@ export default function BibleReader() {
                 isAudioPlaying={h.audioActive}
                 canGoPrev={h.canGoPrev}
                 canGoNext={h.canGoNext}
+              />
+            )}
           </div>
         </div>
       </div>
+
       {/* ── Verse explanation drawer (overlay) ── */}
       <VerseExplanationDrawer
         open={h.drawerOpen} onClose={() => h.setDrawerOpen(false)}
         bookName={h.drawerVerse.book} chapter={h.drawerVerse.chapter} verse={h.drawerVerse.verse}
+      />
+
+      {/* ── Note dialog ── */}
       <Dialog open={h.noteDialogOpen} onOpenChange={h.setNoteDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>

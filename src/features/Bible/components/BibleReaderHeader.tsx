@@ -25,6 +25,7 @@ interface BibleReaderHeaderProps {
   translationSearch: string;
   onTranslationSearchChange: (search: string) => void;
 }
+
 export default function BibleReaderHeader({
   bookName, chapter, audioActive, fontSize, onFontSizeChange,
   onBack, onToggleSidebar, onBookOverview, onReadChapter, onToggleSearch,
@@ -71,8 +72,10 @@ export default function BibleReaderHeader({
           size="sm"
           onClick={onReadChapter}
           className="h-8 px-2.5 text-xs gap-1.5"
+        >
           {audioActive ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
           <span className="hidden sm:inline">{audioActive ? t.bibleReader.stop : t.bibleReader.listen}</span>
+        </Button>
         {/* Translation */}
         <TranslationPicker
           translations={translations}
@@ -84,11 +87,15 @@ export default function BibleReaderHeader({
           onSearchChange={onTranslationSearchChange}
         />
         {/* Search */}
+        <button
           type="button"
           onClick={onToggleSearch}
           aria-label={t.common.search}
           className="w-9 h-9 rounded-lg bg-muted/50 flex items-center justify-center border border-border/40 hover:bg-muted transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
           <Search className="w-3.5 h-3.5 text-muted-foreground" />
+        </button>
       </div>
     </header>
   );
+}
