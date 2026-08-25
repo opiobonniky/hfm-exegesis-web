@@ -5,16 +5,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { sendPostRequest } from "@/services/api";
 
-export interface PlanDetailReadingPlan {
-  planId: string; title: string; description: string; total_days: number;
-  created_at: string; is_active: boolean; questions_enabled: boolean;
-  completed_days_json: string; planImage?: string;
-}
-
-export interface DayAssignment {
-  dayNumber: number; book: string; chapterStart: number; chapterEnd: number;
-  reflectionQuestions: string[]; quizQuestions: any[]; exists: boolean;
-}
 
 export function usePlanDetailPage() {
   const { planId } = useParams<{ planId: string }>();
@@ -23,9 +13,9 @@ export function usePlanDetailPage() {
   const { userInfo } = useAuth();
   const { t, isRtl, lang } = useLanguage();
   const isAdmin = userInfo?.userRole === 1;
-  const [plan, setPlan] = useState<PlanDetailReadingPlan | null>(null);
+  const [plan, setPlan] = useState<any>(null);
   const [adminStats, setAdminStats] = useState<any>(null);
-  const [days, setDays] = useState<DayAssignment[]>([]);
+  const [days, setDays] = useState<any[]>([]);
   const [loadingPlan, setLoadingPlan] = useState(true);
   const [loadingAdminStats, setLoadingAdminStats] = useState(false);
   const [userSearchTerm, setUserSearchFilter] = useState("");
@@ -65,7 +55,16 @@ export function usePlanDetailPage() {
       if (resp.returnCode === 200 && resp.returnData) {
         const data = resp.returnData;
         setPlan(data);
-        if (data.days && Array.isArray(data.days)) setDays(data.days);
+        if (data.days && Array.isArray(data.days)) {
+          const mapped = data.days.map((d: any) => ({
+            dayNumber: d.dayNumber ?? d.day_number,
+            chapters: d.chapters ?? (d.book ? [{ book: d.book, chapter: d.chapterStart ?? d.chapter }] : []),
+            reflectionQuestions: d.reflectionQuestions ?? d.reflection_questions ?? [],
+            quizQuestions: d.quizQuestions ?? d.quiz_questions ?? [],
+            exists: d.exists ?? true,
+          }));
+          setDays(mapped);
+        }
         if (isAdmin) loadAdminStats();
       } else {
         toast({ title: t.readingPlan?.toastLoadError || "Failed to load plan", description: resp.returnMessage, variant: "destructive" });

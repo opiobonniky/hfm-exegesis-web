@@ -21,6 +21,10 @@ export function useReadingPlansPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [catFilter, setCatFilter] = useState("all");
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [hasNext, setHasNext] = useState(false);
+  const [hasPrevious, setHasPrevious] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<ReadingPlanItem | null>(null);
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
   const [deleting, setDeleting] = useState(false);
@@ -38,6 +42,10 @@ export function useReadingPlansPage() {
           ...p, started: p.started ?? false, completed: p.completed ?? false,
           progress: p.progress ?? 0, streak: p.streak ?? 0,
         })));
+        const rd = res.returnData;
+        if (rd.totalPages) setTotalPages(rd.totalPages);
+        if (rd.hasNext !== undefined) setHasNext(rd.hasNext);
+        if (rd.hasPrevious !== undefined) setHasPrevious(rd.hasPrevious);
       } else {
         toast({ title: t.readingPlan?.toastFailedLoad || "Failed to load", description: res.returnMessage, variant: "destructive" });
       }
@@ -92,6 +100,7 @@ export function useReadingPlansPage() {
 
   return {
     plans, loading, search, setSearch, catFilter, setCatFilter,
+    page, setPage, totalPages, hasNext, hasPrevious,
     deleteTarget, setDeleteTarget, deleteConfirmText, setDeleteConfirmText, deleting, handleDelete,
     editTarget, setEditTarget, editForm, setEditForm, saving, handleEditSave,
     isAdmin, navigate, t, isRtl, loadPlans,

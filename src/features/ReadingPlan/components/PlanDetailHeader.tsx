@@ -3,13 +3,12 @@ import { cn } from "@/lib/utils";
 import { GlassCard, Ring, StatusBadge } from "./PlanDetailUI";
 import { DIFFICULTY_CONFIG, CATEGORY_LABELS, normalizeDifficulty, normalizeCategory, formatDate } from "../constants";
 import { routes } from "@/components/Routes/routes";
-import type { ReadingPlan } from "../types";
 import type { Dispatch, SetStateAction } from "react";
 
 type Tab = "overview" | "schedule" | "quiz" | "admin";
 
 interface PlanDetailHeaderProps {
-  plan: ReadingPlan;
+  plan: any;
   isAdmin: boolean;
   isRtl: boolean;
   lang: string;
