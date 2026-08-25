@@ -3,23 +3,26 @@ import { cn } from "@/lib/utils";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { ActivePlanCard } from "./ActivePlanCard";
 import type { ReadingPlan } from "../types";
+import type { Tab } from "../hooks/useBibleReadingPlanPage";
 
 interface Props {
   myPlans: ReadingPlan[];
   progressMap: Record<string, any>;
   getCompletedDays: (pr: any) => number[];
   navigate: (path: string) => void;
-  setActiveTab: (tab: string) => void;
+  setActiveTab: (tab: Tab) => void;
   setPlanToRemove: (p: ReadingPlan | null) => void;
   setRemovePlanModalVisible: (v: boolean) => void;
   isRtl: boolean;
   routes: any;
 }
+
 export function ReadingPlanProgressTab({
   myPlans, progressMap, getCompletedDays, navigate, setActiveTab,
   setPlanToRemove, setRemovePlanModalVisible, isRtl, routes,
 }: Props) {
   const { t } = useLanguage();
+
   if (!myPlans.length) {
     return (
       <div className="flex flex-col items-center justify-center py-16 px-4">
@@ -36,22 +39,26 @@ export function ReadingPlanProgressTab({
       </div>
     );
   }
+
   const inProgress = myPlans.filter((p) => !progressMap[p.planId]?.isCompleted);
   const completed = myPlans.filter((p) => progressMap[p.planId]?.isCompleted);
+
   const makeHandlers = (plan: ReadingPlan) => {
     const pr = progressMap[plan.planId];
     const done = pr ? getCompletedDays(pr) : [];
     const pct = Math.round((done.length / (plan.totalDays || plan.total_days || 1)) * 100);
     const streak = pr?.streak || 0;
-    const nextDay = done.length > 0 ? Math.min(Math.max(...done) + 1, plan.totalDays || plan.total_days) : 1;
+    const nextDay = done.length > 0 ? Math.min(Math.max(...done) + 1, plan.totalDays || plan.total_days || 1) : 1;
     const lastDay = done.length > 0 ? Math.max(...done) : null;
     const isCompleted = !!progressMap[plan.planId]?.isCompleted;
-    return { pct, done: done.length, streak, nextDay, lastDay, isCompleted,
+    return {
+      pct, done: done.length, streak, nextDay, lastDay, isCompleted,
       onRead: () => navigate(routes.dailyReading.path.replace(":planId", plan.planId).replace(":day", String(isCompleted ? "1" : nextDay))),
       onSummary: () => navigate(routes.readingPlanDetail.path.replace(":planId", plan.planId)),
       onRemove: () => { setPlanToRemove(plan); setRemovePlanModalVisible(true); },
     };
   };
+
   return (
     <div className="space-y-6">
       {inProgress.map((plan) => (
@@ -70,3 +77,4 @@ export function ReadingPlanProgressTab({
       )}
     </div>
   );
+}

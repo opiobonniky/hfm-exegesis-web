@@ -9,6 +9,7 @@ interface Props {
   t: any;
   onView: (planId: string) => void;
 }
+
 export default function CompletedPlanCard({ plan, t, onView }: Props) {
   return (
     <Card className="border-l-4 border-l-emerald-500 dark:border-l-emerald-600 overflow-hidden opacity-80">
@@ -27,13 +28,17 @@ export default function CompletedPlanCard({ plan, t, onView }: Props) {
               <circle cx="28" cy="28" r="24" stroke="currentColor" strokeWidth="4" fill="none" strokeDasharray="150.8" className="text-emerald-500 dark:text-emerald-400" />
             </svg>
             <span className="absolute inset-0 flex items-center justify-center text-sm font-bold text-emerald-600 dark:text-emerald-400">100%</span>
+          </div>
         </div>
       </CardHeader>
       <CardContent className="flex gap-2">
         <Button variant="outline" className="flex-1" onClick={() => onView(plan.planId)}>
           <Eye className="w-4 h-4 mr-2" />Summary
         </Button>
-          Revisit
+        <Button variant="outline" className="flex-1">
+          <Trophy className="w-4 h-4 mr-2" />Revisit
+        </Button>
       </CardContent>
     </Card>
   );
+}

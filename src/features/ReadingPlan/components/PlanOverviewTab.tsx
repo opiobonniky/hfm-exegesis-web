@@ -16,7 +16,12 @@ interface PlanOverviewTabProps {
   configuredDays: number;
   t: any;
 }
-export function PlanOverviewTab({ plan, lang, isAdmin, adminStats, displayQuizAccuracy, displayAnsweredQuestions, displayCorrectAnswers, displayWrongAnswers, totalReflections, configuredDays, t }: PlanOverviewTabProps) {
+
+export function PlanOverviewTab({
+  plan, lang, isAdmin, adminStats, displayQuizAccuracy,
+  displayAnsweredQuestions, displayCorrectAnswers, displayWrongAnswers,
+  totalReflections, configuredDays, t,
+}: PlanOverviewTabProps) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
       <GlassCard className="p-5">
@@ -35,6 +40,8 @@ export function PlanOverviewTab({ plan, lang, isAdmin, adminStats, displayQuizAc
           </div>
         ))}
       </GlassCard>
+
+      <GlassCard className="p-5">
         <SectionLabel>{isAdmin ? t.readingPlan.aggregatePerformance : t.readingPlan.userPerformance}</SectionLabel>
         <div className="flex items-center gap-4 mb-4">
           <div className="relative shrink-0">
@@ -43,6 +50,7 @@ export function PlanOverviewTab({ plan, lang, isAdmin, adminStats, displayQuizAc
               <span className="text-sm font-bold text-foreground">{displayQuizAccuracy}%</span>
               <span className="text-[7px] text-muted-foreground uppercase">{t.readingPlan.quizAccuracyLabel}</span>
             </div>
+          </div>
           <div className="flex-1 space-y-2">
             {[
               { label: isAdmin ? t.readingPlan.totalAnswers : t.readingPlan.answered, value: isAdmin ? displayAnsweredQuestions : `${displayAnsweredQuestions} / ${plan.total_quiz_questions}`, color: "text-foreground" },
@@ -54,14 +62,22 @@ export function PlanOverviewTab({ plan, lang, isAdmin, adminStats, displayQuizAc
                 <span className={cn("font-semibold", color)}>{value}</span>
               </div>
             ))}
+          </div>
         </div>
+
+        {[
           { label: t.readingPlan.avgDaysPerCompletion, value: plan.avg_days_per_completion !== null ? `${plan.avg_days_per_completion}d` : "—" },
           { label: t.readingPlan.estDaysToComplete, value: plan.estimated_days_to_complete !== null ? `${plan.estimated_days_to_complete}d` : "—" },
           { label: t.readingPlan.reflectionQuestions, value: totalReflections },
           { label: t.readingPlan.configuredDays, value: `${configuredDays} / ${plan.total_days}` },
+        ].map(({ label, value }) => (
           <div key={label} className="flex justify-between py-2 border-b border-border last:border-0 text-xs">
             <span className="text-muted-foreground">{label}</span>
             <span className="font-medium text-foreground">{value}</span>
+          </div>
+        ))}
+      </GlassCard>
+
       <GlassCard className="p-5 lg:col-span-2">
         <SectionLabel>{t.readingPlan.adminNotes}</SectionLabel>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
@@ -75,7 +91,12 @@ export function PlanOverviewTab({ plan, lang, isAdmin, adminStats, displayQuizAc
               <div className="flex items-center gap-2 mb-2">
                 <item.icon className="w-4 h-4 text-muted-foreground" />
                 <p className="text-sm font-semibold text-foreground">{item.title}</p>
+              </div>
               <p className="text-xs text-muted-foreground leading-relaxed">{item.desc}</p>
+            </div>
           ))}
+        </div>
+      </GlassCard>
     </div>
   );
+}

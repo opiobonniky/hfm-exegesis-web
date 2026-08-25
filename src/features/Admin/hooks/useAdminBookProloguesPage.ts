@@ -38,3 +38,4 @@ export function useAdminBookProloguesPage() {
     editItem, editForm, setEditForm, deleteItem, setDeleteItem,
     openEdit, handleSave, handleDelete, filteredBooks, navigate,
   };
+}

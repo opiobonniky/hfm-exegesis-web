@@ -64,3 +64,4 @@ export default function VerseMultiSelectBar({
       </button>
     </div>
   );
+}

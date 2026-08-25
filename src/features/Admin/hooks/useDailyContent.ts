@@ -71,3 +71,4 @@ export function useDailyContent(type: "verse" | "devotion" | "exegesis") {
     deleteItem,
     refresh: fetchItems,
   };
+}

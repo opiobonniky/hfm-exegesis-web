@@ -24,3 +24,4 @@ export function useAdminTriviaUserDetailPage() {
   }, [userId, toast, navigate]);
   useEffect(() => { fetchDetail(); }, [fetchDetail]);
   return { detail, loading, navigate };
+}

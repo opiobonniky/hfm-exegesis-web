@@ -11,9 +11,11 @@ interface Props {
   onRemove: (planId: string) => void;
   onBrowse: () => void;
 }
+
 export default function UserProgressTab({ userPlans, t, onContinue, onRemove, onBrowse }: Props) {
   const inProgress = userPlans.filter((p) => !p.isCompleted);
   const completed = userPlans.filter((p) => p.isCompleted);
+
   if (userPlans.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16">
@@ -30,6 +32,7 @@ export default function UserProgressTab({ userPlans, t, onContinue, onRemove, on
       </div>
     );
   }
+
   return (
     <div className="space-y-6">
       {inProgress.length > 0 && (
@@ -37,6 +40,7 @@ export default function UserProgressTab({ userPlans, t, onContinue, onRemove, on
           {inProgress.map((plan) => (
             <UserPlanCard key={plan.planId} plan={plan} t={t} onContinue={onContinue} onRemove={onRemove} />
           ))}
+        </div>
       )}
       {completed.length > 0 && (
         <div>
@@ -48,5 +52,9 @@ export default function UserProgressTab({ userPlans, t, onContinue, onRemove, on
             {completed.map((plan) => (
               <CompletedPlanCard key={plan.planId} plan={plan} t={t} onView={onContinue} />
             ))}
+          </div>
+        </div>
+      )}
     </div>
   );
+}

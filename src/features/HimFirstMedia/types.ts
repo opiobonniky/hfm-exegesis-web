@@ -12,9 +12,15 @@ export interface TeamMember {
     instagram?: string;
   };
 }
+
 export interface MinistryGoal {
   title: string;
   description: string;
   icon?: string;
+}
+
 export interface VisionStatement {
+  title: string;
+  content: string;
   scripture?: string;
+}

@@ -1,6 +1,5 @@
 // ─── Reading Plan Types ────────────────────────────────────────────────────────
 
-/** Admin listing item */
 export interface ReadingPlanListItem {
   id: number;
   title: string;
@@ -13,10 +12,13 @@ export interface ReadingPlanListItem {
   completionRate: number;
   createdAt: string;
 }
+
 export interface ReadingPlan {
   plan_id: string;
   planId?: string;
   plan_db_id: number;
+  title?: string;
+  description?: string;
   category: string;
   difficulty: string;
   total_days: number;
@@ -48,17 +50,23 @@ export interface ReadingPlan {
   quiz_accuracy_percentage?: number;
   plan_created_on: string;
   days?: DayAssignment[];
+}
+
 export interface Chapter {
   book: string;
   chapter: number;
   startChapter?: number;
   endChapter?: number;
+}
+
 export interface QuizQuestion {
   questionId?: number;
   question: string;
   options: [string, string, string, string];
   correctAnswer: number;
   explanation: string;
+}
+
 export interface DayAssignment {
   dayNumber: number;
   chapters: Chapter[];
@@ -66,6 +74,8 @@ export interface DayAssignment {
   quizQuestions: QuizQuestion[];
   loaded?: boolean;
   exists?: boolean;
+}
+
 export interface ReadingPlanResponse {
   content: ReadingPlan[];
   currentPage: number;
@@ -76,6 +86,8 @@ export interface ReadingPlanResponse {
   hasPrevious: boolean;
   isFirst: boolean;
   isLast: boolean;
+}
+
 export interface UserPlanItem {
   planId: string;
   planName: string;
@@ -83,6 +95,15 @@ export interface UserPlanItem {
   totalDays: number;
   isCompleted: boolean;
   streak: number;
+}
+
 export interface BrowsePlanItem {
+  planId: string;
+  title: string;
+  description: string;
+  category: string;
+  difficulty: string;
+  totalDays: number;
   isActive: boolean;
   questionsEnabled: boolean;
+}

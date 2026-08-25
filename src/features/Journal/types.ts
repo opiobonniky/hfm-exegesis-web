@@ -5,6 +5,7 @@ export interface StudiedWord {
   surfaceText: string;
   lemma?: string;
 }
+
 export interface JournalEntry {
   id: string;
   title: string;
@@ -19,7 +20,8 @@ export interface JournalEntry {
   userName?: string;
   createdAt: string;
   updatedAt: string;
-/** List item version — returned by get-all endpoint */
+}
+
 export interface JournalListItem {
   id: number;
   title: string | null;
@@ -32,21 +34,32 @@ export interface JournalListItem {
   isFavorite: boolean;
   tags: string | null;
   createdOn: string;
+}
+
 export interface JournalTemplate {
+  id?: number;
   name: string;
   description: string;
   fields: JournalTemplateField[];
   isPublic: boolean;
   createdBy: string;
+}
+
 export interface JournalTemplateField {
   type: "text" | "textarea" | "select";
+  label?: string;
   placeholder?: string;
   options?: string[];
   required: boolean;
+}
+
 export interface JournalPrompt {
+  id?: number;
   text: string;
   difficulty: string;
   isActive: boolean;
+}
+
 export interface JournalStats {
   totalEntries: number;
   totalWords: number;
@@ -54,12 +67,26 @@ export interface JournalStats {
   longestStreak: number;
   averageWordsPerEntry: number;
   lastEntryDate: string | null;
-/** JournalEntryPage form state */
+}
+
 export interface JournalEntryFormData {
-  id?: number; title: string; content: string; bookName: string; chapter: string;
-  verseNumber: string; category: string; mood: string; prayers: string;
-  gratitude: string; learnings: string; application: string;
-  isFavorite: boolean; isPublished: boolean; tags: string;
+  id?: number;
+  title: string;
+  content: string;
+  bookName: string;
+  chapter: string;
+  verseNumber: string;
+  category: string;
+  mood: string;
+  prayers: string;
+  gratitude: string;
+  learnings: string;
+  application: string;
+  isFavorite: boolean;
+  isPublished: boolean;
+  tags: string;
+}
+
 export const DEFAULT_ENTRY_FORM: JournalEntryFormData = {
   title: "", content: "", bookName: "", chapter: "", verseNumber: "",
   category: "general", mood: "", prayers: "", gratitude: "",

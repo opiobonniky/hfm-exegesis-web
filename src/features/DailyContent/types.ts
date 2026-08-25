@@ -1,6 +1,5 @@
 // ─── Daily Content Types ───────────────────────────────────────────────────────
 
-// ─── Daily Verse Types ─────────────────────────────────────────────────────────
 export interface DailyVerseItem {
   id: number;
   bookName: string;
@@ -13,7 +12,6 @@ export interface DailyVerseItem {
   reflection?: string | null;
   explanation?: string | null;
   learnMore?: string | null;
-  /** Rich content fields — match app */
   application?: string | null;
   verseIntroduction?: string | null;
   backgroundAuthor?: string | null;
@@ -31,7 +29,7 @@ export interface DailyVerseItem {
   updatedOn: string | Record<string, never>;
   isPublished: boolean;
 }
-/** Fields sent to backend add/update-daily-verse */
+
 export interface DailyVersePayload {
   id?: number;
   bibleVersion: string;
@@ -51,6 +49,8 @@ export interface DailyVersePayload {
   finalThoughts?: string;
   takeaways?: string;
   published: boolean;
+}
+
 export interface DailyVerseResponse {
   content: DailyVerseItem[];
   currentPage: number;
@@ -61,39 +61,85 @@ export interface DailyVerseResponse {
   hasPrevious: boolean;
   isFirst: boolean;
   isLast: boolean;
+}
+
 export interface EditState {
+  bookName: string;
   chapter: string;
   verseNumber: string;
+  bibleVersion: string;
+  explanation: string;
   reflection: string;
   learnMore: string;
+  application: string;
+  verseIntroduction: string;
+  displayDate: string;
+  isPublished: boolean;
+}
+
 export const EMPTY_EDIT: EditState = {
   bookName: "", chapter: "", verseNumber: "", bibleVersion: "BSB",
   explanation: "", reflection: "", learnMore: "",
   application: "", verseIntroduction: "",
   displayDate: new Date().toISOString().split("T")[0], isPublished: true,
 };
-// ─── Daily Devotion Types ──────────────────────────────────────────────────────
+
 export interface DailyDevotionItem {
+  id: number;
   title: string;
   content: string;
+  displayDate: string;
   bookName?: string | null;
   chapter?: number | null;
   verseNumber?: number | null;
   bibleVersion?: string | null;
+  isPublished: boolean;
+}
+
 export interface DailyDevotionResponse {
   content: DailyDevotionItem[];
-// ─── Daily Exegesis Types ──────────────────────────────────────────────────────
+  currentPage: number;
+  pageSize: number;
+  totalElements: number;
+  totalPages: number;
+}
+
 export interface DailyExegesisItem {
-  passage: string;
+  id: number;
+  passageReference: string;
   introduction: string;
-  context: string;
-  teaching: string;
+  contextSummary: string;
+  teachingBody: string;
+  application: string;
   prayer: string;
-  tags: string[];
+  tags: string | null;
+  displayDate: string;
+  isPublished: boolean;
+}
+
 export interface DailyExegesisResponse {
   content: DailyExegesisItem[];
-// ─── Verse Explanation Types ───────────────────────────────────────────────────
+  currentPage: number;
+  pageSize: number;
+  totalElements: number;
+  totalPages: number;
+}
+
 export interface VerseExplanationItem {
+  id: number;
   book: string;
+  chapter: number;
+  verseNumber: number;
+  explanation: string;
+  learnMore?: string;
+  displayDate: string;
+  isPublished: boolean;
+}
+
 export interface VerseExplanationResponse {
   content: VerseExplanationItem[];
+  currentPage: number;
+  pageSize: number;
+  totalElements: number;
+  totalPages: number;
+}

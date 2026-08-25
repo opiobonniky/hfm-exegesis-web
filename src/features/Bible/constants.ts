@@ -29,3 +29,4 @@ export function isBibleBook(book: string | null): book is BibleBookName {
 export function clampChapter(book: BibleBookName, chapter: number): number {
   if (!Number.isFinite(chapter)) return 1;
   return Math.min(Math.max(Math.trunc(chapter), 1), BIBLE_BOOK_CHAPTERS[book]);
+}

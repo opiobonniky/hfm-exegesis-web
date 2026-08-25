@@ -15,6 +15,7 @@ export interface ExegesisSession {
   learnNotes?: string;
   abideNotes?: string;
 }
+
 export interface StageMeta {
   key: "look" | "listen" | "learn" | "abide";
   icon: string;
@@ -23,9 +24,13 @@ export interface StageMeta {
   color: string;
   tagline: string;
   time: string;
+}
+
 export interface SuggestedPassage {
   ref: string;
-// ─── Dictionary Types ─────────────────────────────────────────────────────────
+  description: string;
+}
+
 export interface WordResult {
   strongsId: string;
   originalWord: string;
@@ -34,3 +39,4 @@ export interface WordResult {
   fullDefinition: string;
   partOfSpeech: string;
   language: string;
+}

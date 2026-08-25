@@ -58,3 +58,4 @@ export function ExegesisContentForm({
       </CardContent>
     </Card>
   );
+}

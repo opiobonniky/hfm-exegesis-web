@@ -11,29 +11,49 @@ export function useBibleReadingPlan(planId?: string) {
   const [assignments, setAssignments] = useState<any[]>([]);
   const [completedDays, setCompletedDays] = useState<Set<number>>(new Set());
   const [completing, setCompleting] = useState(false);
+
   const loadPlan = useCallback(async () => {
     if (!planId) { setLoading(false); return; }
     setLoading(true);
     try {
       const res = await sendPostRequest("reading-plans", "get-plan", { planId });
-      if (res?.returnCode === 200) { setPlan(res.returnData); setCompletedDays(new Set(res.returnData?.completedDaysJson ? JSON.parse(res.returnData.completedDaysJson) : [])); }
-    } catch { toast({ title: "Failed to load plan", variant: "destructive" }); }
-    finally { setLoading(false); }
+      if (res?.returnCode === 200) {
+        setPlan(res.returnData);
+        setCompletedDays(new Set(res.returnData?.completedDaysJson ? JSON.parse(res.returnData.completedDaysJson) : []));
+      }
+    } catch {
+      toast({ title: "Failed to load plan", variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
   }, [planId, toast]);
+
   const loadAssignments = useCallback(async (day: number) => {
     if (!planId) return;
+    try {
       const res = await sendPostRequest("reading-plans", "get-plan-assignments", { planId, dayNumber: day + 1 });
       if (res?.returnCode === 200) setAssignments(res.returnData?.chapters || []);
-    } catch {}
+    } catch { /* noop */ }
   }, [planId]);
+
   useEffect(() => { loadPlan(); }, [loadPlan]);
   useEffect(() => { loadAssignments(currentDay); }, [currentDay, loadAssignments]);
+
   const markDayComplete = useCallback(async () => {
     setCompleting(true);
+    try {
       const res = await sendPostRequest("reading-plans", "complete-day", { planId, dayNumber: currentDay + 1 });
-      if (res?.returnCode === 200) { setCompletedDays(prev => new Set([...prev, currentDay])); setCurrentDay(d => d + 1); toast({ title: "Day completed!" }); }
-    } catch { toast({ title: "Error", variant: "destructive" }); }
-    finally { setCompleting(false); }
+      if (res?.returnCode === 200) {
+        setCompletedDays(prev => new Set([...prev, currentDay]));
+        setCurrentDay(d => d + 1);
+        toast({ title: "Day completed!" });
+      }
+    } catch {
+      toast({ title: "Error", variant: "destructive" });
+    } finally {
+      setCompleting(false);
+    }
   }, [planId, currentDay, toast]);
+
   return { plan, loading, currentDay, setCurrentDay, assignments, completedDays, completing, markDayComplete };
 }

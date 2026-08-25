@@ -10,9 +10,11 @@ interface Props {
   onContinue: (planId: string) => void;
   onRemove: (planId: string) => void;
 }
+
 export default function UserPlanCard({ plan, t, onContinue, onRemove }: Props) {
   const pct = plan.totalDays === 0 ? 0 : Math.round((plan.completedDays / plan.totalDays) * 100);
   const nextDay = plan.completedDays + 1;
+
   return (
     <Card className="border-l-4 border-l-primary overflow-hidden">
       <CardHeader className="pb-3">
@@ -29,25 +31,36 @@ export default function UserPlanCard({ plan, t, onContinue, onRemove }: Props) {
               <circle cx="32" cy="32" r="28" stroke="currentColor" strokeWidth="4" fill="none" strokeDasharray={`${pct * 1.76} 176`} className="text-primary" />
             </svg>
             <span className="absolute inset-0 flex items-center justify-center text-sm font-bold">{pct}%</span>
+          </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="h-2 bg-muted rounded-full overflow-hidden">
           <div className="h-full bg-primary rounded-full" style={{ width: `${pct}%` }} />
+        </div>
         <p className="text-xs text-muted-foreground text-center">{pct}% complete</p>
+
         <div className="grid grid-cols-3 gap-2 bg-muted/50 rounded-lg p-3">
           <div className="text-center">
             <div className="flex items-center justify-center gap-1 text-amber-500 mb-1">
               <Flame className="w-4 h-4" /><span className="font-bold">{plan.streak}d</span>
             </div>
             <p className="text-xs text-muted-foreground">Streak</p>
+          </div>
           <div className="text-center border-l border-border">
             <div className="flex items-center justify-center gap-1 text-emerald-500 mb-1">
               <CheckCircle2 className="w-4 h-4" /><span className="font-bold">{plan.completedDays}</span>
+            </div>
             <p className="text-xs text-muted-foreground">Done</p>
+          </div>
+          <div className="text-center border-l border-border">
             <div className="flex items-center justify-center gap-1 text-muted-foreground mb-1">
               <BookOpen className="w-4 h-4" /><span className="font-bold">Day {Math.min(nextDay, plan.totalDays)}</span>
+            </div>
             <p className="text-xs text-muted-foreground">Next</p>
+          </div>
+        </div>
+
         <div className="flex gap-2">
           <Button className="flex-1" onClick={() => onContinue(plan.planId)}>
             <Play className="w-4 h-4 mr-2" />
@@ -55,6 +68,9 @@ export default function UserPlanCard({ plan, t, onContinue, onRemove }: Props) {
           </Button>
           <Button variant="outline" size="icon" onClick={() => onRemove(plan.planId)}>
             <Trash2 className="w-4 h-4 text-destructive" />
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );
+}

@@ -15,10 +15,13 @@ export interface TriviaQuestion {
   createdBy: string;
   createdOn: string;
 }
+
 export interface TriviaCategory {
   name: string;
   description: string;
   questionCount: number;
+}
+
 export interface TriviaUserStats {
   totalAnswered: number;
   correctAnswers: number;
@@ -26,8 +29,11 @@ export interface TriviaUserStats {
   currentStreak: number;
   longestStreak: number;
   lastPlayed: string;
+}
+
 export interface TriviaLeaderboardEntry {
   rank: number;
   userId: string;
   userName: string;
   score: number;
+}

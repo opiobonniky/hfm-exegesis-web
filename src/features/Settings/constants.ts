@@ -21,3 +21,4 @@ export const TAB_CONFIG = [
   { value: "password", icon: "Lock", label: "Password", short: "Pass" },
   { value: "preferences", icon: "Sliders", label: "Reading", short: "Read" },
   { value: "notifications", icon: "Bell", label: "Notifications", short: "Notify" },
+]

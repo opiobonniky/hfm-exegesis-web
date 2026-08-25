@@ -47,3 +47,4 @@ export function ReflectionSection({ questions, pondered, onTogglePonder }: Refle
       ))}
     </div>
   );
+}

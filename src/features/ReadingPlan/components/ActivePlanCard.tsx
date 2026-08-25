@@ -5,14 +5,23 @@ import { ProgressCircle } from "./ProgressCircle";
 import type { ReadingPlan } from "../types";
 
 interface Props {
-  plan: ReadingPlan; pct: number; done: number; streak: number; nextDay: number;
-  lastDay: number | null; isCompleted: boolean;
-  onRead: () => void; onSummary: () => void; onRemove: () => void;
+  plan: ReadingPlan;
+  pct: number;
+  done: number;
+  streak: number;
+  nextDay: number;
+  lastDay: number | null;
+  isCompleted: boolean;
+  onRead: () => void;
+  onSummary: () => void;
+  onRemove: () => void;
 }
+
 export function ActivePlanCard({ plan, pct, done, streak, nextDay, lastDay, isCompleted, onRead, onSummary, onRemove }: Props) {
   const { t, isRtl } = useLanguage();
   const total = plan.totalDays || plan.total_days || 1;
   const accent = isCompleted ? "#10B981" : "#14b8a6";
+
   return (
     <div className={cn("bg-card rounded-2xl border shadow-sm overflow-hidden", isCompleted ? "border-emerald-200 dark:border-emerald-800/40" : "border-border")}>
       <div className="flex">
@@ -39,24 +48,34 @@ export function ActivePlanCard({ plan, pct, done, streak, nextDay, lastDay, isCo
           </div>
           <div className="h-1.5 bg-muted rounded-full overflow-hidden mb-2">
             <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: accent }} />
+          </div>
           <p className="text-xs text-muted-foreground/70 mb-4">{(t.readingPlan?.pctComplete || "{pct}% complete").replace("{pct}", String(pct))}</p>
           <div className="grid grid-cols-3 gap-4 bg-muted rounded-xl p-3 mb-4">
             <div className="text-center">
               <div className="flex items-center justify-center gap-1 text-amber-500 mb-1"><Flame className="w-4 h-4" /><span className="font-bold text-foreground">{streak}d</span></div>
               <p className="text-xs text-muted-foreground">{t.readingPlan?.streak || "Streak"}</p>
+            </div>
             <div className={cn("text-center", isRtl ? "border-r border-border" : "border-l border-border")}>
               <div className="flex items-center justify-center gap-1 text-emerald-500 mb-1"><CheckCircle className="w-4 h-4" /><span className="font-bold text-foreground">{done}</span></div>
               <p className="text-xs text-muted-foreground">{t.readingPlan?.done || "Done"}</p>
+            </div>
+            <div className="text-center">
               <div className="flex items-center justify-center gap-1 text-muted-foreground mb-1">
                 <BookOpen className="w-4 h-4" />
                 <span className="font-bold text-foreground">{lastDay ? (t.readingPlan?.dayLabel || "Day {day}").replace("{day}", String(lastDay)) : "—"}</span>
+              </div>
               <p className="text-xs text-muted-foreground">{t.readingPlan?.lastRead || "Last read"}</p>
+            </div>
+          </div>
           {isCompleted ? (
             <div className="flex gap-3">
               <button onClick={onSummary} className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-border text-foreground/80 font-semibold hover:bg-muted transition-colors">
                 <Eye className="w-4 h-4" />{t.readingPlan?.summary || "Summary"}
+              </button>
               <button onClick={onRead} className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-muted text-foreground/80 font-semibold hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors">
                 <Play className="w-4 h-4" />{t.readingPlan?.revisit || "Revisit"}
+              </button>
+            </div>
           ) : (
             <button onClick={onRead} className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-muted text-foreground/80 font-semibold hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors">
               <Play className="w-4 h-4" />
@@ -69,3 +88,4 @@ export function ActivePlanCard({ plan, pct, done, streak, nextDay, lastDay, isCo
       </div>
     </div>
   );
+}

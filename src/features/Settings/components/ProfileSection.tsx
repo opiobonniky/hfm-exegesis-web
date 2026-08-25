@@ -46,3 +46,4 @@ export function ProfileSection({ profile, saving, onSave }: ProfileSectionProps)
       </CardContent>
     </Card>
   );
+}

@@ -61,3 +61,4 @@ export function PromptSelector({ prompts, loading, selectedIds, onToggle, t }: P
       </CardContent>
     </Card>
   );
+}

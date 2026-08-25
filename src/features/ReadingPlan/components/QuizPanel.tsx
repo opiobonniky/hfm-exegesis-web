@@ -1,4 +1,3 @@
-// Quiz question display with options, result, and navigation
 import { CheckCircle, XCircle, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -11,6 +10,7 @@ interface QuizQuestion {
   userAnswer: number | null;
   isCorrect: boolean | null;
 }
+
 interface QuizPanelProps {
   question: QuizQuestion;
   currentIndex: number;
@@ -23,23 +23,25 @@ interface QuizPanelProps {
   onSubmit: () => void;
   onNext: () => void;
   optionRefs: React.MutableRefObject<(HTMLButtonElement | null)[]>;
+}
+
 export function QuizPanel({
   question, currentIndex, total, selected, showResult, revealedCorrectAnswer,
   lastAnswerCorrect, onSelect, onSubmit, onNext, optionRefs,
 }: QuizPanelProps) {
   const correctIdx = revealedCorrectAnswer ?? (typeof question.correctAnswer === "number" ? question.correctAnswer : null);
+
   return (
     <div className="space-y-4">
-      {/* Question header */}
       <div className="flex items-center justify-between">
         <span className="text-xs font-bold text-primary">Question {currentIndex + 1}/{total}</span>
         {question.explanation && showResult && (
           <span className="text-[10px] text-muted-foreground">Tap to see explanation</span>
         )}
       </div>
-      {/* Question text */}
+
       <p className="text-sm sm:text-base font-medium text-foreground leading-relaxed">{question.question}</p>
-      {/* Options */}
+
       <div className="space-y-2">
         {question.options.map((opt, idx) => {
           const isSelected = selected === idx;
@@ -71,7 +73,8 @@ export function QuizPanel({
             </button>
           );
         })}
-      {/* Result feedback */}
+      </div>
+
       {showResult && (
         <div className={cn(
           "p-3 rounded-xl border text-xs",
@@ -85,7 +88,7 @@ export function QuizPanel({
           )}
         </div>
       )}
-      {/* Actions */}
+
       <div className="flex gap-3">
         {showResult ? (
           <button
@@ -95,9 +98,15 @@ export function QuizPanel({
             Next <ArrowRight className="w-3 h-3" />
           </button>
         ) : (
+          <button
             onClick={onSubmit}
             disabled={selected === null}
             className="flex-1 py-2.5 rounded-xl bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 transition-all disabled:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed"
+          >
             Submit Answer
+          </button>
+        )}
+      </div>
     </div>
   );
+}

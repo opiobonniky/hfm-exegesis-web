@@ -1,10 +1,16 @@
+// ─── Subscription Types ────────────────────────────────────────────────────────
+
 export interface SubscriptionTier {
   id: string;
   name: string;
+  description: string;
   price: number;
+  currency: string;
   interval: string;
   features: string[];
   isActive: boolean;
+  sortOrder?: number;
+  maxSlots?: number | null;
 }
 
 export interface SubscribedUser {
@@ -19,8 +25,11 @@ export interface SubscribedUser {
   endDate: string;
   status: "active" | "cancelled" | "expired";
   stripeSubscriptionId?: string;
+}
+
 export interface SubscriptionStats {
   totalSubscribers: number;
   activeSubscribers: number;
   monthlyRevenue: number;
   churnRate: number;
+}

@@ -1,7 +1,5 @@
- * useDailyReadingPage — comprehensive hook wrapping useDailyReading + all page-level state.
- * Extracts ALL 26 useState/useEffect from DailyReading.tsx.
- */
-import { useState, useCallback, useEffect, useRef, useMemo } from "react";
+// useDailyReadingPage — comprehensive hook for DailyReading page
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { sendPostRequest } from "@/services/api";
@@ -16,6 +14,7 @@ interface DailyAssignment {
   quizQuestions: QuizQuestion[]; ponderNotes: string;
 }
 interface SubmissionRecord { planId: string; dayNumber: number; completedAt: string; }
+
 export function useDailyReadingPage() {
   const navigate = useNavigate();
   const { planId, day } = useParams();
@@ -36,12 +35,13 @@ export function useDailyReadingPage() {
   const [correctCount, setCorrectCount] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submittedIds, setSubmittedIds] = useState<Set<number>>(new Set());
-  const [autoNavigateTimer, setAutoNavigateTimer] = useState<ReturnType<typeof setTimeout> | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
   const [lastAnswerCorrect, setLastAnswerCorrect] = useState<boolean | null>(null);
   const [revealedCorrectAnswer, setRevealedCorrectAnswer] = useState<number | null>(null);
+
   const dayNumber = Number(day) || 1;
   const currentDayIdx = dayNumber - 1;
+
   useEffect(() => {
     if (!planId) return;
     let cancelled = false;
@@ -55,19 +55,33 @@ export function useDailyReadingPage() {
           setAssignment(res.returnData);
           setPlanTitle(res.returnData.planTitle || "Reading Plan");
           setTotalDays(res.returnData.totalDays || 0);
-        } else { setNotYetAdded(true); }
-      } catch { if (!cancelled) setNotYetAdded(true); }
-      finally { if (!cancelled) setLoading(false); }
+        } else {
+          setNotYetAdded(true);
+        }
+      } catch {
+        if (!cancelled) setNotYetAdded(true);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
     };
     load();
     return () => { cancelled = true; };
   }, [planId, dayNumber]);
+
+  useEffect(() => {
+    if (!planId) return;
+    const check = async () => {
+      try {
         const res = await sendPostRequest("reading-plans", "get-submission-records", { planId });
         if (res?.returnCode === 200) {
           const records: SubmissionRecord[] = res.returnData || [];
           setIsCompleted(records.some((r) => r.dayNumber === dayNumber));
         }
-      } catch {}
+      } catch { /* noop */ }
+    };
+    check();
+  }, [planId, dayNumber]);
+
   const togglePonder = useCallback((id: number) => {
     setPonderedReflections((prev) => {
       const next = new Set(prev);
@@ -75,6 +89,7 @@ export function useDailyReadingPage() {
       return next;
     });
   }, []);
+
   const handleSelectAnswer = useCallback((optionIndex: number) => {
     if (showResult || isReviewing) return;
     setSelected(optionIndex);
@@ -84,6 +99,7 @@ export function useDailyReadingPage() {
     setRevealedCorrectAnswer(assignment?.quizQuestions[currentQ]?.correctAnswer ?? null);
     if (isCorrect) setCorrectCount((c) => c + 1);
   }, [showResult, isReviewing, assignment, currentQ]);
+
   const handleNextQuestion = useCallback(() => {
     if (!assignment) return;
     const quiz = assignment.quizQuestions;
@@ -97,6 +113,7 @@ export function useDailyReadingPage() {
       setQuizDone(true);
     }
   }, [assignment, currentQ]);
+
   const handleRetryQuiz = useCallback(() => {
     setCurrentQ(0);
     setSelected(null);
@@ -106,8 +123,12 @@ export function useDailyReadingPage() {
     setIsReviewing(false);
     setLastAnswerCorrect(null);
     setRevealedCorrectAnswer(null);
+  }, []);
+
   const handleReviewQuiz = useCallback(() => {
     setIsReviewing(true);
+  }, []);
+
   const handleSubmitDay = useCallback(async () => {
     if (!planId || isSubmitting) return;
     setIsSubmitting(true);
@@ -122,28 +143,35 @@ export function useDailyReadingPage() {
         setTimeout(() => setShowConfetti(false), 3000);
         toast({ title: "Day completed!" });
       }
-    } catch { toast({ title: "Submission failed", variant: "destructive" }); }
-    finally { setIsSubmitting(false); }
+    } catch {
+      toast({ title: "Submission failed", variant: "destructive" });
+    } finally {
+      setIsSubmitting(false);
+    }
   }, [planId, dayNumber, isSubmitting, toast]);
+
+  useEffect(() => {
     if (showConfetti) {
       const timer = setTimeout(() => setShowConfetti(false), 3000);
       return () => clearTimeout(timer);
+    }
   }, [showConfetti]);
+
   const allReflectionsPondered = useMemo(() => {
     if (!assignment?.reflections?.length) return true;
     return assignment.reflections.every((r) => ponderedReflections.has(r.id));
   }, [assignment, ponderedReflections]);
+
   const canComplete = isCompleted || (allReflectionsPondered && (quizDone || !assignment?.quizQuestions?.length));
+
   return {
     navigate, isRtl, loading, assignment, notYetAdded, isCompleted,
     planTitle, totalDays, dayNumber, currentDayIdx, ponderedReflections,
-    // Quiz
     currentQ, selected, showResult, isReviewing, quizDone, correctCount,
     isSubmitting, submittedIds, showConfetti, lastAnswerCorrect, revealedCorrectAnswer,
-    // Derived
     allReflectionsPondered, canComplete,
-    // Actions
     togglePonder, handleSelectAnswer, handleNextQuestion,
     handleRetryQuiz, handleReviewQuiz, handleSubmitDay,
     setCurrentQ, setSelected, setShowConfetti,
   };
+}

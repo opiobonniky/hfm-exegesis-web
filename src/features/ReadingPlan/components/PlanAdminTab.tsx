@@ -12,7 +12,11 @@ interface PlanAdminTabProps {
   lang: string;
   t: any;
 }
-export function PlanAdminTab({ adminStats, filteredUsers, userSearchTerm, setUserSearchFilter, plan, isRtl, lang, t }: PlanAdminTabProps) {
+
+export function PlanAdminTab({
+  adminStats, filteredUsers, userSearchTerm, setUserSearchFilter,
+  plan, isRtl, lang, t,
+}: PlanAdminTabProps) {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -21,11 +25,18 @@ export function PlanAdminTab({ adminStats, filteredUsers, userSearchTerm, setUse
         <StatCard icon={<Clock className="w-4 h-4 text-amber-600" />} label={t.readingPlan.inProgressCount} value={adminStats?.inProgressEnrollments ?? "—"} accent="bg-amber-50" />
         <StatCard icon={<Sparkles className="w-4 h-4 text-indigo-600" />} label={t.readingPlan.globalQuizAccuracy} value={`${adminStats?.globalQuizAccuracy ?? 0}%`} accent="bg-indigo-50" />
       </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         <GlassCard className="p-5 lg:col-span-2">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
             <SectionLabel>{t.readingPlan.userProgressDetails}</SectionLabel>
-            <input type="text" placeholder={t.readingPlan.searchUsers} value={userSearchTerm} onChange={(e) => setUserSearchFilter(e.target.value)} className="text-xs px-3 py-1.5 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-violet-500/20 w-full sm:w-48 transition-all" />
+            <input
+              type="text"
+              placeholder={t.readingPlan.searchUsers}
+              value={userSearchTerm}
+              onChange={(e) => setUserSearchFilter(e.target.value)}
+              className="text-xs px-3 py-1.5 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-violet-500/20 w-full sm:w-48 transition-all"
+            />
           </div>
           <div className="overflow-x-auto">
             <table className={cn("w-full", isRtl ? "text-right" : "text-left")}>
@@ -45,37 +56,71 @@ export function PlanAdminTab({ adminStats, filteredUsers, userSearchTerm, setUse
                     <td className="py-3 pr-4">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-muted overflow-hidden flex-shrink-0">
-                          {u.photo && u.photo.replace(/[`\s]/g, "") ? <img src={u.photo.replace(/[`\s]/g, "")} alt={u.name} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-xs font-bold text-muted-foreground/70 bg-muted">{u.name?.charAt(0) || "?"}</div>}
+                          {u.photo && u.photo.replace(/[\s`]/g, "") ? (
+                            <img src={u.photo.replace(/[\s`]/g, "")} alt={u.name} className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-xs font-bold text-muted-foreground/70 bg-muted">
+                              {u.name?.charAt(0) || "?"}
+                            </div>
+                          )}
                         </div>
                         <div className="min-w-0">
                           <p className="text-xs font-semibold text-foreground truncate">{u.name}</p>
                           <p className="text-[10px] text-muted-foreground truncate">{u.email}</p>
+                        </div>
                       </div>
                     </td>
                     <td className="py-3 px-4">
                       <div className="flex flex-col items-center gap-1.5 min-w-[100px]">
-                        <div className="w-full h-1.5 rounded-full bg-muted overflow-hidden"><div className="h-full bg-violet-500 rounded-full" style={{ width: `${u.completionPercentage}%` }} /></div>
+                        <div className="w-full h-1.5 rounded-full bg-muted overflow-hidden">
+                          <div className="h-full bg-violet-500 rounded-full" style={{ width: `${u.completionPercentage}%` }} />
+                        </div>
                         <span className="text-[10px] font-medium text-muted-foreground">{u.completedDaysCount} / {plan.total_days} {t.readingPlan.days}</span>
+                      </div>
+                    </td>
                     <td className="py-3 px-4 text-center">
-                      <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-orange-50 text-orange-700 text-[10px] font-bold"><Flame className="w-3 h-3" />{u.streak}d</div>
+                      <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-orange-50 text-orange-700 text-[10px] font-bold">
+                        <Flame className="w-3 h-3" />{u.streak}d
+                      </div>
+                    </td>
+                    <td className="py-3 px-4 text-center">
                       <div className="flex flex-col items-center">
                         <div className="flex items-center gap-1.5 text-[10px] font-bold">
                           <span className="text-emerald-600">{u.quizStats?.correct || 0}</span>
                           <span className="text-muted-foreground/50">/</span>
                           <span className="text-rose-600">{u.quizStats?.wrong || 0}</span>
+                        </div>
                         <span className="text-[9px] text-muted-foreground/70">{u.quizStats?.accuracy || 0}%</span>
-                      <span className="text-[10px] text-muted-foreground whitespace-nowrap">{u.lastActivity ? new Date(u.lastActivity).toLocaleDateString(lang) : t.readingPlan.dateNotSet}</span>
+                      </div>
+                    </td>
+                    <td className="py-3 px-4 text-center">
+                      <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                        {u.lastActivity ? new Date(u.lastActivity).toLocaleDateString(lang) : t.readingPlan.dateNotSet}
+                      </span>
+                    </td>
                     <td className="py-3 pl-4 text-right">
-                      <span className={cn("inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border", u.status === "completed" ? "bg-emerald-50 border-emerald-100 text-emerald-700" : u.status === "inprogress" ? "bg-sky-50 border-sky-100 text-sky-700" : "bg-background border-border/50 text-muted-foreground")}>
+                      <span className={cn(
+                        "inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border",
+                        u.status === "completed" ? "bg-emerald-50 border-emerald-100 text-emerald-700"
+                          : u.status === "inprogress" ? "bg-sky-50 border-sky-100 text-sky-700"
+                            : "bg-background border-border/50 text-muted-foreground",
+                      )}>
                         {u.status === "completed" ? t.readingPlan.done : u.status === "inprogress" ? t.readingPlan.inProgress : t.readingPlan.startedLabel}
                       </span>
+                    </td>
                   </tr>
                 )) : (
-                  <tr><td colSpan={5} className="py-8 text-center text-xs text-muted-foreground/70 italic">{userSearchTerm.trim() ? t.readingPlan.noUsersMatching.replace("{term}", userSearchTerm) : t.readingPlan.noUsersEnrolled}</td></tr>
+                  <tr>
+                    <td colSpan={6} className="py-8 text-center text-xs text-muted-foreground/70 italic">
+                      {userSearchTerm.trim() ? t.readingPlan.noUsersMatching.replace("{term}", userSearchTerm) : t.readingPlan.noUsersEnrolled}
+                    </td>
+                  </tr>
                 )}
               </tbody>
             </table>
+          </div>
         </GlassCard>
+
         <div className="space-y-5">
           <GlassCard className="p-5">
             <SectionLabel>{t.readingPlan.engagementTrends}</SectionLabel>
@@ -85,8 +130,11 @@ export function PlanAdminTab({ adminStats, filteredUsers, userSearchTerm, setUse
                   <p className="text-xs text-muted-foreground font-medium">{t.readingPlan.globalAccuracyLabel}</p>
                   <p className="text-2xl font-bold text-foreground">{adminStats?.globalQuizAccuracy ?? 0}%</p>
                 </div>
-                <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center"><BarChart3 className="w-5 h-5 text-emerald-600" /></div>
+                <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center">
+                  <BarChart3 className="w-5 h-5 text-emerald-600" />
+                </div>
               </div>
+
               <div className="space-y-2">
                 <p className="text-xs font-semibold text-foreground/80 uppercase tracking-wider">{t.readingPlan.mostDifficultQuestions}</p>
                 {adminStats?.difficultQuestions?.length > 0 ? adminStats.difficultQuestions.map((q: any, i: number) => (
@@ -95,11 +143,19 @@ export function PlanAdminTab({ adminStats, filteredUsers, userSearchTerm, setUse
                       <p className="text-xs font-medium text-foreground truncate">{q.question}</p>
                       <p className="text-[10px] text-muted-foreground">{t.readingPlan.day} {q.dayNumber} · {q.totalAnswers} {t.readingPlan.quizAnswersCW.toLowerCase()}</p>
                     </div>
-                    <span className={cn("text-xs font-bold px-2 py-1 rounded-md", q.accuracy < 30 ? "bg-rose-100 text-rose-700" : "bg-amber-100 text-amber-700")}>{q.accuracy}%</span>
+                    <span className={cn(
+                      "text-xs font-bold px-2 py-1 rounded-md",
+                      q.accuracy < 30 ? "bg-rose-100 text-rose-700" : "bg-amber-100 text-amber-700",
+                    )}>{q.accuracy}%</span>
                   </div>
-                )) : <p className="text-xs text-muted-foreground italic">{t.readingPlan.noQuizData}</p>}
+                )) : (
+                  <p className="text-xs text-muted-foreground italic">{t.readingPlan.noQuizData}</p>
+                )}
+              </div>
             </div>
           </GlassCard>
+
+          <GlassCard className="p-5">
             <SectionLabel>{t.readingPlan.planStructureSummary}</SectionLabel>
             <div className="space-y-3">
               {[
@@ -110,10 +166,19 @@ export function PlanAdminTab({ adminStats, filteredUsers, userSearchTerm, setUse
                 <div key={label} className="flex justify-between items-center py-2 border-b border-border/50">
                   <span className="text-xs text-muted-foreground">{label}</span>
                   <span className="text-xs font-bold text-foreground">{value}</span>
+                </div>
               ))}
               <div className="mt-4 p-4 rounded-xl bg-indigo-50 border border-indigo-100">
-                <div className="flex items-center gap-2 mb-2"><Zap className="w-4 h-4 text-indigo-600" /><p className="text-sm font-bold text-indigo-900">{t.readingPlan.proTip}</p></div>
+                <div className="flex items-center gap-2 mb-2">
+                  <Zap className="w-4 h-4 text-indigo-600" />
+                  <p className="text-sm font-bold text-indigo-900">{t.readingPlan.proTip}</p>
+                </div>
                 <p className="text-xs text-indigo-700 leading-relaxed">{t.readingPlan.proTipContent}</p>
+              </div>
+            </div>
+          </GlassCard>
         </div>
+      </div>
     </div>
   );
+}

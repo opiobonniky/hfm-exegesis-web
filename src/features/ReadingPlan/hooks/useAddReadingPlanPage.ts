@@ -13,23 +13,28 @@ export interface PlanMeta {
   category: string;
   difficulty: string;
 }
+
 export const emptyQuiz = (): QuizQuestion => ({
   question: "",
   options: ["", "", "", ""],
   correctAnswer: 0,
   explanation: "",
 });
+
 const emptyDay = (n: number): DayAssignment => ({
   dayNumber: n,
-  title: "",
   chapters: [{ book: "", chapter: 1 }],
   reflectionQuestions: [""],
   quizQuestions: [],
+});
+
 export const isDayComplete = (d: DayAssignment) =>
-  d.chapters.some((c) => c.book) && d.title.trim().length > 0;
+  d.chapters.some((c) => c.book) && d.reflectionQuestions.some((r) => r.trim().length > 0);
+
 export const isDayPartial = (d: DayAssignment) =>
   !isDayComplete(d) &&
-  (d.title.trim().length > 0 || d.chapters.some((c) => c.book));
+  (d.reflectionQuestions.some((r) => r.trim().length > 0) || d.chapters.some((c) => c.book));
+
 export function useAddReadingPlanPage() {
   const { toast } = useToast();
   const { t, isRtl } = useLanguage();
@@ -46,8 +51,10 @@ export function useAddReadingPlanPage() {
   });
   const [days, setDays] = useState<DayAssignment[]>([]);
   const [expandedDay, setExpandedDay] = useState<number | undefined>(undefined);
+
   const updateMeta = <K extends keyof PlanMeta>(key: K, val: PlanMeta[K]) =>
     setMeta((m) => ({ ...m, [key]: val }));
+
   const normaliseDays = (total: number) =>
     setDays((prev) => {
       const next = [...prev];
@@ -55,36 +62,46 @@ export function useAddReadingPlanPage() {
       if (next.length > total) next.splice(total);
       return next;
     });
+
   const handleUpdateDay = useCallback(
     (dayIdx: number, patch: Partial<DayAssignment>) =>
       setDays((p) => p.map((d, x) => (x === dayIdx ? { ...d, ...patch } : d))),
     []
   );
+
   const goToStep2 = () => {
     if (!meta.title.trim()) {
-      toast({ title: t.readingPlan.toastTitleRequired, variant: "destructive" });
+      toast({ title: t.readingPlan?.toastTitleRequired || "Title required", variant: "destructive" });
       return;
     }
     if (meta.totalDays < 1) {
-      toast({ title: t.readingPlan.atLeastOneDay, variant: "destructive" });
+      toast({ title: t.readingPlan?.atLeastOneDay || "At least 1 day", variant: "destructive" });
+      return;
+    }
     normaliseDays(meta.totalDays);
     setExpandedDay(1);
     setStep(2);
   };
+
   const goToStep3 = () => {
     for (let i = 0; i < days.length; i++) {
       if (isDayPartial(days[i])) {
         toast({
-          title: t.readingPlan.dayIncomplete.replace("{day}", String(days[i].dayNumber)),
+          title: (t.readingPlan?.dayIncomplete || "Day {day} incomplete").replace("{day}", String(days[i].dayNumber)),
           variant: "destructive",
         });
         setExpandedDay(days[i].dayNumber);
         return;
       }
+    }
     if (days.filter(isDayComplete).length === 0) {
-      toast({ title: t.readingPlan.completeAtLeastOneDay, variant: "destructive" });
+      toast({ title: t.readingPlan?.completeAtLeastOneDay || "Complete at least one day", variant: "destructive" });
       setExpandedDay(1);
+      return;
+    }
     setStep(3);
+  };
+
   const handleSubmit = async () => {
     setSubmitting(true);
     try {
@@ -97,17 +114,25 @@ export function useAddReadingPlanPage() {
         difficulty: meta.difficulty,
       });
       if (planRes.returnCode !== 200) {
-        toast({ title: t.readingPlan.failedToCreatePlan, description: planRes.returnMessage, variant: "destructive" });
+        toast({ title: t.readingPlan?.failedToCreatePlan || "Failed to create", description: planRes.returnMessage, variant: "destructive" });
+        return;
+      }
       const planId = planRes.returnData?.planId;
       const completedDays = days.filter(isDayComplete);
       if (completedDays.length > 0) {
         await sendPostRequest("reading-plans", "save-days", { planId, days: completedDays });
-      toast({ title: t.readingPlan.planCreated, description: t.readingPlan.planCreatedDesc });
+      }
+      toast({ title: t.readingPlan?.planCreated || "Plan created", description: t.readingPlan?.planCreatedDesc || "Plan created successfully" });
       navigate("/admin/plans");
     } catch {
-      toast({ title: t.common.error, description: "Failed to create plan", variant: "destructive" });
+      toast({ title: t.common?.error || "Error", description: "Failed to create plan", variant: "destructive" });
     } finally {
       setSubmitting(false);
+    }
+  };
+
   return {
     step, setStep, submitting, meta, updateMeta, days, expandedDay, setExpandedDay,
     handleUpdateDay, goToStep2, goToStep3, handleSubmit, navigate, t, isRtl,
+  };
+}

@@ -1,9 +1,8 @@
 import { BookOpen, CheckCircle, Circle } from "lucide-react";
 
 interface Chapter { id: number; bookName: string; chapter: number; completed: boolean; }
-interface Props {
-  chapters: Chapter[];
-}
+interface Props { chapters: Chapter[]; }
+
 export default function DailyReadingChapters({ chapters }: Props) {
   if (!chapters.length) return null;
   return (
@@ -16,8 +15,10 @@ export default function DailyReadingChapters({ chapters }: Props) {
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold">{ch.bookName} {ch.chapter}</p>
+          </div>
           {ch.completed ? <CheckCircle className="w-4 h-4 text-green-500 shrink-0" /> : <Circle className="w-4 h-4 text-muted-foreground/30 shrink-0" />}
         </div>
       ))}
     </div>
   );
+}

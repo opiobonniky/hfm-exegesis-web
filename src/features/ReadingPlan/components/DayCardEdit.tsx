@@ -16,37 +16,40 @@ export interface DayCardEditProps {
   onToggle: () => void;
   onUpdateDay: (dayIdx: number, patch: Partial<DayAssignment>) => void;
 }
+
 export function DayCardEdit({
   day, dayIdx, isOpen, questionsEnabled, onToggle, onUpdateDay,
 }: DayCardEditProps) {
   const { t } = useLanguage();
   const complete = isDayComplete(day);
   const partial = isDayPartial(day);
+
   const addChapter = () =>
     onUpdateDay(dayIdx, { chapters: [...day.chapters, { book: "", chapter: 1 }] });
   const removeChapter = (ci: number) =>
     onUpdateDay(dayIdx, { chapters: day.chapters.filter((_, x) => x !== ci) });
   const updateChapter = (ci: number, p: Partial<Chapter>) =>
-    onUpdateDay(dayIdx, {
-      chapters: day.chapters.map((c, x) => (x === ci ? { ...c, ...p } : c)),
-    });
+    onUpdateDay(dayIdx, { chapters: day.chapters.map((c, x) => (x === ci ? { ...c, ...p } : c)) });
+
   const addReflection = () =>
     onUpdateDay(dayIdx, { reflectionQuestions: [...day.reflectionQuestions, ""] });
   const removeReflection = (ri: number) =>
     onUpdateDay(dayIdx, { reflectionQuestions: day.reflectionQuestions.filter((_, x) => x !== ri) });
   const updateReflection = (ri: number, v: string) =>
-      reflectionQuestions: day.reflectionQuestions.map((r, x) => (x === ri ? v : r)),
+    onUpdateDay(dayIdx, { reflectionQuestions: day.reflectionQuestions.map((r, x) => (x === ri ? v : r)) });
+
   const addQuiz = () =>
     onUpdateDay(dayIdx, { quizQuestions: [...day.quizQuestions, emptyQuiz()] });
   const removeQuiz = (qi: number) =>
     onUpdateDay(dayIdx, { quizQuestions: day.quizQuestions.filter((_, x) => x !== qi) });
   const updateQuiz = (qi: number, patch: Partial<QuizQuestion>) =>
-      quizQuestions: day.quizQuestions.map((q, x) => (x === qi ? { ...q, ...patch } : q)),
+    onUpdateDay(dayIdx, { quizQuestions: day.quizQuestions.map((q, x) => (x === qi ? { ...q, ...patch } : q)) });
   const updateQuizOption = (qi: number, oi: number, val: string) => {
     const opts = [...day.quizQuestions[qi].options] as [string, string, string, string];
     opts[oi] = val;
     updateQuiz(qi, { options: opts });
   };
+
   return (
     <div
       className={cn(
@@ -83,15 +86,23 @@ export function DayCardEdit({
             <p className="text-xs text-muted-foreground/70 truncate">
               {day.chapters.filter((c) => c.book).map((c) => `${c.book} ${c.chapter}`).join(", ")}
             </p>
+          )}
+        </div>
         <div className="flex items-center gap-1.5 shrink-0">
+          {complete && (
             <span className="text-[10px] text-emerald-600 font-bold border border-emerald-200 bg-emerald-50 rounded px-1.5 py-0.5">
               {t.readingPlan.readyLabel}
             </span>
+          )}
           {partial && (
             <span className="text-[10px] text-amber-600 font-bold border border-amber-200 bg-amber-50 rounded px-1.5 py-0.5">
               {t.readingPlan.partialLabel}
+            </span>
+          )}
           {isOpen ? <ChevronUp className="w-4 h-4 text-muted-foreground/70" /> : <ChevronDown className="w-4 h-4 text-muted-foreground/70" />}
+        </div>
       </button>
+
       {isOpen && (
         <div className="border-t border-border/50 p-4 space-y-5">
           <div className="space-y-1.5">
@@ -105,8 +116,11 @@ export function DayCardEdit({
               className={INPUT_CLS}
             />
           </div>
+
           <div className="space-y-2">
+            <label className="text-sm font-semibold text-foreground/80">
               {t.readingPlan.chapters} <span className="text-red-500">*</span>
+            </label>
             {day.chapters.map((ch, ci) => (
               <div key={ci} className="flex items-center gap-2">
                 <Select value={ch.book} onValueChange={(v) => updateChapter(ci, { book: v })}>
@@ -141,17 +155,34 @@ export function DayCardEdit({
             <button type="button" onClick={addChapter} className="flex items-center gap-1.5 text-xs text-teal-600 hover:text-teal-700 font-semibold mt-1 transition-colors">
               <Plus className="w-3.5 h-3.5" />{t.readingPlan.addChapter}
             </button>
+          </div>
+
+          <div className="space-y-2">
             <label className="text-sm font-semibold text-foreground/80">{t.readingPlan.reflectionQuestions}</label>
             {day.reflectionQuestions.map((q, ri) => (
               <div key={ri} className="flex items-center gap-2">
+                <input
                   value={q}
                   onChange={(e) => updateReflection(ri, e.target.value)}
                   placeholder={`${t.readingPlan.reflectionQuestions} ${ri + 1}`}
                   className={cn(INPUT_CLS, "flex-1")}
+                />
                 {day.reflectionQuestions.length > 1 && (
+                  <button
+                    type="button"
                     onClick={() => removeReflection(ri)}
+                    className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 text-muted-foreground/70 hover:text-red-500 dark:hover:text-red-400 transition-colors shrink-0"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+            ))}
             <button type="button" onClick={addReflection} className="flex items-center gap-1.5 text-xs text-teal-600 hover:text-teal-700 font-semibold transition-colors">
               <Plus className="w-3.5 h-3.5" />{t.readingPlan.addReflection}
+            </button>
+          </div>
+
           {questionsEnabled && (
             <div className="space-y-3">
               <label className="text-sm font-semibold text-foreground/80 flex items-center gap-1.5">
@@ -192,14 +223,23 @@ export function DayCardEdit({
                           className={cn(INPUT_CLS, "flex-1", quiz.correctAnswer === oi && "border-teal-400 ring-1 ring-teal-400/30")}
                         />
                       </div>
+                    ))}
+                  </div>
+                  <input
                     value={quiz.explanation}
                     onChange={(e) => updateQuiz(qi, { explanation: e.target.value })}
                     placeholder={`${t.readingPlan.explanation} (${t.userManagement.optional.toLowerCase()})`}
+                    className={cn(INPUT_CLS, "mt-1")}
+                  />
                 </div>
               ))}
               <button type="button" onClick={addQuiz} className="flex items-center gap-1.5 text-xs text-violet-600 hover:text-violet-700 font-semibold transition-colors">
                 <Plus className="w-3.5 h-3.5" />{t.readingPlan.addQuestion}
               </button>
             </div>
+          )}
+        </div>
+      )}
     </div>
   );
+}

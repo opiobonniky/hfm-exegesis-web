@@ -1,4 +1,3 @@
-// Quiz completion score card with performance metrics
 import { Trophy, RotateCcw, SkipForward } from "lucide-react";
 
 interface QuizScoreCardProps {
@@ -10,6 +9,7 @@ interface QuizScoreCardProps {
   onMarkComplete: () => void;
   canMarkComplete: boolean;
 }
+
 export function QuizScoreCard({ correct, total, accuracyPct, performance, onRetry, onMarkComplete, canMarkComplete }: QuizScoreCardProps) {
   return (
     <div className="text-center space-y-4 p-6 rounded-2xl bg-card border border-border">
@@ -20,7 +20,7 @@ export function QuizScoreCard({ correct, total, accuracyPct, performance, onRetr
           {correct}/{total} correct ({accuracyPct}%)
         </p>
       </div>
-      {/* Score ring */}
+
       <div className="flex justify-center">
         <div className="relative w-20 h-20">
           <svg className="w-20 h-20 -rotate-90" viewBox="0 0 80 80">
@@ -37,7 +37,8 @@ export function QuizScoreCard({ correct, total, accuracyPct, performance, onRetr
             <Trophy className="w-6 h-6" style={{ color: performance.color }} />
           </div>
         </div>
-      {/* Actions */}
+      </div>
+
       <div className="flex gap-3">
         <button
           onClick={onRetry}
@@ -53,5 +54,7 @@ export function QuizScoreCard({ correct, total, accuracyPct, performance, onRetr
             <SkipForward className="w-3 h-3" /> Mark Complete
           </button>
         )}
+      </div>
     </div>
   );
+}

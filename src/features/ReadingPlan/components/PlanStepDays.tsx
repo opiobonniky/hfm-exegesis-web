@@ -15,22 +15,23 @@ interface Props {
   t: any;
   isRtl: boolean;
 }
+
 export function PlanStepDays({
   meta, days, expandedDay, setExpandedDay, handleUpdateDay, onPrev, onNext, t, isRtl,
 }: Props) {
   return (
     <div className="space-y-4">
-      <div className="bg-card rounded-2xl border border-border/50 shadow-[0_1px_3px_rgba(0,0,0,0.05)] overflow-hidden">
+      <div className="bg-card rounded-2xl border border-border/50 shadow-sm overflow-hidden">
         <div className="px-6 py-4 border-b border-border/50 bg-muted/50 flex items-center justify-between">
           <div>
             <h2 className="font-bold text-foreground flex items-center gap-2">
               <Calendar className="w-4 h-4 text-teal-600" />
-              {t.readingPlan.dailyContentTitle} — {meta.totalDays} {t.readingPlan.days}
+              {t.readingPlan?.dailyContentTitle || "Daily Content"} — {meta.totalDays} {t.readingPlan?.days || "days"}
             </h2>
-            <p className="text-xs text-muted-foreground/70 mt-0.5">{t.readingPlan.dailyContentDesc}</p>
+            <p className="text-xs text-muted-foreground/70 mt-0.5">{t.readingPlan?.dailyContentDesc || "Configure each day's reading"}</p>
           </div>
           <span className="text-[11px] border border-emerald-200 bg-emerald-50 text-emerald-700 rounded-lg px-2 py-1 font-bold">
-            {t.readingPlan.daysReady
+            {(t.readingPlan?.daysReady || "{ready}/{total} ready")
               .replace("{ready}", String(days.filter(isDayComplete).length))
               .replace("{total}", String(meta.totalDays))}
           </span>
@@ -47,12 +48,16 @@ export function PlanStepDays({
               onUpdateDay={handleUpdateDay}
             />
           ))}
+        </div>
       </div>
       <div className="flex justify-between">
         <button type="button" onClick={onPrev} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-border bg-card text-muted-foreground hover:bg-muted text-sm font-semibold transition-all">
-          <ArrowLeft className={cn("w-4 h-4", isRtl && "rotate-180")} />{t.common.back}
+          <ArrowLeft className={cn("w-4 h-4", isRtl && "rotate-180")} />{t.common?.back || "Back"}
         </button>
-        <button type="button" onClick={onNext} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-sm font-semibold shadow-sm transition-all hover:-translate-y-px">
-          {t.readingPlan.stepReviewSave} <ArrowRight className={cn("w-4 h-4", isRtl && "rotate-180")} />
+        <button type="button" onClick={onNext} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-sm font-semibold shadow-sm transition-all">
+          {t.readingPlan?.stepReviewSave || "Review & Save"} <ArrowRight className={cn("w-4 h-4", isRtl && "rotate-180")} />
+        </button>
+      </div>
     </div>
   );
+}

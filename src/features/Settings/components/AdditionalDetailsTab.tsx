@@ -32,3 +32,4 @@ export default function AdditionalDetailsTab({ profile, onFieldChange, onSave, s
       </Button>
     </div>
   );
+}

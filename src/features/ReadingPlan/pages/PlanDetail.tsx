@@ -1,73 +1,74 @@
 "use client";
 
+import Gate from "@/components/Gate";
+import { PageLayout } from "@/components/PageLayout";
+import { LoadingState } from "@/components/ui/LoadingState";
 import { usePlanDetailPage } from "../hooks/usePlanDetailPage";
-import { useToast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
-import { BookOpen } from "lucide-react";
-import { formatDate } from "../constants";
 import { PlanDetailHeader } from "../components/PlanDetailHeader";
-import { PlanOverviewTab, PlanAdminTab, PlanScheduleTab, PlanQuizTab } from "../components/PlanDetailTabs";
+import { PlanOverviewTab } from "../components/PlanOverviewTab";
+import { PlanAdminTab } from "../components/PlanAdminTab";
+import { PlanScheduleTab } from "../components/PlanScheduleTab";
+import { PlanQuizTab } from "../components/PlanQuizTab";
+import { formatDate } from "../constants";
+
 const PlanDetail = () => {
   const h = usePlanDetailPage();
-  const { toast } = useToast();
-  const navigate = h.navigate;
-  const { t, isRtl, lang } = { t: h.t, isRtl: h.isRtl, lang: h.lang };
-  const { plan, adminStats, days, loadingPlan, userSearchTerm, setUserSearchFilter, activeTab, setActiveTab, filteredUsers, completedDayNums, totalReflections, configuredDays, allQuizDays, totalQuizCount, configuredPct, isAdmin } = h;
-  if (loadingPlan) {
+
+  if (h.loadingPlan) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 rounded-full border-2 border-violet-200 border-t-violet-600 animate-spin" />
-          <p className="text-muted-foreground text-sm">{t.readingPlan.loadingPlan}</p>
-        </div>
+        <LoadingState message={h.t.readingPlan?.loadingPlan || "Loading plan..."} />
       </div>
     );
   }
-  if (!plan) {
-        <div className="text-center space-y-3">
-          <BookOpen className="w-10 h-10 text-muted-foreground/50 mx-auto" />
-          <p className="text-muted-foreground text-sm">{t.readingPlan.planNotFound}</p>
-          <button onClick={() => navigate(-1)} className="text-violet-600 text-sm hover:underline">{t.common.goBack}</button>
-  const pct = Math.round(plan.completion_percentage ?? 0);
-  const displayQuizAccuracy = isAdmin && adminStats ? adminStats.globalQuizAccuracy : Math.round(plan.quiz_accuracy_percentage ?? 0);
-  const displayAnsweredQuestions = isAdmin && adminStats ? adminStats.totalQuizAnswers : (plan.user_answered_questions ?? 0);
-  const displayCorrectAnswers = isAdmin && adminStats ? adminStats.totalQuizCorrect : (plan.user_correct_answers ?? 0);
-  const displayWrongAnswers = isAdmin && adminStats ? adminStats.totalQuizWrong : (plan.user_answered_questions ?? 0) - (plan.user_correct_answers ?? 0);
+
+  if (!h.plan) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <LoadingState message={h.t.readingPlan?.planNotFound || "Plan not found"} />
+      </div>
+    );
+  }
+
+  const pct = Math.round(h.plan.completion_percentage ?? 0);
+  const displayQuizAccuracy = h.isAdmin && h.adminStats ? h.adminStats.globalQuizAccuracy : Math.round(h.plan.quiz_accuracy_percentage ?? 0);
+  const displayAnsweredQuestions = h.isAdmin && h.adminStats ? h.adminStats.totalQuizAnswers : (h.plan.user_answered_questions ?? 0);
+  const displayCorrectAnswers = h.isAdmin && h.adminStats ? h.adminStats.totalQuizCorrect : (h.plan.user_correct_answers ?? 0);
+  const displayWrongAnswers = (displayAnsweredQuestions as number) - (displayCorrectAnswers as number);
+
   return (
-    <div className="min-h-screen bg-background text-foreground overflow-x-hidden" dir={isRtl ? "rtl" : "ltr"} style={{ fontFamily: "'Geist', 'Inter', system-ui, sans-serif" }}>
-      <PlanDetailHeader
-        plan={plan} isAdmin={isAdmin} isRtl={isRtl} lang={lang} activeTab={activeTab}
-        setActiveTab={setActiveTab} navigate={navigate} t={t} pct={pct}
-        displayQuizAccuracy={displayQuizAccuracy} displayAnsweredQuestions={displayAnsweredQuestions}
-        displayCorrectAnswers={displayCorrectAnswers} displayWrongAnswers={displayWrongAnswers}
-        totalReflections={totalReflections} configuredDays={configuredDays} configuredPct={configuredPct}
-        totalQuizCount={totalQuizCount}
-      />
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-6">
-        {activeTab === "overview" && (
-          <PlanOverviewTab plan={plan} lang={lang} isAdmin={isAdmin} adminStats={adminStats}
+    <Gate tier="legacy_sower" featureName="Reading Plans" featureDescription="View reading plan details.">
+      <PageLayout isRtl={h.isRtl} accentColor="primary">
+        <PlanDetailHeader
+          plan={h.plan} isAdmin={h.isAdmin} isRtl={h.isRtl} lang={h.lang} activeTab={h.activeTab}
+          setActiveTab={h.setActiveTab} navigate={h.navigate} t={h.t} pct={pct}
+          displayQuizAccuracy={displayQuizAccuracy} displayAnsweredQuestions={displayAnsweredQuestions}
+          displayCorrectAnswers={displayCorrectAnswers} displayWrongAnswers={displayWrongAnswers}
+          totalReflections={h.totalReflections} configuredDays={h.configuredDays} configuredPct={h.configuredPct}
+          totalQuizCount={h.totalQuizCount}
+        />
+
+        {h.activeTab === "overview" && (
+          <PlanOverviewTab plan={h.plan} lang={h.lang} isAdmin={h.isAdmin} adminStats={h.adminStats}
             displayQuizAccuracy={displayQuizAccuracy} displayAnsweredQuestions={displayAnsweredQuestions}
             displayCorrectAnswers={displayCorrectAnswers} displayWrongAnswers={displayWrongAnswers}
-            totalReflections={totalReflections} configuredDays={configuredDays} t={t} />
+            totalReflections={h.totalReflections} configuredDays={h.configuredDays} t={h.t} />
         )}
-        {activeTab === "admin" && isAdmin && (
-          <PlanAdminTab adminStats={adminStats} filteredUsers={filteredUsers} userSearchTerm={userSearchTerm}
-            setUserSearchFilter={setUserSearchFilter} plan={plan} isRtl={isRtl} lang={lang} t={t} />
-        {activeTab === "schedule" && (
-          <PlanScheduleTab loadingPlan={loadingPlan} days={days} completedDayNums={completedDayNums}
-            questionsEnabled={plan.questions_enabled} totalDays={plan.total_days} />
-        {activeTab === "quiz" && (
-          <PlanQuizTab questionsEnabled={plan.questions_enabled} loadingPlan={loadingPlan}
-            allQuizDays={allQuizDays} t={t} />
-        {/* Footer */}
-        <div className="flex flex-wrap gap-x-5 gap-y-1 pb-8 text-[10px] text-muted-foreground/70 font-mono">
-          <span>{plan.plan_id}</span>
-          <span>DB#{plan.plan_db_id}</span>
-          <span>{formatDate(plan.plan_created_on, lang)}</span>
-          <span className={plan.is_active ? "text-emerald-600" : "text-rose-600"}>
-            {plan.is_active ? `● ${t.readingPlan.activeLabel}` : `● ${t.common.inactive}`}
-          </span>
-    </div>
+        {h.activeTab === "admin" && h.isAdmin && (
+          <PlanAdminTab adminStats={h.adminStats} filteredUsers={h.filteredUsers} userSearchTerm={h.userSearchTerm}
+            setUserSearchFilter={h.setUserSearchFilter} plan={h.plan} isRtl={h.isRtl} lang={h.lang} t={h.t} />
+        )}
+        {h.activeTab === "schedule" && (
+          <PlanScheduleTab loadingPlan={h.loadingPlan} days={h.days} completedDayNums={h.completedDayNums}
+            questionsEnabled={h.plan.questions_enabled} totalDays={h.plan.total_days} />
+        )}
+        {h.activeTab === "quiz" && (
+          <PlanQuizTab questionsEnabled={h.plan.questions_enabled} loadingPlan={h.loadingPlan}
+            allQuizDays={h.allQuizDays} t={h.t} />
+        )}
+      </PageLayout>
+    </Gate>
   );
 };
+
 export default PlanDetail;

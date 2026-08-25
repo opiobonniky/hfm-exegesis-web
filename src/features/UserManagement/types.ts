@@ -1,6 +1,5 @@
 // ─── User Management Types ─────────────────────────────────────────────────────
 
-/** Raw user object from backend SystemUser table */
 export interface RawUser {
   id: string;
   firstName: string;
@@ -10,19 +9,21 @@ export interface RawUser {
   phoneNumber: string;
   username: string;
   gender: string;
-  status: boolean;            // isActive
-  emailVerified: boolean;     // isVerified
-  userRole?: number;          // 1=admin, 2=user etc
-  accountStatus: string;      // active | disabled | suspended
-  subscriptionTier: string;   // free | legacy_sower | covenant_sower
+  status: boolean;
+  emailVerified: boolean;
+  userRole?: number;
+  accountStatus: string;
+  subscriptionTier: string;
   profilePhotoUrl?: string;
   createdOn: string;
   lastLogin?: string;
   loginCount?: number;
 }
-/** Mapped user for UI display */
+
 export interface User {
+  id?: string;
   name: string;
+  email: string;
   phone?: string;
   profileImage?: string;
   role: "user" | "admin" | "superadmin";
@@ -31,13 +32,17 @@ export interface User {
   subscription?: string;
   lastActive?: string;
   createdAt: string;
-/** Backend paginated response for users */
+  username?: string;
+}
+
 export interface UsersResponse {
   users: RawUser[];
   totalCount: number;
   page: number;
   pageSize: number;
   totalPages: number;
+}
+
 export interface PagedResponse<T> {
   content: T[];
   currentPage: number;
@@ -46,6 +51,8 @@ export interface PagedResponse<T> {
   hasPrevious: boolean;
   isFirst: boolean;
   isLast: boolean;
+}
+
 export interface UserFilters {
   search?: string;
   role?: string;
@@ -53,7 +60,8 @@ export interface UserFilters {
   isActive?: boolean;
   sortBy?: string;
   sortOrder?: "asc" | "desc";
-/** Map raw backend user to UI User */
+}
+
 export function mapUser(raw: RawUser): User {
   const roleMap: Record<number, "user" | "admin" | "superadmin"> = {
     1: "admin",
@@ -73,3 +81,5 @@ export function mapUser(raw: RawUser): User {
     lastActive: raw.lastLogin,
     createdAt: raw.createdOn,
     username: raw.username,
+  };
+}

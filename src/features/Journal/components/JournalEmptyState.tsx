@@ -43,3 +43,4 @@ export function JournalEmptyState({ hasSearch, currentCategory, isDiscover, onCr
       )}
     </div>
   );
+}

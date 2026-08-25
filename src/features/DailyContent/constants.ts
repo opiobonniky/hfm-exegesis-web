@@ -1,9 +1,9 @@
 // ─── DailyContent Constants ────────────────────────────────────────────────────
 
-// ─── DailyVerse Constants ──────────────────────────────────────────────────────
 export const SMART_PAGE_SIZE = 6;
 export const SMART_FUTURE_DAYS = 2;
 export const FILTERED_PAGE_SIZE = 12;
+
 export const PRESETS = (t?: any) => [
   { value: "thisWeek", label: t?.dailyVerse?.thisWeek || "This Week" },
   { value: "thisMonth", label: t?.dailyVerse?.thisMonth || "This Month" },
@@ -12,9 +12,12 @@ export const PRESETS = (t?: any) => [
   { value: "last30Days", label: t?.dailyVerse?.last30Days || "Last 30 Days" },
   { value: "custom", label: t?.dailyVerse?.custom || "Custom Range" },
 ];
+
 export const TESTAMENTS = (t?: any) => [
   { value: "Old", label: t?.dailyVerse?.oldTestament || "Old Testament" },
   { value: "New", label: t?.dailyVerse?.newTestament || "New Testament" },
+];
+
 export const OLD_TESTAMENT_BOOKS = [
   "Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy",
   "Joshua", "Judges", "Ruth", "1 Samuel", "2 Samuel",
@@ -24,24 +27,44 @@ export const OLD_TESTAMENT_BOOKS = [
   "Ezekiel", "Daniel", "Hosea", "Joel", "Amos", "Obadiah",
   "Jonah", "Micah", "Nahum", "Habakkuk", "Zephaniah", "Haggai",
   "Zechariah", "Malachi",
-// ─── Date Helpers ─────────────────────────────────────────────────────────────
+];
+
+export const NEW_TESTAMENT_BOOKS = [
+  "Matthew", "Mark", "Luke", "John", "Acts", "Romans",
+  "1 Corinthians", "2 Corinthians", "Galatians", "Ephesians",
+  "Philippians", "Colossians", "1 Thessalonians", "2 Thessalonians",
+  "1 Timothy", "2 Timothy", "Titus", "Philemon", "Hebrews",
+  "James", "1 Peter", "2 Peter", "1 John", "2 John", "3 John",
+  "Jude", "Revelation",
+];
+
 export const safeDate = (value: unknown): Date => {
   if (!value || typeof value === "object") return new Date();
   const d = new Date(value as string);
   return isNaN(d.getTime()) ? new Date() : d;
 };
+
 export const toYMD = (d: Date): string =>
   d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+
 export const getLocalDateString = (utcDateString: unknown): string => toYMD(safeDate(utcDateString));
+
 export const isToday = (utcDateString: unknown): boolean =>
   getLocalDateString(utcDateString) === getLocalDateString(new Date());
+
 export const isFuture = (utcDateString: unknown): boolean =>
   getLocalDateString(utcDateString) > getLocalDateString(new Date());
+
 export const formatDisplayDate = (utcDateString: unknown): string => {
   const d = safeDate(utcDateString);
   return d.toLocaleDateString(undefined, { weekday: "short", year: "numeric", month: "short", day: "numeric" });
+};
+
 export const formatShortDate = (utcDateString: unknown): string => {
+  const d = safeDate(utcDateString);
   return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+};
+
 export const getConflictMessage = (conflict: any, t?: any): string => {
   if (!conflict) return "";
   const ref = conflict.existing?.bookName + " " + conflict.existing?.chapter + ":" + conflict.existing?.verseNumber;
@@ -53,10 +76,14 @@ export const getConflictMessage = (conflict: any, t?: any): string => {
   }
   const msg = dv?.verseConflictForVerse || "This verse ({ref}) already exists for {date}.";
   return msg.replace("{ref}", ref).replace("{date}", date);
+};
+
 export const addDays = (d: Date, days: number): Date => {
   const result = new Date(d);
   result.setDate(result.getDate() + days);
   return result;
+};
+
 export const getPresetRange = (preset: string): { from: string; to: string } => {
   const now = new Date();
   switch (preset) {
@@ -75,3 +102,5 @@ export const getPresetRange = (preset: string): { from: string; to: string } => 
       return { from: toYMD(addDays(now, -29)), to: toYMD(now) };
     default:
       return { from: "", to: "" };
+  }
+};

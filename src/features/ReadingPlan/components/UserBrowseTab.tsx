@@ -15,25 +15,32 @@ interface Props {
   onStartPlan: (planId: string) => void;
   onViewDetail: (planId: string) => void;
 }
+
 function getProgressPercentage(completed: number, total: number) {
   return total === 0 ? 0 : Math.round((completed / total) * 100);
+}
+
 export default function UserBrowseTab({
   plans, userPlans, loading, catFilter, t, onCatFilter, onStartPlan, onViewDetail,
 }: Props) {
   const catLabel = (cat: string) => t.readingPlan?.[CATEGORY_KEYS[cat]] || cat;
+
   return (
     <div className="space-y-4">
-      {/* Category filters */}
       <div className="flex gap-2 overflow-x-auto pb-2">
         {Object.entries(CATEGORY_KEYS).map(([value, key]) => (
-          <button key={value} onClick={() => onCatFilter(value)}
+          <button
+            key={value}
+            onClick={() => onCatFilter(value)}
             className={`min-h-[44px] px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition-colors active:scale-[0.97] [touch-action:manipulation] ${
               catFilter === value ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"
-            }`}>
+            }`}
+          >
             {t.readingPlan?.[key] || key}
           </button>
         ))}
       </div>
+
       {loading ? (
         <div className="flex items-center justify-center py-12">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -54,6 +61,7 @@ export default function UserBrowseTab({
             const isCompleted = userPlan?.isCompleted || false;
             const isActive = hasStarted && !isCompleted;
             const pct = userPlan ? getProgressPercentage(userPlan.completedDays, plan.totalDays) : 0;
+
             return (
               <Card key={plan.planId} className={`overflow-hidden ${isActive ? "border-primary/50" : isCompleted ? "border-emerald-500/50" : ""}`}>
                 {(isActive || isCompleted) && (
@@ -71,6 +79,7 @@ export default function UserBrowseTab({
                     </div>
                     <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
                       <BookOpen className="w-5 h-5 text-primary" />
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-3">
@@ -79,12 +88,16 @@ export default function UserBrowseTab({
                     <span className="text-xs px-2 py-1 bg-muted rounded-lg font-medium">{catLabel(plan.category)}</span>
                     <span className="text-xs px-2 py-1 bg-muted rounded-lg font-medium">{plan.totalDays} days</span>
                     {plan.questionsEnabled && <span className="text-xs px-2 py-1 bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300 rounded-lg font-medium">Q&A</span>}
+                  </div>
                   {hasStarted && userPlan && (
                     <div className="bg-muted/50 rounded-lg p-3">
                       <div className="flex justify-between text-sm mb-2">
                         <span className="text-muted-foreground">{userPlan.completedDays}/{plan.totalDays} · {pct}%</span>
+                      </div>
                       <div className="h-1.5 bg-muted rounded-full overflow-hidden">
                         <div className={`h-full rounded-full ${isCompleted ? "bg-emerald-500" : "bg-primary"}`} style={{ width: `${pct}%` }} />
+                      </div>
+                    </div>
                   )}
                   <div className="flex gap-2">
                     {hasStarted ? (
@@ -95,10 +108,13 @@ export default function UserBrowseTab({
                       <Button className="flex-1" onClick={() => onStartPlan(plan.planId)} disabled={!plan.isActive}>Start Plan</Button>
                     )}
                     <Button variant="outline" onClick={() => onViewDetail(plan.planId)}>Details</Button>
+                  </div>
                 </CardContent>
               </Card>
             );
           })}
+        </div>
       )}
     </div>
   );
+}

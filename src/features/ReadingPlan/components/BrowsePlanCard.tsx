@@ -5,13 +5,20 @@ import { DIFFICULTY_COLOR, DIFFICULTY_KEYS, CATEGORY_KEYS } from "../constants";
 import type { ReadingPlan } from "../types";
 
 interface Props {
-  plan: ReadingPlan; isActive: boolean; hasStarted: boolean; isCompleted: boolean;
-  done: number; pct: number; onPress: () => void;
+  plan: ReadingPlan;
+  isActive: boolean;
+  hasStarted: boolean;
+  isCompleted: boolean;
+  done: number;
+  pct: number;
+  onPress: () => void;
 }
+
 export function BrowsePlanCard({ plan, isActive, hasStarted, isCompleted, done, pct, onPress }: Props) {
   const { t, isRtl } = useLanguage();
   const total = plan.totalDays || plan.total_days || 1;
   const diffColor = DIFFICULTY_COLOR[plan.difficulty]?.badge || "bg-muted text-muted-foreground";
+
   return (
     <button
       onClick={onPress}
@@ -23,6 +30,7 @@ export function BrowsePlanCard({ plan, isActive, hasStarted, isCompleted, done, 
     >
       {(isActive || isCompleted) && (
         <div className="h-1 rounded-t-2xl" style={{ backgroundColor: isCompleted ? "#10B981" : "#14b8a6" }} />
+      )}
       <div className="p-5 flex items-start gap-4">
         <div className="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center shrink-0">
           <BookOpen className="w-5 h-5 text-teal-600" />
@@ -39,11 +47,12 @@ export function BrowsePlanCard({ plan, isActive, hasStarted, isCompleted, done, 
               {t.readingPlan?.[DIFFICULTY_KEYS[plan.difficulty]] || plan.difficulty}
             </span>
             <span className="text-xs px-2 py-1 rounded-lg font-medium bg-muted text-muted-foreground">
-              {t.readingPlan?.[CATEGORY_KEYS[plan.category]] || plan.category}
-              {total} {t.readingPlan?.days || "days"}
+              {t.readingPlan?.[CATEGORY_KEYS[plan.category]] || plan.category} · {total} {t.readingPlan?.days || "days"}
+            </span>
             {plan.questionsEnabled && (
               <span className="text-xs px-2 py-1 rounded-lg font-medium bg-violet-100 text-violet-700">{t.readingPlan?.badgeQA || "Q&A"}</span>
             )}
+          </div>
           {hasStarted && (
             <div className="bg-muted rounded-lg p-3">
               <div className="flex justify-between text-sm mb-2">
@@ -51,9 +60,12 @@ export function BrowsePlanCard({ plan, isActive, hasStarted, isCompleted, done, 
               </div>
               <div className="h-1.5 bg-stone-200 rounded-full overflow-hidden">
                 <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: isCompleted ? "#10B981" : "#14b8a6" }} />
+              </div>
             </div>
           )}
+        </div>
         <ChevronRight className={cn("w-5 h-5 text-muted-foreground/70 shrink-0", isRtl && "rotate-180")} />
       </div>
     </button>
   );
+}

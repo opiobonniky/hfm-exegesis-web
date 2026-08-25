@@ -1,4 +1,4 @@
-// DailyContent dailyVerseApi — API endpoints for dailyVerseApi operations
+// DailyContent dailyVerseApi — API endpoints for daily verse operations
 import { sendPostRequest } from "@/services/api";
 
 export const dailyVerseApi = {
@@ -13,14 +13,23 @@ export const dailyVerseApi = {
   delete: (id: number) =>
     sendPostRequest("admin", "delete-daily-verse", { id }),
 };
+
 export const dailyDevotionApi = {
   getAll: (page = 0, size = 20, filters?: Record<string, any>) =>
     sendPostRequest("admin", "get-all-daily-devotions", { page, size, ...filters }),
+  add: (data: any) =>
     sendPostRequest("admin", "add-daily-devotion", data),
+  update: (data: any) =>
     sendPostRequest("admin", "update-daily-devotion", data),
+  delete: (id: number) =>
     sendPostRequest("admin", "delete-daily-devotion", { id }),
+};
+
 export const verseExplanationApi = {
   getAll: (page = 0, size = 20, search = "") =>
     sendPostRequest("bible", "get-all-verses-explanation", { page, size, search }),
+  add: (data: any) =>
     sendPostRequest("bible", "add-verse-explanation", data),
+  delete: (id: number) =>
     sendPostRequest("bible", "delete-verse-explanation", { id }),
+};

@@ -1,4 +1,3 @@
-// Individual day assignment card for PlanDetail
 import { CheckCircle, Circle, ChevronRight, Play } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -11,6 +10,7 @@ interface PlanAssignmentCardProps {
   quizQuestionCount?: number;
   onClick: () => void;
 }
+
 export function PlanAssignmentCard({ day, title, chapters, completed, isCurrent, quizQuestionCount, onClick }: PlanAssignmentCardProps) {
   return (
     <button
@@ -50,10 +50,13 @@ export function PlanAssignmentCard({ day, title, chapters, completed, isCurrent,
             {chapters.length > 3 && (
               <span className="text-[10px] text-muted-foreground">+{chapters.length - 3}</span>
             )}
+          </div>
           {quizQuestionCount ? (
             <p className="text-[10px] text-muted-foreground mt-1">{quizQuestionCount} quiz questions</p>
           ) : null}
+        </div>
         <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0 mt-1" />
       </div>
     </button>
   );
+}

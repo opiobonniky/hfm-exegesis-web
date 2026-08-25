@@ -39,3 +39,4 @@ export function useAdminVerseExplanationsPage() {
     editItem, editForm, setEditForm, deleteItem, setDeleteItem,
     openEdit, handleSave, handleDelete, filteredBooks, navigate,
   };
+}

@@ -1,6 +1,5 @@
 // ─── Admin Types ───────────────────────────────────────────────────────────────
 
-// ─── Daily Content Types ──────────────────────────────────────────────────────
 export interface DailyItem {
   id: number;
   bookName?: string;
@@ -22,7 +21,7 @@ export interface DailyItem {
   isPublished: boolean;
   creatorName?: string;
 }
-// ─── Dashboard Types ───────────────────────────────────────────────────────────
+
 export interface DashboardStats {
   totalUsers: number;
   activeUsers: number;
@@ -30,13 +29,16 @@ export interface DashboardStats {
   totalVerses: number;
   newUsersToday: number;
   activeSubscriptions: number;
+}
+
 export interface ToolCard {
   title: string;
   description: string;
   icon: string;
   route: string;
   color: string;
-// ─── Trivia Types ──────────────────────────────────────────────────────────────
+}
+
 export interface TriviaQuestion {
   question: string;
   optionsJson: string;
@@ -49,6 +51,8 @@ export interface TriviaQuestion {
   difficulty: string;
   isActive: boolean;
   createdOn: string;
+}
+
 export interface TriviaOverviewStats {
   totalParticipants: number;
   totalAnswers: number;
@@ -56,6 +60,8 @@ export interface TriviaOverviewStats {
   dailyActiveParticipants: number;
   todayAnswers: number;
   difficultyBreakdown: Record<string, { total: number; correct: number }>;
+}
+
 export interface TriviaUserPerformance {
   userId: string;
   firstName: string;
@@ -66,7 +72,8 @@ export interface TriviaUserPerformance {
   incorrect: number;
   percentage: number;
   lastAnsweredDate: string | null;
-// ─── Subscriptions Types ───────────────────────────────────────────────────────
+}
+
 export interface SubscriptionTier {
   id: string;
   name: string;
@@ -77,13 +84,20 @@ export interface SubscriptionTier {
   features: string[];
   sortOrder: number;
   maxSlots: number | null;
+}
+
 export interface SubscribedUser {
+  id: number;
+  firstName: string;
+  lastName: string;
+  email: string;
   subscriptionTier: string;
   accessExpiresAt: string | null;
   isSuspended: boolean;
   source: string;
   outOfSync: boolean;
-// ─── Activity Log Types ────────────────────────────────────────────────────────
+}
+
 export interface ActivitySession {
   username: string;
   loggedInAt: string;
@@ -96,24 +110,29 @@ export interface ActivitySession {
   failureReason: string | null;
   browser: string | null;
   os: string | null;
+}
+
 export interface ActivitySummary {
   successCount: number;
   failedCount: number;
   onlineCount: number;
-// ─── Book Prologues Types ──────────────────────────────────────────────────────
+}
+
 export interface BookPrologue {
   bookName: string;
   content: string;
   createdBy: string;
   updatedBy: string | null;
   updatedOn: string | null;
-// ─── Verse Explanations Types ──────────────────────────────────────────────────
+}
+
 export interface VerseExplanation {
   book: string;
   chapter: number;
   verseNumber: number;
   explanation: string;
-// ─── Daily Exegesis Types ──────────────────────────────────────────────────────
+}
+
 export interface DailyExegesis {
   passageReference: string;
   introduction: string;
@@ -122,23 +141,36 @@ export interface DailyExegesis {
   application: string;
   prayer: string;
   tags: string | null;
-// ─── Study Tools Types ─────────────────────────────────────────────────────────
+}
+
 export interface WordStudyItem {
   strongsId: string;
   word: string;
   pronunciation: string;
   meaning: string;
   strongsNumber: string;
+}
+
 export interface CommentaryItem {
   verse: number;
   author: string;
+  text: string;
+}
+
 export interface CrossReferenceItem {
   sourceVerse: string;
   targetVerse: string;
+}
+
 export interface DictionaryTermItem {
   term: string;
   definition: string;
+}
+
 export interface TopicItem {
   verseCount: number;
+}
+
 export interface VerseResource {
   resources: Record<string, unknown>;
+}
