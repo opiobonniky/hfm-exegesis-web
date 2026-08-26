@@ -69,6 +69,7 @@ export interface QuizQuestion {
 
 export interface DayAssignment {
   dayNumber: number;
+  title?: string;
   chapters: Chapter[];
   reflectionQuestions: string[];
   quizQuestions: QuizQuestion[];

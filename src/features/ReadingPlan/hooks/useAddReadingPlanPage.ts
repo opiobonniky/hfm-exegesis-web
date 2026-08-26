@@ -122,7 +122,7 @@ export function useAddReadingPlanPage() {
       if (completedDays.length > 0) {
         await sendPostRequest("reading-plans", "save-days", { planId, days: completedDays });
       }
-      toast({ title: t.readingPlan?.planCreated || "Plan created", description: t.readingPlan?.planCreatedDesc || "Plan created successfully" });
+      toast({ title: t.readingPlan?.planCreated || "Plan created", description: t.readingPlan?.planCreated || "Plan created successfully" });
       navigate("/admin/plans");
     } catch {
       toast({ title: t.common?.error || "Error", description: "Failed to create plan", variant: "destructive" });

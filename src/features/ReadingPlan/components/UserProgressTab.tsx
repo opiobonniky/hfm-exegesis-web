@@ -2,10 +2,10 @@ import { BookOpen, ChevronRight, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import UserPlanCard from "./UserPlanCard";
 import CompletedPlanCard from "./CompletedPlanCard";
-import type { UserPlanItem } from "../types";
+import type { UserPlan } from "../hooks/useUserPlansPage";
 
 interface Props {
-  userPlans: UserPlanItem[];
+  userPlans: UserPlan[];
   t: any;
   onContinue: (planId: string) => void;
   onRemove: (planId: string) => void;

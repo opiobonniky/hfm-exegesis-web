@@ -27,7 +27,7 @@ export interface ReadingPlanDetail {
 }
 
 export function usePlanDetail(planId?: string) {
-  const { user } = useAuth();
+  const { userInfo } = useAuth();
   const [plan, setPlan] = useState<ReadingPlanDetail | null>(null);
   const [readings, setReadings] = useState<DailyReading[]>([]);
   const [loading, setLoading] = useState(true);

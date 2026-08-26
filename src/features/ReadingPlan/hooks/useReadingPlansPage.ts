@@ -64,12 +64,12 @@ export function useReadingPlansPage() {
     try {
       const res = await sendPostRequest("reading-plans", "delete", { planId: deleteTarget.planId });
       if (res.returnCode === 200) {
-        toast({ title: t.readingPlan?.toastDeleted || "Deleted", description: t.readingPlan?.toastDeletedDesc || "Plan deleted" });
+        toast({ title: t.readingPlan?.toastPlanDeleted || "Deleted", description: t.readingPlan?.toastPlanDeletedDesc || "Plan deleted" });
         setDeleteTarget(null);
         setDeleteConfirmText("");
         await loadPlans();
       } else {
-        toast({ title: t.readingPlan?.toastFailedDelete || "Failed to delete", description: res.returnMessage, variant: "destructive" });
+        toast({ title: t.readingPlan?.toastFailedLoad || "Failed to delete", description: res.returnMessage, variant: "destructive" });
       }
     } catch {
       toast({ title: t.common?.error || "Error", description: "Failed to delete plan", variant: "destructive" });
@@ -84,12 +84,12 @@ export function useReadingPlansPage() {
     try {
       const res = await sendPostRequest("reading-plans", "update", { planId: editTarget.planId, ...editForm });
       if (res.returnCode === 200) {
-        toast({ title: t.readingPlan?.toastUpdated || "Updated", description: t.readingPlan?.toastUpdatedDesc || "Plan updated" });
+        toast({ title: t.readingPlan?.toastPlanUpdated || "Updated", description: t.readingPlan?.toastPlanUpdatedDesc || "Plan updated" });
         setEditTarget(null);
         setEditForm({});
         await loadPlans();
       } else {
-        toast({ title: t.readingPlan?.toastFailedUpdate || "Failed to update", description: res.returnMessage, variant: "destructive" });
+        toast({ title: t.readingPlan?.toastUpdateFailed || "Failed to update", description: res.returnMessage, variant: "destructive" });
       }
     } catch {
       toast({ title: t.common?.error || "Error", description: "Failed to update plan", variant: "destructive" });

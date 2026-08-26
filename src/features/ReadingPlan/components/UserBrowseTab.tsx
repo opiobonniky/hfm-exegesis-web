@@ -3,11 +3,11 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { routes } from "@/components/Routes/routes";
 import { CATEGORY_KEYS, DIFFICULTY_KEYS } from "../constants";
-import type { ReadingPlan, UserPlanItem } from "../types";
+import type { UserPlanReadingPlan, UserPlan } from "../hooks/useUserPlansPage";
 
 interface Props {
-  plans: ReadingPlan[];
-  userPlans: UserPlanItem[];
+  plans: UserPlanReadingPlan[];
+  userPlans: UserPlan[];
   loading: boolean;
   catFilter: string;
   t: any;

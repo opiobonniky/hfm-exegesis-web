@@ -261,6 +261,6 @@ export function useAddDailyVerse() {
     // Conflict dialog
     conflictDialog, setConflictDialog,
     // Helpers
-    t, isRtl, navigate,
+    t, isRtl,
   };
 }

@@ -31,7 +31,7 @@ const AdminDailyContent = () => {
           <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
             <CalendarDays className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
           </div>
-          <div>
+          <div>Daily Verses
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Daily Content Manager</h1>
             <p className="text-sm text-muted-foreground/80">Manage daily verses, devotions, and exegesis content</p>
           </div>

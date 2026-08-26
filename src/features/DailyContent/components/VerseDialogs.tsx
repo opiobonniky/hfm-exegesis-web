@@ -34,6 +34,8 @@ export function DeleteVerseDialog({ open, onOpenChange, target, isDeleting, onCo
 }
 
 interface ConflictDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   conflict: any;
   t?: any;
   onUpdate: () => void;

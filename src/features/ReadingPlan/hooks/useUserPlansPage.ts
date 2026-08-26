@@ -6,7 +6,8 @@ import { sendPostRequest } from "@/services/api";
 
 export interface UserPlanReadingPlan {
   planId: string; title: string; description: string; totalDays?: number;
-  category?: string; planImage?: string;
+  category?: string; difficulty?: string; isActive?: boolean;
+  questionsEnabled?: boolean; planImage?: string;
 }
 
 export interface UserPlan {

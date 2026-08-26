@@ -41,13 +41,10 @@ const ReadingPlans = () => {
           <LoadingState />
         ) : p.plans.length === 0 ? (
           <EmptyState
-            title={p.t.readingPlan?.noPlans || "No plans yet"}
-            description={p.t.readingPlan?.noPlansDesc || "Create your first reading plan to get started."}
-            action={
-              <Button onClick={() => navigate("/admin/plans/new")} className="gap-2">
-                <Plus className="w-4 h-4" />Create Plan
-              </Button>
-            }
+            title={p.t.readingPlan?.noPlansYet || "No plans yet"}
+            message={p.t.readingPlan?.noPlansDesc || "Create your first reading plan to get started."}
+            actionLabel="Create Plan"
+            onAction={() => navigate("/admin/plans/new")}
           />
         ) : (
           <>

@@ -32,7 +32,11 @@ export interface DailyVerseItem {
 
 export interface DailyVersePayload {
   id?: number;
+  bookName: string;
+  chapter: number;
+  verseNumber: number;
   bibleVersion: string;
+  verseText?: string | null;
   displayDate: string;
   displayTime?: string;
   explanation: string;

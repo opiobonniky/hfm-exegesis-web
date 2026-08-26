@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
   DialogDescription, DialogFooter,
@@ -41,6 +41,7 @@ function Section({
 
 const AddDailyVerse = () => {
   const h = useAddDailyVerse();
+  const navigate = useNavigate();
 
   return (
     <div dir={h.isRtl ? "rtl" : "ltr"} className="min-h-screen bg-gradient-to-b from-background to-muted/30 p-6 lg:p-10">
@@ -129,6 +130,7 @@ const AddDailyVerse = () => {
                 crossReferences={h.crossReferences} setCrossReferences={h.setCrossReferences}
                 finalThoughts={h.finalThoughts} setFinalThoughts={h.setFinalThoughts}
                 takeaways={h.takeaways} setTakeaways={h.setTakeaways}
+                isRtl={h.isRtl}
               />
             </Section>
 
@@ -183,7 +185,7 @@ const AddDailyVerse = () => {
             <Button variant="ghost" onClick={() => h.setConflictDialog({ open: false, conflict: null, payload: null })}>
               {h.t.common.cancel}
             </Button>
-            <Button variant="outline" onClick={() => { h.setConflictDialog({ open: false, conflict: null, payload: null }); h.navigate(routes.dailyVerse.path); }}>
+            <Button variant="outline" onClick={() => { h.setConflictDialog({ open: false, conflict: null, payload: null }); navigate(routes.dailyVerse.path); }}>
               <BookOpen className="h-4 w-4 mr-2" /> {h.t.dailyVerse.viewExisting}
             </Button>
             <Button onClick={h.handleConflictUpdate}>

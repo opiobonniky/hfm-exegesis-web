@@ -14,7 +14,7 @@ interface PlanDetailHeaderProps {
   lang: string;
   activeTab: Tab;
   setActiveTab: Dispatch<SetStateAction<Tab>>;
-  navigate: (delta: number) => void;
+  navigate: (to: string | number) => void;
   t: any;
   pct: number;
   displayQuizAccuracy: number;
