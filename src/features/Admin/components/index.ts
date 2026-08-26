@@ -1,7 +1,7 @@
 // Admin components barrel export
 export { AdminContentTable } from "./AdminContentTable";
 export { AdminContentForm } from "./AdminContentForm";
-export { WordsTab } from "./WordsTab";
+export { default as WordsTab } from "./WordsTab";
 export { ResourcesTab } from "./ResourcesTab";
 export { StudiesTab } from "./StudiesTab";
 export { ProloguesTab } from "./ProloguesTab";

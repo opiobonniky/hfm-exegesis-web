@@ -15,7 +15,7 @@ interface WordsTabProps {
   state: StudyToolsState;
 }
 
-export default function WordsTab({ state }: WordsTabProps) {
+export function WordsTab({ state }: WordsTabProps) {
   const {
     words, wordsLoading, wordSearch, setWordSearch, searchWords,
     verseBook, handleBookChange, verseChapter, handleChapterChange,
@@ -116,3 +116,5 @@ export default function WordsTab({ state }: WordsTabProps) {
     </div>
   );
 }
+
+export default WordsTab;
