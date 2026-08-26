@@ -1,130 +1,245 @@
 "use client";
 
 /**
- * AddDailyDevotion — add a new daily devotion with Bible reference.
- * State in useAddDailyDevotion hook, UI composed of reusable components.
+ * AddDailyDevotion — add/edit daily devotion with all rich content fields.
+ * Matches the app's AddDailyDevotion screen fields.
  */
-import { Sun, Save, ArrowLeft, Lightbulb, Clock, CalendarIcon } from "lucide-react";
+import {
+  Sun, Save, BookOpen, AlertTriangle,
+} from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Combobox } from "@/components/ui/combobox";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
+import { Combobox } from "@/components/ui/combobox";
 import { format } from "date-fns";
 import { useAddDailyDevotion } from "../hooks/useAddDailyDevotion";
+import { StructuredContentSection } from "../components";
+
+/** Collapsible section wrapper */
+function Section({
+  title, defaultOpen = true, children,
+}: { title: string; defaultOpen?: boolean; children: React.ReactNode }) {
+  return (
+    <details open={defaultOpen} className="group">
+      <summary className="cursor-pointer select-none flex items-center gap-2 py-2 text-sm font-semibold text-foreground/80 border-b border-border/40 mb-4">
+        <span className="group-open:rotate-90 transition-transform text-xs">▶</span>
+        {title}
+      </summary>
+      <div className="space-y-6">{children}</div>
+    </details>
+  );
+}
 
 const AddDailyDevotion = () => {
   const h = useAddDailyDevotion();
 
   return (
-    <div className="min-h-screen bg-background p-6 lg:p-8" dir={h.isRtl ? "rtl" : "ltr"}>
+    <div dir={h.isRtl ? "rtl" : "ltr"} className="min-h-screen bg-gradient-to-b from-background to-muted/30 p-6 lg:p-10">
       <div className="max-w-4xl mx-auto space-y-8">
         {/* Header */}
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" asChild>
-            <Link to="/daily-devotions" className="flex items-center gap-2">
-              <ArrowLeft className="h-5 w-5" /> {h.t.common.back}
-            </Link>
-          </Button>
+          <Link to="/daily-devotions" className="text-muted-foreground hover:text-foreground inline-flex items-center gap-2">
+            ← {h.t.common.back}
+          </Link>
           <div className="flex items-center gap-3">
             <div className="w-14 h-14 rounded-2xl bg-accent/10 flex items-center justify-center shadow-sm">
               <Sun className="h-7 w-7 text-accent" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold tracking-tight text-gradient">{h.t.devotions.addDevotion}</h1>
+              <h1 className="text-3xl font-bold tracking-tight text-gradient">
+                {h.isEditing ? "Edit Devotion" : h.t.devotions.addDevotion}
+              </h1>
               <p className="text-muted-foreground">{h.t.devotions.addPageSubtitle}</p>
             </div>
           </div>
         </div>
 
-        <Card className="fade-up stagger-1 border-border/40 shadow-md">
+        {/* Form Card */}
+        <Card className="border-border/40 shadow-md">
           <CardHeader className="bg-gradient-to-r from-primary/5 to-accent/5 pb-6">
             <CardTitle className="flex items-center gap-2">
-              <Lightbulb className="h-5 w-5 text-primary" /> {h.t.devotions.devotionDetails}
+              <BookOpen className="h-5 w-5 text-primary" />
+              {h.t.devotions.devotionDetails}
             </CardTitle>
             <CardDescription>{h.t.devotions.devotionDetailsDesc}</CardDescription>
           </CardHeader>
-          <CardContent className="pt-6 space-y-8">
-            <form onSubmit={h.handleSave} className="space-y-7">
-              {/* Title */}
-              <div className="space-y-2">
-                <Label>{h.t.common.title} *</Label>
-                <Input value={h.title} onChange={(e) => h.setTitle(e.target.value)} placeholder={h.t.devotions.titlePlaceholder} className="text-lg" />
-              </div>
+          <CardContent className="pt-6 space-y-6">
+            <form onSubmit={h.handleSave} className="space-y-8">
+              {/* 1. Title */}
+              <Section title="Devotion Title">
+                <div className="space-y-2">
+                  <Label>Title *</Label>
+                  <Input value={h.title} onChange={(e) => h.setTitle(e.target.value)}
+                    placeholder="Enter devotion title..." className="text-lg" />
+                </div>
+              </Section>
 
-              {/* Content */}
-              <div className="space-y-2">
-                <Label>{h.t.common.content} *</Label>
-                <Textarea value={h.content} onChange={(e) => h.setContent(e.target.value)} placeholder={h.t.devotions.contentPlaceholder} className="min-h-[300px] leading-relaxed" />
-              </div>
+              {/* 2. Content */}
+              <Section title="Devotion Content">
+                <div className="space-y-2">
+                  <Label>Content *</Label>
+                  <Textarea value={h.content} onChange={(e) => h.setContent(e.target.value)}
+                    placeholder="Write your devotional message..."
+                    className="min-h-[200px] leading-relaxed resize-none" />
+                </div>
+              </Section>
 
-              {/* Bible Reference */}
-              <div className="space-y-3">
-                <Label className="text-muted-foreground">{h.t.devotions.optionalBibleReference}</Label>
-                <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+              {/* 3. Bible Reference */}
+              <Section title="Optional Bible Reference" defaultOpen={false}>
+                <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   <div className="space-y-2">
-                    <Label>{h.t.devotions.testament}</Label>
+                    <Label>Testament</Label>
                     <Combobox
                       options={[{ value: "Old", label: h.t.dailyVerse.oldTestament }, { value: "New", label: h.t.dailyVerse.newTestament }]}
                       value={h.testament} onChange={h.setTestament}
-                      placeholder={h.t.devotions.selectTestament} width="w-full"
-                    />
+                      placeholder={h.t.devotions.selectTestament} width="w-full" />
                   </div>
                   <div className="space-y-2">
-                    <Label>{h.t.dailyVerse.book}</Label>
+                    <Label>Book</Label>
                     <Combobox options={h.books.map((b) => ({ value: b, label: b }))}
-                      value={h.book} onChange={h.setBook} placeholder={h.t.dailyVerse.selectBook} disabled={!h.testament} width="w-full" />
+                      value={h.book} onChange={h.setBook} placeholder={h.t.dailyVerse.selectBook}
+                      disabled={!h.testament} width="w-full" />
                   </div>
                   <div className="space-y-2">
-                    <Label>{h.t.dailyVerse.chapter}</Label>
+                    <Label>Chapter</Label>
                     <Combobox options={h.chapters.map((c) => ({ value: String(c), label: String(c) }))}
-                      value={h.chapter} onChange={h.setChapter} placeholder={h.t.dailyVerse.selectChapter} disabled={!h.book} width="w-full" />
+                      value={h.chapter} onChange={h.setChapter} placeholder={h.t.dailyVerse.selectChapter}
+                      disabled={!h.book} width="w-full" />
                   </div>
                   <div className="space-y-2">
-                    <Label>{h.t.dailyVerse.verse}</Label>
+                    <Label>Verse</Label>
                     <Input type="number" value={h.verseNumber} onChange={(e) => h.setVerseNumber(e.target.value)}
                       placeholder="Verse #" disabled={!h.chapter} min={1} />
                   </div>
                 </div>
-                {h.book && h.chapter && h.verseNumber && (
-                  <p className="text-sm text-muted-foreground">{h.book} {h.chapter}:{h.verseNumber}</p>
-                )}
-              </div>
-
-              {/* Date + Time */}
-              <div className="grid sm:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label>{h.t.devotions.displayDate} *</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !h.selectedDate && "text-muted-foreground")}>
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {h.selectedDate ? format(h.selectedDate, "PPP") : h.t.devotions.pickDate}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar mode="single" selected={h.selectedDate} onSelect={(d) => d && h.setSelectedDate(d)} initialFocus />
-                    </PopoverContent>
-                  </Popover>
+                  <Label>Bible Version</Label>
+                  <Combobox
+                    options={[{ value: "BSB", label: "BSB (Berean Study Bible)" }, { value: "KJV", label: "KJV (King James)" }, { value: "ESV", label: "ESV" }, { value: "NIV", label: "NIV" }]}
+                    value={h.bibleVersion} onChange={h.setBibleVersion}
+                    placeholder="Select version" width="w-full" />
                 </div>
-                <div className="space-y-2">
-                  <Label>{h.t.devotions.displayTime}</Label>
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-4 w-4 text-muted-foreground" />
-                    <Input type="time" value={h.selectedTime} onChange={h.handleTimeChange} className="flex-1" />
+                {h.verseText && (
+                  <div className="rounded-lg bg-muted/30 border border-border/40 p-4">
+                    <p className="text-xs font-semibold text-muted-foreground mb-1">Verse Preview:</p>
+                    <p className="text-sm italic text-foreground/80">"{h.verseText}"</p>
+                  </div>
+                )}
+              </Section>
+
+              {/* 4. Rich Content (required) */}
+              <Section title="Content Fields">
+                <div className="space-y-5">
+                  <div className="space-y-2">
+                    <Label>Explanation</Label>
+                    <Textarea value={h.explanation} onChange={(e) => h.setExplanation(e.target.value)}
+                      placeholder={h.t.devotions.contentPlaceholder || "Explain the heart of this devotion and its key message..."}
+                      rows={5} className="resize-none" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Application</Label>
+                    <Textarea value={h.application} onChange={(e) => h.setApplication(e.target.value)}
+                      placeholder={h.t.devotions.contentPlaceholder || "How should readers respond and apply this to daily life?"}
+                      rows={4} className="resize-none" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Introduction</Label>
+                    <Textarea value={h.verseIntroduction} onChange={(e) => h.setVerseIntroduction(e.target.value)}
+                      placeholder="Introduce the devotion, the verse, and its central purpose..."
+                      rows={4} className="resize-none" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Learn More <span className="text-xs text-muted-foreground">(optional)</span></Label>
+                    <Textarea value={h.learnMore} onChange={(e) => h.setLearnMore(e.target.value)}
+                      placeholder="Additional resources, related verses, or deeper insights..."
+                      rows={4} className="resize-none" />
                   </div>
                 </div>
-              </div>
+              </Section>
+
+              {/* 5. Background */}
+              <Section title="Background" defaultOpen={false}>
+                <div className="space-y-5">
+                  <div className="space-y-2">
+                    <Label>Author</Label>
+                    <Textarea value={h.backgroundAuthor} onChange={(e) => h.setBackgroundAuthor(e.target.value)}
+                      placeholder="Who wrote the book and why does that matter?"
+                      rows={3} className="resize-none" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Book</Label>
+                    <Textarea value={h.backgroundBook} onChange={(e) => h.setBackgroundBook(e.target.value)}
+                      placeholder="Summarize the book and its major purpose..."
+                      rows={3} className="resize-none" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Context</Label>
+                    <Textarea value={h.backgroundContext} onChange={(e) => h.setBackgroundContext(e.target.value)}
+                      placeholder="Describe the immediate historical and literary context..."
+                      rows={3} className="resize-none" />
+                  </div>
+                </div>
+              </Section>
+
+              {/* 6. Structured content */}
+              <Section title="Rich Content" defaultOpen={false}>
+                <StructuredContentSection
+                  wordStudies={h.wordStudies} setWordStudies={h.setWordStudies}
+                  practicalApplications={h.practicalApplications} setPracticalApplications={h.setPracticalApplications}
+                  keyThemes={h.keyThemes} setKeyThemes={h.setKeyThemes}
+                  crossReferences={h.crossReferences} setCrossReferences={h.setCrossReferences}
+                  finalThoughts={h.finalThoughts} setFinalThoughts={h.setFinalThoughts}
+                  takeaways={h.takeaways} setTakeaways={h.setTakeaways}
+                  isRtl={h.isRtl}
+                />
+              </Section>
+
+              {/* 7. Date/Time + Publish */}
+              <Section title="Schedule & Publish">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-1">
+                      <Label>Published</Label>
+                      <p className="text-xs text-muted-foreground">Show to all users</p>
+                    </div>
+                    <Switch checked={h.published} onCheckedChange={h.setPublished} />
+                  </div>
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Date *</Label>
+                      <Input type="date" value={format(h.selectedDate, "yyyy-MM-dd")}
+                        onChange={(e) => {
+                          const d = new Date(e.target.value);
+                          d.setHours(h.selectedDate.getHours(), h.selectedDate.getMinutes(), 0, 0);
+                          h.setSelectedDate(d);
+                        }} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Time</Label>
+                      <Input type="time" value={h.selectedTime} onChange={h.handleTimeChange} />
+                    </div>
+                  </div>
+                </div>
+              </Section>
 
               {/* Actions */}
-              <div className="flex justify-end gap-4 pt-4">
-                <Button variant="outline" asChild><Link to="/daily-devotions">{h.t.common.cancel}</Link></Button>
-                <Button type="submit" className="gap-2"><Save className="w-4 h-4" /> {h.t.devotions.saveDevotion}</Button>
+              <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-4 border-t">
+                <Button type="button" variant="ghost" asChild>
+                  <Link to="/daily-devotions">{h.t.common.cancel}</Link>
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={h.saveDisabled}
+                  className="bg-gradient-to-r from-primary to-primary/90 shadow-md"
+                >
+                  <Save className="h-4 w-4 mr-2" />
+                  {h.isEditing ? "Update Devotion" : h.t.devotions.saveDevotion}
+                </Button>
               </div>
             </form>
           </CardContent>

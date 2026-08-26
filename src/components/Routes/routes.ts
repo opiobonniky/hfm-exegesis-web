@@ -14,6 +14,7 @@ const VerseExplanations = lazy(() => import("@/features/Bible/pages/VerseExplana
 const AddDailyVerse = lazy(() => import("@/features/DailyContent/pages/AddDailyVerse"));
 const DailyDevotions = lazy(() => import("@/features/DailyContent/pages/DailyDevotions"));
 const AddDailyDevotion = lazy(() => import("@/features/DailyContent/pages/AddDailyDevotion"));
+const AddDailyExegesis = lazy(() => import("@/features/DailyContent/pages/AddDailyExegesis"));
 const AddExplanation = lazy(() => import("@/features/DailyContent/pages/AddExplanation"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
 const PlanDetail = lazy(() => import("@/features/ReadingPlan/pages/PlanDetail"));
@@ -52,6 +53,8 @@ const AdminBookPrologues = lazy(() => import("@/features/Admin/pages/AdminBookPr
 const AdminVerseExplanations = lazy(() => import("@/features/Admin/pages/AdminVerseExplanations"));
 const AdminTriviaPerformance = lazy(() => import("@/features/Admin/pages/AdminTriviaPerformance"));
 const DailyVerseDetail = lazy(() => import("@/features/DailyContent/pages/DailyVerseDetail"));
+const DailyDevotionDetail = lazy(() => import("@/features/DailyContent/pages/DailyDevotionDetail"));
+const DailyExegesisDetail = lazy(() => import("@/features/DailyContent/pages/DailyExegesisDetail"));
 const AdminDailyExegesis = lazy(() => import("@/features/Admin/pages/AdminDailyExegesis"));
 const AdminTriviaUserDetail = lazy(() => import("@/features/AdminTriviaUserDetail/pages/AdminTriviaUserDetail"));
 const AdminAddTriviaQuestion = lazy(() => import("@/features/AdminAddTriviaQuestion/pages/AdminAddTriviaQuestion"));
@@ -175,6 +178,13 @@ export const routes = {
     isProtected: true,
     requiresLayout: true,
     title: "Add Daily Devotion",
+  },
+  addDailyExegesis: {
+    path: "/add-daily-exegesis",
+    component: AddDailyExegesis,
+    isProtected: true,
+    requiresLayout: true,
+    title: "Add Daily Exegesis",
   },
   verseExplanations: {
     path: "/verse-explanations",
@@ -499,6 +509,20 @@ export const routes = {
     isProtected: true,
     requiresLayout: true,
     title: "Daily Verse Detail",
+  },
+  dailyDevotionDetail: {
+    path: "/daily-devotion-detail",
+    component: DailyDevotionDetail,
+    isProtected: true,
+    requiresLayout: true,
+    title: "Daily Devotion Detail",
+  },
+  dailyExegesisDetail: {
+    path: "/daily-exegesis-detail",
+    component: DailyExegesisDetail,
+    isProtected: true,
+    requiresLayout: true,
+    title: "Daily Exegesis Detail",
   },
   adminJournalModeration: {
     path: "/admin/journal-moderation",

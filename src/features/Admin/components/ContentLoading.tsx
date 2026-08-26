@@ -1,12 +1,9 @@
-// Skeleton loading grid for admin daily content lists
-import { Skeleton } from "@/components/ui/skeleton";
+import { Loader2 } from "lucide-react";
 
-export function ContentLoading({ rows = 4 }: { rows?: number }) {
+export function ContentLoading() {
   return (
-    <div className="space-y-3">
-      {Array.from({ length: rows }).map((_, i) => (
-        <Skeleton key={i} className="h-24 w-full rounded-xl" />
-      ))}
+    <div className="flex items-center justify-center py-16">
+      <Loader2 className="w-8 h-8 animate-spin text-primary" />
     </div>
   );
 }

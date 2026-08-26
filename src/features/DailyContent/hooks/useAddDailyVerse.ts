@@ -16,6 +16,38 @@ import {
 import { BIBLE_VERSIONS } from "@/assets/bibleVersion/json/bibleVersions";
 import type { DailyVersePayload } from "../types";
 
+/** Parse a JSON array/string into newline-separated text for textarea display */
+const parseStructuredField = (val: any): string => {
+  if (!val) return "";
+  if (Array.isArray(val)) {
+    return val.map((item: any) => {
+      if (typeof item === "object" && item !== null) {
+        if (item.word && item.strongs && item.definition) {
+          return `${item.word} | ${item.strongs} | ${item.definition}`;
+        }
+        return JSON.stringify(item);
+      }
+      return String(item);
+    }).join("\n");
+  }
+  const str = String(val);
+  try {
+    const p = JSON.parse(str);
+    if (Array.isArray(p)) {
+      return p.map((item: any) => {
+        if (typeof item === "object" && item !== null) {
+          if (item.word && item.strongs && item.definition) {
+            return `${item.word} | ${item.strongs} | ${item.definition}`;
+          }
+          return JSON.stringify(item);
+        }
+        return String(item);
+      }).join("\n");
+    }
+  } catch { /* not JSON */ }
+  return str;
+};
+
 /** All form fields in one object */
 export interface VerseFormFields {
   testament: string;
@@ -92,13 +124,13 @@ export function useAddDailyVerse() {
   const [backgroundBook, setBackgroundBook] = useState(editingVerse?.backgroundBook || "");
   const [backgroundContext, setBackgroundContext] = useState(editingVerse?.backgroundContext || "");
 
-  // Structured fields
-  const [wordStudies, setWordStudies] = useState(editingVerse?.wordStudies || "");
-  const [practicalApplications, setPracticalApplications] = useState(editingVerse?.practicalApplications || "");
-  const [keyThemes, setKeyThemes] = useState(editingVerse?.keyThemes || "");
-  const [crossReferences, setCrossReferences] = useState(editingVerse?.crossReferences || "");
+  // Structured fields (parse JSON arrays to newline-separated text)
+  const [wordStudies, setWordStudies] = useState(() => parseStructuredField(editingVerse?.wordStudies));
+  const [practicalApplications, setPracticalApplications] = useState(() => parseStructuredField(editingVerse?.practicalApplications));
+  const [keyThemes, setKeyThemes] = useState(() => parseStructuredField(editingVerse?.keyThemes));
+  const [crossReferences, setCrossReferences] = useState(() => parseStructuredField(editingVerse?.crossReferences));
   const [finalThoughts, setFinalThoughts] = useState(editingVerse?.finalThoughts || "");
-  const [takeaways, setTakeaways] = useState(editingVerse?.takeaways || "");
+  const [takeaways, setTakeaways] = useState(() => parseStructuredField(editingVerse?.takeaways));
 
   // Conflict dialog
   const [conflictDialog, setConflictDialog] = useState<{

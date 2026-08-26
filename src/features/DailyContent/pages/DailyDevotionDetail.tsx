@@ -1,9 +1,9 @@
-// DailyVerseDetail — read-only detail view for a daily verse
+// DailyDevotionDetail — read-only detail view for a daily devotion
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   ArrowLeft, Calendar, BookOpen, Edit3, Tag,
   MessageSquare, Lightbulb, Layers, BookMarked,
-  Clock, CheckCircle, XCircle, GraduationCap,
+  Clock, CheckCircle, XCircle, Heart, GraduationCap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -29,7 +29,7 @@ function TextBlock({ label, value, icon }: { label: string; value?: string | nul
   );
 }
 
-// ── List block (newline-separated or array) ──
+// ── List block ──
 function ListBlock({ label, value, icon }: { label: string; value?: string | null; icon?: any }) {
   const items = parseList(value);
   if (items.length === 0) return null;
@@ -48,7 +48,7 @@ function ListBlock({ label, value, icon }: { label: string; value?: string | nul
   );
 }
 
-// ── Word Studies (JSON array of objects) ──
+// ── Word Studies ──
 function WordStudiesBlock({ value }: { value?: string | null }) {
   const studies = parseWordStudies(value);
   if (studies.length === 0) return null;
@@ -74,7 +74,6 @@ function WordStudiesBlock({ value }: { value?: string | null }) {
 const parseList = (val: any): string[] => {
   if (!val) return [];
   if (Array.isArray(val)) {
-    // Array of objects with .word/.definition → format as "word — definition"
     if (val.length > 0 && typeof val[0] === "object" && val[0] !== null) {
       return val.map((item: any) => {
         if (item.word && item.definition) return `${item.word} — ${item.definition}`;
@@ -84,7 +83,6 @@ const parseList = (val: any): string[] => {
     return val.map(String);
   }
   const str = String(val);
-  // Try JSON parse
   try {
     const p = JSON.parse(str);
     if (Array.isArray(p)) {
@@ -97,7 +95,6 @@ const parseList = (val: any): string[] => {
       return p.map(String);
     }
   } catch { /* not JSON */ }
-  // Newline-separated
   return str.split("\n").map(s => s.trim()).filter(Boolean);
 };
 
@@ -121,7 +118,6 @@ const parseWordStudies = (val: any): Array<{ word: string; strongs?: string; def
       }));
     }
   } catch { /* not JSON */ }
-  // Newline-separated "word | strongs | definition"
   return str.split("\n").map(s => s.trim()).filter(Boolean).map(line => {
     const parts = line.split("|").map(p => p.trim());
     return { word: parts[0] || "", strongs: parts[1] || "", definition: parts[2] || "" };
@@ -135,26 +131,28 @@ const fmtDate = (d: string | null) => {
 };
 
 // ── Main page ──
-export default function DailyVerseDetail() {
+export default function DailyDevotionDetail() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
 
-  const verseParam = params.get("verse");
-  let verse: any = null;
-  try { verse = verseParam ? JSON.parse(verseParam) : null; } catch { /* invalid */ }
+  const devotionParam = params.get("devotion");
+  let devotion: any = null;
+  try { devotion = devotionParam ? JSON.parse(devotionParam) : null; } catch { /* invalid */ }
 
-  if (!verse) {
+  if (!devotion) {
     return (
       <div className="min-h-full flex flex-col items-center justify-center bg-background gap-4 text-center px-6">
-        <BookOpen className="w-12 h-12 text-muted-foreground/40" />
-        <h2 className="text-lg font-bold">Verse not found</h2>
-        <p className="text-sm text-muted-foreground">No verse data was provided.</p>
+        <Heart className="w-12 h-12 text-muted-foreground/40" />
+        <h2 className="text-lg font-bold">Devotion not found</h2>
+        <p className="text-sm text-muted-foreground">No devotion data was provided.</p>
         <Button variant="outline" onClick={() => navigate(-1)}>Go back</Button>
       </div>
     );
   }
 
-  const reference = `${verse.bookName || ""} ${verse.chapter || ""}:${verse.verseNumber || ""}`;
+  const reference = devotion.bookName
+    ? `${devotion.bookName} ${devotion.chapter || ""}:${devotion.verseNumber || ""}`
+    : null;
 
   return (
     <div className="min-h-full bg-background">
@@ -165,10 +163,10 @@ export default function DailyVerseDetail() {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div className="flex-1 min-w-0">
-            <h1 className="text-lg font-bold truncate">Daily Verse Detail</h1>
-            <p className="text-xs text-muted-foreground">{reference}</p>
+            <h1 className="text-lg font-bold truncate">{devotion.title || "Daily Devotion"}</h1>
+            <p className="text-xs text-muted-foreground">{fmtDate(devotion.displayDate)}</p>
           </div>
-          <Button variant="outline" size="sm" onClick={() => navigate(`/add-daily-verse`, { state: { verse } })}>
+          <Button variant="outline" size="sm" onClick={() => navigate(`/add-daily-devotion`, { state: { devotion } })}>
             <Edit3 className="w-3.5 h-3.5 mr-1.5" /> Edit
           </Button>
         </div>
@@ -177,62 +175,59 @@ export default function DailyVerseDetail() {
       <div className="px-4 sm:px-6 py-6 max-w-3xl mx-auto space-y-6">
         {/* Title + status */}
         <div className="space-y-2">
-          <h2 className="text-2xl font-bold">{reference}</h2>
+          <h2 className="text-2xl font-bold">{devotion.title}</h2>
           <div className="flex items-center gap-2 flex-wrap">
-            <Badge variant={verse.isPublished ? "default" : "secondary"}>
-              {verse.isPublished ? <><CheckCircle className="w-3 h-3 mr-1" /> Published</> : <><XCircle className="w-3 h-3 mr-1" /> Draft</>}
+            <Badge variant={devotion.isPublished ? "default" : "secondary"}>
+              {devotion.isPublished ? <><CheckCircle className="w-3 h-3 mr-1" /> Published</> : <><XCircle className="w-3 h-3 mr-1" /> Draft</>}
             </Badge>
-            {verse.bibleVersion && <Badge variant="outline" className="text-xs">{verse.bibleVersion}</Badge>}
+            {reference && <Badge variant="outline" className="text-xs">{reference}</Badge>}
+            {devotion.bibleVersion && <Badge variant="outline" className="text-xs">{devotion.bibleVersion}</Badge>}
           </div>
         </div>
 
         {/* Meta row */}
         <div className="flex items-center gap-4 text-xs text-muted-foreground">
-          <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> {fmtDate(verse.displayDate)}</span>
-          {verse.createdOn && <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> Created {fmtDate(verse.createdOn)}</span>}
-          {verse.updatedOn && <span>Updated {fmtDate(verse.updatedOn)}</span>}
+          <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> {fmtDate(devotion.displayDate)}</span>
+          {devotion.createdOn && <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> Created {fmtDate(devotion.createdOn)}</span>}
+          {devotion.updatedOn && <span>Updated {fmtDate(devotion.updatedOn)}</span>}
         </div>
 
         <div className="h-px bg-border/40" />
 
-        {/* Verse Text */}
-        {verse.verseText && (
-          <div className="py-4">
-            <div className="rounded-xl bg-primary/5 border border-primary/10 px-5 py-4">
-              <p className="text-sm font-semibold text-primary mb-1">Verse Text</p>
-              <p className="text-base italic text-foreground/90 leading-relaxed font-serif">"{verse.verseText}"</p>
-            </div>
-          </div>
-        )}
+        {/* Content */}
+        <div className="py-4">
+          <SectionLabel icon={BookOpen}>Content</SectionLabel>
+          <p className="text-sm leading-relaxed text-foreground whitespace-pre-line">{devotion.content}</p>
+        </div>
 
         {/* Content sections */}
         <div className="space-y-1">
-          <TextBlock label="Explanation" value={verse.explanation} icon={Lightbulb} />
-          <TextBlock label="Application" value={verse.application} icon={Tag} />
-          <TextBlock label="Verse Introduction" value={verse.verseIntroduction} icon={BookMarked} />
-          <TextBlock label="Learn More" value={verse.learnMore} icon={Layers} />
+          <TextBlock label="Explanation" value={devotion.explanation} icon={Lightbulb} />
+          <TextBlock label="Application" value={devotion.application} icon={Tag} />
+          <TextBlock label="Introduction" value={devotion.verseIntroduction} icon={BookMarked} />
+          <TextBlock label="Learn More" value={devotion.learnMore} icon={Layers} />
         </div>
 
         {/* Background */}
-        {(verse.backgroundAuthor || verse.backgroundBook || verse.backgroundContext) && (
+        {(devotion.backgroundAuthor || devotion.backgroundBook || devotion.backgroundContext) && (
           <div className="space-y-1">
             <h3 className="text-sm font-bold text-foreground mb-2">Background</h3>
-            <TextBlock label="Author" value={verse.backgroundAuthor} />
-            <TextBlock label="Book" value={verse.backgroundBook} />
-            <TextBlock label="Context" value={verse.backgroundContext} />
+            <TextBlock label="Author" value={devotion.backgroundAuthor} />
+            <TextBlock label="Book" value={devotion.backgroundBook} />
+            <TextBlock label="Context" value={devotion.backgroundContext} />
           </div>
         )}
 
         {/* Word Studies */}
-        <WordStudiesBlock value={verse.wordStudies} />
+        <WordStudiesBlock value={devotion.wordStudies} />
 
         {/* Lists */}
         <div className="space-y-1">
-          <ListBlock label="Practical Applications" value={verse.practicalApplications} icon={Lightbulb} />
-          <ListBlock label="Key Themes" value={verse.keyThemes} icon={Tag} />
-          <ListBlock label="Cross References" value={verse.crossReferences} icon={Layers} />
-          <TextBlock label="Final Thoughts" value={verse.finalThoughts} />
-          <ListBlock label="Takeaways" value={verse.takeaways} icon={BookMarked} />
+          <ListBlock label="Practical Applications" value={devotion.practicalApplications} icon={Lightbulb} />
+          <ListBlock label="Key Themes" value={devotion.keyThemes} icon={Tag} />
+          <ListBlock label="Cross References" value={devotion.crossReferences} icon={Layers} />
+          <TextBlock label="Final Thoughts" value={devotion.finalThoughts} />
+          <ListBlock label="Takeaways" value={devotion.takeaways} icon={BookMarked} />
         </div>
       </div>
     </div>
