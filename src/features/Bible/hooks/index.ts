@@ -1,4 +1,3 @@
-export { useBibleNavigation } from "./useBibleNavigation";
 export { useBibleHighlights } from "./useBibleHighlights";
 export { useBibleNotes } from "./useBibleNotes";
 export { useBibleFavorites } from "./useBibleFavorites";

@@ -14,7 +14,7 @@ interface Props {
   action?: ReactNode;
 }
 
-export function PageHeader({ back = "Back", onBack, icon, title, subtitle, action }: Props) {
+export function PageHeader({ back = "Back", onBack, icon, iconBg, title, subtitle, action }: Props) {
   return (
     <div className="flex items-center justify-between gap-4">
       <div className="flex items-center gap-3">

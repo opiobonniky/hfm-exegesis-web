@@ -40,6 +40,7 @@ export interface ToolCard {
 }
 
 export interface TriviaQuestion {
+  id: number;
   question: string;
   optionsJson: string;
   correctAnswer: number;
@@ -84,6 +85,7 @@ export interface SubscriptionTier {
   features: string[];
   sortOrder: number;
   maxSlots: number | null;
+  isActive: boolean;
 }
 
 export interface SubscribedUser {
@@ -99,7 +101,9 @@ export interface SubscribedUser {
 }
 
 export interface ActivitySession {
+  id: string;
   username: string;
+  email: string;
   loggedInAt: string;
   loggedOutAt: string | null;
   deviceType: string;
@@ -119,6 +123,7 @@ export interface ActivitySummary {
 }
 
 export interface BookPrologue {
+  id: number;
   bookName: string;
   content: string;
   createdBy: string;
@@ -127,6 +132,7 @@ export interface BookPrologue {
 }
 
 export interface VerseExplanation {
+  id: number;
   book: string;
   chapter: number;
   verseNumber: number;
@@ -134,6 +140,8 @@ export interface VerseExplanation {
 }
 
 export interface DailyExegesis {
+  id: number;
+  title: string;
   passageReference: string;
   introduction: string;
   contextSummary: string;
@@ -141,6 +149,8 @@ export interface DailyExegesis {
   application: string;
   prayer: string;
   tags: string | null;
+  displayDate: string;
+  isPublished: boolean;
 }
 
 export interface WordStudyItem {

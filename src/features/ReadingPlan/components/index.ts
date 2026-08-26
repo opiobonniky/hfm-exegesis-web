@@ -1,8 +1,8 @@
 export { ReadingDayRow } from "./ReadingDayRow";
 export { PlanForm } from "./PlanForm";
 export { PlanStats } from "./PlanStats";
-export { PlanDetailUI } from "./PlanDetailUI";
-export { DayCard } from "./DayCard";
+export { GlassCard, SectionLabel, Ring } from "./PlanDetailUI";
+export { default as DayCard } from "./DayCard";
 export { BibleReadingList } from "./BibleReadingList";
 export { QuizPanel } from "./QuizPanel";
 export { DayNavigation } from "./DayNavigation";

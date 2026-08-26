@@ -1,86 +1,15 @@
 // AdminDailyContent — thin page composing hooks + components
-import { Sun, Sprout, BookOpen, CalendarDays } from "lucide-react";
-import { TabsContent } from "@/components/ui/tabs";
-import { Skeleton } from "@/components/ui/skeleton";
+import { CalendarDays } from "lucide-react";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { useAdminDailyContent } from "../hooks/useAdminDailyContent";
 import { PAGE_SIZE } from "../constants";
 import {
-  AdminFormHeader, PublishedToggle, FormActions, DateField, ConflictDialog,
-  VerseContentForm, DevotionContentForm, ExegesisContentForm,
+  ConflictDialog,
   DailyContentCard, DailyContentEmptyState,
   DailyContentFilters, ContentTabPanel, AdminDeleteDialog,
+  ContentLoading, DailyVerseForm, DailyDevotionForm, DailyExegesisForm,
 } from "../components";
-import { isFormValid } from "../utils";
 import { useLanguage } from "@/components/languages/languageProvider";
-
-// ── Form views ────────────────────────────────────────────────────────────────
-function VerseForm({ h }: { h: ReturnType<typeof useAdminDailyContent> }) {
-  return (
-    <div className="min-h-screen bg-background">
-      <AdminFormHeader icon={Sun} title={`${h.editItem ? "Edit" : "New"} Daily Verse`} subtitle="Create a new daily verse with explanation" onBack={h.closeForm} />
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-        <VerseContentForm formBook={h.formBook} setFormBook={h.setFormBook} formChapter={h.formChapter} setFormChapter={h.setFormChapter}
-          formVerse={h.formVerse} setFormVerse={h.setFormVerse} verseVersion={h.verseVersion} setVerseVersion={h.setVerseVersion}
-          formExplanation={h.formExplanation} setFormExplanation={h.setFormExplanation} formReflection={h.formReflection} setFormReflection={h.setFormReflection}
-          formLearnMore={h.formLearnMore} setFormLearnMore={h.setFormLearnMore} formChapters={h.formChapters} formMaxVerses={h.formMaxVerses}
-          formVerseText={h.formVerseText} formVerseLoading={h.formVerseLoading} />
-        <DateField label="Display Date" value={h.formDate} onChange={h.setFormDate} required />
-        <PublishedToggle checked={h.formPublished} onCheckedChange={h.setFormPublished} />
-        <FormActions saving={h.saving} disabled={!isFormValid("verse", h)} onCancel={h.closeForm}
-          onSave={h.handleSave} saveLabel={h.editItem ? "Update Verse" : "Add Verse"} savingLabel="Saving..." />
-      </div>
-    </div>
-  );
-}
-
-function DevotionForm({ h }: { h: ReturnType<typeof useAdminDailyContent> }) {
-  return (
-    <div className="min-h-screen bg-background">
-      <AdminFormHeader icon={Sprout} title={`${h.editItem ? "Edit" : "New"} Daily Devotion`} subtitle="Create a new daily devotion with optional Bible reference" onBack={h.closeForm} />
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-        <DevotionContentForm formTitle={h.formTitle} setFormTitle={h.setFormTitle} formContent={h.formContent} setFormContent={h.setFormContent}
-          formBook={h.formBook} setFormBook={h.setFormBook} formChapter={h.formChapter} setFormChapter={h.setFormChapter}
-          formVerse={h.formVerse} setFormVerse={h.setFormVerse} formChapters={h.formChapters} formMaxVerses={h.formMaxVerses} />
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <DateField label="Display Date" value={h.formDate} onChange={h.setFormDate} required />
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold">Display Time</label>
-            <input type="time" value={h.formTime} onChange={h.handleTimeChange} className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm" />
-          </div>
-        </div>
-        <FormActions saving={h.saving} disabled={!isFormValid("devotion", h)} onCancel={h.closeForm}
-          onSave={h.handleSave} saveLabel={h.editItem ? "Update Devotion" : "Add Devotion"} savingLabel="Saving..." />
-      </div>
-    </div>
-  );
-}
-
-function ExegesisForm({ h }: { h: ReturnType<typeof useAdminDailyContent> }) {
-  return (
-    <div className="min-h-screen bg-background">
-      <AdminFormHeader icon={BookOpen} title={`${h.editItem ? "Edit" : "New"} Daily Exegesis`} subtitle="Create a new daily exegesis with full teaching content" onBack={h.closeForm} />
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-        <ExegesisContentForm formTitle={h.formTitle} setFormTitle={h.setFormTitle} formPassageRef={h.formPassageRef} setFormPassageRef={h.setFormPassageRef}
-          formIntro={h.formIntro} setFormIntro={h.setFormIntro} formContextSummary={h.formContextSummary} setFormContextSummary={h.setFormContextSummary}
-          formTeachingBody={h.formTeachingBody} setFormTeachingBody={h.setFormTeachingBody} formApplication={h.formApplication} setFormApplication={h.setFormApplication}
-          formPrayer={h.formPrayer} setFormPrayer={h.setFormPrayer} formTags={h.formTags} setFormTags={h.setFormTags} />
-        <FormActions saving={h.saving} disabled={!isFormValid("exegesis", h)} onCancel={h.closeForm}
-          onSave={h.handleSave} saveLabel={h.editItem ? "Update Exegesis" : "Add Exegesis"} savingLabel="Saving..." />
-      </div>
-    </div>
-  );
-}
-
-// ── Loading state ─────────────────────────────────────────────────────────────
-function ContentLoading() {
-  return (
-    <div className="space-y-3">
-      {Array.from({ length: 4 }).map((_, i) => (
-        <Skeleton key={i} className="h-24 w-full rounded-xl" />
-      ))}
-    </div>
-  );
-}
 
 // ── Main page ─────────────────────────────────────────────────────────────────
 const AdminDailyContent = () => {
@@ -88,9 +17,9 @@ const AdminDailyContent = () => {
   const { isRtl } = useLanguage();
 
   // Render form view if in form mode
-  if (h.formMode === "verse") return <><VerseForm h={h} /><ConflictDialog open={h.conflictDialog.open} onOpenChange={o => h.setConflictDialog({ open: o, data: null, payload: null })} contentType={h.formMode} data={h.conflictDialog.data} saving={h.saving} onResolve={h.handleConflictUpdate} /></>;
-  if (h.formMode === "devotion") return <><DevotionForm h={h} /><ConflictDialog open={h.conflictDialog.open} onOpenChange={o => h.setConflictDialog({ open: o, data: null, payload: null })} contentType={h.formMode} data={h.conflictDialog.data} saving={h.saving} onResolve={h.handleConflictUpdate} /></>;
-  if (h.formMode === "exegesis") return <><ExegesisForm h={h} /><ConflictDialog open={h.conflictDialog.open} onOpenChange={o => h.setConflictDialog({ open: o, data: null, payload: null })} contentType={h.formMode} data={h.conflictDialog.data} saving={h.saving} onResolve={h.handleConflictUpdate} /></>;
+  if (h.formMode === "verse") return <><DailyVerseForm h={h} /><ConflictDialog open={h.conflictDialog.open} onOpenChange={o => h.setConflictDialog({ open: o, data: null, payload: null })} contentType={h.formMode} data={h.conflictDialog.data} saving={h.saving} onResolve={h.handleConflictUpdate} /></>;
+  if (h.formMode === "devotion") return <><DailyDevotionForm h={h} /><ConflictDialog open={h.conflictDialog.open} onOpenChange={o => h.setConflictDialog({ open: o, data: null, payload: null })} contentType={h.formMode} data={h.conflictDialog.data} saving={h.saving} onResolve={h.handleConflictUpdate} /></>;
+  if (h.formMode === "exegesis") return <><DailyExegesisForm h={h} /><ConflictDialog open={h.conflictDialog.open} onOpenChange={o => h.setConflictDialog({ open: o, data: null, payload: null })} contentType={h.formMode} data={h.conflictDialog.data} saving={h.saving} onResolve={h.handleConflictUpdate} /></>;
 
   // List view
   return (
@@ -110,6 +39,7 @@ const AdminDailyContent = () => {
       </div>
 
       {/* Tabs + content */}
+      <Tabs value={h.activeTab} onValueChange={v => { h.setActiveTab(v); h.setPage(0); }}>
       <DailyContentFilters activeTab={h.activeTab} onTabChange={v => { h.setActiveTab(v); h.setPage(0); }}
         searchDate={h.searchDate} onSearchDateChange={v => { h.setSearchDate(v); h.setPage(0); }}
         onClearDate={() => { h.setSearchDate(""); h.setPage(0); }} total={h.total} />
@@ -144,6 +74,7 @@ const AdminDailyContent = () => {
           </ContentTabPanel>
         </TabsContent>
       ))}
+      </Tabs>
 
       {/* Delete dialog */}
       <AdminDeleteDialog open={!!h.deleteTarget} onOpenChange={o => !o && h.setDeleteTarget(null)}

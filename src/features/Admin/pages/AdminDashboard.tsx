@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/components/languages/languageProvider";
 
 interface ToolCard {
   title: string;
@@ -23,6 +24,7 @@ interface ToolCard {
 const AdminDashboard = () => {
   const h = useAdminDashboardPage();
   const navigate = useNavigate();
+  const { isRtl } = useLanguage();
 
   const tools: ToolCard[] = [
     {
@@ -46,13 +48,7 @@ const AdminDashboard = () => {
       path: "/admin/subscriptions",
       color: "bg-rose-500/10 text-rose-600 dark:bg-rose-500/15",
     },
-    {
-      title: "Activity Log",
-      description: "View all user login activity across the platform",
-      icon: Activity,
-      path: "/admin/activity-log",
-      color: "bg-indigo-500/10 text-indigo-600 dark:bg-indigo-500/15",
-    },
+
   ];
 
   const StatCard = ({ label, value, icon: Icon, color }: any) => (
@@ -74,7 +70,7 @@ const AdminDashboard = () => {
   );
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-6" dir={h.isRtl ? "rtl" : "ltr"}>
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6" dir={isRtl ? "rtl" : "ltr"}>
       {/* Header */}
       <div className="flex items-center gap-3">
         <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
@@ -85,7 +81,7 @@ const AdminDashboard = () => {
             Admin Console
           </h1>
           <p className="text-sm text-muted-foreground">
-            Welcome back, {h.userInfo?.firstName || "Admin"} — manage your platform from one place
+            Welcome back, Admin — manage your platform from one place
           </p>
         </div>
       </div>

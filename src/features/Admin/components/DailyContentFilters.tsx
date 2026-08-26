@@ -2,7 +2,7 @@
 import { CalendarDays, Sun, Sprout, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CONTENT_TABS } from "../constants";
 
 const ICONS: Record<string, typeof Sun> = { Sun, Sprout, BookOpen };
@@ -16,7 +16,6 @@ interface Props {
 }
 export function DailyContentFilters({ activeTab, onTabChange, searchDate, onSearchDateChange, onClearDate, total }: Props) {
   return (
-    <Tabs value={activeTab} onValueChange={onTabChange}>
       <div className="overflow-x-auto pb-0.5 -mx-1 px-1">
         <TabsList className="inline-flex w-auto gap-1 rounded-xl bg-muted/30 border border-border/40 p-1 backdrop-blur-sm">
           {CONTENT_TABS.map(tab => {
@@ -31,7 +30,6 @@ export function DailyContentFilters({ activeTab, onTabChange, searchDate, onSear
           })}
         </TabsList>
       </div>
-      </Tabs>
     );
 }
 /** Tab content wrapper with header, search, and count */

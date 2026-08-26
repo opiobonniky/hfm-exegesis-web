@@ -35,7 +35,7 @@ export function useAdminBookProloguesPage() {
   const filteredBooks = !editForm.bookName ? BIBLE_BOOKS : BIBLE_BOOKS.filter((b) => b.toLowerCase().includes(editForm.bookName.toLowerCase()));
   return {
     items, loading, search, setSearch, hasMore, saving, deleting, refresh, loadMore,
-    editItem, editForm, setEditForm, deleteItem, setDeleteItem,
+    editItem, setEditItem, editForm, setEditForm, deleteItem, setDeleteItem,
     openEdit, handleSave, handleDelete, filteredBooks, navigate,
   };
 }

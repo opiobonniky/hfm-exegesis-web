@@ -35,13 +35,13 @@ export function SaveButton({
  * Delete button with confirmation loading state.
  */
 export function DeleteButton({
-  deleting, onClick, disabled, label = "Delete", deletingLabel = "Deleting...",
+  deleting, onClick, disabled, label = "Delete",
   className,
 }: Omit<SaveButtonProps, "variant" | "size"> & { deleting?: boolean }) {
   return (
     <Button variant="destructive" onClick={onClick} disabled={deleting || disabled} className={cn("gap-2", className)}>
       {deleting ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-      {deleting ? deletingLabel : label}
+      {deleting ? "Deleting..." : label}
     </Button>
   );
 }

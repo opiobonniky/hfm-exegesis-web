@@ -63,6 +63,9 @@ export interface ReadHistoryItem {
 
 export interface VerseExplanation {
   id?: number;
+  bookName: string;
+  chapter: number;
+  verseNumber: number;
   explanation: string;
   learnMore: string;
   bibleVersion?: string;

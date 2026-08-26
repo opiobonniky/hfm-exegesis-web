@@ -64,10 +64,13 @@ export interface DailyVerseResponse {
 }
 
 export interface EditState {
+  testament?: string;
+  book?: string;
   bookName: string;
   chapter: string;
   verseNumber: string;
   bibleVersion: string;
+  verseText?: string;
   explanation: string;
   reflection: string;
   learnMore: string;

@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { type LucideIcon, Inbox } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-interface EmptyStateProps {
+export interface EmptyStateProps {
   icon?: LucideIcon;
   title?: string;
   message?: string;

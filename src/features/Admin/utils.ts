@@ -1,5 +1,6 @@
 // ─── Admin Feature Helpers ─────────────────────────────────────────────────────
-import type { ContentType, DailyItem } from "./types";
+import type { DailyItem } from "./types";
+import type { ContentType } from "./constants";
 import { API_ACTIONS, DELETE_ID_KEY, CHAPTER_COUNTS, DEFAULT_VERSE_COUNT } from "./constants";
 
 export const getChaptersForBook = (book: string): number[] => {

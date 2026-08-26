@@ -45,11 +45,15 @@ export default function AdminTriviaUserDetailPage() {
     );
   }
 
+  const accuracy = h.detail.questionsAnswered > 0
+    ? Math.round((h.detail.correctAnswers / h.detail.questionsAnswered) * 100)
+    : 0;
+
   const stats = [
-    { label: "Total Answered", value: h.detail.totalAnswered, icon: Target, color: "text-blue-500" },
+    { label: "Total Answered", value: h.detail.questionsAnswered, icon: Target, color: "text-blue-500" },
     { label: "Correct Answers", value: h.detail.correctAnswers, icon: CheckCircle2, color: "text-emerald-500" },
-    { label: "Accuracy", value: `${h.detail.accuracy.toFixed(1)}%`, icon: TrendingUp, color: h.detail.accuracy >= 70 ? "text-emerald-500" : "text-amber-500" },
-    { label: "Avg Time/Question", value: `${h.detail.averageTimePerQuestion.toFixed(1)}s`, icon: Clock, color: "text-purple-500" },
+    { label: "Accuracy", value: `${accuracy}%`, icon: TrendingUp, color: accuracy >= 70 ? "text-emerald-500" : "text-amber-500" },
+    { label: "Score", value: h.detail.score, icon: Clock, color: "text-purple-500" },
   ];
 
   return (
@@ -60,7 +64,7 @@ export default function AdminTriviaUserDetailPage() {
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <div>
-          <h1 className="text-2xl font-bold">{h.detail.firstName} {h.detail.lastName}</h1>
+          <h1 className="text-2xl font-bold">{h.detail.username}</h1>
           <p className="text-sm text-muted-foreground">{h.detail.email}</p>
         </div>
       </div>
@@ -90,7 +94,7 @@ export default function AdminTriviaUserDetailPage() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {h.detail.answers.length === 0 ? (
+          {h.detail.recentAnswers.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
               <CheckCircle2 className="h-12 w-12 mb-3" />
               <p>No answers recorded yet.</p>
@@ -101,23 +105,14 @@ export default function AdminTriviaUserDetailPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Question</TableHead>
-                    <TableHead>Category</TableHead>
-                    <TableHead>Difficulty</TableHead>
                     <TableHead>Result</TableHead>
-                    <TableHead>Time</TableHead>
                     <TableHead>Date</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {h.detail.answers.map((answer) => (
-                    <TableRow key={answer.id}>
+                  {h.detail.recentAnswers.map((answer) => (
+                    <TableRow key={answer.questionId}>
                       <TableCell className="max-w-xs truncate font-medium">{answer.question}</TableCell>
-                      <TableCell><Badge variant="outline">{answer.category}</Badge></TableCell>
-                      <TableCell>
-                        <Badge variant={answer.difficulty === "hard" ? "destructive" : answer.difficulty === "medium" ? "default" : "secondary"}>
-                          {answer.difficulty}
-                        </Badge>
-                      </TableCell>
                       <TableCell>
                         {answer.isCorrect ? (
                           <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200">
@@ -129,7 +124,6 @@ export default function AdminTriviaUserDetailPage() {
                           </Badge>
                         )}
                       </TableCell>
-                      <TableCell className="text-muted-foreground">{answer.timeSpent.toFixed(1)}s</TableCell>
                       <TableCell className="text-muted-foreground">{new Date(answer.answeredAt).toLocaleDateString()}</TableCell>
                     </TableRow>
                   ))}

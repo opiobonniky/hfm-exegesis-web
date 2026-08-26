@@ -15,7 +15,7 @@ export default function DailyVerse() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8 space-y-8" dir={p.isRtl ? "rtl" : "ltr"}>
-      <DailyVerseHeader onAdd={() => p.navigate("/admin/daily-verse/add")} />
+      <DailyVerseHeader onAdd={() => p.navigate("/add-daily-verse")} />
 
       <VerseFilterBar
         fromDate={p.fromDate}
@@ -52,6 +52,7 @@ export default function DailyVerse() {
         hasNext={p.hasNext}
         hasPrevious={p.hasPrevious}
         onPageChange={p.setPage}
+        isFiltered
       />
 
       {p.verses.length === 0 && !p.loading && (

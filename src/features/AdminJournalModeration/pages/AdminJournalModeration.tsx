@@ -71,9 +71,8 @@ export default function AdminJournalModerationPage() {
                     </div>
                     <p className="text-sm text-muted-foreground line-clamp-2">{entry.content}</p>
                     <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
-                      <span className="flex items-center gap-1"><User className="h-3 w-3" /> {entry.userName}</span>
-                      <span className="flex items-center gap-1"><Calendar className="h-3 w-3" /> {new Date(entry.createdOn).toLocaleDateString()}</span>
-                      <span>📌 {entry.verseReference}</span>
+                      <span className="flex items-center gap-1"><User className="h-3 w-3" /> {entry.username}</span>
+                      <span className="flex items-center gap-1"><Calendar className="h-3 w-3" /> {new Date(entry.createdAt).toLocaleDateString()}</span>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
@@ -96,12 +95,12 @@ export default function AdminJournalModerationPage() {
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{h.viewEntry?.title}</DialogTitle>
-            <DialogDescription>By {h.viewEntry?.userName} • {h.viewEntry && new Date(h.viewEntry.createdOn).toLocaleDateString()}</DialogDescription>
+            <DialogDescription>By {h.viewEntry?.username} • {h.viewEntry && new Date(h.viewEntry.createdAt).toLocaleDateString()}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div>
               <p className="text-sm font-medium text-muted-foreground mb-1">Verse Reference</p>
-              <p className="text-sm">{h.viewEntry?.verseReference}</p>
+              <p className="text-sm">{h.viewEntry?.title}</p>
             </div>
             <div>
               <p className="text-sm font-medium text-muted-foreground mb-1">Content</p>

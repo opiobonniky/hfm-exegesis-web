@@ -8,7 +8,7 @@ export function useAdminDashboardPage() {
   const loadStats = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await sendPostRequest("admin", "dashboard-stats", {});
+      const res = await sendPostRequest("admin", "get-admin-dashboard-stats", {});
       if (res.returnCode === 200) setStats(res.returnData);
     } catch { /* ignore */ } finally { setLoading(false); }
   }, []);

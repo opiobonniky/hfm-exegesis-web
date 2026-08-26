@@ -172,5 +172,8 @@ export function useAdminDailyContent() {
     openForm, closeForm, handleSave, confirmDelete,
     calendarModifiers: { sunday: (d: Date) => d.getDay() === 0, special: (d: Date) => d.getDate() === 1, today: (d: Date) => d.toDateString() === new Date().toDateString() },
     calendarModifiersClassNames: { sunday: "text-red-600 dark:text-red-400 font-medium", special: "after:content-['★'] after:text-yellow-500 after:absolute after:bottom-0.5 after:right-0.5 after:text-[9px]", today: "bg-accent text-accent-foreground font-bold rounded-full" },
+    handleConflictUpdate() {
+
+    }
   };
 }

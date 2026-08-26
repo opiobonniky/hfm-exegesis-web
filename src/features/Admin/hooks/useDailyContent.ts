@@ -43,19 +43,28 @@ export function useDailyContent(type: "verse" | "devotion" | "exegesis") {
     }
   }, [page, searchQuery, selectedStatus, endpoints.list]);
   const createItem = useCallback(async (data: Partial<DailyContent>) => {
+    try {
       await sendPostRequest("admin", endpoints.add, data);
       await fetchItems();
+    } catch (e) {
       console.error("Failed to create content", e);
+    }
   }, [endpoints.add, fetchItems]);
   const updateItem = useCallback(async (id: string, data: Partial<DailyContent>) => {
+    try {
       await sendPostRequest("admin", endpoints.add, { ...data, id });
       setItems(prev => prev.map(item => item.id === id ? { ...item, ...data } : item));
+    } catch (e) {
       console.error("Failed to update content", e);
+    }
   }, [endpoints.add]);
   const deleteItem = useCallback(async (id: string) => {
+    try {
       await sendPostRequest("admin", endpoints.delete, { id });
       setItems(prev => prev.filter(item => item.id !== id));
+    } catch (e) {
       console.error("Failed to delete content", e);
+    }
   }, [endpoints.delete]);
   return {
     items,
