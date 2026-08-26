@@ -43,8 +43,11 @@ export function TriviaQuestionCard({ question, difficulty, category, isActive, o
           </Button>
           <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={onDelete}>
             <Trash2 className="w-4 h-4 text-foreground/60" />
+          </Button>
+        </div>
       </div>
     </div>
   );
+}
 /** Re-export difficultyColor for use in other trivia components */
 export { difficultyColor };

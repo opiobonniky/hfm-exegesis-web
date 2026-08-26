@@ -70,5 +70,7 @@ export function ExportModal({ onClose, selectedIds }: Props) {
           {exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
           {exporting ? "Exporting..." : "Export"}
         </Button>
+      </div>
     </div>
   );
+}

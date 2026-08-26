@@ -31,8 +31,9 @@ export function DailyContentFilters({ activeTab, onTabChange, searchDate, onSear
           })}
         </TabsList>
       </div>
-    </Tabs>
-  );
+      </Tabs>
+    );
+}
 /** Tab content wrapper with header, search, and count */
 export function ContentTabPanel({
   tab, total, searchDate, onSearchDateChange, onClearDate, onAdd,
@@ -43,6 +44,7 @@ export function ContentTabPanel({
   onAdd: () => void; children: React.ReactNode;
 }) {
   const tabConfig = CONTENT_TABS.find(t => t.value === tab);
+  return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <h3 className="text-base font-semibold">
@@ -51,6 +53,7 @@ export function ContentTabPanel({
         <Button size="sm" onClick={onAdd} className="gap-1.5">
           <CalendarDays className="w-3.5 h-3.5" /> New {tabConfig?.label?.replace("Daily ", "") || "Entry"}
         </Button>
+      </div>
       <div className="flex gap-2">
         <div className="relative flex-1 max-w-[200px]">
           <CalendarDays className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground dark:text-foreground/80" />
@@ -62,5 +65,8 @@ export function ContentTabPanel({
             ✕ Clear
           </Button>
         )}
+      </div>
       {children}
     </div>
+  );
+}

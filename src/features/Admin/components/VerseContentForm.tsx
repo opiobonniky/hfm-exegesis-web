@@ -44,26 +44,34 @@ export function VerseContentForm({
               onChange={v => { setFormBook(v || ""); setFormChapter(""); setFormVerse(""); }}
               placeholder="Select book" searchPlaceholder="Search books..." width="w-full" />
           </div>
+          <div className="space-y-1.5">
             <Label className="text-xs font-semibold">Chapter *</Label>
             <Combobox options={formChapters.map(c => ({ value: String(c), label: String(c) }))} value={formChapter}
               onChange={v => { setFormChapter(v || ""); setFormVerse(""); }}
               placeholder="Select chapter" disabled={formChapters.length === 0} width="w-full" />
+          </div>
+          <div className="space-y-1.5">
             <Label className="text-xs font-semibold">Verse *</Label>
             <Combobox options={verseOptions} value={formVerse}
               onChange={v => setFormVerse(v || "")}
               placeholder="Select verse" disabled={!formChapter || formMaxVerses === 0} width="w-full" />
+          </div>
+          <div className="space-y-1.5">
             <Label className="text-xs font-semibold">Translation</Label>
             <Combobox options={BIBLE_VERSIONS.map(v => ({ value: v.id, label: `${v.name} (${v.abbreviation})` }))}
               value={verseVersion} onChange={v => { if (v) setVerseVersion(v); }}
               placeholder="Select version" searchPlaceholder="Search translations..." width="w-full" />
+          </div>
         </div>
         {/* Verse reference preview */}
         {formBook && formChapter && formVerse && (
           <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-primary/[0.03] border border-primary/10 text-sm">
             <BookOpen className="w-3.5 h-3.5 text-primary" />
             <span className="font-medium">{formBook} {formChapter}:{formVerse}</span>
+          </div>
         )}
         {/* Verse text preview */}
+        <div className="space-y-1.5">
             <Label className="flex items-center justify-between text-xs font-semibold">
               <span>Verse Text Preview</span>
               <span className="text-[10px] font-mono text-muted-foreground bg-muted/30 px-1.5 py-0.5 rounded">{verseVersion}</span>
@@ -77,6 +85,7 @@ export function VerseContentForm({
                 <div className="absolute bottom-3 right-3 text-[10px] text-muted-foreground/50 font-mono">{formBook} {formChapter}:{formVerse}</div>
               )}
             </div>
+        </div>
         {/* Explanation */}
         <div className="space-y-1.5">
           <Label className="flex items-center gap-1.5 text-xs font-semibold">
@@ -84,14 +93,20 @@ export function VerseContentForm({
           </Label>
           <Textarea value={formExplanation} onChange={e => setFormExplanation(e.target.value)}
             placeholder="Write a brief explanation of this verse..." rows={4} className="resize-none text-sm leading-relaxed" />
+        </div>
         {/* Reflection */}
+        <div className="space-y-1.5">
           <Label className="text-xs font-semibold">Reflection</Label>
           <Textarea value={formReflection} onChange={e => setFormReflection(e.target.value)}
             placeholder="Optional reflection prompt..." rows={3} className="resize-none text-sm leading-relaxed" />
+        </div>
         {/* Learn More */}
+        <div className="space-y-1.5">
           <Label className="text-xs font-semibold">Learn More</Label>
           <Input value={formLearnMore} onChange={e => setFormLearnMore(e.target.value)}
             placeholder="Reference or link for further reading" className="h-9 text-sm" />
+        </div>
       </CardContent>
     </Card>
   );
+}

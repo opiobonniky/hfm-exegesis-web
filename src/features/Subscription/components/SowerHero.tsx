@@ -27,14 +27,22 @@ export function SowerHero({ billingInterval, setBillingInterval }: Props) {
           "Whoever sows sparingly will also reap sparingly, and whoever sows bountifully will also reap bountifully."
           <br />
           <span className="text-xs text-violet-300/50">— 2 Corinthians 9:6</span>
+        </p>
         <div className="flex items-center justify-center gap-3 mb-8">
           <button
             onClick={() => setBillingInterval("month")}
             className={cn("px-5 py-2 rounded-full text-sm font-bold transition-all",
               billingInterval === "month" ? "bg-card text-violet-900 shadow-lg" : "bg-card/10 text-violet-200 hover:bg-card/20")}
           >Monthly</button>
+          <button
             onClick={() => setBillingInterval("year")}
+            className={cn("px-5 py-2 rounded-full text-sm font-bold transition-all",
               billingInterval === "year" ? "bg-card text-violet-900 shadow-lg" : "bg-card/10 text-violet-200 hover:bg-card/20")}
-          >Yearly<span className="ml-1.5 text-[10px] font-semibold opacity-70">~20% off</span></button>
+          >
+            Yearly<span className="ml-1.5 text-[10px] font-semibold opacity-70">~20% off</span>
+          </button>
+        </div>
+      </div>
     </section>
   );
+}

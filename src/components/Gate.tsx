@@ -20,7 +20,7 @@ export interface GateProps {
   showChildrenWhenLocked?: boolean;
 }
 
-export default function Gate({
+export function Gate({
   children,
   tier = "legacy_sower",
   featureName,
@@ -46,7 +46,10 @@ export default function Gate({
         featureDescription ||
         `Upgrade to ${tier === "covenant_sower" ? "Covenant Sower" : "Legacy Sower or Covenant Sower"} to unlock this feature.`
       }
+
       className={className}
     />
   );
 }
+
+export default Gate;

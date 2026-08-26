@@ -33,5 +33,7 @@ export function DevotionCalendar({ preset, onPresetChange, totalCount }: Devotio
             {p.label}
           </button>
         ))}
+      </div>
     </div>
   );
+}

@@ -15,6 +15,7 @@ interface Props {
   displayDate: string;
   isUpcoming: boolean;
   canOpenBible: boolean;
+}
 export function ExegesisHero({ item, series, onSelect, onOpenBible, displayDate, isUpcoming, canOpenBible }: Props) {
   return (
     <>
@@ -43,7 +44,9 @@ export function ExegesisHero({ item, series, onSelect, onOpenBible, displayDate,
                 {entry.passageReference}
               </button>
             ))}
+          </div>
         </section>
       )}
     </>
   );
+}

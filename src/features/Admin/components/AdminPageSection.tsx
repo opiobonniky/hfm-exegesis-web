@@ -32,9 +32,12 @@ export function AdminPageSection({ title, count, actionLabel, onAction, loading,
             {actionLabel && onAction && (
               <Button size="sm" onClick={onAction} className="h-8 gap-1">
                 <Plus className="w-3.5 h-3.5" /> {actionLabel}
+              </Button>
+            )}
           </div>
         </div>
       </CardHeader>
       <CardContent>{children}</CardContent>
     </Card>
   );
+}

@@ -25,7 +25,7 @@ export interface TierBadgeProps {
   className?: string;
 }
 
-export default function TierBadge({
+export function TierBadge({
   onClick,
   loading = false,
   sidebar = false,
@@ -121,3 +121,5 @@ export default function TierBadge({
     </button>
   );
 }
+
+export default TierBadge;

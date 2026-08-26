@@ -24,7 +24,9 @@ export function ValidationChecklist({ items, valid, t }: Props) {
 }
 // FormattingTips — text formatting help card
 export function FormattingTips({ t }: { t: any }) {
+  return (
     <Card className="border-border/30 bg-muted/20">
+      <CardContent className="p-4 space-y-2">
         <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t.verseExplanations.formattingTips}</p>
         <div className="space-y-1.5 text-xs text-muted-foreground" dir="ltr">
           {[
@@ -35,5 +37,10 @@ export function FormattingTips({ t }: { t: any }) {
             <div key={item.code} className="flex gap-2">
               <code className="bg-muted px-1.5 py-0.5 rounded shrink-0">{item.code}</code>
               <span>{item.desc}</span>
+            </div>
           ))}
         </div>
+      </CardContent>
+    </Card>
+  );
+}

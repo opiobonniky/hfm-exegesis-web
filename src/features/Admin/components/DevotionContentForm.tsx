@@ -38,9 +38,11 @@ export function DevotionContentForm({
             placeholder="Devotion title" className="h-9 text-sm" />
         </div>
         {/* Content */}
+        <div className="space-y-1.5">
           <Label className="text-xs font-semibold">Content *</Label>
           <Textarea value={formContent} onChange={e => setFormContent(e.target.value)}
             placeholder="Write the devotion content..." rows={10} className="resize-none text-sm leading-relaxed" />
+        </div>
         {/* Optional Bible Reference */}
         <div className="rounded-lg border border-border/40 bg-muted/10 p-4 space-y-3">
           <div className="flex items-center gap-1.5">
@@ -54,17 +56,24 @@ export function DevotionContentForm({
                 onChange={v => { setFormBook(v || ""); setFormChapter(""); setFormVerse(""); }}
                 placeholder="Select" searchPlaceholder="Search..." width="w-full" />
             </div>
+            <div className="space-y-1">
               <Label className="text-[10px] font-semibold text-muted-foreground">Chapter</Label>
               <Combobox options={formChapters.map(c => ({ value: String(c), label: String(c) }))} value={formChapter}
                 onChange={v => { setFormChapter(v || ""); setFormVerse(""); }}
                 placeholder="Ch." disabled={formChapters.length === 0} width="w-full" />
+            </div>
+            <div className="space-y-1">
               <Label className="text-[10px] font-semibold text-muted-foreground">Verse</Label>
               <Combobox options={verseOptions} value={formVerse}
                 onChange={v => setFormVerse(v || "")}
                 placeholder="V." disabled={!formChapter || formMaxVerses === 0} width="w-full" />
+            </div>
+          </div>
           {formBook && formChapter && formVerse && (
             <p className="text-xs text-muted-foreground">Reference: <span className="font-semibold">{formBook} {formChapter}:{formVerse}</span></p>
           )}
+        </div>
       </CardContent>
     </Card>
   );
+}

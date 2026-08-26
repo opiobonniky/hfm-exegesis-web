@@ -31,6 +31,7 @@ export default function BookOverviewTeaser({
         <p className="text-[11px] text-muted-foreground truncate">
           Read the introduction to {bookName}
         </p>
+      </div>
       <Chevron
         className={cn(
           "w-5 h-5 text-primary/60 group-hover:text-primary group-hover:translate-x-0.5 transition-all",
@@ -39,3 +40,4 @@ export default function BookOverviewTeaser({
       />
     </button>
   );
+}

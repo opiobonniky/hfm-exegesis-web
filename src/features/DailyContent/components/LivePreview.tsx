@@ -23,6 +23,7 @@ function renderContent(text: string, t: any) {
       <p key={i} className="text-sm leading-relaxed text-foreground/80 mb-1.5">{line}</p>
     );
   });
+}
 export function LivePreview({ bookName, chapter, verseNumber, bibleVersion, explanation, learnMore, t }: Props) {
   const [showLearnMore, setShowLearnMore] = useState(false);
   return (
@@ -35,11 +36,13 @@ export function LivePreview({ bookName, chapter, verseNumber, bibleVersion, expl
             {bibleVersion && <Badge variant="outline" className="text-xs font-mono">{bibleVersion}</Badge>}
           </div>
         )}
+      </div>
       <div className="p-4 space-y-4 bg-card">
         <div>
           <div className="flex items-center gap-2 mb-2">
             <div className="w-1 h-4 rounded-full bg-primary" />
             <span className="text-xs font-bold text-primary uppercase tracking-wider">{t.verseExplanations.previewExplanation}</span>
+          </div>
           <div className="pl-3">{renderContent(explanation, t)}</div>
         </div>
         {learnMore && (
@@ -54,5 +57,9 @@ export function LivePreview({ bookName, chapter, verseNumber, bibleVersion, expl
                 {renderContent(learnMore, t)}
               </div>
             )}
+          </div>
+        )}
+      </div>
     </div>
   );
+}

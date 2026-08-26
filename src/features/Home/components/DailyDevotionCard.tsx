@@ -37,15 +37,20 @@ export default function DailyDevotionCard({
       {/* Title */}
       {title && (
         <p className="text-sm font-semibold text-foreground mb-2">{title}</p>
+      )}
       {/* Content */}
       {content && (
         <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3">
           {content}
+        </p>
+      )}
       {/* Action */}
       <div className="flex items-center gap-1 mt-3 text-rose-500">
         <span className="text-xs font-semibold">
           {t?.home?.readDevotion || "Read Devotion"}
         </span>
         <ArrowRight className="w-3.5 h-3.5" />
+      </div>
     </div>
   );
+}

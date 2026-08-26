@@ -17,7 +17,7 @@ interface Props {
   deleting: number | null;
 }
 
-export function ActivityFeedItem({ item, formatTimeAgo, goToReader, onDelete, deleting }: Props) {
+export default function ActivityFeedItem({ item, formatTimeAgo, goToReader, onDelete, deleting }: Props) {
   const { type, data } = item;
   const verseRef = `${data.bookName} ${data.chapter}:${data.verseNumber}`;
   const endpoints: Record<string, { endpoint: string; field: string }> = {

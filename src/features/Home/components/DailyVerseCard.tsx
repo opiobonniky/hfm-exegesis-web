@@ -44,11 +44,15 @@ export default function DailyVerseCard({
           >
             &ldquo;{text}&rdquo;
           </p>
+        </div>
+      )}
       {/* Action */}
       <div className="flex items-center gap-1 mt-3 text-primary">
         <span className="text-xs font-semibold">
           {t?.home?.readExplanation || "Read Explanation"}
         </span>
         <ArrowRight className="w-3.5 h-3.5" />
+      </div>
     </div>
   );
+}

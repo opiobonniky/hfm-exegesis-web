@@ -19,6 +19,7 @@ export const DIFFICULTY_OPTIONS: {
 
 export const TRIVIA_STORAGE_KEY = "exegesis_trivia_state";
 export const DAILY_STORAGE_KEY = "exegesis_daily_session";
+export const MILESTONE_THRESHOLDS = [10, 25, 50, 100, 250, 500];
 
 export const BADGE_CATEGORIES = [
   { label: "Milestones", key: "milestone", color: "#6366F1" },

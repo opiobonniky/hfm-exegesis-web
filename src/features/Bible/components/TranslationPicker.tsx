@@ -59,5 +59,8 @@ export default function TranslationPicker({
           {filtered.length === 0 && (
             <p className="px-3 py-6 text-center text-xs text-muted-foreground">{t.bibleReader.noTranslations}</p>
           )}
+        </div>
       </PopoverContent>
     </Popover>
+  );
+}

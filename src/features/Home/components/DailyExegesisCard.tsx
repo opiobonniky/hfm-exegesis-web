@@ -30,11 +30,14 @@ export default function DailyExegesisCard({
         <div className="flex-1 min-w-0">
           <p className="font-semibold text-sm text-foreground line-clamp-1">{title}</p>
           {passageRef && <p className="text-xs text-indigo-500 font-medium mt-0.5">{passageRef}</p>}
+        </div>
         <ChevronRight className="w-4 h-4 text-muted-foreground/30 shrink-0 mt-1" />
       </div>
       {introduction && (
         <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2 italic pl-3">
           &ldquo;{introduction}&rdquo;
         </p>
+      )}
     </div>
   );
+}

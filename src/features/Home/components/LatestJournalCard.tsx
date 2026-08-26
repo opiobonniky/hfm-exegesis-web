@@ -44,13 +44,19 @@ export default function LatestJournalCard({
             {passageRef || title || "Journal entry"}
           </p>
           <p className="text-xs text-muted-foreground/60 mt-0.5">{timeLabel}</p>
+        </div>
         <ChevronRight className="w-4 h-4 text-muted-foreground/30 shrink-0 mt-1" />
       </div>
       {reflection && (
         <div className="rounded-xl bg-white/40 dark:bg-emerald-950/20 p-3">
           <p className="text-xs text-foreground/70 italic leading-relaxed line-clamp-2">
             &ldquo;{reflection}&rdquo;
+          </p>
+        </div>
+      )}
       <div className="flex items-center gap-2 mt-3">
         {isPublic && <span className="text-[10px] font-semibold text-emerald-500">Public</span>}
+      </div>
     </div>
   );
+}

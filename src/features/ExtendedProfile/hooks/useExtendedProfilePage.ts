@@ -50,3 +50,4 @@ export function useExtendedProfilePage() {
   const updateField = <K extends keyof ExtendedProfileData>(key: K, val: ExtendedProfileData[K]) =>
     setForm((f) => ({ ...f, [key]: val }));
   return { loading, saving, form, updateField, handleSave, navigate };
+}

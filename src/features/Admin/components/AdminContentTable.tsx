@@ -16,6 +16,8 @@ interface AdminContentTableProps {
   onEdit: (item: ContentItem) => void;
   onDelete: (id: string) => void;
   onView: (item: ContentItem) => void;
+}
+
 export function AdminContentTable({ items, onEdit, onDelete, onView }: AdminContentTableProps) {
   return (
     <div className="rounded-xl border border-border overflow-hidden">
@@ -41,6 +43,7 @@ export function AdminContentTable({ items, onEdit, onDelete, onView }: AdminCont
               </TableCell>
               <TableCell className="text-muted-foreground text-sm">
                 {new Date(item.date || item.createdAt).toLocaleDateString()}
+              </TableCell>
               <TableCell className="text-right">
                 <div className="flex items-center justify-end gap-1">
                   <Button variant="ghost" size="sm" onClick={() => onView(item)} className="h-8 w-8 p-0">
@@ -48,12 +51,16 @@ export function AdminContentTable({ items, onEdit, onDelete, onView }: AdminCont
                   </Button>
                   <Button variant="ghost" size="sm" onClick={() => onEdit(item)} className="h-8 w-8 p-0">
                     <Edit className="w-4 h-4" />
+                  </Button>
                   <Button variant="ghost" size="sm" onClick={() => onDelete(item.id)} className="h-8 w-8 p-0 text-destructive hover:text-destructive">
                     <Trash2 className="w-4 h-4" />
+                  </Button>
                 </div>
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
     </div>
   );
+}

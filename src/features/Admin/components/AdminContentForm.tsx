@@ -8,9 +8,9 @@ import { Save, ArrowLeft } from "lucide-react";
 
 interface AdminContentFormProps {
   type: "verse" | "devotion" | "exegesis";
-  initialData?: any;
+  initialData?: Record<string, string | undefined>;
   saving: boolean;
-  onSave: (data: any) => void;
+  onSave: (data: Record<string, FormDataEntryValue>) => void;
   onBack?: () => void;
 }
 export function AdminContentForm({ type, initialData, saving, onSave, onBack }: AdminContentFormProps) {
@@ -18,7 +18,7 @@ export function AdminContentForm({ type, initialData, saving, onSave, onBack }: 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
-    const data: any = {
+    const data: Record<string, FormDataEntryValue> = {
       title: fd.get("title"),
       description: fd.get("description"),
       reference: fd.get("reference"),
@@ -57,6 +57,7 @@ export function AdminContentForm({ type, initialData, saving, onSave, onBack }: 
               <Label htmlFor="reference">Reference</Label>
               <Input id="reference" name="reference" defaultValue={initialData?.reference || ""} placeholder="e.g. John 3:16" />
             </div>
+            <div className="space-y-2">
               <Label>Status</Label>
               <Select name="status" defaultValue={initialData?.status || "draft"}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
@@ -65,24 +66,42 @@ export function AdminContentForm({ type, initialData, saving, onSave, onBack }: 
                   <SelectItem value="published">Published</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+          </div>
+          <div className="space-y-2">
             <Label htmlFor="date">Date</Label>
             <Input id="date" name="date" type="date" defaultValue={initialData?.date || ""} />
+          </div>
+          <div className="space-y-2">
             <Label htmlFor="description">Description</Label>
             <Textarea id="description" name="description" defaultValue={initialData?.description || ""} rows={2} />
+          </div>
           {type === "verse" && (
+            <div className="space-y-2">
               <Label htmlFor="verseText">Verse Text</Label>
               <Textarea id="verseText" name="verseText" defaultValue={initialData?.verseText || ""} rows={3} />
+            </div>
+          )}
           {type === "devotion" && (
+            <div className="space-y-2">
               <Label htmlFor="content">Content</Label>
               <Textarea id="content" name="content" defaultValue={initialData?.content || ""} rows={8} />
+            </div>
+          )}
           {type === "exegesis" && (
+            <div className="space-y-2">
               <Label htmlFor="exegesis">Exegesis</Label>
               <Textarea id="exegesis" name="exegesis" defaultValue={initialData?.exegesis || ""} rows={8} />
+            </div>
+          )}
           <div className="flex justify-end gap-2 pt-2">
             {onBack && <Button type="button" variant="outline" onClick={onBack}>Cancel</Button>}
             <Button type="submit" disabled={saving} className="bg-primary hover:bg-primary/90">
               <Save className="w-4 h-4 mr-2" /> {saving ? "Saving..." : initialData ? "Update" : "Create"}
+            </Button>
+          </div>
         </form>
       </CardContent>
     </Card>
   );
+}

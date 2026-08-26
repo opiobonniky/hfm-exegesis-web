@@ -16,6 +16,7 @@ function renderMarkdown(text: string): string {
     .replace(/^(-|•)\s+(.+)$/gm, '<li class="ml-4 list-disc">$2</li>')
     .replace(/^(\d+)\.\s+(.+)$/gm, '<li class="ml-4 list-decimal">$2</li>')
     .replace(/\n/g, "<br/>");
+}
 export function ExplanationPreview({ title, content, bookName, chapter, verseNumber }: ExplanationPreviewProps) {
   return (
     <div className="p-4 sm:p-6 rounded-2xl bg-card border border-border">
@@ -30,6 +31,7 @@ export function ExplanationPreview({ title, content, bookName, chapter, verseNum
       )}
       {title && (
         <h4 className="text-base font-bold text-foreground mb-3">{title}</h4>
+      )}
       {content ? (
         <div
           className="text-sm text-foreground/80 leading-relaxed prose prose-sm max-w-none"
@@ -37,5 +39,7 @@ export function ExplanationPreview({ title, content, bookName, chapter, verseNum
         />
       ) : (
         <p className="text-xs text-muted-foreground italic">Start typing to see a live preview...</p>
+      )}
     </div>
   );
+}

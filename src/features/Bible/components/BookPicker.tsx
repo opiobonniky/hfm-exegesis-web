@@ -105,6 +105,7 @@ export default function BookPicker({
             </button>
           )}
         </div>
+      </div>
       <div className="flex-1 overflow-y-auto px-1 space-y-1">
         {loading ? (
           <div className="space-y-2 p-2">
@@ -118,5 +119,7 @@ export default function BookPicker({
             {renderSection("New Testament", grouped.nt)}
           </>
         )}
+      </div>
     </div>
   );
+}

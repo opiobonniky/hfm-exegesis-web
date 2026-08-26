@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { useToast } from "@/hooks/use-toast";
 import { sendPostRequest } from "@/services/api";
-import { getBooksByTestament, getChaptersForBook, getVersesCountForChapter } from "@/features/Admin/utils";
+import { getBooksByTestament, getChaptersForBook, getVersesCountForChapter } from "@/utilities/bibleUtils";
 
 interface Prompt { id: string; text: string; category: string; difficulty: string; isActive: boolean; description?: string; order?: number; bookName?: string; chapter?: string; verseNumber?: string; }
 export function useJournalPrompts(isAdmin: boolean) {
@@ -57,6 +57,7 @@ export function useJournalPrompts(isAdmin: boolean) {
       const res = await sendPostRequest("journal", "prompts/delete", { id: deleteDialog.id });
       if (res?.returnCode === 200) { toast({ title: "Deleted" }); setDeleteDialog(null); fetchPrompts(); }
       else { toast({ title: "Delete failed", variant: "destructive" }); }
+    } catch { toast({ title: "Error", variant: "destructive" }); }
     finally { setDeleting(false); }
   }, [deleteDialog, toast, fetchPrompts]);
   const openEdit = useCallback((prompt?: Prompt) => {

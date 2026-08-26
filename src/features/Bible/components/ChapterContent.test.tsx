@@ -24,7 +24,7 @@ describe("ChapterContent", () => {
         onToggleFavorite={vi.fn()}
         onExplainVerse={vi.fn()}
         chapterRefs={{ current: {} } as MutableRefObject<Record<string, HTMLDivElement>>}
-        verseRefs={{ current: {} } as MutableRefObject<Record<string, HTMLButtonElement | null>>}
+        verseRefs={{ current: {} } as MutableRefObject<Record<string, HTMLSpanElement | null>>}
       />,
     );
 

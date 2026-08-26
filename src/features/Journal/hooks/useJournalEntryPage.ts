@@ -3,8 +3,11 @@ import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { sendPostRequest } from "@/services/api";
-import { getBooksByTestament, getChaptersForBook, getVersesCountForChapter, getTestamentForBook } from "@/features/Admin/utils";
+import { getBooksByTestament, getChaptersForBook, getVersesCountForChapter } from "@/utilities/bibleUtils";
 import { getVerseText } from "@/utilities/bibleUtils";
+
+const getTestamentForBook = (book: string): "Old" | "New" =>
+  getBooksByTestament("Old").includes(book) ? "Old" : "New";
 
 interface JournalEntryData { id: string; title: string; content: string; mood: string; tags: string; bookName: string; chapter: string; verseNumber: string; isPrivate: boolean; prayers: string; application: string; learnings: string; }
 const DEFAULT_ENTRY: JournalEntryData = { id: "", title: "", content: "", mood: "neutral", tags: "", bookName: "", chapter: "", verseNumber: "", isPrivate: true, prayers: "", application: "", learnings: "" };

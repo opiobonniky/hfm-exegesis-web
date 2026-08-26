@@ -38,16 +38,20 @@ export function useTriviaPage() {
   const prevStreakRef = useRef(0);
   const prevTotalRef = useRef(0);
   const prevPhaseRef = useRef(phase);
+
   // Keep refs in sync
   useEffect(() => { gameModeRef.current = gameMode; }, [gameMode]);
   useEffect(() => { dcSessionRef.current = dcSession; }, [dcSession]);
+
   const { state: badgeState, justUnlocked, checkNewBadges, clearUnlocked, getProgress } = useBadges();
   const prevResultRef = useRef<any>(null);
   const { state: leaderboardState, recordSession, getComparison, resetLeaderboard } = useLeaderboard();
   const weekHistory = getWeekHistory();
   const leaderboardComparison = getComparison();
-  //  EFFECTS
+
+  // EFFECTS
   useEffect(() => { fetchStats(); }, [fetchStats]);
+
   // Restore saved state on mount
   useEffect(() => {
     const savedTrivia = sessionStorage.getItem(TRIVIA_STORAGE_KEY);
@@ -64,43 +68,57 @@ export function useTriviaPage() {
       } catch {}
     }
   }, [restoreState, dcRestoreSession]);
+
   // Re-fetch when difficulty changes during game
   useEffect(() => {
     if (prevDifficultyRef.current !== difficulty && phase !== "plan") { prevDifficultyRef.current = difficulty; fetchQuestion(); }
     if (phase === "plan") prevDifficultyRef.current = difficulty;
   }, [difficulty, fetchQuestion, phase]);
+
   // Reset result dismissed when entering playing phase
   useEffect(() => { if (phase === "playing") setResultDismissed(false); }, [phase]);
+
   // Starburst on 3+ streak
+  useEffect(() => {
     if (streak >= 3 && prevStreakRef.current < 3 && phase === "answered" && result?.isCorrect) setShowStarBurst(true);
     prevStreakRef.current = streak;
   }, [streak, phase, result]);
+
   // Milestone detection
+  useEffect(() => {
     const cur = score.total;
     if (cur > 0 && cur !== prevTotalRef.current && MILESTONE_THRESHOLDS.includes(cur) && phase === "answered") setShowMilestone(true);
     prevTotalRef.current = cur;
   }, [score.total, phase]);
+
   // Check badges after each answer
+  useEffect(() => {
     if (phase === "answered" && result && result !== prevResultRef.current) {
       prevResultRef.current = result;
       checkNewBadges({
         totalAnswered: score.total, totalCorrect: score.correct, streak,
         bookName: question?.bookName || null, difficulty: question?.difficulty || null, isCorrect: result.isCorrect,
       });
+    }
   }, [phase, result, score, streak, question, checkNewBadges]);
+
   // Record session on quiz finish
+  useEffect(() => {
     if (phase === "finished" && prevPhaseRef.current !== "finished" && score.total > 0) recordSession(score.correct, score.total, streak);
     prevPhaseRef.current = phase;
   }, [phase, score, streak, recordSession]);
-  //  AUTO-ADVANCE
+
+  // AUTO-ADVANCE
   const cleanupAutoAdvance = useCallback(() => {
     cancelledRef.current = true;
     if (autoAdvanceRef.current) {
       cancelAnimationFrame(autoAdvanceRef.current.rafId);
       clearTimeout(autoAdvanceRef.current.timeoutId);
       autoAdvanceRef.current = null;
+    }
     setAutoAdvanceProgress(null);
   }, []);
+
   const startAutoAdvance = useCallback(() => {
     cleanupAutoAdvance();
     const duration = result?.isCorrect ? 3000 : 4500;
@@ -121,16 +139,20 @@ export function useTriviaPage() {
     };
     autoAdvanceRef.current = { startTime, duration, rafId: requestAnimationFrame(tick) };
   }, [result, cleanupAutoAdvance, nextQuestion]);
+
+  useEffect(() => {
     if (phase === "answered" && result && !resultDismissed) startAutoAdvance();
     return () => { cleanupAutoAdvance(); };
   }, [phase, result, resultDismissed, startAutoAdvance, cleanupAutoAdvance]);
-  //  HANDLERS
+
+  // HANDLERS
   const handleSelect = useCallback((index: number) => { if (selectedAnswer !== null) return; answer(index); }, [answer, selectedAnswer]);
   const handleSelectDaily = useCallback((index: number) => { if (dcSession.selectedAnswer !== null) return; dcSubmitAnswer(index); }, [dcSession.selectedAnswer, dcSubmitAnswer]);
   const handleDismissDaily = useCallback(() => { dcNextQuestion(); }, [dcNextQuestion]);
   const startDailyChallenge = useCallback(() => { setGameMode("daily"); startChallenge(); }, [startChallenge]);
   const handleDailyBackToPlan = useCallback(() => { setGameMode("normal"); dcReset(); }, [dcReset]);
   const handleDismissWithCancel = useCallback(() => { cleanupAutoAdvance(); setResultDismissed(true); }, [cleanupAutoAdvance]);
+
   const handleReferencePress = useCallback((bookName: string, chapter: number, verseNumber?: number | null) => {
     const gm = gameModeRef.current;
     const dcs = dcSessionRef.current;
@@ -138,9 +160,11 @@ export function useTriviaPage() {
       sessionStorage.setItem(TRIVIA_STORAGE_KEY, JSON.stringify({ phase, question, selectedAnswer, result, score, stats, loading, error, questionIdsSeen, difficulty, totalCount, streak }));
     } else if (gm === "daily") {
       sessionStorage.setItem(DAILY_STORAGE_KEY, JSON.stringify(dcs));
+    }
     navigate(`${routes.bibleReader.path}?book=${encodeURIComponent(bookName)}&chapter=${chapter}&verse=${verseNumber ?? 1}&ref=trivia`);
   }, [navigate, phase, question, selectedAnswer, result, score, stats, loading, error, difficulty, totalCount, streak, questionIdsSeen]);
-  //  RETURN
+
+  // RETURN
   return {
     // Core state
     navigate, isRtl, phase, question, selectedAnswer, result, score, stats,

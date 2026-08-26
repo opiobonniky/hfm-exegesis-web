@@ -32,6 +32,8 @@ export function StageContent({ stage, saving, onSave }: StageContentProps) {
             {saving ? "Saving..." : stage.completed ? "Completed" : "Complete Stage"}
             {!stage.completed && !saving && <ArrowRight className="w-4 h-4 ml-2" />}
           </Button>
+        </div>
       </CardContent>
     </Card>
   );
+}

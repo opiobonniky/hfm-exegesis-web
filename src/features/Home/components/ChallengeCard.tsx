@@ -22,6 +22,7 @@ export default function ChallengeCard({ onPress }: ChallengeCardProps) {
         <div>
           <p className="font-bold text-sm text-rose-800 dark:text-rose-300">Challenge Yourself</p>
           <p className="text-[10px] text-rose-500 dark:text-rose-400">Bible Trivia Quiz</p>
+        </div>
         <ChevronRight className="w-4 h-4 text-rose-300 dark:text-rose-600 shrink-0 ml-auto" />
       </div>
       <p className="text-xs text-rose-600/70 dark:text-rose-400/70 leading-relaxed mb-3">
@@ -32,3 +33,4 @@ export default function ChallengeCard({ onPress }: ChallengeCardProps) {
       </button>
     </div>
   );
+}

@@ -1,6 +1,6 @@
 "use client";
 
-import { Sun, Moon, ChevronRight } from "lucide-react";
+import { Sun, Moon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/components/languages/languageProvider";
 interface GreetingCardProps {
@@ -47,6 +47,7 @@ export default function GreetingCard({
             <Moon className="w-[17px] h-[17px] text-primary" />
           )}
         </button>
+      )}
       {/* Greeting */}
       <div className="pr-12">
         <p className="text-2xl sm:text-3xl font-bold tracking-tight">
@@ -61,3 +62,4 @@ export default function GreetingCard({
       </p>
     </div>
   );
+}

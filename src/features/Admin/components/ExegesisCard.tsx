@@ -43,6 +43,9 @@ export function ExegesisCard({ title, passageReference, displayDate, teachingBod
           </Button>
           <Button variant="outline" size="sm" onClick={onDelete} className="gap-1 text-destructive hover:text-destructive">
             <Trash2 className="w-3.5 h-3.5" /> Delete
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );
+}

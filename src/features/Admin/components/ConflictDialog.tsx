@@ -54,7 +54,9 @@ export function ConflictDialog({ open, onOpenChange, contentType, data, saving, 
             ) : (
               <><Save className="w-4 h-4" /> Update Existing</>
             )}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
+}

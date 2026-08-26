@@ -29,6 +29,8 @@ export default function LabCard({ onPress }: LabCardProps) {
           <p className="text-[10px] text-muted-foreground flex items-center gap-1">
             <Timer className="w-2.5 h-2.5" />
             {t?.home?.labDurationHint || "5 steps · 30–60 min"}
+          </p>
+        </div>
       </div>
       {/* Description */}
       <p className="text-sm text-muted-foreground leading-relaxed mb-3">
@@ -41,5 +43,7 @@ export default function LabCard({ onPress }: LabCardProps) {
           {t?.home?.labStartStudy || "Start Study"}
         </span>
         <ArrowRight className="w-3.5 h-3.5" />
+      </div>
     </div>
   );
+}

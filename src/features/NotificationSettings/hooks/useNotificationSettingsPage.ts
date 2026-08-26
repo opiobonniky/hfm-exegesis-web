@@ -29,8 +29,10 @@ export function useNotificationSettingsPage() {
   useEffect(() => { loadSettings(); }, [loadSettings]);
   const handleToggle = useCallback((key: keyof NotificationSettingsData) => {
     setSettings((s) => ({ ...s, [key]: !s[key] }));
+  }, []);
   const updateSettings = useCallback((patch: Partial<NotificationSettingsData>) => {
     setSettings((s) => ({ ...s, ...patch }));
+  }, []);
   const handleSave = useCallback(async () => {
     setSaving(true);
     try {
@@ -46,3 +48,4 @@ export function useNotificationSettingsPage() {
     } finally { setSaving(false); }
   }, [settings, navigate, toast]);
   return { loading, saving, settings, handleToggle, updateSettings, handleSave, navigate };
+}

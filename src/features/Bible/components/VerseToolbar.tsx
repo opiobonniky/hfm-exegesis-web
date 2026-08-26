@@ -73,7 +73,9 @@ export default function VerseToolbar({
               ))}
               {/* Remove highlight */}
               {currentHighlight !== undefined && (
-                    onHighlight(book, chapter, verse, currentHighlight);
+                <button
+                  type="button"
+                  onClick={() => onHighlight(book, chapter, verse, -1)}
                   className="w-6 h-6 rounded-full border-2 border-dashed border-muted-foreground/40 flex items-center justify-center text-[10px] text-muted-foreground hover:bg-muted transition-all"
                   title="Remove"
                   aria-label="Remove highlight"
@@ -96,6 +98,7 @@ export default function VerseToolbar({
           isFavorited
             ? "bg-rose-500/10 text-rose-500"
             : "text-muted-foreground hover:bg-muted hover:text-foreground",
+        )}
         title={isFavorited ? "Remove favorite" : "Add favorite"}
         aria-label={isFavorited ? "Remove favorite" : "Add favorite"}
         aria-pressed={isFavorited}
@@ -103,10 +106,14 @@ export default function VerseToolbar({
         <Star className={cn("w-3.5 h-3.5", isFavorited && "fill-current")} />
       </button>
       {/* Explain */}
+      <button
         onClick={(e) => { e.stopPropagation(); onExplain(); }}
         className="w-7 h-7 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-primary/10 hover:text-primary transition-all"
         title="View explanation"
         aria-label={`Explain ${book} ${chapter}:${verse}`}
+      >
         <MessageCircle className="w-3.5 h-3.5" />
+      </button>
     </div>
   );
+}

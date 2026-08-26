@@ -41,6 +41,8 @@ export function useUserDailyVerse() {
     );
   }, [verse, toast]);
   const handleShare = useCallback(async () => {
+    if (!verse) return;
+    const ref = `${verse.bookName} ${verse.chapter}:${verse.verseNumber}`;
     const text = `\u201C${verse.verseText || ""}\u201D \u2014 ${ref}\n\nvia Exegesis Bible App`;
     if (navigator.share) {
       try { await navigator.share({ text }); } catch {}
@@ -49,6 +51,7 @@ export function useUserDailyVerse() {
         toast({ title: "Copied to clipboard" })
       );
     }
+  }, [verse, toast]);
   return {
     verse, loading, refreshing, liked, setLiked,
     scrolled, scrollRef, navigate,

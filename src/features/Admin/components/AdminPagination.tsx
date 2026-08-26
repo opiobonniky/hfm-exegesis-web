@@ -22,6 +22,8 @@ export function AdminPagination({ page, totalPages, total, onPageChange }: Props
         </Button>
         <Button variant="outline" size="icon" className="h-7 w-7" disabled={page >= totalPages - 1} onClick={() => onPageChange(page + 1)}>
           <ChevronRight className="w-3 h-3" />
+        </Button>
       </div>
     </div>
   );
+}

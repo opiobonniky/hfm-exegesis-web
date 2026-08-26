@@ -44,6 +44,7 @@ export function useAdminCrud<T extends { id: number }>(opts: UseAdminCrudOpts<T>
   const loadMore = useCallback(() => { const np = page + 1; setPage(np); fetchItems(np, search, true); }, [page, search, fetchItems]);
   const save = useCallback(async (data: any, itemId?: number) => {
     setSaving(true);
+    try {
       const payload = itemId ? { id: itemId, ...data } : data;
       const res = await sendPostRequest(opts.route, opts.saveAction, payload);
       if (res?.returnCode === 200 || res?.status === 200) {
@@ -55,17 +56,29 @@ export function useAdminCrud<T extends { id: number }>(opts: UseAdminCrudOpts<T>
     } catch (e: any) {
       toast({ title: "Error", description: e.message || "Failed to save", variant: "destructive" });
       return false;
+    } finally {
       setSaving(false);
+    }
   }, [opts.route, opts.saveAction, refresh, toast]);
   const remove = useCallback(async (itemId: number) => {
     setDeleting(itemId);
+    try {
       const res = await sendPostRequest(opts.route, opts.deleteAction, { id: itemId });
+      if (res?.returnCode === 200 || res?.status === 200) {
         toast({ title: "Success", description: "Deleted successfully" });
+        refresh();
+        return true;
+      }
       throw new Error(res?.returnMessage || "Failed to delete");
+    } catch (e: any) {
       toast({ title: "Error", description: e.message || "Failed to delete", variant: "destructive" });
+      return false;
+    } finally {
       setDeleting(null);
+    }
   }, [opts.route, opts.deleteAction, refresh, toast]);
   return {
     items, loading, search, setSearch, hasMore, saving, deleting,
     refresh, loadMore, save, remove,
   };
+}

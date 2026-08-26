@@ -20,6 +20,7 @@ export function useLabHome() {
   const dismissOnboarding = useCallback(() => {
     setShowOnboarding(false);
     localStorage.setItem("lab_onboarding_dismissed", "true");
+  }, []);
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
@@ -29,13 +30,15 @@ export function useLabHome() {
       ]);
       if (activeRes?.returnCode === 200 && activeRes.returnData) setActiveSession(activeRes.returnData);
       if (historyRes?.returnCode === 200 && historyRes.returnData?.content) setHistory(historyRes.returnData.content);
-    } catch {} finally { setLoading(false); }
+    } catch { setHistory([]); } finally { setLoading(false); }
+  }, []);
   useEffect(() => { loadData(); }, [loadData]);
   const handleResumeStudy = useCallback((sessionId: string) => {
     navigate(`/lab/flow?sessionId=${sessionId}`);
   }, [navigate]);
   const handleReviewStudy = useCallback((sessionId: string) => {
     navigate(`/lab/review?sessionId=${sessionId}`);
+  }, [navigate]);
   const handleNewStudy = useCallback((book?: string, chapter?: number, verse?: number) => {
     const params = new URLSearchParams();
     if (book) params.set("book", book);

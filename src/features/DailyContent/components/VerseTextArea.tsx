@@ -58,6 +58,9 @@ export function VerseTextArea(p: Props) {
         {p.book && p.chapter && p.verseNumber && (
           <div className="absolute bottom-3 right-3 text-xs text-muted-foreground">
             {p.t.dailyVerse.refPrefix} {p.book} {p.chapter}:{p.verseNumber} ({versionAbbr})
+          </div>
+        )}
       </div>
     </div>
   );
+}

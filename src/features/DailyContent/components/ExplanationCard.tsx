@@ -21,6 +21,7 @@ export function ExplanationCard({ reference, title, content, status, date, onCli
           </div>
           <div className="flex-1 min-w-0">
             <p className="font-medium text-sm truncate">{reference}</p>
+          </div>
           <Badge variant={status === "published" ? "success" : "warning"}>{status}</Badge>
         </div>
         {title && <p className="font-semibold text-foreground mb-1 line-clamp-1">{title}</p>}
@@ -30,6 +31,8 @@ export function ExplanationCard({ reference, title, content, status, date, onCli
             <Calendar className="w-3 h-3" /> {new Date(date).toLocaleDateString()}
           </span>
           <ChevronRight className="w-4 h-4" />
+        </div>
       </CardContent>
     </Card>
   );
+}

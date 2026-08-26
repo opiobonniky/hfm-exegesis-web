@@ -14,11 +14,14 @@ const STAGE_DESC: Record<string, string> = {
   listen: "Meditate through repetition",
   learn: "Understand the deeper meaning",
   abide: "Apply what you've learned",
+};
+
 const STAGE_TIME: Record<string, string> = {
   look: "8–12 min",
   listen: "5–15 min",
   learn: "15–25 min",
   abide: "8–12 min",
+};
 interface StageProgressProps {
   currentStage: string;
   onStageClick: (stage: string) => void;
@@ -42,6 +45,8 @@ export function StageProgress({ currentStage, onStageClick, isRtl }: StageProgre
               <Timer className="w-2.5 h-2.5" />
               {STAGE_TIME[currentStage] || ""}
             </span>
+          </div>
+        </div>
         </div>
         {/* Stage indicators */}
         <div className="flex items-center justify-between">
@@ -79,11 +84,14 @@ export function StageProgress({ currentStage, onStageClick, isRtl }: StageProgre
                     !isDone && !isCurrent && "text-muted-foreground",
                   )}>{s}</p>
                   <p className="text-[9px] text-muted-foreground/60 mt-0.5 leading-none">{STAGE_DESC[s]}</p>
+                </div>
                 {idx < STAGE_ORDER.length - 1 && (
                   <div className={cn("hidden sm:block w-8 h-px mx-1", isDone ? "bg-green-300" : "bg-border/50")} />
+                )}
               </button>
             );
           })}
       </div>
     </div>
   );
+}

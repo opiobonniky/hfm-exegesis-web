@@ -15,7 +15,7 @@ interface ChapterContentProps {
   onToggleFavorite: (book: string, chapter: number, verse: number) => void;
   onExplainVerse: (book: string, chapter: number, verse: number) => void;
   chapterRefs: React.MutableRefObject<Record<string, HTMLDivElement>>;
-  verseRefs: React.MutableRefObject<Record<string, HTMLButtonElement | null>>;
+  verseRefs: React.MutableRefObject<Record<string, HTMLSpanElement | null>>;
 }
 
 const HC: Record<number, { light: string; dark: string }> = {
@@ -39,7 +39,7 @@ export default function ChapterContent({
         const chapterKey = `${ch.book}-${ch.chapter}`;
         return (
           <div key={chapterKey} ref={(el) => { if (el) chapterRefs.current[chapterKey] = el; }}>
-            <div className="flex items-center gap-3 mb-5 sticky top-0 bg-background/95 backdrop-blur-sm z-10 py-2">
+            <div className="flex items-center gap-3 mb-5 top-0 bg-background/95 backdrop-blur-sm z-10 py-2">
               <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
                 <span className="text-sm font-bold text-primary">{ch.chapter}</span>
               </div>
@@ -56,15 +56,22 @@ export default function ChapterContent({
                 const note = verseNotes[key];
                 const hc = highlight ? HC[highlight.colorId] : null;
                 return (
-                  <span key={verse.verse} className="group relative">
-                    <button
+                  <span key={verse.verse} className="group relative !inline whitespace-normal" style={{ whiteSpace: "normal" }}>
+                    <span
                       ref={(el) => { verseRefs.current[key] = el; }}
-                      type="button"
                       onClick={() => onToggleVerse(key)}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter" || event.key === " ") {
+                          event.preventDefault();
+                          onToggleVerse(key);
+                        }
+                      }}
+                      role="button"
+                      tabIndex={0}
                       aria-pressed={isSelected}
                       aria-label={`${ch.book} ${ch.chapter}:${verse.verse}. ${verse.text}`}
                       className={cn(
-                        "inline scroll-mt-16 text-start cursor-pointer transition-all duration-200 rounded-sm -mx-0.5 px-0.5",
+                        "inline scroll-mt-16 whitespace-normal cursor-pointer transition-all duration-200 rounded-sm -mx-0.5 px-0.5 align-baseline",
                         "hover:bg-primary/8 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
                         isSelected && "bg-primary/10 ring-1 ring-primary/20",
                         hc && cn(hc.light, hc.dark),
@@ -79,7 +86,7 @@ export default function ChapterContent({
                       </sup>
                       {" "}
                       {verse.text}
-                    </button>
+                    </span>
                     <span className={cn(
                       "absolute -top-11 start-0 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-all duration-200 z-20 pointer-events-none translate-y-1 group-hover:translate-y-0 group-focus-within:translate-y-0",
                       isSelected && "max-sm:opacity-100 max-sm:translate-y-0",

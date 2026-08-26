@@ -11,11 +11,13 @@ const TimeAgo = (d: string) => {
   if (hrs < 24) return `${hrs}h ago`;
   return `${Math.floor(hrs / 24)}d ago`;
 };
+
 interface Props {
   history: any[];
   handleResumeStudy: (s: any) => void;
   handleReviewStudy: (id: string) => void;
 }
+
 export function LabHistoryList({ history, handleResumeStudy, handleReviewStudy }: Props) {
   return (
     <section className="max-w-2xl mx-auto w-full px-4 sm:px-6 py-6">
@@ -50,10 +52,13 @@ export function LabHistoryList({ history, handleResumeStudy, handleReviewStudy }
                       {statusLabel}
                     </Badge>
                   </div>
+                </div>
                 <ChevronRight className="w-4 h-4 text-muted-foreground/25 group-hover:text-muted-foreground/50 transition-colors shrink-0" />
               </div>
             </button>
           );
         })}
+      </div>
     </section>
   );
+}

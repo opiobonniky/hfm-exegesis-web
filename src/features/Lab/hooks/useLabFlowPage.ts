@@ -70,42 +70,72 @@ export function useLabFlowPage() {
         if (!cancelled) setVerseWords(words);
       } catch { if (!cancelled) setVerseWords([]); }
       finally { if (!cancelled) setWordsLoading(false); }
+    };
     fetchWords();
+    return () => { cancelled = true; };
   }, [lab.stage, lab.passageRef, passageVerses]);
   // Fetch book prologue when entering Learn stage
+  useEffect(() => {
     if (lab.stage !== "learn" || !lab.bookName) return;
+    let cancelled = false;
     const fetch = async () => {
       setPrologueLoading(true);
+      try {
         const p = await getBookPrologue(lab.bookName);
         if (!cancelled) setBookPrologue(p);
       } catch { if (!cancelled) setBookPrologue(null); }
       finally { if (!cancelled) setPrologueLoading(false); }
+    };
     fetch();
+    return () => { cancelled = true; };
   }, [lab.stage, lab.bookName]);
   // Fetch verse resources when entering Learn stage
+  useEffect(() => {
     if (lab.stage !== "learn" || !lab.passageRef) return;
+    let cancelled = false;
+    const fetch = async () => {
       setResourcesLoading(true);
+      try {
         const r = await getVerseResources(lab.bookName, lab.chapter, lab.verseStart);
         if (!cancelled) setVerseResources(r);
       } catch { if (!cancelled) setVerseResources(null); }
       finally { if (!cancelled) setResourcesLoading(false); }
+    };
+    fetch();
+    return () => { cancelled = true; };
   }, [lab.stage, lab.passageRef, lab.bookName, lab.chapter, lab.verseStart]);
   // Fetch translation comparison when entering Learn stage
+  useEffect(() => {
+    if (lab.stage !== "learn" || !lab.passageRef) return;
+    let cancelled = false;
+    const fetch = async () => {
       setTranslationsLoading(true);
       setTranslationsError(false);
+      try {
         const t = await getTranslationComparison(lab.bookName, lab.chapter, lab.verseStart, lab.verseEnd);
         if (!cancelled) setTranslations(t);
       } catch { if (!cancelled) { setTranslations(null); setTranslationsError(true); } }
       finally { if (!cancelled) setTranslationsLoading(false); }
+    };
+    fetch();
+    return () => { cancelled = true; };
   }, [lab.stage, lab.passageRef, lab.bookName, lab.chapter, lab.verseStart, lab.verseEnd]);
   // Preview text for passage selection
+  useEffect(() => {
     if (lab.stage !== "passage" || !lab.bookName || !lab.chapter || !lab.verseStart) { setPreviewText(""); return; }
+    let cancelled = false;
+    const fetch = async () => {
       setPreviewLoading(true);
+      try {
+        const data = await bibleApi.getChapter(lab.bookName, lab.chapter, lab.versionId);
         const end = lab.verseEnd || lab.verseStart;
         const filtered = data.filter((v: Verse) => v.verse >= lab.verseStart && v.verse <= end);
         setPreviewText(filtered.map((v: Verse) => `${v.verse}. ${v.text}`).join("\n"));
       } catch { if (!cancelled) setPreviewText(""); }
       finally { if (!cancelled) setPreviewLoading(false); }
+    };
+    fetch();
+    return () => { cancelled = true; };
   }, [lab.stage, lab.bookName, lab.chapter, lab.verseStart, lab.verseEnd, lab.versionId]);
   //  HANDLERS
   const handleWordTap = useCallback(async (strongsId: string) => {
@@ -130,14 +160,21 @@ export function useLabFlowPage() {
     return lines.join("\n");
   }, [lab]);
   const handleCopy = useCallback(async () => {
-    try { await navigator.clipboard.writeText(formatStudyAsText()); setCopied(true); setTimeout(() => setCopied(false), 2500); } catch {}
+    try { await navigator.clipboard.writeText(formatStudyAsText()); setCopied(true); setTimeout(() => setCopied(false), 2500); } catch { setCopied(false); }
   }, [formatStudyAsText]);
   const handleShare = useCallback(async () => {
     setSharing(true);
+    try {
       if (navigator.share) await navigator.share({ title: `Bible Study: ${lab.passageRef}`, text: formatStudyAsText() });
       else await navigator.clipboard.writeText(formatStudyAsText());
-    } catch {} finally { setSharing(false); }
+    } catch { setSharing(false); } finally { setSharing(false); }
   }, [lab.passageRef, formatStudyAsText]);
+  const showShortcutHint = useCallback((text: string) => {
+    setShortcutHint(text);
+    if (shortcutTimeoutRef.current) clearTimeout(shortcutTimeoutRef.current);
+    shortcutTimeoutRef.current = setTimeout(() => setShortcutHint(null), 2000);
+  }, []);
+  useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
       if (e.key === "?") { e.preventDefault(); setShowShortcuts((p) => !p); return; }
@@ -145,13 +182,11 @@ export function useLabFlowPage() {
       if ((e.ctrlKey || e.metaKey) && e.key === "s") { e.preventDefault(); if (lab.stage !== "passage" && lab.stage !== "completed") lab.saveCurrentProgress(); showShortcutHint("Progress saved!"); }
       if (lab.stage === "completed" && e.key.toLowerCase() === "r") { e.preventDefault(); lab.reset(); }
       const num = parseInt(e.key);
-      if (num >= 1 && num <= STAGE_ORDER.length) { const target = STAGE_ORDER[num - 1]; const currentIdx = STAGE_ORDER.indexOf(lab.stage as any); if (num - 1 < currentIdx) { lab.goToStage(target); showShortcutHint(`Jumped to ${target}`); } }
+      if (num >= 1 && num <= STAGE_ORDER.length) { const target = STAGE_ORDER[num - 1]; const currentIdx = STAGE_ORDER.indexOf(lab.stage); if (num - 1 < currentIdx) { lab.goToStage(target); showShortcutHint(`Jumped to ${target}`); } }
+    };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  const showShortcutHint = useCallback((text: string) => {
-    setShortcutHint(text);
-    if (shortcutTimeoutRef.current) clearTimeout(shortcutTimeoutRef.current);
-    shortcutTimeoutRef.current = setTimeout(() => setShortcutHint(null), 2000);
+  }, [lab, showShortcutHint]);
   return {
     navigate, lab, isRtl: false, // lab provides isRtl
     // Passage data

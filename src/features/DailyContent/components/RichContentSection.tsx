@@ -32,14 +32,19 @@ function Field({ label, icon, value, onChange, placeholder, rows = 4, required, 
       />
     </div>
   );
+}
+
 interface Props {
   explanation: string; setExplanation: (v: string) => void;
   application: string; setApplication: (v: string) => void;
   verseIntroduction: string; setVerseIntroduction: (v: string) => void;
   learnMore: string; setLearnMore: (v: string) => void;
   t: any; isRtl: boolean;
+}
+
 /** Required content fields (explanation, application, verse introduction) */
 export function RequiredContentFields(p: Props) {
+  return (
     <div className="space-y-5">
       <Field
         label={p.t.dailyVerse.explanation}
@@ -50,19 +55,35 @@ export function RequiredContentFields(p: Props) {
         rows={5}
         required
         isRtl={p.isRtl}
+      />
+      <Field
         label="Application"
         icon={<MessageSquare className="h-4 w-4 text-emerald-500" />}
         value={p.application}
         onChange={p.setApplication}
         placeholder="How should believers respond to this verse?"
         rows={4}
+        required
+        isRtl={p.isRtl}
+      />
+      <Field
         label="Verse Introduction"
         icon={<BookOpen className="h-4 w-4 text-blue-500" />}
         value={p.verseIntroduction}
         onChange={p.setVerseIntroduction}
         placeholder="Introduce the verse and its central purpose..."
+        required
+        isRtl={p.isRtl}
+      />
+      <Field
         label={p.t.dailyVerse.learnMore}
         icon={<Bookmark className="h-4 w-4 text-muted-foreground" />}
         value={p.learnMore}
         onChange={p.setLearnMore}
         placeholder={p.t.dailyVerse.learnMorePlaceholder}
+        rows={4}
+        isRtl={p.isRtl}
+      />
+    </div>
+  );
+}

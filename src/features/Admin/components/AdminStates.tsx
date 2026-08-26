@@ -21,6 +21,7 @@ export function AdminEmptyState({ icon, title, message, onAction, actionLabel }:
 }
 /** Loading skeleton grid for card-based listings */
 export function AdminLoadingGrid({ count = 6 }: { count?: number }) {
+  return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       {Array.from({ length: count }).map((_, i) => (
         <Card key={i}>
@@ -28,9 +29,14 @@ export function AdminLoadingGrid({ count = 6 }: { count?: number }) {
           <CardContent><Skeleton className="h-16 w-full" /></CardContent>
         </Card>
       ))}
+    </div>
+  );
+}
 /** Search bar with input + button */
 export function AdminSearchBar({ value, onChange, onSearch, placeholder = "Search..." }: {
   value: string; onChange: (v: string) => void; onSearch: () => void; placeholder?: string;
+}) {
+  return (
     <div className="flex items-center gap-3 mb-6">
       <div className="relative flex-1 max-w-md">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -38,3 +44,6 @@ export function AdminSearchBar({ value, onChange, onSearch, placeholder = "Searc
           onKeyDown={(e) => e.key === "Enter" && onSearch()} className="pl-9" />
       </div>
       <Button variant="outline" onClick={onSearch}>Search</Button>
+    </div>
+  );
+}

@@ -10,6 +10,8 @@ interface StageIndicatorProps {
   stages: Stage[];
   activeStage: number;
   onStageClick: (index: number) => void;
+}
+
 export function StageIndicator({ stages, activeStage, onStageClick }: StageIndicatorProps) {
   return (
     <div className="flex items-center justify-between w-full max-w-md mx-auto">
@@ -35,3 +37,4 @@ export function StageIndicator({ stages, activeStage, onStageClick }: StageIndic
       ))}
     </div>
   );
+}

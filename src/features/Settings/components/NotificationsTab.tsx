@@ -1,8 +1,5 @@
 import { Bell, BookOpen, Heart, Flame, Mail } from "lucide-react";
-import { Card } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Input } from "@/components/ui/input";
 
 interface NotificationsTabProps {
   notifications: Record<string, boolean>;
@@ -25,6 +22,7 @@ export function NotificationsTab({ notifications, onToggle }: NotificationsTabPr
         <div>
           <h3 className="font-semibold">Notification Preferences</h3>
           <p className="text-xs text-muted-foreground">Manage how you receive notifications</p>
+        </div>
       </div>
       {items.map(({ key, label, desc, icon: Icon, color }) => (
         <div key={key} className="flex items-center justify-between py-2">

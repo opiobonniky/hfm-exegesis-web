@@ -1,5 +1,5 @@
 // AdminDataTable — reusable table with loading/empty states
-import { Loader2, Inbox } from "lucide-react";
+import { Inbox } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { ReactNode } from "react";
 
@@ -18,7 +18,9 @@ interface Props<T> {
   emptyMessage?: string;
   emptyIcon?: ReactNode;
   onRowClick?: (item: T) => void;
-export function AdminDataTable<T extends Record<string, any>>({
+}
+
+export function AdminDataTable<T extends Record<string, unknown>>({
   columns, data, loading, keyField = "id", emptyMessage = "No data found", emptyIcon, onRowClick,
 }: Props<T>) {
   if (loading) {
@@ -29,9 +31,13 @@ export function AdminDataTable<T extends Record<string, any>>({
     );
   }
   if (data.length === 0) {
+    return (
       <div className="flex flex-col items-center py-12 text-center">
         {emptyIcon || <Inbox className="w-10 h-10 text-muted-foreground/30 mb-3" />}
         <p className="text-sm text-muted-foreground">{emptyMessage}</p>
+      </div>
+    );
+  }
   return (
     <div className="overflow-x-auto rounded-lg border">
       <table className="w-full text-sm">
@@ -47,7 +53,7 @@ export function AdminDataTable<T extends Record<string, any>>({
         <tbody>
           {data.map((item, idx) => (
             <tr
-              key={item[keyField] ?? idx}
+              key={String(item[keyField] ?? idx)}
               className={`border-b last:border-0 ${onRowClick ? "cursor-pointer hover:bg-muted/30" : ""}`}
               onClick={() => onRowClick?.(item)}
             >
@@ -62,3 +68,4 @@ export function AdminDataTable<T extends Record<string, any>>({
       </table>
     </div>
   );
+}

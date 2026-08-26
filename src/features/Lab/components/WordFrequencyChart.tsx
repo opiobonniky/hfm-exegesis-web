@@ -27,17 +27,21 @@ export function WordFrequencyChart({ data, onWordClick, mode, onModeChange, lang
               {m === "frequency" ? "Freq" : "POS"}
             </button>
           ))}
+        </div>
       </div>
       <div className="space-y-1">
         {data.slice(0, 20).map((item, i) => (
           <div key={i} className="flex items-center gap-2">
             <button onClick={() => item.strongsId && onWordClick(item.strongsId)} className="text-xs font-medium text-foreground hover:text-primary truncate w-20 text-right">
               {item.word}
+            </button>
             <div className="flex-1 h-4 bg-muted rounded overflow-hidden">
               <div className="h-full bg-primary/60 rounded" style={{ width: `${(item.count / maxCount) * 100}%` }} />
             </div>
             <span className="text-[10px] font-mono text-muted-foreground w-6 text-right">{item.count}</span>
           </div>
         ))}
+      </div>
     </div>
   );
+}

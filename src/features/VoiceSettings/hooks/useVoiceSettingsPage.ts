@@ -57,6 +57,7 @@ export function useVoiceSettingsPage() {
   const stopPreview = useCallback(() => { synthRef.current?.cancel(); setIsPlaying(false); }, []);
   const handleSave = useCallback(async () => {
     setSaving(true);
+    try {
       const res = await sendPostRequest("user", "update-voice-settings", settings);
       if (res.data?.returnCode === 200) {
         toast({ title: "Saved", description: "Voice settings updated" });
@@ -69,3 +70,4 @@ export function useVoiceSettingsPage() {
   const updateSetting = <K extends keyof VoiceSettingsData>(key: K, value: VoiceSettingsData[K]) =>
     setSettings((s) => ({ ...s, [key]: value }));
   return { loading, saving, isPlaying, settings, updateSetting, handlePreview, stopPreview, handleSave, navigate };
+}

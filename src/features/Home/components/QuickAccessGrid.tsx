@@ -1,6 +1,6 @@
 "use client";
 
-import { type LucideIcon, BookMarked, PenLine, History, Star, Heart } from "lucide-react";
+import { type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 interface QuickLink {
   label: string;
@@ -11,6 +11,8 @@ interface QuickLink {
 }
 interface QuickAccessGridProps {
   links: QuickLink[];
+}
+
 export default function QuickAccessGrid({ links }: QuickAccessGridProps) {
   return (
     <div className="grid grid-cols-2 gap-2">
@@ -33,3 +35,4 @@ export default function QuickAccessGrid({ links }: QuickAccessGridProps) {
       })}
     </div>
   );
+}

@@ -39,6 +39,9 @@ export function DailyContentCard({ item, onEdit, onDelete }: Props) {
           <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive"
             onClick={() => onDelete(item)}>
             <Trash2 className="w-4 h-4 text-foreground/60" />
+          </Button>
+        </div>
       </div>
     </div>
   );
+}

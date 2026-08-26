@@ -14,11 +14,13 @@ const COMPARISON = [
     { label: "Basic Notes", free: true, legacy: true, covenant: true },
     { label: "Legacy Ledger (full journal)", free: false, legacy: true, covenant: true },
     { label: "Journal Export", free: false, legacy: true, covenant: true },
+  ]},
   { category: "AI & Analytics", items: [
     { label: "Explain Bible & Study Notes", free: false, legacy: true, covenant: true },
     { label: "Prayers & Reflection", free: false, legacy: false, covenant: true },
     { label: "Advanced Analytics", free: false, legacy: false, covenant: true },
     { label: "Early Access Features", free: false, legacy: false, covenant: true },
+  ]},
 ];
 export function SowerFeatureComparison() {
   return (
@@ -56,6 +58,7 @@ export function SowerFeatureComparison() {
               ))}
             </tbody>
           </table>
+        </div>
       </div>
     </section>
   );

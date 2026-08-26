@@ -23,6 +23,7 @@ interface Props {
   saving: boolean;
   onSave: () => void;
   onClose: () => void;
+}
 export function ExegesisFormDialog({ open, editItem, form, onFormChange, saving, onSave, onClose }: Props) {
   const update = (patch: Partial<FormState>) => onFormChange(f => ({ ...f, ...patch }));
   return (
@@ -37,9 +38,11 @@ export function ExegesisFormDialog({ open, editItem, form, onFormChange, saving,
             <Label>Title *</Label>
             <Input placeholder="e.g., The Parable of the Sower" value={form.title} onChange={e => update({ title: e.target.value })} />
           </div>
+          <div className="space-y-2">
             <Label>Passage Reference *</Label>
             <Input placeholder="e.g., Matthew 13:1-23" value={form.passageReference} onChange={e => update({ passageReference: e.target.value })} />
             <p className="text-xs text-muted-foreground">Or build from components below:</p>
+          </div>
           <div className="grid grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label>Book</Label>
@@ -48,16 +51,23 @@ export function ExegesisFormDialog({ open, editItem, form, onFormChange, saving,
                 <SelectContent>{BIBLE_BOOKS.map(b => <SelectItem key={b} value={b}>{b}</SelectItem>)}</SelectContent>
               </Select>
             </div>
+            <div className="space-y-2">
               <Label>Chapter</Label>
               <Input type="number" min="1" placeholder="e.g., 13" value={form.chapter} onChange={e => update({ chapter: e.target.value })} />
+            </div>
+            <div className="space-y-2">
               <Label>Verses</Label>
               <div className="flex items-center gap-2">
                 <Input type="number" min="1" placeholder="Start" value={form.verseStart} onChange={e => update({ verseStart: e.target.value })} />
                 <span className="text-muted-foreground">–</span>
                 <Input type="number" min="1" placeholder="End" value={form.verseEnd} onChange={e => update({ verseEnd: e.target.value })} />
               </div>
+            </div>
+            <div className="space-y-2">
             <Label>Display Date</Label>
             <Input type="date" value={form.displayDate} onChange={e => update({ displayDate: e.target.value })} />
+            </div>
+          </div>
           <div className="space-y-2"><Label>Introduction</Label><Textarea placeholder="Opening context..." value={form.introduction} onChange={e => update({ introduction: e.target.value })} rows={3} /></div>
           <div className="space-y-2"><Label>Context Summary</Label><Textarea placeholder="Historical context..." value={form.contextSummary} onChange={e => update({ contextSummary: e.target.value })} rows={3} /></div>
           <div className="space-y-2"><Label>Teaching Body *</Label><Textarea placeholder="Main teaching..." value={form.teachingBody} onChange={e => update({ teachingBody: e.target.value })} rows={6} className="min-h-[150px]" /></div>
@@ -67,6 +77,7 @@ export function ExegesisFormDialog({ open, editItem, form, onFormChange, saving,
           <div className="flex items-center justify-between">
             <div><Label>Published</Label><p className="text-sm text-muted-foreground">Make this exegesis visible to users</p></div>
             <Switch checked={form.isPublished} onCheckedChange={v => update({ isPublished: v })} />
+          </div>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>Cancel</Button>
@@ -78,3 +89,4 @@ export function ExegesisFormDialog({ open, editItem, form, onFormChange, saving,
       </DialogContent>
     </Dialog>
   );
+}

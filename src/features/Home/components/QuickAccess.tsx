@@ -12,6 +12,7 @@ interface QuickAccessItem {
 interface QuickAccessProps {
   title?: string;
   items: QuickAccessItem[];
+}
 export default function QuickAccess({ title, items }: QuickAccessProps) {
   return (
     <div>
@@ -48,3 +49,4 @@ export default function QuickAccess({ title, items }: QuickAccessProps) {
       </div>
     </div>
   );
+}

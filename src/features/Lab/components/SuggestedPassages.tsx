@@ -31,5 +31,7 @@ export function SuggestedPassages({ onSelect }: SuggestedPassagesProps) {
             <p className="text-[10px] text-muted-foreground">{p.ref} — {p.desc}</p>
           </button>
         ))}
+      </div>
     </div>
   );
+}

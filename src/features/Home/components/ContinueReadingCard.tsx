@@ -32,12 +32,15 @@ export default function ContinueReadingCard({
           </p>
           <p className="text-sm font-semibold text-foreground truncate">
             {bookName} {chapter}
+          </p>
           {lastReadTime && (
             <p className="text-xs text-muted-foreground/60 mt-0.5">
               Last read · {lastReadTime}
             </p>
           )}
+        </div>
         <ChevronRight className="w-4 h-4 text-muted-foreground/30 shrink-0" />
       </div>
     </div>
   );
+}

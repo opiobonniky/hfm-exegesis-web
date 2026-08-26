@@ -20,9 +20,13 @@ const stageColors: Record<string, string> = {
   listen: "purple",
   learn: "amber",
   abide: "green",
+};
+
 interface LabStageCardProps {
   stage: LabStage;
   onClick: () => void;
+}
+
 export function LabStageCard({ stage, onClick }: LabStageCardProps) {
   const Icon = stageIcons[stage.type] || BookOpen;
   const color = stageColors[stage.type] || "blue";
@@ -38,7 +42,9 @@ export function LabStageCard({ stage, onClick }: LabStageCardProps) {
             {stage.completed && <Badge variant="success" className="text-xs">Done</Badge>}
           </div>
           <p className="text-sm text-muted-foreground line-clamp-1">{stage.description}</p>
+        </div>
         <ChevronRight className="w-5 h-5 text-muted-foreground shrink-0" />
       </CardContent>
     </Card>
   );
+}

@@ -84,7 +84,7 @@ const parseRef = (ref: string) => {
 
 // ── Component ──
 
-export default function WordDetailSheet({
+export function WordDetailSheet({
   open,
   onOpenChange,
   strongsId,
@@ -829,3 +829,5 @@ export default function WordDetailSheet({
     </Sheet>
   );
 }
+
+export default WordDetailSheet;

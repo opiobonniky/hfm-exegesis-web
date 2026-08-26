@@ -23,6 +23,8 @@ interface Props {
   finalThoughts: string; setFinalThoughts: (v: string) => void;
   takeaways: string; setTakeaways: (v: string) => void;
   isRtl: boolean;
+}
+
 export function StructuredContentSection(p: Props) {
   const fields: Field[] = [
     {
@@ -33,34 +35,44 @@ export function StructuredContentSection(p: Props) {
       hint: "One study per line: Word | Strong's ID | Definition",
       rows: 8,
     },
+    {
       label: "Practical Applications",
       icon: <ListChecks className="h-4 w-4 text-green-500" />,
       value: p.practicalApplications, onChange: p.setPracticalApplications,
       placeholder: "Respond promptly when God's direction is confirmed.",
       hint: "One application per line",
       rows: 7,
+    },
+    {
       label: "Key Themes",
       icon: <Sparkles className="h-4 w-4 text-amber-500" />,
       value: p.keyThemes, onChange: p.setKeyThemes,
       placeholder: "Immediate obedience",
       hint: "One theme per line",
       rows: 5,
+    },
+    {
       label: "Cross References",
       icon: <Link2 className="h-4 w-4 text-sky-500" />,
       value: p.crossReferences, onChange: p.setCrossReferences,
       placeholder: "Acts 13:2–3 — The Spirit calls and sends.",
       hint: "One reference per line",
       rows: 6,
+    },
+    {
       label: "Final Thoughts",
       icon: <BookMarked className="h-4 w-4 text-rose-500" />,
       value: p.finalThoughts, onChange: p.setFinalThoughts,
       placeholder: "Summarize the enduring truth of this verse...",
       rows: 4,
+    },
+    {
       label: "Takeaways",
       icon: <Lightbulb className="h-4 w-4 text-violet-500" />,
       value: p.takeaways, onChange: p.setTakeaways,
       placeholder: "God expects prompt obedience to clear direction.",
       hint: "One takeaway per line",
+    },
   ];
   return (
     <div className="space-y-5" dir={p.isRtl ? "rtl" : "ltr"}>
@@ -81,3 +93,4 @@ export function StructuredContentSection(p: Props) {
       ))}
     </div>
   );
+}

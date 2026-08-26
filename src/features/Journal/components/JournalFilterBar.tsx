@@ -64,12 +64,21 @@ export function JournalFilterBar({
                 </Select>
               </div>
             )}
+            <div>
                 <p className={labelCls}>Strong's ID</p>
                 <Input placeholder="e.g. G26, H7225" value={strongsId} onChange={(e) => setStrongsId(e.target.value)} className="h-9 text-xs rounded-xl bg-card dark:bg-stone-900 border-border dark:border-stone-800" autoComplete="off" />
-              <p className={labelCls}>Start Date</p>
-              <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="h-9 text-xs rounded-xl bg-card dark:bg-stone-900 border-border dark:border-stone-800" />
-              <p className={labelCls}>End Date</p>
-              <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="h-9 text-xs rounded-xl bg-card dark:bg-stone-900 border-border dark:border-stone-800" />
+            </div>
+            <div>
+                <p className={labelCls}>Start Date</p>
+                <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="h-9 text-xs rounded-xl bg-card dark:bg-stone-900 border-border dark:border-stone-800" />
+            </div>
+            <div>
+                <p className={labelCls}>End Date</p>
+                <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="h-9 text-xs rounded-xl bg-card dark:bg-stone-900 border-border dark:border-stone-800" />
+            </div>
+          </div>
+        </div>
       )}
     </>
   );
+}

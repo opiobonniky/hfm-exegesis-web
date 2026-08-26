@@ -46,6 +46,11 @@ export const BOOK_NAMES = [
   "James","1 Peter","2 Peter","1 John","2 John","3 John","Jude","Revelation",
 ];
 
+export const TESTAMENTS = [
+  { value: "Old", labelKey: "oldTestament" },
+  { value: "New", labelKey: "newTestament" },
+];
+
 export function getCategoryLabel(t: any, catValue: string): string {
   if (catValue === "all") return t.journal?.categoryAll || "All";
   const cat = CATEGORIES.find((c) => c.value === catValue);

@@ -60,7 +60,9 @@ export function useLabDictionaryPage() {
   const loadBookWords = useCallback(async (book: string, page = 0, append = false) => {
     if (!book) return;
     setBrowseLoading(true); if (!append) setBrowseLoaded(false);
+    try {
       const res = await sendGetRequest("strongs", `book-words/${encodeURIComponent(book)}`, { limit: BROWSE_PAGE_SIZE, offset: page * BROWSE_PAGE_SIZE });
+      if (res.returnCode === 200 && res.returnData) {
         const rd = res.returnData as any; const newData = rd.data || [];
         setBrowseWords((prev) => (append ? [...prev, ...newData] : newData));
         setBrowseTotal(rd.total ?? newData.length); setBrowseHasNext(!!rd.hasNext); setBrowsePage(page);
@@ -71,15 +73,21 @@ export function useLabDictionaryPage() {
   const loadVerseWords = useCallback(async (book: string, chapter: number, verse: number) => {
     if (!book || !chapter || !verse) return;
     setVerseWordsLoading(true); setVerseWordsLoaded(false);
+    try {
       const res = await sendPostRequest("strongs", "verse-unique-words", { bookName: book, chapter, verse, translation: "BSB" });
+      if (res.returnCode === 200 && res.returnData) {
         const rd = res.returnData as any; setVerseWords(rd.data || []); setVerseWordsTotal(rd.total ?? rd.data?.length ?? 0);
       } else { setVerseWords([]); setVerseWordsTotal(0); }
     } catch { setVerseWords([]); setVerseWordsTotal(0); }
     finally { setVerseWordsLoading(false); setVerseWordsLoaded(true); }
+  }, []);
+  useEffect(() => {
     const book = searchParams.get("book"); const chapter = searchParams.get("chapter"); const verse = searchParams.get("verse");
     if (book && chapter && verse) {
       const ch = parseInt(chapter, 10); const vs = parseInt(verse, 10);
       if (!isNaN(ch) && !isNaN(vs)) { setVerseBook(book); setVerseChapter(ch); setVerseNum(vs); setMode("verse"); loadVerseWords(book, ch, vs); }
+    }
+  }, [searchParams, loadVerseWords]);
   const handleBookChange = useCallback((book: string) => {
     setSelectedBook(book); setBrowsePage(0); setBrowseHasNext(false);
     if (book) {
@@ -94,7 +102,9 @@ export function useLabDictionaryPage() {
     return counts;
   }, [browseWords]);
   const searchLangCounts = useMemo(() => {
+    const counts: Record<string, number> = { all: 0 };
     for (const w of results) { const lang = w.language?.toLowerCase() || "other"; counts[lang] = (counts[lang] || 0) + 1; counts.all++; }
+    return counts;
   }, [results]);
   const chartData = useMemo(() => {
     const filtered = langFilter === "all" ? [...browseWords] : browseWords.filter((w) => w.language?.toLowerCase() === langFilter);
@@ -106,6 +116,7 @@ export function useLabDictionaryPage() {
       const result: Array<any> = [];
       for (const pos of posOrder) { if (!groups[pos]) continue; result.push(...groups[pos].sort((a, b) => (b.usageCount ?? 0) - (a.usageCount ?? 0)).slice(0, 5).map((w) => ({ word: w.originalWord || w.transliteration || w.strongsId, transliteration: w.transliteration, definition: w.shortDefinition, usageCount: w.usageCount ?? 0, strongsId: w.strongsId, language: w.language, partOfSpeech: pos }))); }
       return result;
+    }
     return validWords.sort((a, b) => (b.usageCount ?? 0) - (a.usageCount ?? 0)).slice(0, 20).map((w) => ({ word: w.originalWord || w.transliteration || w.strongsId, transliteration: w.transliteration, definition: w.shortDefinition, usageCount: w.usageCount ?? 0, strongsId: w.strongsId, language: w.language, partOfSpeech: w.partOfSpeech || "" }));
   }, [browseWords, chartMode, langFilter]);
   const openWordDialog = useCallback((strongsId: string, surfaceText?: string) => { setDialogStrongsId(strongsId); setDialogSurfaceText(surfaceText || ""); setDialogOpen(true); }, []);
@@ -113,6 +124,7 @@ export function useLabDictionaryPage() {
     setDetailLoading(true); setDetailOpen(true);
     try { const res = await sendGetRequest("strongs", word.strongsId, {}); if (res.returnCode === 200 && res.returnData) setSelectedWord(res.returnData as WordEntry); else setSelectedWord(word); }
     catch { setSelectedWord(word); } finally { setDetailLoading(false); }
+  }, []);
   const openWordDetailById = useCallback((strongsId: string) => { const word = browseWords.find((w) => w.strongsId === strongsId); if (word) openWordDetail(word); }, [browseWords, openWordDetail]);
   return {
     navigate, mode, setMode, searchQuery, setSearchQuery, results, loading, searched, resultTotal,

@@ -31,10 +31,13 @@ export function TemplatesDialog({ open, onOpenChange, templates, t, handleApplyT
             </button>
           )) : FALLBACKS(t).map((tpl) => (
             <button key={tpl.id} onClick={() => applyTemplate(tpl.id)}
+              className="w-full text-left px-4 py-3 rounded-xl border border-border dark:border-stone-800 bg-card dark:bg-stone-900 hover:bg-muted dark:hover:bg-stone-800 transition-colors">
               <p className="font-semibold text-sm text-foreground dark:text-stone-200">{tpl.emoji} {tpl.title}</p>
               <p className="text-xs text-muted-foreground dark:text-muted-foreground/70 mt-0.5">{tpl.desc}</p>
+            </button>
           ))}
         </div>
       </DialogContent>
     </Dialog>
   );
+}

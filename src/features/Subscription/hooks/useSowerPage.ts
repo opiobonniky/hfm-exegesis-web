@@ -60,3 +60,4 @@ export function useSowerPage() {
     openFaq, setOpenFaq, isPayingUser, tierLabel, filteredPlans,
     handleSubscribe, handleManageSubscription, navigate,
   };
+}

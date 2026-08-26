@@ -42,6 +42,7 @@ export function useUserDevotions() {
     );
   }, [devotion, toast]);
   const handleShare = useCallback(async () => {
+    if (!devotion) return;
     const text = `${devotion.title}\n\n${devotion.content}\n\nvia Exegesis Bible App`;
     if (navigator.share) {
       try { await navigator.share({ title: devotion.title, text }); } catch {}
@@ -50,6 +51,7 @@ export function useUserDevotions() {
         toast({ title: "Copied to clipboard" })
       );
     }
+  }, [devotion, toast]);
   return {
     devotion, loading, refreshing, liked, setLiked,
     scrolled, scrollRef, navigate,

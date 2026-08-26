@@ -24,10 +24,15 @@ export default function FontSizeControls({
         A−
       </button>
       <span aria-live="polite" className="text-[10px] font-mono text-muted-foreground w-7 text-center">{fontSize}</span>
+      <button
         onClick={() => onFontSizeChange(Math.min(max, fontSize + step))}
         disabled={fontSize >= max}
         aria-label="Increase font size"
+        type="button"
+        className="h-9 min-w-9 text-xs font-bold text-muted-foreground hover:text-foreground transition-colors rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-40"
+      >
         A+
+      </button>
     </div>
   );
 }
