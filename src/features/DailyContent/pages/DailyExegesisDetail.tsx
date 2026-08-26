@@ -6,37 +6,10 @@ import {
   Clock, CheckCircle, XCircle, Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { TextBlock, TagsBlock } from "../components";
+import { fmtDate } from "../helpers/contentDetailHelpers";
 
-// ── Section block ──
-function DetailSection({ label, value, icon: Icon }: { label: string; value?: string | null; icon?: any }) {
-  if (!value) return null;
-  return (
-    <div className="space-y-1">
-      <div className="flex items-center gap-1.5">
-        {Icon && <Icon className="w-3.5 h-3.5 text-primary" />}
-        <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{label}</h3>
-      </div>
-      <p className="text-sm leading-relaxed text-foreground whitespace-pre-line">{value}</p>
-    </div>
-  );
-}
-
-// ── Helpers ──
-const fmtDate = (d: string | null) => {
-  if (!d) return null;
-  try { return new Date(d).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }); }
-  catch { return d; }
-};
-
-const parseTags = (val: any): string[] => {
-  if (!val) return [];
-  if (Array.isArray(val)) return val.map(String);
-  return String(val).split(",").map(t => t.trim()).filter(Boolean);
-};
-
-// ── Main page ──
 export default function DailyExegesisDetail() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
@@ -58,21 +31,22 @@ export default function DailyExegesisDetail() {
 
   return (
     <div className="min-h-full bg-background">
-      {/* Header */}
       <header className="sticky top-0 z-30 bg-background/95 backdrop-blur-sm border-b border-border">
         <div className="flex items-center gap-3 px-4 sm:px-6 py-3">
           <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate(-1)}>
-            <ArrowLeft className="h-4 h-4" />
+            <ArrowLeft className="h-4 w-4" />
           </Button>
           <div className="flex-1 min-w-0">
             <h1 className="text-lg font-bold truncate">{exegesis.title || "Daily Exegesis"}</h1>
             <p className="text-xs text-muted-foreground">{fmtDate(exegesis.displayDate)}</p>
           </div>
+          <Button variant="outline" size="sm" onClick={() => navigate(`/add-daily-exegesis`, { state: { exegesis } })}>
+            <Edit3 className="w-3.5 h-3.5 mr-1.5" /> Edit
+          </Button>
         </div>
       </header>
 
-      <div className="px-4 sm:px-6 py-6 max-w-3xl mx-auto space-y-5">
-        {/* Title + status */}
+      <div className="px-4 sm:px-6 py-6 max-w-3xl mx-auto space-y-6">
         <div className="space-y-2">
           <h2 className="text-2xl font-bold">{exegesis.title}</h2>
           <div className="flex items-center gap-2 flex-wrap">
@@ -83,62 +57,29 @@ export default function DailyExegesisDetail() {
           </div>
         </div>
 
-        <div className="h-px bg-border" />
-
-        {/* Passage */}
-        <Card>
-          <CardContent className="p-5 space-y-4">
-            <DetailSection label="Passage Reference" value={exegesis.passageReference} icon={BookOpen} />
-          </CardContent>
-        </Card>
-
-        {/* Teaching Body */}
-        <Card>
-          <CardContent className="p-5 space-y-4">
-            <h3 className="text-sm font-bold text-primary">Teaching</h3>
-            <DetailSection label="Teaching Body" value={exegesis.teachingBody} icon={MessageSquare} />
-          </CardContent>
-        </Card>
-
-        {/* Introduction & Context */}
-        <Card>
-          <CardContent className="p-5 space-y-4">
-            <h3 className="text-sm font-bold text-primary">Introduction & Context</h3>
-            <DetailSection label="Introduction" value={exegesis.introduction} icon={Lightbulb} />
-            <DetailSection label="Context Summary" value={exegesis.contextSummary} icon={Layers} />
-          </CardContent>
-        </Card>
-
-        {/* Application & Prayer */}
-        <Card>
-          <CardContent className="p-5 space-y-4">
-            <h3 className="text-sm font-bold text-primary">Application & Prayer</h3>
-            <DetailSection label="Application" value={exegesis.application} icon={Tag} />
-            <DetailSection label="Prayer" value={exegesis.prayer} icon={BookMarked} />
-          </CardContent>
-        </Card>
-
-        {/* Tags */}
-        {exegesis.tags && (
-          <Card>
-            <CardContent className="p-5">
-              <div className="flex items-center gap-2 flex-wrap">
-                <Tag className="w-3.5 h-3.5 text-primary" />
-                <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Tags</h3>
-              </div>
-              <div className="flex items-center gap-2 flex-wrap mt-2">
-                {parseTags(exegesis.tags).map((tag, i) => (
-                  <Badge key={i} variant="outline" className="text-xs">{tag}</Badge>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Audit */}
-        <div className="flex items-center gap-4 text-xs text-muted-foreground pt-2">
-          <span><Clock className="w-3 h-3 inline mr-1" />Created {fmtDate(exegesis.createdOn) || "—"}</span>
+        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+          <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> {fmtDate(exegesis.displayDate)}</span>
+          {exegesis.createdOn && <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> Created {fmtDate(exegesis.createdOn)}</span>}
         </div>
+
+        <div className="h-px bg-border/40" />
+
+        <div className="space-y-1">
+          <TextBlock label="Passage Reference" value={exegesis.passageReference} icon={BookOpen} />
+          <TextBlock label="Teaching Body" value={exegesis.teachingBody} icon={MessageSquare} />
+        </div>
+
+        <div className="space-y-1">
+          <TextBlock label="Introduction" value={exegesis.introduction} icon={Lightbulb} />
+          <TextBlock label="Context Summary" value={exegesis.contextSummary} icon={Layers} />
+        </div>
+
+        <div className="space-y-1">
+          <TextBlock label="Application" value={exegesis.application} icon={Tag} />
+          <TextBlock label="Prayer" value={exegesis.prayer} icon={BookMarked} />
+        </div>
+
+        <TagsBlock tags={exegesis.tags} />
       </div>
     </div>
   );

@@ -15,38 +15,7 @@ import {
 } from "@/utilities/bibleUtils";
 import { BIBLE_VERSIONS } from "@/assets/bibleVersion/json/bibleVersions";
 import type { DailyVersePayload } from "../types";
-
-/** Parse a JSON array/string into newline-separated text for textarea display */
-const parseStructuredField = (val: any): string => {
-  if (!val) return "";
-  if (Array.isArray(val)) {
-    return val.map((item: any) => {
-      if (typeof item === "object" && item !== null) {
-        if (item.word && item.strongs && item.definition) {
-          return `${item.word} | ${item.strongs} | ${item.definition}`;
-        }
-        return JSON.stringify(item);
-      }
-      return String(item);
-    }).join("\n");
-  }
-  const str = String(val);
-  try {
-    const p = JSON.parse(str);
-    if (Array.isArray(p)) {
-      return p.map((item: any) => {
-        if (typeof item === "object" && item !== null) {
-          if (item.word && item.strongs && item.definition) {
-            return `${item.word} | ${item.strongs} | ${item.definition}`;
-          }
-          return JSON.stringify(item);
-        }
-        return String(item);
-      }).join("\n");
-    }
-  } catch { /* not JSON */ }
-  return str;
-};
+import { parseStructuredField } from "../helpers/contentDetailHelpers";
 
 /** All form fields in one object */
 export interface VerseFormFields {

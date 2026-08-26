@@ -25,7 +25,7 @@ const FALLBACK: DailyExegesis = {
 
 export default function DailyExegesisPage() {
   const p = useDailyExegesisPage();
-  const { navigate, t, isRtl, loading, error, exegesis, series, refresh, setExegesis, loadExegesis } = p;
+  const { navigate, t, isRtl, loading, error, exegesis, series, refresh } = p;
   const item = exegesis ?? FALLBACK;
   const passage = useMemo(() => parsePassage(item.passageReference), [item.passageReference]);
   const isUpcoming = useMemo(() => { try { return new Date(item.displayDate) >= new Date(new Date().toDateString()); } catch { return false; } }, [item.displayDate]);
@@ -63,13 +63,13 @@ export default function DailyExegesisPage() {
     <div className="min-h-screen flex flex-col bg-background" dir={isRtl ? "rtl" : "ltr"}>
       <ExegesisHeader onBack={() => navigate(-1)} t={t} />
 
-      <ExegesisHero item={item} series={series} onSelect={setExegesis} onOpenBible={openInBible}
+      <ExegesisHero item={item} series={series} onSelect={() => {}} onOpenBible={openInBible}
         displayDate={fmtDate(item.displayDate, "long")} isUpcoming={isUpcoming} canOpenBible={!!passage} />
 
       <main className="flex-1 overflow-y-auto">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6">
           {error && (
-            <Button variant="outline" onClick={loadExegesis} className="w-full mb-4 flex items-center gap-2 justify-center">
+            <Button variant="outline" onClick={refresh} className="w-full mb-4 flex items-center gap-2 justify-center">
               <RefreshCcw className="w-4 h-4" /> {error}
             </Button>
           )}

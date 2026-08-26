@@ -20,3 +20,5 @@ export { ExegesisContent } from "./ExegesisContent";
 export { DailyContentListItem } from "./DailyContentListItem";
 export { DailyContentEmptyState } from "./DailyContentEmptyState";
 export { DailyContentHeader } from "./DailyContentHeader";
+export { SectionLabel, TextBlock, ListBlock, WordStudiesBlock, TagsBlock } from "./ContentDetailBlocks";
+export { CollapsibleSection } from "./CollapsibleSection";
