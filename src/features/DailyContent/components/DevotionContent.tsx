@@ -1,6 +1,6 @@
 import { BookOpen, Calendar, Heart, Copy, Share2, Lightbulb, GraduationCap, BookMarked, Sparkles, ScrollText, ListChecks } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { VerseSection, SubLabel, NumberedList, BulletList, WordStudyList, BackgroundSection, parseList } from "./DailyVerseSections";
+import { VerseSection, SubLabel, NumberedList, BulletList, WordStudyList, BackgroundSection, parseList, parseWordStudies } from "./DailyVerseSections";
 import { fmtDate } from "../helpers";
 
 interface DevotionData {
@@ -18,7 +18,7 @@ interface Props {
 
 export function DevotionContent({ devotion, accent = "hsl(var(--primary))", liked, onCopy, onShare, onLike }: Props) {
   const verseRef = devotion.bookName ? `${devotion.bookName} ${devotion.chapter}:${devotion.verseNumber}` : null;
-  const wordStudies = parseList(devotion.wordStudies);
+  const wordStudies = parseWordStudies(devotion.wordStudies);
   const practicalApps = parseList(devotion.practicalApplications);
   const keyThemes = parseList(devotion.keyThemes);
   const crossRefs = parseList(devotion.crossReferences);

@@ -88,6 +88,15 @@ export function useJournalPageFull() {
     if (selectedIds.size === entries.length) setSelectedIds(new Set());
     else setSelectedIds(new Set(entries.map((e) => e.id)));
   }, [entries, selectedIds.size]);
+  const exitSelectionMode = useCallback(() => { setSelectionMode(false); setSelectedIds(new Set()); }, []);
+  const selectAll = useCallback(() => {
+    if (selectedIds.size === entries.length) setSelectedIds(new Set());
+    else setSelectedIds(new Set(entries.map((e) => e.id)));
+  }, [entries, selectedIds.size]);
+  const clearSelection = useCallback(() => setSelectedIds(new Set()), []);
+  const hasActiveFilters = !!(search || category || bookName || source || strongsId || startDate || endDate);
+  const clearAllFilters = useCallback(() => { setSearch(""); setCategory(""); setBookName(""); setSource(""); setStrongsId(""); setStartDate(null); setEndDate(null); }, []);
+  const renderEntry = useCallback((entry: any) => null, []);
   return {
     t, isRtl, navigate, userInfo, isPayingUser, handleTierBadgeClick, sowerPortalLoading,
     entries, stats, loading, page, setPage, totalPages, hasNext, hasPrevious,
@@ -96,6 +105,8 @@ export function useJournalPageFull() {
     viewMode, setViewMode, deleteDialog, setDeleteDialog, deleting, handleDelete,
     showExportModal, setShowExportModal, showFilters, setShowFilters,
     selectionMode, setSelectionMode, selectedIds, setSelectedIds, toggleSelectAll,
+    exitSelectionMode, selectAll, clearSelection,
+    hasActiveFilters, clearAllFilters, setSearchDebounced, renderEntry,
     refresh: () => loadEntries(page),
   };
 }

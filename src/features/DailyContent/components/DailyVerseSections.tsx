@@ -11,9 +11,39 @@ export const parseDate = (d: unknown): string => {
   }
   return new Date().toISOString();
 };
-export const parseList = (raw?: string | null): unknown[] => {
+export const parseList = (raw?: string | null): string[] => {
   if (!raw) return [];
-  try { const parsed: unknown = JSON.parse(raw); return Array.isArray(parsed) ? parsed : []; } catch { return []; }
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.map((item) => {
+      if (typeof item === "string") return item;
+      if (item && typeof item === "object") {
+        const obj = item as Record<string, unknown>;
+        if (obj.word) return `${obj.word}${obj.strongs ? " | " + obj.strongs : ""}${obj.definition ? " | " + obj.definition : ""}`;
+        return JSON.stringify(item);
+      }
+      return String(item);
+    });
+  } catch {
+    return raw.split(/[\n]+/).map((l) => l.trim()).filter(Boolean);
+  }
+};
+export const parseWordStudies = (raw?: string | null): WordStudy[] => {
+  if (!raw) return [];
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.map((item) => {
+      if (item && typeof item === "object") {
+        const obj = item as Record<string, unknown>;
+        return { word: String(obj.word || ""), strongs: obj.strongs ? String(obj.strongs) : undefined, definition: obj.definition ? String(obj.definition) : undefined };
+      }
+      return { word: String(item) };
+    });
+  } catch {
+    return raw.split(/[\n]+/).filter(Boolean).map((line) => ({ word: line }));
+  }
 };
 interface SectionProps { label: string; icon: React.ElementType; accent?: string; count?: number; children: ReactNode; }
 export function VerseSection({ label, icon: Icon, accent = "hsl(var(--primary))", count, children }: SectionProps) {

@@ -66,6 +66,9 @@ export interface UserDashboardActivity {
   title: string;
   description: string;
   updatedOn: string;
+  bookName?: string;
+  chapter?: number;
+  verseNumber?: number;
 }
 
 export interface UserDashboardSession {

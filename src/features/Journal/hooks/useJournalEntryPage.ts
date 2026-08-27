@@ -9,8 +9,8 @@ import { getVerseText } from "@/utilities/bibleUtils";
 const getTestamentForBook = (book: string): "Old" | "New" =>
   getBooksByTestament("Old").includes(book) ? "Old" : "New";
 
-interface JournalEntryData { id: string; title: string; content: string; mood: string; tags: string; bookName: string; chapter: string; verseNumber: string; isPrivate: boolean; prayers: string; application: string; learnings: string; }
-const DEFAULT_ENTRY: JournalEntryData = { id: "", title: "", content: "", mood: "neutral", tags: "", bookName: "", chapter: "", verseNumber: "", isPrivate: true, prayers: "", application: "", learnings: "" };
+interface JournalEntryData { id: string; title: string; content: string; mood: string; tags: string; bookName: string; chapter: string; verseNumber: string; isPrivate: boolean; prayers: string; application: string; learnings: string; category: string; gratitude: string; isFavorite: boolean; isPublished: boolean; }
+const DEFAULT_ENTRY: JournalEntryData = { id: "", title: "", content: "", mood: "neutral", tags: "", bookName: "", chapter: "", verseNumber: "", isPrivate: true, prayers: "", application: "", learnings: "", category: "general", gratitude: "", isFavorite: false, isPublished: true };
 export function useJournalEntryPage() {
   const navigate = useNavigate();
   const { entryId } = useParams<{ entryId: string }>();
@@ -78,9 +78,18 @@ export function useJournalEntryPage() {
     finally { setSaving(false); }
   }, [entry, isEditing, entryId, toast, navigate]);
   const updateEntry = useCallback((field: keyof JournalEntryData, value: any) => setEntry((prev) => ({ ...prev, [field]: value })), []);
+  const handleApplyTemplate = useCallback((template: any) => {
+    if (template.prompts?.length) {
+      setEntry((prev) => ({ ...prev, content: prev.content ? prev.content + "\n\n" + template.prompts.join("\n\n") : template.prompts.join("\n\n") }));
+    }
+    setShowTemplates(false);
+  }, [setEntry, setShowTemplates]);
+  const applyTemplate = handleApplyTemplate;
   return {
     t, isRtl, navigate, isEditing, isNewEntry, entry, setEntry, updateEntry,
+    updateField: updateEntry,
     loading, saving, handleSave, testament, setTestament,
     books, chapters, verses, verseText, templates, showTemplates, setShowTemplates,
+    handleApplyTemplate, applyTemplate,
   };
 }

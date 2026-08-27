@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { sendGetRequest, sendPostRequest } from "@/services/api";
-import type { StrongsWordEntry } from "@/services/strongsApi";
+import type { StrongsEntry as StrongsWordEntry } from "@/services/strongsApi";
 
 type WordEntry = StrongsWordEntry;
 type Mode = "search" | "browse" | "verse";
@@ -69,7 +69,7 @@ export function useLabDictionaryPage() {
       } else { if (!append) { setBrowseWords([]); setBrowseTotal(0); } setBrowseHasNext(false); }
     } catch { if (!append) { setBrowseWords([]); setBrowseTotal(0); } setBrowseHasNext(false); }
     finally { setBrowseLoading(false); setBrowseLoaded(true); }
-  }, [book]);
+  }, []);
   const loadVerseWords = useCallback(async (book: string, chapter: number, verse: number) => {
     if (!book || !chapter || !verse) return;
     setVerseWordsLoading(true); setVerseWordsLoaded(false);

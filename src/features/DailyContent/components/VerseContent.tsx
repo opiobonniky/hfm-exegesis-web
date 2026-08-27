@@ -1,7 +1,7 @@
 import { BookOpen, Heart, Copy, Share2, Lightbulb, GraduationCap, BookMarked, Sparkles, ScrollText, ListChecks } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { VerseSection, SubLabel, NumberedList, BulletList, WordStudyList, BackgroundSection, parseList } from "./DailyVerseSections";
+import { VerseSection, SubLabel, NumberedList, BulletList, WordStudyList, BackgroundSection, parseList, parseWordStudies } from "./DailyVerseSections";
 import { fmtDate, isToday } from "../helpers";
 
 interface VerseData {
@@ -17,7 +17,7 @@ interface Props {
   onCopy: () => void; onShare: () => void; onLike: () => void;
 }
 export function VerseContent({ verse, accent = "hsl(var(--primary))", liked, onCopy, onShare, onLike }: Props) {
-  const wordStudies = parseList(verse.wordStudies);
+  const wordStudies = parseWordStudies(verse.wordStudies);
   const practicalApps = parseList(verse.practicalApplications);
   const keyThemes = parseList(verse.keyThemes);
   const crossRefs = parseList(verse.crossReferences);

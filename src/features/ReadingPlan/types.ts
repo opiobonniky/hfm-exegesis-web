@@ -1,18 +1,5 @@
 // ─── Reading Plan Types ────────────────────────────────────────────────────────
 
-export interface ReadingPlanListItem {
-  id: number;
-  title: string;
-  description: string;
-  duration: number;
-  status: string;
-  startDate: string;
-  endDate: string;
-  assignedUsers: number;
-  completionRate: number;
-  createdAt: string;
-}
-
 export interface ReadingPlan {
   plan_id: string;
   planId?: string;
@@ -77,18 +64,6 @@ export interface DayAssignment {
   exists?: boolean;
 }
 
-export interface ReadingPlanResponse {
-  content: ReadingPlan[];
-  currentPage: number;
-  pageSize: number;
-  totalElements: number;
-  totalPages: number;
-  hasNext: boolean;
-  hasPrevious: boolean;
-  isFirst: boolean;
-  isLast: boolean;
-}
-
 export interface UserPlanItem {
   planId: string;
   planName: string;
@@ -96,15 +71,4 @@ export interface UserPlanItem {
   totalDays: number;
   isCompleted: boolean;
   streak: number;
-}
-
-export interface BrowsePlanItem {
-  planId: string;
-  title: string;
-  description: string;
-  category: string;
-  difficulty: string;
-  totalDays: number;
-  isActive: boolean;
-  questionsEnabled: boolean;
 }

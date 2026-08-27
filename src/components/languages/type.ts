@@ -2025,5 +2025,26 @@ export interface Translations {
     foundersQuoteAttribution: string;
     foundersCta: string;
   };
+
+  /** Home page */
+  home?: {
+    goodMorning?: string;
+    goodAfternoon?: string;
+    goodEvening?: string;
+    greetingMessage?: string;
+    labCardTitle?: string;
+    labDurationHint?: string;
+    labCardSubtitle?: string;
+    labStartStudy?: string;
+    dailyDevotionTitle?: string;
+    readDevotion?: string;
+    [key: string]: string | undefined;
+  };
+
+  /** Bible shared */
+  bible?: {
+    dailyDevotionalTitle?: string;
+    [key: string]: string | undefined;
+  };
 }
 

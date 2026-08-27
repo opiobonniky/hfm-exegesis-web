@@ -67,6 +67,9 @@ export interface JournalStats {
   longestStreak: number;
   averageWordsPerEntry: number;
   lastEntryDate: string | null;
+  favoriteCount?: number;
+  entriesThisWeek?: number;
+  entriesThisMonth?: number;
 }
 
 export interface JournalEntryFormData {

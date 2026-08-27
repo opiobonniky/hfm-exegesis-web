@@ -46,18 +46,19 @@ export function useLabFlowPage() {
     const fetchVerses = async () => {
       setVersesLoading(true);
       try {
-        const data = await bibleApi.getChapter(lab.bookName, lab.chapter, lab.versionId);
+        const verseData = await bibleApi.getVerses("BSB", lab.bookName, lab.chapter);
         if (cancelled) return;
+        const data = verseData.verses || [];
         const filtered = lab.verseEnd
-          ? data.filter((v: Verse) => v.verse >= lab.verseStart && v.verse <= lab.verseEnd)
-          : data.filter((v: Verse) => v.verse === lab.verseStart);
+          ? data.filter((v: Verse) => (v.verse ?? v.verseNumber) >= lab.verseStart && (v.verse ?? v.verseNumber) <= lab.verseEnd)
+          : data.filter((v: Verse) => (v.verse ?? v.verseNumber) === lab.verseStart);
         setPassageVerses(filtered);
       } catch { if (!cancelled) setPassageVerses([]); }
       finally { if (!cancelled) setVersesLoading(false); }
     };
     fetchVerses();
     return () => { cancelled = true; };
-  }, [lab.bookName, lab.chapter, lab.verseStart, lab.verseEnd, lab.stage, lab.versionId]);
+  }, [lab.bookName, lab.chapter, lab.verseStart, lab.verseEnd, lab.stage]);
   // Fetch verse words (Strong's) when entering Learn stage
   useEffect(() => {
     if (lab.stage !== "learn" || !lab.passageRef || passageVerses.length === 0) return;
@@ -127,16 +128,17 @@ export function useLabFlowPage() {
     const fetch = async () => {
       setPreviewLoading(true);
       try {
-        const data = await bibleApi.getChapter(lab.bookName, lab.chapter, lab.versionId);
+        const verseData = await bibleApi.getVerses("BSB", lab.bookName, lab.chapter);
+        const data = verseData.verses || [];
         const end = lab.verseEnd || lab.verseStart;
-        const filtered = data.filter((v: Verse) => v.verse >= lab.verseStart && v.verse <= end);
-        setPreviewText(filtered.map((v: Verse) => `${v.verse}. ${v.text}`).join("\n"));
+        const filtered = data.filter((v: Verse) => (v.verse ?? v.verseNumber) >= lab.verseStart && (v.verse ?? v.verseNumber) <= end);
+        setPreviewText(filtered.map((v: Verse) => `${v.verse ?? v.verseNumber}. ${v.text}`).join("\n"));
       } catch { if (!cancelled) setPreviewText(""); }
       finally { if (!cancelled) setPreviewLoading(false); }
     };
     fetch();
     return () => { cancelled = true; };
-  }, [lab.stage, lab.bookName, lab.chapter, lab.verseStart, lab.verseEnd, lab.versionId]);
+  }, [lab.stage, lab.bookName, lab.chapter, lab.verseStart, lab.verseEnd]);
   //  HANDLERS
   const handleWordTap = useCallback(async (strongsId: string) => {
     setWordModalOpen(true);
@@ -180,7 +182,7 @@ export function useLabFlowPage() {
       if (e.key === "?") { e.preventDefault(); setShowShortcuts((p) => !p); return; }
       if ((e.ctrlKey || e.metaKey) && e.key === "Enter") { e.preventDefault(); if (lab.stage === "look") lab.advanceLook(); else if (lab.stage === "listen") lab.advanceListen(); else if (lab.stage === "learn") lab.advanceLearn(); else if (lab.stage === "abide") lab.saveAbide(); }
       if ((e.ctrlKey || e.metaKey) && e.key === "s") { e.preventDefault(); if (lab.stage !== "passage" && lab.stage !== "completed") lab.saveCurrentProgress(); showShortcutHint("Progress saved!"); }
-      if (lab.stage === "completed" && e.key.toLowerCase() === "r") { e.preventDefault(); lab.reset(); }
+      if (lab.stage === "completed" && e.key.toLowerCase() === "r") { e.preventDefault(); lab.resetAll(); }
       const num = parseInt(e.key);
       if (num >= 1 && num <= STAGE_ORDER.length) { const target = STAGE_ORDER[num - 1]; const currentIdx = STAGE_ORDER.indexOf(lab.stage); if (num - 1 < currentIdx) { lab.goToStage(target); showShortcutHint(`Jumped to ${target}`); } }
     };

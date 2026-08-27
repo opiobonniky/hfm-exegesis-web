@@ -25,6 +25,8 @@ export interface Chapter {
 
 export interface Verse {
   verseNumber: number;
+  /** Alias for verseNumber — used by Lab components */
+  verse?: number;
   text: string;
 }
 
