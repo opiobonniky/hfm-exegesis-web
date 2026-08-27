@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { Plus, Trash2, Loader2, BookOpen, FileText } from "lucide-react";
+import { Plus, Trash2, Loader2, BookOpen } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,73 +10,15 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
-import { useLanguage } from "@/components/languages/languageProvider";
-import { sendPostRequest } from "@/services/api";
-
-interface JournalTemplate {
-  id: number;
-  name: string;
-  description: string | null;
-  category: string;
-  prompts: string[];
-  isActive: boolean;
-  isDefault: boolean;
-}
-
-const CATEGORIES = [
-  { value: "general", key: "categoryGeneral" },
-  { value: "study", key: "categoryStudy" },
-  { value: "prayer", key: "categoryPrayer" },
-  { value: "gratitude", key: "categoryGratitude" },
-  { value: "reflection", key: "categoryReflection" },
-  { value: "application", key: "categoryApplication" },
-];
-
-const getCatLabel = (t: any, v: string) => {
-  const c = CATEGORIES.find((x) => x.value === v);
-  return c ? (t.journal as any)?.[c.key] || v : v;
-};
+import { useJournalTemplatesPage, CATEGORIES, getCatLabel } from "../hooks/useJournalTemplatesPage";
 
 export default function JournalTemplates() {
-  const { t } = useLanguage();
-  const [templates, setTemplates] = useState<JournalTemplate[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [deleteDialog, setDeleteDialog] = useState<JournalTemplate | null>(null);
-  const [deleting, setDeleting] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [formData, setFormData] = useState({ name: "", description: "", category: "general", prompts: [""] as string[], isActive: true });
-
-  const loadTemplates = useCallback(async () => {
-    setLoading(true);
-    try {
-      const res = await sendPostRequest("journal", "get-templates", {});
-      if (res.returnCode === 200 && res.returnData) setTemplates(res.returnData);
-    } catch {} finally { setLoading(false); }
-  }, []);
-
-  useEffect(() => { loadTemplates(); }, [loadTemplates]);
-
-  const handleSave = useCallback(async () => {
-    if (!formData.name.trim() || formData.prompts.filter(p => p.trim()).length === 0) return;
-    setSaving(true);
-    try {
-      const res = await sendPostRequest("journal", "save-template", {
-        ...formData, prompts: formData.prompts.filter(p => p.trim()),
-      });
-      if (res.returnCode === 200) { setDialogOpen(false); loadTemplates(); }
-    } catch {} finally { setSaving(false); }
-  }, [formData, loadTemplates]);
-
-  const handleDelete = useCallback(async () => {
-    if (!deleteDialog) return;
-    setDeleting(true);
-    try {
-      await sendPostRequest("journal", "delete-template", { id: deleteDialog.id });
-      setDeleteDialog(null); loadTemplates();
-    } catch {} finally { setDeleting(false); }
-  }, [deleteDialog, loadTemplates]);
+  const {
+    t, templates, loading, dialogOpen, setDialogOpen,
+    deleteDialog, setDeleteDialog, deleting, saving,
+    formData, setFormData, saveDisabled,
+    handleSave, handleDelete, openAddDialog,
+  } = useJournalTemplatesPage();
 
   if (loading) {
     return <div className="flex items-center justify-center py-20"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>;
@@ -87,7 +28,7 @@ export default function JournalTemplates() {
     <div className="space-y-6 p-6 max-w-4xl mx-auto">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">{t.journal?.templates || "Journal Templates"}</h1>
-        <Button onClick={() => setDialogOpen(true)} className="gap-2"><Plus className="w-4 h-4" />{t.journal?.addTemplate || "Add Template"}</Button>
+        <Button onClick={openAddDialog} className="gap-2"><Plus className="w-4 h-4" />{t.journal?.addTemplate || "Add Template"}</Button>
       </div>
 
       {templates.length === 0 ? (
@@ -179,7 +120,7 @@ export default function JournalTemplates() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
-            <Button onClick={handleSave} disabled={saving || !formData.name.trim()}>
+            <Button onClick={handleSave} disabled={saveDisabled}>
               {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}Save
             </Button>
           </DialogFooter>

@@ -1,15 +1,16 @@
 import { useNavigate } from "react-router-dom";
 import { Mail, User, Lock, Eye, EyeOff, ArrowRight } from "lucide-react";
-import { useState } from "react";
 import { useGoogleRegisterPage } from "../hooks/useGoogleRegisterPage";
 
 const GoogleRegister = () => {
   const p = useGoogleRegisterPage();
-  const { t, isRtl, state, phoneNumber, setPhoneNumber, username, setUsername, loading, error, handleRegister } = p;
+  const {
+    t, isRtl, state, phoneNumber, setPhoneNumber,
+    username, setUsername, password, setPassword,
+    confirmPassword, setConfirmPassword, showPassword, setShowPassword,
+    passwordMismatch, loading, error, handleRegister,
+  } = p;
   const navigate = useNavigate();
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
 
   const firstName = state?.firstName || "";
   const lastName = state?.lastName || "";
@@ -109,7 +110,7 @@ const GoogleRegister = () => {
                 className="w-full pl-10 pr-3 py-2 border rounded-lg bg-background text-sm"
               />
             </div>
-            {confirmPassword.length > 0 && password !== confirmPassword && (
+            {passwordMismatch && (
               <p className="text-xs text-red-500">{t.auth?.passwordsDoNotMatch || 'Passwords do not match'}</p>
             )}
           </div>

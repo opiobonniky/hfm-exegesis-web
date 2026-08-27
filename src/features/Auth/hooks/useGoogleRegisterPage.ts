@@ -17,8 +17,13 @@ export function useGoogleRegisterPage() {
   const state = location.state as any;
   const [phoneNumber, setPhoneNumber] = useState("");
   const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const passwordMismatch = confirmPassword.length > 0 && password !== confirmPassword;
 
   const handleRegister = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,5 +52,10 @@ export function useGoogleRegisterPage() {
     finally { setLoading(false); }
   }, [state, phoneNumber, username, toast, setUserInfo, navigate]);
 
-  return { t, isRtl, state, phoneNumber, setPhoneNumber, username, setUsername, loading, error, handleRegister };
+  return {
+    t, isRtl, state, phoneNumber, setPhoneNumber,
+    username, setUsername, password, setPassword,
+    confirmPassword, setConfirmPassword, showPassword, setShowPassword,
+    passwordMismatch, loading, error, handleRegister,
+  };
 }
