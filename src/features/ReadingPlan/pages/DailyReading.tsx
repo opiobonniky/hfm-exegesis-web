@@ -9,15 +9,14 @@ import DailyReadingQuiz from "../components/DailyReadingQuiz";
 import { DailyCompletionButton } from "../components/DailyReadingCompletion";
 import { ConfettiOverlay } from "../components/ConfettiOverlay";
 import { NotYetAdded } from "../components/NotYetAdded";
+import {PageSkeleton} from "@/components/ui/skeletons.tsx";
 
 export default function DailyReading() {
   const p = useDailyReadingPage();
 
   if (p.loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <LoadingState message="Loading reading..." />
-      </div>
+      <PageSkeleton/>
     );
   }
 

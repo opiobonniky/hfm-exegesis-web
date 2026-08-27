@@ -3,7 +3,8 @@ import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/components/languages/languageProvider";
-import heroBgImage from "@/assets/logos/hero-bg.jpeg";
+import heroBgJpeg from "@/assets/logos/hero-bg.jpeg";
+import heroBgWebp from "@/assets/logos/hero-bg.webp";
 import logoImage from "@/assets/logos/exegesis_bg_rm.png";
 
 export function HeroSection() {
@@ -11,7 +12,10 @@ export function HeroSection() {
   return (
     <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden">
       <div className="absolute inset-0">
-        <img src={heroBgImage} alt="" className="w-full h-full object-cover" />
+        <picture>
+          <source srcSet={heroBgWebp} type="image/webp" />
+          <img src={heroBgJpeg} alt="" className="w-full h-full object-cover" loading="eager" />
+        </picture>
         <div className="absolute inset-0 bg-black/50" />
       </div>
       <div className="relative z-10 text-center px-4 sm:px-6 w-full max-w-5xl mx-auto pt-20 sm:pt-24 lg:pt-28 pb-12">
