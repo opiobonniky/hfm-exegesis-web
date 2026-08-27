@@ -21,7 +21,7 @@ export function HeroSection() {
       <div className="relative z-10 text-center px-4 sm:px-6 w-full max-w-5xl mx-auto pt-20 sm:pt-24 lg:pt-28 pb-12">
         <motion.div initial={{ opacity: 0, y: 40, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: 0.9, ease: [0.25, 0.1, 0.25, 1] }}>
           <div className="w-28 h-28 mx-auto mb-6 lg:hidden">
-            <img src={logoImage} alt="Exegesis" className="w-full h-full object-contain" />
+            <img src={logoImage} alt="Exegesis" className="w-full h-full object-contain" loading="lazy" />
           </div>
           <h1 className="text-lg sm:text-2xl md:text-4xl lg:text-5xl xl:text-6xl font-black text-white leading-[1.1] tracking-tighter whitespace-nowrap uppercase text-center w-full">
             {t.landing?.welcome || "Welcome To The"}{" "}

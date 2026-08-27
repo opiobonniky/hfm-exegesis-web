@@ -382,3 +382,30 @@
   .stagger-4 { animation-delay: 0.4s; }
   .stagger-5 { animation-delay: 0.5s; }
 }
+
+/* Landing hero nav styles */
+.nav-hero .nav-menu-item {
+  color: rgba(255, 255, 255, 0.85) !important;
+  background: transparent !important;
+}
+.nav-hero .nav-menu-item:hover {
+  color: white !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+.nav-hero .nav-lang-selector {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+.nav-hero .nav-lang-selector .globe-icon {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+.nav-hero .nav-lang-selector [role="combobox"] {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+.nav-hero .nav-signin {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+.nav-hero .nav-signin:hover {
+  color: white !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+}

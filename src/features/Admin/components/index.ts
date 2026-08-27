@@ -1,25 +1,12 @@
 // Admin components barrel export
-export { AdminContentTable } from "./AdminContentTable";
-export { AdminContentForm } from "./AdminContentForm";
 export { default as WordsTab } from "./WordsTab";
 export { default as ResourcesTab } from "./ResourcesTab";
 export { default as StudiesTab } from "./StudiesTab";
 export { default as ProloguesTab } from "./ProloguesTab";
 export { AdminPageHeader } from "./AdminPageHeader";
 export { AdminEmptyState, AdminLoadingGrid, AdminSearchBar } from "./AdminStates";
-export { AdminPageSection } from "./AdminPageSection";
-export { AdminDataTable } from "./AdminDataTable";
-export { AdminFormDialog } from "./AdminFormDialog";
 export { AdminDeleteDialog } from "./AdminDeleteDialog";
-export { AdminPagination } from "./AdminPagination";
-export { AdminFormHeader } from "./AdminFormHeader";
-export { PublishedToggle } from "./PublishedToggle";
-export { FormActions } from "./FormActions";
-export { DateField } from "./DateField";
 export { ConflictDialog } from "./ConflictDialog";
-export { VerseContentForm } from "./VerseContentForm";
-export { DevotionContentForm } from "./DevotionContentForm";
-export { ExegesisContentForm } from "./ExegesisContentForm";
 export { DailyContentCard } from "./DailyContentCard";
 export { DailyContentEmptyState } from "./DailyContentEmptyState";
 export { ContentLoading } from "./ContentLoading";

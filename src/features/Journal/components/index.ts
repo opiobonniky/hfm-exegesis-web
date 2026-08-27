@@ -1,1 +1,1 @@
-export { JournalPromptCard } from "./JournalPromptCard";
+// Journal components barrel export (empty after cleanup)

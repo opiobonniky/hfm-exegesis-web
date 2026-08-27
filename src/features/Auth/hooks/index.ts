@@ -1,6 +1,4 @@
 // Auth hooks barrel export
-export { useAuthLogin } from "./useAuthLogin";
-export { useAuthRegister } from "./useAuthRegister";
 export { useForgotPassword } from "./useForgotPassword";
 export { useVerifyAccount } from "./useVerifyAccount";
 export { useGoogleRegister } from "./useGoogleRegister";

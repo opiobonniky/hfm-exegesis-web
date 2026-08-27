@@ -4,6 +4,7 @@ import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/comp
 import { useLanguage } from "@/components/languages/languageProvider";
 import { animSlideLeft, animFadeUp, animSlideRight } from "./animations";
 import logoImage from "@/assets/logos/exegesis_bg_rm.png";
+import lordsBookImage from "@/assets/logos/lordsbook.png";
 
 function TikTokIcon({ className }: { className?: string }) {
   return (
@@ -22,7 +23,7 @@ function WhatsAppIcon({ className }: { className?: string }) {
 }
 
 function LordsBookIcon({ className }: { className?: string }) {
-  return <img src="/src/assets/logos/lordsbook.png" alt="LordsBook" className={className} />;
+  return <img src={lordsBookImage} alt="LordsBook" className={className} />;
 }
 
 export function FooterSection() {

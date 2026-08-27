@@ -1,1 +1,1 @@
-export * from "./settingsApi";
+// Settings services barrel export (empty after cleanup)

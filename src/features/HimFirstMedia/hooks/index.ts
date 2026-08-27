@@ -1,1 +1,1 @@
-export { useHimFirstMedia } from "./useHimFirstMedia";
+// HimFirstMedia hooks barrel export (empty after cleanup)

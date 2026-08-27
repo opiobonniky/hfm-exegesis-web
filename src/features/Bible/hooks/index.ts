@@ -1,7 +1,3 @@
-export { useBibleHighlights } from "./useBibleHighlights";
-export { useBibleNotes } from "./useBibleNotes";
-export { useBibleFavorites } from "./useBibleFavorites";
-export { useBibleSearch } from "./useBibleSearch";
 export { useBibleReader } from "./useBibleReader";
 export { useBibleReaderPage } from "./useBibleReaderPage";
 export { useVerseResources } from "./useVerseResources";
