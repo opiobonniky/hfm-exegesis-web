@@ -1,121 +1,190 @@
 /**
- * LabFlow — thin page composing extracted components.
- * Uses useLabFlowPage which wraps useLabFlow for session management
- * plus passage data fetching.
+ * LabFlow — composable page for the 5-stage Bible study flow.
+ * Uses useLabFlowPage which wraps useLabFlow + data fetching.
  */
+import { useNavigate } from "react-router-dom";
 import Gate from "@/components/Gate";
-import { useLabFlowPage } from "../hooks/useLabFlowPage";
 import { useRTL } from "@/providers/RTLProvider";
+import { useLabFlowPage } from "../hooks/useLabFlowPage";
+
+import LabFlowHeader from "../components/LabFlowHeader";
+import LabPassageSelector from "../components/LabPassageSelector";
+import LabLookStage from "../components/LabLookStage";
+import LabListenStage from "../components/LabListenStage";
+import LabLearnStage from "../components/LabLearnStage";
+import LabAbideStage from "../components/LabAbideStage";
+import LabApplyStage from "../components/LabApplyStage";
+import LabCompletedStage from "../components/LabCompletedStage";
 
 export default function LabFlow() {
   const { isRtl } = useRTL();
+  const navigate = useNavigate();
   const h = useLabFlowPage();
   const { lab } = h;
 
-  if (lab.loading) return <div className="flex items-center justify-center p-12 text-muted-foreground">Loading study session...</div>;
+  const handleBack = () => {
+    if (lab.stage === "passage" || lab.completed) {
+      navigate("/lab");
+    } else {
+      lab.saveCurrentProgress();
+      navigate("/lab");
+    }
+  };
+
+  if (lab.loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          <p className="text-sm text-muted-foreground">Loading study session...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <Gate>
+    <Gate featureName="Exegesis Lab" featureDescription="The full 5-stage Scripture study journey is available for Legacy Sower and Covenant Sower subscribers.">
       <div dir={isRtl ? "rtl" : "ltr"} className="min-h-screen flex flex-col bg-background">
+        <LabFlowHeader
+          passageRef={lab.passageRef}
+          stage={lab.stage}
+          saving={lab.saving}
+          completed={lab.completed}
+          onBack={handleBack}
+          onSave={() => lab.saveCurrentProgress()}
+          onGoToStage={lab.goToStage}
+        />
+
         <div className="flex-1 overflow-y-auto">
-          <div className="max-w-2xl mx-auto w-full px-4 sm:px-6 py-6 space-y-6">
-            {/* Passage selector stage */}
+          <div className="max-w-2xl mx-auto w-full px-4 sm:px-6 py-6">
+
+            {/* Error banner */}
+            {lab.error && (
+              <div className="mb-4 p-3 rounded-xl bg-destructive/10 border border-destructive/20 text-sm text-destructive">
+                {lab.error}
+              </div>
+            )}
+
+            {/* Stage: Passage selector */}
             {lab.stage === "passage" && (
-              <div className="space-y-4">
-                <div className="p-4 rounded-xl border bg-card">
-                  <p className="text-sm font-medium">Select a Bible passage for your study</p>
-                  {h.previewText && (
-                    <pre className="mt-2 text-xs text-muted-foreground whitespace-pre-wrap max-h-48 overflow-y-auto">{h.previewText}</pre>
-                  )}
-                </div>
-              </div>
+              <LabPassageSelector
+                bookName={lab.bookName}
+                chapter={lab.chapter}
+                verseStart={lab.verseStart}
+                verseEnd={lab.verseEnd}
+                loading={lab.loading}
+                previewText={h.previewText}
+                previewLoading={h.previewLoading}
+                onSelectBook={(book) => lab.update({ bookName: book, chapter: "", verseStart: "", verseEnd: "" })}
+                onSelectChapter={(ch) => lab.update({ chapter: ch, verseStart: "", verseEnd: "" })}
+                onSelectVerseStart={(v) => lab.update({ verseStart: v })}
+                onSelectVerseEnd={(v) => lab.update({ verseEnd: v })}
+                onBeginStudy={lab.startSession}
+              />
             )}
 
-            {/* Look stage */}
+            {/* Stage: Look */}
             {lab.stage === "look" && (
-              <div className="space-y-4">
-                <div className="p-4 rounded-xl border bg-card">
-                  <p className="text-sm font-medium mb-2">📖 Look — Read and Observe</p>
-                  {h.versesLoading ? (
-                    <p className="text-xs text-muted-foreground">Loading passage...</p>
-                  ) : (
-                    <div className="text-sm leading-7">
-                      {h.passageVerses.map((v) => (
-                        <span key={v.verse}>
-                          <sup className="text-[9px] font-bold text-amber-500 mr-px">{v.verse}</sup>
-                          {v.text}{" "}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
+              <LabLookStage
+                passageRef={lab.passageRef}
+                bookName={lab.bookName}
+                chapter={lab.chapter}
+                passageVerses={h.passageVerses}
+                versesLoading={h.versesLoading}
+                lookNotes={lab.lookNotes}
+                setLookNotes={(v) => lab.update({ lookNotes: v })}
+                saving={lab.saving}
+                onAdvance={lab.advanceLook}
+              />
             )}
 
-            {/* Listen stage */}
+            {/* Stage: Listen */}
             {lab.stage === "listen" && (
-              <div className="space-y-4">
-                <div className="p-4 rounded-xl border bg-card">
-                  <p className="text-sm font-medium mb-2">🎧 Listen — Hear the Word</p>
-                  <p className="text-xs text-muted-foreground">Listen to the passage and let it sink deep into your heart.</p>
-                </div>
-              </div>
+              <LabListenStage
+                passageRef={lab.passageRef}
+                bookName={lab.bookName}
+                chapter={lab.chapter}
+                passageVerses={h.passageVerses}
+                selectedRepeats={lab.selectedRepeats}
+                setSelectedRepeats={(v) => lab.update({ selectedRepeats: v })}
+                repeatCount={lab.repeatCount}
+                listenComplete={lab.listenComplete}
+                saving={lab.saving}
+                onStart={() => { lab.startListening(); /* TTS would go here */ lab.incrementRepeat(); }}
+                onAdvance={lab.advanceListen}
+                onReset={lab.resetListening}
+                onSkip={lab.advanceListen}
+              />
             )}
 
-            {/* Learn stage */}
+            {/* Stage: Learn */}
             {lab.stage === "learn" && (
-              <div className="space-y-4">
-                <div className="p-4 rounded-xl border bg-card">
-                  <p className="text-sm font-medium mb-2">📝 Learn — Study the Word</p>
-                  {h.wordsLoading && <p className="text-xs text-muted-foreground">Loading word study data...</p>}
-                  {h.verseWords.length > 0 && (
-                    <div className="space-y-1">
-                      {h.verseWords.map((w, idx) => (
-                        <div key={idx} className="flex items-center gap-2 text-sm" onClick={() => w.strongsId && h.handleWordTap(w.strongsId)}>
-                          <span className="font-medium">{w.surfaceText}</span>
-                          {w.lemma && <span className="text-xs text-amber-600 italic">{w.lemma}</span>}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
+              <LabLearnStage
+                passageRef={lab.passageRef}
+                bookName={lab.bookName}
+                chapter={lab.chapter}
+                verseStart={lab.verseStart}
+                learnNotes={lab.learnNotes}
+                setLearnNotes={(v) => lab.update({ learnNotes: v })}
+                learnDataLoading={h.wordsLoading || h.resourcesLoading}
+                verseResources={h.verseResources}
+                bookPrologue={h.bookPrologue}
+                verseWords={h.verseWords}
+                translations={h.translations}
+                translationsLoading={h.translationsLoading}
+                isPublic={lab.isPublic}
+                setIsPublic={(v) => lab.update({ isPublic: v })}
+                saving={lab.saving}
+                onAdvance={lab.advanceLearn}
+                onWordTap={h.handleWordTap}
+              />
             )}
 
-            {/* Abide stage */}
+            {/* Stage: Abide */}
             {lab.stage === "abide" && (
-              <div className="space-y-4">
-                <div className="p-4 rounded-xl border bg-card">
-                  <p className="text-sm font-medium mb-2">🙏 Abide — Reflect and Apply</p>
-                  <p className="text-xs text-muted-foreground">Take a moment to reflect on what you've learned.</p>
-                </div>
-              </div>
+              <LabAbideStage
+                reflection={lab.reflection}
+                setReflection={(v) => lab.update({ reflection: v })}
+                prayer={lab.prayer}
+                setPrayer={(v) => lab.update({ prayer: v })}
+                appText={lab.appText}
+                setAppText={(v) => lab.update({ appText: v })}
+                tags={lab.tags}
+                setTags={(v) => lab.update({ tags: v })}
+                isPublic={lab.isPublic}
+                setIsPublic={(v) => lab.update({ isPublic: v })}
+                saving={lab.saving}
+                onAdvance={lab.saveAbide}
+              />
             )}
 
-            {/* Completed */}
+            {/* Stage: Apply */}
+            {lab.stage === "apply" && (
+              <LabApplyStage
+                passageRef={lab.passageRef}
+                bookName={lab.bookName}
+                chapter={lab.chapter}
+                verseStart={lab.verseStart}
+                passageVerses={h.passageVerses}
+                challengeText={lab.challengeText}
+                setChallengeText={(v) => lab.update({ challengeText: v })}
+                resultsText={lab.resultsText}
+                setResultsText={(v) => lab.update({ resultsText: v })}
+                saving={lab.saving}
+                onComplete={lab.saveApply}
+                onOpenBibleReader={() => navigate(`/bible-reader?book=${lab.bookName}&chapter=${lab.chapter}`)}
+              />
+            )}
+
+            {/* Stage: Completed */}
             {lab.stage === "completed" && (
-              <div className="p-6 rounded-xl border bg-card text-center">
-                <p className="text-lg font-bold mb-2">✅ Study Complete!</p>
-                <p className="text-sm text-muted-foreground">Your study has been saved to your journal.</p>
-              </div>
+              <LabCompletedStage
+                passageRef={lab.passageRef}
+                onReset={lab.resetAll}
+                journalEntryId={lab.journalEntryId}
+              />
             )}
 
-            {/* Navigation actions */}
-            {lab.stage !== "passage" && lab.stage !== "completed" && (
-              <div className="flex items-center gap-3">
-                <button onClick={() => lab.saveCurrentProgress()} className="px-4 py-2 rounded-lg border text-sm font-medium hover:bg-muted transition-colors">
-                  Save Progress
-                </button>
-                <button onClick={() => {
-                  if (lab.stage === "look") lab.advanceLook();
-                  else if (lab.stage === "listen") lab.advanceListen();
-                  else if (lab.stage === "learn") lab.advanceLearn();
-                  else if (lab.stage === "abide") lab.saveAbide();
-                }} className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors">
-                  Continue
-                </button>
-              </div>
-            )}
           </div>
         </div>
       </div>

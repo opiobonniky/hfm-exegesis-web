@@ -10,11 +10,11 @@ import {
 } from "@/services/exegesisApi";
 import { sendPostRequest } from "@/services/api";
 
-export type LabStage = "passage" | "look" | "listen" | "learn" | "abide" | "completed";
+export type LabStage = "passage" | "look" | "listen" | "learn" | "abide" | "apply" | "completed";
 export type PassageSubStage = "book" | "chapter" | "verse";
 export type LearnTab = "exegesis" | "language" | "history" | "prologue";
 
-export const STAGE_ORDER: LabStage[] = ["look", "listen", "learn", "abide"];
+export const STAGE_ORDER: LabStage[] = ["look", "listen", "learn", "abide", "apply"];
 
 export const LISTEN_OPTIONS = [
   { label: "1x", value: 1 },
@@ -94,6 +94,10 @@ interface LabFlowState {
   tags: string;
   isPublic: boolean;
   journalEntryId: string | null;
+
+  // Apply stage
+  challengeText: string;
+  resultsText: string;
 }
 
 export function useLabFlow() {
@@ -138,6 +142,9 @@ export function useLabFlow() {
     tags: "",
     isPublic: false,
     journalEntryId: null,
+
+    challengeText: "",
+    resultsText: "",
   });
 
   const stateRef = useRef(state);
@@ -179,6 +186,8 @@ export function useLabFlow() {
             tags: session.abideTags || "",
             isPublic: session.isPublic ?? false,
             journalEntryId: session.journalEntryId || null,
+            challengeText: session.challengeText || "",
+            resultsText: session.resultsText || "",
             selectedRepeats: session.listenRepeats || 3,
             repeatCount: session.listenRepeatCount || 0,
             listenComplete: session.listenCompleted || false,
@@ -297,6 +306,10 @@ export function useLabFlow() {
             body.abideTags = st.tags;
             body.isPublic = st.isPublic;
             break;
+          case "apply":
+            body.challengeText = st.challengeText;
+            body.resultsText = st.resultsText;
+            break;
           default:
             update({ saving: false });
             return;
@@ -356,15 +369,16 @@ export function useLabFlow() {
     await saveAndAdvance("abide", { notes: learnNotes, isPublic });
   }, [saveAndAdvance]);
 
-  // ── Abide stage: save to Legacy Ledger ──
+  // ── Abide stage: save and advance to Apply ──
   const saveAbide = useCallback(async () => {
     const st = stateRef.current;
-    if (!st.sessionId) return;
+    if (!st.sessionId) {
+      update({ stage: "apply" });
+      return;
+    }
 
     update({ saving: true });
-
     try {
-      // Save progress first
       await saveProgress(st.sessionId, {
         abideReflection: st.reflection,
         abidePrayer: st.prayer,
@@ -372,37 +386,57 @@ export function useLabFlow() {
         abideTags: st.tags,
         isPublic: st.isPublic,
       });
+      await sendPostRequest("exegesis", `${st.sessionId}/abide`, {
+        reflection: st.reflection,
+        prayer: st.prayer,
+        application: st.appText,
+        tags: st.tags,
+        isPublic: st.isPublic,
+      });
+      update({ stage: "apply", saving: false });
+    } catch {
+      update({ stage: "apply", saving: false });
+    }
+  }, [update]);
 
-      // Save abide stage (completes the session + creates journal entry)
+  // ── Apply stage: save and complete ──
+  const saveApply = useCallback(async () => {
+    const st = stateRef.current;
+    if (!st.sessionId) {
+      update({ stage: "completed", completed: true });
+      return;
+    }
+
+    update({ saving: true });
+    try {
+      await saveProgress(st.sessionId, {
+        challengeText: st.challengeText,
+        resultsText: st.resultsText,
+      });
       const res = await sendPostRequest(
         "exegesis",
-        `${st.sessionId}/abide`,
+        `${st.sessionId}/apply`,
         {
-          reflection: st.reflection,
-          prayer: st.prayer,
-          application: st.appText,
-          tags: st.tags,
-          isPublic: st.isPublic,
+          challengeText: st.challengeText,
+          resultsText: st.resultsText,
         },
       );
-
       if (res.returnCode === 200 && res.returnData) {
         const data = res.returnData as any;
         update({
-          completed: true,
           stage: "completed",
+          completed: true,
+          saving: false,
           journalEntryId:
             data.journalEntryId ||
             data.journalEntry?.id ||
-            data.session?.journalEntryId ||
-            null,
-          saving: false,
+            data.session?.journalEntryId || null,
         });
       } else {
-        update({ saving: false, stage: "completed", completed: true });
+        update({ stage: "completed", completed: true, saving: false });
       }
     } catch {
-      update({ saving: false, stage: "completed", completed: true });
+      update({ stage: "completed", completed: true, saving: false });
     }
   }, [update]);
 
@@ -434,6 +468,9 @@ export function useLabFlow() {
       tags: "",
       isPublic: false,
       journalEntryId: null,
+
+      challengeText: "",
+      resultsText: "",
     });
   }, []);
 
@@ -447,6 +484,7 @@ export function useLabFlow() {
     advanceListen,
     advanceLearn,
     saveAbide,
+    saveApply,
     resetAll,
     startListening,
     incrementRepeat,

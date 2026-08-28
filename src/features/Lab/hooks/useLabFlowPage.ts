@@ -180,7 +180,7 @@ export function useLabFlowPage() {
     const handler = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
       if (e.key === "?") { e.preventDefault(); setShowShortcuts((p) => !p); return; }
-      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") { e.preventDefault(); if (lab.stage === "look") lab.advanceLook(); else if (lab.stage === "listen") lab.advanceListen(); else if (lab.stage === "learn") lab.advanceLearn(); else if (lab.stage === "abide") lab.saveAbide(); }
+      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") { e.preventDefault(); if (lab.stage === "look") lab.advanceLook(); else if (lab.stage === "listen") lab.advanceListen(); else if (lab.stage === "learn") lab.advanceLearn(); else if (lab.stage === "abide") lab.saveAbide(); else if (lab.stage === "apply") lab.saveApply(); }
       if ((e.ctrlKey || e.metaKey) && e.key === "s") { e.preventDefault(); if (lab.stage !== "passage" && lab.stage !== "completed") lab.saveCurrentProgress(); showShortcutHint("Progress saved!"); }
       if (lab.stage === "completed" && e.key.toLowerCase() === "r") { e.preventDefault(); lab.resetAll(); }
       const num = parseInt(e.key);
