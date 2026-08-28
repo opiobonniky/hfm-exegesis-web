@@ -3,7 +3,7 @@ import { PageLayout } from "@/components/PageLayout";
 import { PageHeader } from "@/components/PageHeader";
 import { TabBar } from "@/components/TabBar";
 import { LoadingState } from "@/components/ui/LoadingState";
-import { useUserPlansPage } from "../hooks/useUserPlansPage";
+import { useUserPlansPage } from "@/features/ReadingPlan";
 import UserProgressTab from "../components/UserProgressTab";
 import UserBrowseTab from "../components/UserBrowseTab";
 import RemovePlanModal from "../components/RemovePlanModal";

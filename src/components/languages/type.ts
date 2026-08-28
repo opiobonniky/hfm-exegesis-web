@@ -7,40 +7,59 @@
 
 /** Supported language codes */
 export const SUPPORTED_LANGUAGES = [
-  'en', 'ar', 'de', 'fr', 'es', 'pt',
-  'hi', 'bn', 'ta', 'te', 'mr', 'gu', 'kn', 'ml', 'pa', 'ur',
-  'sw', 'it', 'el', 'ru', 'ne', 'fil',
+  "en",
+  "ar",
+  "de",
+  "fr",
+  "es",
+  "pt",
+  "hi",
+  "bn",
+  "ta",
+  "te",
+  "mr",
+  "gu",
+  "kn",
+  "ml",
+  "pa",
+  "ur",
+  "sw",
+  "it",
+  "el",
+  "ru",
+  "ne",
+  "fil",
 ] as const;
 
 export type Language = (typeof SUPPORTED_LANGUAGES)[number];
 
 export const LANGUAGE_NAMES: Record<Language, string> = {
-  en: 'English',
-  ar: 'العربية',
-  de: 'Deutsch',
-  fr: 'Français',
-  es: 'Español',
-  pt: 'Português',
-  hi: 'हिन्दी',
-  bn: 'বাংলা',
-  ta: 'தமிழ்',
-  te: 'తెలుగు',
-  mr: 'मराठी',
-  gu: 'ગુજરાતી',
-  kn: 'ಕನ್ನಡ',
-  ml: 'മലയാളം',
-  pa: 'ਪੰਜਾਬੀ',
-  ur: 'اردو',
-  sw: 'Kiswahili',
-  it: 'Italiano',
-  el: 'Ελληνικά',
-  ru: 'Русский',
-  ne: 'नेपाली',
-  fil: 'Filipino',
+  en: "English",
+  ar: "العربية",
+  de: "Deutsch",
+  fr: "Français",
+  es: "Español",
+  pt: "Português",
+  hi: "हिन्दी",
+  bn: "বাংলা",
+  ta: "தமிழ்",
+  te: "తెలుగు",
+  mr: "मराठी",
+  gu: "ગુજરાતી",
+  kn: "ಕನ್ನಡ",
+  ml: "മലയാളം",
+  pa: "ਪੰਜਾਬੀ",
+  ur: "اردو",
+  sw: "Kiswahili",
+  it: "Italiano",
+  el: "Ελληνικά",
+  ru: "Русский",
+  ne: "नेपाली",
+  fil: "Filipino",
 };
 
 /** RTL languages */
-export const RTL_LANGUAGES: Language[] = ['ar', 'ur'];
+export const RTL_LANGUAGES: Language[] = ["ar", "ur"];
 
 /** Translation strings structure organized by page */
 export interface Translations {
@@ -695,6 +714,29 @@ export interface Translations {
     endOfReading: string;
     chapter: string;
     verse: string;
+    verseActions: string;
+    verseActionsDescription: string;
+    look: string;
+    lookDescription: string;
+    listenDescription: string;
+    learn: string;
+    learnDescription: string;
+    abide: string;
+    abideDescription: string;
+    apply: string;
+    applyDescription: string;
+    exegesisLab: string;
+    exegesisLabDescription: string;
+    resources: string;
+    commentaries: string;
+    crossReferences: string;
+    translations: string;
+    devotional: string;
+    studyTools: string;
+    strongs: string;
+    trivia: string;
+    listenHighlightSave: string;
+    shareExport: string;
   };
 
   /** Daily Exegesis */
@@ -1202,6 +1244,7 @@ export interface Translations {
 
   /** Reading Plan pages */
   readingPlan: {
+    browse: string;
     readingPlans: string;
     myPlans: string;
     createPlan: string;
@@ -2047,4 +2090,3 @@ export interface Translations {
     [key: string]: string | undefined;
   };
 }
-

@@ -1,7 +1,6 @@
 // ReadingPlan components barrel export
 export { GlassCard, SectionLabel, Ring } from "./PlanDetailUI";
 export { default as DayCard } from "./DayCard";
-export { PlanStats } from "./PlanStats";
 export { ReadingPlanCard } from "./ReadingPlanCard";
 export { ReadingPlanFilters } from "./ReadingPlanFilters";
 export { ReadingPlanPagination } from "./ReadingPlanPagination";

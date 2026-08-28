@@ -1,5 +1,12 @@
-// Bible reader header — navigation, font size, audio toggle, translation picker, search
-import { ArrowLeft, Volume2, VolumeX, Search, ChevronDown, BookOpen } from "lucide-react";
+// Bible reader header - navigation, font size, audio toggle, translation picker, search
+import {
+  ArrowLeft,
+  Volume2,
+  VolumeX,
+  Search,
+  ChevronDown,
+  BookOpen,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import FontSizeControls from "./FontSizeControls";
 import TranslationPicker from "./TranslationPicker";
@@ -27,17 +34,36 @@ interface BibleReaderHeaderProps {
 }
 
 export default function BibleReaderHeader({
-  bookName, chapter, audioActive, fontSize, onFontSizeChange,
-  onBack, onToggleSidebar, onBookOverview, onReadChapter, onToggleSearch,
-  translations, selectedTranslation, onSelectTranslation,
-  translationOpen, onTranslationOpenChange, translationSearch, onTranslationSearchChange,
+  bookName,
+  chapter,
+  audioActive,
+  fontSize,
+  onFontSizeChange,
+  onBack,
+  onToggleSidebar,
+  onBookOverview,
+  onReadChapter,
+  onToggleSearch,
+  translations,
+  selectedTranslation,
+  onSelectTranslation,
+  translationOpen,
+  onTranslationOpenChange,
+  translationSearch,
+  onTranslationSearchChange,
 }: BibleReaderHeaderProps) {
   const { t, isRtl } = useLanguage();
   return (
-    <header className="shrink-0 z-30 bg-background/95 backdrop-blur-sm border-b border-border">
-      <div className="flex items-center gap-2 px-3 sm:px-5 py-2.5">
+    <header className="z-30 shrink-0 border-b border-border/70 bg-background/90 backdrop-blur-xl">
+      <div className="mx-auto flex min-h-16 w-full items-center gap-1.5 px-2 sm:gap-2 sm:px-5">
         {/* Back */}
-        <Button variant="ghost" size="icon" className="h-9 w-9" onClick={onBack} aria-label={t.common.back}>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-9 w-9"
+          onClick={onBack}
+          aria-label={t.common.back}
+        >
           <ArrowLeft className={`h-4 w-4 ${isRtl ? "rotate-180" : ""}`} />
         </Button>
         {/* Book / Chapter */}
@@ -45,11 +71,20 @@ export default function BibleReaderHeader({
           onClick={onToggleSidebar}
           aria-label={t.bibleReader.selectBookChapter}
           aria-haspopup="dialog"
-          className="flex items-center gap-1.5 text-sm font-semibold hover:bg-muted rounded-lg px-2 py-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="group flex min-w-0 items-center gap-2 rounded-xl px-2 py-1.5 text-start transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:px-3"
         >
-          <BookOpen className="w-4 h-4 text-primary" />
-          <span className="truncate max-w-[140px]">{bookName} {chapter}</span>
-          <ChevronDown className="w-3 h-3 text-muted-foreground" />
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+            <BookOpen className="h-4 w-4" />
+          </span>
+          <span className="flex min-w-0 flex-col">
+            <span className="max-w-[8rem] truncate font-[family-name:var(--font-heading)] text-sm font-bold leading-tight tracking-tight text-foreground sm:max-w-[14rem] sm:text-base">
+              {bookName}
+            </span>
+            <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+              Chapter {chapter}
+            </span>
+          </span>
+          <ChevronDown className="h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform group-hover:translate-y-0.5" />
         </button>
         <div className="flex-1" />
         {/* Book Overview (desktop) */}
@@ -58,23 +93,33 @@ export default function BibleReaderHeader({
             variant="ghost"
             size="sm"
             onClick={onBookOverview}
-            className="h-8 px-2.5 text-xs gap-1.5 hidden sm:flex"
+            className="hidden h-9 gap-1.5 px-3 text-xs sm:flex"
           >
             <BookOpen className="w-3.5 h-3.5" />
             <span>Overview</span>
           </Button>
         )}
         {/* Font size (desktop) */}
-        <FontSizeControls fontSize={fontSize} onFontSizeChange={onFontSizeChange} className="hidden sm:flex" />
+        <FontSizeControls
+          fontSize={fontSize}
+          onFontSizeChange={onFontSizeChange}
+          className="hidden sm:flex"
+        />
         {/* Audio toggle */}
         <Button
           variant={audioActive ? "default" : "outline"}
           size="sm"
           onClick={onReadChapter}
-          className="h-8 px-2.5 text-xs gap-1.5"
+          className="h-9 gap-1.5 px-2.5 text-xs"
         >
-          {audioActive ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
-          <span className="hidden sm:inline">{audioActive ? t.bibleReader.stop : t.bibleReader.listen}</span>
+          {audioActive ? (
+            <VolumeX className="w-3.5 h-3.5" />
+          ) : (
+            <Volume2 className="w-3.5 h-3.5" />
+          )}
+          <span className="hidden sm:inline">
+            {audioActive ? t.bibleReader.stop : t.bibleReader.listen}
+          </span>
         </Button>
         {/* Translation */}
         <TranslationPicker
@@ -91,7 +136,7 @@ export default function BibleReaderHeader({
           type="button"
           onClick={onToggleSearch}
           aria-label={t.common.search}
-          className="w-9 h-9 rounded-lg bg-muted/50 flex items-center justify-center border border-border/40 hover:bg-muted transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="flex h-9 w-9 items-center justify-center rounded-lg border border-border/60 bg-muted/40 transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <Search className="w-3.5 h-3.5 text-muted-foreground" />
         </button>

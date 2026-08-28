@@ -46,7 +46,9 @@ function loadSpeechRate(): number {
       const rate = parseFloat(saved);
       if (SPEED_OPTIONS.includes(rate)) return rate;
     }
-  } catch {}
+  } catch {
+    // Storage may be unavailable in private browsing or tests.
+  }
   return 1.0;
 }
 
@@ -65,26 +67,34 @@ function loadVolume(): number {
       const vol = parseFloat(saved);
       if (vol >= 0 && vol <= 1) return vol;
     }
-  } catch {}
+  } catch {
+    // Storage may be unavailable in private browsing or tests.
+  }
   return 1;
 }
 
 function saveSpeechRate(rate: number): void {
   try {
     localStorage.setItem(STORAGE_KEYS.speechRate, String(rate));
-  } catch {}
+  } catch {
+    // Preference persistence is best-effort.
+  }
 }
 
 function saveVoiceId(voiceId: string): void {
   try {
     localStorage.setItem(STORAGE_KEYS.selectedVoiceId, voiceId);
-  } catch {}
+  } catch {
+    // Preference persistence is best-effort.
+  }
 }
 
 function saveVolume(vol: number): void {
   try {
     localStorage.setItem(STORAGE_KEYS.volume, String(vol));
-  } catch {}
+  } catch {
+    // Preference persistence is best-effort.
+  }
 }
 
 export function useAudioPlayer(): AudioPlayerState & AudioPlayerActions {
@@ -112,27 +122,46 @@ export function useAudioPlayer(): AudioPlayerState & AudioPlayerActions {
   const repeatModeRef = useRef<"none" | "one" | "all">("none");
 
   // Sync refs and persist
-  useEffect(() => { speechRateRef.current = speechRate; saveSpeechRate(speechRate); }, [speechRate]);
-  useEffect(() => { volumeRef.current = volume; saveVolume(volume); }, [volume]);
-  useEffect(() => { repeatModeRef.current = repeatMode; }, [repeatMode]);
+  useEffect(() => {
+    speechRateRef.current = speechRate;
+    saveSpeechRate(speechRate);
+  }, [speechRate]);
+  useEffect(() => {
+    volumeRef.current = volume;
+    saveVolume(volume);
+  }, [volume]);
+  useEffect(() => {
+    repeatModeRef.current = repeatMode;
+  }, [repeatMode]);
 
   // Check whether TTS API is enabled
   useEffect(() => {
-    ttsService.isEnabled().then(setTtsEnabled).catch(() => setTtsEnabled(false));
+    ttsService
+      .isEnabled()
+      .then(setTtsEnabled)
+      .catch(() => setTtsEnabled(false));
   }, []);
 
   // Load voices on mount
   useEffect(() => {
-    ttsService.getVoices().then((available) => {
-      setVoices(available);
-      const savedVoiceId = loadVoiceId();
-      if (savedVoiceId) {
-        const saved = available.find((v) => v.voiceId === savedVoiceId);
-        if (saved) { setSelectedVoice(saved); return; }
-      }
-      const preferred = available.find((v) => /aria|jenny|guy|davis|emma/i.test(v.name));
-      setSelectedVoice(preferred || available[0] || null);
-    }).catch(() => {});
+    ttsService
+      .getVoices()
+      .then((available) => {
+        setVoices(available);
+        const savedVoiceId = loadVoiceId();
+        if (savedVoiceId) {
+          const saved = available.find((v) => v.voiceId === savedVoiceId);
+          if (saved) {
+            setSelectedVoice(saved);
+            return;
+          }
+        }
+        const preferred = available.find((v) =>
+          /aria|jenny|guy|davis|emma/i.test(v.name),
+        );
+        setSelectedVoice(preferred || available[0] || null);
+      })
+      .catch(() => {});
   }, []);
 
   // ── Playback engines ──
@@ -154,101 +183,123 @@ export function useAudioPlayer(): AudioPlayerState & AudioPlayerActions {
   }, []);
 
   // TTS API path (backed by Edge TTS / ElevenLabs)
-  const playTTS = useCallback(async (text: string): Promise<void> => {
-    return new Promise((resolve) => {
-      const doSpeak = async () => {
-        try {
-          const arrayBuffer = await ttsService.speak(
-            text,
-            selectedVoice?.voiceId || "en-US-AriaNeural",
-            speechRateRef.current,
-          );
-          const blob = new Blob([arrayBuffer], { type: "audio/mpeg" });
-          const url = URL.createObjectURL(blob);
-          const audio = new Audio(url);
-          audioRef.current = audio;
-          audio.playbackRate = speechRateRef.current;
-          audio.volume = volumeRef.current;
+  const playTTS = useCallback(
+    async (text: string): Promise<void> => {
+      return new Promise((resolve) => {
+        const doSpeak = async () => {
+          try {
+            const arrayBuffer = await ttsService.speak(
+              text,
+              selectedVoice?.voiceId || "en-US-AriaNeural",
+              speechRateRef.current,
+            );
+            const blob = new Blob([arrayBuffer], { type: "audio/mpeg" });
+            const url = URL.createObjectURL(blob);
+            const audio = new Audio(url);
+            audioRef.current = audio;
+            audio.playbackRate = speechRateRef.current;
+            audio.volume = volumeRef.current;
 
-          skipRef.current = () => {
-            audio.pause();
-            audio.src = "";
-            URL.revokeObjectURL(url);
-            audioRef.current = null;
-            resolve();
-          };
+            skipRef.current = () => {
+              audio.pause();
+              audio.src = "";
+              URL.revokeObjectURL(url);
+              audioRef.current = null;
+              resolve();
+            };
 
-          audio.onended = () => {
-            URL.revokeObjectURL(url);
+            audio.onended = () => {
+              URL.revokeObjectURL(url);
+              audioRef.current = null;
+              skipRef.current = null;
+              resolve();
+            };
+
+            audio.onerror = () => {
+              URL.revokeObjectURL(url);
+              audioRef.current = null;
+              skipRef.current = null;
+              resolve();
+            };
+
+            await audio.play();
+            if (isPausedRef.current) audio.pause();
+          } catch {
             audioRef.current = null;
             skipRef.current = null;
-            resolve();
-          };
-
-          audio.onerror = () => {
-            URL.revokeObjectURL(url);
-            audioRef.current = null;
-            skipRef.current = null;
-            resolve();
-          };
-
-          await audio.play();
-          if (isPausedRef.current) audio.pause();
-        } catch {
-          audioRef.current = null;
-          skipRef.current = null;
-          // Fallback to Web Speech
-          resolve(await playWebSpeech(text));
-        }
-      };
-      doSpeak();
-    });
-  }, [selectedVoice]);
+            // Fallback to Web Speech
+            resolve(await playWebSpeech(text));
+          }
+        };
+        doSpeak();
+      });
+    },
+    [selectedVoice],
+  );
 
   // Web Speech API fallback
-  const playWebSpeech = useCallback((text: string): Promise<void> => {
-    return new Promise((resolve) => {
-      if (!("speechSynthesis" in window)) { resolve(); return; }
+  const playWebSpeech = useCallback(
+    (text: string): Promise<void> => {
+      return new Promise((resolve) => {
+        if (!("speechSynthesis" in window)) {
+          resolve();
+          return;
+        }
 
-      const u = new SpeechSynthesisUtterance(text);
-      u.rate = speechRateRef.current;
-      u.volume = volumeRef.current;
-      u.pitch = 1.0;
+        const u = new SpeechSynthesisUtterance(text);
+        u.rate = speechRateRef.current;
+        u.volume = volumeRef.current;
+        u.pitch = 1.0;
 
-      // Match selected voice to browser voices
-      if (selectedVoice?.voiceId && window.speechSynthesis.getVoices().length > 0) {
-        const voices = window.speechSynthesis.getVoices();
-        const svn = selectedVoice.name.toLowerCase();
-        const match = voices.find((v) => {
-          const vn = v.name.toLowerCase();
-          const shortName = svn.split("(")[0].trim();
-          return vn.includes(shortName) || shortName.includes(vn);
-        });
-        if (match) u.voice = match;
+        // Match selected voice to browser voices
+        if (
+          selectedVoice?.voiceId &&
+          window.speechSynthesis.getVoices().length > 0
+        ) {
+          const voices = window.speechSynthesis.getVoices();
+          const svn = selectedVoice.name.toLowerCase();
+          const match = voices.find((v) => {
+            const vn = v.name.toLowerCase();
+            const shortName = svn.split("(")[0].trim();
+            return vn.includes(shortName) || shortName.includes(vn);
+          });
+          if (match) u.voice = match;
+        }
+        utteranceRef.current = u;
+
+        skipRef.current = () => {
+          utteranceRef.current = null;
+          resolve();
+        };
+
+        u.onend = () => {
+          utteranceRef.current = null;
+          skipRef.current = null;
+          resolve();
+        };
+        u.onerror = (e) => {
+          if (e.error === "interrupted") return;
+          utteranceRef.current = null;
+          skipRef.current = null;
+          resolve();
+        };
+
+        window.speechSynthesis.speak(u);
+      });
+    },
+    [selectedVoice],
+  );
+
+  const playVerse = useCallback(
+    async (text: string): Promise<void> => {
+      if (ttsEnabled) {
+        await playTTS(text);
+      } else {
+        await playWebSpeech(text);
       }
-      utteranceRef.current = u;
-
-      skipRef.current = () => { utteranceRef.current = null; resolve(); };
-
-      u.onend = () => { utteranceRef.current = null; skipRef.current = null; resolve(); };
-      u.onerror = (e) => {
-        if (e.error === "interrupted") return;
-        utteranceRef.current = null;
-        skipRef.current = null;
-        resolve();
-      };
-
-      window.speechSynthesis.speak(u);
-    });
-  }, [selectedVoice]);
-
-  const playVerse = useCallback(async (text: string): Promise<void> => {
-    if (ttsEnabled) {
-      await playTTS(text);
-    } else {
-      await playWebSpeech(text);
-    }
-  }, [ttsEnabled, playTTS, playWebSpeech]);
+    },
+    [ttsEnabled, playTTS, playWebSpeech],
+  );
 
   // ── Playback loop ──
 
@@ -280,22 +331,25 @@ export function useAudioPlayer(): AudioPlayerState & AudioPlayerActions {
 
   // ── Public actions ──
 
-  const startPlayback = useCallback((verses: { text: string }[], startIdx = 0) => {
-    skipRef.current?.();
-    cancelAllAudio();
-    skipRef.current = null;
+  const startPlayback = useCallback(
+    (verses: { text: string }[], startIdx = 0) => {
+      skipRef.current?.();
+      cancelAllAudio();
+      skipRef.current = null;
 
-    versesRef.current = verses;
-    currentIdxRef.current = startIdx;
-    isReadingRef.current = true;
-    isPausedRef.current = false;
-    setTotalVerses(verses.length);
-    setCurrentVerseIdx(startIdx);
-    setIsPlaying(true);
-    setIsPaused(false);
-    setPassageComplete(false);
-    runPlayback();
-  }, [runPlayback, cancelAllAudio]);
+      versesRef.current = verses;
+      currentIdxRef.current = startIdx;
+      isReadingRef.current = true;
+      isPausedRef.current = false;
+      setTotalVerses(verses.length);
+      setCurrentVerseIdx(startIdx);
+      setIsPlaying(true);
+      setIsPaused(false);
+      setPassageComplete(false);
+      runPlayback();
+    },
+    [runPlayback, cancelAllAudio],
+  );
 
   const stopPlayback = useCallback(() => {
     skipRef.current?.();
@@ -329,7 +383,11 @@ export function useAudioPlayer(): AudioPlayerState & AudioPlayerActions {
   }, []);
 
   const togglePause = useCallback(() => {
-    if (isPaused) { resumePlayback(); } else { pausePlayback(); }
+    if (isPaused) {
+      resumePlayback();
+    } else {
+      pausePlayback();
+    }
   }, [isPaused, pausePlayback, resumePlayback]);
 
   const cycleSpeed = useCallback(() => {
@@ -370,7 +428,10 @@ export function useAudioPlayer(): AudioPlayerState & AudioPlayerActions {
   }, [isPaused, resumePlayback, cancelAllAudio]);
 
   const handleSetVolume = useCallback((vol: number) => {
-    setVolume(Math.max(0, Math.min(1, vol)));
+    const nextVolume = Math.max(0, Math.min(1, vol));
+    volumeRef.current = nextVolume;
+    if (audioRef.current) audioRef.current.volume = nextVolume;
+    setVolume(nextVolume);
   }, []);
 
   const cycleRepeatMode = useCallback(() => {
@@ -382,7 +443,12 @@ export function useAudioPlayer(): AudioPlayerState & AudioPlayerActions {
   }, []);
 
   // Cleanup on unmount
-  useEffect(() => () => { cancelAllAudio(); }, [cancelAllAudio]);
+  useEffect(
+    () => () => {
+      cancelAllAudio();
+    },
+    [cancelAllAudio],
+  );
 
   return {
     isPlaying,

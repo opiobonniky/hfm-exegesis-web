@@ -1,17 +1,30 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { toast } from "@/components/ui/sonner";
 import { useAudioPlayer } from "@/hooks/useAudioPlayer";
 import { BIBLE_BOOKS } from "../constants";
 import { useBibleReader } from "./useBibleReader";
+import type {
+  LabStage,
+  VerseActionTarget,
+} from "../components/VerseActionSheet";
 
 const MIN_FONT_SIZE = 12;
 const MAX_FONT_SIZE = 40;
 const DEFAULT_FONT_SIZE = 20;
 function getInitialFontSize(): number {
   try {
-    const stored = Number.parseInt(localStorage.getItem("bible-font-size") || String(DEFAULT_FONT_SIZE), 10);
+    const stored = Number.parseInt(
+      localStorage.getItem("bible-font-size") || String(DEFAULT_FONT_SIZE),
+      10,
+    );
     return Number.isFinite(stored)
       ? Math.min(Math.max(stored, MIN_FONT_SIZE), MAX_FONT_SIZE)
       : DEFAULT_FONT_SIZE;
@@ -30,14 +43,22 @@ export function useBibleReaderPage() {
   const scrollAnimationRef = useRef<number | null>(null);
   const pendingChapterRef = useRef<string | null>(null);
   const loadedPassageRef = useRef<string | null>(null);
+  const visibleChapterRef = useRef(reader.selectedChapter);
   const { chapters, chapterRefs, setVisibleChapter } = reader;
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [translationOpen, setTranslationOpen] = useState(false);
   const [translationSearch, setTranslationSearch] = useState("");
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [drawerVerse, setDrawerVerse] = useState({ book: "", chapter: 0, verse: 0 });
+  const [drawerVerse, setDrawerVerse] = useState({
+    book: "",
+    chapter: 0,
+    verse: 0,
+  });
   const [noteDialogOpen, setNoteDialogOpen] = useState(false);
   const [noteText, setNoteText] = useState("");
+  const [verseActionsOpen, setVerseActionsOpen] = useState(false);
+  const [verseActionTarget, setVerseActionTarget] =
+    useState<VerseActionTarget | null>(null);
   const [fontSize, setFontSize] = useState(getInitialFontSize);
 
   const updateFontSize = useCallback((size: number) => {
@@ -62,7 +83,8 @@ export function useBibleReaderPage() {
     if (loadedPassageRef.current === passageKey) return;
     loadedPassageRef.current = passageKey;
     lastFocusedVerseRef.current = null;
-    if (!reader.selectedVerse && scrollRef.current) scrollRef.current.scrollTop = 0;
+    if (!reader.selectedVerse && scrollRef.current)
+      scrollRef.current.scrollTop = 0;
   }, [chapters, reader.selectedVerse]);
 
   const stopScrollAnimation = useCallback(() => {
@@ -72,38 +94,51 @@ export function useBibleReaderPage() {
     }
   }, []);
 
-  const animateScrollTo = useCallback((targetTop: number, duration = 850) => {
-    const scrollRoot = scrollRef.current;
-    if (!scrollRoot) return;
-    stopScrollAnimation();
-    const maxScroll = Math.max(scrollRoot.scrollHeight - scrollRoot.clientHeight, 0);
-    const target = Math.min(Math.max(targetTop, 0), maxScroll);
-    const start = scrollRoot.scrollTop;
-    const distance = target - start;
-    if (Math.abs(distance) < 2 || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      scrollRoot.scrollTop = target;
-      return;
-    }
-    const startedAt = performance.now();
-    const step = (now: number) => {
-      const progress = Math.min((now - startedAt) / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      scrollRoot.scrollTop = start + distance * eased;
-      if (progress < 1) scrollAnimationRef.current = requestAnimationFrame(step);
-      else scrollAnimationRef.current = null;
-    };
-    scrollAnimationRef.current = requestAnimationFrame(step);
-  }, [stopScrollAnimation]);
+  const animateScrollTo = useCallback(
+    (targetTop: number, duration = 850) => {
+      const scrollRoot = scrollRef.current;
+      if (!scrollRoot) return;
+      stopScrollAnimation();
+      const maxScroll = Math.max(
+        scrollRoot.scrollHeight - scrollRoot.clientHeight,
+        0,
+      );
+      const target = Math.min(Math.max(targetTop, 0), maxScroll);
+      const start = scrollRoot.scrollTop;
+      const distance = target - start;
+      if (
+        Math.abs(distance) < 2 ||
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      ) {
+        scrollRoot.scrollTop = target;
+        return;
+      }
+      const startedAt = performance.now();
+      const step = (now: number) => {
+        const progress = Math.min((now - startedAt) / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        scrollRoot.scrollTop = start + distance * eased;
+        if (progress < 1)
+          scrollAnimationRef.current = requestAnimationFrame(step);
+        else scrollAnimationRef.current = null;
+      };
+      scrollAnimationRef.current = requestAnimationFrame(step);
+    },
+    [stopScrollAnimation],
+  );
 
-  const scrollToChapter = useCallback((book: string, chapter: number) => {
-    const scrollRoot = scrollRef.current;
-    const chapterElement = chapterRefs.current[`${book}-${chapter}`];
-    if (!scrollRoot || !chapterElement) return false;
-    const rootTop = scrollRoot.getBoundingClientRect().top;
-    const chapterTop = chapterElement.getBoundingClientRect().top;
-    animateScrollTo(scrollRoot.scrollTop + chapterTop - rootTop, 950);
-    return true;
-  }, [animateScrollTo, chapterRefs]);
+  const scrollToChapter = useCallback(
+    (book: string, chapter: number) => {
+      const scrollRoot = scrollRef.current;
+      const chapterElement = chapterRefs.current[`${book}-${chapter}`];
+      if (!scrollRoot || !chapterElement) return false;
+      const rootTop = scrollRoot.getBoundingClientRect().top;
+      const chapterTop = chapterElement.getBoundingClientRect().top;
+      animateScrollTo(scrollRoot.scrollTop + chapterTop - rootTop, 950);
+      return true;
+    },
+    [animateScrollTo, chapterRefs],
+  );
 
   // Stop scroll animation on user interaction
   useEffect(() => {
@@ -121,19 +156,31 @@ export function useBibleReaderPage() {
 
   // Track visible chapter on scroll
   useEffect(() => {
+    visibleChapterRef.current = reader.selectedChapter;
+  }, [reader.selectedChapter]);
+
+  useEffect(() => {
     const scrollRoot = scrollRef.current;
     if (!scrollRoot || chapters.length === 0) return;
     let frame: number | null = null;
     const updateVisibleChapter = () => {
       frame = null;
-      const readingLine = scrollRoot.getBoundingClientRect().top + 12;
+      const rootRect = scrollRoot.getBoundingClientRect();
+      const readingOffset = Math.min(
+        Math.max(scrollRoot.clientHeight * 0.22, 72),
+        180,
+      );
+      const readingLine = rootRect.top + readingOffset;
       let visibleChapter = chapters[0];
       for (const chapter of chapters) {
-        const element = chapterRefs.current[`${chapter.book}-${chapter.chapter}`];
-        if (!element || element.getBoundingClientRect().top > readingLine) break;
+        const element =
+          chapterRefs.current[`${chapter.book}-${chapter.chapter}`];
+        if (!element || element.getBoundingClientRect().top > readingLine)
+          break;
         visibleChapter = chapter;
       }
-      if (visibleChapter.chapter !== reader.selectedChapter) {
+      if (visibleChapter.chapter !== visibleChapterRef.current) {
+        visibleChapterRef.current = visibleChapter.chapter;
         setVisibleChapter(visibleChapter.chapter);
       }
     };
@@ -146,13 +193,15 @@ export function useBibleReaderPage() {
       scrollRoot.removeEventListener("scroll", onScroll);
       if (frame !== null) cancelAnimationFrame(frame);
     };
-  }, [chapterRefs, chapters, reader.selectedChapter, setVisibleChapter]);
+  }, [chapterRefs, chapters, setVisibleChapter]);
 
   // Scroll to pending chapter after navigation
   useEffect(() => {
     const pendingChapter = pendingChapterRef.current;
     if (!pendingChapter) return;
-    const chapter = chapters.find((item) => `${item.book}-${item.chapter}` === pendingChapter);
+    const chapter = chapters.find(
+      (item) => `${item.book}-${item.chapter}` === pendingChapter,
+    );
     if (!chapter || !scrollToChapter(chapter.book, chapter.chapter)) return;
     pendingChapterRef.current = null;
   }, [chapters, scrollToChapter]);
@@ -170,7 +219,13 @@ export function useBibleReaderPage() {
     );
     observer.observe(sentinel);
     return () => observer.disconnect();
-  }, [reader, reader.hasMore, reader.loadError, reader.loadMore, reader.loadMoreRef]);
+  }, [
+    reader,
+    reader.hasMore,
+    reader.loadError,
+    reader.loadMore,
+    reader.loadMoreRef,
+  ]);
 
   // Auto-scroll to selected verse
   useEffect(() => {
@@ -184,7 +239,14 @@ export function useBibleReaderPage() {
       element.scrollIntoView({ behavior: "smooth", block: "center" });
       element.focus({ preventScroll: true });
     });
-  }, [reader.chapters, reader.loading, reader.selectedBook, reader.selectedChapter, reader.selectedVerse, reader.verseRefs]);
+  }, [
+    reader.chapters,
+    reader.loading,
+    reader.selectedBook,
+    reader.selectedChapter,
+    reader.selectedVerse,
+    reader.verseRefs,
+  ]);
 
   const handleReadChapter = useCallback(() => {
     if (audio.isPlaying || audio.isPaused) {
@@ -192,44 +254,200 @@ export function useBibleReaderPage() {
       return;
     }
     const verses = reader.chapters
-      .filter((chapter) => chapter.book === reader.selectedBook && chapter.chapter === reader.selectedChapter)
+      .filter(
+        (chapter) =>
+          chapter.book === reader.selectedBook &&
+          chapter.chapter === reader.selectedChapter,
+      )
       .flatMap((chapter) => chapter.verses)
       .filter((verse) => verse.text);
     if (verses.length > 0) audio.startPlayback(verses);
   }, [audio, reader.chapters, reader.selectedBook, reader.selectedChapter]);
 
-  const handleExplainVerse = useCallback((book: string, chapter: number, verse: number) => {
-    setDrawerVerse({ book, chapter, verse });
-    setDrawerOpen(true);
-  }, []);
+  const handleExplainVerse = useCallback(
+    (book: string, chapter: number, verse: number) => {
+      setDrawerVerse({ book, chapter, verse });
+      setDrawerOpen(true);
+    },
+    [],
+  );
 
-  const handleToggleHighlight = useCallback(async (book: string, chapter: number, verse: number, colorId: number) => {
+  const handleOpenVerseActions = useCallback(
+    (book: string, chapter: number, verse: number) => {
+      const text =
+        reader.chapters
+          .find((item) => item.book === book && item.chapter === chapter)
+          ?.verses.find((item) => item.verse === verse)?.text ?? "";
+      setVerseActionTarget({ book, chapter, verse, text });
+      setVerseActionsOpen(true);
+    },
+    [reader.chapters],
+  );
+
+  const actionUrl = useCallback(
+    (path: string, extra: Record<string, string> = {}) => {
+      if (!verseActionTarget) return path;
+      const params = new URLSearchParams({
+        book: verseActionTarget.book,
+        chapter: String(verseActionTarget.chapter),
+        verse: String(verseActionTarget.verse),
+        ...extra,
+      });
+      return `${path}?${params.toString()}`;
+    },
+    [verseActionTarget],
+  );
+
+  const handleActionExplain = useCallback(() => {
+    if (!verseActionTarget) return;
+    handleExplainVerse(
+      verseActionTarget.book,
+      verseActionTarget.chapter,
+      verseActionTarget.verse,
+    );
+  }, [handleExplainVerse, verseActionTarget]);
+
+  const handleActionLab = useCallback(
+    (stage: LabStage) => {
+      if (!verseActionTarget) return;
+      navigate(
+        actionUrl("/bible-study", {
+          verseStart: String(verseActionTarget.verse),
+          verseEnd: String(verseActionTarget.verse),
+          stage,
+        }),
+      );
+    },
+    [actionUrl, navigate, verseActionTarget],
+  );
+
+  const handleActionResources = useCallback(
+    (tab: "commentaries" | "crossReferences" | "translations") => {
+      navigate(actionUrl("/verse-resources", { tab }));
+    },
+    [actionUrl, navigate],
+  );
+
+  const handleActionListen = useCallback(() => {
+    if (!verseActionTarget?.text) return;
+    audio.startPlayback([
+      {
+        text: verseActionTarget.text,
+      },
+    ]);
+  }, [audio, verseActionTarget]);
+
+  const handleActionHighlight = useCallback(async () => {
+    if (!verseActionTarget) return;
     try {
-      await reader.toggleHighlight(book, chapter, verse, colorId);
+      await reader.toggleHighlight(
+        verseActionTarget.book,
+        verseActionTarget.chapter,
+        verseActionTarget.verse,
+        0,
+      );
     } catch {
       toast.error("Unable to update the highlight");
     }
-  }, [reader]);
+  }, [reader, verseActionTarget]);
 
-  const handleToggleFavorite = useCallback(async (book: string, chapter: number, verse: number) => {
+  const handleActionFavorite = useCallback(async () => {
+    if (!verseActionTarget) return;
     try {
-      await reader.toggleFavorite(book, chapter, verse);
+      await reader.toggleFavorite(
+        verseActionTarget.book,
+        verseActionTarget.chapter,
+        verseActionTarget.verse,
+      );
     } catch {
       toast.error("Unable to update the favorite");
     }
-  }, [reader]);
+  }, [reader, verseActionTarget]);
+
+  const handleActionNote = useCallback(() => {
+    if (!verseActionTarget) return;
+    const key = `${verseActionTarget.book}-${verseActionTarget.chapter}-${verseActionTarget.verse}`;
+    reader.clearSelectedVerses();
+    reader.toggleVerse(key);
+    setNoteText(reader.verseNotes[key] || "");
+    setNoteDialogOpen(true);
+  }, [reader, verseActionTarget]);
+
+  const handleActionCopy = useCallback(async () => {
+    if (!verseActionTarget) return;
+    const text = `${verseActionTarget.book} ${verseActionTarget.chapter}:${verseActionTarget.verse} ${verseActionTarget.text}`;
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success("Verse copied");
+    } catch {
+      toast.error("Unable to copy the verse");
+    }
+  }, [verseActionTarget]);
+
+  const handleActionShare = useCallback(async () => {
+    if (!verseActionTarget) return;
+    const reference = `${verseActionTarget.book} ${verseActionTarget.chapter}:${verseActionTarget.verse}`;
+    const text = `${reference} ${verseActionTarget.text}`;
+    try {
+      if (navigator.share) await navigator.share({ title: reference, text });
+      else await navigator.clipboard.writeText(text);
+      toast.success(
+        navigator.share ? "Verse shared" : "Verse copied for sharing",
+      );
+    } catch (error) {
+      if ((error as DOMException)?.name !== "AbortError") {
+        toast.error("Unable to share the verse");
+      }
+    }
+  }, [verseActionTarget]);
+
+  const handleToggleHighlight = useCallback(
+    async (book: string, chapter: number, verse: number, colorId: number) => {
+      try {
+        await reader.toggleHighlight(book, chapter, verse, colorId);
+      } catch {
+        toast.error("Unable to update the highlight");
+      }
+    },
+    [reader],
+  );
+
+  const handleToggleFavorite = useCallback(
+    async (book: string, chapter: number, verse: number) => {
+      try {
+        await reader.toggleFavorite(book, chapter, verse);
+      } catch {
+        toast.error("Unable to update the favorite");
+      }
+    },
+    [reader],
+  );
 
   const selectedVerseData = reader.chapters.flatMap((chapter) =>
     chapter.verses
-      .filter((verse) => reader.selectedVerses.includes(`${chapter.book}-${chapter.chapter}-${verse.verse}`))
-      .map((verse) => ({ ...verse, book: chapter.book, chapter: chapter.chapter })),
+      .filter((verse) =>
+        reader.selectedVerses.includes(
+          `${chapter.book}-${chapter.chapter}-${verse.verse}`,
+        ),
+      )
+      .map((verse) => ({
+        ...verse,
+        book: chapter.book,
+        chapter: chapter.chapter,
+      })),
   );
 
-  const clearSelection = useCallback(() => reader.clearSelectedVerses(), [reader]);
+  const clearSelection = useCallback(
+    () => reader.clearSelectedVerses(),
+    [reader],
+  );
 
   const handleCopySelected = useCallback(async () => {
     const text = selectedVerseData
-      .map((verse) => `${verse.book} ${verse.chapter}:${verse.verse} ${verse.text}`)
+      .map(
+        (verse) =>
+          `${verse.book} ${verse.chapter}:${verse.verse} ${verse.text}`,
+      )
       .join("\n");
     try {
       await navigator.clipboard.writeText(text);
@@ -242,14 +460,21 @@ export function useBibleReaderPage() {
 
   const handleShareSelected = useCallback(async () => {
     const text = selectedVerseData
-      .map((verse) => `${verse.book} ${verse.chapter}:${verse.verse} ${verse.text}`)
+      .map(
+        (verse) =>
+          `${verse.book} ${verse.chapter}:${verse.verse} ${verse.text}`,
+      )
       .join("\n");
     try {
-      if (navigator.share) await navigator.share({ title: "Selected Bible verses", text });
+      if (navigator.share)
+        await navigator.share({ title: "Selected Bible verses", text });
       else await navigator.clipboard.writeText(text);
-      toast.success(navigator.share ? "Verses shared" : "Verses copied for sharing");
+      toast.success(
+        navigator.share ? "Verses shared" : "Verses copied for sharing",
+      );
     } catch (error) {
-      if ((error as DOMException)?.name !== "AbortError") toast.error("Unable to share the selected verses");
+      if ((error as DOMException)?.name !== "AbortError")
+        toast.error("Unable to share the selected verses");
     }
   }, [selectedVerseData]);
 
@@ -261,9 +486,11 @@ export function useBibleReaderPage() {
 
   const handleMultiHighlight = useCallback(async () => {
     try {
-      await Promise.all(selectedVerseData.map((verse) =>
-        reader.toggleHighlight(verse.book, verse.chapter, verse.verse, 0),
-      ));
+      await Promise.all(
+        selectedVerseData.map((verse) =>
+          reader.toggleHighlight(verse.book, verse.chapter, verse.verse, 0),
+        ),
+      );
       toast.success("Selected verses highlighted");
     } catch {
       toast.error("Unable to highlight the selected verses");
@@ -273,9 +500,11 @@ export function useBibleReaderPage() {
 
   const handleMultiFavorite = useCallback(async () => {
     try {
-      await Promise.all(selectedVerseData.map((verse) =>
-        reader.toggleFavorite(verse.book, verse.chapter, verse.verse),
-      ));
+      await Promise.all(
+        selectedVerseData.map((verse) =>
+          reader.toggleFavorite(verse.book, verse.chapter, verse.verse),
+        ),
+      );
       toast.success("Favorites updated");
     } catch {
       toast.error("Unable to update favorites");
@@ -284,9 +513,12 @@ export function useBibleReaderPage() {
   }, [clearSelection, reader, selectedVerseData]);
 
   const handleOpenNote = useCallback(() => {
-    const existingNote = selectedVerseData.length === 1
-      ? reader.verseNotes[`${selectedVerseData[0].book}-${selectedVerseData[0].chapter}-${selectedVerseData[0].verse}`] || ""
-      : "";
+    const existingNote =
+      selectedVerseData.length === 1
+        ? reader.verseNotes[
+            `${selectedVerseData[0].book}-${selectedVerseData[0].chapter}-${selectedVerseData[0].verse}`
+          ] || ""
+        : "";
     setNoteText(existingNote);
     setNoteDialogOpen(true);
   }, [reader, selectedVerseData]);
@@ -295,22 +527,32 @@ export function useBibleReaderPage() {
     const note = noteText.trim();
     if (!note) return;
     try {
-      await Promise.all(selectedVerseData.map((verse) =>
-        reader.saveNote(verse.book, verse.chapter, verse.verse, note),
-      ));
+      await Promise.all(
+        selectedVerseData.map((verse) =>
+          reader.saveNote(verse.book, verse.chapter, verse.verse, note),
+        ),
+      );
       setNoteDialogOpen(false);
       setNoteText("");
-      toast.success(selectedVerseData.length === 1 ? "Note saved" : "Note saved to selected verses");
+      toast.success(
+        selectedVerseData.length === 1
+          ? "Note saved"
+          : "Note saved to selected verses",
+      );
     } catch {
       toast.error("Unable to save the note");
     }
     clearSelection();
   }, [clearSelection, noteText, reader, selectedVerseData]);
 
-  const currentBookIndex = BIBLE_BOOKS.findIndex((book) => book.bookName === reader.selectedBook);
+  const currentBookIndex = BIBLE_BOOKS.findIndex(
+    (book) => book.bookName === reader.selectedBook,
+  );
   const currentBook = BIBLE_BOOKS[currentBookIndex];
   const canGoPrev = currentBookIndex > 0 || reader.selectedChapter > 1;
-  const canGoNext = currentBookIndex < BIBLE_BOOKS.length - 1 || reader.selectedChapter < (currentBook?.maxChapter ?? 0);
+  const canGoNext =
+    currentBookIndex < BIBLE_BOOKS.length - 1 ||
+    reader.selectedChapter < (currentBook?.maxChapter ?? 0);
 
   const handlePrevChapter = useCallback(() => {
     if (reader.selectedChapter > 1) {
@@ -349,21 +591,31 @@ export function useBibleReaderPage() {
 
   const scrollToTop = useCallback(() => {
     const element = scrollRef.current;
-    if (element) animateScrollTo(element.scrollTop - element.clientHeight * 0.75, 650);
+    if (element)
+      animateScrollTo(element.scrollTop - element.clientHeight * 0.75, 650);
   }, [animateScrollTo]);
 
   const scrollToBottom = useCallback(() => {
     const element = scrollRef.current;
-    if (element) animateScrollTo(element.scrollTop + element.clientHeight * 0.75, 650);
+    if (element)
+      animateScrollTo(element.scrollTop + element.clientHeight * 0.75, 650);
   }, [animateScrollTo]);
 
   const handleBookmark = useCallback(async () => {
     const firstVerse = reader.chapters
-      .find((chapter) => chapter.book === reader.selectedBook && chapter.chapter === reader.selectedChapter)
+      .find(
+        (chapter) =>
+          chapter.book === reader.selectedBook &&
+          chapter.chapter === reader.selectedChapter,
+      )
       ?.verses.at(0);
     if (!firstVerse) return;
     try {
-      await reader.toggleFavorite(reader.selectedBook, reader.selectedChapter, firstVerse.verse);
+      await reader.toggleFavorite(
+        reader.selectedBook,
+        reader.selectedChapter,
+        firstVerse.verse,
+      );
       toast.success("Chapter bookmark updated");
     } catch {
       toast.error("Unable to update the bookmark");
@@ -386,6 +638,9 @@ export function useBibleReaderPage() {
     drawerOpen,
     setDrawerOpen,
     drawerVerse,
+    verseActionsOpen,
+    setVerseActionsOpen,
+    verseActionTarget,
     noteDialogOpen,
     setNoteDialogOpen,
     noteText,
@@ -398,6 +653,25 @@ export function useBibleReaderPage() {
     canGoNext,
     handleReadChapter,
     handleExplainVerse,
+    handleOpenVerseActions,
+    handleActionExplain,
+    handleActionLab,
+    handleActionResources,
+    handleActionListen,
+    handleActionHighlight,
+    handleActionFavorite,
+    handleActionNote,
+    handleActionCopy,
+    handleActionShare,
+    handleActionDevotional: () => navigate(actionUrl("/daily-devotions")),
+    handleActionStudyTools: () => navigate(actionUrl("/verse-resources")),
+    handleActionStrongs: () => navigate(actionUrl("/strongs-dictionary")),
+    handleActionTrivia: () => navigate(actionUrl("/trivia")),
+    handleActionJournal: () => navigate(actionUrl("/journal/new")),
+    handleActionSearch: () =>
+      navigate(
+        `/search?query=${encodeURIComponent(verseActionTarget?.text.slice(0, 100) ?? "")}`,
+      ),
     handleToggleHighlight,
     handleToggleFavorite,
     handleMultiHighlight,
@@ -411,7 +685,10 @@ export function useBibleReaderPage() {
     handlePrevChapter,
     handleNextChapter,
     handleSearch: () => navigate("/search"),
-    handleBookOverview: () => navigate(`/book-overview?book=${encodeURIComponent(reader.selectedBook)}`),
+    handleBookOverview: () =>
+      navigate(
+        `/book-overview?book=${encodeURIComponent(reader.selectedBook)}`,
+      ),
     scrollToTop,
     scrollToBottom,
     handleBookmark,

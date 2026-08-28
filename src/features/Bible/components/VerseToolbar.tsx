@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Star, Highlighter, MessageCircle } from "lucide-react";
+import { Star, Highlighter, MessageCircle, MoreHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
 const HIGHLIGHT_COLORS = [
   { id: 0, color: "bg-yellow-300", ring: "ring-yellow-300", label: "Yellow" },
@@ -17,18 +17,31 @@ interface VerseToolbarProps {
   verse: number;
   isFavorited: boolean;
   currentHighlight?: number;
-  onHighlight: (book: string, chapter: number, verse: number, colorId: number) => void;
+  onHighlight: (
+    book: string,
+    chapter: number,
+    verse: number,
+    colorId: number,
+  ) => void;
   onFavorite: (book: string, chapter: number, verse: number) => void;
   onExplain: () => void;
+  onMore: () => void;
 }
 export default function VerseToolbar({
-  verseKey, book, chapter, verse, isFavorited, currentHighlight,
-  onHighlight, onFavorite, onExplain,
+  book,
+  chapter,
+  verse,
+  isFavorited,
+  currentHighlight,
+  onHighlight,
+  onFavorite,
+  onExplain,
+  onMore,
 }: VerseToolbarProps) {
   const [showColors, setShowColors] = useState(false);
   return (
     <div
-      className="flex items-center gap-1 bg-card/95 backdrop-blur-md border border-border/60 rounded-xl px-1.5 py-1 shadow-lg shadow-black/5"
+      className="flex items-center gap-0.5 rounded-xl border border-border/70 bg-card/95 p-1 shadow-lg backdrop-blur-md"
       onClick={(e) => e.stopPropagation()}
     >
       {/* Highlight */}
@@ -37,7 +50,7 @@ export default function VerseToolbar({
           type="button"
           onClick={() => setShowColors(!showColors)}
           className={cn(
-            "w-7 h-7 rounded-lg flex items-center justify-center transition-all",
+            "w-7 h-7 rounded-lg flex items-center justify-center transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
             currentHighlight !== undefined
               ? "bg-primary/15 text-primary"
               : "text-muted-foreground hover:bg-muted hover:text-foreground",
@@ -51,7 +64,10 @@ export default function VerseToolbar({
         {/* Color picker dropdown */}
         {showColors && (
           <>
-            <div className="fixed inset-0 z-10" onClick={() => setShowColors(false)} />
+            <div
+              className="fixed inset-0 z-10"
+              onClick={() => setShowColors(false)}
+            />
             <div className="absolute top-full end-0 mt-1.5 flex gap-1.5 p-2 rounded-xl bg-card border border-border shadow-xl z-20">
               {HIGHLIGHT_COLORS.map((c) => (
                 <button
@@ -63,9 +79,11 @@ export default function VerseToolbar({
                     setShowColors(false);
                   }}
                   className={cn(
-                    "w-6 h-6 rounded-full border-2 transition-all hover:scale-110",
+                    "w-6 h-6 rounded-full border-2 transition-all hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                     c.color,
-                    currentHighlight === c.id ? "border-foreground ring-2 ring-foreground/20 scale-110" : "border-white/50",
+                    currentHighlight === c.id
+                      ? "border-foreground ring-2 ring-foreground/20 scale-110"
+                      : "border-white/50",
                   )}
                   title={c.label}
                   aria-label={`${c.label} highlight`}
@@ -75,8 +93,10 @@ export default function VerseToolbar({
               {currentHighlight !== undefined && (
                 <button
                   type="button"
-                  onClick={() => onHighlight(book, chapter, verse, -1)}
-                  className="w-6 h-6 rounded-full border-2 border-dashed border-muted-foreground/40 flex items-center justify-center text-[10px] text-muted-foreground hover:bg-muted transition-all"
+                  onClick={() =>
+                    onHighlight(book, chapter, verse, currentHighlight)
+                  }
+                  className="w-6 h-6 rounded-full border-2 border-dashed border-muted-foreground/40 flex items-center justify-center text-[10px] text-muted-foreground hover:bg-muted transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   title="Remove"
                   aria-label="Remove highlight"
                 >
@@ -92,9 +112,12 @@ export default function VerseToolbar({
       {/* Favorite */}
       <button
         type="button"
-        onClick={(e) => { e.stopPropagation(); onFavorite(book, chapter, verse); }}
+        onClick={(e) => {
+          e.stopPropagation();
+          onFavorite(book, chapter, verse);
+        }}
         className={cn(
-          "w-7 h-7 rounded-lg flex items-center justify-center transition-all",
+          "w-7 h-7 rounded-lg flex items-center justify-center transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
           isFavorited
             ? "bg-rose-500/10 text-rose-500"
             : "text-muted-foreground hover:bg-muted hover:text-foreground",
@@ -107,12 +130,28 @@ export default function VerseToolbar({
       </button>
       {/* Explain */}
       <button
-        onClick={(e) => { e.stopPropagation(); onExplain(); }}
-        className="w-7 h-7 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-primary/10 hover:text-primary transition-all"
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          onExplain();
+        }}
+        className="w-7 h-7 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-primary/10 hover:text-primary transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         title="View explanation"
         aria-label={`Explain ${book} ${chapter}:${verse}`}
       >
         <MessageCircle className="w-3.5 h-3.5" />
+      </button>
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          onMore();
+        }}
+        className="flex h-7 w-7 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        title="More verse actions"
+        aria-label={`More actions for ${book} ${chapter}:${verse}`}
+      >
+        <MoreHorizontal className="h-3.5 w-3.5" />
       </button>
     </div>
   );

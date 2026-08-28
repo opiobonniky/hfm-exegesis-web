@@ -49,21 +49,60 @@ interface NavItem {
 /* ─── Nav items ────────────────────────────────────────────────────────────── */
 
 const adminNavItems: NavItem[] = [
-  { title: "sidebar.dashboard", url: routes.dashboard.path, icon: LayoutDashboard },
+  {
+    title: "sidebar.dashboard",
+    url: routes.dashboard.path,
+    icon: LayoutDashboard,
+  },
   { title: "sidebar.activity", url: routes.systemUsers.path, icon: Users },
   { title: "sidebar.bible", url: routes.bibleReader.path, icon: BookText },
-  { title: "sidebar.dailyVerse", url: routes.dailyVerse.path, icon: Sun },
-  // { title: "sidebar.devotions", url: routes.dailyDevotions.path, icon: SproutIcon },
-  { title: "sidebar.explanations", url: routes.verseExplanations.path, icon: BookMarked },
-  { title: "sidebar.readingPlans", url: routes.readingPlans.path, icon: BookOpen },
-  { title: "sidebar.myActivity", url: routes.myActivity.path, icon: Highlighter },
-  { title: "sidebar.studyTools", url: routes.adminStudyTools.path, icon: BookText },
-  { title: "sidebar.triviaAdmin", url: routes.adminTrivia.path, icon: HelpCircle },
-  { title: "sidebar.dailyContentAdmin", url: routes.adminDailyContent.path, icon: CalendarDays },
-  { title: "sidebar.subscriptionsAdmin", url: routes.adminSubscriptions.path, icon: CreditCard },
+  {
+    title: "sidebar.dailyContentAdmin",
+    url: routes.adminDailyContent.path,
+    icon: CalendarDays,
+  },
+
+  {
+    title: "sidebar.explanations",
+    url: routes.verseExplanations.path,
+    icon: BookMarked,
+  },
+  {
+    title: "sidebar.readingPlans",
+    url: routes.readingPlans.path,
+    icon: BookOpen,
+  },
+  {
+    title: "sidebar.myActivity",
+    url: routes.myActivity.path,
+    icon: Highlighter,
+  },
+  {
+    title: "sidebar.studyTools",
+    url: routes.adminStudyTools.path,
+    icon: BookText,
+  },
+  {
+    title: "sidebar.triviaAdmin",
+    url: routes.adminTrivia.path,
+    icon: HelpCircle,
+  },
+  {
+    title: "sidebar.subscriptionsAdmin",
+    url: routes.adminSubscriptions.path,
+    icon: CreditCard,
+  },
   { title: "sidebar.journal", url: routes.journal.path, icon: PenLine },
-  { title: "sidebar.journalPrompts", url: routes.journalPrompts.path, icon: Lightbulb },
-  { title: "sidebar.journalTemplates", url: routes.journalTemplates.path, icon: LayoutTemplate },
+  {
+    title: "sidebar.journalPrompts",
+    url: routes.journalPrompts.path,
+    icon: Lightbulb,
+  },
+  {
+    title: "sidebar.journalTemplates",
+    url: routes.journalTemplates.path,
+    icon: LayoutTemplate,
+  },
 ];
 
 const userNavItems: NavItem[] = [
@@ -71,12 +110,28 @@ const userNavItems: NavItem[] = [
   { title: "sidebar.bible", url: routes.bibleLibrary.path, icon: BookText },
   { title: "sidebar.search", url: routes.search.path, icon: SearchIcon },
   { title: "sidebar.dailyVerse", url: routes.userDailyVerse.path, icon: Sun },
-  { title: "sidebar.dailyExegesis", url: routes.dailyExegesis.path, icon: BookOpen },
-  { title: "sidebar.devotions", url: routes.userDevotions.path, icon: SproutIcon },
+  {
+    title: "sidebar.dailyExegesis",
+    url: routes.dailyExegesis.path,
+    icon: BookOpen,
+  },
+  {
+    title: "sidebar.devotions",
+    url: routes.userDevotions.path,
+    icon: SproutIcon,
+  },
   { title: "sidebar.readingPlans", url: routes.userPlans.path, icon: BookOpen },
-  { title: "sidebar.myActivity", url: routes.myActivity.path, icon: Highlighter },
+  {
+    title: "sidebar.myActivity",
+    url: routes.myActivity.path,
+    icon: Highlighter,
+  },
   { title: "sidebar.journal", url: routes.journal.path, icon: PenLine },
-  { title: "sidebar.exegesisLab", url: routes.dictionary.path, icon: Microscope },
+  {
+    title: "sidebar.exegesisLab",
+    url: routes.dictionary.path,
+    icon: Microscope,
+  },
   { title: "sidebar.studyBible", url: routes.studyBible.path, icon: BookText },
   { title: "sidebar.trivia", url: routes.trivia.path, icon: Sparkles },
 ];
@@ -183,8 +238,13 @@ function PillNavItem({
 /* ── Section Divider ────────────────────────────────────────────────────── */
 
 function SectionDivider({ collapsed }: { collapsed: boolean }) {
-  if (collapsed) return <div className="mx-auto my-3 w-4 h-px bg-border/50 cathedral:bg-primary/30" />;
-  return <div className="mx-3 my-3 h-px bg-gradient-to-r from-border/60 via-border/30 to-transparent cathedral:from-primary/30 cathedral:via-primary/15 cathedral:to-transparent" />;
+  if (collapsed)
+    return (
+      <div className="mx-auto my-3 w-4 h-px bg-border/50 cathedral:bg-primary/30" />
+    );
+  return (
+    <div className="mx-3 my-3 h-px bg-gradient-to-r from-border/60 via-border/30 to-transparent cathedral:from-primary/30 cathedral:via-primary/15 cathedral:to-transparent" />
+  );
 }
 
 /* ── Collapsed Tooltip Button ───────────────────────────────────────────── */
@@ -225,19 +285,32 @@ function getBibleNavUrl(): string {
   return routes.bibleLibrary.path;
 }
 
-function BibleNavItem({ collapsed, onNavClick }: { collapsed: boolean; onNavClick?: () => void }) {
+function BibleNavItem({
+  collapsed,
+  onNavClick,
+}: {
+  collapsed: boolean;
+  onNavClick?: () => void;
+}) {
   const navigate = useNavigate();
   const location = useLocation();
   const t = useLanguage().t;
   const label = getNavTitle(t, "sidebar.bible");
   const targetUrl = getBibleNavUrl();
-  const isBibleReaderActive = location.pathname.startsWith(routes.bibleReader.path);
-  const isBibleLibraryActive = location.pathname.startsWith(routes.bibleLibrary.path);
+  const isBibleReaderActive = location.pathname.startsWith(
+    routes.bibleReader.path,
+  );
+  const isBibleLibraryActive = location.pathname.startsWith(
+    routes.bibleLibrary.path,
+  );
   const active = isBibleReaderActive || isBibleLibraryActive;
 
   return (
     <button
-      onClick={() => { navigate(targetUrl); onNavClick?.(); }}
+      onClick={() => {
+        navigate(targetUrl);
+        onNavClick?.();
+      }}
       className={cn(
         "group flex items-center gap-3 w-full transition-all duration-200",
         collapsed ? "justify-center px-0" : "px-1",
@@ -306,7 +379,9 @@ export function AppSidebar() {
   const { userInfo, logout } = useAuth();
   const { t, isRtl } = useLanguage();
 
-  const closeMobileSidebar = () => { if (isMobile) setOpenMobile(false); };
+  const closeMobileSidebar = () => {
+    if (isMobile) setOpenMobile(false);
+  };
 
   const isAdmin = userInfo?.userRole === 1;
   const mainNavItems = isAdmin ? adminNavItems : userNavItems;
@@ -318,13 +393,21 @@ export function AppSidebar() {
       if (item.title === "sidebar.bible" && !isAdmin) {
         return (
           <li key={item.title}>
-            <BibleNavItem collapsed={collapsed} onNavClick={closeMobileSidebar} />
+            <BibleNavItem
+              collapsed={collapsed}
+              onNavClick={closeMobileSidebar}
+            />
           </li>
         );
       }
       return (
         <li key={item.title}>
-          <PillNavItem item={item} isActive={isActive(item.url)} collapsed={collapsed} onNavClick={closeMobileSidebar} />
+          <PillNavItem
+            item={item}
+            isActive={isActive(item.url)}
+            collapsed={collapsed}
+            onNavClick={closeMobileSidebar}
+          />
         </li>
       );
     });
@@ -345,7 +428,12 @@ export function AppSidebar() {
       return (
         <li key={item.title}>
           <CollapsedTooltipButton label={label}>
-            <PillNavItem item={item} isActive={isActive(item.url)} collapsed onNavClick={closeMobileSidebar} />
+            <PillNavItem
+              item={item}
+              isActive={isActive(item.url)}
+              collapsed
+              onNavClick={closeMobileSidebar}
+            />
           </CollapsedTooltipButton>
         </li>
       );
@@ -411,7 +499,9 @@ export function AppSidebar() {
         {/* ═══════════════════════════════════════════════════════════════════
            HEADER — Minimal brand mark
            ═══════════════════════════════════════════════════════════════════ */}
-        <SidebarHeader className={collapsed ? "px-2 pt-4 pb-2" : "px-4 pt-6 pb-4"}>
+        <SidebarHeader
+          className={collapsed ? "px-2 pt-4 pb-2" : "px-4 pt-6 pb-4"}
+        >
           <NavLink
             to={isAdmin ? routes.dashboard.path : routes.home.path}
             className={cn(
@@ -419,14 +509,14 @@ export function AppSidebar() {
               collapsed ? "mx-auto" : "",
             )}
           >
-            <div className={cn(
-              collapsed && "flex-col items-center gap-1.5",
-            )}>
+            <div className={cn(collapsed && "flex-col items-center gap-1.5")}>
               {/* Logo — the image already contains the app name text */}
-              <div className={cn(
-                "mx-auto flex items-center justify-center",
-                collapsed ? "w-10 h-10" : "w-[140px] h-[140px]",
-              )}>
+              <div
+                className={cn(
+                  "mx-auto flex items-center justify-center",
+                  collapsed ? "w-10 h-10" : "w-[140px] h-[140px]",
+                )}
+              >
                 <img
                   src={logoImage}
                   alt={t.brand?.title || "EXEGESIS"}
@@ -446,15 +536,21 @@ export function AppSidebar() {
         <SidebarContent className="sidebar-scroll px-2 py-1 overflow-y-auto overflow-x-hidden">
           {/* ── Main Menu ── */}
           <nav>
-            <ul className={cn("flex flex-col", collapsed ? "gap-1" : "gap-0.5")}>
-              {collapsed ? renderCollapsedNavItems(mainNavItems) : renderNavItems(mainNavItems)}
+            <ul
+              className={cn("flex flex-col", collapsed ? "gap-1" : "gap-0.5")}
+            >
+              {collapsed
+                ? renderCollapsedNavItems(mainNavItems)
+                : renderNavItems(mainNavItems)}
             </ul>
           </nav>
 
           {/* ── Manage / Settings section for all users ── */}
           <SectionDivider collapsed={collapsed} />
           <nav>
-            <ul className={cn("flex flex-col", collapsed ? "gap-1" : "gap-0.5")}>
+            <ul
+              className={cn("flex flex-col", collapsed ? "gap-1" : "gap-0.5")}
+            >
               {collapsed
                 ? renderCollapsedNavItems(manageNavItems)
                 : renderNavItems(manageNavItems)}
@@ -465,24 +561,24 @@ export function AppSidebar() {
         {/* ═══════════════════════════════════════════════════════════════════
            FOOTER — Compact: user avatar + sign out only
            ═══════════════════════════════════════════════════════════════════ */}
-        <SidebarFooter className={cn(
-          collapsed ? "px-2 pb-3 pt-2" : "px-3 pb-4 pt-1",
-        )}>
+        <SidebarFooter
+          className={cn(collapsed ? "px-2 pb-3 pt-2" : "px-3 pb-4 pt-1")}
+        >
           {/* {─ Sign Out Button ─} */}
           <button
             onClick={logout}
             className={cn(
               "door-hover flex items-center w-full rounded-xl transition-all duration-200",
               "text-foreground/30 hover:text-red-400 hover:bg-red-500/8",
-              collapsed
-                ? "justify-center p-2"
-                : "gap-3 px-3 py-2.5",
+              collapsed ? "justify-center p-2" : "gap-3 px-3 py-2.5",
             )}
           >
-            <div className={cn(
-              "flex items-center justify-center rounded-lg transition-all duration-200 shrink-0",
-              collapsed ? "w-9 h-9" : "w-8 h-8",
-            )}>
+            <div
+              className={cn(
+                "flex items-center justify-center rounded-lg transition-all duration-200 shrink-0",
+                collapsed ? "w-9 h-9" : "w-8 h-8",
+              )}
+            >
               <LogOut className="door-icon w-3.5 h-3.5 transition-all duration-200" />
             </div>
             {!collapsed && (
