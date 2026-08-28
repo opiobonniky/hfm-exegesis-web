@@ -110,10 +110,11 @@ export default function LabFlow() {
                 repeatCount={lab.repeatCount}
                 listenComplete={lab.listenComplete}
                 saving={lab.saving}
-                onStart={() => { lab.startListening(); /* TTS would go here */ lab.incrementRepeat(); }}
+                audio={h.audio}
+                onStartListening={h.startListeningWithTTS}
                 onAdvance={lab.advanceListen}
-                onReset={lab.resetListening}
-                onSkip={lab.advanceListen}
+                onReset={() => { h.audio.stopPlayback(); lab.resetListening(); }}
+                onSkip={() => { h.audio.stopPlayback(); lab.advanceListen(); }}
               />
             )}
 

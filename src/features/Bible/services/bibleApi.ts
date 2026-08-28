@@ -14,8 +14,10 @@ export const bibleApi = {
     sendPostRequest("bible", "search", { query, page, size }),
   getVerseResources: (book: string, chapter: number, verse: number) =>
     sendPostRequest("bible", "get-verse-resources", { bookName: book, chapter, verseStart: verse }),
-  getTranslations: () =>
-    sendPostRequest("bible", "get-translations", {}),
+  getTranslations: async () => {
+    const { bibleApi } = await import("@/services/bibleApi");
+    return bibleApi.getTranslations();
+  },
   getTodaysVerse: () =>
     sendPostRequest("bible", "get-todays-verse", {}),
   getTodaysDevotion: () =>

@@ -13,10 +13,13 @@ import { getVerseResources, getTranslationComparison } from "@/services/verseRes
 import type { VerseResourceData, TranslationComparisonEntry } from "@/services/verseResourcesApi";
 import { bibleApi } from "@/services/bibleApi";
 import type { Verse } from "@/services/bibleApi";
+import { useAudioPlayer } from "@/hooks/useAudioPlayer";
+import { useCallback as useCallbackTTS } from "react";
 
 export function useLabFlowPage() {
   const navigate = useNavigate();
   const lab = useLabFlow();
+  const audio = useAudioPlayer();
   const [passageVerses, setPassageVerses] = useState<Verse[]>([]);
   const [versesLoading, setVersesLoading] = useState(false);
   const [previewText, setPreviewText] = useState("");
@@ -171,6 +174,26 @@ export function useLabFlowPage() {
       else await navigator.clipboard.writeText(formatStudyAsText());
     } catch { setSharing(false); } finally { setSharing(false); }
   }, [lab.passageRef, formatStudyAsText]);
+  // Listen stage TTS playback
+  const startListeningWithTTS = useCallback(() => {
+    if (passageVerses.length === 0) return;
+    audio.startPlayback(passageVerses.map((v) => ({ text: v.text })), 0);
+  }, [passageVerses, audio]);
+
+  // When passage completes one full read-through, increment repeat count
+  useEffect(() => {
+    if (audio.passageComplete && lab.stage === "listen" && !lab.listenComplete) {
+      lab.incrementRepeat();
+      // Auto-start next repeat if not done
+      const nextCount = lab.repeatCount + 1;
+      if (nextCount < lab.selectedRepeats) {
+        setTimeout(() => {
+          audio.startPlayback(passageVerses.map((v) => ({ text: v.text })), 0);
+        }, 800);
+      }
+    }
+  }, [audio.passageComplete]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const showShortcutHint = useCallback((text: string) => {
     setShortcutHint(text);
     if (shortcutTimeoutRef.current) clearTimeout(shortcutTimeoutRef.current);
@@ -201,6 +224,8 @@ export function useLabFlowPage() {
     bookPrologue, prologueLoading,
     // Actions
     handleWordTap, handleCopy, handleShare, copied, sharing,
+    // Listen TTS
+    audio, startListeningWithTTS,
     // Shortcuts
     showShortcuts, setShowShortcuts, shortcutHint,
     // Constants re-export

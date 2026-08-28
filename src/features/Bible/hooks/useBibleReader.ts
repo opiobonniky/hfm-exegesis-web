@@ -71,14 +71,15 @@ export function useBibleReader() {
   const verseRefs = useRef<Record<string, HTMLSpanElement | null>>({});
 
   useEffect(() => {
-    sendPostRequest("bible", "get-translations", {})
-      .then((res) => {
-        if (res.returnCode === 200)
-          setAvailableTranslations(res.returnData || []);
-      })
-      .catch((error) =>
-        console.error("Failed to load Bible translations:", error),
-      );
+    import("@/services/bibleApi").then(({ bibleApi }) => {
+      bibleApi.getTranslations()
+        .then((data) => {
+          setAvailableTranslations(data || []);
+        })
+        .catch((error) =>
+          console.error("Failed to load Bible translations:", error),
+        );
+    });
   }, []);
   const fetchChapters = useCallback(
     async (
