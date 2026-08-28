@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { sendPostRequest } from "@/services/api";
+import { ensureDataLoaded, getVerseText } from "@/utilities/bibleUtils";
 
 import type { ActivityType } from "../types";
 export function useMyActivity() {
@@ -20,6 +21,7 @@ export function useMyActivity() {
   const [readHistory, setReadHistory] = useState<any[]>([]);
   const [deleting, setDeleting] = useState<number | null>(null);
   const [clearingAll, setClearingAll] = useState(false);
+  const [verseTextMap, setVerseTextMap] = useState<Record<string, string>>({});
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
@@ -29,10 +31,27 @@ export function useMyActivity() {
         sendPostRequest("bible", "get-favorites", { pageSize: 100 }),
         sendPostRequest("bible", "get-read-history", { pageSize: 100 }),
       ]);
-      if (h.returnCode === 200) setHighlights(h.returnData?.highlights || []);
-      if (n.returnCode === 200) setNotes(n.returnData || []);
-      if (f.returnCode === 200) setFavorites(f.returnData?.favorites || []);
-      if (r.returnCode === 200) setReadHistory(r.returnData?.readHistories || []);
+      const hl = h.returnCode === 200 ? (h.returnData?.highlights || []) : [];
+      const nt = n.returnCode === 200 ? (n.returnData || []) : [];
+      const fv = f.returnCode === 200 ? (f.returnData?.favorites || []) : [];
+      const rh = r.returnCode === 200 ? (r.returnData?.readHistories || []) : [];
+      setHighlights(hl); setNotes(nt); setFavorites(fv); setReadHistory(rh);
+      // Pre-fetch verse texts from local Bible data
+      try {
+        await ensureDataLoaded();
+        const allItems = [...hl, ...nt, ...fv, ...rh].filter(Boolean);
+        const map: Record<string, string> = {};
+        for (const item of allItems) {
+          if (item?.bookName && item?.chapter && item?.verseNumber) {
+            const key = `${item.bookName} ${item.chapter}:${item.verseNumber}`;
+            if (!(key in map)) {
+              const text = getVerseText(item.bookName, Number(item.chapter), Number(item.verseNumber));
+              if (text) map[key] = text;
+            }
+          }
+        }
+        setVerseTextMap(map);
+      } catch { /* Bible data not available — show refs only */ }
     } catch (e) { console.error(e); } finally { setLoading(false); }
   }, []);
   useEffect(() => { loadData(); }, [loadData]);
@@ -74,11 +93,11 @@ export function useMyActivity() {
   }, [t]);
   const feed = useMemo(() => {
     return [
-      ...highlights.map((h) => ({ id: `h-${h.id}`, type: "highlights" as const, data: h, ts: h.createdOn })),
-      ...notes.map((n) => ({ id: `n-${n.id}`, type: "notes" as const, data: n, ts: n.createdOn })),
-      ...favorites.map((f) => ({ id: `f-${f.id}`, type: "favorites" as const, data: f, ts: f.createdOn })),
-      ...readHistory.map((h) => ({ id: `r-${h.id}`, type: "history" as const, data: h, ts: h.createdOn })),
-    ].filter((item) => {
+      ...highlights.filter(Boolean).map((h) => ({ id: `h-${h.id}`, type: "highlights" as const, data: h, ts: h.createdOn })),
+      ...notes.filter(Boolean).map((n) => ({ id: `n-${n.id}`, type: "notes" as const, data: n, ts: n.createdOn })),
+      ...favorites.filter(Boolean).map((f) => ({ id: `f-${f.id}`, type: "favorites" as const, data: f, ts: f.createdOn })),
+      ...readHistory.filter(Boolean).map((h) => ({ id: `r-${h.id}`, type: "history" as const, data: h, ts: h.createdOn })),
+    ].filter((item) => item?.data && item.data.bookName).filter((item) => {
       if (activeFilter !== "all" && item.type !== activeFilter) return false;
       if (filterBook !== "all" && item.data.bookName.toLowerCase() !== filterBook.toLowerCase()) return false;
       if (searchQuery) {
@@ -100,7 +119,7 @@ export function useMyActivity() {
     activeFilter, setActiveFilter,
     loading, searchQuery, setSearchQuery,
     filterBook, setFilterBook,
-    feed, counts, deleting, clearingAll,
+    feed, counts, deleting, clearingAll, verseTextMap,
     deleteItem, clearHistory, goToReader, formatTimeAgo,
   };
 }

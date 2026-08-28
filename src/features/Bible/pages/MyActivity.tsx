@@ -77,7 +77,8 @@ export default function MyActivity() {
           <div className="space-y-3">
             <p className="text-xs text-muted-foreground/50 mb-1">{h.feed.length} {h.feed.length === 1 ? "item" : "items"}</p>
             {h.feed.map((item) => (
-              <ActivityFeedItem key={item.id} type={item.type} data={item.data} formatTimeAgo={h.formatTimeAgo}
+              <ActivityFeedItem key={item.id} type={item.type} data={item.data} verseTextMap={h.verseTextMap}
+                formatTimeAgo={h.formatTimeAgo}
                 onNavigate={(book, ch) => h.goToReader(book, ch)}
                 onDelete={() => {
                   const endpoints: Record<string, [string, string]> = {

@@ -1,36 +1,26 @@
-import { ChevronRight, Trash2, Loader2, Eye, Edit2 } from "lucide-react";
+import { ChevronRight, Trash2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-
-interface ActivityItem {
-  id: string;
-  type: "highlights" | "notes" | "favorites" | "history";
-  data: any;
-  ts: string;
-}
 
 interface Props {
-  item: ActivityItem;
+  type: "highlights" | "notes" | "favorites" | "history";
+  data: any;
+  verseTextMap?: Record<string, string>;
   formatTimeAgo: (ts: string) => string;
-  goToReader: (book: string, ch: number) => void;
-  onDelete: (type: string, id: number, endpoint: string, field: string) => void;
-  deleting: number | null;
+  onNavigate: (book: string, ch: number) => void;
+  onDelete: () => void;
+  deleting: boolean;
 }
 
-export default function ActivityFeedItem({ item, formatTimeAgo, goToReader, onDelete, deleting }: Props) {
-  const { type, data } = item;
-  const verseRef = `${data.bookName} ${data.chapter}:${data.verseNumber}`;
-  const endpoints: Record<string, { endpoint: string; field: string }> = {
-    highlights: { endpoint: "delete-highlights", field: "highlightId" },
-    notes: { endpoint: "delete-verse-note", field: "noteId" },
-    favorites: { endpoint: "delete-favorites", field: "favoriteId" },
-    history: { endpoint: "delete-read-history", field: "readHistoryId" },
-  };
+export default function ActivityFeedItem({ type, data, verseTextMap, formatTimeAgo, onNavigate, onDelete, deleting }: Props) {
+  if (!data) return null;
+  const verseRef = `${data.bookName ?? ""} ${data.chapter ?? ""}:${data.verseNumber ?? ""}`;
+  const verseKey = `${data.bookName} ${data.chapter}:${data.verseNumber}`;
+  const verseText = verseTextMap?.[verseKey] || null;
 
   return (
     <div
       className="group p-3 rounded-xl border border-border/40 bg-card hover:bg-muted/30 hover:border-primary/20 transition-all cursor-pointer"
-      onClick={() => goToReader(data.bookName, data.chapter)}
+      onClick={() => onNavigate(data.bookName, data.chapter)}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
@@ -38,6 +28,9 @@ export default function ActivityFeedItem({ item, formatTimeAgo, goToReader, onDe
             <span className="text-xs font-semibold text-foreground">{verseRef}</span>
             {data.bibleVersion && <span className="text-[10px] font-mono text-muted-foreground/50">{data.bibleVersion}</span>}
           </div>
+          {verseText && (
+            <p className="text-sm text-muted-foreground/80 italic leading-relaxed line-clamp-2">&ldquo;{verseText}&rdquo;</p>
+          )}
         </div>
         {type === "highlights" && data.highlightColor && (
           <div className="w-5 h-5 rounded-full shrink-0 border border-border/50" style={{ backgroundColor: data.highlightColor }} />
@@ -59,8 +52,8 @@ export default function ActivityFeedItem({ item, formatTimeAgo, goToReader, onDe
           Open in reader<ChevronRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
         </span>
         <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg text-muted-foreground/30 hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-all max-sm:opacity-100"
-          onClick={(e) => { e.stopPropagation(); onDelete(type, data.id, endpoints[type].endpoint, endpoints[type].field); }} disabled={deleting === data.id}>
-          {deleting === data.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+          onClick={(e) => { e.stopPropagation(); onDelete(); }} disabled={deleting}>
+          {deleting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
         </Button>
       </div>
     </div>
