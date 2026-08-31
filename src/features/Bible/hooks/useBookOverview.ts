@@ -4,6 +4,7 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import { getBookPrologue } from "@/services/bookProloguesApi";
 import type { BookPrologue } from "@/services/bookProloguesApi";
 import { sendPostRequest } from "@/services/api";
+import { markBookOverviewSeen } from "../services/bookOverviewSeen";
 
 const OT_COUNT = 39;
 const ORDINALS = [
@@ -117,18 +118,36 @@ export function useBookOverview() {
   const testamentLabel = isOt ? "Old Testament" : "New Testament";
   const designation = getBookDesignation(bookName);
 
+  // Check for return URL (from auto-redirect)
+  const returnUrl = searchParams.get("return");
+
   const onStartReading = useCallback(() => {
+    // Mark this book's overview as seen
+    markBookOverviewSeen(bookName);
+
+    // If there's a return URL, go back to where the user was
+    if (returnUrl) {
+      navigate(returnUrl, { replace: true });
+      return;
+    }
+
+    // Otherwise navigate to the Bible reader
     const params = new URLSearchParams({
       book: bookName,
       chapter: String(resumeChapter ?? 1),
     });
     if (resumeVerse) params.set("verse", String(resumeVerse));
     navigate(`/bible-reader?${params.toString()}`);
-  }, [bookName, resumeChapter, resumeVerse, navigate]);
+  }, [bookName, resumeChapter, resumeVerse, returnUrl, navigate]);
 
   const onBack = useCallback(() => {
+    // If there's a return URL, go back to where the user was
+    if (returnUrl) {
+      navigate(returnUrl, { replace: true });
+      return;
+    }
     navigate(-1);
-  }, [navigate]);
+  }, [returnUrl, navigate]);
 
   return {
     bookName,
@@ -139,6 +158,7 @@ export function useBookOverview() {
     isOt,
     designation,
     testamentLabel,
+    hasReturnUrl: !!returnUrl,
     onStartReading,
     onBack,
   };

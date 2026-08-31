@@ -1,7 +1,7 @@
 // BibleReaderBody — sidebar + scrollable chapter content + bottom action bar
 "use client";
 
-import React from "react";
+import React, {RefObject} from "react";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { LoadingSkeleton } from "@/components/verseResources";

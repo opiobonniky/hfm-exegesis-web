@@ -5,12 +5,13 @@ import {
   useRef,
   useState,
 } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { toast } from "@/components/ui/sonner";
 import { useAudioPlayer } from "@/hooks/useAudioPlayer";
 import { BIBLE_BOOKS } from "../constants";
 import { useBibleReader } from "./useBibleReader";
+import { hasSeenBookOverview, markBookOverviewSeen } from "../services/bookOverviewSeen";
 import type {
   LabStage,
   VerseActionTarget,
@@ -35,10 +36,21 @@ function getInitialFontSize(): number {
 
 export function useBibleReaderPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { isRtl } = useLanguage();
   const reader = useBibleReader();
   const audio = useAudioPlayer();
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Auto-redirect to BookOverview for first-time book opens
+  useEffect(() => {
+    const book = searchParams.get("book") || reader.selectedBook;
+    if (book && !hasSeenBookOverview(book)) {
+      // Build the return URL so BookOverview can send user back here
+      const returnUrl = window.location.pathname + window.location.search;
+      navigate(`/book-overview?book=${encodeURIComponent(book)}&return=${encodeURIComponent(returnUrl)}`, { replace: true });
+    }
+  }, [searchParams, reader.selectedBook, navigate]);
   const lastFocusedVerseRef = useRef<string | null>(null);
   const scrollAnimationRef = useRef<number | null>(null);
   const pendingChapterRef = useRef<string | null>(null);

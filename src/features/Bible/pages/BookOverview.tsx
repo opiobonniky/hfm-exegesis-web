@@ -15,6 +15,7 @@ export default function BookOverview() {
     isOt,
     designation,
     testamentLabel,
+    hasReturnUrl,
     onStartReading,
     onBack,
   } = useBookOverview();
@@ -38,7 +39,7 @@ export default function BookOverview() {
         )}
       </main>
 
-      <BookOverviewStartCTA onStart={onStartReading} resumeChapter={resumeChapter} />
+      <BookOverviewStartCTA onStart={onStartReading} resumeChapter={resumeChapter} hasReturnUrl={hasReturnUrl} />
     </div>
   );
 }
