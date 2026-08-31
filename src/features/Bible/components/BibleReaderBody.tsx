@@ -1,7 +1,7 @@
 // BibleReaderBody — sidebar + scrollable chapter content + bottom action bar
 "use client";
 
-import { RefObject } from "react";
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { LoadingSkeleton } from "@/components/verseResources";
@@ -39,8 +39,8 @@ interface ChapterProps {
   onToggleFavorite: (book: string, chapter: number, verse: number) => void;
   onExplainVerse: (book: string, chapter: number, verse: number) => void;
   onOpenVerseActions: (book: string, chapter: number, verse: number) => void;
-  chapterRefs: RefObject<Record<string, HTMLElement>>;
-  verseRefs: RefObject<Record<string, HTMLElement>>;
+  chapterRefs: React.MutableRefObject<Record<string, HTMLDivElement>>;
+  verseRefs: React.MutableRefObject<Record<string, HTMLSpanElement | null>>;
 }
 
 /* ─── Loading/Error Props ────────────────────────────────────────────────── */
