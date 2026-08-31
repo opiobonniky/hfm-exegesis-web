@@ -9,6 +9,7 @@ import type { TriviaQuestion, TriviaOverviewStats, TriviaUserPerformance } from 
 export function useAdminTrivia() {
   const { t, isRtl } = useLanguage();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("questions");
   const [loading, setLoading] = useState(true);
   const [questions, setQuestions] = useState<TriviaQuestion[]>([]);
@@ -74,7 +75,7 @@ export function useAdminTrivia() {
     setSaving(true);
     try {
       const payload = { ...editForm, optionsJson: JSON.stringify(filteredOptions) };
-      const res = await sendPostRequest("trivia", editForm.id ? "admin/update" : "admin/create", payload);
+      const res = await sendPostRequest("trivia", editForm.id ? "update" : "create", payload);
       if (res?.returnCode === 200) { toast({ title: editForm.id ? "Updated" : "Created" }); setEditDialog(false); loadQuestions(questionPage); }
       else { toast({ title: "Failed", description: res?.returnMessage, variant: "destructive" }); }
     } catch { toast({ title: "Error", variant: "destructive" }); }
@@ -83,13 +84,12 @@ export function useAdminTrivia() {
   const handleDelete = useCallback(async () => {
     if (!deleteTarget) return; setDeleting(true);
     try {
-      const res = await sendPostRequest("trivia", "admin/delete", { id: deleteTarget.id });
+      const res = await sendPostRequest("trivia", "delete", { id: deleteTarget.id });
       if (res?.returnCode === 200) { toast({ title: "Deleted" }); setDeleteTarget(null); loadQuestions(questionPage); }
       else { toast({ title: "Delete failed", variant: "destructive" }); }
     } catch { toast({ title: "Error", variant: "destructive" }); }
     finally { setDeleting(false); }
   }, [deleteTarget, toast, loadQuestions, questionPage]);
-  const navigate = useNavigate();
   const onViewQuestion = useCallback((q: TriviaQuestion) => {
     navigate(`/admin/trivia/${q.id}`);
   }, [navigate]);

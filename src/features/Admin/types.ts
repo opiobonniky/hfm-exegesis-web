@@ -184,3 +184,54 @@ export interface TopicItem {
 export interface VerseResource {
   resources: Record<string, unknown>;
 }
+
+// ─── Admin User Types ─────────────────────────────────────────────────────────
+
+export interface AdminUser {
+  id: string;
+  username: string;
+  firstName: string;
+  lastName: string;
+  middleName?: string | null;
+  email: string;
+  phoneNumber?: string | null;
+  gender?: string | null;
+  dateOfBirth?: string | null;
+  maritalStatus?: string | null;
+  userRole: number;
+  emailVerified: boolean;
+  status: boolean;
+  accountStatus?: string;
+  subscriptionTier?: string;
+  loginCount?: number;
+  lastLogin?: string | null;
+  isLoggedIn?: boolean;
+  profilePhotoUrl?: string | null;
+  coverPhotoUrl?: string | null;
+  ministryGroup?: string | null;
+  servicePosition?: string | null;
+  spiritualGifts?: string | null;
+  emergencyContactName?: string | null;
+  emergencyContactPhone?: string | null;
+  emergencyContactRelationship?: string | null;
+  addressId?: string | null;
+  stripeCustomerId?: string | null;
+  stripeSubscriptionId?: string | null;
+  legacySowerSlot?: string | null;
+  supporterBadgeText?: string | null;
+  createdOn: string;
+  updatedOn?: string | null;
+}
+
+export interface UserActivitySession {
+  id: string;
+  loggedInAt: string;
+  loggedOutAt: string | null;
+  deviceType: string;
+  deviceName: string | null;
+  ipAddress: string | null;
+  browser: string | null;
+  os: string | null;
+  success: boolean;
+  failureReason: string | null;
+}

@@ -6,7 +6,6 @@ const adminOnlyRoutes = [
   { path: routes.addDailyVerse.path, pattern: /^\/add-daily-verse/ },
   { path: routes.addDailyDevotion.path, pattern: /^\/add-daily-devotion/ },
   { path: routes.addExplanation.path, pattern: /^\/add-explanation/ },
-  { path: routes.systemUsers.path, pattern: /^\/system-users/ },
   { path: routes.addReadingPlan.path, pattern: /^\/add-reading-plan/ },
   { path: routes.editReadingPlan.path, pattern: /^\/edit-reading-plan/ },
   { path: routes.readingPlanDetail.path, pattern: /^\/reading-plan-detail/ },
@@ -14,6 +13,7 @@ const adminOnlyRoutes = [
   { path: routes.dailyVerse.path, pattern: /^\/daily-verse$/ },
   { path: routes.dailyDevotions.path, pattern: /^\/daily-devotions$/ },
   { path: routes.dashboard.path, pattern: /^\/dashboard$/ },
+  { path: routes.adminDashboard.path, pattern: /^\/admin/ },
 ];
 
 const userReadOnlyRoutes = [

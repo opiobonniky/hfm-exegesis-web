@@ -57,7 +57,7 @@ const adminNavItems: NavItem[] = [
     url: routes.dashboard.path,
     icon: LayoutDashboard,
   },
-  { title: "sidebar.activity", url: routes.systemUsers.path, icon: Users },
+
   { title: "sidebar.users", url: routes.adminUsers.path, icon: Users },
   { title: "sidebar.bible", url: routes.bibleReader.path, icon: BookText },
   {

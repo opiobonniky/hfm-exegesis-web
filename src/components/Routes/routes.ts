@@ -64,6 +64,12 @@ const AdminAddTriviaQuestion = lazy(() => import("@/features/AdminAddTriviaQuest
 const TriviaDetail = lazy(() => import("@/features/Admin/pages/TriviaDetail"));
 const AdminJournalModeration = lazy(() => import("@/features/Admin/pages/AdminJournalModeration"));
 const AdminUsersPage = lazy(() => import("@/features/Admin/pages/AdminUsersPage"));
+const AdminUserDetail = lazy(() => import("@/features/Admin/pages/AdminUserDetail"));
+const AdminCreateUser = lazy(() => import("@/features/Admin/pages/AdminCreateUser"));
+const VerseExplanationDetail = lazy(() => import("@/features/Admin/pages/VerseExplanationDetail"));
+const BookPrologueDetail = lazy(() => import("@/features/Admin/pages/BookPrologueDetail"));
+const JournalEntryAdminDetail = lazy(() => import("@/features/Admin/pages/JournalEntryAdminDetail"));
+const AdminReadingPlanDetail = lazy(() => import("@/features/Admin/pages/AdminReadingPlanDetail"));
 const AdminReadingPlans = lazy(() => import("@/features/Admin/pages/AdminReadingPlans"));
 const ExtendedProfile = lazy(() => import("@/features/ExtendedProfile/pages/ExtendedProfile"));
 const VoiceSettings = lazy(() => import("@/features/VoiceSettings/pages/VoiceSettings"));
@@ -241,13 +247,7 @@ export const routes = {
     requiresLayout: true,
     title: "Edit Verse Explanation",
   },
-  systemUsers: {
-    path: "/system-users",
-    component: lazy(() => import("@/features/UserManagement/pages/UsersPage")),
-    isProtected: true,
-    requiresLayout: true,
-    title: "System Users",
-  },
+
   readingPlanDetail: {
     path: "/reading-plan-detail/:planId",
     component: PlanDetail,
@@ -481,12 +481,26 @@ export const routes = {
     requiresLayout: true,
     title: "Book Prologues Manager",
   },
+  bookPrologueDetail: {
+    path: "/admin/book-prologues/:bookName",
+    component: BookPrologueDetail,
+    isProtected: true,
+    requiresLayout: true,
+    title: "Book Prologue Detail",
+  },
   adminVerseExplanations: {
     path: "/admin/verse-explanations",
     component: AdminVerseExplanations,
     isProtected: true,
     requiresLayout: true,
     title: "Verse Explanations Manager",
+  },
+  verseExplanationDetail: {
+    path: "/admin/verse-explanations/:bookName/:chapter/:verseNumber",
+    component: VerseExplanationDetail,
+    isProtected: true,
+    requiresLayout: true,
+    title: "Verse Explanation Detail",
   },
   adminDailyExegesis: {
     path: "/admin/daily-exegesis",
@@ -558,6 +572,13 @@ export const routes = {
     requiresLayout: true,
     title: "Journal Moderation",
   },
+  journalEntryAdminDetail: {
+    path: "/admin/journal-moderation/:entryId",
+    component: JournalEntryAdminDetail,
+    isProtected: true,
+    requiresLayout: true,
+    title: "Journal Entry Detail",
+  },
   adminUsers: {
     path: "/admin/users",
     component: AdminUsersPage,
@@ -565,12 +586,33 @@ export const routes = {
     requiresLayout: true,
     title: "User Management",
   },
+  adminUserDetail: {
+    path: "/admin/users/:userId",
+    component: AdminUserDetail,
+    isProtected: true,
+    requiresLayout: true,
+    title: "User Detail",
+  },
+  adminCreateUser: {
+    path: "/admin/users/create",
+    component: AdminCreateUser,
+    isProtected: true,
+    requiresLayout: true,
+    title: "Create User",
+  },
   adminReadingPlans: {
     path: "/admin/reading-plans",
     component: AdminReadingPlans,
     isProtected: true,
     requiresLayout: true,
     title: "Reading Plans Manager",
+  },
+  adminReadingPlanDetail: {
+    path: "/admin/reading-plans/:planId",
+    component: AdminReadingPlanDetail,
+    isProtected: true,
+    requiresLayout: true,
+    title: "Reading Plan Detail",
   },
   extendedProfile: {
     path: "/extended-profile",

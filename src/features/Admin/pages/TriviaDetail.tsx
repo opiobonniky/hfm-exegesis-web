@@ -14,7 +14,8 @@ import { difficultyColor } from "../components/TriviaQuestionCard";
 interface TriviaQuestion {
   id: number;
   question: string;
-  options: string[];
+  options?: string[];
+  optionsJson?: string;
   correctAnswer: number;
   explanation: string;
   difficulty: string;
@@ -63,6 +64,15 @@ export default function TriviaDetail() {
 
   if (!question) return null;
 
+  // Parse options from either options array or optionsJson string
+  const options: string[] = (() => {
+    if (Array.isArray(question.options)) return question.options;
+    if (question.optionsJson) {
+      try { return JSON.parse(question.optionsJson); } catch { return []; }
+    }
+    return [];
+  })();
+
   const verseRef = question.bookName
     ? `${question.bookName}${question.chapter ? ` ${question.chapter}` : ""}${question.verseNumber ? `:${question.verseNumber}` : ""}`
     : null;
@@ -71,7 +81,7 @@ export default function TriviaDetail() {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="border-b bg-card">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6">
+        <div className="max-w-3xl mx-auto px-3 sm:px-4 lg:px-6">
           <div className="flex items-center gap-3 h-16">
             <Button variant="ghost" size="icon" onClick={() => navigate("/admin/trivia")}>
               <ArrowLeft className="w-5 h-5" />
@@ -84,7 +94,7 @@ export default function TriviaDetail() {
         </div>
       </div>
 
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+      <div className="max-w-3xl mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6">
         {/* Question */}
         <Card>
           <CardHeader className="pb-3">
@@ -118,7 +128,7 @@ export default function TriviaDetail() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
-            {question.options.map((option, idx) => {
+            {options.map((option, idx) => {
               const isCorrect = idx === question.correctAnswer;
               return (
                 <div

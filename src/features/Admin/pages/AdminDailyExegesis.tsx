@@ -17,7 +17,7 @@ export default function AdminDailyExegesis() {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="border-b bg-card">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-3">
               <Button variant="ghost" size="icon" onClick={() => navigate("/admin")}><span className="sr-only">Back</span>←</Button>
@@ -32,7 +32,7 @@ export default function AdminDailyExegesis() {
       </div>
 
       {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-6">
         <div className="flex items-center gap-3 mb-6">
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -43,7 +43,7 @@ export default function AdminDailyExegesis() {
         </div>
 
         {h.loading && h.items.length === 0 ? (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 6 }).map((_, i) => (
               <Card key={i}><CardHeader className="pb-3"><Skeleton className="h-5 w-32" /><Skeleton className="h-4 w-48" /></CardHeader>
                 <CardContent><Skeleton className="h-16 w-full" /></CardContent></Card>
@@ -58,19 +58,24 @@ export default function AdminDailyExegesis() {
           </div>
         ) : (
           <>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
               {h.items.map(item => (
                 <ExegesisCard key={item.id} id={item.id} title={item.title} passageReference={item.passageReference}
                   displayDate={item.displayDate} teachingBody={item.teachingBody} isPublished={item.isPublished}
                   onEdit={() => h.openEdit(item)} onDelete={() => h.setDeleteTarget(item)} />
               ))}
             </div>
-            {h.hasMore && (
-              <div className="flex justify-center mt-6">
-                <Button variant="outline" onClick={h.handleLoadMore} disabled={h.loading} className="gap-2">
-                  {h.loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ChevronRight className="w-4 h-4" />} Load More
-                </Button>
+                        {/* Infinite scroll sentinel */}
+            <div ref={h.sentinelRef} className="h-4" />
+            {h.loadingMore && (
+              <div className="flex items-center justify-center py-4">
+                <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
               </div>
+            )}
+            {!hasMore && h.items.length > 0 && (
+              <p className="text-center text-xs text-muted-foreground/50 py-4">
+                All items loaded
+              </p>
             )}
           </>
         )}

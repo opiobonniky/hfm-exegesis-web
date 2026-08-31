@@ -101,3 +101,15 @@ export const ACTIVITY_PAGE_SIZE = 20;
 export const DEVICE_FILTERS = ["all", "mobile", "desktop", "tablet"] as const;
 export const STATUS_FILTERS = ["all", "success", "failed", "online"] as const;
 export const EXEGESIS_PAGE_SIZE = 20;
+export const USERS_PAGE_SIZE = 20;
+export const USER_SEARCH_DEBOUNCE_MS = 300;
+export const USER_ROLE_MAP: Record<number, { label: string; color: string }> = {
+  1: { label: "Admin", color: "bg-purple-100 text-purple-700 dark:bg-purple-950/30 dark:text-purple-400" },
+  2: { label: "User", color: "bg-blue-100 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400" },
+};
+export const SUBSCRIPTION_TIER_COLORS: Record<string, string> = {
+  free: "bg-gray-100 text-gray-700 dark:bg-gray-950/30 dark:text-gray-400",
+  supporter: "bg-amber-100 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400",
+  legacy_sower: "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400",
+  sower: "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400",
+};

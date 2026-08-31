@@ -1,5 +1,5 @@
 // useAdminDailyExegesis — all state, effects, and logic for AdminDailyExegesis page
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { sendPostRequest } from "@/services/api";
 import type { DailyExegesis } from "../types";
@@ -22,6 +22,7 @@ export function useAdminDailyExegesis() {
   const { toast } = useToast();
   const [items, setItems] = useState<DailyExegesis[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [search, setSearch] = useState("");
@@ -33,9 +34,11 @@ export function useAdminDailyExegesis() {
   const [dialogOpen, setDialogOpen] = useState(false);
   // Delete dialog
   const [deleteTarget, setDeleteTarget] = useState<DailyExegesis | null>(null);
+  const sentinelRef = useRef<HTMLDivElement>(null);
 
   const load = useCallback(async (p: number, append = false) => {
-    setLoading(true);
+    if (append) setLoadingMore(true);
+    else setLoading(true);
     try {
       const res = await sendPostRequest("admin", "get-all-daily-exegesis", {
         page: p, size: 20, search: search || undefined,
@@ -46,10 +49,28 @@ export function useAdminDailyExegesis() {
       setItems(prev => append ? [...prev, ...list] : list);
       setHasMore(next);
     } catch { toast({ title: "Failed to load", variant: "destructive" }); }
-    finally { setLoading(false); }
+    finally { setLoading(false); setLoadingMore(false); }
   }, [search, toast]);
 
   useEffect(() => { load(0); setPage(0); }, []);
+
+  // Infinite scroll observer
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel || !hasMore || loadingMore) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && hasMore && !loadingMore) {
+          const nextPage = page + 1;
+          setPage(nextPage);
+          load(nextPage, true);
+        }
+      },
+      { rootMargin: "200px" },
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasMore, loadingMore, page, load]);
 
   const handleSearch = useCallback(() => { setPage(0); load(0); }, [load]);
   const handleLoadMore = useCallback(() => { const np = page + 1; setPage(np); load(np, true); }, [page, load]);
@@ -121,8 +142,8 @@ export function useAdminDailyExegesis() {
   }, [deleteTarget, toast, load]);
 
   return {
-    items, loading, page, setPage, hasMore, search, setSearch, saving, deletingId,
-    editItem, editForm, setEditForm, dialogOpen, deleteTarget, setDeleteTarget,
+    items, loading, loadingMore, page, setPage, hasMore, search, setSearch, saving, deletingId,
+    sentinelRef, editItem, editForm, setEditForm, dialogOpen, deleteTarget, setDeleteTarget,
     handleSearch, handleLoadMore, openEdit, closeDialog, handleSave, handleDelete,
   };
 }
