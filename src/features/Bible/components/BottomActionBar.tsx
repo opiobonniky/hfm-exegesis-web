@@ -78,6 +78,7 @@ export default function BottomActionBar({
               : "bg-muted text-muted-foreground hover:bg-muted/80",
           )}
         >
+
           {isAudioPlaying ? (
             <VolumeX className="w-5 h-5" />
           ) : (

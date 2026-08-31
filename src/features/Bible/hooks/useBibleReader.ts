@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { useLanguage } from "@/components/languages/languageProvider";
 import { sendPostRequest } from "@/services/api";
 import { bibleApi } from "@/services/bibleApi";
 import {
@@ -9,6 +10,7 @@ import {
   isBibleBook,
   type BibleBookName,
 } from "../constants";
+import { getFreeBibleIdsForLanguage } from "../services/freeBibleTranslations";
 
 export interface TranslationOption {
   id: string;
@@ -70,17 +72,30 @@ export function useBibleReader() {
   const chapterRefs = useRef<Record<string, HTMLDivElement>>({});
   const verseRefs = useRef<Record<string, HTMLSpanElement | null>>({});
 
+  const { language } = useLanguage();
+
   useEffect(() => {
     import("@/services/bibleApi").then(({ bibleApi }) => {
       bibleApi.getTranslations()
         .then((data) => {
-          setAvailableTranslations(data || []);
+          // Filter translations to only show those matching the current language
+          const freeIds = getFreeBibleIdsForLanguage(language);
+          const filtered = (data || []).filter((t: TranslationOption) =>
+            freeIds.includes(t.id)
+          );
+          // Always include the currently selected translation even if not in the free list
+          const currentInList = filtered.some((t: TranslationOption) => t.id === versionId);
+          if (!currentInList && versionId) {
+            const current = (data || []).find((t: TranslationOption) => t.id === versionId);
+            if (current) filtered.unshift(current);
+          }
+          setAvailableTranslations(filtered.length > 0 ? filtered : data || []);
         })
         .catch((error) =>
           console.error("Failed to load Bible translations:", error),
         );
     });
-  }, []);
+  }, [language, versionId]);
   const fetchChapters = useCallback(
     async (
       book: BibleBookName,
