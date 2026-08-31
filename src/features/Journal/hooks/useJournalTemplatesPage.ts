@@ -42,7 +42,7 @@ export function useJournalTemplatesPage() {
   const loadTemplates = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await sendPostRequest("journal", "get-templates", {});
+      const res = await sendPostRequest("journal", "templates/get-all", {});
       if (res.returnCode === 200 && res.returnData) setTemplates(res.returnData);
     } catch {} finally { setLoading(false); }
   }, []);
@@ -53,7 +53,7 @@ export function useJournalTemplatesPage() {
     if (!formData.name.trim() || formData.prompts.filter(p => p.trim()).length === 0) return;
     setSaving(true);
     try {
-      const res = await sendPostRequest("journal", "save-template", {
+      const res = await sendPostRequest("journal", "templates/create", {
         ...formData, prompts: formData.prompts.filter(p => p.trim()),
       });
       if (res.returnCode === 200) { setDialogOpen(false); loadTemplates(); }
@@ -64,7 +64,7 @@ export function useJournalTemplatesPage() {
     if (!deleteDialog) return;
     setDeleting(true);
     try {
-      await sendPostRequest("journal", "delete-template", { id: deleteDialog.id });
+      await sendPostRequest("journal", "templates/delete", { id: deleteDialog.id });
       setDeleteDialog(null); loadTemplates();
     } catch {} finally { setDeleting(false); }
   }, [deleteDialog, loadTemplates]);

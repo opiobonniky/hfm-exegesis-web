@@ -19,7 +19,7 @@ export function useJournalDetail() {
   const fetchEntry = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await sendPostRequest("journal", "get-entry", { id: entryId });
+      const res = await sendPostRequest("journal", "get", { id: entryId });
       if (res?.returnCode === 200 && res.returnData) setEntry(res.returnData);
       else { toast({ title: "Entry not found", variant: "destructive" }); navigate("/journal"); }
     } catch { toast({ title: "Failed to load", variant: "destructive" }); }

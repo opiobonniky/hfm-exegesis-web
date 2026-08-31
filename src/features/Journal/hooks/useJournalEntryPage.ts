@@ -59,7 +59,7 @@ export function useJournalEntryPage() {
   const fetchEntry = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await sendPostRequest("journal", "get-entry", { id: entryId });
+      const res = await sendPostRequest("journal", "get", { id: entryId });
       if (res?.returnCode === 200 && res.returnData) setEntry(res.returnData);
     } catch {} finally { setLoading(false); }
   }, [entryId]);
@@ -71,7 +71,7 @@ export function useJournalEntryPage() {
     setSaving(true);
     try {
       const payload = { ...entry, id: isEditing ? entryId : undefined };
-      const res = await sendPostRequest("journal", isEditing ? "update-entry" : "create-entry", payload);
+      const res = await sendPostRequest("journal", isEditing ? "update" : "create", payload);
       if (res?.returnCode === 200) { toast({ title: isEditing ? "Updated" : "Created" }); navigate("/journal"); }
       else { toast({ title: res?.returnMessage || "Failed", variant: "destructive" }); }
     } catch { toast({ title: "Error", variant: "destructive" }); }

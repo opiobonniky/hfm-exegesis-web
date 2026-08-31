@@ -21,7 +21,7 @@ export function useJournalEntry(entryId?: string) {
   // Load existing entry if editing
   useState(() => {
     if (!entryId) return;
-    sendPostRequest("journal", "get-by-id", { id: entryId }).then(res => {
+    sendPostRequest("journal", "get", { id: entryId }).then(res => {
       if (res?.returnCode === 200 && res?.returnData) {
         const e = res.returnData;
         setTitle(e.title || ""); setContent(e.content || ""); setMood(e.mood || "");
