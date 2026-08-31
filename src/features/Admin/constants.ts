@@ -165,6 +165,22 @@ export const ADMIN_QUICK_ACTIONS = [
   { label: "User Management", description: "Manage user accounts", icon: "Users", path: "/admin/users", color: "text-blue-500" },
   { label: "Journal Moderation", description: "Review journal entries", icon: "BookOpen", path: "/admin/journal-moderation", color: "text-rose-500" },
 ] as const;
+
+// ─── Admin Trivia Constants ───────────────────────────────────────────────────
+
+export const TRIVIA_TABS = [
+  { value: "overview", label: "Overview", icon: "BarChart3" },
+  { value: "questions", label: "Questions", icon: "HelpCircle" },
+  { value: "users", label: "User Performance", icon: "Users" },
+  { value: "performance", label: "Question Stats", icon: "TrendingUp" },
+] as const;
+
+// ─── Admin Subscriptions Constants ────────────────────────────────────────────
+
+export const SUBSCRIPTION_TABS = [
+  { value: "tiers", label: "Subscription Tiers", icon: "ShieldCheck" },
+  { value: "subscribers", label: "Subscribers", icon: "Users" },
+] as const;
 export const USERS_PAGE_SIZE = 20;
 export const USER_SEARCH_DEBOUNCE_MS = 300;
 export const USER_ROLE_MAP: Record<number, { label: string; color: string }> = {
