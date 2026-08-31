@@ -1181,7 +1181,11 @@
     "triviaAdmin": "Trivia Management",
     "dailyContentAdmin": "Daily Content",
     "subscriptionsAdmin": "Subscriptions",
-    "adminTools": "Admin Tools"
+    "adminTools": "Admin Tools",
+    "highlights": "Hervorhebungen",
+    "notes": "Meine Notizen",
+    "favorites": "Favoriten",
+    "history": "Leseverlauf"
   },
   "userActivity": {
     "action": "Aktion",

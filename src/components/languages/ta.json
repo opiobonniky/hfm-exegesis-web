@@ -1181,7 +1181,11 @@
     "triviaAdmin": "Trivia Management",
     "dailyContentAdmin": "Daily Content",
     "subscriptionsAdmin": "Subscriptions",
-    "adminTools": "Admin Tools"
+    "adminTools": "Admin Tools",
+    "highlights": "சிறப்பு குறிப்புகள்",
+    "notes": "என் குறிப்புகள்",
+    "favorites": "விருப்பமானவை",
+    "history": "படிக்கும் வரலாறு"
   },
   "userActivity": {
     "action": "செயல்",

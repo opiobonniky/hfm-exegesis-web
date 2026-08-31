@@ -90,7 +90,7 @@ export default function UserDashboard() {
             <RecentActivityList
               activities={data.recentActivity}
               navigate={navigate}
-              onSeeAll={() => navigate(routes.myActivity.path)}
+              onSeeAll={() => navigate(routes.highlights.path)}
             />
 
             {/* Daily exegesis */}

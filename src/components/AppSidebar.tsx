@@ -19,6 +19,9 @@ import {
   HelpCircle,
   CalendarDays,
   CreditCard,
+  FileText,
+  Star,
+  Clock,
 } from "lucide-react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -73,11 +76,6 @@ const adminNavItems: NavItem[] = [
     icon: BookOpen,
   },
   {
-    title: "sidebar.myActivity",
-    url: routes.myActivity.path,
-    icon: Highlighter,
-  },
-  {
     title: "sidebar.studyTools",
     url: routes.adminStudyTools.path,
     icon: BookText,
@@ -121,11 +119,10 @@ const userNavItems: NavItem[] = [
     icon: SproutIcon,
   },
   { title: "sidebar.readingPlans", url: routes.userPlans.path, icon: BookOpen },
-  {
-    title: "sidebar.myActivity",
-    url: routes.myActivity.path,
-    icon: Highlighter,
-  },
+  { title: "sidebar.highlights", url: routes.highlights.path, icon: Highlighter },
+  { title: "sidebar.notes", url: routes.notes.path, icon: FileText },
+  { title: "sidebar.favorites", url: routes.favorites.path, icon: Star },
+  { title: "sidebar.history", url: routes.history.path, icon: Clock },
   { title: "sidebar.journal", url: routes.journal.path, icon: PenLine },
   {
     title: "sidebar.exegesisLab",

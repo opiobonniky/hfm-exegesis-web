@@ -1181,7 +1181,11 @@
     "triviaAdmin": "Trivia Management",
     "dailyContentAdmin": "Daily Content",
     "subscriptionsAdmin": "Subscriptions",
-    "adminTools": "Admin Tools"
+    "adminTools": "Admin Tools",
+    "highlights": "Viashiria",
+    "notes": "Vidokezo Vyangu",
+    "favorites": "Vipendwa",
+    "history": "Historia ya Kusoma"
   },
   "userActivity": {
     "action": "Kitendo",

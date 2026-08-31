@@ -1181,7 +1181,11 @@
     "triviaAdmin": "Trivia Management",
     "dailyContentAdmin": "Daily Content",
     "subscriptionsAdmin": "Subscriptions",
-    "adminTools": "Admin Tools"
+    "adminTools": "Admin Tools",
+    "highlights": "હાઈલાઈટ્સ",
+    "notes": "મારી નોટ્સ",
+    "favorites": "મનપસંદ",
+    "history": "વાંચન ઇતિહાસ"
   },
   "userActivity": {
     "action": "ક્રિયા",

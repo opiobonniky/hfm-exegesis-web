@@ -12,15 +12,7 @@ import VerseActionSheet from "../components/VerseActionSheet";
 import BottomActionBar from "../components/BottomActionBar";
 import { LoadingSkeleton } from "@/components/verseResources";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { EditNoteDialog } from "../components/EditNoteDialog";
 import { Loader2 } from "lucide-react";
 
 export default function BibleReader() {
@@ -212,40 +204,18 @@ export default function BibleReader() {
       />
 
       {/* ── Note dialog ── */}
-      <Dialog open={h.noteDialogOpen} onOpenChange={h.setNoteDialogOpen}>
-        <DialogContent className="overflow-hidden border-border/70 p-0 sm:max-w-lg">
-          <div className="border-b border-border/60 bg-primary/[0.04] px-6 py-5">
-            <DialogHeader>
-              <DialogTitle className="font-[family-name:var(--font-heading)] text-xl">
-                Add a verse note
-              </DialogTitle>
-              <DialogDescription>
-                The note will be saved to every selected verse.
-              </DialogDescription>
-            </DialogHeader>
-          </div>
-          <div className="space-y-4 px-6 py-5">
-            <Textarea
-              value={h.noteText}
-              onChange={(event) => h.setNoteText(event.target.value)}
-              placeholder="Write your note..."
-              rows={7}
-              className="resize-none border-border/70 bg-background text-base leading-relaxed"
-            />
-            <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={() => h.setNoteDialogOpen(false)}
-              >
-                Cancel
-              </Button>
-              <Button onClick={h.handleSaveNote} disabled={!h.noteText.trim()}>
-                Save note
-              </Button>
-            </DialogFooter>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <EditNoteDialog
+        open={h.noteDialogOpen}
+        mode={h.noteDialogMode}
+        verseRef={h.noteDialogVerseRef}
+        text={h.noteText}
+        saving={h.noteSaving}
+        deleting={h.noteDeleting}
+        onTextChange={h.setNoteText}
+        onSave={h.handleSaveNote}
+        onClose={() => h.setNoteDialogOpen(false)}
+        onDelete={h.handleDeleteNote}
+      />
     </div>
   );
 }

@@ -1632,7 +1632,11 @@
     "triviaAdmin": "Trivia Management",
     "dailyContentAdmin": "Daily Content",
     "subscriptionsAdmin": "Subscriptions",
-    "adminTools": "Admin Tools"
+    "adminTools": "Admin Tools",
+    "highlights": "Highlights",
+    "notes": "My Notes",
+    "favorites": "Favorites",
+    "history": "Reading History"
   },
   "settings": {
     "pageTitle": "Account Settings",

@@ -1181,7 +1181,11 @@
     "triviaAdmin": "Trivia Management",
     "dailyContentAdmin": "Daily Content",
     "subscriptionsAdmin": "Subscriptions",
-    "adminTools": "Admin Tools"
+    "adminTools": "Admin Tools",
+    "highlights": "Επισημάνσεις",
+    "notes": "Σημειώσεις μου",
+    "favorites": "Αγαπημένα",
+    "history": "Ιστορικό Ανάγνωσης"
   },
   "userActivity": {
     "action": "Ενέργεια",

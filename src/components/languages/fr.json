@@ -1181,7 +1181,11 @@
     "triviaAdmin": "Trivia Management",
     "dailyContentAdmin": "Daily Content",
     "subscriptionsAdmin": "Subscriptions",
-    "adminTools": "Admin Tools"
+    "adminTools": "Admin Tools",
+    "highlights": "Surlignages",
+    "notes": "Mes Notes",
+    "favorites": "Favoris",
+    "history": "Historique de Lecture"
   },
   "userActivity": {
     "action": "Cela supprimera définitivement le verset. Cette action ne peut pas être annulée.",

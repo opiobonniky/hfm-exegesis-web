@@ -26,17 +26,24 @@ export function AdminSearchBar({
 }
 
 export function AdminEmptyState({
-  icon, title, description,
+  icon, title, description, message, onAction,
 }: {
   icon?: React.ReactNode;
   title: string;
   description?: string;
+  message?: string;
+  onAction?: () => void;
 }) {
   return (
     <div className="flex flex-col items-center justify-center py-16 text-center">
       {icon && <div className="text-muted-foreground mb-4">{icon}</div>}
       <h3 className="text-lg font-semibold text-foreground">{title}</h3>
-      {description && <p className="text-sm text-muted-foreground mt-1">{description}</p>}
+      {(description || message) && <p className="text-sm text-muted-foreground mt-1">{description || message}</p>}
+      {onAction && (
+        <button onClick={onAction} className="mt-4 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors">
+          Get Started
+        </button>
+      )}
     </div>
   );
 }

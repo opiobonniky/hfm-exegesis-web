@@ -29,7 +29,10 @@ const UserDailyVerse = lazy(() => import("@/features/DailyContent/pages/UserDail
 const UserPlans = lazy(() => import("@/features/ReadingPlan/pages/UserPlans"));
 const BibleReadingPlan = lazy(() => import("@/features/ReadingPlan/pages/BibleReadingPlan"));
 const DailyReading = lazy(() => import("@/features/ReadingPlan/pages/DailyReading"));
-const MyActivity = lazy(() => import("@/features/Bible/pages/MyActivity"));
+const Highlights = lazy(() => import("@/features/Bible/pages/Highlights"));
+const Notes = lazy(() => import("@/features/Bible/pages/Notes"));
+const Favorites = lazy(() => import("@/features/Bible/pages/Favorites"));
+const HistoryPage = lazy(() => import("@/features/Bible/pages/History"));
 const Settings = lazy(() => import("@/features/Settings/pages/Settings"));
 const Journal = lazy(() => import("@/features/Journal/pages/Journal"));
 const JournalEntry = lazy(() => import("@/features/Journal/pages/JournalEntry"));
@@ -298,12 +301,33 @@ export const routes = {
     requiresLayout: true,
     title: "Daily Reading",
   },
-  myActivity: {
-    path: "/my-activity",
-    component: MyActivity,
+  highlights: {
+    path: "/highlights",
+    component: Highlights,
     isProtected: true,
     requiresLayout: true,
-    title: "My Activity",
+    title: "Highlights",
+  },
+  notes: {
+    path: "/notes",
+    component: Notes,
+    isProtected: true,
+    requiresLayout: true,
+    title: "My Notes",
+  },
+  favorites: {
+    path: "/favorites",
+    component: Favorites,
+    isProtected: true,
+    requiresLayout: true,
+    title: "Favorites",
+  },
+  history: {
+    path: "/history",
+    component: HistoryPage,
+    isProtected: true,
+    requiresLayout: true,
+    title: "Reading History",
   },
   settings: {
     path: "/settings",

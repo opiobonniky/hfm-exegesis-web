@@ -1,6 +1,6 @@
 "use client";
 
-import { BookMarked, Star, Heart, Clock, Settings, type LucideIcon } from "lucide-react";
+import { BookMarked, Star, Heart, Clock, Settings, History, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { routes } from "@/components/Routes/routes";
 import type { NavigateFunction } from "react-router-dom";
@@ -12,10 +12,10 @@ interface QuickLink {
   route: string;
 }
 const QUICK_LINKS: QuickLink[] = [
-  { label: "Notes", icon: BookMarked, color: "text-violet-500", bg: "bg-violet-50 dark:bg-violet-950/30", route: routes.myActivity.path },
-  { label: "Highlights", icon: Star, color: "text-amber-500", bg: "bg-amber-50 dark:bg-amber-950/30", route: routes.myActivity.path },
-  { label: "Favorites", icon: Heart, color: "text-rose-500", bg: "bg-rose-50 dark:bg-rose-950/30", route: routes.myActivity.path },
-  { label: "History", icon: Clock, color: "text-blue-500", bg: "bg-blue-50 dark:bg-blue-950/30", route: routes.myActivity.path },
+  { label: "Highlights", icon: Star, color: "text-amber-500", bg: "bg-amber-50 dark:bg-amber-950/30", route: routes.highlights.path },
+  { label: "Notes", icon: BookMarked, color: "text-violet-500", bg: "bg-violet-50 dark:bg-violet-950/30", route: routes.notes.path },
+  { label: "Favorites", icon: Heart, color: "text-rose-500", bg: "bg-rose-50 dark:bg-rose-950/30", route: routes.favorites.path },
+  { label: "History", icon: History, color: "text-blue-500", bg: "bg-blue-50 dark:bg-blue-950/30", route: routes.history.path },
   { label: "Settings", icon: Settings, color: "text-muted-foreground", bg: "bg-muted/50", route: routes.settings.path },
 ];
 interface QuickAccessIconsProps {

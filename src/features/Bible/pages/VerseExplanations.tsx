@@ -1,12 +1,11 @@
 "use client";
 
 // VerseExplanations — browse and manage verse explanations
-import { Loader2, AlertTriangle, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useVerseExplanationsPage } from "../hooks/useVerseExplanationsPage";
 import ExplanationList from "../components/ExplanationList";
 import { PageHeader } from "@/components/PageHeader";
+import { DeleteConfirmDialog } from "../components/DeleteConfirmDialog";
 
 const VerseExplanations = () => {
   const h = useVerseExplanationsPage();
@@ -33,31 +32,21 @@ const VerseExplanations = () => {
         />
       </div>
 
-      {/* Delete dialog */}
-      <Dialog open={!!h.deleteTarget} onOpenChange={(o) => !o && h.setDeleteTarget(null)}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-destructive">
-              <AlertTriangle className="w-5 h-5" /> {h.t.verseExplanations?.deleteDialogTitle || "Delete Explanation"}
-            </DialogTitle>
-            <DialogDescription>
-              {`This will permanently delete the explanation for ${h.deleteTarget?.bookName} ${h.deleteTarget?.chapter}:${h.deleteTarget?.verseNumber}.`}
-            </DialogDescription>
-          </DialogHeader>
-          {h.deleteTarget && (
-            <div className="rounded-lg border bg-muted/30 p-3">
-              <p className="font-semibold text-sm">{h.deleteTarget.bookName} {h.deleteTarget.chapter}:{h.deleteTarget.verseNumber}</p>
-              <p className="text-xs text-muted-foreground line-clamp-2 mt-1">{h.deleteTarget.explanation}</p>
-            </div>
-          )}
-          <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => h.setDeleteTarget(null)} disabled={h.deleting}>Cancel</Button>
-            <Button variant="destructive" onClick={h.confirmDelete} disabled={h.deleting} className="gap-2">
-              {h.deleting ? <><Loader2 className="w-4 h-4 animate-spin" /> Deleting...</> : <><Trash2 className="w-4 h-4" /> Delete</>}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <DeleteConfirmDialog
+        open={!!h.deleteTarget}
+        title={h.t.verseExplanations?.deleteDialogTitle || "Delete Explanation"}
+        description={`This will permanently delete the explanation for ${h.deleteTarget?.bookName} ${h.deleteTarget?.chapter}:${h.deleteTarget?.verseNumber}.`}
+        loading={h.deleting}
+        onConfirm={h.confirmDelete}
+        onClose={() => h.setDeleteTarget(null)}
+      >
+        {h.deleteTarget && (
+          <div className="rounded-lg border bg-muted/30 p-3">
+            <p className="font-semibold text-sm">{h.deleteTarget.bookName} {h.deleteTarget.chapter}:{h.deleteTarget.verseNumber}</p>
+            <p className="text-xs text-muted-foreground line-clamp-2 mt-1">{h.deleteTarget.explanation}</p>
+          </div>
+        )}
+      </DeleteConfirmDialog>
     </div>
   );
 };

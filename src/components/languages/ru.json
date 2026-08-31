@@ -1501,7 +1501,11 @@
     "triviaAdmin": "Trivia Management",
     "dailyContentAdmin": "Daily Content",
     "subscriptionsAdmin": "Subscriptions",
-    "adminTools": "Admin Tools"
+    "adminTools": "Admin Tools",
+    "highlights": "Выделения",
+    "notes": "Мои заметки",
+    "favorites": "Избранное",
+    "history": "История чтения"
   },
   "settings": {
     "pageTitle": "Настройки",

@@ -1501,7 +1501,11 @@
     "triviaAdmin": "Trivia Management",
     "dailyContentAdmin": "Daily Content",
     "subscriptionsAdmin": "Subscriptions",
-    "adminTools": "Admin Tools"
+    "adminTools": "Admin Tools",
+    "highlights": "Destaques",
+    "notes": "Minhas Notas",
+    "favorites": "Favoritos",
+    "history": "Histórico de Leitura"
   },
   "settings": {
     "pageTitle": "Configurações",

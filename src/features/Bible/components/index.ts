@@ -11,7 +11,6 @@ export { default as SearchResultCard } from "./SearchResultCard";
 export { default as SearchFilters } from "./SearchFilters";
 export { default as SearchSkeleton } from "./SearchSkeleton";
 export { default as SearchInitialState } from "./SearchInitialState";
-export { default as ActivityFeedItem } from "./ActivityFeedItem";
 export { default as BookCard } from "./BookCard";
 export { default as ExplanationList } from "./ExplanationList";
 export { default as VerseMultiSelectBar } from "./VerseMultiSelectBar";

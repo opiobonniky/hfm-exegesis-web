@@ -56,6 +56,11 @@ export function useBibleReaderPage() {
   });
   const [noteDialogOpen, setNoteDialogOpen] = useState(false);
   const [noteText, setNoteText] = useState("");
+  const [noteDialogMode, setNoteDialogMode] = useState<"create" | "edit">("create");
+  const [noteDialogVerseRef, setNoteDialogVerseRef] = useState("");
+  const [noteSaving, setNoteSaving] = useState(false);
+  const [noteDeleting, setNoteDeleting] = useState(false);
+  const [noteTargetKey, setNoteTargetKey] = useState<string | null>(null);
   const [verseActionsOpen, setVerseActionsOpen] = useState(false);
   const [verseActionTarget, setVerseActionTarget] =
     useState<VerseActionTarget | null>(null);
@@ -369,7 +374,11 @@ export function useBibleReaderPage() {
     const key = `${verseActionTarget.book}-${verseActionTarget.chapter}-${verseActionTarget.verse}`;
     reader.clearSelectedVerses();
     reader.toggleVerse(key);
-    setNoteText(reader.verseNotes[key] || "");
+    const existingNote = reader.verseNotes[key] || "";
+    setNoteText(existingNote);
+    setNoteDialogMode(existingNote ? "edit" : "create");
+    setNoteDialogVerseRef(`${verseActionTarget.book} ${verseActionTarget.chapter}:${verseActionTarget.verse}`);
+    setNoteTargetKey(key);
     setNoteDialogOpen(true);
   }, [reader, verseActionTarget]);
 
@@ -513,19 +522,27 @@ export function useBibleReaderPage() {
   }, [clearSelection, reader, selectedVerseData]);
 
   const handleOpenNote = useCallback(() => {
-    const existingNote =
-      selectedVerseData.length === 1
-        ? reader.verseNotes[
-            `${selectedVerseData[0].book}-${selectedVerseData[0].chapter}-${selectedVerseData[0].verse}`
-          ] || ""
-        : "";
-    setNoteText(existingNote);
+    if (selectedVerseData.length === 1) {
+      const verse = selectedVerseData[0];
+      const key = `${verse.book}-${verse.chapter}-${verse.verse}`;
+      const existingNote = reader.verseNotes[key] || "";
+      setNoteText(existingNote);
+      setNoteDialogMode(existingNote ? "edit" : "create");
+      setNoteDialogVerseRef(`${verse.book} ${verse.chapter}:${verse.verse}`);
+      setNoteTargetKey(key);
+    } else {
+      setNoteText("");
+      setNoteDialogMode("create");
+      setNoteDialogVerseRef(`${selectedVerseData.length} verses`);
+      setNoteTargetKey(null);
+    }
     setNoteDialogOpen(true);
   }, [reader, selectedVerseData]);
 
   const handleSaveNote = useCallback(async () => {
     const note = noteText.trim();
     if (!note) return;
+    setNoteSaving(true);
     try {
       await Promise.all(
         selectedVerseData.map((verse) =>
@@ -534,6 +551,7 @@ export function useBibleReaderPage() {
       );
       setNoteDialogOpen(false);
       setNoteText("");
+      setNoteTargetKey(null);
       toast.success(
         selectedVerseData.length === 1
           ? "Note saved"
@@ -541,6 +559,8 @@ export function useBibleReaderPage() {
       );
     } catch {
       toast.error("Unable to save the note");
+    } finally {
+      setNoteSaving(false);
     }
     clearSelection();
   }, [clearSelection, noteText, reader, selectedVerseData]);
@@ -622,6 +642,24 @@ export function useBibleReaderPage() {
     }
   }, [reader]);
 
+  const handleDeleteNote = useCallback(async () => {
+    if (!noteTargetKey) return;
+    const [, bookName, chapterStr, verseStr] = noteTargetKey.match(/^(.+?)-(\d+)-(\d+)$/) || [];
+    if (!bookName) return;
+    setNoteDeleting(true);
+    try {
+      await reader.saveNote(bookName, parseInt(chapterStr), parseInt(verseStr), "");
+      setNoteDialogOpen(false);
+      setNoteText("");
+      setNoteTargetKey(null);
+      toast.success("Note deleted");
+    } catch {
+      toast.error("Unable to delete the note");
+    } finally {
+      setNoteDeleting(false);
+    }
+  }, [noteTargetKey, reader]);
+
   return {
     navigate,
     dir: isRtl ? ("rtl" as const) : ("ltr" as const),
@@ -645,6 +683,11 @@ export function useBibleReaderPage() {
     setNoteDialogOpen,
     noteText,
     setNoteText,
+    noteDialogMode,
+    noteDialogVerseRef,
+    noteSaving,
+    noteDeleting,
+    handleDeleteNote,
     fontSize,
     updateFontSize,
     audioActive: audio.isPlaying || audio.isPaused,
