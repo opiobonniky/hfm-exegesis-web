@@ -43,7 +43,7 @@ export function useAdminDailyExegesis() {
       const res = await sendPostRequest("admin", "get-all-daily-exegesis", {
         page: p, size: 20, search: search || undefined,
       });
-      const data = res?.data?.data;
+      const data = res?.returnData || res?.data;
       const list = Array.isArray(data) ? data : data?.content || [];
       const next = data?.hasNext ?? list.length === 20;
       setItems(prev => append ? [...prev, ...list] : list);
@@ -121,10 +121,10 @@ export function useAdminDailyExegesis() {
         displayDate: editForm.displayDate || undefined, isPublished: editForm.isPublished,
       };
       const res = await sendPostRequest("admin", "add-daily-exegesis", payload);
-      if (res?.data?.status === 200 || res?.data?.success) {
+      if (res?.returnCode === 200 || res?.status === 200) {
         toast({ title: editItem ? "Updated" : "Created" });
         closeDialog(); load(0); setPage(0);
-      } else { throw new Error(res?.data?.returnMessage || "Failed"); }
+      } else { throw new Error(res?.returnMessage || res?.message || "Failed"); }
     } catch (e) { toast({ title: "Error", description: (e as Error).message, variant: "destructive" }); }
     finally { setSaving(false); }
   }, [editForm, editItem, toast, closeDialog, load]);
@@ -134,7 +134,7 @@ export function useAdminDailyExegesis() {
     setDeletingId(deleteTarget.id);
     try {
       const res = await sendPostRequest("admin", "delete-daily-exegesis", { id: deleteTarget.id });
-      if (res?.returnCode === 200 || res?.data?.success) {
+      if (res?.returnCode === 200 || res?.status === 200) {
         toast({ title: "Deleted" }); setDeleteTarget(null); load(0); setPage(0);
       }
     } catch { toast({ title: "Delete failed", variant: "destructive" }); }

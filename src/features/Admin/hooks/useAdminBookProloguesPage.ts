@@ -14,6 +14,7 @@ export function useAdminBookProloguesPage() {
     useAdminCrud<BookPrologue>({
       route: "book-prologues", listAction: "admin/get-all",
       saveAction: "admin/upsert", deleteAction: "admin/delete",
+      listKey: "data", totalKey: "total",
     });
   const [editItem, setEditItem] = useState<BookPrologue | null>(null);
   const [editForm, setEditForm] = useState(EMPTY_FORM);

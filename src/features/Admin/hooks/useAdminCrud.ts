@@ -10,6 +10,12 @@ interface UseAdminCrudOpts<T> {
   listAction: string;
   saveAction: string;
   deleteAction: string;
+  /** Key inside returnData that holds the items array.
+   *  e.g. "explanations", "plans", "entries", "content", "users", "data".
+   *  If omitted, the hook tries common keys automatically. */
+  listKey?: string;
+  /** Key inside returnData that holds the total count (default: "totalCount" | "totalElements" | "total") */
+  totalKey?: string;
   /** Transform API response items to T[] */
   mapItems?: (data: any) => T[];
 }
@@ -37,11 +43,18 @@ export function useAdminCrud<T extends { id: number }>(opts: UseAdminCrudOpts<T>
           search: q || undefined,
         });
         const data = res?.returnData || res?.data;
+        // Extract items: use explicit listKey, or try common keys
         const raw = Array.isArray(data)
           ? data
-          : data?.content || data?.users || [];
+          : opts.listKey
+            ? data?.[opts.listKey] || []
+            : data?.content || data?.users || data?.explanations || data?.plans || data?.entries || data?.data || [];
         const mapped: T[] = opts.mapItems ? raw.map(opts.mapItems) : raw;
-        const hasNext = data?.hasNext ?? mapped.length === 20;
+        // Extract total count: use explicit totalKey, or try common keys
+        const total = opts.totalKey
+          ? data?.[opts.totalKey] ?? mapped.length
+          : data?.totalCount ?? data?.totalElements ?? data?.total ?? mapped.length;
+        const hasNext = data?.hasNext ?? (mapped.length === 20);
         setItems((prev) => (append ? [...prev, ...mapped] : mapped));
         setHasMore(hasNext);
       } catch {

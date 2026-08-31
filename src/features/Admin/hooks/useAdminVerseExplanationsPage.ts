@@ -15,6 +15,7 @@ export function useAdminVerseExplanationsPage() {
     useAdminCrud<VerseExplanation>({
       route: "bible", listAction: "get-all-verses-explanation",
       saveAction: "add-verse-explanation", deleteAction: "delete-verse-explanation",
+      listKey: "explanations", totalKey: "totalCount",
     });
   const [editItem, setEditItem] = useState<VerseExplanation | null>(null);
   const [editForm, setEditForm] = useState(EMPTY_FORM);
