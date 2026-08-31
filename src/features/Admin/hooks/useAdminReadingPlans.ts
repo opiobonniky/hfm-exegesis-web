@@ -52,7 +52,7 @@ export function useAdminReadingPlans() {
       if (append) setLoadingMore(true);
       else setLoading(true);
       try {
-        const res = await sendPostRequest("readingPlan", "get-all", {
+        const res = await sendPostRequest("reading-plans", "get-all", {
           page: pageNum,
           size: 20,
           search: q || undefined,
@@ -138,7 +138,7 @@ export function useAdminReadingPlans() {
         ...(editPlan ? { id: editPlan.id } : {}),
       };
       const res = await sendPostRequest(
-        "readingPlan",
+        "reading-plans",
         editPlan ? "update" : "create",
         payload,
       );
@@ -158,7 +158,7 @@ export function useAdminReadingPlans() {
     if (!deletePlan) return;
     setDeleting(true);
     try {
-      const res = await sendPostRequest("readingPlan", "delete", {
+      const res = await sendPostRequest("reading-plans", "delete", {
         id: deletePlan.id,
       });
       if (res.returnCode === 200) {

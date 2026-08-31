@@ -44,7 +44,7 @@ export function useAdminReadingPlanDetail() {
   useEffect(() => {
     if (!planId) return;
     setLoading(true);
-    sendPostRequest("readingPlan", "plan-detail", {
+    sendPostRequest("reading-plans", "plan-detail", {
       planId: decodeURIComponent(planId),
     })
       .then((res) => {
