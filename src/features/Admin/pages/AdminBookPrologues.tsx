@@ -86,7 +86,7 @@ export default function AdminBookPrologues() {
       <PrologueDeleteDialog
         open={!!h.deleteItem}
         bookName={h.deleteItem?.bookName || null}
-        deleting={h.deleting === h.deleteItem?.id}
+        deleting={h.deleting === h.deleteItem?.bookName}
         onOpenChange={(o) => !o && h.setDeleteItem(null)}
         onConfirm={h.handleDelete}
       />

@@ -5,7 +5,6 @@ import { useToast } from "@/hooks/use-toast";
 import { sendPostRequest } from "@/services/api";
 
 interface BookPrologueDetail {
-  id: number;
   bookName: string;
   title: string;
   content: string;

@@ -5,7 +5,6 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface PrologueItem {
-  id: number;
   bookName: string;
   title: string;
   content: string;
