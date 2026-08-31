@@ -1185,7 +1185,9 @@
     "highlights": "ہائی لائٹس",
     "notes": "میرے نوٹس",
     "favorites": "پسندیدہ",
-    "history": "پڑھنے کا تاریخچہ"
+    "history": "پڑھنے کا تاریخچہ",
+    "users": "صارفین",
+    "readingPlansAdmin": "پڑھنے کے منصوبے"
   },
   "userActivity": {
     "action": "عمل",

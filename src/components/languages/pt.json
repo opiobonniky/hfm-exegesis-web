@@ -1505,7 +1505,9 @@
     "highlights": "Destaques",
     "notes": "Minhas Notas",
     "favorites": "Favoritos",
-    "history": "Histórico de Leitura"
+    "history": "Histórico de Leitura",
+    "users": "Usuários",
+    "readingPlansAdmin": "Planos de Leitura"
   },
   "settings": {
     "pageTitle": "Configurações",

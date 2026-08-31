@@ -1185,7 +1185,9 @@
     "highlights": "హైలైట్లు",
     "notes": "నా నోట్స్",
     "favorites": "ఇష్టమైనవి",
-    "history": "చదివిన చరిత్ర"
+    "history": "చదివిన చరిత్ర",
+    "users": "వినియోగదారులు",
+    "readingPlansAdmin": "చదువు ప్రణాళికలు"
   },
   "userActivity": {
     "action": "చర్య",

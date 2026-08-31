@@ -1185,7 +1185,9 @@
     "highlights": "ਹਾਈਲਾਈਟਾਂ",
     "notes": "ਮੇਰੇ ਨੋਟਸ",
     "favorites": "ਪਸੰਦੀਦਾ",
-    "history": "ਪੜ੍ਹਾਈ ਦਾ ਇਤਿਹਾਸ"
+    "history": "ਪੜ੍ਹਾਈ ਦਾ ਇਤਿਹਾਸ",
+    "users": "ਵਰਤੋਂਕਾਰ",
+    "readingPlansAdmin": "ਪੜ੍ਹਾਈ ਦੀਆਂ ਯੋਜਨਾਵਾਂ"
   },
   "userActivity": {
     "action": "ਕਾਰਵਾਈ",

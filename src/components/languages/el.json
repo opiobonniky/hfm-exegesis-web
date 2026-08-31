@@ -1185,7 +1185,9 @@
     "highlights": "Επισημάνσεις",
     "notes": "Σημειώσεις μου",
     "favorites": "Αγαπημένα",
-    "history": "Ιστορικό Ανάγνωσης"
+    "history": "Ιστορικό Ανάγνωσης",
+    "users": "Χρήστες",
+    "readingPlansAdmin": "Σχέδια Ανάγνωσης"
   },
   "userActivity": {
     "action": "Ενέργεια",

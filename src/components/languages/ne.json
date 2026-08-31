@@ -1185,7 +1185,9 @@
     "highlights": "हाइलाइटहरू",
     "notes": "मेरो नोटहरू",
     "favorites": "मनपर्ने",
-    "history": "पढ्ने इतिहास"
+    "history": "पढ्ने इतिहास",
+    "users": "प्रयोगकर्ताहरू",
+    "readingPlansAdmin": "पढ्ने योजनाहरू"
   },
   "userActivity": {
     "action": "क्रिया",

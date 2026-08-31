@@ -1185,7 +1185,9 @@
     "highlights": "હાઈલાઈટ્સ",
     "notes": "મારી નોટ્સ",
     "favorites": "મનપસંદ",
-    "history": "વાંચન ઇતિહાસ"
+    "history": "વાંચન ઇતિહાસ",
+    "users": "વપરાશકર્તાઓ",
+    "readingPlansAdmin": "વાંચન યોજનાઓ"
   },
   "userActivity": {
     "action": "ક્રિયા",

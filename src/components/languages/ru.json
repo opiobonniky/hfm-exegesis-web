@@ -1505,7 +1505,9 @@
     "highlights": "Выделения",
     "notes": "Мои заметки",
     "favorites": "Избранное",
-    "history": "История чтения"
+    "history": "История чтения",
+    "users": "Пользователи",
+    "readingPlansAdmin": "Планы Чтения"
   },
   "settings": {
     "pageTitle": "Настройки",

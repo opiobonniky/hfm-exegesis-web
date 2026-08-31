@@ -1185,7 +1185,9 @@
     "highlights": "Mga Highlight",
     "notes": "Mga Tala Ko",
     "favorites": "Mga Paborito",
-    "history": "Kasaysayan ng Pagbasa"
+    "history": "Kasaysayan ng Pagbasa",
+    "users": "Mga Gumagamit",
+    "readingPlansAdmin": "Plano ng Pagbasa"
   },
   "userActivity": {
     "action": "Aksyon",

@@ -1185,7 +1185,9 @@
     "highlights": "Hervorhebungen",
     "notes": "Meine Notizen",
     "favorites": "Favoriten",
-    "history": "Leseverlauf"
+    "history": "Leseverlauf",
+    "users": "Benutzer",
+    "readingPlansAdmin": "Lesepläne"
   },
   "userActivity": {
     "action": "Aktion",

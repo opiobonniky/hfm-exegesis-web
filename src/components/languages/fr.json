@@ -1185,7 +1185,9 @@
     "highlights": "Surlignages",
     "notes": "Mes Notes",
     "favorites": "Favoris",
-    "history": "Historique de Lecture"
+    "history": "Historique de Lecture",
+    "users": "Utilisateurs",
+    "readingPlansAdmin": "Plans de Lecture"
   },
   "userActivity": {
     "action": "Cela supprimera définitivement le verset. Cette action ne peut pas être annulée.",

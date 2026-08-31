@@ -61,7 +61,9 @@ const DailyExegesisDetail = lazy(() => import("@/features/DailyContent/pages/Dai
 const AdminDailyExegesis = lazy(() => import("@/features/Admin/pages/AdminDailyExegesis"));
 const AdminTriviaUserDetail = lazy(() => import("@/features/AdminTriviaUserDetail/pages/AdminTriviaUserDetail"));
 const AdminAddTriviaQuestion = lazy(() => import("@/features/AdminAddTriviaQuestion/pages/AdminAddTriviaQuestion"));
-const AdminJournalModeration = lazy(() => import("@/features/AdminJournalModeration/pages/AdminJournalModeration"));
+const AdminJournalModeration = lazy(() => import("@/features/Admin/pages/AdminJournalModeration"));
+const AdminUsersPage = lazy(() => import("@/features/Admin/pages/AdminUsersPage"));
+const AdminReadingPlans = lazy(() => import("@/features/Admin/pages/AdminReadingPlans"));
 const ExtendedProfile = lazy(() => import("@/features/ExtendedProfile/pages/ExtendedProfile"));
 const VoiceSettings = lazy(() => import("@/features/VoiceSettings/pages/VoiceSettings"));
 const ReadingSettings = lazy(() => import("@/features/ReadingSettings/pages/ReadingSettings"));
@@ -554,6 +556,20 @@ export const routes = {
     isProtected: true,
     requiresLayout: true,
     title: "Journal Moderation",
+  },
+  adminUsers: {
+    path: "/admin/users",
+    component: AdminUsersPage,
+    isProtected: true,
+    requiresLayout: true,
+    title: "User Management",
+  },
+  adminReadingPlans: {
+    path: "/admin/reading-plans",
+    component: AdminReadingPlans,
+    isProtected: true,
+    requiresLayout: true,
+    title: "Reading Plans Manager",
   },
   extendedProfile: {
     path: "/extended-profile",

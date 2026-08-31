@@ -1185,7 +1185,9 @@
     "highlights": "प्रकाश विषय",
     "notes": "माझ्या नोट्स",
     "favorites": "आवडते",
-    "history": "वाचन इतिहास"
+    "history": "वाचन इतिहास",
+    "users": "वापरकर्ते",
+    "readingPlansAdmin": "वाचन योजना"
   },
   "userActivity": {
     "action": "कृती",

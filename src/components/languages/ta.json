@@ -1185,7 +1185,9 @@
     "highlights": "சிறப்பு குறிப்புகள்",
     "notes": "என் குறிப்புகள்",
     "favorites": "விருப்பமானவை",
-    "history": "படிக்கும் வரலாறு"
+    "history": "படிக்கும் வரலாறு",
+    "users": "பயனர்கள்",
+    "readingPlansAdmin": "படிப்பு திட்டங்கள்"
   },
   "userActivity": {
     "action": "செயல்",

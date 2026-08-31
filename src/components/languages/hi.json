@@ -1185,7 +1185,9 @@
     "highlights": "हाइलाइट्स",
     "notes": "मेरे नोट्स",
     "favorites": "पसंदीदा",
-    "history": "पठन इतिहास"
+    "history": "पठन इतिहास",
+    "users": "उपयोगकर्ता",
+    "readingPlansAdmin": "पठन योजनाएँ"
   },
   "userActivity": {
     "action": "कार्रवाई",

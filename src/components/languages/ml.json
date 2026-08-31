@@ -1185,7 +1185,9 @@
     "highlights": "ഹൈലൈറ്റുകൾ",
     "notes": "എന്റെ കുറിപ്പുകൾ",
     "favorites": "ഇഷ്ടപ്പെട്ടവ",
-    "history": "വായന ചരിത്രം"
+    "history": "വായന ചരിത്രം",
+    "users": "ഉപയോക്താക്കൾ",
+    "readingPlansAdmin": "വായന പദ്ധതികൾ"
   },
   "userActivity": {
     "action": "പ്രവർത്തനം",

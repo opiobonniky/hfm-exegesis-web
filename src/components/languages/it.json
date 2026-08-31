@@ -1185,7 +1185,9 @@
     "highlights": "Evidenziature",
     "notes": "Le Mie Note",
     "favorites": "Preferiti",
-    "history": "Cronologia Letture"
+    "history": "Cronologia Letture",
+    "users": "Utenti",
+    "readingPlansAdmin": "Piani di Lettura"
   },
   "userActivity": {
     "action": "Azione",

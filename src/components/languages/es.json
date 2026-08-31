@@ -1185,7 +1185,9 @@
     "highlights": "Marcadores",
     "notes": "Mis Notas",
     "favorites": "Favoritos",
-    "history": "Historial de Lectura"
+    "history": "Historial de Lectura",
+    "users": "Usuarios",
+    "readingPlansAdmin": "Planes de Lectura"
   },
   "userActivity": {
     "action": "Acción",

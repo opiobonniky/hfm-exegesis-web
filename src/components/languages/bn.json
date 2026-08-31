@@ -1185,7 +1185,9 @@
     "highlights": "হাইলাইট",
     "notes": "আমার নোট",
     "favorites": "পছন্দের",
-    "history": "পড়ার ইতিহাস"
+    "history": "পড়ার ইতিহাস",
+    "users": "ব্যবহারকারী",
+    "readingPlansAdmin": "পড়ার পরিকল্পনা"
   },
   "userActivity": {
     "action": "কাজ",

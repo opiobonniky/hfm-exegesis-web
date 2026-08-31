@@ -1185,7 +1185,9 @@
     "highlights": "ಹೈಲೈಟ್‌ಗಳು",
     "notes": "ನನ್ನ ನೋಟ್‌ಗಳು",
     "favorites": "ಇಷ್ಟಪಟ್ಟವು",
-    "history": "ಓದುವ ಇತಿಹಾಸ"
+    "history": "ಓದುವ ಇತಿಹಾಸ",
+    "users": "ಬಳಕೆದಾರರು",
+    "readingPlansAdmin": "ಓದುವ ಯೋಜನೆಗಳು"
   },
   "userActivity": {
     "action": "ಕ್ರಿಯೆ",

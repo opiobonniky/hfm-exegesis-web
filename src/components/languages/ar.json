@@ -1185,7 +1185,9 @@
     "highlights": "تمييزات",
     "notes": "ملاحظاتي",
     "favorites": "المفضلة",
-    "history": "سجل القراءة"
+    "history": "سجل القراءة",
+    "users": "المستخدمون",
+    "readingPlansAdmin": "خطط القراءة"
   },
   "userActivity": {
     "action": "الإجراء",

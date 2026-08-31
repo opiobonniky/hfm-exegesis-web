@@ -1636,7 +1636,9 @@
     "highlights": "Highlights",
     "notes": "My Notes",
     "favorites": "Favorites",
-    "history": "Reading History"
+    "history": "Reading History",
+    "users": "Users",
+    "readingPlansAdmin": "Reading Plans"
   },
   "settings": {
     "pageTitle": "Account Settings",
