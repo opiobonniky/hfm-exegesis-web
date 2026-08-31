@@ -2,7 +2,7 @@
 "use client";
 
 import { useNavigate } from "react-router-dom";
-import { ScrollText } from "lucide-react";
+import { ScrollText, Loader2 } from "lucide-react";
 import { useAdminBookProloguesPage } from "../hooks/useAdminBookProloguesPage";
 import {
   AdminPageHeader,
@@ -24,7 +24,7 @@ export default function AdminBookPrologues() {
     <div className="min-h-screen bg-background">
       <AdminPageHeader
         title="Book Prologues Manager"
-        subtitle="Manage book introductions and overviews"
+        subtitle={`${h.totalCount} prologues`}
         icon={<ScrollText className="w-5 h-5 text-primary" />}
         onBack={() => navigate("/admin")}
         onAdd={() => h.openEdit()}
@@ -35,7 +35,7 @@ export default function AdminBookPrologues() {
         <AdminSearchBar
           value={h.search}
           onChange={h.setSearch}
-          onSearch={h.refresh}
+          onSearch={() => {}}
           placeholder="Search by book name..."
         />
 
@@ -53,19 +53,49 @@ export default function AdminBookPrologues() {
             onAction={!h.search ? () => h.openEdit() : undefined}
           />
         ) : (
-          <PrologueGrid
-            items={h.items}
-            loadingMore={h.loadingMore}
-            hasMore={h.hasMore}
-            sentinelRef={h.sentinelRef}
-            onEdit={(item) => h.openEdit(item)}
-            onDelete={(item) => h.setDeleteItem(item)}
-            onView={(item) =>
-              navigate(
-                `/admin/book-prologues/${encodeURIComponent(item.bookName)}`,
-              )
-            }
-          />
+          <>
+            <PrologueGrid
+              items={h.items}
+              loadingMore={false}
+              hasMore={h.hasMore}
+              sentinelRef={h.sentinelRef}
+              onEdit={(item) => h.openEdit(item)}
+              onDelete={(item) => h.setDeleteItem(item)}
+              onView={(item) =>
+                navigate(
+                  `/admin/book-prologues/${encodeURIComponent(item.bookName)}`,
+                )
+              }
+            />
+
+            {/* Page info */}
+            <div className="flex items-center justify-between mt-4">
+              <p className="text-xs text-muted-foreground">
+                Showing {h.items.length} of {h.totalCount} prologues
+              </p>
+              <div className="flex items-center gap-2">
+                {h.currentPage > 1 && (
+                  <button
+                    onClick={() => h.setPage((p) => p - 1)}
+                    className="px-3 py-1.5 text-xs font-medium rounded-lg border hover:bg-muted transition-colors"
+                  >
+                    Previous
+                  </button>
+                )}
+                <span className="text-xs text-muted-foreground">
+                  Page {h.currentPage} of {h.totalPages}
+                </span>
+                {h.hasMore && (
+                  <button
+                    onClick={() => h.setPage((p) => p + 1)}
+                    className="px-3 py-1.5 text-xs font-medium rounded-lg border hover:bg-muted transition-colors"
+                  >
+                    Next
+                  </button>
+                )}
+              </div>
+            </div>
+          </>
         )}
       </div>
 

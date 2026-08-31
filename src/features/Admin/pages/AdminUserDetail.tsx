@@ -13,6 +13,7 @@ import { UserSessionsCard } from "../components/UserSessionsCard";
 import {
   Mail, Phone, User, Calendar, MapPin, Clock, CreditCard, Smartphone,
 } from "lucide-react";
+import {Skeleton} from "@/components/ui/skeleton.tsx";
 
 function formatDate(dateStr: string | null | undefined) {
   if (!dateStr) return "\u2014";
@@ -28,9 +29,7 @@ export default function AdminUserDetail() {
 
   if (h.loading) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
-      </div>
+     <Skeleton />
     );
   }
   if (!h.user) return null;

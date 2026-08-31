@@ -1,5 +1,5 @@
 // useAdminBookProloguesPage — list + CRUD for book prologues (uses bookName as key)
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { BIBLE_BOOKS } from "@/data/staticData";
@@ -15,18 +15,15 @@ export interface BookPrologue {
 }
 
 const EMPTY_FORM = { bookName: "", title: "", content: "", isPublished: true };
+const PAGE_SIZE = 12;
 
 export function useAdminBookProloguesPage() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [items, setItems] = useState<BookPrologue[]>([]);
+  const [allItems, setAllItems] = useState<BookPrologue[]>([]);
   const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(0);
-  const [hasMore, setHasMore] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [deleting, setDeleting] = useState<string | null>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
 
   // Edit dialog
@@ -35,59 +32,71 @@ export function useAdminBookProloguesPage() {
 
   // Delete dialog
   const [deleteItem, setDeleteItem] = useState<BookPrologue | null>(null);
+  const [deleting, setDeleting] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
 
-  const load = useCallback(
-    async (pageNum: number, q: string, append = false) => {
-      if (append) setLoadingMore(true);
-      else setLoading(true);
-      try {
-        const res = await sendPostRequest("book-prologues", "admin/get-all", {
-          page: pageNum,
-          size: 20,
-          search: q || undefined,
-        });
-        const data = res?.returnData || res?.data;
-        const raw = Array.isArray(data) ? data : data?.data || [];
-        setItems((prev) => (append ? [...prev, ...raw] : raw));
-        const total = data?.total ?? raw.length;
-        setHasMore(raw.length === 20);
-      } catch {
-        toast({ title: "Failed to load prologues", variant: "destructive" });
-      } finally {
-        setLoading(false);
-        setLoadingMore(false);
-      }
-    },
-    [toast],
-  );
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await sendPostRequest("book-prologues", "admin/get-all", {
+        page: 0,
+        size: 1000,
+      });
+      const data = res?.returnData || res?.data;
+      const raw = Array.isArray(data) ? data : data?.data || [];
+      setAllItems(raw);
+    } catch {
+      toast({ title: "Failed to load prologues", variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  }, [toast]);
 
   useEffect(() => {
-    load(0, search);
+    load();
     setPage(0);
   }, []);
+
+  // Client-side search filtering
+  const filteredItems = useMemo(() => {
+    if (!search.trim()) return allItems;
+    const q = search.toLowerCase();
+    return allItems.filter(
+      (item) =>
+        item.bookName?.toLowerCase().includes(q) ||
+        item.title?.toLowerCase().includes(q),
+    );
+  }, [allItems, search]);
+
+  // Client-side pagination
+  const items = useMemo(() => {
+    return filteredItems.slice(0, (page + 1) * PAGE_SIZE);
+  }, [filteredItems, page]);
+
+  const hasMore = items.length < filteredItems.length;
+  const totalPages = Math.max(1, Math.ceil(filteredItems.length / PAGE_SIZE));
+  const currentPage = Math.min(page + 1, totalPages);
 
   // Infinite scroll observer
   useEffect(() => {
     const sentinel = sentinelRef.current;
-    if (!sentinel || !hasMore || loadingMore) return;
+    if (!sentinel || !hasMore) return;
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && hasMore && !loadingMore) {
-          const nextPage = page + 1;
-          setPage(nextPage);
-          load(nextPage, search, true);
+        if (entry.isIntersecting && hasMore) {
+          setPage((p) => p + 1);
         }
       },
       { rootMargin: "200px" },
     );
     observer.observe(sentinel);
     return () => observer.disconnect();
-  }, [hasMore, loadingMore, page, search, load]);
+  }, [hasMore]);
 
   const refresh = useCallback(() => {
     setPage(0);
-    load(0, search);
-  }, [search, load]);
+    load();
+  }, [load]);
 
   const openEdit = useCallback((item?: BookPrologue) => {
     if (item) {
@@ -162,11 +171,16 @@ export function useAdminBookProloguesPage() {
 
   return {
     items,
+    allItems,
     loading,
-    loadingMore,
     search,
     setSearch,
     hasMore,
+    page,
+    setPage,
+    totalPages,
+    currentPage,
+    totalCount: filteredItems.length,
     saving,
     deleting,
     sentinelRef,

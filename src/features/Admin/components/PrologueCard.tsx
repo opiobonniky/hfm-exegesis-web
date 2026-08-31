@@ -18,7 +18,7 @@ interface Props {
   onView: () => void;
 }
 
-export function PrologueCard({ item, onEdit, onDelete }: Props) {
+export function PrologueCard({ item, onEdit, onDelete, onView }: Props) {
   return (
     <Card className="group hover:shadow-md transition-shadow">
       <CardHeader className="pb-3">
