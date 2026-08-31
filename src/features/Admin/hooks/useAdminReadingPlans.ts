@@ -4,6 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import { sendPostRequest } from "@/services/api";
 
 export interface ReadingPlan {
+  planId: string;
   id: number;
   title: string;
   description: string;
@@ -201,5 +202,6 @@ export function useAdminReadingPlans() {
     handleSave,
     handleDelete,
     loadMore,
+      items: undefined
   };
 }

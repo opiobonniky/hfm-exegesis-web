@@ -1,17 +1,8 @@
-// AdminBookPrologues — thin page composing hook + components
+// AdminBookPrologues — thin page composing hook + components (no inline HTML)
 "use client";
 
 import { useNavigate } from "react-router-dom";
-import { ScrollText, Loader2, AlertTriangle, Trash2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
+import { ScrollText } from "lucide-react";
 import { useAdminBookProloguesPage } from "../hooks/useAdminBookProloguesPage";
 import {
   AdminPageHeader,
@@ -19,8 +10,9 @@ import {
   AdminLoadingGrid,
   AdminSearchBar,
 } from "../components";
-import { PrologueCard } from "../components/PrologueCard";
+import { PrologueGrid } from "../components/PrologueGrid";
 import { PrologueFormDialog } from "../components/PrologueFormDialog";
+import { PrologueDeleteDialog } from "../components/PrologueDeleteDialog";
 
 const EMPTY_FORM = { bookName: "", title: "", content: "", isPublished: true };
 
@@ -61,35 +53,22 @@ export default function AdminBookPrologues() {
             onAction={!h.search ? () => h.openEdit() : undefined}
           />
         ) : (
-          <>
-            <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-              {h.items.map((item) => (
-                <PrologueCard
-                  key={item.id}
-                  item={item}
-                  onEdit={() => h.openEdit(item)}
-                  onDelete={() => h.setDeleteItem(item)}
-                  onView={() => navigate(`/admin/book-prologues/${encodeURIComponent(item.bookName)}`)}
-                />
-              ))}
-            </div>
-                        {/* Infinite scroll sentinel */}
-            <div ref={h.sentinelRef} className="h-4" />
-            {h.loadingMore && (
-              <div className="flex items-center justify-center py-4">
-                <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
-              </div>
-            )}
-            {!h.hasMore && h.items.length > 0 && (
-              <p className="text-center text-xs text-muted-foreground/50 py-4">
-                All items loaded
-              </p>
-            )}
-          </>
+          <PrologueGrid
+            items={h.items}
+            loadingMore={h.loadingMore}
+            hasMore={h.hasMore}
+            sentinelRef={h.sentinelRef}
+            onEdit={(item) => h.openEdit(item)}
+            onDelete={(item) => h.setDeleteItem(item)}
+            onView={(item) =>
+              navigate(
+                `/admin/book-prologues/${encodeURIComponent(item.bookName)}`,
+              )
+            }
+          />
         )}
       </div>
 
-      {/* Edit Dialog */}
       <PrologueFormDialog
         open={!!h.editItem || h.editForm.bookName !== ""}
         editMode={!!h.editItem}
@@ -104,43 +83,13 @@ export default function AdminBookPrologues() {
         }}
       />
 
-      {/* Delete Dialog */}
-      <Dialog
+      <PrologueDeleteDialog
         open={!!h.deleteItem}
+        bookName={h.deleteItem?.bookName || null}
+        deleting={h.deleting === h.deleteItem?.id}
         onOpenChange={(o) => !o && h.setDeleteItem(null)}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <AlertTriangle className="w-5 h-5 text-destructive" /> Delete
-              Prologue
-            </DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete the prologue for{" "}
-              <strong>{h.deleteItem?.bookName}</strong>? This action cannot be
-              undone.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => h.setDeleteItem(null)}>
-              Cancel
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={h.handleDelete}
-              disabled={h.deleting === h.deleteItem?.id}
-              className="gap-2"
-            >
-              {h.deleting === h.deleteItem?.id ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <Trash2 className="w-4 h-4" />
-              )}{" "}
-              Delete
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        onConfirm={h.handleDelete}
+      />
     </div>
   );
 }
