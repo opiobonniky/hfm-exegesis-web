@@ -30,3 +30,7 @@ export { PrologueFormDialog } from "./PrologueFormDialog";
 export { VerseExplanationFormDialog } from "./VerseExplanationFormDialog";
 export { ReadingPlanCard } from "./ReadingPlanCard";
 export { JournalEntryRow } from "./JournalEntryRow";
+export { AdminDashboardHeader } from "./AdminDashboardHeader";
+export { AdminDashboardStats } from "./AdminDashboardStats";
+export { AdminDashboardTools } from "./AdminDashboardTools";
+export { AdminDashboardQuickActions } from "./AdminDashboardQuickActions";
