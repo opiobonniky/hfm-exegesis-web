@@ -1,5 +1,5 @@
 // TriviaQuestionCard — question list item for trivia management
-import { Edit2, Trash2 } from "lucide-react";
+import { Edit2, Trash2, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -11,6 +11,7 @@ interface Props {
   category: string;
   isActive: boolean;
   onEdit: () => void;
+  onView?: () => void;
   onDelete: () => void;
 }
 const difficultyColor = (d: string) => {
@@ -21,7 +22,7 @@ const difficultyColor = (d: string) => {
     default: return "bg-muted text-muted-foreground border-border";
   }
 };
-export function TriviaQuestionCard({ question, difficulty, category, isActive, onEdit, onDelete }: Props) {
+export function TriviaQuestionCard({ question, difficulty, category, isActive, onEdit, onView, onDelete }: Props) {
   return (
     <div className="p-4 hover:bg-muted/20 transition-colors">
       <div className="flex items-start justify-between gap-3">
@@ -38,6 +39,11 @@ export function TriviaQuestionCard({ question, difficulty, category, isActive, o
           </div>
         </div>
         <div className="flex items-center gap-1 shrink-0">
+          {onView && (
+            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={onView} title="View details">
+              <Eye className="w-4 h-4 text-foreground/60" />
+            </Button>
+          )}
           <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={onEdit}>
             <Edit2 className="w-4 h-4 text-foreground/60" />
           </Button>

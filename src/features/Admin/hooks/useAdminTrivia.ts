@@ -1,5 +1,6 @@
 // useAdminTrivia — all state, effects, and logic for AdminTrivia page
 import { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { sendPostRequest } from "@/services/api";
@@ -88,6 +89,11 @@ export function useAdminTrivia() {
     } catch { toast({ title: "Error", variant: "destructive" }); }
     finally { setDeleting(false); }
   }, [deleteTarget, toast, loadQuestions, questionPage]);
+  const navigate = useNavigate();
+  const onViewQuestion = useCallback((q: TriviaQuestion) => {
+    navigate(`/admin/trivia/${q.id}`);
+  }, [navigate]);
+
   return {
     t, isRtl, activeTab, setActiveTab, loading, questions, totalQuestions, questionPage, setQuestionPage,
     searchQuery, setSearchQuery, difficultyFilter, setDifficultyFilter, categoryFilter, setCategoryFilter,
@@ -96,6 +102,6 @@ export function useAdminTrivia() {
     perfSearch, setPerfSearch, perfSortBy, setPerfSortBy, perfSortOrder, setPerfSortOrder,
     questionPerf, qpTotal, qpPage, setQpPage, qpSearch, setQpSearch, qpDifficulty, setQpDifficulty,
     qpSortBy, setQpSortBy, qpSortOrder, setQpSortOrder,
-    openCreateDialog, openEditDialog, handleSave, handleDelete,
+    openCreateDialog, openEditDialog, onViewQuestion, handleSave, handleDelete,
   };
 }

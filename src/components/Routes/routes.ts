@@ -51,7 +51,7 @@ const AdminStudyTools = lazy(() => import("@/features/Admin/pages/AdminStudyTool
 const AdminTrivia = lazy(() => import("@/features/Admin/pages/AdminTrivia"));
 const AdminDailyContent = lazy(() => import("@/features/Admin/pages/AdminDailyContent"));
 const AdminSubscriptions = lazy(() => import("@/features/Admin/pages/AdminSubscriptions"));
-const AdminActivityLog = lazy(() => import("@/features/Admin/pages/AdminActivityLog"));
+
 const AdminBookPrologues = lazy(() => import("@/features/Admin/pages/AdminBookPrologues"));
 const AdminVerseExplanations = lazy(() => import("@/features/Admin/pages/AdminVerseExplanations"));
 const AdminTriviaPerformance = lazy(() => import("@/features/Admin/pages/AdminTriviaPerformance"));
@@ -61,6 +61,7 @@ const DailyExegesisDetail = lazy(() => import("@/features/DailyContent/pages/Dai
 const AdminDailyExegesis = lazy(() => import("@/features/Admin/pages/AdminDailyExegesis"));
 const AdminTriviaUserDetail = lazy(() => import("@/features/AdminTriviaUserDetail/pages/AdminTriviaUserDetail"));
 const AdminAddTriviaQuestion = lazy(() => import("@/features/AdminAddTriviaQuestion/pages/AdminAddTriviaQuestion"));
+const TriviaDetail = lazy(() => import("@/features/Admin/pages/TriviaDetail"));
 const AdminJournalModeration = lazy(() => import("@/features/Admin/pages/AdminJournalModeration"));
 const AdminUsersPage = lazy(() => import("@/features/Admin/pages/AdminUsersPage"));
 const AdminReadingPlans = lazy(() => import("@/features/Admin/pages/AdminReadingPlans"));
@@ -473,13 +474,6 @@ export const routes = {
     requiresLayout: true,
     title: "Subscription Manager",
   },
-  adminActivityLog: {
-    path: "/admin/activity-log",
-    component: AdminActivityLog,
-    isProtected: true,
-    requiresLayout: true,
-    title: "Activity Log",
-  },
   adminBookPrologues: {
     path: "/admin/book-prologues",
     component: AdminBookPrologues,
@@ -521,6 +515,13 @@ export const routes = {
     isProtected: true,
     requiresLayout: true,
     title: "Edit Trivia Question",
+  },
+  triviaDetail: {
+    path: "/admin/trivia/:questionId",
+    component: TriviaDetail,
+    isProtected: true,
+    requiresLayout: true,
+    title: "Trivia Question Detail",
   },
   adminTriviaPerformance: {
     path: "/admin/trivia/performance",

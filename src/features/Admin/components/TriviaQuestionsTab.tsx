@@ -25,6 +25,7 @@ interface Props {
     setCategoryFilter: (v: string) => void;
     openCreateDialog: () => void;
     openEditDialog: (q: any) => void;
+    onViewQuestion: (q: any) => void;
     setDeleteTarget: (q: any) => void;
   };
 }
@@ -73,7 +74,7 @@ export function TriviaQuestionsTab({ h }: Props) {
             {h.questions.map(q => (
               <TriviaQuestionCard key={q.id} id={q.id} question={q.question} difficulty={q.difficulty}
                 category={q.category} isActive={q.isActive}
-                onEdit={() => h.openEditDialog(q)} onDelete={() => h.setDeleteTarget(q)} />
+                onEdit={() => h.openEditDialog(q)} onView={() => h.onViewQuestion(q)} onDelete={() => h.setDeleteTarget(q)} />
             ))}
           </div>
         )}
