@@ -14,6 +14,7 @@ export function useJournalDetail() {
   const [deleting, setDeleting] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const [studiedWordSheetOpen, setStudiedWordSheetOpen] = useState(false);
   const [selectedStudiedWord, setSelectedStudiedWord] = useState<{ strongsId: string; surfaceText: string } | null>(null);
   const fetchEntry = useCallback(async () => {
@@ -46,6 +47,39 @@ export function useJournalDetail() {
     } catch { toast({ title: "Error", variant: "destructive" }); }
     finally { setDeleting(false); setShowDeleteDialog(false); }
   }, [entry, toast, navigate]);
+  const handleExportPdf = useCallback(async () => {
+    if (!entry) return;
+    setExporting(true);
+    try {
+      const res = await sendPostRequest("journal", "export-one", { id: entry.id, format: "pdf" });
+      if (res?.returnCode === 200 && res.returnData) {
+        const { content, filename, mimeType } = res.returnData;
+        const byteCharacters = atob(content);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: mimeType || "application/pdf" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename || `journal-entry-${entry.id}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        toast({ title: "PDF downloaded" });
+      } else {
+        toast({ title: "Export failed", variant: "destructive" });
+      }
+    } catch {
+      toast({ title: "Export failed", variant: "destructive" });
+    } finally {
+      setExporting(false);
+    }
+  }, [entry, toast]);
+
   const openWordStudy = useCallback((strongsId: string, surfaceText: string) => {
     setSelectedStudiedWord({ strongsId, surfaceText });
     setStudiedWordSheetOpen(true);
@@ -53,6 +87,7 @@ export function useJournalDetail() {
   return {
     t, isRtl, navigate, entry, loading, deleting, showDeleteDialog, setShowDeleteDialog,
     copied, handleCopy, handleShare, handleDelete,
+    exporting, handleExportPdf,
     studiedWordSheetOpen, setStudiedWordSheetOpen, selectedStudiedWord, openWordStudy,
   };
 }

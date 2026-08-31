@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Loader2, Star, BookOpen, Tag, Heart, Lightbulb, Pencil, Trash2, Share2, Copy, CheckCircle2, FileDown, MoreHorizontal, Globe, Lock, ExternalLink, Quote } from "lucide-react";
+import { ArrowLeft, Loader2, Star, BookOpen, Tag, Heart, Lightbulb, Pencil, Trash2, Share2, Copy, CheckCircle2, FileDown, Download, MoreHorizontal, Globe, Lock, ExternalLink, Quote } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -37,7 +37,7 @@ const LeafDivider = () => (
 
 const JournalDetailPage = () => {
   const p = useJournalDetail();
-  const { t, isRtl, navigate, entry, loading, deleting, showDeleteDialog, setShowDeleteDialog, copied, handleCopy, handleShare, handleDelete, studiedWordSheetOpen, setStudiedWordSheetOpen, selectedStudiedWord, openWordStudy } = p;
+  const { t, isRtl, navigate, entry, loading, deleting, showDeleteDialog, setShowDeleteDialog, copied, handleCopy, handleShare, handleDelete, exporting, handleExportPdf, studiedWordSheetOpen, setStudiedWordSheetOpen, selectedStudiedWord, openWordStudy } = p;
   const { userInfo } = useAuth();
   if (loading) return <JournalDetailLoadingSkeleton />;
   if (!entry) return null;
@@ -63,6 +63,9 @@ const JournalDetailPage = () => {
           <div className="flex items-center gap-0.5">
             <button onClick={() => {}} className="p-1.5 rounded-lg hover:bg-stone-200/60 dark:hover:bg-stone-800/60 transition-colors"><Star className={cn("w-3.5 h-3.5", entry.isFavorite ? "text-amber-500 fill-amber-500" : "text-muted-foreground/70")} /></button>
             <button onClick={handleShare} className="p-1.5 rounded-lg hover:bg-stone-200/60 dark:hover:bg-stone-800/60 transition-colors"><Share2 className="w-3.5 h-3.5 text-muted-foreground/70" /></button>
+            <button onClick={handleExportPdf} disabled={exporting} className="p-1.5 rounded-lg hover:bg-stone-200/60 dark:hover:bg-stone-800/60 transition-colors">
+              {exporting ? <Loader2 className="w-3.5 h-3.5 animate-spin text-muted-foreground/70" /> : <Download className="w-3.5 h-3.5 text-muted-foreground/70" />}
+            </button>
             <button onClick={handleCopy} className="p-1.5 rounded-lg hover:bg-stone-200/60 dark:hover:bg-stone-800/60 transition-colors">
               {copied ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5 text-muted-foreground/70" />}
             </button>
