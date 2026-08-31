@@ -54,8 +54,8 @@ export function useAdminReadingPlans() {
       else setLoading(true);
       try {
         const res = await sendPostRequest("reading-plans", "get-all", {
-          page: pageNum,
-          size: 20,
+          page: pageNum + 1,
+          pageSize: 20,
           search: q || undefined,
         });
         const data = res?.returnData;
@@ -63,7 +63,9 @@ export function useAdminReadingPlans() {
         setPlans((prev) => (append ? [...prev, ...items] : items));
         const total = data?.totalCount ?? items.length;
         setTotalCount(total);
-        setHasMore(items.length === 20);
+        const apiPage = data?.page ?? pageNum + 1;
+        const totalPages = Math.ceil(total / 20);
+        setHasMore(apiPage < totalPages);
       } catch {
         toast({ title: "Failed to load plans", variant: "destructive" });
       } finally {

@@ -35,8 +35,8 @@ export function useAdminJournalModeration() {
       else setLoading(true);
       try {
         const res = await sendPostRequest("journal", "admin/get-all", {
-          page: pageNum,
-          size: 20,
+          page: pageNum + 1,
+          pageSize: 20,
           search: q || undefined,
         });
         const data = res?.returnData;
@@ -45,7 +45,9 @@ export function useAdminJournalModeration() {
         setEntries((prev) => (append ? [...prev, ...items] : items));
         const total = data?.totalCount ?? items.length;
         setTotalCount(total);
-        setHasMore(items.length === 20);
+        const apiPage = data?.page ?? pageNum + 1;
+        const totalPages = Math.ceil(total / 20);
+        setHasMore(apiPage < totalPages);
       } catch {
         toast({ title: "Failed to load entries", variant: "destructive" });
       } finally {

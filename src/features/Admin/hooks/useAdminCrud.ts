@@ -38,8 +38,8 @@ export function useAdminCrud<T extends { id: number }>(opts: UseAdminCrudOpts<T>
       else setLoading(true);
       try {
         const res = await sendPostRequest(opts.route, opts.listAction, {
-          page: pageNum,
-          size: 20,
+          page: pageNum + 1,
+          pageSize: 20,
           search: q || undefined,
         });
         const data = res?.returnData || res?.data;
@@ -54,7 +54,11 @@ export function useAdminCrud<T extends { id: number }>(opts: UseAdminCrudOpts<T>
         const total = opts.totalKey
           ? data?.[opts.totalKey] ?? mapped.length
           : data?.totalCount ?? data?.totalElements ?? data?.total ?? mapped.length;
-        const hasNext = data?.hasNext ?? (mapped.length === 20);
+        const pageFromApi = data?.page ?? data?.currentPage ?? pageNum + 1;
+        const totalFromApi = total ?? mapped.length;
+        const pageSize = 20;
+        const totalPages = Math.ceil(totalFromApi / pageSize);
+        const hasNext = data?.hasNext ?? (pageFromApi < totalPages);
         setItems((prev) => (append ? [...prev, ...mapped] : mapped));
         setHasMore(hasNext);
       } catch {
