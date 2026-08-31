@@ -105,7 +105,7 @@ export default function AdminBookPrologues() {
         form={h.editForm}
         filteredBooks={h.filteredBooks}
         saving={h.saving}
-        onFormChange={h.setEditForm}
+        onFormChange={h.updateFormField}
         onSave={h.handleSave}
         onClose={() => {
           h.setEditItem(null);

@@ -1,16 +1,35 @@
-// useBookPrologueDetail — fetch a single book prologue
+// useBookPrologueDetail — fetch a single book prologue with all fields
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { sendPostRequest } from "@/services/api";
 
-interface BookPrologueDetail {
+export interface BookPrologueDetail {
   bookName: string;
-  title: string;
-  content: string;
+  title?: string;
+  sortOrder?: number;
+  author?: string;
+  authorDetail?: string;
+  audience?: string;
+  dateWritten?: string;
+  locationWritten?: string;
+  purpose?: string;
+  keyTheme?: string;
+  summary?: string;
+  background?: string;
+  lessons?: string;
+  chapters?: number;
+  structure?: Array<{ range: string; title: string }>;
+  applications?: string[];
+  keyScripture?: Array<{ reference: string; text: string }>;
+  mainThemes?: string[];
+  keyPeople?: string[];
+  keyVerses?: string[];
+  christConnection?: string;
   isPublished?: boolean;
   createdBy?: string;
   createdOn?: string;
+  updatedBy?: string;
   updatedOn?: string;
 }
 

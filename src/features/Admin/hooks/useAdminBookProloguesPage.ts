@@ -8,13 +8,25 @@ import { sendPostRequest } from "@/services/api";
 export interface BookPrologue {
   bookName: string;
   title?: string;
-  content?: string;
+  summary?: string;
+  author?: string;
+  keyTheme?: string;
+  purpose?: string;
+  chapters?: number;
   isPublished?: boolean;
   createdOn?: string;
   updatedOn?: string | null;
+  [key: string]: any; // allow all other fields
 }
 
-const EMPTY_FORM = { bookName: "", title: "", content: "", isPublished: true };
+const EMPTY_FORM = {
+  bookName: "", title: "", summary: "", purpose: "", keyTheme: "",
+  author: "", authorDetail: "", audience: "", dateWritten: "", locationWritten: "",
+  background: "", lessons: "", chapters: "", christConnection: "",
+  applications: [] as string[], keyScriptureRef: [] as string[], keyScriptureText: [] as string[],
+  mainThemes: [] as string[], keyPeople: [] as string[], keyVerses: [] as string[],
+  content: "", isPublished: true,
+};
 const PAGE_SIZE = 12;
 
 export function useAdminBookProloguesPage() {
@@ -93,6 +105,10 @@ export function useAdminBookProloguesPage() {
     return () => observer.disconnect();
   }, [hasMore]);
 
+  const updateFormField = useCallback((field: string, value: any) => {
+    setEditForm((prev) => ({ ...prev, [field]: value }));
+  }, []);
+
   const refresh = useCallback(() => {
     setPage(0);
     load();
@@ -101,10 +117,21 @@ export function useAdminBookProloguesPage() {
   const openEdit = useCallback((item?: BookPrologue) => {
     if (item) {
       setEditItem(item);
+      const ks = item.keyScripture as any[] || [];
       setEditForm({
-        bookName: item.bookName,
-        title: item.title || "",
-        content: item.content || "",
+        bookName: item.bookName, title: item.title || "", summary: item.summary || "",
+        purpose: item.purpose || "", keyTheme: item.keyTheme || "",
+        author: item.author || "", authorDetail: item.authorDetail || "",
+        audience: item.audience || "", dateWritten: item.dateWritten || "",
+        locationWritten: item.locationWritten || "", background: item.background || "",
+        lessons: item.lessons || "", chapters: item.chapters ? String(item.chapters) : "",
+        christConnection: item.christConnection || "",
+        applications: item.applications || [],
+        keyScriptureRef: ks.map((s: any) => s.reference || ""),
+        keyScriptureText: ks.map((s: any) => s.text || ""),
+        mainThemes: item.mainThemes || [], keyPeople: item.keyPeople || [],
+        keyVerses: item.keyVerses || [],
+        content: (item as any).content || item.summary || "",
         isPublished: item.isPublished ?? true,
       });
     } else {
@@ -114,15 +141,26 @@ export function useAdminBookProloguesPage() {
   }, []);
 
   const handleSave = useCallback(async () => {
-    if (!editForm.bookName || !editForm.title || !editForm.content) return;
+    if (!editForm.bookName || !editForm.title) return;
     setSaving(true);
     try {
-      const res = await sendPostRequest("book-prologues", "admin/upsert", {
-        bookName: editForm.bookName,
-        title: editForm.title,
-        content: editForm.content,
+      const keyScripture = editForm.keyScriptureRef
+        .map((ref, i) => ({ reference: ref, text: editForm.keyScriptureText[i] || "" }))
+        .filter((s) => s.reference.trim());
+      const payload: any = {
+        bookName: editForm.bookName, title: editForm.title, summary: editForm.summary,
+        purpose: editForm.purpose, keyTheme: editForm.keyTheme,
+        author: editForm.author, authorDetail: editForm.authorDetail,
+        audience: editForm.audience, dateWritten: editForm.dateWritten,
+        locationWritten: editForm.locationWritten, background: editForm.background,
+        lessons: editForm.lessons, chapters: editForm.chapters ? parseInt(editForm.chapters) : null,
+        christConnection: editForm.christConnection,
+        applications: editForm.applications.filter(Boolean),
+        keyScripture, mainThemes: editForm.mainThemes.filter(Boolean),
+        keyPeople: editForm.keyPeople.filter(Boolean), keyVerses: editForm.keyVerses.filter(Boolean),
         isPublished: editForm.isPublished,
-      });
+      };
+      const res = await sendPostRequest("book-prologues", "admin/upsert", payload);
       if (res?.returnCode === 200 || res?.status === 200) {
         toast({ title: editItem ? "Updated" : "Created" });
         setEditItem(null);
@@ -191,6 +229,7 @@ export function useAdminBookProloguesPage() {
     deleteItem,
     setDeleteItem,
     refresh,
+    updateFormField,
     openEdit,
     handleSave,
     handleDelete,
