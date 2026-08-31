@@ -5,6 +5,8 @@ import { RefObject } from "react";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { LoadingSkeleton } from "@/components/verseResources";
+import type { AudioPlayerState, AudioPlayerActions } from "@/hooks/useAudioPlayer";
+import type { ChapterData, Highlight } from "../hooks/useBibleReader";
 import BibleSidebar from "./BibleSidebar";
 import ChapterContent from "./ChapterContent";
 import AudioControlBar from "./AudioControlBar";
@@ -17,7 +19,7 @@ interface SidebarProps {
   open: boolean;
   onClose: () => void;
   isRtl: boolean;
-  books: any[];
+  books: { bookNumber: number; bookName: string; maxChapter: number }[];
   selectedBook: string;
   selectedChapter: number;
   onSelect: (book: string, chapter: number) => void;
@@ -27,9 +29,9 @@ interface SidebarProps {
 
 /* ─── Chapter Props ──────────────────────────────────────────────────────── */
 interface ChapterProps {
-  chapters: any[];
+  chapters: ChapterData[];
   selectedVerses: string[];
-  highlights: Record<string, any>;
+  highlights: Record<string, Highlight>;
   favorites: Set<string>;
   verseNotes: Record<string, string>;
   onToggleVerse: (key: string) => void;
@@ -55,7 +57,7 @@ interface LoadingProps {
 /* ─── Bottom Bar Props ───────────────────────────────────────────────────── */
 interface BottomBarProps {
   audioActive: boolean;
-  audio: any;
+  audio: AudioPlayerState & AudioPlayerActions;
   selectedBook: string;
   selectedChapter: number;
   hasSelection: boolean;
