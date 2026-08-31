@@ -17,6 +17,7 @@ export function JournalEntryRow({
   actionLoading,
   onTogglePublication,
   onDelete,
+  onView,
 }: Props) {
   const isLoading = actionLoading === entry.id;
 
