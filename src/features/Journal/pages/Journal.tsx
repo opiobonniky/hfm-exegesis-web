@@ -12,11 +12,12 @@ import { JournalSegmentControl } from "../components/JournalSegmentControl";
 import { JournalStatsCards } from "../components/JournalStatsCards";
 import { JournalFilterBar } from "../components/JournalFilterBar";
 import { JournalEmptyState } from "../components/JournalEmptyState";
+import { JournalEntryCard } from "../components/JournalEntryCard";
 import { ExportModal } from "../components/ExportModal";
 
 export default function LegacyLedgerPage() {
   const p = useJournalPageFull();
-  const { t, isRtl, navigate, userInfo, handleTierBadgeClick, sowerPortalLoading, entries, stats, loading, page, setPage, totalPages, hasNext, hasPrevious, search, setSearch, category, setCategory, bookName, setBookName, source, setSource, strongsId, setStrongsId, startDate, setStartDate, endDate, setEndDate, viewMode, setViewMode, deleteDialog, setDeleteDialog, deleting, handleDelete, showExportModal, setShowExportModal, showFilters, setShowFilters, selectionMode, setSelectionMode, selectedIds, setSelectedIds, exitSelectionMode, refresh, setSearchDebounced, renderEntry, selectAll, clearSelection, hasActiveFilters, clearAllFilters } = p;
+  const { t, isRtl, navigate, userInfo, handleTierBadgeClick, sowerPortalLoading, entries, stats, loading, page, setPage, totalPages, hasNext, hasPrevious, search, setSearch, category, setCategory, bookName, setBookName, source, setSource, strongsId, setStrongsId, startDate, setStartDate, endDate, setEndDate, viewMode, setViewMode, deleteDialog, setDeleteDialog, deleting, handleDelete, showExportModal, setShowExportModal, showFilters, setShowFilters, selectionMode, setSelectionMode, selectedIds, setSelectedIds, exitSelectionMode, refresh, setSearchDebounced, toggleEntrySelection, selectAll, clearSelection, hasActiveFilters, clearAllFilters } = p;
 
   return (
     <>
@@ -61,7 +62,19 @@ export default function LegacyLedgerPage() {
             ) : entries.length === 0 ? (
               <JournalEmptyState hasSearch={!!search} currentCategory={category} isDiscover={viewMode === "discover"} onCreateNew={() => navigate(routes.newJournalEntry.path)} />
             ) : (
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">{entries.map(renderEntry)}</div>
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {entries.map((entry) => (
+                  <JournalEntryCard
+                    key={entry.id}
+                    entry={entry}
+                    selectionMode={selectionMode}
+                    selected={selectedIds.has(entry.id)}
+                    onSelect={toggleEntrySelection}
+                    onView={(id) => navigate(`/journal/view/${id}`)}
+                    onDelete={(e) => setDeleteDialog(e)}
+                  />
+                ))}
+              </div>
             )}
 
             {totalPages > 1 && (

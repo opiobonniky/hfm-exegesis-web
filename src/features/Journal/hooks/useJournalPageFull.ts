@@ -7,7 +7,31 @@ import { useSubscription } from "@/hooks/useSubscription";
 import { sendPostRequest } from "@/services/api";
 import { routes } from "@/components/Routes/routes";
 
-interface JournalEntry { id: number; title: string; content: string; mood?: string; tags?: string; isPrivate: boolean; createdAt: string; updatedAt: string; }
+interface JournalEntry {
+  id: number;
+  userId: string;
+  title: string;
+  content: string;
+  bookName?: string;
+  chapter?: number;
+  verseNumber?: number | null;
+  category?: string;
+  mood?: string | null;
+  prayers?: string | null;
+  gratitude?: string | null;
+  learnings?: string | null;
+  application?: string | null;
+  isPublished?: boolean;
+  isFavorite?: boolean;
+  strongsWords?: string | null;
+  strongsIds?: string | null;
+  source?: string;
+  tags?: string | null;
+  createdOn?: string;
+  updatedOn?: string;
+  createdBy?: string;
+  updatedBy?: string | null;
+}
 interface JournalStats { totalEntries: number; thisMonth: number; currentStreak: number; totalWords: number; }
 export function useJournalPageFull() {
   const { t, isRtl } = useLanguage();
@@ -59,15 +83,20 @@ export function useJournalPageFull() {
         startDate: startDate || undefined, endDate: endDate || undefined, viewMode,
       });
       if (res?.returnCode === 200 && res?.returnData) {
-        setEntries(res.returnData.content || []); setTotalPages(res.returnData.totalPages || 1);
-        setHasNext(res.returnData.hasNext || false); setHasPrevious(res.returnData.hasPrevious || false);
+        const data = res.returnData;
+        // API returns entries array (may be paginated or flat)
+        const items = data.entries || data.content || data || [];
+        setEntries(Array.isArray(items) ? items : []);
+        setTotalPages(data.totalPages || 1);
+        setHasNext(data.hasNext || false);
+        setHasPrevious(data.hasPrevious || false);
       }
     } catch { toast({ title: "Failed to load", variant: "destructive" }); }
     finally { setLoading(false); }
   }, [searchDebounced, category, bookName, source, strongsId, startDate, endDate, viewMode, toast]);
   const loadStats = useCallback(async () => {
     try {
-      const res = await sendPostRequest("journal", "get-stats", {});
+      const res = await sendPostRequest("journal", "stats", {});
       if (res?.returnCode === 200 && res?.returnData) setStats(res.returnData);
     } catch {}
   }, []);
@@ -96,7 +125,13 @@ export function useJournalPageFull() {
   const clearSelection = useCallback(() => setSelectedIds(new Set()), []);
   const hasActiveFilters = !!(search || category || bookName || source || strongsId || startDate || endDate);
   const clearAllFilters = useCallback(() => { setSearch(""); setCategory(""); setBookName(""); setSource(""); setStrongsId(""); setStartDate(null); setEndDate(null); }, []);
-  const renderEntry = useCallback((entry: any) => null, []);
+  const toggleEntrySelection = useCallback((id: number) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }, []);
   return {
     t, isRtl, navigate, userInfo, isPayingUser, handleTierBadgeClick, sowerPortalLoading,
     entries, stats, loading, page, setPage, totalPages, hasNext, hasPrevious,
@@ -106,7 +141,7 @@ export function useJournalPageFull() {
     showExportModal, setShowExportModal, showFilters, setShowFilters,
     selectionMode, setSelectionMode, selectedIds, setSelectedIds, toggleSelectAll,
     exitSelectionMode, selectAll, clearSelection,
-    hasActiveFilters, clearAllFilters, setSearchDebounced, renderEntry,
+    hasActiveFilters, clearAllFilters, setSearchDebounced, toggleEntrySelection,
     refresh: () => loadEntries(page),
   };
 }
