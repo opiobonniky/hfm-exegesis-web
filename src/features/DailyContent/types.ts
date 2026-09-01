@@ -150,3 +150,41 @@ export interface VerseExplanationResponse {
   totalElements: number;
   totalPages: number;
 }
+
+// ── Page-level types (used by DailyExegesis, DailyDevotions, etc.) ──
+
+export interface DailyExegesisFull {
+  id: number;
+  title: string;
+  passageReference: string;
+  introduction: string;
+  contextSummary: string;
+  teachingBody: string;
+  application: string;
+  prayer: string;
+  tags: string;
+  displayDate: string;
+  createdOn: string;
+  isPublished: boolean;
+}
+
+export interface DailyExegesisSeriesItem {
+  id: number;
+  title: string;
+  displayDate: string;
+}
+
+export interface DevotionPaginationProps {
+  page: number;
+  totalPages: number;
+  total: number;
+  hasNext: boolean;
+  hasPrevious: boolean;
+  onPageChange: (page: number) => void;
+}
+
+export interface DevotionPaginationLabels {
+  page: string;
+  of: string;
+  results: string;
+}
