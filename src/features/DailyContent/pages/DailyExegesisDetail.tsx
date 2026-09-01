@@ -7,8 +7,11 @@ import {
   DailyContentDetailMeta,
   TextBlock,
   TagsBlock,
+  DetailSection,
+  DetailTitleBlock,
+  DetailPageLayout,
+  DetailPageInner,
 } from "../components";
-import { DetailPageContent } from "../components/DetailPageContent";
 import { fmtDate } from "../helpers/contentDetailHelpers";
 
 export default function DailyExegesisDetail() {
@@ -31,7 +34,7 @@ export default function DailyExegesisDetail() {
   }
 
   return (
-    <div className="min-h-full bg-background">
+    <DetailPageLayout>
       <DailyContentDetailHeader
         title={exegesis.title || "Daily Exegesis"}
         subtitle={fmtDate(exegesis.displayDate)}
@@ -39,34 +42,33 @@ export default function DailyExegesisDetail() {
         onEdit={() => navigate(`/add-daily-exegesis`, { state: { exegesis } })}
       />
 
-      <DetailPageContent>
-        <div className="space-y-2">
-          <h2 className="text-2xl font-bold">{exegesis.title}</h2>
+      <DetailPageInner>
+        <DetailTitleBlock title={exegesis.title}>
           <DailyContentDetailMeta
             isPublished={exegesis.isPublished}
             reference={exegesis.passageReference}
             displayDate={exegesis.displayDate}
             createdOn={exegesis.createdOn}
           />
-        </div>
+        </DetailTitleBlock>
 
-        <div className="space-y-1">
+        <DetailSection>
           <TextBlock label="Passage Reference" value={exegesis.passageReference} icon={BookOpen} />
           <TextBlock label="Teaching Body" value={exegesis.teachingBody} icon={MessageSquare} />
-        </div>
+        </DetailSection>
 
-        <div className="space-y-1">
+        <DetailSection>
           <TextBlock label="Introduction" value={exegesis.introduction} icon={Lightbulb} />
           <TextBlock label="Context Summary" value={exegesis.contextSummary} icon={Layers} />
-        </div>
+        </DetailSection>
 
-        <div className="space-y-1">
+        <DetailSection>
           <TextBlock label="Application" value={exegesis.application} icon={Tag} />
           <TextBlock label="Prayer" value={exegesis.prayer} icon={BookMarked} />
-        </div>
+        </DetailSection>
 
         <TagsBlock tags={exegesis.tags} />
-      </DetailPageContent>
-    </div>
+      </DetailPageInner>
+    </DetailPageLayout>
   );
 }

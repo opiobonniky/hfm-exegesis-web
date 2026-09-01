@@ -1,6 +1,6 @@
 /**
- * DetailPageContent — content wrapper for DailyContent detail pages.
- * Replaces the repeated `<div className="px-4 sm:px-6 py-6 max-w-3xl mx-auto space-y-6">` pattern.
+ * DetailPageContent — root wrapper for DailyContent detail pages.
+ * Replaces the repeated `<div className="min-h-full bg-background">` + inner content pattern.
  */
 import { ReactNode } from "react";
 
@@ -10,7 +10,7 @@ interface Props {
 
 export function DetailPageContent({ children }: Props) {
   return (
-    <div className="px-4 sm:px-6 py-6 max-w-3xl mx-auto space-y-6">
+    <div className="min-h-full bg-background">
       {children}
     </div>
   );

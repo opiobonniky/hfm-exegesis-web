@@ -5,6 +5,7 @@ import { useNotesPage } from "../hooks/useNotesPage";
 import { BiblePageLayout } from "../components/BiblePageLayout";
 import { NoteCard } from "../components/NoteCard";
 import { EditNoteDialog } from "../components/EditNoteDialog";
+import { BibleGroupSection, BibleSubGroup } from "../components/BibleGroupSection";
 
 export default function Notes() {
   const h = useNotesPage();
@@ -26,37 +27,29 @@ export default function Notes() {
         emptyMessage="Add notes to verses while reading to see them here"
       >
         {Object.entries(h.grouped).map(([book, chapters]) => (
-          <div key={book} className="mb-6">
-            <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3 px-1">
-              {book}
-            </h3>
+          <BibleGroupSection key={book} label={book}>
             {Object.entries(chapters).map(([chapter, verses]) => (
-              <div key={chapter} className="mb-4 ml-2">
-                <p className="text-[11px] font-medium text-muted-foreground/50 mb-2 px-1">
-                  Chapter {chapter}
-                </p>
-                <div className="space-y-2">
-                  {verses.map((n) => (
-                    <NoteCard
-                      key={n.id}
-                      bookName={n.bookName}
-                      chapter={n.chapter}
-                      verseNumber={n.verseNumber}
-                      verseText={h.verseTextMap[`${n.bookName} ${n.chapter}:${n.verseNumber}`]}
-                      note={n.note}
-                      createdOn={n.createdOn}
-                      updatedOn={n.updatedOn}
-                      deleting={h.deleting === n.id}
-                      onGoToReader={() => h.goToReader(n.bookName, n.chapter)}
-                      onEdit={() => h.openEdit(n)}
-                      onDelete={() => h.deleteNote(n.id)}
-                      formatDate={h.formatDate}
-                    />
-                  ))}
-                </div>
-              </div>
+              <BibleSubGroup key={chapter} label={`Chapter ${chapter}`}>
+                {verses.map((n) => (
+                  <NoteCard
+                    key={n.id}
+                    bookName={n.bookName}
+                    chapter={n.chapter}
+                    verseNumber={n.verseNumber}
+                    verseText={h.verseTextMap[`${n.bookName} ${n.chapter}:${n.verseNumber}`]}
+                    note={n.note}
+                    createdOn={n.createdOn}
+                    updatedOn={n.updatedOn}
+                    deleting={h.deleting === n.id}
+                    onGoToReader={() => h.goToReader(n.bookName, n.chapter)}
+                    onEdit={() => h.openEdit(n)}
+                    onDelete={() => h.deleteNote(n.id)}
+                    formatDate={h.formatDate}
+                  />
+                ))}
+              </BibleSubGroup>
             ))}
-          </div>
+          </BibleGroupSection>
         ))}
       </BiblePageLayout>
 

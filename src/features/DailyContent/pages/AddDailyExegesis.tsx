@@ -2,161 +2,116 @@
 
 /**
  * AddDailyExegesis — add/edit daily exegesis with all fields.
- * Fields: title, passageReference, teachingBody, introduction, contextSummary,
- *         application, prayer, tags, displayDate, isPublished
+ * All state in useAddDailyExegesis hook, UI split into section components.
+ * Zero raw divs — pure compositor.
  */
-import {
-  Sparkles, BookOpen,
-} from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Sparkles, BookOpen } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
-import { format } from "date-fns";
 import { useAddDailyExegesis } from "../hooks/useAddDailyExegesis";
-import { CollapsibleSection as Section, DailyContentPageHeader, DailyContentFormActions } from "../components";
+import {
+  CollapsibleSection as Section, DailyContentPageHeader, DailyContentFormActions,
+  DailyContentFormCard, PublishToggle, PageContentWrapper, FormField, DateTimeFields,
+} from "../components";
 
 const AddDailyExegesis = () => {
   const h = useAddDailyExegesis();
 
   return (
-    <div dir={h.isRtl ? "rtl" : "ltr"} className="min-h-screen bg-gradient-to-b from-background to-muted/30 p-6 lg:p-10">
-      <div className="max-w-4xl mx-auto space-y-8">
-        <DailyContentPageHeader
-          backTo="/daily-exegesis"
-          backLabel={h.t.common.back}
-          icon={Sparkles}
-          title={h.isEditing ? "Edit Exegesis" : "Add Daily Exegesis"}
-          subtitle="Teach, explain, and apply Scripture with rich context"
-        />
+    <PageContentWrapper isRtl={h.isRtl}>
+      <DailyContentPageHeader
+        backTo="/daily-exegesis"
+        backLabel={h.t.common.back}
+        icon={Sparkles}
+        title={h.isEditing ? "Edit Exegesis" : "Add Daily Exegesis"}
+        subtitle="Teach, explain, and apply Scripture with rich context"
+      />
 
-        {/* Form Card */}
-        <Card className="border-border/40 shadow-md">
-          <CardHeader className="bg-gradient-to-r from-primary/5 to-accent/5 pb-6">
-            <CardTitle className="flex items-center gap-2">
-              <BookOpen className="h-5 w-5 text-primary" />
-              Exegesis Details
-            </CardTitle>
-            <CardDescription>Provide the passage, teaching body, and supporting content</CardDescription>
-          </CardHeader>
-          <CardContent className="pt-6 space-y-6">
-            <form onSubmit={h.handleSave} className="space-y-8">
-              {/* 1. Title */}
-              <Section title="Title">
-                <div className="space-y-2">
-                  <Label>Title *</Label>
-                  <Input value={h.title} onChange={(e) => h.setTitle(e.target.value)}
-                    placeholder="Enter exegesis title..." className="text-lg" />
-                </div>
-              </Section>
+      <DailyContentFormCard
+        icon={BookOpen}
+        title="Exegesis Details"
+        description="Provide the passage, teaching body, and supporting content"
+      >
+        <form onSubmit={h.handleSave} className="space-y-8">
+          <Section title="Title">
+            <FormField label="Title" required>
+              <Input value={h.title} onChange={(e) => h.setTitle(e.target.value)}
+                placeholder="Enter exegesis title..." className="text-lg" />
+            </FormField>
+          </Section>
 
-              {/* 2. Passage Reference */}
-              <Section title="Passage Reference">
-                <div className="space-y-2">
-                  <Label>Passage Reference *</Label>
-                  <Input value={h.passageReference} onChange={(e) => h.setPassageReference(e.target.value)}
-                    placeholder="e.g., Psalm 46:10, John 15:1-5, Romans 8:28-30" />
-                  <p className="text-xs text-muted-foreground">The Bible passage this exegesis covers</p>
-                </div>
-              </Section>
+          <Section title="Passage Reference">
+            <FormField label="Passage Reference" required description="The Bible passage this exegesis covers">
+              <Input value={h.passageReference} onChange={(e) => h.setPassageReference(e.target.value)}
+                placeholder="e.g., Psalm 46:10, John 15:1-5, Romans 8:28-30" />
+            </FormField>
+          </Section>
 
-              {/* 3. Teaching Body */}
-              <Section title="Teaching Body">
-                <div className="space-y-2">
-                  <Label>Teaching Body *</Label>
-                  <Textarea value={h.teachingBody} onChange={(e) => h.setTeachingBody(e.target.value)}
-                    placeholder="Write the main teaching content — the expository explanation of the passage..."
-                    rows={10} className="min-h-[250px] leading-relaxed resize-none" />
-                </div>
-              </Section>
+          <Section title="Teaching Body">
+            <FormField label="Teaching Body" required>
+              <Textarea value={h.teachingBody} onChange={(e) => h.setTeachingBody(e.target.value)}
+                placeholder="Write the main teaching content — the expository explanation of the passage..."
+                rows={10} className="min-h-[250px] leading-relaxed resize-none" />
+            </FormField>
+          </Section>
 
-              {/* 4. Introduction & Context */}
-              <Section title="Introduction & Context" defaultOpen={false}>
-                <div className="space-y-5">
-                  <div className="space-y-2">
-                    <Label>Introduction</Label>
-                    <Textarea value={h.introduction} onChange={(e) => h.setIntroduction(e.target.value)}
-                      placeholder="Introduce the passage, its purpose, and what the reader will learn..."
-                      rows={4} className="resize-none" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Context Summary</Label>
-                    <Textarea value={h.contextSummary} onChange={(e) => h.setContextSummary(e.target.value)}
-                      placeholder="Describe the historical, literary, and theological context..."
-                      rows={4} className="resize-none" />
-                  </div>
-                </div>
-              </Section>
+          <Section title="Introduction & Context" defaultOpen={false}>
+            <FormField label="Introduction">
+              <Textarea value={h.introduction} onChange={(e) => h.setIntroduction(e.target.value)}
+                placeholder="Introduce the passage, its purpose, and what the reader will learn..."
+                rows={4} className="resize-none" />
+            </FormField>
+            <FormField label="Context Summary">
+              <Textarea value={h.contextSummary} onChange={(e) => h.setContextSummary(e.target.value)}
+                placeholder="Describe the historical, literary, and theological context..."
+                rows={4} className="resize-none" />
+            </FormField>
+          </Section>
 
-              {/* 5. Application & Prayer */}
-              <Section title="Application & Prayer" defaultOpen={false}>
-                <div className="space-y-5">
-                  <div className="space-y-2">
-                    <Label>Application</Label>
-                    <Textarea value={h.application} onChange={(e) => h.setApplication(e.target.value)}
-                      placeholder="How should readers apply this passage to their lives?"
-                      rows={4} className="resize-none" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Prayer</Label>
-                    <Textarea value={h.prayer} onChange={(e) => h.setPrayer(e.target.value)}
-                      placeholder="Write a prayer inspired by this passage..."
-                      rows={4} className="resize-none" />
-                  </div>
-                </div>
-              </Section>
+          <Section title="Application & Prayer" defaultOpen={false}>
+            <FormField label="Application">
+              <Textarea value={h.application} onChange={(e) => h.setApplication(e.target.value)}
+                placeholder="How should readers apply this passage to their lives?"
+                rows={4} className="resize-none" />
+            </FormField>
+            <FormField label="Prayer">
+              <Textarea value={h.prayer} onChange={(e) => h.setPrayer(e.target.value)}
+                placeholder="Write a prayer inspired by this passage..."
+                rows={4} className="resize-none" />
+            </FormField>
+          </Section>
 
-              {/* 6. Tags */}
-              <Section title="Tags" defaultOpen={false}>
-                <div className="space-y-2">
-                  <Label>Tags</Label>
-                  <Input value={h.tags} onChange={(e) => h.setTags(e.target.value)}
-                    placeholder="e.g., daily, exegesis, psalms, trust" />
-                  <p className="text-xs text-muted-foreground">Comma-separated tags for categorization</p>
-                </div>
-              </Section>
+          <Section title="Tags" defaultOpen={false}>
+            <FormField label="Tags" description="Comma-separated tags for categorization">
+              <Input value={h.tags} onChange={(e) => h.setTags(e.target.value)}
+                placeholder="e.g., daily, exegesis, psalms, trust" />
+            </FormField>
+          </Section>
 
-              {/* 7. Date/Time + Publish */}
-              <Section title="Schedule & Publish">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-1">
-                      <Label>Published</Label>
-                      <p className="text-xs text-muted-foreground">Show to all users</p>
-                    </div>
-                    <Switch checked={h.published} onCheckedChange={h.setPublished} />
-                  </div>
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Date *</Label>
-                      <Input type="date" value={format(h.selectedDate, "yyyy-MM-dd")}
-                        onChange={(e) => {
-                          const d = new Date(e.target.value);
-                          d.setHours(h.selectedDate.getHours(), h.selectedDate.getMinutes(), 0, 0);
-                          h.setSelectedDate(d);
-                        }} />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Time</Label>
-                      <Input type="time" value={h.selectedTime} onChange={h.handleTimeChange} />
-                    </div>
-                  </div>
-                </div>
-              </Section>
+          <Section title="Schedule & Publish">
+            <PublishToggle
+              published={h.published}
+              onCheckedChange={h.setPublished}
+              publishedLabel="Published"
+              publishedDesc="Show to all users"
+            />
+            <DateTimeFields
+              selectedDate={h.selectedDate} setSelectedDate={h.setSelectedDate}
+              selectedTime={h.selectedTime} handleTimeChange={h.handleTimeChange}
+            />
+          </Section>
 
-              <DailyContentFormActions
-                cancelTo="/daily-exegesis"
-                cancelLabel={h.t.common.cancel}
-                saveLabel={h.isEditing ? "Update Exegesis" : "Create Exegesis"}
-                disabled={h.saveDisabled}
-                onSave={h.handleSave}
-              />
-            </form>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+          <DailyContentFormActions
+            cancelTo="/daily-exegesis"
+            cancelLabel={h.t.common.cancel}
+            saveLabel={h.isEditing ? "Update Exegesis" : "Create Exegesis"}
+            disabled={h.saveDisabled}
+            onSave={h.handleSave}
+          />
+        </form>
+      </DailyContentFormCard>
+    </PageContentWrapper>
   );
 };
 

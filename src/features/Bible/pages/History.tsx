@@ -7,6 +7,7 @@ import { useHistoryPage } from "../hooks/useHistoryPage";
 import { BiblePageLayout } from "../components/BiblePageLayout";
 import { HistoryCard } from "../components/HistoryCard";
 import { DeleteConfirmDialog } from "../components/DeleteConfirmDialog";
+import { BibleGroupSection, BibleSubGroup } from "../components/BibleGroupSection";
 
 export default function History() {
   const h = useHistoryPage();
@@ -42,27 +43,22 @@ export default function History() {
         }
       >
         {Object.entries(h.grouped).map(([dateLabel, items]) => (
-          <div key={dateLabel} className="mb-6">
-            <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3 px-1">
-              {dateLabel}
-            </h3>
-            <div className="space-y-2">
-              {items.map((item) => (
-                <HistoryCard
-                  key={item.id}
-                  bookName={item.bookName}
-                  chapter={item.chapter}
-                  lastVerse={item.lastVerse || item.verseNumber}
-                  createdOn={item.createdOn}
-                  lastRead={item.lastRead}
-                  deleting={h.deleting === item.id}
-                  onGoToReader={() => h.goToReader(item.bookName, item.chapter)}
-                  onDelete={() => h.setDeleteModal({ visible: true, type: "single", itemId: item.id, itemName: `${item.bookName} ${item.chapter}` })}
-                  formatTimeAgo={h.formatTimeAgo}
-                />
-              ))}
-            </div>
-          </div>
+          <BibleGroupSection key={dateLabel} label={dateLabel}>
+            {items.map((item) => (
+              <HistoryCard
+                key={item.id}
+                bookName={item.bookName}
+                chapter={item.chapter}
+                lastVerse={item.lastVerse || item.verseNumber}
+                createdOn={item.createdOn}
+                lastRead={item.lastRead}
+                deleting={h.deleting === item.id}
+                onGoToReader={() => h.goToReader(item.bookName, item.chapter)}
+                onDelete={() => h.setDeleteModal({ visible: true, type: "single", itemId: item.id, itemName: `${item.bookName} ${item.chapter}` })}
+                formatTimeAgo={h.formatTimeAgo}
+              />
+            ))}
+          </BibleGroupSection>
         ))}
       </BiblePageLayout>
 

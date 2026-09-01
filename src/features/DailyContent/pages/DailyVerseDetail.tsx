@@ -8,8 +8,12 @@ import {
   TextBlock,
   ListBlock,
   WordStudiesBlock,
+  DetailSection,
+  VerseTextDisplay,
+  DetailTitleBlock,
+  DetailPageLayout,
+  DetailPageInner,
 } from "../components";
-import { DetailPageContent } from "../components/DetailPageContent";
 import { parseList } from "../helpers/contentDetailHelpers";
 
 export default function DailyVerseDetail() {
@@ -34,7 +38,7 @@ export default function DailyVerseDetail() {
   const reference = `${verse.bookName || ""} ${verse.chapter || ""}:${verse.verseNumber || ""}`;
 
   return (
-    <div className="min-h-full bg-background">
+    <DetailPageLayout>
       <DailyContentDetailHeader
         title="Daily Verse Detail"
         subtitle={reference}
@@ -42,9 +46,8 @@ export default function DailyVerseDetail() {
         onEdit={() => navigate(`/add-daily-verse`, { state: { verse } })}
       />
 
-      <DetailPageContent>
-        <div className="space-y-2">
-          <h2 className="text-2xl font-bold">{reference}</h2>
+      <DetailPageInner>
+        <DetailTitleBlock title={reference}>
           <DailyContentDetailMeta
             isPublished={verse.isPublished}
             extraBadge={verse.bibleVersion}
@@ -52,41 +55,35 @@ export default function DailyVerseDetail() {
             createdOn={verse.createdOn}
             updatedOn={verse.updatedOn}
           />
-        </div>
+        </DetailTitleBlock>
 
-        {verse.verseText && (
-          <div className="rounded-xl bg-primary/5 border border-primary/10 px-5 py-4">
-            <p className="text-sm font-semibold text-primary mb-1">Verse Text</p>
-            <p className="text-base italic text-foreground/90 leading-relaxed font-serif">"{verse.verseText}"</p>
-          </div>
-        )}
+        {verse.verseText && <VerseTextDisplay text={verse.verseText} />}
 
-        <div className="space-y-1">
+        <DetailSection>
           <TextBlock label="Explanation" value={verse.explanation} icon={Lightbulb} />
           <TextBlock label="Application" value={verse.application} icon={Tag} />
           <TextBlock label="Verse Introduction" value={verse.verseIntroduction} icon={BookMarked} />
           <TextBlock label="Learn More" value={verse.learnMore} icon={Layers} />
-        </div>
+        </DetailSection>
 
         {(verse.backgroundAuthor || verse.backgroundBook || verse.backgroundContext) && (
-          <div className="space-y-1">
-            <h3 className="text-sm font-bold text-foreground mb-2">Background</h3>
+          <DetailSection title="Background">
             <TextBlock label="Author" value={verse.backgroundAuthor} />
             <TextBlock label="Book" value={verse.backgroundBook} />
             <TextBlock label="Context" value={verse.backgroundContext} />
-          </div>
+          </DetailSection>
         )}
 
         <WordStudiesBlock value={verse.wordStudies} />
 
-        <div className="space-y-1">
+        <DetailSection>
           <ListBlock label="Practical Applications" items={parseList(verse.practicalApplications)} icon={Lightbulb} />
           <ListBlock label="Key Themes" items={parseList(verse.keyThemes)} icon={Tag} />
           <ListBlock label="Cross References" items={parseList(verse.crossReferences)} icon={Layers} />
           <TextBlock label="Final Thoughts" value={verse.finalThoughts} />
           <ListBlock label="Takeaways" items={parseList(verse.takeaways)} icon={BookMarked} />
-        </div>
-      </DetailPageContent>
-    </div>
+        </DetailSection>
+      </DetailPageInner>
+    </DetailPageLayout>
   );
 }

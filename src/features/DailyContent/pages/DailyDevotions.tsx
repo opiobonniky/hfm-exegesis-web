@@ -65,7 +65,7 @@ export default function DailyDevotions() {
           labels={{
             page: h.t.common?.page || "Page",
             of: h.t.common?.of || "of",
-            results: h.t.common?.results || "results",
+            results: "results",
           }}
         />
       )}

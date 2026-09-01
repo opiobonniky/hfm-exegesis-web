@@ -8,8 +8,12 @@ import {
   TextBlock,
   ListBlock,
   WordStudiesBlock,
+  DetailSection,
+  DetailTitleBlock,
+  DetailPageLayout,
+  DetailPageInner,
+  ContentBlock,
 } from "../components";
-import { DetailPageContent } from "../components/DetailPageContent";
 import { parseList, fmtDate } from "../helpers/contentDetailHelpers";
 
 export default function DailyDevotionDetail() {
@@ -36,7 +40,7 @@ export default function DailyDevotionDetail() {
     : null;
 
   return (
-    <div className="min-h-full bg-background">
+    <DetailPageLayout>
       <DailyContentDetailHeader
         title={devotion.title || "Daily Devotion"}
         subtitle={fmtDate(devotion.displayDate)}
@@ -44,9 +48,8 @@ export default function DailyDevotionDetail() {
         onEdit={() => navigate(`/add-daily-devotion`, { state: { devotion } })}
       />
 
-      <DetailPageContent>
-        <div className="space-y-2">
-          <h2 className="text-2xl font-bold">{devotion.title}</h2>
+      <DetailPageInner>
+        <DetailTitleBlock title={devotion.title}>
           <DailyContentDetailMeta
             isPublished={devotion.isPublished}
             reference={reference}
@@ -55,39 +58,35 @@ export default function DailyDevotionDetail() {
             createdOn={devotion.createdOn}
             updatedOn={devotion.updatedOn}
           />
-        </div>
+        </DetailTitleBlock>
 
-        <div className="py-4">
-          <p className="text-sm font-semibold text-primary mb-1">Content</p>
-          <p className="text-sm leading-relaxed text-foreground whitespace-pre-line">{devotion.content}</p>
-        </div>
+        <ContentBlock label="Content" text={devotion.content} />
 
-        <div className="space-y-1">
+        <DetailSection>
           <TextBlock label="Explanation" value={devotion.explanation} icon={Lightbulb} />
           <TextBlock label="Application" value={devotion.application} icon={Tag} />
           <TextBlock label="Introduction" value={devotion.verseIntroduction} icon={BookMarked} />
           <TextBlock label="Learn More" value={devotion.learnMore} icon={Layers} />
-        </div>
+        </DetailSection>
 
         {(devotion.backgroundAuthor || devotion.backgroundBook || devotion.backgroundContext) && (
-          <div className="space-y-1">
-            <h3 className="text-sm font-bold text-foreground mb-2">Background</h3>
+          <DetailSection title="Background">
             <TextBlock label="Author" value={devotion.backgroundAuthor} />
             <TextBlock label="Book" value={devotion.backgroundBook} />
             <TextBlock label="Context" value={devotion.backgroundContext} />
-          </div>
+          </DetailSection>
         )}
 
         <WordStudiesBlock value={devotion.wordStudies} />
 
-        <div className="space-y-1">
+        <DetailSection>
           <ListBlock label="Practical Applications" items={parseList(devotion.practicalApplications)} icon={Lightbulb} />
           <ListBlock label="Key Themes" items={parseList(devotion.keyThemes)} icon={Tag} />
           <ListBlock label="Cross References" items={parseList(devotion.crossReferences)} icon={Layers} />
           <TextBlock label="Final Thoughts" value={devotion.finalThoughts} />
           <ListBlock label="Takeaways" items={parseList(devotion.takeaways)} icon={BookMarked} />
-        </div>
-      </DetailPageContent>
-    </div>
+        </DetailSection>
+      </DetailPageInner>
+    </DetailPageLayout>
   );
 }

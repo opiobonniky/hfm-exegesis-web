@@ -16,6 +16,8 @@ interface Props {
   iconColor?: string;
   title: string;
   subtitle: string;
+  /** Optional element to render on the right side */
+  rightElement?: ReactNode;
 }
 
 export function DailyContentPageHeader({
@@ -25,6 +27,7 @@ export function DailyContentPageHeader({
   iconColor = "text-accent",
   title,
   subtitle,
+  rightElement,
 }: Props) {
   return (
     <div className="flex items-center gap-4">
@@ -45,6 +48,7 @@ export function DailyContentPageHeader({
           <p className="text-muted-foreground">{subtitle}</p>
         </div>
       </div>
+      {rightElement}
     </div>
   );
 }
