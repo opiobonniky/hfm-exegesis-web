@@ -1,13 +1,11 @@
-import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Loader2, Star, BookOpen, Tag, Heart, Lightbulb, Pencil, Trash2, Share2, Copy, CheckCircle2, FileDown, Download, MoreHorizontal, Globe, Lock, ExternalLink, Quote } from "lucide-react";
+// JournalDetail — thin compositor, no logic in page
+import { ArrowLeft, Loader2, Star, BookOpen, Tag, Heart, Lightbulb, Pencil, Trash2, Share2, Copy, CheckCircle2, Download, MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { useAuth } from "@/contexts/AuthContext";
 import { routes } from "@/components/Routes/routes";
 import { useJournalDetail } from "../hooks/useJournalDetail";
-import { formatDate, formatDate as formatDateFull } from "../constants";
 import { ReflectionSection } from "../components/ReflectionSection";
 import { WordDetailSheet } from "@/components/WordDetailSheet";
 import JournalDetailLoadingSkeleton from "../components/JournalDetailLoadingSkeleton";
@@ -36,47 +34,46 @@ const LeafDivider = () => (
 );
 
 const JournalDetailPage = () => {
-  const p = useJournalDetail();
-  const { t, isRtl, navigate, entry, loading, deleting, showDeleteDialog, setShowDeleteDialog, copied, handleCopy, handleShare, handleDelete, exporting, handleExportPdf, studiedWordSheetOpen, setStudiedWordSheetOpen, selectedStudiedWord, openWordStudy } = p;
-  const { userInfo } = useAuth();
-  if (loading) return <JournalDetailLoadingSkeleton />;
-  if (!entry) return null;
-  const catMeta = CATEGORY_META[entry.category] || CATEGORY_META.general;
-  const moodInfo = entry.mood ? MOOD_EMOJI[entry.mood] : null;
-  const tagsArray = entry.tags ? entry.tags.split(",").map((t: string) => t.trim()).filter(Boolean) : [];
+  const h = useJournalDetail();
+
+  if (h.loading) return <JournalDetailLoadingSkeleton />;
+  if (!h.entry) return null;
+
+  const catMeta = CATEGORY_META[h.entry.category] || CATEGORY_META.general;
+  const moodInfo = h.entry.mood ? MOOD_EMOJI[h.entry.mood] : null;
+  const tagsArray = h.entry.tags ? h.entry.tags.split(",").map((t: string) => t.trim()).filter(Boolean) : [];
   const reflectionSections = [
-    { key: "learnings", icon: Lightbulb, label: "What I Learned", subtitle: "Insights & revelations", content: entry.learnings, iconColor: "text-amber-500" },
-    { key: "application", icon: Pencil, label: "How I'll Apply", subtitle: "Practical steps", content: entry.application, iconColor: "text-blue-500" },
-    { key: "gratitude", icon: Heart, label: "Gratitude", subtitle: "Counting blessings", content: entry.gratitude, iconColor: "text-rose-500" },
-    { key: "prayers", icon: Star, label: "Prayers", subtitle: "Conversations with the Father", content: entry.prayers, iconColor: "text-violet-500" },
+    { key: "learnings", icon: Lightbulb, label: "What I Learned", subtitle: "Insights & revelations", content: h.entry.learnings, iconColor: "text-amber-500" },
+    { key: "application", icon: Pencil, label: "How I'll Apply", subtitle: "Practical steps", content: h.entry.application, iconColor: "text-blue-500" },
+    { key: "gratitude", icon: Heart, label: "Gratitude", subtitle: "Counting blessings", content: h.entry.gratitude, iconColor: "text-rose-500" },
+    { key: "prayers", icon: Star, label: "Prayers", subtitle: "Conversations with the Father", content: h.entry.prayers, iconColor: "text-violet-500" },
   ].filter((s) => s.content);
-  const formatDateShort = (d: string) => new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric" });
 
   return (
-    <div className="min-h-full bg-amber-50/30 dark:bg-stone-950" dir={isRtl ? "rtl" : "ltr"}>
+    <div className="min-h-full bg-amber-50/30 dark:bg-stone-950" dir={h.isRtl ? "rtl" : "ltr"}>
       {/* Top bar */}
       <div className="sticky top-0 z-20 border-b border-border/60 dark:border-stone-800/60 bg-amber-50/80 dark:bg-stone-950/80 backdrop-blur-md">
         <div className="max-w-2xl mx-auto px-4 flex items-center justify-between h-12">
-          <button onClick={() => navigate(routes.journal.path)} className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors">
+          <button onClick={() => h.navigate(routes.journal.path)} className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors">
             <ArrowLeft className="w-3.5 h-3.5" />Journal
           </button>
           <div className="flex items-center gap-0.5">
-            <button onClick={() => {}} className="p-1.5 rounded-lg hover:bg-stone-200/60 dark:hover:bg-stone-800/60 transition-colors"><Star className={cn("w-3.5 h-3.5", entry.isFavorite ? "text-amber-500 fill-amber-500" : "text-muted-foreground/70")} /></button>
-            <button onClick={handleShare} className="p-1.5 rounded-lg hover:bg-stone-200/60 dark:hover:bg-stone-800/60 transition-colors"><Share2 className="w-3.5 h-3.5 text-muted-foreground/70" /></button>
-            <button onClick={handleExportPdf} disabled={exporting} className="p-1.5 rounded-lg hover:bg-stone-200/60 dark:hover:bg-stone-800/60 transition-colors">
-              {exporting ? <Loader2 className="w-3.5 h-3.5 animate-spin text-muted-foreground/70" /> : <Download className="w-3.5 h-3.5 text-muted-foreground/70" />}
+            <button onClick={() => {}} className="p-1.5 rounded-lg hover:bg-stone-200/60 dark:hover:bg-stone-800/60 transition-colors"><Star className={cn("w-3.5 h-3.5", h.entry.isFavorite ? "text-amber-500 fill-amber-500" : "text-muted-foreground/70")} /></button>
+            <button onClick={h.handleShare} className="p-1.5 rounded-lg hover:bg-stone-200/60 dark:hover:bg-stone-800/60 transition-colors"><Share2 className="w-3.5 h-3.5 text-muted-foreground/70" /></button>
+            <button onClick={h.handleExportPdf} disabled={h.exporting} className="p-1.5 rounded-lg hover:bg-stone-200/60 dark:hover:bg-stone-800/60 transition-colors">
+              {h.exporting ? <Loader2 className="w-3.5 h-3.5 animate-spin text-muted-foreground/70" /> : <Download className="w-3.5 h-3.5 text-muted-foreground/70" />}
             </button>
-            <button onClick={handleCopy} className="p-1.5 rounded-lg hover:bg-stone-200/60 dark:hover:bg-stone-800/60 transition-colors">
-              {copied ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5 text-muted-foreground/70" />}
+            <button onClick={h.handleCopy} className="p-1.5 rounded-lg hover:bg-stone-200/60 dark:hover:bg-stone-800/60 transition-colors">
+              {h.copied ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5 text-muted-foreground/70" />}
             </button>
-            {userInfo?.id && String(entry.userId) === String(userInfo.id) && (
+            {h.isOwner && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button className="p-1.5 rounded-lg hover:bg-stone-200/60 dark:hover:bg-stone-800/60 transition-colors"><MoreHorizontal className="w-3.5 h-3.5 text-muted-foreground/70" /></button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="rounded-xl border-border dark:border-stone-800">
-                  <DropdownMenuItem onClick={() => navigate(`/journal/entry/${entry.id}`)} className="text-xs"><Pencil className="w-3.5 h-3.5 mr-2" />Edit</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setShowDeleteDialog(true)} className="text-xs text-red-600 dark:text-red-400"><Trash2 className="w-3.5 h-3.5 mr-2" />Delete</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => h.navigate(`/journal/entry/${h.entry.id}`)} className="text-xs"><Pencil className="w-3.5 h-3.5 mr-2" />Edit</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => h.setShowDeleteDialog(true)} className="text-xs text-red-600 dark:text-red-400"><Trash2 className="w-3.5 h-3.5 mr-2" />Delete</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             )}
@@ -89,14 +86,14 @@ const JournalDetailPage = () => {
         <div className="flex items-center gap-3 flex-wrap mb-4">
           <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold tracking-wide uppercase">
             <span className={cn("w-2 h-2 rounded-full", catMeta.color)} />
-            <span className="text-muted-foreground dark:text-muted-foreground/70">{(t.journal as any)?.[catMeta.labelKey] || catMeta.label}</span>
+            <span className="text-muted-foreground dark:text-muted-foreground/70">{(h.t.journal as any)?.[catMeta.labelKey] || catMeta.label}</span>
           </span>
           {moodInfo && <span className="text-sm leading-none">{moodInfo.emoji}</span>}
-          <span className="text-[11px] text-muted-foreground/70 dark:text-muted-foreground">{formatDate(entry.createdOn)}</span>
+          <span className="text-[11px] text-muted-foreground/70 dark:text-muted-foreground">{h.formatDate(h.entry.createdOn)}</span>
         </div>
-        {entry.title && <h1 className="text-3xl sm:text-4xl font-bold text-foreground dark:text-stone-100 leading-tight mb-2 tracking-tight" style={{ fontFamily: "'Georgia', 'Times New Roman', serif" }}>{entry.title}</h1>}
-        {entry.bookName && <div className="flex items-center gap-1.5 mt-1 mb-6 text-xs text-muted-foreground/70 dark:text-muted-foreground"><BookOpen className="w-3 h-3" /><span className="font-medium">{entry.bookName} {entry.chapter}:{entry.verseNumber}</span></div>}
-        {entry.content && <div className="mb-6"><p className="text-sm sm:text-base leading-[1.8] text-foreground/80 dark:text-muted-foreground/50 whitespace-pre-line" style={{ fontFamily: "'Georgia', 'Times New Roman', serif" }}>{entry.content}</p></div>}
+        {h.entry.title && <h1 className="text-3xl sm:text-4xl font-bold text-foreground dark:text-stone-100 leading-tight mb-2 tracking-tight" style={{ fontFamily: "'Georgia', 'Times New Roman', serif" }}>{h.entry.title}</h1>}
+        {h.entry.bookName && <div className="flex items-center gap-1.5 mt-1 mb-6 text-xs text-muted-foreground/70 dark:text-muted-foreground"><BookOpen className="w-3 h-3" /><span className="font-medium">{h.entry.bookName} {h.entry.chapter}:{h.entry.verseNumber}</span></div>}
+        {h.entry.content && <div className="mb-6"><p className="text-sm sm:text-base leading-[1.8] text-foreground/80 dark:text-muted-foreground/50 whitespace-pre-line" style={{ fontFamily: "'Georgia', 'Times New Roman', serif" }}>{h.entry.content}</p></div>}
         {reflectionSections.length > 0 && <><LeafDivider /><div className="space-y-8 mb-6">{reflectionSections.map((s) => <ReflectionSection key={s.key} {...s} />)}</div></>}
         {tagsArray.length > 0 && (
           <div className="mb-6">
@@ -107,28 +104,26 @@ const JournalDetailPage = () => {
         )}
         <LeafDivider />
         <div className="text-center space-y-0.5 pb-8">
-          <p className="text-[11px] text-muted-foreground/70 dark:text-muted-foreground">Written {formatDateShort(entry.createdOn)}</p>
-          <p className="text-[11px] text-muted-foreground/50 dark:text-muted-foreground">Last edited {formatDateShort(entry.updatedOn)}</p>
+          <p className="text-[11px] text-muted-foreground/70 dark:text-muted-foreground">Written {h.formatDateShort(h.entry.createdOn)}</p>
+          <p className="text-[11px] text-muted-foreground/50 dark:text-muted-foreground">Last edited {h.formatDateShort(h.entry.updatedOn)}</p>
         </div>
       </div>
 
-      {/* Delete Dialog */}
-      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+      <Dialog open={h.showDeleteDialog} onOpenChange={h.setShowDeleteDialog}>
         <DialogContent className="rounded-2xl border-border dark:border-stone-800">
           <DialogHeader><DialogTitle>Delete Entry</DialogTitle></DialogHeader>
           <p className="text-sm text-muted-foreground dark:text-muted-foreground/70">This cannot be undone.</p>
-          {entry.title && <p className="text-sm font-medium text-foreground dark:text-stone-200">&ldquo;{entry.title}&rdquo;</p>}
+          {h.entry.title && <p className="text-sm font-medium text-foreground dark:text-stone-200">&ldquo;{h.entry.title}&rdquo;</p>}
           <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setShowDeleteDialog(false)} className="rounded-xl">Cancel</Button>
-            <Button variant="destructive" onClick={handleDelete} disabled={deleting} className="rounded-xl">
-              {deleting && <Loader2 className="w-4 h-4 animate-spin mr-2" />}Delete
+            <Button variant="outline" onClick={() => h.setShowDeleteDialog(false)} className="rounded-xl">Cancel</Button>
+            <Button variant="destructive" onClick={h.handleDelete} disabled={h.deleting} className="rounded-xl">
+              {h.deleting && <Loader2 className="w-4 h-4 animate-spin mr-2" />}Delete
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Word Detail Sheet */}
-      <WordDetailSheet open={studiedWordSheetOpen} onOpenChange={setStudiedWordSheetOpen} wordEntry={selectedStudiedWord || null} strongsId={selectedStudiedWord?.strongsId || null} />
+      <WordDetailSheet open={h.studiedWordSheetOpen} onOpenChange={h.setStudiedWordSheetOpen} wordEntry={h.selectedStudiedWord || null} strongsId={h.selectedStudiedWord?.strongsId || null} />
     </div>
   );
 };

@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/components/languages/languageProvider";
 import { sendPostRequest } from "@/services/api";
 import { useSubscription } from "@/hooks/useSubscription";
 
@@ -15,6 +16,7 @@ export const FAQ_ITEMS = [
   { q: "What payment methods are accepted?", a: "We accept all major credit cards through our secure payment partner Stripe." },
 ];
 export function useSowerPage() {
+  const { t, isRtl } = useLanguage();
   const navigate = useNavigate();
   const { toast } = useToast();
   const { isPayingUser, tierLabel } = useSubscription();
@@ -56,6 +58,7 @@ export function useSowerPage() {
     return p.interval === "year";
   });
   return {
+    t, isRtl,
     plans, loading, checkoutLoading, portalLoading, billingInterval, setBillingInterval,
     openFaq, setOpenFaq, isPayingUser, tierLabel, filteredPlans,
     handleSubscribe, handleManageSubscription, navigate,

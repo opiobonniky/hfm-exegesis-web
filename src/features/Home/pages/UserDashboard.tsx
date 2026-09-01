@@ -1,9 +1,6 @@
+// UserDashboard — thin compositor, no logic in page
 "use client";
 
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
-import { useRTL } from "@/providers/RTLProvider";
-import { routes } from "@/components/Routes/routes";
 import { useUserDashboard } from "../hooks/useUserDashboard";
 import {
   DashboardSkeleton,
@@ -17,119 +14,88 @@ import {
   RecentActivityList,
   ContentCard,
 } from "../components";
+import { routes } from "@/components/Routes/routes";
 
 export default function UserDashboard() {
-  const { userInfo } = useAuth();
-  const { isRtl } = useRTL();
-  const navigate = useNavigate();
-  const data = useUserDashboard();
-  const name = userInfo?.firstName || userInfo?.lastName || userInfo?.username || "Friend";
-  const initial = name.charAt(0).toUpperCase();
+  const d = useUserDashboard();
 
-  if (data.loading) return <DashboardSkeleton />;
+  if (d.loading) return <DashboardSkeleton />;
 
   return (
-    <div dir={isRtl ? "rtl" : "ltr"} className="min-h-full bg-background">
-      {/* Hero section with greeting + verse */}
-      <HeroSection userName={name} initial={initial} verse={data.dailyVerse} />
+    <div dir={d.isRtl ? "rtl" : "ltr"} className="min-h-full bg-background">
+      <HeroSection userName={d.name} initial={d.initial} verse={d.dailyVerse} />
 
-      {/* Body */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
-        {/* Stats row */}
         <StatCards
-          chaptersRead={data.stats.chaptersRead}
-          highlights={data.stats.highlights}
-          notes={data.stats.notes}
-          journalEntries={data.stats.journalEntries}
-          favorites={data.stats.favorites}
+          chaptersRead={d.stats.chaptersRead}
+          highlights={d.stats.highlights}
+          notes={d.stats.notes}
+          journalEntries={d.stats.journalEntries}
+          favorites={d.stats.favorites}
         />
 
-        {/* Two-column layout */}
         <div className="grid grid-cols-1 xl:grid-cols-[1fr_360px] gap-8">
-          {/* Left column */}
           <div className="space-y-8">
             <ExploreGrid />
-            {data.currentSession && (
+            {d.currentSession && (
               <StudySessionCard
-                session={data.currentSession}
-                onPress={() => navigate(`${routes.labFlow.path}?sessionId=${data.currentSession.id}`)}
+                session={d.currentSession}
+                onPress={() => d.navigate(`${routes.labFlow.path}?sessionId=${d.currentSession.id}`)}
               />
             )}
             <ReadingPlansSection
-              plans={data.readingPlans}
-              onSeeAll={() => navigate(routes.userPlans.path)}
-              onPressPlan={(p) => navigate(routes.userPlans.path)}
+              plans={d.readingPlans}
+              onSeeAll={() => d.navigate(routes.userPlans.path)}
+              onPressPlan={() => d.navigate(routes.userPlans.path)}
             />
-            <ChallengeCard onPress={() => navigate(routes.trivia.path)} />
+            <ChallengeCard onPress={() => d.navigate(routes.trivia.path)} />
           </div>
 
-          {/* Right column */}
           <div className="space-y-6">
-            {/* Continue reading */}
-            {data.lastRead && (
+            {d.lastRead && (
               <ContentCard
                 title="Continue Reading"
-                onClick={() => navigate(`${routes.bibleReader.path}?book=${encodeURIComponent(data.lastRead!.bookName)}&chapter=${data.lastRead!.chapter}`)}
+                onClick={() => d.navigate(`${routes.bibleReader.path}?book=${encodeURIComponent(d.lastRead!.bookName)}&chapter=${d.lastRead!.chapter}`)}
               >
                 <div className="flex items-center gap-3">
                   <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                     <span className="text-primary">📖</span>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-sm text-foreground">{data.lastRead.bookName}</p>
-                    <p className="text-xs text-muted-foreground/60">Chapter {data.lastRead.chapter}</p>
+                    <p className="font-semibold text-sm text-foreground">{d.lastRead.bookName}</p>
+                    <p className="text-xs text-muted-foreground/60">Chapter {d.lastRead.chapter}</p>
                   </div>
                 </div>
               </ContentCard>
             )}
 
-            {/* Quick access icons */}
-            <QuickAccessIcons navigate={navigate} />
+            <QuickAccessIcons navigate={d.navigate} />
 
-            {/* Recent activity */}
             <RecentActivityList
-              activities={data.recentActivity}
-              navigate={navigate}
-              onSeeAll={() => navigate(routes.highlights.path)}
+              activities={d.recentActivity}
+              navigate={d.navigate}
+              onSeeAll={() => d.navigate(routes.highlights.path)}
             />
 
-            {/* Daily exegesis */}
-            {data.dailyExegesis && (
-              <ContentCard
-                title="Daily Exegesis"
-                cta="Study"
-                onClick={() => navigate(routes.dailyExegesis.path)}
-                onCta={() => navigate(routes.dailyExegesis.path)}
-              >
-                <p className="font-semibold text-sm text-foreground line-clamp-1">{data.dailyExegesis.title || "Daily Exegesis"}</p>
-                {data.dailyExegesis.passageRef && <p className="text-xs text-muted-foreground/60 mt-1 font-mono">{data.dailyExegesis.passageRef}</p>}
+            {d.dailyExegesis && (
+              <ContentCard title="Daily Exegesis" cta="Study" onClick={() => d.navigate(routes.dailyExegesis.path)} onCta={() => d.navigate(routes.dailyExegesis.path)}>
+                <p className="font-semibold text-sm text-foreground line-clamp-1">{d.dailyExegesis.title || "Daily Exegesis"}</p>
+                {d.dailyExegesis.passageRef && <p className="text-xs text-muted-foreground/60 mt-1 font-mono">{d.dailyExegesis.passageRef}</p>}
               </ContentCard>
             )}
 
-            {/* Daily devotion */}
-            {data.dailyDevotion && (
-              <ContentCard
-                title="Daily Devotion"
-                cta="Read"
-                onClick={() => navigate(routes.userDevotions.path)}
-                onCta={() => navigate(routes.userDevotions.path)}
-              >
-                <p className="font-semibold text-sm text-foreground line-clamp-1">{data.dailyDevotion.title || "Daily Devotion"}</p>
-                {data.dailyDevotion.content && <p className="text-xs text-muted-foreground/60 mt-1 line-clamp-2">{data.dailyDevotion.content}</p>}
+            {d.dailyDevotion && (
+              <ContentCard title="Daily Devotion" cta="Read" onClick={() => d.navigate(routes.userDevotions.path)} onCta={() => d.navigate(routes.userDevotions.path)}>
+                <p className="font-semibold text-sm text-foreground line-clamp-1">{d.dailyDevotion.title || "Daily Devotion"}</p>
+                {d.dailyDevotion.content && <p className="text-xs text-muted-foreground/60 mt-1 line-clamp-2">{d.dailyDevotion.content}</p>}
               </ContentCard>
             )}
 
-            {/* Latest journal */}
-            {data.latestEntry && (
-              <ContentCard
-                title="Latest Journal"
-                cta="Open"
-                onClick={() => navigate(`/journal/view/${data.latestEntry.id}`)}
-                onCta={() => navigate(`/journal/view/${data.latestEntry.id}`)}
-              >
-                <p className="font-semibold text-sm text-foreground line-clamp-1">{data.latestEntry.title || "Journal Entry"}</p>
-                {(data.latestEntry.passageRef || data.latestEntry.reflection) && (
-                  <p className="text-xs text-muted-foreground/60 mt-1 line-clamp-1">{data.latestEntry.passageRef || data.latestEntry.reflection}</p>
+            {d.latestEntry && (
+              <ContentCard title="Latest Journal" cta="Open" onClick={() => d.navigate(`/journal/view/${d.latestEntry.id}`)} onCta={() => d.navigate(`/journal/view/${d.latestEntry.id}`)}>
+                <p className="font-semibold text-sm text-foreground line-clamp-1">{d.latestEntry.title || "Journal Entry"}</p>
+                {(d.latestEntry.passageRef || d.latestEntry.reflection) && (
+                  <p className="text-xs text-muted-foreground/60 mt-1 line-clamp-1">{d.latestEntry.passageRef || d.latestEntry.reflection}</p>
                 )}
               </ContentCard>
             )}

@@ -2,13 +2,16 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/components/languages/languageProvider";
+import { useAuth } from "@/contexts/AuthContext";
 import { sendPostRequest } from "@/services/api";
+import { formatDate } from "../constants";
 
 export function useJournalDetail() {
   const navigate = useNavigate();
   const { entryId } = useParams<{ entryId: string }>();
   const { t, isRtl } = useLanguage();
   const { toast } = useToast();
+  const { userInfo } = useAuth();
   const [entry, setEntry] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
@@ -84,10 +87,16 @@ export function useJournalDetail() {
     setSelectedStudiedWord({ strongsId, surfaceText });
     setStudiedWordSheetOpen(true);
   }, []);
+  // ── Derived values ──
+  const isOwner = userInfo?.id && entry ? String(userInfo.id) === String(entry.userId) : false;
+
+  const formatDateShort = useCallback((d: string) => new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric" }), []);
+
   return {
     t, isRtl, navigate, entry, loading, deleting, showDeleteDialog, setShowDeleteDialog,
     copied, handleCopy, handleShare, handleDelete,
     exporting, handleExportPdf,
     studiedWordSheetOpen, setStudiedWordSheetOpen, selectedStudiedWord, openWordStudy,
+    isOwner, formatDate, formatDateShort,
   };
 }

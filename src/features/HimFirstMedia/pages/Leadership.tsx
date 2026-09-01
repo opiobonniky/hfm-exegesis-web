@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Crown } from "lucide-react";
-import { useLanguage } from "@/components/languages/languageProvider";
+import { useHimFirstMediaPage } from "../hooks/useHimFirstMediaPage";
 
 const leadership = [
   {
@@ -16,7 +16,7 @@ const leadership = [
 ];
 
 const Leadership = () => {
-  const { t } = useLanguage();
+  const { t } = useHimFirstMediaPage();
   const animFadeUp: any = {
     hidden: { opacity: 0, y: 24 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.25, 0.1, 0.25, 1] } },

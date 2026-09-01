@@ -1,11 +1,17 @@
 // Home useUserDashboard — useUserDashboard state and API logic
 import { useState, useCallback, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { useRTL } from "@/providers/RTLProvider";
 import { sendPostRequest } from "@/services/api";
 import { getCurrentSession } from "@/services/exegesisApi";
 
 import type { UserDashboardVerse, UserDashboardPlan, UserDashboardStats, UserDashboardActivity } from "../types";
 
 export function useUserDashboard() {
+  const navigate = useNavigate();
+  const { userInfo } = useAuth();
+  const { isRtl } = useRTL();
   const [dailyVerse, setDailyVerse] = useState<UserDashboardVerse | null>(null);
   const [verseText, setVerseText] = useState<string | null>(null);
   const [readingPlans, setReadingPlans] = useState<UserDashboardPlan[]>([]);
@@ -78,7 +84,12 @@ export function useUserDashboard() {
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
 
+  // ── Derived values ──
+  const name = userInfo?.firstName || userInfo?.lastName || userInfo?.username || "Friend";
+  const initial = name.charAt(0).toUpperCase();
+
   return {
+    navigate, isRtl, name, initial,
     dailyVerse, verseText, readingPlans, stats, recentActivity,
     lastRead, currentSession, dailyExegesis, dailyDevotion, latestEntry,
     loading, fetchAll,

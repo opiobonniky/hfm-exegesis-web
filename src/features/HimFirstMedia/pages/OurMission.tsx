@@ -2,10 +2,10 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Target, ArrowRight, BookOpen, Heart, Globe, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useLanguage } from "@/components/languages/languageProvider";
+import { useHimFirstMediaPage } from "../hooks/useHimFirstMediaPage";
 
 const OurMission = () => {
-  const { t } = useLanguage();
+  const { t } = useHimFirstMediaPage();
   const animFadeUp: any = {
     hidden: { opacity: 0, y: 24 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.25, 0.1, 0.25, 1] } },

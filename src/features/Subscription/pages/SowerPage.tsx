@@ -3,7 +3,7 @@
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSowerPage } from "../hooks/useSowerPage";
-import { useLanguage } from "@/components/languages/languageProvider";
+// useLanguage moved to useSowerPage hook
 import { SowerHero } from "../components/SowerHero";
 import { TierCard, TIERS, type TierId } from "../components/SowerTierCards";
 import { SowerFeatureComparison } from "../components/SowerFeatureComparison";
@@ -12,7 +12,7 @@ import { SowerFAQ } from "../components/SowerFAQ";
 import { SowerFooter } from "../components/SowerFooter";
 export default function SowerPage() {
   const h = useSowerPage();
-  const { t, isRtl } = useLanguage();
+  // t, isRtl now come from useSowerPage
   const { billingInterval, setBillingInterval, checkoutLoading, portalLoading, isPayingUser, tierLabel, handleSubscribe, handleManageSubscription } = h;
   const isLegacySower = tierLabel === "legacy_sower";
   const isCovenantSower = tierLabel === "covenant_sower";

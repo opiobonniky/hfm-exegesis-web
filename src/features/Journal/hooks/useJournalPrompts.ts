@@ -1,12 +1,18 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useLanguage } from "@/components/languages/languageProvider";
+import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { sendPostRequest } from "@/services/api";
 import { getBooksByTestament, getChaptersForBook, getVersesCountForChapter } from "@/utilities/bibleUtils";
 
 interface Prompt { id: string; text: string; category: string; difficulty: string; isActive: boolean; description?: string; order?: number; bookName?: string; chapter?: string; verseNumber?: string; }
-export function useJournalPrompts(isAdmin: boolean) {
+
+const ALL_BOOKS = getBooksByTestament("Old").concat(getBooksByTestament("New"));
+
+export function useJournalPrompts() {
   const { t, isRtl } = useLanguage();
+  const { userInfo } = useAuth();
+  const isAdmin = userInfo?.userRole === 1;
   const { toast } = useToast();
   const [prompts, setPrompts] = useState<Prompt[]>([]);
   const [loading, setLoading] = useState(true);
@@ -70,12 +76,42 @@ export function useJournalPrompts(isAdmin: boolean) {
     }
     setDialogOpen(true);
   }, []);
+  // ── Derived values ──
+  const filteredBooks = useMemo(
+    () => ALL_BOOKS.filter((b) => !filterBookSearch || b.toLowerCase().includes(filterBookSearch.toLowerCase())),
+    [filterBookSearch],
+  );
+
+  const filteredPrompts = useMemo(
+    () => prompts.filter((item) => {
+      if (search && !item.prompt.toLowerCase().includes(search.toLowerCase())) return false;
+      if (category && item.category !== category) return false;
+      if (filterBook && item.bookName !== filterBook) return false;
+      if (filterChapter && item.chapter !== Number(filterChapter)) return false;
+      return true;
+    }),
+    [prompts, search, category, filterBook, filterChapter],
+  );
+
+  // ── Actions ──
+  const handleBookChange = useCallback((v: string) => {
+    setFormData((prev) => ({ ...prev, bookName: v, chapter: "", verseNumber: "" }));
+    if (v) { setChapters(getChaptersForBook(v)); } else { setChapters([]); setVerses([]); }
+  }, []);
+
+  const handleChapterChange = useCallback((v: string) => {
+    setFormData((prev) => ({ ...prev, chapter: v, verseNumber: "" }));
+    if (v && formData.bookName) { setVerses(getVersesCountForChapter(formData.bookName, Number(v))); } else { setVerses([]); }
+  }, [formData.bookName]);
+
   return {
-    t, isRtl, prompts, loading, search, setSearch, category, setCategory,
+    t, isRtl, isAdmin,
+    prompts, filteredPrompts, loading, search, setSearch, category, setCategory,
     filterBook, setFilterBook, filterChapter, setFilterChapter, filterBookSearch, setFilterBookSearch,
     dialogOpen, setDialogOpen, editingPrompt, formData, setFormData, saving, handleSave,
     deleteDialog, setDeleteDialog, deleting, handleDelete,
     books, chapters, verses, setChapters, setVerses, bookSearch, setBookSearch,
+    filteredBooks, handleBookChange, handleChapterChange,
     openEdit, refresh: fetchPrompts,
   };
 }
