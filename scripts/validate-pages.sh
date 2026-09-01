@@ -9,7 +9,9 @@
 #   3. Pages must NOT contain inline business logic functions (const handleX = ..., const filtered = ...)
 #      — only `const h = useXxxPage()` and component rendering
 #   4. Pages must NOT define types/interfaces (interface X, type X = ...)
-#      — types belong in types.ts or constants.ts
+#      — types belong in types.ts
+#   5. Pages must NOT define constants (const UPPER_CASE = ..., const XxxArray = [...], etc.)
+#      — constants belong in constants.ts
 #
 # Usage: bash scripts/validate-pages.sh
 # Exit code: 0 if all pages pass, 1 if any fail
@@ -48,16 +50,29 @@ check_page() {
     issues+=("RULE2: Contains React hooks: ${hooks%, }")
   fi
 
-  # Rule 3: Check for inline business logic (const xxx = useCallback/useMemo/arrow functions with logic)
-  logic=$(grep -nE '(const\s+\w+\s*=\s*(useCallback|useMemo|async\s|\([^)]*\)\s*=>|function\s))' "$file" 2>/dev/null | grep -v 'import\|export\|//\|const\s\+\w\+\s*=\s*use\w\+Page\|const\s\+\w\+\s*=\s*use\w\+()' | head -5 || true)
+  # Rule 3: Check for inline business logic (useCallback, useMemo, async handlers, useEffect)
+  logic=$(grep -nE '\b(useCallback|useMemo|useEffect|useRef)\b' "$file" 2>/dev/null | grep -v 'import\|//\|use\w\+Page\|use\w\+()' | head -5 || true)
   if [ -n "$logic" ]; then
-    issues+=("RULE3: Contains inline business logic functions")
+    issues+=("RULE3: Contains React hooks used as inline logic")
   fi
 
   # Rule 4: Check for type/interface definitions
   types=$(grep -nE '^\s*(export\s+)?(interface|type)\s+\w+' "$file" 2>/dev/null | grep -v 'import\|//' | head -5 || true)
   if [ -n "$types" ]; then
     issues+=("RULE4: Contains type/interface definitions (move to types.ts)")
+  fi
+
+  # Rule 5: Check for inline constant definitions (should be in constants.ts)
+  # Matches: const UPPER_CASE =, const SomeArray = [...], const SomeObject = {...},
+  #          const FALLBACK =, const SLIDES =, const CATEGORY_META =, etc.
+  # Allows: const h = useXxxPage(), const p = useXxx(), imports, return statements
+  constants=$(grep -nE '^\s*(export\s+)?const\s+[A-Z][A-Z_0-9]+\s*=' "$file" 2>/dev/null | grep -v 'import\|//' | head -5 || true)
+  constants2=$(grep -nE '^\s*(export\s+)?const\s+[A-Z][a-zA-Z]+\s*=\s*(\[|\{|\`)' "$file" 2>/dev/null | grep -v 'import\|//\|use[A-Z]' | head -5 || true)
+  all_constants=""
+  if [ -n "$constants" ]; then all_constants="$constants"; fi
+  if [ -n "$constants2" ]; then all_constants="$all_constants\n$constants2"; fi
+  if [ -n "$all_constants" ]; then
+    issues+=("RULE5: Contains inline constants (move to constants.ts)")
   fi
 
   if [ ${#issues[@]} -eq 0 ]; then
