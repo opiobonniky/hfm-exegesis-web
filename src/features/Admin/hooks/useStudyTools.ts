@@ -2,6 +2,7 @@
 import { useState, useCallback, useRef } from "react";
 import { sendPostRequest } from "@/services/api";
 import { bibleApi } from "@/services/bibleApi";
+import { useAdminErrorHandler } from "./useAdminErrorHandler";
 import {
   getChaptersForBook,
   getVersesCountForChapter,
@@ -93,6 +94,7 @@ export function useStudyTools() {
   const [confirmSyncDesc, setConfirmSyncDesc] = useState("");
   const [syncingAllRefs, setSyncingAllRefs] = useState(false);
   const confirmSyncActionRef = useRef<(() => Promise<void>) | null>(null);
+  const { handleError } = useAdminErrorHandler();
 
   const searchWords = useCallback(async (query: string) => {
     if (!query.trim()) return;
@@ -100,9 +102,9 @@ export function useStudyTools() {
     try {
       const res = await sendPostRequest("strongs", "admin/search-words", { query, page: 0, size: 50 });
       if (res.returnCode === 200) setWords(res.returnData?.words || []);
-    } catch (e) { console.error(e); }
+    } catch (e) { handleError(e, "load words"); }
     finally { setWordsLoading(false); }
-  }, []);
+  }, [handleError]);
 
   const loadResource = useCallback(async (book: string, chapter: number, verse: number) => {
     setResourcesLoading(true);
@@ -117,27 +119,27 @@ export function useStudyTools() {
         setDictTerms(r.dictionaryTerms || []);
         setTopics(r.relatedTopics || []);
       }
-    } catch (e) { console.error(e); }
+    } catch (e) { handleError(e, "load verse resource"); }
     finally { setResourcesLoading(false); }
-  }, []);
+  }, [handleError]);
 
   const loadPrologues = useCallback(async () => {
     setProloguesLoading(true);
     try {
       const res = await sendPostRequest("book-prologues", "admin/get-all", { page: 0, size: 50, search: prologueSearch });
       if (res.returnCode === 200) setPrologues(res.returnData?.content || []);
-    } catch (e) { console.error(e); }
+    } catch (e) { handleError(e, "load prologues"); }
     finally { setProloguesLoading(false); }
-  }, [prologueSearch]);
+  }, [prologueSearch, handleError]);
 
   const loadStudies = useCallback(async (page = 0, search = "") => {
     setStudiesLoading(true);
     try {
       const res = await sendPostRequest("admin", "get-all-daily-exegesis", { page, size: 20, search });
       if (res.returnCode === 200) setStudies(res.returnData?.content || []);
-    } catch (e) { console.error(e); }
+    } catch (e) { handleError(e, "load studies"); }
     finally { setStudiesLoading(false); }
-  }, []);
+  }, [handleError]);
 
   const handleBookChange = useCallback((book: string) => {
     setVerseBook(book);

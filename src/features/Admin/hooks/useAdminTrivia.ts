@@ -47,14 +47,17 @@ export function useAdminTrivia() {
     finally { setLoading(false); }
   }, [searchQuery, difficultyFilter, categoryFilter, toast]);
   const loadOverview = useCallback(async () => {
-    try { const res = await sendPostRequest("trivia", "admin/overview"); if (res?.returnCode === 200 && res?.returnData) setOverviewStats(res.returnData); } catch {}
-  }, []);
+    try { const res = await sendPostRequest("trivia", "admin/overview"); if (res?.returnCode === 200 && res?.returnData) setOverviewStats(res.returnData); }
+    catch { toast({ title: "Failed to load overview", variant: "destructive" }); }
+  }, [toast]);
   const loadUserPerformance = useCallback(async (p: number) => {
-    try { const res = await sendPostRequest("trivia", "admin/user-performance", { page: p, pageSize: 20, search: perfSearch || undefined, sortBy: perfSortBy, sortOrder: perfSortOrder }); if (res?.returnCode === 200 && res?.returnData) { setUserPerformance(res.returnData.data || []); setPerfTotal(res.returnData.total || 0); } } catch {}
-  }, [perfSearch, perfSortBy, perfSortOrder]);
+    try { const res = await sendPostRequest("trivia", "admin/user-performance", { page: p, pageSize: 20, search: perfSearch || undefined, sortBy: perfSortBy, sortOrder: perfSortOrder }); if (res?.returnCode === 200 && res?.returnData) { setUserPerformance(res.returnData.data || []); setPerfTotal(res.returnData.total || 0); } }
+    catch { toast({ title: "Failed to load user performance", variant: "destructive" }); }
+  }, [perfSearch, perfSortBy, perfSortOrder, toast]);
   const loadQuestionPerformance = useCallback(async (p: number) => {
-    try { const res = await sendPostRequest("trivia", "admin/question-performance", { page: p, pageSize: 20, search: qpSearch || undefined, difficulty: qpDifficulty !== "all" ? qpDifficulty : undefined, sortBy: qpSortBy, sortOrder: qpSortOrder }); if (res?.returnCode === 200 && res?.returnData) { setQuestionPerf(res.returnData.data || []); setQpTotal(res.returnData.total || 0); } } catch {}
-  }, [qpSearch, qpDifficulty, qpSortBy, qpSortOrder]);
+    try { const res = await sendPostRequest("trivia", "admin/question-performance", { page: p, pageSize: 20, search: qpSearch || undefined, difficulty: qpDifficulty !== "all" ? qpDifficulty : undefined, sortBy: qpSortBy, sortOrder: qpSortOrder }); if (res?.returnCode === 200 && res?.returnData) { setQuestionPerf(res.returnData.data || []); setQpTotal(res.returnData.total || 0); } }
+    catch { toast({ title: "Failed to load question performance", variant: "destructive" }); }
+  }, [qpSearch, qpDifficulty, qpSortBy, qpSortOrder, toast]);
   useEffect(() => { loadQuestions(questionPage); }, [loadQuestions, questionPage]);
   useEffect(() => { loadOverview(); }, [loadOverview]);
   useEffect(() => { loadUserPerformance(perfPage); }, [loadUserPerformance, perfPage]);
