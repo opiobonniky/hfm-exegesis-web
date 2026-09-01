@@ -3,63 +3,60 @@ import { motion } from "framer-motion";
 import { Eye, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useHimFirstMediaPage } from "../hooks/useHimFirstMediaPage";
+import {
+  HimFirstMediaPageLayout,
+  HimFirstHero,
+  HimFirstContentSection,
+  HimFirstAnimated,
+  HimFirstQuoteBlock,
+} from "../components";
 
 const OurVision = () => {
   const { t } = useHimFirstMediaPage();
-  const animFadeUp: any = {
-    hidden: { opacity: 0, y: 24 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.25, 0.1, 0.25, 1] } },
-  };
 
   return (
-    <div className="w-full bg-background text-foreground overflow-x-hidden">
-      <section className="pt-16 sm:pt-20 pb-16 sm:pb-20 px-4 sm:px-6 lg:px-12 bg-brand-dark">
-        <div className="w-full max-w-4xl mx-auto text-center">
-          <motion.div variants={animFadeUp} initial="hidden" animate="visible">
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-white font-[family-name:var(--font-heading)] tracking-tighter leading-none mb-6">
-              {t.himFirstMedia?.ourVisionTitle || "Our"} <span className="text-brand-accent">{t.himFirstMedia?.ourVisionTitleHighlight || "Vision"}</span>
-            </h1>
-            <p className="text-lg sm:text-xl text-white/80 max-w-2xl mx-auto leading-relaxed font-medium">
-              {t.himFirstMedia?.ourVisionTagline || "To see every believer equipped with the Word of God through technology that inspires, teaches, and transforms."}
-            </p>
-          </motion.div>
-        </div>
-      </section>
+    <HimFirstMediaPageLayout>
+      <HimFirstHero
+        title={
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-white font-[family-name:var(--font-heading)] tracking-tighter leading-none mb-6">
+            {t.himFirstMedia?.ourVisionTitle || "Our"} <span className="text-brand-accent">{t.himFirstMedia?.ourVisionTitleHighlight || "Vision"}</span>
+          </h1>
+        }
+        subtitle={t.himFirstMedia?.ourVisionTagline || "To see every believer equipped with the Word of God through technology that inspires, teaches, and transforms."}
+      />
 
-      <section className="py-16 sm:py-24 px-4 sm:px-6 lg:px-12 bg-card">
-        <div className="w-full max-w-4xl mx-auto">
-          <motion.div variants={animFadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }}>
-            <h2 className="text-2xl sm:text-3xl font-black text-brand-primary mb-6 font-[family-name:var(--font-heading)] tracking-tight">
-              {t.himFirstMedia?.ourVisionSectionTitle || "A Kingdom-Focused Future"}
-            </h2>
-            <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed font-medium mb-6">
-              {t.himFirstMedia?.ourVisionPara1 || "Our vision is to build the most comprehensive, accessible, and Spirit-led Bible study platform in the world. We envision a global community where believers from every nation can dive deep into Scripture, grow in their faith, and connect with others on the same journey."}
-            </p>
-            <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed font-medium mb-6">
-              {t.himFirstMedia?.ourVisionPara2 || "As a project of Him First Media Group, we are committed to using cutting-edge digital tools to spread the Gospel and make disciples of all nations."}
-            </p>
-            <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed font-medium mb-6">
-              {t.himFirstMedia?.ourVisionPara3 || "We see a world where every Christian has a personalized Bible study experience with daily verses, reading plans, journaling tools, and rich verse-by-verse teaching designed to draw them closer to the heart of God."}
-            </p>
-          </motion.div>
+      <HimFirstContentSection>
+        <HimFirstAnimated>
+          <h2 className="text-2xl sm:text-3xl font-black text-brand-primary mb-6 font-[family-name:var(--font-heading)] tracking-tight">
+            {t.himFirstMedia?.ourVisionSectionTitle || "A Kingdom-Focused Future"}
+          </h2>
+          <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed font-medium mb-6">
+            {t.himFirstMedia?.ourVisionPara1 || "Our vision is to build the most comprehensive, accessible, and Spirit-led Bible study platform in the world."}
+          </p>
+          <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed font-medium mb-6">
+            {t.himFirstMedia?.ourVisionPara2 || "As a project of Him First Media Group, we are committed to using cutting-edge digital tools to spread the Gospel."}
+          </p>
+          <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed font-medium mb-6">
+            {t.himFirstMedia?.ourVisionPara3 || "We see a world where every Christian has a personalized Bible study experience."}
+          </p>
+        </HimFirstAnimated>
 
-          <motion.div variants={animFadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="mt-12 bg-card rounded-[2rem] p-8 sm:p-12 border border-border text-center">
-            <p className="text-xl sm:text-2xl font-black text-brand-accent italic font-[family-name:var(--font-heading)] tracking-tight mb-4">
-              {t.himFirstMedia?.ourVisionVerse || "\"Write the vision, and make it plain upon tables, that he may run that readeth it.\""}
-            </p>
-            <p className="text-sm font-black text-muted-foreground uppercase tracking-widest">— {t.himFirstMedia?.ourVisionVerseRef || "Habakkuk 2:2"}</p>
-          </motion.div>
+        <HimFirstAnimated className="mt-12">
+          <HimFirstQuoteBlock
+            quote={t.himFirstMedia?.ourVisionVerse || "Write the vision, and make it plain upon tables, that he may run that readeth it."}
+            attribution={t.himFirstMedia?.ourVisionVerseRef || "Habakkuk 2:2"}
+          />
+        </HimFirstAnimated>
 
-          <motion.div variants={animFadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="mt-12 text-center">
-            <Link to="/register">
-              <Button className="bg-brand-primary text-white hover:bg-brand-primary-dark px-8 py-6 rounded-[2rem] font-black text-base shadow-2xl shadow-brand-primary/20 uppercase tracking-widest">
-                {t.himFirstMedia?.ourVisionCta || "Join the Vision"} <ArrowRight className="ml-2 w-5 h-5" />
-              </Button>
-            </Link>
-          </motion.div>
-        </div>
-      </section>
-    </div>
+        <HimFirstAnimated className="mt-12 text-center">
+          <Link to="/register">
+            <Button className="bg-brand-primary text-white hover:bg-brand-primary-dark px-8 py-6 rounded-[2rem] font-black text-base shadow-2xl shadow-brand-primary/20 uppercase tracking-widest">
+              {t.himFirstMedia?.ourVisionCta || "Join the Vision"} <ArrowRight className="ml-2 w-5 h-5" />
+            </Button>
+          </Link>
+        </HimFirstAnimated>
+      </HimFirstContentSection>
+    </HimFirstMediaPageLayout>
   );
 };
 
