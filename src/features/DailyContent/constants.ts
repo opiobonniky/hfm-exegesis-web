@@ -4,6 +4,8 @@ export const SMART_PAGE_SIZE = 6;
 export const SMART_FUTURE_DAYS = 2;
 export const FILTERED_PAGE_SIZE = 12;
 
+export const BIBLE_VERSIONS = ["KJV", "NIV", "ESV", "NASB", "NLT", "NKJV", "CSB", "RSV", "ASV", "AMP", "MSG", "WEB"];
+
 export const PRESETS = (t?: any) => [
   { value: "thisWeek", label: t?.dailyVerse?.thisWeek || "This Week" },
   { value: "thisMonth", label: t?.dailyVerse?.thisMonth || "This Month" },

@@ -75,3 +75,19 @@ export function getRelativeTime(dateStr: string): string {
 export function formatDate(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }
+
+export const CATEGORY_META: Record<string, { labelKey: string; label: string; color: string }> = {
+  general: { labelKey: "categoryGeneral", label: "General", color: "bg-zinc-500" },
+  study: { labelKey: "categoryStudy", label: "Study", color: "bg-blue-500" },
+  prayer: { labelKey: "categoryPrayer", label: "Prayer", color: "bg-violet-500" },
+  gratitude: { labelKey: "categoryGratitude", label: "Gratitude", color: "bg-amber-500" },
+  reflection: { labelKey: "categoryReflection", label: "Reflection", color: "bg-emerald-500" },
+  application: { labelKey: "categoryApplication", label: "Application", color: "bg-indigo-500" },
+};
+
+export const MOOD_EMOJI_MAP: Record<string, { label: string; emoji: string }> = {
+  happy: { label: "Happy", emoji: "😊" }, grateful: { label: "Grateful", emoji: "🙏" },
+  peaceful: { label: "Peaceful", emoji: "🕊️" }, thoughtful: { label: "Thoughtful", emoji: "🤔" },
+  motivated: { label: "Motivated", emoji: "💪" }, hopeful: { label: "Hopeful", emoji: "🌟" },
+  challenged: { label: "Challenged", emoji: "🧗" }, blessed: { label: "Blessed", emoji: "✨" },
+};

@@ -6,25 +6,10 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { cn } from "@/lib/utils";
 import { routes } from "@/components/Routes/routes";
 import { useJournalDetail } from "../hooks/useJournalDetail";
+import { CATEGORY_META, MOOD_EMOJI_MAP } from "../constants";
 import { ReflectionSection } from "../components/ReflectionSection";
 import { WordDetailSheet } from "@/components/WordDetailSheet";
 import JournalDetailLoadingSkeleton from "../components/JournalDetailLoadingSkeleton";
-
-const CATEGORY_META: Record<string, { labelKey: string; label: string; color: string }> = {
-  general: { labelKey: "categoryGeneral", label: "General", color: "bg-zinc-500" },
-  study: { labelKey: "categoryStudy", label: "Study", color: "bg-blue-500" },
-  prayer: { labelKey: "categoryPrayer", label: "Prayer", color: "bg-violet-500" },
-  gratitude: { labelKey: "categoryGratitude", label: "Gratitude", color: "bg-amber-500" },
-  reflection: { labelKey: "categoryReflection", label: "Reflection", color: "bg-emerald-500" },
-  application: { labelKey: "categoryApplication", label: "Application", color: "bg-indigo-500" },
-};
-
-const MOOD_EMOJI: Record<string, { label: string; emoji: string }> = {
-  happy: { label: "Happy", emoji: "😊" }, grateful: { label: "Grateful", emoji: "🙏" },
-  peaceful: { label: "Peaceful", emoji: "🕊️" }, thoughtful: { label: "Thoughtful", emoji: "🤔" },
-  motivated: { label: "Motivated", emoji: "💪" }, hopeful: { label: "Hopeful", emoji: "🌟" },
-  challenged: { label: "Challenged", emoji: "🧗" }, blessed: { label: "Blessed", emoji: "✨" },
-};
 
 const LeafDivider = () => (
   <div className="flex items-center gap-3 my-8 select-none">
@@ -40,7 +25,7 @@ const JournalDetailPage = () => {
   if (!h.entry) return null;
 
   const catMeta = CATEGORY_META[h.entry.category] || CATEGORY_META.general;
-  const moodInfo = h.entry.mood ? MOOD_EMOJI[h.entry.mood] : null;
+  const moodInfo = h.entry.mood ? MOOD_EMOJI_MAP[h.entry.mood] : null;
   const tagsArray = h.entry.tags ? h.entry.tags.split(",").map((t: string) => t.trim()).filter(Boolean) : [];
   const reflectionSections = [
     { key: "learnings", icon: Lightbulb, label: "What I Learned", subtitle: "Insights & revelations", content: h.entry.learnings, iconColor: "text-amber-500" },

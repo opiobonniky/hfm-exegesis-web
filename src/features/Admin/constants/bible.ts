@@ -23,3 +23,10 @@ export const getChaptersForBook = (book: string): number[] => {
 };
 
 export const DEFAULT_VERSE_COUNT = 31;
+
+// ── Form defaults ──
+export const PROLOGUE_EMPTY_FORM = { bookName: "", title: "", content: "", isPublished: true };
+
+export const VERSE_EXPLANATION_EMPTY_FORM = {
+  bookName: "", chapter: "", verseNumber: "", explanation: "", learnMore: "", isPublished: true,
+};

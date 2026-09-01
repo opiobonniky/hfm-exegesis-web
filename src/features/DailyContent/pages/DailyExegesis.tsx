@@ -9,6 +9,7 @@ import {
   DailyExegesisLoading,
   DailyExegesisActions,
   DailyExegesisFooter,
+  DailyExegesisLayout,
 } from "../components";
 
 export default function DailyExegesisPage() {
@@ -38,7 +39,7 @@ export default function DailyExegesisPage() {
       />
 
       <main className="flex-1 overflow-y-auto">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6">
+        <DailyExegesisLayout>
           {h.error && (
             <Button
               variant="outline"
@@ -54,7 +55,7 @@ export default function DailyExegesisPage() {
             onOpenBible={h.openInBible}
             onSaveToJournal={h.saveToLedger}
           />
-        </div>
+        </DailyExegesisLayout>
       </main>
 
       <DailyExegesisFooter />

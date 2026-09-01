@@ -8,6 +8,7 @@ import {
   TextBlock,
   TagsBlock,
 } from "../components";
+import { DetailPageContent } from "../components/DetailPageContent";
 import { fmtDate } from "../helpers/contentDetailHelpers";
 
 export default function DailyExegesisDetail() {
@@ -38,7 +39,7 @@ export default function DailyExegesisDetail() {
         onEdit={() => navigate(`/add-daily-exegesis`, { state: { exegesis } })}
       />
 
-      <div className="px-4 sm:px-6 py-6 max-w-3xl mx-auto space-y-6">
+      <DetailPageContent>
         <div className="space-y-2">
           <h2 className="text-2xl font-bold">{exegesis.title}</h2>
           <DailyContentDetailMeta
@@ -65,7 +66,7 @@ export default function DailyExegesisDetail() {
         </div>
 
         <TagsBlock tags={exegesis.tags} />
-      </div>
+      </DetailPageContent>
     </div>
   );
 }

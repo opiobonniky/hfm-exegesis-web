@@ -2,13 +2,14 @@ import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { BIBLE_BOOKS } from "@/data/staticData";
 import { useAdminCrud } from "./useAdminCrud";
+import { VERSE_EXPLANATION_EMPTY_FORM } from "../constants";
 
 interface VerseExplanation {
   id: number; bookName: string; chapter: number; verseNumber: number;
   explanation: string; learnMore: string | null; isPublished: boolean;
   createdOn: string; updatedOn: string | null;
 }
-const EMPTY_FORM = { bookName: "", chapter: "", verseNumber: "", explanation: "", learnMore: "", isPublished: true };
+const EMPTY_FORM = VERSE_EXPLANATION_EMPTY_FORM;
 export function useAdminVerseExplanationsPage() {
   const navigate = useNavigate();
   const { items, loading, search, setSearch, hasMore, saving, deleting, refresh, loadMore, save, remove } =

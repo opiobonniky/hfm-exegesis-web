@@ -9,6 +9,7 @@ import {
   ListBlock,
   WordStudiesBlock,
 } from "../components";
+import { DetailPageContent } from "../components/DetailPageContent";
 import { parseList, fmtDate } from "../helpers/contentDetailHelpers";
 
 export default function DailyDevotionDetail() {
@@ -43,7 +44,7 @@ export default function DailyDevotionDetail() {
         onEdit={() => navigate(`/add-daily-devotion`, { state: { devotion } })}
       />
 
-      <div className="px-4 sm:px-6 py-6 max-w-3xl mx-auto space-y-6">
+      <DetailPageContent>
         <div className="space-y-2">
           <h2 className="text-2xl font-bold">{devotion.title}</h2>
           <DailyContentDetailMeta
@@ -86,7 +87,7 @@ export default function DailyDevotionDetail() {
           <TextBlock label="Final Thoughts" value={devotion.finalThoughts} />
           <ListBlock label="Takeaways" items={parseList(devotion.takeaways)} icon={BookMarked} />
         </div>
-      </div>
+      </DetailPageContent>
     </div>
   );
 }

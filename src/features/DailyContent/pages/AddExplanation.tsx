@@ -20,9 +20,8 @@ import { Link } from "react-router-dom";
 import { useAddExplanation } from "../hooks/useAddExplanation";
 import { CharCount, LivePreview, PromptSelector, ValidationChecklist, FormattingTips } from "../components";
 import { BIBLE_BOOKS } from "@/features/Bible/constants";
+import { BIBLE_VERSIONS } from "../constants";
 import { routes } from "@/components/Routes/routes";
-
-const BIBLE_VERSIONS = ["KJV", "NIV", "ESV", "NASB", "NLT", "NKJV", "CSB", "RSV", "ASV", "AMP", "MSG", "WEB"];
 
 const AddVerseExplanation = () => {
   const h = useAddExplanation();

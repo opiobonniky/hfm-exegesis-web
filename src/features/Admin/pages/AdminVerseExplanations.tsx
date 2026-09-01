@@ -12,17 +12,8 @@ import {
   AdminPageContent,
 } from "../components";
 import { VerseExplanationTable } from "../components/VerseExplanationTable";
-import { VerseExplanationFormDialog } from "../components/VerseExplanationFormDialog";
-import { VerseExplanationDeleteDialog } from "../components/VerseExplanationDeleteDialog";
-
-const EMPTY_FORM = {
-  bookName: "",
-  chapter: "",
-  verseNumber: "",
-  explanation: "",
-  learnMore: "",
-  isPublished: true,
-};
+import { VerseExplanationFormDialog } from "../components/VerseExplanationFormDialog";import { VerseExplanationDeleteDialog } from "../components/VerseExplanationDeleteDialog";
+import { VERSE_EXPLANATION_EMPTY_FORM } from "../constants";
 
 export default function AdminVerseExplanations() {
   const h = useAdminVerseExplanationsPage();
@@ -87,7 +78,7 @@ export default function AdminVerseExplanations() {
         onSave={h.handleSave}
         onClose={() => {
           h.setEditItem(null);
-          h.setEditForm(EMPTY_FORM);
+          h.setEditForm(VERSE_EXPLANATION_EMPTY_FORM);
         }}
       />
 

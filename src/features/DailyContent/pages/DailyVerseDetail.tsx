@@ -9,6 +9,7 @@ import {
   ListBlock,
   WordStudiesBlock,
 } from "../components";
+import { DetailPageContent } from "../components/DetailPageContent";
 import { parseList } from "../helpers/contentDetailHelpers";
 
 export default function DailyVerseDetail() {
@@ -41,7 +42,7 @@ export default function DailyVerseDetail() {
         onEdit={() => navigate(`/add-daily-verse`, { state: { verse } })}
       />
 
-      <div className="px-4 sm:px-6 py-6 max-w-3xl mx-auto space-y-6">
+      <DetailPageContent>
         <div className="space-y-2">
           <h2 className="text-2xl font-bold">{reference}</h2>
           <DailyContentDetailMeta
@@ -85,7 +86,7 @@ export default function DailyVerseDetail() {
           <TextBlock label="Final Thoughts" value={verse.finalThoughts} />
           <ListBlock label="Takeaways" items={parseList(verse.takeaways)} icon={BookMarked} />
         </div>
-      </div>
+      </DetailPageContent>
     </div>
   );
 }

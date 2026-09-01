@@ -12,11 +12,12 @@ import {
   AdminSearchBar,
   AdminPageContent,
 } from "../components";
+import { PROLOGUE_EMPTY_FORM } from "../constants";
 import { PrologueGrid } from "../components/PrologueGrid";
 import { PrologueFormDialog } from "../components/PrologueFormDialog";
 import { PrologueDeleteDialog } from "../components/PrologueDeleteDialog";
 
-const EMPTY_FORM = { bookName: "", title: "", content: "", isPublished: true };
+
 
 export default function AdminBookPrologues() {
   const h = useAdminBookProloguesPage();
@@ -90,7 +91,7 @@ export default function AdminBookPrologues() {
         onSave={h.handleSave}
         onClose={() => {
           h.setEditItem(null);
-          h.setEditForm(EMPTY_FORM);
+          h.setEditForm(PROLOGUE_EMPTY_FORM);
         }}
       />
 
