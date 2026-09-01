@@ -2,7 +2,6 @@
 "use client";
 
 import { BookOpen } from "lucide-react";
-import { useState } from "react";
 import { useJournalEntryAdminDetail } from "../hooks/useJournalEntryAdminDetail";
 import { DetailLoading, DetailPageHeader, DetailContent, DetailBackButton } from "../components/DetailPageLayout";
 import { DetailMetadataGrid } from "../components/DetailSection";
@@ -11,7 +10,6 @@ import { AdminDeleteDialog } from "../components/AdminDeleteDialog";
 
 export default function JournalEntryAdminDetail() {
   const h = useJournalEntryAdminDetail();
-  const [confirmDelete, setConfirmDelete] = useState(false);
 
   if (h.loading) return <DetailLoading />;
   if (!h.item) return null;
@@ -28,7 +26,7 @@ export default function JournalEntryAdminDetail() {
             userId={h.item.userId}
             isPublished={h.item.isPublished}
             onTogglePublication={h.handleTogglePublication}
-            onDelete={() => setConfirmDelete(true)}
+            onDelete={() => h.setConfirmDelete(true)}
           />
         }
       />
@@ -47,13 +45,13 @@ export default function JournalEntryAdminDetail() {
       </DetailContent>
 
       <AdminDeleteDialog
-        open={confirmDelete}
-        onOpenChange={setConfirmDelete}
+        open={h.confirmDelete}
+        onOpenChange={h.setConfirmDelete}
         title="Delete Journal Entry"
         description={`Are you sure you want to delete "${h.item.title}"? This action cannot be undone.`}
         deleting={h.deleting}
         onConfirm={() => {
-          setConfirmDelete(false);
+          h.setConfirmDelete(false);
           h.handleDelete();
         }}
       />

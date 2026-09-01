@@ -31,6 +31,7 @@ export function useJournalEntryAdminDetail() {
   const [item, setItem] = useState<JournalAdminDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   useEffect(() => {
     if (!entryId) return;
@@ -91,6 +92,7 @@ export function useJournalEntryAdminDetail() {
     item,
     loading,
     deleting,
+    confirmDelete, setConfirmDelete,
     navigate,
     handleDelete,
     handleTogglePublication,

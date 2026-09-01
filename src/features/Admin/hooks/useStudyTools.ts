@@ -1,5 +1,6 @@
 // Admin useStudyTools — useStudyTools state and API logic
 import { useState, useCallback, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { sendPostRequest } from "@/services/api";
 import { bibleApi } from "@/services/bibleApi";
 import { useAdminErrorHandler } from "./useAdminErrorHandler";
@@ -58,6 +59,8 @@ export interface VerseResource {
 }
 
 export function useStudyTools() {
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState("words");
   const [words, setWords] = useState<WordEntry[]>([]);
   const [wordsLoading, setWordsLoading] = useState(false);
   const [wordSearch, setWordSearch] = useState("");
@@ -182,5 +185,8 @@ export function useStudyTools() {
     confirmSyncOpen, setConfirmSyncOpen, confirmSyncLabel, setConfirmSyncLabel,
     confirmSyncDesc, setConfirmSyncDesc, syncingAllRefs, setSyncingAllRefs,
     confirmSyncActionRef,
+    // Tab
+    activeTab, setActiveTab,
+    navigate,
   };
 }
