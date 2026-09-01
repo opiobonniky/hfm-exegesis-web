@@ -30,3 +30,4 @@ export { UserVerseStickyHeader } from "./UserVerseStickyHeader";
 export { DevotionList } from "./DevotionList";
 export { DevotionLoadingSpinner } from "./DevotionLoadingSpinner";
 export { DailyExegesisLayout } from "./DailyExegesisLayout";
+export { DailyExegesisPageLayout } from "./DailyExegesisPageLayout";

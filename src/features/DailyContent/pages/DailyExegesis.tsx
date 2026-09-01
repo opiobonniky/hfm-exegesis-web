@@ -10,6 +10,7 @@ import {
   DailyExegesisActions,
   DailyExegesisFooter,
   DailyExegesisLayout,
+  DailyExegesisPageLayout,
 } from "../components";
 
 export default function DailyExegesisPage() {
@@ -17,15 +18,15 @@ export default function DailyExegesisPage() {
 
   if (h.loading) {
     return (
-      <div className="min-h-screen flex flex-col bg-background" dir={h.isRtl ? "rtl" : "ltr"}>
+      <DailyExegesisPageLayout isRtl={h.isRtl}>
         <ExegesisHeader onBack={h.goBack} t={h.t} />
         <DailyExegesisLoading />
-      </div>
+      </DailyExegesisPageLayout>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-background" dir={h.isRtl ? "rtl" : "ltr"}>
+    <DailyExegesisPageLayout isRtl={h.isRtl}>
       <ExegesisHeader onBack={h.goBack} t={h.t} />
 
       <ExegesisHero
@@ -59,6 +60,6 @@ export default function DailyExegesisPage() {
       </main>
 
       <DailyExegesisFooter />
-    </div>
+    </DailyExegesisPageLayout>
   );
 }
