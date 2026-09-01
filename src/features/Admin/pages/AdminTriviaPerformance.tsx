@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAdminTriviaPerformancePage } from "../hooks/useAdminTriviaPerformancePage";
 import { routes } from "@/components/Routes/routes";
 import { TriviaPerformanceHeader } from "../components/TriviaPerformanceHeader";
+import { AdminPageContent } from "../components/AdminPageContent";
 import {
   TriviaOverviewPanel,
   TriviaUsersPanel,
@@ -24,7 +25,7 @@ export default function AdminTriviaPerformance() {
         onRefresh={h.loadAll}
       />
 
-      <div className="px-4 sm:px-6 py-4">
+      <AdminPageContent className="py-4">
         <Tabs value={h.tab} onValueChange={h.setTab}>
           <TabsList className="mb-4">
             <TabsTrigger value="overview">
@@ -59,7 +60,7 @@ export default function AdminTriviaPerformance() {
             <TriviaQuestionsPanel questions={h.questions} />
           </TabsContent>
         </Tabs>
-      </div>
+      </AdminPageContent>
     </div>
   );
 }

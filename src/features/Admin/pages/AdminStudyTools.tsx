@@ -10,6 +10,7 @@ import ResourcesTab from "../components/ResourcesTab";
 import StudiesTab from "../components/StudiesTab";
 import ProloguesTab from "../components/ProloguesTab";
 import { StudyToolsHeader } from "../components/StudyToolsHeader";
+import { AdminPageContent } from "../components/AdminPageContent";
 
 export default function AdminStudyTools() {
   const navigate = useNavigate();
@@ -18,7 +19,7 @@ export default function AdminStudyTools() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-7xl mx-auto px-4 py-6 space-y-6">
+      <AdminPageContent className="py-6 space-y-6">
         <StudyToolsHeader onBack={() => navigate(-1)} />
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -33,7 +34,7 @@ export default function AdminStudyTools() {
           <TabsContent value="studies"><StudiesTab state={state} /></TabsContent>
           <TabsContent value="prologues"><ProloguesTab state={state} /></TabsContent>
         </Tabs>
-      </div>
+      </AdminPageContent>
     </div>
   );
 }

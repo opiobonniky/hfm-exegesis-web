@@ -10,6 +10,7 @@ import {
   AdminEmptyState,
   AdminLoadingGrid,
   AdminSearchBar,
+  AdminPageContent,
 } from "../components";
 import { PrologueGrid } from "../components/PrologueGrid";
 import { PrologueFormDialog } from "../components/PrologueFormDialog";
@@ -32,7 +33,7 @@ export default function AdminBookPrologues() {
         addLabel="Add Prologue"
       />
 
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-6">
+      <AdminPageContent className="py-6">
         <AdminSearchBar
           value={h.search}
           onChange={h.setSearch}
@@ -77,7 +78,7 @@ export default function AdminBookPrologues() {
             />
           </>
         )}
-      </div>
+      </AdminPageContent>
 
       <PrologueFormDialog
         open={!!h.editItem || h.editForm.bookName !== ""}

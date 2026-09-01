@@ -9,6 +9,7 @@ import {
   AdminEmptyState,
   AdminLoadingGrid,
   AdminSearchBar,
+  AdminPageContent,
 } from "../components";
 import { ReadingPlanGrid } from "../components/ReadingPlanGrid";
 import { ReadingPlanFormDialog } from "../components/ReadingPlanFormDialog";
@@ -31,7 +32,7 @@ export default function AdminReadingPlans() {
         addLabel="Add Plan"
       />
 
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-6">
+      <AdminPageContent className="py-6">
         <AdminSearchBar
           value={h.search}
           onChange={h.setSearch}
@@ -65,7 +66,7 @@ export default function AdminReadingPlans() {
             }
           />
         )}
-      </div>
+      </AdminPageContent>
 
       <ReadingPlanFormDialog
         open={showEditDialog}

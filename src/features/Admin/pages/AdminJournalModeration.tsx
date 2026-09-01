@@ -9,6 +9,7 @@ import {
   AdminEmptyState,
   AdminLoadingGrid,
   AdminSearchBar,
+  AdminPageContent,
 } from "../components";
 import { JournalTable } from "../components/JournalTable";
 import { JournalDeleteDialog } from "../components/JournalDeleteDialog";
@@ -28,7 +29,7 @@ export default function AdminJournalModeration() {
         addLabel=""
       />
 
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6">
+      <AdminPageContent>
         <AdminSearchBar
           value={h.search}
           onChange={h.setSearch}
@@ -57,7 +58,7 @@ export default function AdminJournalModeration() {
             }
           />
         )}
-      </div>
+      </AdminPageContent>
 
       <JournalDeleteDialog
         open={!!h.deleteTarget}

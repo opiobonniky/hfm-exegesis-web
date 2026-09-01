@@ -10,6 +10,7 @@ import { UserSessionsCard } from "../components/UserSessionsCard";
 import { UserDetailInfoSection } from "../components/UserDetailInfoSection";
 import { DetailBackButton } from "../components/DetailPageLayout";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AdminPageContent } from "../components/AdminPageContent";
 
 export default function AdminUserDetail() {
   const h = useAdminUserDetail();
@@ -34,7 +35,7 @@ export default function AdminUserDetail() {
         onDelete={h.handleDelete}
       />
 
-      <div className="max-w-4xl mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6">
+      <AdminPageContent className="max-w-4xl space-y-4 sm:space-y-6">
         <UserProfileCard
           firstName={u.firstName}
           lastName={u.lastName}
@@ -53,7 +54,7 @@ export default function AdminUserDetail() {
         <UserSessionsCard sessions={h.sessions} loading={h.sessionsLoading} />
 
         <DetailBackButton label="Back to Users" onClick={() => h.navigate("/admin/users")} />
-      </div>
+      </AdminPageContent>
     </div>
   );
 }

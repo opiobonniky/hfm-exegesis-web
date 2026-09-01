@@ -4,7 +4,7 @@
 import { useNavigate } from "react-router-dom";
 import { Users } from "lucide-react";
 import { useAdminUsers } from "../hooks/useAdminUsers";
-import { AdminPageHeader, AdminEmptyState, AdminLoadingGrid, AdminSearchBar } from "../components";
+import { AdminPageHeader, AdminEmptyState, AdminLoadingGrid, AdminSearchBar, AdminPageContent } from "../components";
 import { UsersTable } from "../components/UsersTable";
 
 export default function AdminUsersPage() {
@@ -22,7 +22,7 @@ export default function AdminUsersPage() {
         addLabel="Add User"
       />
 
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6">
+      <AdminPageContent>
         <AdminSearchBar
           value={h.search}
           onChange={h.setSearch}
@@ -50,7 +50,7 @@ export default function AdminUsersPage() {
             onView={(user) => navigate(`/admin/users/${user.id}`)}
           />
         )}
-      </div>
+      </AdminPageContent>
     </div>
   );
 }

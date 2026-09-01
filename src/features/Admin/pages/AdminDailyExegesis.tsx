@@ -8,6 +8,7 @@ import { ExegesisSearchBar } from "../components/ExegesisSearchBar";
 import { ExegesisLoadingGrid } from "../components/ExegesisLoadingGrid";
 import { ExegesisEmptyState } from "../components/ExegesisEmptyState";
 import { ExegesisGrid } from "../components/ExegesisGrid";
+import { AdminPageContent } from "../components/AdminPageContent";
 import { ExegesisFormDialog } from "../components/ExegesisFormDialog";
 import { ExegesisDeleteDialog } from "../components/ExegesisDeleteDialog";
 
@@ -22,7 +23,7 @@ export default function AdminDailyExegesis() {
         onAdd={() => h.openEdit()}
       />
 
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-6">
+      <AdminPageContent className="py-6">
         <ExegesisSearchBar
           value={h.search}
           onChange={h.setSearch}
@@ -43,7 +44,7 @@ export default function AdminDailyExegesis() {
             onDelete={(item) => h.setDeleteTarget(item)}
           />
         )}
-      </div>
+      </AdminPageContent>
 
       <ExegesisFormDialog
         open={h.dialogOpen}

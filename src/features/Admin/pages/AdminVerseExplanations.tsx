@@ -9,6 +9,7 @@ import {
   AdminEmptyState,
   AdminLoadingGrid,
   AdminSearchBar,
+  AdminPageContent,
 } from "../components";
 import { VerseExplanationTable } from "../components/VerseExplanationTable";
 import { VerseExplanationFormDialog } from "../components/VerseExplanationFormDialog";
@@ -38,7 +39,7 @@ export default function AdminVerseExplanations() {
         addLabel="Add"
       />
 
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6">
+      <AdminPageContent>
         <AdminSearchBar
           value={h.search}
           onChange={h.setSearch}
@@ -74,7 +75,7 @@ export default function AdminVerseExplanations() {
             onDelete={(item) => h.setDeleteItem(item)}
           />
         )}
-      </div>
+      </AdminPageContent>
 
       <VerseExplanationFormDialog
         open={!!h.editItem || h.editForm.bookName !== ""}
