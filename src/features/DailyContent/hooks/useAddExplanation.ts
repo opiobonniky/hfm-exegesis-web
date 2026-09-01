@@ -41,6 +41,16 @@ export function useAddExplanation() {
     verseNumber >= 1 &&
     (explanation ?? "").trim().length >= 20;
 
+  const validationItems = [
+    { label: t.verseExplanations.clBookSelected, ok: (bookName ?? "").trim() !== "" },
+    { label: t.verseExplanations.clValidChapter, ok: chapter >= 1 },
+    { label: t.verseExplanations.clValidVerse, ok: verseNumber >= 1 },
+    {
+      label: t.verseExplanations.clExplanationWords,
+      ok: (explanation ?? "").trim().split(/\s+/).length >= 20,
+    },
+  ];
+
   const fetchPrompts = async (bn: string, ch: number, vn?: number) => {
     if (!bn || !ch) return;
     setPromptsLoading(true);
@@ -127,6 +137,10 @@ export function useAddExplanation() {
     NONE_VALUE,
     // UI state
     loadingExisting, existingFound, saving, saved, isValid, isRtl, isEditMode,
+    validationItems,
+    showExplanationWarning:
+      (explanation ?? "").trim().length > 0 &&
+      (explanation ?? "").trim().length < 20,
     // Actions
     handleSave, handleVerseBlur,
     // Route params
@@ -135,3 +149,5 @@ export function useAddExplanation() {
     t,
   };
 }
+
+export type AddExplanationPageModel = ReturnType<typeof useAddExplanation>;

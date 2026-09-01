@@ -14,7 +14,6 @@ import {
   getVerseText,
   setActiveVersion,
 } from "@/utilities/bibleUtils";
-import { BIBLE_VERSIONS } from "@/assets/bibleVersion/json/bibleVersions";
 import { parseStructuredField } from "../helpers/contentDetailHelpers";
 
 export function useAddDailyDevotion() {
@@ -79,6 +78,27 @@ export function useAddDailyDevotion() {
     () => (book && chapter ? getVersesCountForChapter(book, Number(chapter)) : 0),
     [book, chapter],
   );
+  const testamentOptions = useMemo(() => [
+    { value: "Old", label: t.dailyVerse.oldTestament },
+    { value: "New", label: t.dailyVerse.newTestament },
+  ], [t]);
+  const bookOptions = useMemo(
+    () => books.map((bookName) => ({ value: bookName, label: bookName })),
+    [books],
+  );
+  const chapterOptions = useMemo(
+    () => chapters.map((chapterNumber) => ({
+      value: String(chapterNumber),
+      label: String(chapterNumber),
+    })),
+    [chapters],
+  );
+  const bibleVersionOptions = useMemo(() => [
+    { value: "BSB", label: "BSB (Berean Study Bible)" },
+    { value: "KJV", label: "KJV (King James)" },
+    { value: "ESV", label: "ESV" },
+    { value: "NIV", label: "NIV" },
+  ], []);
 
   // Auto-fetch verse text
   useEffect(() => {
@@ -177,6 +197,7 @@ export function useAddDailyDevotion() {
     bibleVersion, setBibleVersion,
     verseText, isVerseLoading,
     books, chapters, maxVerses,
+    testamentOptions, bookOptions, chapterOptions, bibleVersionOptions,
     // Date/time/publish
     selectedDate, setSelectedDate,
     selectedTime, handleTimeChange,
@@ -199,9 +220,13 @@ export function useAddDailyDevotion() {
     takeaways, setTakeaways,
     // Derived
     saveDisabled, isEditing,
+    pageTitle: isEditing ? "Edit Devotion" : t.devotions.addDevotion,
+    saveLabel: isEditing ? "Update Devotion" : t.devotions.saveDevotion,
     // Actions
     handleSave,
     // Helpers
     t, isRtl, navigate,
   };
 }
+
+export type AddDailyDevotionPageModel = ReturnType<typeof useAddDailyDevotion>;

@@ -1,6 +1,7 @@
 import { useLandingPage } from "../hooks/useLandingPage";
 import { NavBar, HeroSection, FeaturesSection, BibleStatsSection, ExegesisSection, AboutSection, CTASection, FooterSection } from "../components/landing";
 import { Skeleton } from "@/components/ui/skeleton";
+import { LandingContentWrapper } from "../components";
 
 const Landing = () => {
   const p = useLandingPage();
@@ -23,7 +24,7 @@ const Landing = () => {
 
   return (
     <div className="w-full bg-background text-foreground overflow-x-hidden">
-      <div className="relative z-10">
+      <LandingContentWrapper>
         <NavBar
           scrolled={scrolled}
           mobileMenuOpen={mobileMenuOpen}
@@ -40,7 +41,7 @@ const Landing = () => {
         <AboutSection />
         <CTASection />
         <FooterSection />
-      </div>
+      </LandingContentWrapper>
     </div>
   );
 };

@@ -5,37 +5,23 @@
  * All state in useAddDailyVerse hook, UI split into section components.
  * Single root div — no inline HTML beyond components.
  */
-import { Sun, BookOpen, AlertTriangle } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
-import {
-  Dialog, DialogContent, DialogHeader, DialogTitle,
-  DialogDescription, DialogFooter,
-} from "@/components/ui/dialog";
+import { BookOpen } from "lucide-react";
 import { useAddDailyVerse } from "../hooks/useAddDailyVerse";
 import {
   VerseReferenceSection, VerseTextArea, RequiredContentFields,
   BackgroundSection, StructuredContentSection, CollapsibleSection as Section,
-  DailyContentPageHeader, DailyContentFormActions, DailyContentFormCard,
+  DailyContentFormActions, DailyContentFormCard,
   PublishToggle, PageContentWrapper,
+  AddDailyVerseHeader, AddDailyVerseConflictDialog,
 } from "../components";
 import { routes } from "@/components/Routes/routes";
 
 const AddDailyVerse = () => {
   const h = useAddDailyVerse();
-  const navigate = useNavigate();
 
   return (
     <PageContentWrapper isRtl={h.isRtl} maxWidth="max-w-7xl">
-      <div className="fade-up">
-        <DailyContentPageHeader
-          backTo={routes.dashboard.path}
-          backLabel={h.t.common.back}
-          icon={Sun}
-          title={h.isEditing ? "Edit Daily Verse" : h.t.dailyVerse.addVerseTitle}
-          subtitle={h.t.dailyVerse.addVerseSubtitle}
-        />
-      </div>
+      <AddDailyVerseHeader model={h} />
 
       <DailyContentFormCard
         icon={BookOpen}
@@ -115,35 +101,7 @@ const AddDailyVerse = () => {
         </Section>
       </DailyContentFormCard>
 
-      <Dialog open={h.conflictDialog.open} onOpenChange={(o) => !o && h.setConflictDialog({ open: false, conflict: null, payload: null })}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-amber-500" />
-              {h.t.dailyVerse.verseAlreadyExists}
-            </DialogTitle>
-            <DialogDescription>
-              {(() => {
-                const ref = h.conflictDialog.conflict?.existing?.bookName
-                  ? `${h.conflictDialog.conflict.existing.bookName} ${h.conflictDialog.conflict.existing.chapter}:${h.conflictDialog.conflict.existing.verseNumber}`
-                  : "";
-                return h.conflictDialog.conflict?.type === "date"
-                  ? h.t.dailyVerse.verseConflictForDate.replace("{ref}", ref)
-                  : h.t.dailyVerse.verseConflictForVerse.replace("{ref}", ref).replace("{date}", h.conflictDialog.conflict?.existing?.displayDate || "");
-              })()}{" "}
-              {h.t.dailyVerse.verseConflictUpdatePrompt}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="ghost" onClick={() => h.setConflictDialog({ open: false, conflict: null, payload: null })}>
-              {h.t.common.cancel}
-            </Button>
-            <Button variant="outline" onClick={() => { h.setConflictDialog({ open: false, conflict: null, payload: null }); navigate(routes.dailyVerse.path); }}>
-              <BookOpen className="h-4 w-4 mr-2" /> {h.t.dailyVerse.viewExisting}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <AddDailyVerseConflictDialog model={h} />
     </PageContentWrapper>
   );
 };

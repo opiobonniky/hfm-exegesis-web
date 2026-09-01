@@ -230,6 +230,28 @@ export function useAddDailyVerse() {
     }
   }, [conflictDialog, toast, t]);
 
+  const closeConflict = useCallback(() => {
+    setConflictDialog({ open: false, conflict: null, payload: null });
+  }, []);
+
+  const handleConflictOpenChange = useCallback((open: boolean) => {
+    if (!open) closeConflict();
+  }, [closeConflict]);
+
+  const viewExisting = useCallback(() => {
+    closeConflict();
+    navigate(routes.dailyVerse.path);
+  }, [closeConflict, navigate]);
+
+  const conflictReference = conflictDialog.conflict?.existing?.bookName
+    ? `${conflictDialog.conflict.existing.bookName} ${conflictDialog.conflict.existing.chapter}:${conflictDialog.conflict.existing.verseNumber}`
+    : "";
+  const conflictMessage = conflictDialog.conflict?.type === "date"
+    ? t.dailyVerse.verseConflictForDate.replace("{ref}", conflictReference)
+    : t.dailyVerse.verseConflictForVerse
+      .replace("{ref}", conflictReference)
+      .replace("{date}", conflictDialog.conflict?.existing?.displayDate || "");
+
   return {
     // State
     testament, setTestament,
@@ -260,8 +282,11 @@ export function useAddDailyVerse() {
     // Actions
     handleSave, handleConflictUpdate,
     // Conflict dialog
-    conflictDialog, setConflictDialog,
+    conflictDialog, closeConflict, handleConflictOpenChange, viewExisting,
+    conflictMessage,
     // Helpers
     t, isRtl,
   };
 }
+
+export type AddDailyVersePageModel = ReturnType<typeof useAddDailyVerse>;
