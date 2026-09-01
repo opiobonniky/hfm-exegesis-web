@@ -11,6 +11,7 @@ import {
   AdminDeleteDialog,
   ContentLoading,
 } from "../components";
+import { DailyContentGrid } from "../components/DailyContentGrid";
 import { AdminDailyContentHeader } from "../components/AdminDailyContentHeader";
 import { PaginationControls } from "../components/PaginationControls";
 
@@ -68,7 +69,7 @@ const AdminDailyContent = () => {
               ) : h.content.length === 0 ? (
                 <DailyContentEmptyState tab={tab} typeLabel={h.typeLabel} onAdd={() => handleAdd(tab)} />
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                <DailyContentGrid>
                   {h.content.map((item) => (
                     <DailyContentCard
                       key={item.id}
@@ -78,7 +79,7 @@ const AdminDailyContent = () => {
                       onDelete={(i) => h.setDeleteTarget(i)}
                     />
                   ))}
-                </div>
+                </DailyContentGrid>
               )}
               <PaginationControls
                 page={h.page}

@@ -1,35 +1,26 @@
+// AdminStudyTools — thin page composing hook + components (no inline HTML)
 "use client";
 
 import { useState } from "react";
-import { ArrowLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNavigate } from "react-router-dom";
-import { useLanguage } from "@/components/languages/languageProvider";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useStudyTools } from "../hooks/useStudyTools";
 import WordsTab from "../components/WordsTab";
 import ResourcesTab from "../components/ResourcesTab";
 import StudiesTab from "../components/StudiesTab";
 import ProloguesTab from "../components/ProloguesTab";
+import { StudyToolsHeader } from "../components/StudyToolsHeader";
+
 export default function AdminStudyTools() {
   const navigate = useNavigate();
-  const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState("words");
   const state = useStudyTools();
+
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto px-4 py-6 space-y-6">
-        {/* Header */}
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <div>
-            <h1 className="text-xl sm:text-2xl font-bold">Study Tools Manager</h1>
-            <p className="text-sm text-muted-foreground">Manage Strong's words, verse resources, studies, and prologues</p>
-          </div>
-        </div>
-        {/* Tabs */}
+        <StudyToolsHeader onBack={() => navigate(-1)} />
+
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList>
             <TabsTrigger value="words">Words</TabsTrigger>

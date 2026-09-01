@@ -1,36 +1,35 @@
 // AdminReadingPlanDetail — thin page composing hook + components (no inline HTML)
 "use client";
 
-import { ArrowLeft, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { useAdminReadingPlanDetail } from "../hooks/useAdminReadingPlanDetail";
-import { ReadingPlanDetailHeader } from "../components/ReadingPlanDetailHeader";
+import { DetailLoading, DetailPageHeader, DetailContent, DetailBackButton } from "../components/DetailPageLayout";
+import { DetailMetadataGrid } from "../components/DetailSection";
 import { ReadingPlanInfoCard } from "../components/ReadingPlanInfoCard";
 import { ReadingPlanAssignmentsCard } from "../components/ReadingPlanAssignmentsCard";
 import { ReadingPlanQuizCard } from "../components/ReadingPlanQuizCard";
+import { Badge } from "@/components/ui/badge";
+import { Calendar } from "lucide-react";
 
 export default function AdminReadingPlanDetail() {
   const h = useAdminReadingPlanDetail();
 
-  if (h.loading) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
+  if (h.loading) return <DetailLoading />;
   if (!h.item) return null;
 
   return (
     <div className="min-h-screen bg-background">
-      <ReadingPlanDetailHeader
-        planId={h.item.planId || ""}
-        isPublished={h.item.isPublished ?? true}
+      <DetailPageHeader
+        icon={<Calendar className="w-5 h-5 text-primary" />}
+        title={h.item.title}
+        subtitle={h.item.category || undefined}
+        badge={h.item.isPublished !== undefined ? {
+          label: h.item.isPublished ? "Published" : "Draft",
+          variant: h.item.isPublished ? "default" : "secondary",
+        } : undefined}
         onBack={() => h.navigate("/admin/reading-plans")}
       />
 
-      <div className="max-w-3xl mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6">
+      <DetailContent>
         <ReadingPlanInfoCard
           title={h.item.title}
           category={h.item.category}
@@ -46,27 +45,14 @@ export default function AdminReadingPlanDetail() {
           <ReadingPlanQuizCard questions={h.item.questions} />
         )}
 
-        {h.item.createdOn && (
-          <Card>
-            <CardContent className="pt-6">
-              <div className="text-xs text-muted-foreground">
-                <p className="font-semibold mb-1">Created</p>
-                <p>{new Date(h.item.createdOn).toLocaleString()}</p>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+        <DetailMetadataGrid
+          fields={[
+            { label: "Created", value: h.item.createdOn, format: "datetime" },
+          ]}
+        />
 
-        <div className="flex gap-2 pb-8">
-          <Button
-            variant="outline"
-            onClick={() => h.navigate("/admin/reading-plans")}
-            className="gap-1.5"
-          >
-            <ArrowLeft className="w-4 h-4" /> Back to Reading Plans
-          </Button>
-        </div>
-      </div>
+        <DetailBackButton label="Back to Reading Plans" onClick={() => h.navigate("/admin/reading-plans")} />
+      </DetailContent>
     </div>
   );
 }

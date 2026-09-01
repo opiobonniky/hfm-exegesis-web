@@ -71,3 +71,13 @@ export { ReadingPlanQuizCard } from "./ReadingPlanQuizCard";
 export { TriviaPerformanceHeader } from "./TriviaPerformanceHeader";
 export { TriviaOverviewPanel, TriviaUsersPanel, TriviaQuestionsPanel } from "./TriviaPerformanceTabs";
 export { UsersTable } from "./UsersTable";
+export { DailyContentGrid } from "./DailyContentGrid";
+// Detail page components
+export { DetailLoading, DetailPageHeader, DetailContent, DetailBackButton } from "./DetailPageLayout";
+export { DetailSection, DetailMetadataGrid } from "./DetailSection";
+export { PrologueDetailContent } from "./PrologueDetailContent";
+export { JournalDetailContent, JournalDetailHeader } from "./JournalDetailContent";
+export { TriviaDetailContent, TriviaDetailActions, parseOptions, getVerseRef } from "./TriviaDetailContent";
+export { VerseExplanationDetailContent } from "./VerseExplanationDetailContent";
+export { StudyToolsHeader } from "./StudyToolsHeader";
+export { UserDetailInfoSection } from "./UserDetailInfoSection";
