@@ -97,6 +97,23 @@ export function useHistoryPage() {
     navigate(`/bible-reader?book=${book}&chapter=${ch}`);
   }, [navigate]);
 
+  const openClearAllDialog = useCallback(() => {
+    setDeleteModal({ visible: true, type: "all" });
+  }, []);
+
+  const openDeleteDialog = useCallback((item: HistoryItem) => {
+    setDeleteModal({
+      visible: true,
+      type: "single",
+      itemId: item.id,
+      itemName: `${item.bookName} ${item.chapter}`,
+    });
+  }, []);
+
+  const closeDeleteDialog = useCallback(() => {
+    setDeleteModal({ visible: false, type: null });
+  }, []);
+
   const filtered = useMemo(() => {
     const q = searchQuery.toLowerCase();
     return history.filter((h) => {
@@ -153,7 +170,13 @@ export function useHistoryPage() {
 
   return {
     t, isRtl, loading, history, filtered, grouped, searchQuery, setSearchQuery,
-    filterBook, setFilterBook, deleting, clearingAll, deleteModal, setDeleteModal,
+    filterBook, setFilterBook, deleting, clearingAll, deleteModal,
     confirmDelete, goToReader, formatTimeAgo, refresh: loadData,
+    openClearAllDialog, openDeleteDialog, closeDeleteDialog,
+    deleteDialogTitle: deleteModal.type === "all" ? "Clear All History" : "Delete History Item",
+    deleteDialogDescription: deleteModal.type === "all"
+      ? `This will permanently delete all ${history.length} reading history items. This action cannot be undone.`
+      : `Remove "${deleteModal.itemName}" from your reading history?`,
+    deleteDialogConfirmLabel: deleteModal.type === "all" ? "Clear All" : "Delete",
   };
 }

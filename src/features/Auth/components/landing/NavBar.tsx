@@ -88,14 +88,14 @@ export function NavBar({ scrolled, mobileMenuOpen, setMobileMenuOpen, menuPanelR
   return (
     <>
       {/* Desktop Nav */}
-      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? "bg-background/95 backdrop-blur-md border-b border-border" : "bg-transparent nav-hero"}`}>
+      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? "bg-background/95 backdrop-blur-md border-b border-border shadow-sm" : "bg-transparent nav-hero"}`}>
         <div className="w-full px-4 sm:px-6 lg:px-12">
-          <div className="flex items-center justify-between h-14 sm:h-16 lg:h-20">
-            <div className={`items-center gap-2 sm:gap-3 hidden sm:flex transition-all duration-300 ${scrolled ? "translate-y-0" : "gap-3 sm:gap-4 translate-y-10 sm:translate-y-14"}`}>
-              <div className={`rounded-xl bg-transparent flex items-center justify-center shrink-0 overflow-hidden p-0 transition-all duration-300 ${scrolled ? "w-9 h-9 sm:w-11 sm:h-11" : "w-28 h-28 sm:w-32 sm:h-32"}`}>
+          <div className={`flex items-center justify-between transition-[height] duration-300 ${scrolled ? "h-12 sm:h-14 lg:h-16" : "h-14 sm:h-16 lg:h-20"}`}>
+            <div className={`flex items-center transition-all duration-300 ${scrolled ? "gap-2 sm:gap-3 translate-y-0" : "gap-3 sm:gap-4 translate-y-8 sm:translate-y-14"}`}>
+              <div className={`rounded-xl bg-transparent flex items-center justify-center shrink-0 overflow-hidden p-0 transition-all duration-300 ${scrolled ? "w-8 h-8 sm:w-10 sm:h-10" : "w-20 h-20 sm:w-28 sm:h-28 lg:w-32 lg:h-32"}`}>
                 <img src={logoImage} alt="Exegesis" className="w-full h-full object-contain" />
               </div>
-              <span className={`font-black font-[family-name:var(--font-heading)] tracking-tighter transition-all duration-300 ${scrolled ? "text-base sm:text-xl text-brand-primary" : "hidden"}`}>
+              <span className={`font-black font-[family-name:var(--font-heading)] tracking-tighter whitespace-nowrap transition-all duration-300 ${scrolled ? "text-sm sm:text-lg lg:text-xl text-brand-primary opacity-100" : "text-xs opacity-0 pointer-events-none w-0 overflow-hidden"}`}>
                 {t.landing?.siteTitle || "EXEGESIS PROJECT"}
               </span>
             </div>
@@ -141,9 +141,9 @@ export function NavBar({ scrolled, mobileMenuOpen, setMobileMenuOpen, menuPanelR
             </div>
 
             {/* Mobile nav */}
-            <div className="flex lg:hidden items-center justify-between w-full">
-              <button className={`p-2 rounded-xl transition-colors ${scrolled ? "text-brand-primary hover:bg-muted" : "text-white hover:bg-white/10"}`} onClick={() => setMobileMenuOpen(true)}>
-                <Menu className="w-6 h-6" />
+            <div className="flex lg:hidden items-center ml-auto">
+              <button className={`rounded-xl transition-all duration-300 ${scrolled ? "p-1.5 text-brand-primary hover:bg-muted" : "p-2 text-white hover:bg-white/10"}`} onClick={() => setMobileMenuOpen(true)}>
+                <Menu className={`transition-all duration-300 ${scrolled ? "w-5 h-5" : "w-6 h-6"}`} />
               </button>
             </div>
           </div>

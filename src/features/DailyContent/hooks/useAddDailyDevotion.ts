@@ -134,8 +134,8 @@ export function useAddDailyDevotion() {
 
   const saveDisabled = !title.trim() || !content.trim();
 
-  const handleSave = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSave = useCallback(async (e?: React.FormEvent) => {
+    e?.preventDefault();
     if (saveDisabled) {
       toast({ title: "Missing fields", description: "Title and content are required", variant: "destructive" });
       return;

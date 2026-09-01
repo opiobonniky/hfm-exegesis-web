@@ -10,8 +10,6 @@ import {
   Home,
   Highlighter,
   PenLine,
-  Lightbulb,
-  LayoutTemplate,
   SproutIcon,
   Search as SearchIcon,
   Sparkles,
@@ -92,16 +90,6 @@ const adminNavItems: NavItem[] = [
     url: routes.adminSubscriptions.path,
     icon: CreditCard,
   },
-  // {
-  //   title: "sidebar.journalPrompts",
-  //   url: routes.journalPrompts.path,
-  //   icon: Lightbulb,
-  // },
-  // {
-  //   title: "sidebar.journalTemplates",
-  //   url: routes.journalTemplates.path,
-  //   icon: LayoutTemplate,
-  // },
 ];
 
 const userNavItems: NavItem[] = [

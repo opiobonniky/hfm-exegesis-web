@@ -65,11 +65,17 @@ export function useVerseExplanationsPage() {
   const goToEdit = useCallback((item: VerseExplanation) => {
     navigate(`/admin/verse-explanation/edit/${item.bookName}/${item.chapter}/${item.verseNumber}`);
   }, [navigate]);
+  const closeDelete = useCallback(() => setDeleteTarget(null), []);
+  const deleteReference = deleteTarget
+    ? `${deleteTarget.bookName} ${deleteTarget.chapter}:${deleteTarget.verseNumber}`
+    : "";
   return {
     t, isAdmin,
     explanations, filtered, loading, search, setSearch,
     bookFilter, setBookFilter,
-    deleteTarget, setDeleteTarget, deleting, confirmDelete,
+    deleteTarget, setDeleteTarget, deleting, confirmDelete, closeDelete,
+    deleteDescription: `This will permanently delete the explanation for ${deleteReference}.`,
+    deleteReference,
     goToAdd, goToEdit,
   };
 }

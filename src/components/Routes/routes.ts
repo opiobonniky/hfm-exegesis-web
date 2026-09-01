@@ -37,8 +37,6 @@ const Settings = lazy(() => import("@/features/Settings/pages/Settings"));
 const Journal = lazy(() => import("@/features/Journal/pages/Journal"));
 const JournalEntry = lazy(() => import("@/features/Journal/pages/JournalEntry"));
 const JournalDetail = lazy(() => import("@/features/Journal/pages/JournalDetail"));
-const JournalPrompts = lazy(() => import("@/features/Journal/pages/JournalPrompts"));
-const JournalTemplates = lazy(() => import("@/features/Journal/pages/JournalTemplates"));
 const UserDevotions = lazy(() => import("@/features/DailyContent/pages/UserDevotions"));
 const Search = lazy(() => import("@/features/Bible/pages/Search"));
 const Trivia = lazy(() => import("@/features/Trivia/pages/Trivia"));
@@ -365,20 +363,6 @@ export const routes = {
     isProtected: true,
     requiresLayout: true,
     title: "New Journal Entry",
-  },
-  journalPrompts: {
-    path: "/journal-prompts",
-    component: JournalPrompts,
-    isProtected: true,
-    requiresLayout: true,
-    title: "Journal Prompts",
-  },
-  journalTemplates: {
-    path: "/journal-templates",
-    component: JournalTemplates,
-    isProtected: true,
-    requiresLayout: true,
-    title: "Journal Templates",
   },
   search: {
     path: "/search",

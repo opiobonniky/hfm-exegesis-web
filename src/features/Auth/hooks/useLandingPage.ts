@@ -15,11 +15,10 @@ export function useLandingPage() {
 
   // Track scroll position
   useEffect(() => {
-    const el = document.getElementById("landing-scroll");
-    if (!el) return;
-    const handler = () => setScrolled(el.scrollTop > 50);
-    el.addEventListener("scroll", handler, { passive: true });
-    return () => el.removeEventListener("scroll", handler);
+    const handler = () => setScrolled(window.scrollY > 50);
+    handler();
+    window.addEventListener("scroll", handler, { passive: true });
+    return () => window.removeEventListener("scroll", handler);
   }, []);
 
   // Load daily verse

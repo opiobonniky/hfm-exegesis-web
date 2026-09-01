@@ -30,3 +30,9 @@ export { SearchResultsList, SearchNoQuery, SearchNoResults, SearchError } from "
 export { SearchLockedBadge } from "./SearchLockedBadge";
 export { SearchResultsCount } from "./SearchResultsCount";
 export { ScrollContainer } from "./ScrollContainer";
+export { FavoritesList } from "./FavoritesList";
+export { HighlightsList } from "./HighlightsList";
+export { HistoryList } from "./HistoryList";
+export { HistoryClearAction } from "./HistoryClearAction";
+export { NotesList } from "./NotesList";
+export { VerseExplanationsAddAction } from "./VerseExplanationsAddAction";

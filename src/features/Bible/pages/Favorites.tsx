@@ -4,7 +4,7 @@
 import { Star } from "lucide-react";
 import { useFavoritesPage } from "../hooks/useFavoritesPage";
 import { BiblePageLayout } from "../components/BiblePageLayout";
-import { FavoriteCard } from "../components/FavoriteCard";
+import { FavoritesList } from "../components";
 
 export default function Favorites() {
   const h = useFavoritesPage();
@@ -25,20 +25,14 @@ export default function Favorites() {
       emptyMessage="Star verses while reading to save them here"
       emptyIcon={<Star className="w-8 h-8 text-muted-foreground/30 mb-4" />}
     >
-      {h.filtered.map((f) => (
-        <FavoriteCard
-          key={f.id}
-          bookName={f.bookName}
-          chapter={f.chapter}
-          verseNumber={f.verseNumber}
-          verseText={h.verseTextMap[`${f.bookName} ${f.chapter}:${f.verseNumber}`]}
-          createdOn={f.createdOn}
-          deleting={h.deleting === f.id}
-          onGoToReader={() => h.goToReader(f.bookName, f.chapter)}
-          onDelete={() => h.deleteFavorite(f.id)}
-          formatDate={h.formatDate}
-        />
-      ))}
+      <FavoritesList
+        items={h.filtered}
+        verseTextMap={h.verseTextMap}
+        deleting={h.deleting}
+        onGoToReader={h.goToReader}
+        onDelete={h.deleteFavorite}
+        formatDate={h.formatDate}
+      />
     </BiblePageLayout>
   );
 }

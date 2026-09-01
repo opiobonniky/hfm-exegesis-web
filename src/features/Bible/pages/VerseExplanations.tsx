@@ -1,12 +1,11 @@
 "use client";
 
 // VerseExplanations — browse and manage verse explanations
-import { Button } from "@/components/ui/button";
 import { useVerseExplanationsPage } from "../hooks/useVerseExplanationsPage";
 import ExplanationList from "../components/ExplanationList";
 import { PageHeader } from "@/components/PageHeader";
 import { DeleteConfirmDialog } from "../components/DeleteConfirmDialog";
-import { BiblePageLayout, BiblePageInner, DeletePreview } from "../components";
+import { BiblePageLayout, BiblePageInner, DeletePreview, VerseExplanationsAddAction } from "../components";
 
 const VerseExplanations = () => {
   const h = useVerseExplanationsPage();
@@ -17,8 +16,8 @@ const VerseExplanations = () => {
         <PageHeader
           title={h.t.verseExplanations?.title || "Verse Explanations"}
           subtitle={`${h.explanations.length} explanations`}
-          onBack={() => h.goToAdd()}
-          action={<Button size="sm" onClick={h.goToAdd} className="gap-1.5 text-xs">+ Add</Button>}
+          onBack={h.goToAdd}
+          action={<VerseExplanationsAddAction onAdd={h.goToAdd} />}
         />
       </BiblePageInner>
 
@@ -36,14 +35,14 @@ const VerseExplanations = () => {
       <DeleteConfirmDialog
         open={!!h.deleteTarget}
         title={h.t.verseExplanations?.deleteDialogTitle || "Delete Explanation"}
-        description={`This will permanently delete the explanation for ${h.deleteTarget?.bookName} ${h.deleteTarget?.chapter}:${h.deleteTarget?.verseNumber}.`}
+        description={h.deleteDescription}
         loading={h.deleting}
         onConfirm={h.confirmDelete}
-        onClose={() => h.setDeleteTarget(null)}
+        onClose={h.closeDelete}
       >
         {h.deleteTarget && (
           <DeletePreview
-            title={`${h.deleteTarget.bookName} ${h.deleteTarget.chapter}:${h.deleteTarget.verseNumber}`}
+            title={h.deleteReference}
             description={h.deleteTarget.explanation}
           />
         )}

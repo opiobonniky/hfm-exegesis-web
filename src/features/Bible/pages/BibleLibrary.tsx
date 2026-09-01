@@ -1,6 +1,5 @@
 // BibleLibrary — book browser with search and chapter navigation
 import { useBibleLibrary } from "../hooks/useBibleLibrary";
-import BookCard from "../components/BookCard";
 import {
   BiblePageLayout, BibleLibraryHeader, BibleLibraryEmpty, BibleLibraryLoading, BibleLibraryFooter, BibleBookList,
 } from "../components";
@@ -27,15 +26,14 @@ export default function BibleLibrary() {
         {h.filteredBooks.length === 0 ? (
           <BibleLibraryEmpty searchQuery={h.searchQuery} clearSearch={h.clearSearch} />
         ) : (
-          <BibleBookList>
-            {h.filteredBooks.map((book) => (
-              <BookCard key={book.bookName} bookNumber={book.bookNumber} bookName={book.bookName} testament={book.testament}
-                chaptersCount={book.chaptersCount} totalVerses={book.totalVerses}
-                expanded={h.expandedBook === book.bookName} onToggle={() => h.toggleExpand(book.bookName)}
-                onChapterClick={(ch) => h.goToChapter(book.bookName, ch)}
-                onBookOverview={() => h.goToBookOverview(book.bookName)} isRtl={h.isRtl} />
-            ))}
-          </BibleBookList>
+          <BibleBookList
+            books={h.filteredBooks}
+            expandedBook={h.expandedBook}
+            isRtl={h.isRtl}
+            onToggle={h.toggleExpand}
+            onChapterClick={h.goToChapter}
+            onBookOverview={h.goToBookOverview}
+          />
         )}
 
         {h.filteredBooks.length > 0 && (

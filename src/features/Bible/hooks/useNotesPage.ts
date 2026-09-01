@@ -73,6 +73,8 @@ export function useNotesPage() {
     setEditText(note.note);
   }, []);
 
+  const closeEdit = useCallback(() => setEditingNote(null), []);
+
   const saveNote = useCallback(async () => {
     if (!editingNote || !editText.trim()) return;
     setSaving(true);
@@ -129,6 +131,6 @@ export function useNotesPage() {
     t, isRtl, loading, notes, filtered, grouped, searchQuery, setSearchQuery,
     filterBook, setFilterBook, deleting, editingNote, editText, setEditText,
     saving, verseTextMap,
-    deleteNote, openEdit, saveNote, setEditingNote, goToReader, formatDate, refresh: loadData,
+    deleteNote, openEdit, closeEdit, saveNote, goToReader, formatDate, refresh: loadData,
   };
 }

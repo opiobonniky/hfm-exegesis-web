@@ -13,7 +13,7 @@ interface Props {
   /** Attribution for the quote */
   attribution?: string;
   /** Tagline below the logo */
-  tagline?: string;
+  tagline?: ReactNode;
   /** Extra content below the quote */
   children?: ReactNode;
   /** RTL-aware classes */
