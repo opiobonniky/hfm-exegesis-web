@@ -1,5 +1,4 @@
 // UserDailyVerse — user-facing daily verse reader (thin compositor)
-import { useLanguage } from "@/components/languages/languageProvider";
 import { useUserDailyVerse } from "../hooks";
 import { VerseLoadingSkeleton, VerseEmptyState } from "../components/VerseStates";
 import { VerseContent } from "../components/VerseContent";
@@ -7,39 +6,26 @@ import { UserVerseStickyHeader } from "../components/UserVerseStickyHeader";
 import { fmtDate, isToday } from "../helpers";
 
 export default function UserDailyVerse() {
-  const { t, isRtl } = useLanguage();
-  const {
-    verse,
-    loading,
-    refreshing,
-    liked,
-    setLiked,
-    scrolled,
-    scrollRef,
-    navigate,
-    refresh,
-    handleCopy,
-    handleShare,
-  } = useUserDailyVerse();
+  const h = useUserDailyVerse();
 
-  if (loading) return <VerseLoadingSkeleton />;
-  if (!verse) return <VerseEmptyState onBack={() => navigate(-1)} />;
+  if (h.loading) return <VerseLoadingSkeleton />;
+  if (!h.verse) return <VerseEmptyState onBack={() => h.navigate(-1)} />;
 
   return (
-    <div ref={scrollRef} className="min-h-screen bg-background" dir={isRtl ? "rtl" : "ltr"}>
+    <div ref={h.scrollRef} className="min-h-screen bg-background" dir={h.isRtl ? "rtl" : "ltr"}>
       <UserVerseStickyHeader
-        label={isToday(verse.displayDate) ? "Today\u2019s Verse" : fmtDate(verse.displayDate)}
-        scrolled={scrolled}
-        refreshing={refreshing}
-        onBack={() => navigate(-1)}
-        onRefresh={refresh}
+        label={isToday(h.verse.displayDate) ? "Today\u2019s Verse" : fmtDate(h.verse.displayDate)}
+        scrolled={h.scrolled}
+        refreshing={h.refreshing}
+        onBack={() => h.navigate(-1)}
+        onRefresh={h.refresh}
       />
       <VerseContent
-        verse={verse}
-        liked={liked}
-        onCopy={handleCopy}
-        onShare={handleShare}
-        onLike={() => setLiked(!liked)}
+        verse={h.verse}
+        liked={h.liked}
+        onCopy={h.handleCopy}
+        onShare={h.handleShare}
+        onLike={() => h.setLiked(!h.liked)}
       />
     </div>
   );

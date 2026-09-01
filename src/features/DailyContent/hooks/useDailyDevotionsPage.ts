@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/components/languages/languageProvider";
+import { useAuth } from "@/contexts/AuthContext";
 import { sendPostRequest } from "@/services/api";
 import type { DailyDevotionItem } from "../types";
 
@@ -19,6 +20,8 @@ export function useDailyDevotionsPage() {
   const { t, isRtl } = useLanguage();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { userInfo } = useAuth();
+  const isAdmin = userInfo?.userRole === 1;
   // Listing
   const [devotions, setDevotions] = useState<DailyDevotionItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -101,12 +104,48 @@ export function useDailyDevotionsPage() {
     } catch { toast({ title: "Error", variant: "destructive" }); }
     finally { setIsDeleting(false); }
   }, [deleteTarget, toast, loadDevotions, page]);
+  // ── Preset date ranges ──
+  const toYMD = (d: Date) => d.toISOString().split("T")[0];
+  const applyPreset = useCallback((preset: string) => {
+    const now = new Date();
+    let from = "";
+    let to = toYMD(now);
+    switch (preset) {
+      case "last_7": from = toYMD(new Date(now.getTime() - 6 * 864e5)); break;
+      case "last_30": from = toYMD(new Date(now.getTime() - 29 * 864e5)); break;
+      case "this_week": {
+        const s = new Date(now); s.setDate(now.getDate() - now.getDay()); from = toYMD(s); break;
+      }
+      case "this_month": from = toYMD(new Date(now.getFullYear(), now.getMonth(), 1)); break;
+      case "last_month": from = toYMD(new Date(now.getFullYear(), now.getMonth() - 1, 1)); to = toYMD(new Date(now.getFullYear(), now.getMonth(), 0)); break;
+    }
+    setFromDate(from);
+    setToDate(to);
+    setActivePreset(preset);
+  }, []);
+
+  const clearFilter = useCallback(() => {
+    setFromDate("");
+    setToDate("");
+    setActivePreset(null);
+    setFilterError("");
+  }, []);
+
+  const applyFilter = useCallback(() => {
+    setFilterError("");
+    refresh();
+  }, []);
+
+  const refresh = useCallback(() => loadDevotions(page), [page]);
+
   return {
-    t, isRtl, navigate,
+    t, isRtl, navigate, isAdmin,
     devotions, loading, page, setPage, total, totalPages, hasNext, hasPrevious, selectedIndex, setSelectedIndex,
     fromDate, setFromDate, toDate, setToDate, activePreset, setActivePreset, filterError, setFilterError,
+    isFiltered: fromDate !== "" || toDate !== "",
+    applyPreset, clearFilter, applyFilter,
     editOpen, setEditOpen, editState, setEditState, isSaving, openEdit, handleSave,
     deleteOpen, setDeleteOpen, deleteTarget, setDeleteTarget, isDeleting, handleDelete,
-    refresh: () => loadDevotions(page),
+    refresh,
   };
 }

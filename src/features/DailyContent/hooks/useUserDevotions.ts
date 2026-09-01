@@ -2,10 +2,12 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import { useLanguage } from "@/components/languages/languageProvider";
 import { sendPostRequest } from "@/services/api";
 import type { DailyDevotionItem } from "../types";
 
 export function useUserDevotions() {
+  const { t, isRtl } = useLanguage();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [devotion, setDevotion] = useState<DailyDevotionItem | null>(null);
@@ -53,6 +55,7 @@ export function useUserDevotions() {
     }
   }, [devotion, toast]);
   return {
+    t, isRtl,
     devotion, loading, refreshing, liked, setLiked,
     scrolled, scrollRef, navigate,
     refresh: () => loadDevotion(true),

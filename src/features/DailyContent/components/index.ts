@@ -28,3 +28,4 @@ export { DailyDevotionsPagination } from "./DailyDevotionsPagination";
 export { DailyDevotionsEmpty } from "./DailyDevotionsEmpty";
 export { UserVerseStickyHeader } from "./UserVerseStickyHeader";
 export { DevotionList } from "./DevotionList";
+export { DevotionLoadingSpinner } from "./DevotionLoadingSpinner";

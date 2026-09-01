@@ -2,10 +2,12 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import { useLanguage } from "@/components/languages/languageProvider";
 import { sendPostRequest } from "@/services/api";
 import type { DailyVerseItem } from "../types";
 
 export function useUserDailyVerse() {
+  const { t, isRtl } = useLanguage();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [verse, setVerse] = useState<DailyVerseItem | null>(null);
@@ -53,6 +55,7 @@ export function useUserDailyVerse() {
     }
   }, [verse, toast]);
   return {
+    t, isRtl,
     verse, loading, refreshing, liked, setLiked,
     scrolled, scrollRef, navigate,
     refresh: () => loadVerse(true),
