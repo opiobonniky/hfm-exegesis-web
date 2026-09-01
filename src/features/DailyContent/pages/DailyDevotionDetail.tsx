@@ -1,5 +1,4 @@
 // DailyDevotionDetail — read-only detail view for a daily devotion
-import { useNavigate, useSearchParams } from "react-router-dom";
 import { Heart, Lightbulb, Tag, Layers, BookMarked } from "lucide-react";
 import {
   DailyContentDetailHeader,
@@ -14,77 +13,68 @@ import {
   DetailPageInner,
   ContentBlock,
 } from "../components";
-import { parseList, fmtDate } from "../helpers/contentDetailHelpers";
+import { useDailyDevotionDetailPage } from "../hooks/useDailyDevotionDetailPage";
 
 export default function DailyDevotionDetail() {
-  const navigate = useNavigate();
-  const [params] = useSearchParams();
+  const p = useDailyDevotionDetailPage();
 
-  const devotionParam = params.get("devotion");
-  let devotion: any = null;
-  try { devotion = devotionParam ? JSON.parse(devotionParam) : null; } catch { /* invalid */ }
-
-  if (!devotion) {
+  if (!p.devotion) {
     return (
       <DailyContentDetailEmpty
         icon={Heart}
         title="Devotion not found"
         message="No devotion data was provided."
-        onBack={() => navigate(-1)}
+        onBack={p.goBack}
       />
     );
   }
 
-  const reference = devotion.bookName
-    ? `${devotion.bookName} ${devotion.chapter || ""}:${devotion.verseNumber || ""}`
-    : null;
-
   return (
     <DetailPageLayout>
       <DailyContentDetailHeader
-        title={devotion.title || "Daily Devotion"}
-        subtitle={fmtDate(devotion.displayDate)}
-        onBack={() => navigate(-1)}
-        onEdit={() => navigate(`/add-daily-devotion`, { state: { devotion } })}
+        title={p.headerTitle}
+        subtitle={p.subtitle}
+        onBack={p.goBack}
+        onEdit={p.editDevotion}
       />
 
       <DetailPageInner>
-        <DetailTitleBlock title={devotion.title}>
+        <DetailTitleBlock title={p.devotion.title}>
           <DailyContentDetailMeta
-            isPublished={devotion.isPublished}
-            reference={reference}
-            extraBadge={devotion.bibleVersion}
-            displayDate={devotion.displayDate}
-            createdOn={devotion.createdOn}
-            updatedOn={devotion.updatedOn}
+            isPublished={p.devotion.isPublished}
+            reference={p.reference}
+            extraBadge={p.devotion.bibleVersion}
+            displayDate={p.devotion.displayDate}
+            createdOn={p.devotion.createdOn}
+            updatedOn={p.devotion.updatedOn}
           />
         </DetailTitleBlock>
 
-        <ContentBlock label="Content" text={devotion.content} />
+        <ContentBlock label="Content" text={p.devotion.content} />
 
         <DetailSection>
-          <TextBlock label="Explanation" value={devotion.explanation} icon={Lightbulb} />
-          <TextBlock label="Application" value={devotion.application} icon={Tag} />
-          <TextBlock label="Introduction" value={devotion.verseIntroduction} icon={BookMarked} />
-          <TextBlock label="Learn More" value={devotion.learnMore} icon={Layers} />
+          <TextBlock label="Explanation" value={p.devotion.explanation} icon={Lightbulb} />
+          <TextBlock label="Application" value={p.devotion.application} icon={Tag} />
+          <TextBlock label="Introduction" value={p.devotion.verseIntroduction} icon={BookMarked} />
+          <TextBlock label="Learn More" value={p.devotion.learnMore} icon={Layers} />
         </DetailSection>
 
-        {(devotion.backgroundAuthor || devotion.backgroundBook || devotion.backgroundContext) && (
+        {p.hasBackground && (
           <DetailSection title="Background">
-            <TextBlock label="Author" value={devotion.backgroundAuthor} />
-            <TextBlock label="Book" value={devotion.backgroundBook} />
-            <TextBlock label="Context" value={devotion.backgroundContext} />
+            <TextBlock label="Author" value={p.devotion.backgroundAuthor} />
+            <TextBlock label="Book" value={p.devotion.backgroundBook} />
+            <TextBlock label="Context" value={p.devotion.backgroundContext} />
           </DetailSection>
         )}
 
-        <WordStudiesBlock value={devotion.wordStudies} />
+        <WordStudiesBlock value={p.devotion.wordStudies} />
 
         <DetailSection>
-          <ListBlock label="Practical Applications" items={parseList(devotion.practicalApplications)} icon={Lightbulb} />
-          <ListBlock label="Key Themes" items={parseList(devotion.keyThemes)} icon={Tag} />
-          <ListBlock label="Cross References" items={parseList(devotion.crossReferences)} icon={Layers} />
-          <TextBlock label="Final Thoughts" value={devotion.finalThoughts} />
-          <ListBlock label="Takeaways" items={parseList(devotion.takeaways)} icon={BookMarked} />
+          <ListBlock label="Practical Applications" items={p.practicalApplications} icon={Lightbulb} />
+          <ListBlock label="Key Themes" items={p.keyThemes} icon={Tag} />
+          <ListBlock label="Cross References" items={p.crossReferences} icon={Layers} />
+          <TextBlock label="Final Thoughts" value={p.devotion.finalThoughts} />
+          <ListBlock label="Takeaways" items={p.takeaways} icon={BookMarked} />
         </DetailSection>
       </DetailPageInner>
     </DetailPageLayout>

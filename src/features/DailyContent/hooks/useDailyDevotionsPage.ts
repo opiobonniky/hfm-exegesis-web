@@ -104,6 +104,11 @@ export function useDailyDevotionsPage() {
     } catch { toast({ title: "Error", variant: "destructive" }); }
     finally { setIsDeleting(false); }
   }, [deleteTarget, toast, loadDevotions, page]);
+
+  const openDelete = useCallback((item: DailyDevotionItem) => {
+    setDeleteTarget(item);
+    setDeleteOpen(true);
+  }, []);
   // ── Preset date ranges ──
   const toYMD = (d: Date) => d.toISOString().split("T")[0];
   const applyPreset = useCallback((preset: string) => {
@@ -131,12 +136,20 @@ export function useDailyDevotionsPage() {
     setFilterError("");
   }, []);
 
+  const refresh = useCallback(() => loadDevotions(page), [loadDevotions, page]);
+
   const applyFilter = useCallback(() => {
     setFilterError("");
     refresh();
-  }, []);
+  }, [refresh]);
 
-  const refresh = useCallback(() => loadDevotions(page), [page]);
+  const emptyMessage = t.devotions?.noDevotions || "No devotions found";
+  const addLabel = t.devotions?.addDevotion || "Add Devotion";
+  const paginationLabels = {
+    page: t.common?.page || "Page",
+    of: t.common?.of || "of",
+    results: "results",
+  };
 
   return {
     t, isRtl, navigate, isAdmin,
@@ -145,7 +158,8 @@ export function useDailyDevotionsPage() {
     isFiltered: fromDate !== "" || toDate !== "",
     applyPreset, clearFilter, applyFilter,
     editOpen, setEditOpen, editState, setEditState, isSaving, openEdit, handleSave,
-    deleteOpen, setDeleteOpen, deleteTarget, setDeleteTarget, isDeleting, handleDelete,
+    deleteOpen, setDeleteOpen, deleteTarget, isDeleting, handleDelete, openDelete,
+    emptyMessage, addLabel, paginationLabels, showPagination: totalPages > 1,
     refresh,
   };
 }

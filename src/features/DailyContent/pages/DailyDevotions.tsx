@@ -14,7 +14,7 @@ export default function DailyDevotions() {
 
   return (
     <div className="space-y-6">
-      <DailyDevotionsHeader onAdd={() => h.openEdit()} />
+      <DailyDevotionsHeader onAdd={h.openEdit} />
 
       {h.isAdmin && (
         <DevotionFilterBar
@@ -35,10 +35,10 @@ export default function DailyDevotions() {
         <DevotionLoadingSpinner />
       ) : h.devotions.length === 0 ? (
         <DailyDevotionsEmpty
-          message={h.t.devotions?.noDevotions || "No devotions found"}
+          message={h.emptyMessage}
           isAdmin={h.isAdmin}
-          addLabel={h.t.devotions?.addDevotion || "Add Devotion"}
-          onAdd={() => h.openEdit()}
+          addLabel={h.addLabel}
+          onAdd={h.openEdit}
         />
       ) : (
         <DevotionList
@@ -46,15 +46,12 @@ export default function DailyDevotions() {
           selectedIndex={h.selectedIndex}
           isAdmin={h.isAdmin}
           onSelect={h.setSelectedIndex}
-          onEdit={(item) => h.openEdit(item)}
-          onDelete={(item) => {
-            h.setDeleteTarget(item);
-            h.setDeleteOpen(true);
-          }}
+          onEdit={h.openEdit}
+          onDelete={h.openDelete}
         />
       )}
 
-      {h.totalPages > 1 && (
+      {h.showPagination && (
         <DailyDevotionsPagination
           page={h.page}
           totalPages={h.totalPages}
@@ -62,11 +59,7 @@ export default function DailyDevotions() {
           hasNext={h.hasNext}
           hasPrevious={h.hasPrevious}
           onPageChange={h.setPage}
-          labels={{
-            page: h.t.common?.page || "Page",
-            of: h.t.common?.of || "of",
-            results: "results",
-          }}
+          labels={h.paginationLabels}
         />
       )}
 

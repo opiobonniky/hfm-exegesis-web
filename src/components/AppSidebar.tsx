@@ -76,7 +76,7 @@ const adminNavItems: NavItem[] = [
     url: routes.readingPlans.path,
     icon: BookOpen,
   },
- 
+
   {
     title: "sidebar.studyTools",
     url: routes.adminStudyTools.path,
@@ -92,17 +92,16 @@ const adminNavItems: NavItem[] = [
     url: routes.adminSubscriptions.path,
     icon: CreditCard,
   },
-  { title: "sidebar.journal", url: routes.journal.path, icon: PenLine },
-  {
-    title: "sidebar.journalPrompts",
-    url: routes.journalPrompts.path,
-    icon: Lightbulb,
-  },
-  {
-    title: "sidebar.journalTemplates",
-    url: routes.journalTemplates.path,
-    icon: LayoutTemplate,
-  },
+  // {
+  //   title: "sidebar.journalPrompts",
+  //   url: routes.journalPrompts.path,
+  //   icon: Lightbulb,
+  // },
+  // {
+  //   title: "sidebar.journalTemplates",
+  //   url: routes.journalTemplates.path,
+  //   icon: LayoutTemplate,
+  // },
 ];
 
 const userNavItems: NavItem[] = [

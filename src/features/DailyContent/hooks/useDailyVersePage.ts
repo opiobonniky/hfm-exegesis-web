@@ -224,6 +224,20 @@ export function useDailyVersePage() {
     );
   }, []);
 
+  const openAddVerse = useCallback(() => {
+    navigate("/add-daily-verse");
+  }, [navigate]);
+
+  const openVerseDetails = useCallback((verse: DailyVerseItem) => {
+    navigate(`/daily-verse-detail?verse=${encodeURIComponent(JSON.stringify(verse))}`);
+  }, [navigate]);
+
+  const setConflictOpen = useCallback((open: boolean) => {
+    setConflictDialog((current) => ({ ...current, open }));
+  }, []);
+
+  const refresh = useCallback(() => loadVerses(page), [loadVerses, page]);
+
   return {
     t, isRtl, navigate, isAdmin,
     // Listing
@@ -242,10 +256,10 @@ export function useDailyVersePage() {
     deleteOpen, setDeleteOpen, deleteTarget, setDeleteTarget,
     isDeleting, handleDelete, openDelete,
     // Conflict
-    conflictDialog, setConflictDialog,
+    conflictDialog, setConflictDialog, setConflictOpen,
     // Navigate
-    openInBible, openInJournal,
+    openInBible, openInJournal, openAddVerse, openVerseDetails,
     // Refresh
-    refresh: () => loadVerses(page),
+    refresh,
   };
 }

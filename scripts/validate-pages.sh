@@ -1,19 +1,19 @@
 #!/bin/bash
 # validate-pages.sh — Validates that all feature pages follow the clean compositor pattern.
 #
-# Rules (based on DailyVerse.tsx and DailyDevotions.tsx as exemplars):
-#   1. Pages must NOT contain raw HTML tags (div, h1, h2, p, span, button, input, etc.)
-#      — only component tags (PascalCase) and JSX expressions are allowed
+# Rules (based on DailyVerse.tsx as exemplar):
+#   1. Pages must NOT contain more than 1 raw <div> tag (root wrapper only)
 #   2. Pages must NOT contain React hooks (useState, useMemo, useCallback, useEffect, useRef)
-#      — all logic belongs in hooks/
-#   3. Pages must NOT contain inline business logic functions (const handleX = ..., const filtered = ...)
-#      — only `const h = useXxxPage()` and component rendering
+#   3. Pages must NOT contain inline business logic (useCallback, useMemo, async handlers)
 #   4. Pages must NOT define types/interfaces (interface X, type X = ...)
-#      — types belong in types.ts
-#   5. Pages must NOT define constants (const UPPER_CASE = ..., const XxxArray = [...], etc.)
-#      — constants belong in constants.ts
-#   6. Pages must NOT have TypeScript errors (type mismatches, missing properties, etc.)
-#      — run `npx tsc --noEmit` and check for errors in each page file
+#   5. Pages must NOT define constants (const UPPER_CASE = ..., const XxxArray = [...])
+#   6. Pages must NOT have TypeScript errors (tsc --noEmit)
+#   7. Pages must NOT have className on styled components or raw HTML elements
+#   8. Pages must NOT have inline .map() or array rendering
+#   9. Pages must NOT use motion.* components (motion.div, motion.span, etc.)
+#  10. Pages must NOT have styled <button> or <a> elements
+#  11. Pages must NOT have inline data arrays (const xxx = [...]) for component props
+#      — data arrays belong in constants.ts, pages just import and pass to components
 #
 # Usage: bash scripts/validate-pages.sh
 # Exit code: 0 if all pages pass, 1 if any fail
@@ -38,15 +38,11 @@ else
   TS_CLEAN=false
 fi
 
-# Build associative array: file -> list of error lines
 declare -A TS_ERRORS
 if [ "$TS_CLEAN" = false ] && [ -s "$TS_ERROR_FILE" ]; then
   while IFS= read -r line; do
-    # Extract file path from lines like: src/features/X/pages/Y.tsx(10,5): error TS2339: ...
     fpath=$(echo "$line" | grep -oP '^\S+\.tsx' || true)
     if [ -n "$fpath" ]; then
-      # Get just the filename portion for matching
-      fname=$(basename "$fpath")
       if [ -z "${TS_ERRORS[$fpath]+x}" ]; then
         TS_ERRORS[$fpath]="$line"
       else
@@ -63,8 +59,7 @@ check_page() {
   local relpath="$file"
   local issues=()
 
-  # Rule 1: Check for raw HTML tags (not inside comments or strings)
-  # More lenient: just check for <div which is the most common raw HTML
+  # ── RULE 1: Max 1 raw <div> (root wrapper) ──
   div_count=$(grep -cE '<div\b' "$file" 2>/dev/null || true)
   div_count=${div_count:-0}
   div_count=$(echo "$div_count" | head -1 | tr -d '[:space:]')
@@ -72,45 +67,92 @@ check_page() {
     issues+=("RULE1: Has $div_count raw <div> tags (max 1 allowed — the root wrapper)")
   fi
 
-  # Rule 2: Check for React hooks
+  # ── RULE 2: No React hooks in pages ──
   hooks=$(grep -oE '\b(useState|useMemo|useCallback|useEffect|useRef)\b' "$file" 2>/dev/null | sort -u | tr '\n' ', ' || true)
   if [ -n "$hooks" ]; then
     issues+=("RULE2: Contains React hooks: ${hooks%, }")
   fi
 
-  # Rule 3: Check for inline business logic (useCallback, useMemo, async handlers, useEffect)
+  # ── RULE 3: No inline business logic ──
   logic=$(grep -nE '\b(useCallback|useMemo|useEffect|useRef)\b' "$file" 2>/dev/null | grep -v 'import\|//\|use\w\+Page\|use\w\+()' | head -5 || true)
   if [ -n "$logic" ]; then
     issues+=("RULE3: Contains React hooks used as inline logic")
   fi
 
-  # Rule 4: Check for type/interface definitions
+  # ── RULE 4: No type/interface definitions ──
   types=$(grep -nE '^\s*(export\s+)?(interface|type)\s+\w+' "$file" 2>/dev/null | grep -v 'import\|//' | head -5 || true)
   if [ -n "$types" ]; then
     issues+=("RULE4: Contains type/interface definitions (move to types.ts)")
   fi
 
-  # Rule 5: Check for inline constant definitions (should be in constants.ts)
+  # ── RULE 5: No inline constant definitions ──
   constants=$(grep -nE '^\s*(export\s+)?const\s+[A-Z][A-Z_0-9]+\s*=' "$file" 2>/dev/null | grep -v 'import\|//' | head -5 || true)
   constants2=$(grep -nE '^\s*(export\s+)?const\s+[A-Z][a-zA-Z]+\s*=\s*(\[|\{|\`)' "$file" 2>/dev/null | grep -v 'import\|//\|use[A-Z]' | head -5 || true)
   all_constants=""
   if [ -n "$constants" ]; then all_constants="$constants"; fi
-  if [ -n "$constants2" ]; then all_constants="$all_constants\n$constants2"; fi
+  if [ -n "$constants2" ]; then all_constants="$all_constants
+$constants2"; fi
   if [ -n "$all_constants" ]; then
     issues+=("RULE5: Contains inline constants (move to constants.ts)")
   fi
 
-  # Rule 6: Check for TypeScript errors in this file
+  # ── RULE 6: No TypeScript errors ──
   if [ "$TS_CLEAN" = false ]; then
     local file_errors="${TS_ERRORS[$file]:-}"
     if [ -n "$file_errors" ]; then
       local error_count
       error_count=$(echo "$file_errors" | wc -l | tr -d '[:space:]')
-      # Extract first error message (trimmed)
       local first_error
       first_error=$(echo "$file_errors" | head -1 | sed 's/^.*error TS[0-9]*: //' | head -c 120)
       issues+=("RULE6: Has $error_count TypeScript error(s) — e.g. $first_error")
     fi
+  fi
+
+  # ── RULE 7: No className on styled components or raw HTML ──
+  styled_buttons=$(grep -nE '<Button\s+.*className=' "$file" 2>/dev/null | grep -v 'import\|//' | head -5 || true)
+  styled_links=$(grep -nE '<Link\s+.*className=' "$file" 2>/dev/null | grep -v 'import\|//' | head -5 || true)
+  styled_headings=$(grep -nE '<(h[1-6]|span|p|label)\s+.*className=' "$file" 2>/dev/null | grep -v 'import\|//' | head -5 || true)
+  styled_buttons_total=0
+  if [ -n "$styled_buttons" ]; then
+    styled_buttons_total=$(echo "$styled_buttons" | wc -l | tr -d '[:space:]')
+  fi
+  styled_links_total=0
+  if [ -n "$styled_links" ]; then
+    styled_links_total=$(echo "$styled_links" | wc -l | tr -d '[:space:]')
+  fi
+  styled_headings_total=0
+  if [ -n "$styled_headings" ]; then
+    styled_headings_total=$(echo "$styled_headings" | wc -l | tr -d '[:space:]')
+  fi
+  total_styled=$((styled_buttons_total + styled_links_total + styled_headings_total))
+  if [ "$total_styled" -gt 0 ]; then
+    issues+=("RULE7: Has $total_styled styled element(s) — extract Button/Link/text to wrapper components")
+  fi
+
+  # ── RULE 8: No inline .map() or array rendering ──
+  maps=$(grep -nE '\.map\(' "$file" 2>/dev/null | grep -v 'import\|//\|^\s*\*' | head -5 || true)
+  if [ -n "$maps" ]; then
+    issues+=("RULE8: Contains inline .map() — extract data to constants, rendering to components")
+  fi
+
+  # ── RULE 9: No motion.* components ──
+  motion=$(grep -nE 'motion\.' "$file" 2>/dev/null | grep -v 'import\|//\|^\s*\*' | head -5 || true)
+  if [ -n "$motion" ]; then
+    issues+=("RULE9: Contains motion.* components — extract to animated wrapper components")
+  fi
+
+  # ── RULE 10: No styled <button> or <a> elements ──
+  styled_native=$(grep -nE '<(button|a)\s+.*className=' "$file" 2>/dev/null | grep -v 'import\|//' | head -5 || true)
+  if [ -n "$styled_native" ]; then
+    issues+=("RULE10: Contains styled native <button>/<a> — extract to wrapper components")
+  fi
+
+  # ── RULE 11: No inline data arrays for component props ──
+  # Matches: const xxx = [{ icon: ..., title: ... }], const items = [...]
+  # These should be in constants.ts and imported
+  data_arrays=$(grep -nE '^\s*(const|let|var)\s+\w+\s*=\s*\[' "$file" 2>/dev/null | grep -v 'import\|//\|^\s*\*' | head -5 || true)
+  if [ -n "$data_arrays" ]; then
+    issues+=("RULE11: Contains inline data array — move to constants.ts")
   fi
 
   if [ ${#issues[@]} -eq 0 ]; then
@@ -132,13 +174,11 @@ echo " Exemplar: DailyVerse.tsx / DailyDevotions.tsx"
 echo "═══════════════════════════════════════════════════════════"
 echo ""
 
-# Show TypeScript check status
 if [ "$TS_CLEAN" = true ]; then
   echo -e "${GREEN}✓ TypeScript: no errors${NC}"
 else
   error_count=$(wc -l < "$TS_ERROR_FILE" 2>/dev/null || echo 0)
   echo -e "${RED}✗ TypeScript: $error_count error(s) found${NC}"
-  # Show per-file error summary
   for fpath in "${!TS_ERRORS[@]}"; do
     count=$(echo "${TS_ERRORS[$fpath]}" | wc -l | tr -d '[:space:]')
     echo -e "   ${RED}• $fpath — $count error(s)${NC}"
@@ -146,7 +186,6 @@ else
 fi
 echo ""
 
-# Find all page files (relative to project root where script runs)
 echo -e "${YELLOW}Checking Admin pages...${NC}"
 for f in $(find src/features/Admin/pages -name "*.tsx" 2>/dev/null | sort); do
   check_page "$f"

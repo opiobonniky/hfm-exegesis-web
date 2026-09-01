@@ -103,6 +103,24 @@ export interface DailyDevotionItem {
   isPublished: boolean;
 }
 
+export interface DailyDevotionDetailData extends DailyDevotionItem {
+  explanation?: string | null;
+  application?: string | null;
+  verseIntroduction?: string | null;
+  learnMore?: string | null;
+  backgroundAuthor?: string | null;
+  backgroundBook?: string | null;
+  backgroundContext?: string | null;
+  wordStudies?: string | null;
+  practicalApplications?: string | null;
+  keyThemes?: string | null;
+  crossReferences?: string | null;
+  finalThoughts?: string | null;
+  takeaways?: string | null;
+  createdOn?: string | null;
+  updatedOn?: string | null;
+}
+
 export interface DailyDevotionResponse {
   content: DailyDevotionItem[];
   currentPage: number;

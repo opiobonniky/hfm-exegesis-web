@@ -15,7 +15,7 @@ export default function DailyVerse() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8 space-y-8" dir={p.isRtl ? "rtl" : "ltr"}>
-      <DailyVerseHeader onAdd={() => p.navigate("/add-daily-verse")} />
+      <DailyVerseHeader onAdd={p.openAddVerse} />
 
       <VerseFilterBar
         fromDate={p.fromDate}
@@ -44,7 +44,7 @@ export default function DailyVerse() {
         selectedIndex={p.selectedIndex}
         isAdmin={p.isAdmin}
         onSelect={p.setSelectedIndex}
-        onView={(v) => p.navigate(`/daily-verse-detail?verse=${encodeURIComponent(JSON.stringify(v))}`)}
+        onView={p.openVerseDetails}
         onEdit={p.openEdit}
         onDelete={p.openDelete}
         page={p.page}
@@ -86,7 +86,7 @@ export default function DailyVerse() {
 
       <ConflictVerseDialog
         open={p.conflictDialog.open}
-        onOpenChange={(o) => p.setConflictDialog({ ...p.conflictDialog, open: o })}
+        onOpenChange={p.setConflictOpen}
         conflict={p.conflictDialog.conflict}
         t={p.t}
         onUpdate={p.handleConflictUpdate}
