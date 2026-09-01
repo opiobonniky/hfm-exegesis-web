@@ -76,11 +76,7 @@ const adminNavItems: NavItem[] = [
     url: routes.readingPlans.path,
     icon: BookOpen,
   },
-  {
-    title: "sidebar.readingPlansAdmin",
-    url: routes.adminReadingPlans.path,
-    icon: BookOpen,
-  },
+ 
   {
     title: "sidebar.studyTools",
     url: routes.adminStudyTools.path,

@@ -70,7 +70,6 @@ const VerseExplanationDetail = lazy(() => import("@/features/Admin/pages/VerseEx
 const BookPrologueDetail = lazy(() => import("@/features/Admin/pages/BookPrologueDetail"));
 const JournalEntryAdminDetail = lazy(() => import("@/features/Admin/pages/JournalEntryAdminDetail"));
 const AdminReadingPlanDetail = lazy(() => import("@/features/Admin/pages/AdminReadingPlanDetail"));
-const AdminReadingPlans = lazy(() => import("@/features/Admin/pages/AdminReadingPlans"));
 const ExtendedProfile = lazy(() => import("@/features/ExtendedProfile/pages/ExtendedProfile"));
 const VoiceSettings = lazy(() => import("@/features/VoiceSettings/pages/VoiceSettings"));
 const ReadingSettings = lazy(() => import("@/features/ReadingSettings/pages/ReadingSettings"));
@@ -599,13 +598,6 @@ export const routes = {
     isProtected: true,
     requiresLayout: true,
     title: "Create User",
-  },
-  adminReadingPlans: {
-    path: "/admin/reading-plans",
-    component: AdminReadingPlans,
-    isProtected: true,
-    requiresLayout: true,
-    title: "Reading Plans Manager",
   },
   adminReadingPlanDetail: {
     path: "/admin/reading-plans/:planId",

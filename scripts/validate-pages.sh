@@ -12,6 +12,8 @@
 #      — types belong in types.ts
 #   5. Pages must NOT define constants (const UPPER_CASE = ..., const XxxArray = [...], etc.)
 #      — constants belong in constants.ts
+#   6. Pages must NOT have TypeScript errors (type mismatches, missing properties, etc.)
+#      — run `npx tsc --noEmit` and check for errors in each page file
 #
 # Usage: bash scripts/validate-pages.sh
 # Exit code: 0 if all pages pass, 1 if any fail
@@ -28,14 +30,40 @@ FAIL=0
 WARN=0
 FAILED_FILES=()
 
+# ── Run TypeScript check once and cache errors per file ──
+TS_ERROR_FILE=$(mktemp)
+if npx tsc --noEmit 2>"$TS_ERROR_FILE"; then
+  TS_CLEAN=true
+else
+  TS_CLEAN=false
+fi
+
+# Build associative array: file -> list of error lines
+declare -A TS_ERRORS
+if [ "$TS_CLEAN" = false ] && [ -s "$TS_ERROR_FILE" ]; then
+  while IFS= read -r line; do
+    # Extract file path from lines like: src/features/X/pages/Y.tsx(10,5): error TS2339: ...
+    fpath=$(echo "$line" | grep -oP '^\S+\.tsx' || true)
+    if [ -n "$fpath" ]; then
+      # Get just the filename portion for matching
+      fname=$(basename "$fpath")
+      if [ -z "${TS_ERRORS[$fpath]+x}" ]; then
+        TS_ERRORS[$fpath]="$line"
+      else
+        TS_ERRORS[$fpath]="${TS_ERRORS[$fpath]}
+$line"
+      fi
+    fi
+  done < "$TS_ERROR_FILE"
+fi
+rm -f "$TS_ERROR_FILE"
+
 check_page() {
   local file="$1"
   local relpath="$file"
   local issues=()
 
   # Rule 1: Check for raw HTML tags (not inside comments or strings)
-  # Match common HTML tags that should be components instead
-  html_tags=$(grep -nE '<(div|span|p |h1|h2|h3|h4|h5|h6|button|input|select|textarea|label|img|table|tr|td|th|thead|tbody|form|section|article|nav|header|footer|main|aside|br|hr|a )\b' "$file" 2>/dev/null | grep -v '^\s*//' | grep -v 'className=' | head -20 || true)
   # More lenient: just check for <div which is the most common raw HTML
   div_count=$(grep -cE '<div\b' "$file" 2>/dev/null || true)
   div_count=${div_count:-0}
@@ -63,9 +91,6 @@ check_page() {
   fi
 
   # Rule 5: Check for inline constant definitions (should be in constants.ts)
-  # Matches: const UPPER_CASE =, const SomeArray = [...], const SomeObject = {...},
-  #          const FALLBACK =, const SLIDES =, const CATEGORY_META =, etc.
-  # Allows: const h = useXxxPage(), const p = useXxx(), imports, return statements
   constants=$(grep -nE '^\s*(export\s+)?const\s+[A-Z][A-Z_0-9]+\s*=' "$file" 2>/dev/null | grep -v 'import\|//' | head -5 || true)
   constants2=$(grep -nE '^\s*(export\s+)?const\s+[A-Z][a-zA-Z]+\s*=\s*(\[|\{|\`)' "$file" 2>/dev/null | grep -v 'import\|//\|use[A-Z]' | head -5 || true)
   all_constants=""
@@ -73,6 +98,19 @@ check_page() {
   if [ -n "$constants2" ]; then all_constants="$all_constants\n$constants2"; fi
   if [ -n "$all_constants" ]; then
     issues+=("RULE5: Contains inline constants (move to constants.ts)")
+  fi
+
+  # Rule 6: Check for TypeScript errors in this file
+  if [ "$TS_CLEAN" = false ]; then
+    local file_errors="${TS_ERRORS[$file]:-}"
+    if [ -n "$file_errors" ]; then
+      local error_count
+      error_count=$(echo "$file_errors" | wc -l | tr -d '[:space:]')
+      # Extract first error message (trimmed)
+      local first_error
+      first_error=$(echo "$file_errors" | head -1 | sed 's/^.*error TS[0-9]*: //' | head -c 120)
+      issues+=("RULE6: Has $error_count TypeScript error(s) — e.g. $first_error")
+    fi
   fi
 
   if [ ${#issues[@]} -eq 0 ]; then
@@ -92,6 +130,20 @@ echo "════════════════════════�
 echo " Page Validator — Clean Compositor Pattern"
 echo " Exemplar: DailyVerse.tsx / DailyDevotions.tsx"
 echo "═══════════════════════════════════════════════════════════"
+echo ""
+
+# Show TypeScript check status
+if [ "$TS_CLEAN" = true ]; then
+  echo -e "${GREEN}✓ TypeScript: no errors${NC}"
+else
+  error_count=$(wc -l < "$TS_ERROR_FILE" 2>/dev/null || echo 0)
+  echo -e "${RED}✗ TypeScript: $error_count error(s) found${NC}"
+  # Show per-file error summary
+  for fpath in "${!TS_ERRORS[@]}"; do
+    count=$(echo "${TS_ERRORS[$fpath]}" | wc -l | tr -d '[:space:]')
+    echo -e "   ${RED}• $fpath — $count error(s)${NC}"
+  done
+fi
 echo ""
 
 # Find all page files (relative to project root where script runs)

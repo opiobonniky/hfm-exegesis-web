@@ -6,22 +6,23 @@ import { useVerseExplanationsPage } from "../hooks/useVerseExplanationsPage";
 import ExplanationList from "../components/ExplanationList";
 import { PageHeader } from "@/components/PageHeader";
 import { DeleteConfirmDialog } from "../components/DeleteConfirmDialog";
+import { BiblePageLayout, BiblePageInner, DeletePreview } from "../components";
 
 const VerseExplanations = () => {
   const h = useVerseExplanationsPage();
 
   return (
-    <div className="min-h-screen bg-background" dir={h.t.layoutDirection === "rtl" ? "rtl" : "ltr"}>
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4">
+    <BiblePageLayout isRtl={h.t.layoutDirection === "rtl"}>
+      <BiblePageInner>
         <PageHeader
           title={h.t.verseExplanations?.title || "Verse Explanations"}
           subtitle={`${h.explanations.length} explanations`}
           onBack={() => h.goToAdd()}
           action={<Button size="sm" onClick={h.goToAdd} className="gap-1.5 text-xs">+ Add</Button>}
         />
-      </div>
+      </BiblePageInner>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6">
+      <BiblePageInner className="py-6">
         <ExplanationList
           explanations={h.explanations} filtered={h.filtered} loading={h.loading}
           search={h.search} bookFilter={h.bookFilter} isAdmin={h.isAdmin}
@@ -30,7 +31,7 @@ const VerseExplanations = () => {
           onDelete={h.setDeleteTarget}
           onAddFirst={h.goToAdd}
         />
-      </div>
+      </BiblePageInner>
 
       <DeleteConfirmDialog
         open={!!h.deleteTarget}
@@ -41,13 +42,13 @@ const VerseExplanations = () => {
         onClose={() => h.setDeleteTarget(null)}
       >
         {h.deleteTarget && (
-          <div className="rounded-lg border bg-muted/30 p-3">
-            <p className="font-semibold text-sm">{h.deleteTarget.bookName} {h.deleteTarget.chapter}:{h.deleteTarget.verseNumber}</p>
-            <p className="text-xs text-muted-foreground line-clamp-2 mt-1">{h.deleteTarget.explanation}</p>
-          </div>
+          <DeletePreview
+            title={`${h.deleteTarget.bookName} ${h.deleteTarget.chapter}:${h.deleteTarget.verseNumber}`}
+            description={h.deleteTarget.explanation}
+          />
         )}
       </DeleteConfirmDialog>
-    </div>
+    </BiblePageLayout>
   );
 };
 
