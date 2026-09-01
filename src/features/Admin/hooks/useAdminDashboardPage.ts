@@ -14,7 +14,7 @@ export function useAdminDashboardPage() {
       if (res.returnCode === 200) setStats(res.returnData);
     } catch (e) { handleError(e, "load dashboard stats"); }
     finally { setLoading(false); }
-  }, [handleError]);
+  }, []);
 
   useEffect(() => { loadStats(); }, [loadStats]);
 
