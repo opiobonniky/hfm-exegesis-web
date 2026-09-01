@@ -1,14 +1,15 @@
 // DailyVerseDetail — read-only detail view for a daily verse
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { BookOpen, Lightbulb, Tag, Layers, BookMarked } from "lucide-react";
 import {
-  ArrowLeft, Calendar, BookOpen, Edit3, Tag,
-  MessageSquare, Lightbulb, Layers, BookMarked,
-  Clock, CheckCircle, XCircle,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { TextBlock, ListBlock, WordStudiesBlock } from "../components";
-import { parseList, fmtDate } from "../helpers/contentDetailHelpers";
+  DailyContentDetailHeader,
+  DailyContentDetailEmpty,
+  DailyContentDetailMeta,
+  TextBlock,
+  ListBlock,
+  WordStudiesBlock,
+} from "../components";
+import { parseList } from "../helpers/contentDetailHelpers";
 
 export default function DailyVerseDetail() {
   const navigate = useNavigate();
@@ -20,12 +21,12 @@ export default function DailyVerseDetail() {
 
   if (!verse) {
     return (
-      <div className="min-h-full flex flex-col items-center justify-center bg-background gap-4 text-center px-6">
-        <BookOpen className="w-12 h-12 text-muted-foreground/40" />
-        <h2 className="text-lg font-bold">Verse not found</h2>
-        <p className="text-sm text-muted-foreground">No verse data was provided.</p>
-        <Button variant="outline" onClick={() => navigate(-1)}>Go back</Button>
-      </div>
+      <DailyContentDetailEmpty
+        icon={BookOpen}
+        title="Verse not found"
+        message="No verse data was provided."
+        onBack={() => navigate(-1)}
+      />
     );
   }
 
@@ -33,39 +34,24 @@ export default function DailyVerseDetail() {
 
   return (
     <div className="min-h-full bg-background">
-      <header className="sticky top-0 z-30 bg-background/95 backdrop-blur-sm border-b border-border">
-        <div className="flex items-center gap-3 px-4 sm:px-6 py-3">
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate(-1)}>
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <div className="flex-1 min-w-0">
-            <h1 className="text-lg font-bold truncate">Daily Verse Detail</h1>
-            <p className="text-xs text-muted-foreground">{reference}</p>
-          </div>
-          <Button variant="outline" size="sm" onClick={() => navigate(`/add-daily-verse`, { state: { verse } })}>
-            <Edit3 className="w-3.5 h-3.5 mr-1.5" /> Edit
-          </Button>
-        </div>
-      </header>
+      <DailyContentDetailHeader
+        title="Daily Verse Detail"
+        subtitle={reference}
+        onBack={() => navigate(-1)}
+        onEdit={() => navigate(`/add-daily-verse`, { state: { verse } })}
+      />
 
       <div className="px-4 sm:px-6 py-6 max-w-3xl mx-auto space-y-6">
         <div className="space-y-2">
           <h2 className="text-2xl font-bold">{reference}</h2>
-          <div className="flex items-center gap-2 flex-wrap">
-            <Badge variant={verse.isPublished ? "default" : "secondary"}>
-              {verse.isPublished ? <><CheckCircle className="w-3 h-3 mr-1" /> Published</> : <><XCircle className="w-3 h-3 mr-1" /> Draft</>}
-            </Badge>
-            {verse.bibleVersion && <Badge variant="outline" className="text-xs">{verse.bibleVersion}</Badge>}
-          </div>
+          <DailyContentDetailMeta
+            isPublished={verse.isPublished}
+            extraBadge={verse.bibleVersion}
+            displayDate={verse.displayDate}
+            createdOn={verse.createdOn}
+            updatedOn={verse.updatedOn}
+          />
         </div>
-
-        <div className="flex items-center gap-4 text-xs text-muted-foreground">
-          <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> {fmtDate(verse.displayDate)}</span>
-          {verse.createdOn && <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> Created {fmtDate(verse.createdOn)}</span>}
-          {verse.updatedOn && <span>Updated {fmtDate(verse.updatedOn)}</span>}
-        </div>
-
-        <div className="h-px bg-border/40" />
 
         {verse.verseText && (
           <div className="rounded-xl bg-primary/5 border border-primary/10 px-5 py-4">

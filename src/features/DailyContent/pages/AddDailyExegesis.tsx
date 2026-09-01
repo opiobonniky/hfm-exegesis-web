@@ -6,18 +6,16 @@
  *         application, prayer, tags, displayDate, isPublished
  */
 import {
-  Sparkles, Save, BookOpen,
+  Sparkles, BookOpen,
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { useAddDailyExegesis } from "../hooks/useAddDailyExegesis";
-import { CollapsibleSection as Section } from "../components";
+import { CollapsibleSection as Section, DailyContentPageHeader, DailyContentFormActions } from "../components";
 
 const AddDailyExegesis = () => {
   const h = useAddDailyExegesis();
@@ -25,23 +23,13 @@ const AddDailyExegesis = () => {
   return (
     <div dir={h.isRtl ? "rtl" : "ltr"} className="min-h-screen bg-gradient-to-b from-background to-muted/30 p-6 lg:p-10">
       <div className="max-w-4xl mx-auto space-y-8">
-        {/* Header */}
-        <div className="flex items-center gap-4">
-          <Link to="/daily-exegesis" className="text-muted-foreground hover:text-foreground inline-flex items-center gap-2">
-            ← {h.t.common.back}
-          </Link>
-          <div className="flex items-center gap-3">
-            <div className="w-14 h-14 rounded-2xl bg-accent/10 flex items-center justify-center shadow-sm">
-              <Sparkles className="h-7 w-7 text-accent" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight text-gradient">
-                {h.isEditing ? "Edit Exegesis" : "Add Daily Exegesis"}
-              </h1>
-              <p className="text-muted-foreground">Teach, explain, and apply Scripture with rich context</p>
-            </div>
-          </div>
-        </div>
+        <DailyContentPageHeader
+          backTo="/daily-exegesis"
+          backLabel={h.t.common.back}
+          icon={Sparkles}
+          title={h.isEditing ? "Edit Exegesis" : "Add Daily Exegesis"}
+          subtitle="Teach, explain, and apply Scripture with rich context"
+        />
 
         {/* Form Card */}
         <Card className="border-border/40 shadow-md">
@@ -157,20 +145,13 @@ const AddDailyExegesis = () => {
                 </div>
               </Section>
 
-              {/* Actions */}
-              <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-4 border-t">
-                <Button type="button" variant="ghost" asChild>
-                  <Link to="/daily-exegesis">{h.t.common.cancel}</Link>
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={h.saveDisabled}
-                  className="bg-gradient-to-r from-primary to-primary/90 shadow-md"
-                >
-                  <Save className="h-4 w-4 mr-2" />
-                  {h.isEditing ? "Update Exegesis" : "Create Exegesis"}
-                </Button>
-              </div>
+              <DailyContentFormActions
+                cancelTo="/daily-exegesis"
+                cancelLabel={h.t.common.cancel}
+                saveLabel={h.isEditing ? "Update Exegesis" : "Create Exegesis"}
+                disabled={h.saveDisabled}
+                onSave={h.handleSave}
+              />
             </form>
           </CardContent>
         </Card>

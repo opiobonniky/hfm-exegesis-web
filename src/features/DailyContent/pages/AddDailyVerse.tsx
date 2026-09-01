@@ -5,14 +5,14 @@
  * All state in useAddDailyVerse hook, UI split into section components.
  */
 import {
-  Sun, Save, BookOpen, AlertTriangle,
+  Sun, BookOpen, AlertTriangle,
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
   DialogDescription, DialogFooter,
@@ -21,6 +21,7 @@ import { useAddDailyVerse } from "../hooks/useAddDailyVerse";
 import {
   VerseReferenceSection, VerseTextArea, RequiredContentFields,
   BackgroundSection, StructuredContentSection, CollapsibleSection as Section,
+  DailyContentPageHeader, DailyContentFormActions,
 } from "../components";
 import { routes } from "@/components/Routes/routes";
 
@@ -31,22 +32,14 @@ const AddDailyVerse = () => {
   return (
     <div dir={h.isRtl ? "rtl" : "ltr"} className="min-h-screen bg-gradient-to-b from-background to-muted/30 p-6 lg:p-10">
       <div className="max-w-7xl mx-auto space-y-8">
-        {/* ── Header ── */}
-        <div className="fade-up flex items-center gap-4">
-          <Link to={routes.dashboard.path} className="text-muted-foreground hover:text-foreground inline-flex items-center gap-2">
-            ← {h.t.common.back}
-          </Link>
-          <div className="flex items-center gap-3">
-            <div className="w-14 h-14 rounded-2xl bg-accent/10 flex items-center justify-center shadow-sm">
-              <Sun className="h-7 w-7 text-accent" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight text-gradient">
-                {h.isEditing ? "Edit Daily Verse" : h.t.dailyVerse.addVerseTitle}
-              </h1>
-              <p className="text-muted-foreground">{h.t.dailyVerse.addVerseSubtitle}</p>
-            </div>
-          </div>
+        <div className="fade-up">
+          <DailyContentPageHeader
+            backTo={routes.dashboard.path}
+            backLabel={h.t.common.back}
+            icon={Sun}
+            title={h.isEditing ? "Edit Daily Verse" : h.t.dailyVerse.addVerseTitle}
+            subtitle={h.t.dailyVerse.addVerseSubtitle}
+          />
         </div>
 
         {/* ── Form Card ── */}
@@ -128,19 +121,13 @@ const AddDailyVerse = () => {
                 </div>
                 <Switch checked={h.published} onCheckedChange={h.setPublished} />
               </div>
-              <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
-                <Button type="button" variant="ghost" asChild>
-                  <Link to={routes.dailyVerse.path}>{h.t.common.cancel}</Link>
-                </Button>
-                <Button
-                  onClick={h.handleSave}
-                  disabled={h.saveDisabled}
-                  className="bg-gradient-to-r from-primary to-primary/90 shadow-md"
-                >
-                  <Save className="h-4 w-4 mr-2" />
-                  {h.t.dailyVerse.saveDailyVerse}
-                </Button>
-              </div>
+              <DailyContentFormActions
+                cancelTo={routes.dailyVerse.path}
+                cancelLabel={h.t.common.cancel}
+                saveLabel={h.t.dailyVerse.saveDailyVerse}
+                disabled={h.saveDisabled}
+                onSave={h.handleSave}
+              />
             </div>
           </CardContent>
         </Card>
