@@ -2,9 +2,9 @@
 // Cache-first for static assets, network-first for API calls, offline fallback.
 // In development (?dev=true), bypasses all caching to avoid stale HMR bundles.
 
-const CACHE_NAME = "exegesis-v3";
-const STATIC_CACHE = "exegesis-static-v3";
-const API_CACHE = "exegesis-api-v3";
+const CACHE_NAME = "exegesis-v4";
+const STATIC_CACHE = "exegesis-static-v4";
+const API_CACHE = "exegesis-api-v4";
 
 // Detect development mode: localhost or 127.0.0.1 → no caching.
 const IS_DEV = self.location.hostname === "localhost" || self.location.hostname === "127.0.0.1";

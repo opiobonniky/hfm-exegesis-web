@@ -7,9 +7,10 @@ interface Props {
   isSubmitting: boolean;
   dayNumber: number;
   onSubmit: () => void;
+  incompleteMessage?: string;
 }
 
-export function DailyCompletionButton({ isCompleted, canComplete, isSubmitting, dayNumber, onSubmit }: Props) {
+export function DailyCompletionButton({ isCompleted, canComplete, isSubmitting, dayNumber, onSubmit, incompleteMessage }: Props) {
   if (isCompleted) {
     return (
       <div className="flex items-center justify-center gap-2 p-4 rounded-2xl bg-green-500/5 border border-green-200">
@@ -20,22 +21,27 @@ export function DailyCompletionButton({ isCompleted, canComplete, isSubmitting, 
   }
 
   return (
-    <Button
-      onClick={onSubmit}
-      disabled={!canComplete || isSubmitting}
-      className="w-full h-12 rounded-2xl text-sm font-semibold"
-    >
-      {isSubmitting ? (
-        <span className="flex items-center gap-2">
-          <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-          Submitting...
-        </span>
-      ) : (
-        <span className="flex items-center gap-2">
-          <Send className="w-4 h-4" />
-          Complete Day {dayNumber}
-        </span>
+    <div className="space-y-2">
+      <Button
+        onClick={onSubmit}
+        disabled={!canComplete || isSubmitting}
+        className="w-full h-12 rounded-2xl text-sm font-semibold"
+      >
+        {isSubmitting ? (
+          <span className="flex items-center gap-2">
+            <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+            Submitting...
+          </span>
+        ) : (
+          <span className="flex items-center gap-2">
+            <Send className="w-4 h-4" />
+            Complete Day {dayNumber}
+          </span>
+        )}
+      </Button>
+      {!canComplete && incompleteMessage && (
+        <p className="text-center text-xs text-muted-foreground">{incompleteMessage}</p>
       )}
-    </Button>
+    </div>
   );
 }

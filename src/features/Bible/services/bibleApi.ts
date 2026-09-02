@@ -1,6 +1,13 @@
 // Bible bibleApi — API endpoints for bibleApi operations
 import { sendPostRequest } from "@/services/api";
 
+export interface LastReadPosition {
+  bookName: string;
+  chapter: number;
+  verseNumber: number;
+  createdOn: string | null;
+}
+
 export const bibleApi = {
   getHighlights: (page = 0, size = 50) =>
     sendPostRequest("bible", "get-highlights", { pageSize: size }),
@@ -10,6 +17,8 @@ export const bibleApi = {
     sendPostRequest("bible", "get-favorites", { pageSize: size }),
   getReadHistory: (page = 0, size = 50) =>
     sendPostRequest("bible", "get-read-history", { pageSize: size }),
+  getLastReadPosition: (bookName: string) =>
+    sendPostRequest<LastReadPosition | null>("bible", "get-last-read-position", { bookName }),
   search: (query: string, page = 0, size = 20) =>
     sendPostRequest("bible", "search", { query, page, size }),
   getVerseResources: (book: string, chapter: number, verse: number) =>

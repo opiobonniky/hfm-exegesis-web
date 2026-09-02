@@ -17,14 +17,16 @@ interface Props { chaptersRead: number; highlights: number; notes: number; journ
 export function StatCards({ chaptersRead, highlights, notes, journalEntries, favorites }: Props) {
   const values = [chaptersRead, highlights, notes, journalEntries, favorites];
   return (
-    <div className="grid grid-cols-5 gap-2 sm:gap-3">
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
       {STATS.map((s, i) => (
-        <div key={s.label} className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-card border border-border/50">
-          <div className={cn("w-8 h-8 rounded-xl flex items-center justify-center", s.bg)}>
+        <div key={s.label} className="flex items-center gap-3 rounded-2xl border border-border/60 bg-card p-3 shadow-sm last:col-span-2 sm:last:col-span-1 sm:flex-col sm:justify-center sm:gap-1.5 sm:p-4">
+          <div className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-xl", s.bg)}>
             <s.icon className={cn("w-4 h-4", s.color)} />
           </div>
-          <span className="text-sm sm:text-base font-bold text-foreground">{values[i]}</span>
-          <span className="text-[10px] text-muted-foreground/60 font-medium">{s.label}</span>
+          <div className="sm:text-center">
+            <span className="block text-base font-bold text-foreground">{values[i]}</span>
+            <span className="text-[10px] font-medium text-muted-foreground">{s.label}</span>
+          </div>
         </div>
       ))}
     </div>

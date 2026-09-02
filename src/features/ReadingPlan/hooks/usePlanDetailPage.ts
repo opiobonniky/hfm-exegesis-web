@@ -3,7 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/components/languages/languageProvider";
-import { sendPostRequest } from "@/services/api";
+import { useReadingPlanApi } from "../services";
+import type { PlanDetail, PlanDetailDay } from "../types";
 
 
 export function usePlanDetailPage() {
@@ -13,9 +14,11 @@ export function usePlanDetailPage() {
   const { userInfo } = useAuth();
   const { t, isRtl, lang } = useLanguage();
   const isAdmin = userInfo?.userRole === 1;
-  const [plan, setPlan] = useState<any>(null);
+  const api = useReadingPlanApi();
+
+  const [plan, setPlan] = useState<PlanDetail | null>(null);
   const [adminStats, setAdminStats] = useState<any>(null);
-  const [days, setDays] = useState<any[]>([]);
+  const [days, setDays] = useState<PlanDetailDay[]>([]);
   const [loadingPlan, setLoadingPlan] = useState(true);
   const [loadingAdminStats, setLoadingAdminStats] = useState(false);
   const [userSearchTerm, setUserSearchFilter] = useState("");
@@ -36,27 +39,27 @@ export function usePlanDetailPage() {
   }, [plan?.completed_days_json]);
 
   const loadAdminStats = useCallback(async () => {
-    if (!isAdmin) return;
+    if (!isAdmin || !planId) return;
     setLoadingAdminStats(true);
     try {
-      const resp = await sendPostRequest("reading-plans", "admin-stats", { planId: planId ?? "" });
+      const resp = await api.getAdminStats(planId);
       if (resp.returnCode === 200) setAdminStats(resp.returnData);
     } catch (e) {
       console.error("Admin stats error:", e);
     } finally {
       setLoadingAdminStats(false);
     }
-  }, [planId, isAdmin]);
+  }, [planId, isAdmin, api]);
 
   const loadPlan = useCallback(async () => {
     setLoadingPlan(true);
     try {
-      const resp = await sendPostRequest("reading-plans", "plan-detail", { planId: planId ?? "" });
+      const resp = await api.getPlanDetail(planId ?? "");
       if (resp.returnCode === 200 && resp.returnData) {
         const data = resp.returnData;
         setPlan(data);
         if (data.days && Array.isArray(data.days)) {
-          const mapped = data.days.map((d: any) => ({
+          const mapped: PlanDetailDay[] = data.days.map((d: any) => ({
             dayNumber: d.dayNumber ?? d.day_number,
             chapters: d.chapters ?? (d.book ? [{ book: d.book, chapter: d.chapterStart ?? d.chapter }] : []),
             reflectionQuestions: d.reflectionQuestions ?? d.reflection_questions ?? [],
@@ -74,7 +77,7 @@ export function usePlanDetailPage() {
     } finally {
       setLoadingPlan(false);
     }
-  }, [planId, toast, isAdmin, loadAdminStats, t]);
+  }, [planId, toast, isAdmin, loadAdminStats, t, api]);
 
   useEffect(() => { loadPlan(); }, [loadPlan]);
 
@@ -106,12 +109,37 @@ export function usePlanDetailPage() {
   }, [displayAnsweredQuestions, displayCorrectAnswers]);
 
   return {
-    plan, adminStats, days, loadingPlan, loadingAdminStats,
-    userSearchTerm, setUserSearchFilter, activeTab, setActiveTab,
-    filteredUsers, completedDayNums, totalReflections, configuredDays,
-    allQuizDays, totalQuizCount, configuredPct,
-    loadingMessage, planNotFoundMessage,
-    pct, displayQuizAccuracy, displayAnsweredQuestions, displayCorrectAnswers, displayWrongAnswers,
-    isAdmin, navigate, t, isRtl, lang,
+    data: {
+      plan,
+      adminStats,
+      days,
+      loadingPlan,
+      loadingAdminStats,
+      userSearchTerm,
+      activeTab,
+      filteredUsers,
+      completedDayNums,
+      totalReflections,
+      configuredDays,
+      allQuizDays,
+      totalQuizCount,
+      configuredPct,
+      loadingMessage,
+      planNotFoundMessage,
+      pct,
+      displayQuizAccuracy,
+      displayAnsweredQuestions,
+      displayCorrectAnswers,
+      displayWrongAnswers,
+      isAdmin,
+      navigate,
+      t,
+      isRtl,
+      lang,
+    },
+    actions: {
+      setUserSearchFilter,
+      setActiveTab,
+    },
   };
 }

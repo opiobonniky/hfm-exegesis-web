@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/components/languages/languageProvider";
-import { sendPostRequest } from "@/services/api";
+import { useReadingPlanApi } from "../services";
 import type { DayAssignment, QuizQuestion } from "../types";
 
 export interface PlanMeta {
@@ -39,6 +39,7 @@ export function useAddReadingPlanPage() {
   const { toast } = useToast();
   const { t, isRtl } = useLanguage();
   const navigate = useNavigate();
+  const api = useReadingPlanApi();
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const [meta, setMeta] = useState<PlanMeta>({
@@ -105,7 +106,7 @@ export function useAddReadingPlanPage() {
   const handleSubmit = async () => {
     setSubmitting(true);
     try {
-      const planRes = await sendPostRequest("reading-plans", "create", {
+      const planRes = await api.createPlan({
         title: meta.title,
         description: meta.description,
         totalDays: meta.totalDays,
@@ -119,8 +120,27 @@ export function useAddReadingPlanPage() {
       }
       const planId = planRes.returnData?.planId;
       const completedDays = days.filter(isDayComplete);
-      if (completedDays.length > 0) {
-        await sendPostRequest("reading-plans", "save-days", { planId, days: completedDays });
+      for (const d of completedDays) {
+        await api.addAssignment({
+          planId,
+          dayNumber: d.dayNumber,
+          title: d.title,
+          chapters: d.chapters.map((c) => ({ book: c.book, chapter: c.chapter })),
+          reflectionQuestions: d.reflectionQuestions.filter((r) => r.trim().length > 0),
+        });
+        const quizQs = d.quizQuestions.filter((q) => q.question.trim());
+        if (quizQs.length > 0) {
+          await api.addQuizQuestions({
+            planId,
+            dayNumber: d.dayNumber,
+            questions: quizQs.map((q) => ({
+              question: q.question,
+              options: q.options,
+              correctAnswer: q.correctAnswer,
+              explanation: q.explanation,
+            })),
+          });
+        }
       }
       toast({ title: t.readingPlan?.planCreated || "Plan created", description: t.readingPlan?.planCreated || "Plan created successfully" });
       navigate("/admin/plans");
@@ -132,7 +152,24 @@ export function useAddReadingPlanPage() {
   };
 
   return {
-    step, setStep, submitting, meta, updateMeta, days, expandedDay, setExpandedDay,
-    handleUpdateDay, goToStep2, goToStep3, handleSubmit, navigate, t, isRtl,
+    data: {
+      step,
+      submitting,
+      meta,
+      days,
+      expandedDay,
+      navigate,
+      t,
+      isRtl,
+    },
+    actions: {
+      setStep,
+      updateMeta,
+      setExpandedDay,
+      handleUpdateDay,
+      goToStep2,
+      goToStep3,
+      handleSubmit,
+    },
   };
 }

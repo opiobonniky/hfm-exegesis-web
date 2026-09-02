@@ -1,43 +1,40 @@
-// ExploreGrid — 6-item gradient grid for dashboard explore
-import { BookOpen, Sun, CalendarDays, Microscope, Trophy, PenLine } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { ArrowUpRight, BookOpen, CalendarDays, Microscope, PenLine, Sun, Trophy } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { routes } from "@/components/Routes/routes";
-import { useMemo } from "react";
 
 const ITEMS = [
-  { label: "Bible Reader", sub: "Read & study", icon: BookOpen, gradient: "from-blue-500 to-blue-600", route: routes.bibleReader.path },
-  { label: "Daily Verse", sub: "Today's word", icon: Sun, gradient: "from-amber-500 to-orange-500", route: routes.userDailyVerse.path },
-  { label: "Reading Plans", sub: "Guided journeys", icon: CalendarDays, gradient: "from-emerald-500 to-teal-500", route: routes.userPlans.path },
-  { label: "Word Study", sub: "Dictionary", icon: Microscope, gradient: "from-violet-500 to-purple-600", route: routes.dictionary.path },
-  { label: "Bible Trivia", sub: "Test knowledge", icon: Trophy, gradient: "from-rose-500 to-pink-500", route: routes.trivia.path },
-  { label: "My Journal", sub: "Reflect & write", icon: PenLine, gradient: "from-green-500 to-emerald-500", route: routes.journal.path },
+  { label: "Bible Reader", sub: "Read and study", icon: BookOpen, tone: "bg-blue-500/10 text-blue-600 dark:text-blue-400", route: routes.bibleReader.path },
+  { label: "Daily Verse", sub: "Today's word", icon: Sun, tone: "bg-amber-500/10 text-amber-600 dark:text-amber-400", route: routes.userDailyVerse.path },
+  { label: "Reading Plans", sub: "Guided journeys", icon: CalendarDays, tone: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400", route: routes.userPlans.path },
+  { label: "Word Study", sub: "Explore meaning", icon: Microscope, tone: "bg-violet-500/10 text-violet-600 dark:text-violet-400", route: routes.dictionary.path },
+  { label: "Bible Trivia", sub: "Test knowledge", icon: Trophy, tone: "bg-rose-500/10 text-rose-600 dark:text-rose-400", route: routes.trivia.path },
+  { label: "My Journal", sub: "Reflect and write", icon: PenLine, tone: "bg-teal-500/10 text-teal-600 dark:text-teal-400", route: routes.journal.path },
 ];
 
 export function ExploreGrid() {
   const navigate = useNavigate();
+
   return (
     <section>
-      <h2 className="text-xs font-bold text-muted-foreground/50 uppercase tracking-[0.12em] mb-4">Explore</h2>
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+      <div className="mb-4">
+        <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">Explore</p>
+        <h2 className="mt-1 text-xl font-bold tracking-tight">Where would you like to begin?</h2>
+      </div>
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         {ITEMS.map((item) => (
           <button
             key={item.label}
             onClick={() => navigate(item.route)}
-            className={cn(
-              "group relative overflow-hidden rounded-2xl p-4 sm:p-5 text-start transition-all",
-              "hover:shadow-xl hover:-translate-y-0.5 active:scale-[0.97]",
-              `bg-gradient-to-br ${item.gradient}`,
-            )}
+            className="group rounded-2xl border border-border/60 bg-card p-4 text-start shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-lg sm:p-5"
           >
-            <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent pointer-events-none" />
-            <div className="relative">
-              <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center mb-3">
-                <item.icon className="w-5 h-5 text-white" strokeWidth={1.8} />
+            <div className="mb-5 flex items-start justify-between">
+              <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${item.tone}`}>
+                <item.icon className="h-5 w-5" strokeWidth={1.8} />
               </div>
-              <p className="font-bold text-sm text-white leading-tight">{item.label}</p>
-              <p className="text-[11px] text-white/50 mt-0.5 hidden sm:block">{item.sub}</p>
+              <ArrowUpRight className="h-4 w-4 text-muted-foreground/30 transition-colors group-hover:text-primary" />
             </div>
+            <p className="text-sm font-bold leading-tight text-foreground">{item.label}</p>
+            <p className="mt-1 text-xs text-muted-foreground">{item.sub}</p>
           </button>
         ))}
       </div>

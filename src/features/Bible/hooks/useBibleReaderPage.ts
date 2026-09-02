@@ -20,6 +20,10 @@ import type {
 const MIN_FONT_SIZE = 12;
 const MAX_FONT_SIZE = 40;
 const DEFAULT_FONT_SIZE = 20;
+const parseRequestedChapter = (value: string | null) => {
+  const chapter = Number.parseInt(value || "", 10);
+  return Number.isFinite(chapter) && chapter > 0 ? chapter : null;
+};
 function getInitialFontSize(): number {
   try {
     const stored = Number.parseInt(
@@ -53,7 +57,11 @@ export function useBibleReaderPage() {
   }, [searchParams, reader.selectedBook, navigate]);
   const lastFocusedVerseRef = useRef<string | null>(null);
   const scrollAnimationRef = useRef<number | null>(null);
-  const pendingChapterRef = useRef<string | null>(null);
+  const pendingChapterRef = useRef<string | null>((() => {
+    const book = searchParams.get("book");
+    const chapter = parseRequestedChapter(searchParams.get("chapter"));
+    return book && chapter ? `${book}-${chapter}` : null;
+  })());
   const loadedPassageRef = useRef<string | null>(null);
   const visibleChapterRef = useRef(reader.selectedChapter);
   const { chapters, chapterRefs, setVisibleChapter } = reader;

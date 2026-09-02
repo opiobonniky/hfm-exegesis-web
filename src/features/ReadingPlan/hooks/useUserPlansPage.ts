@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/components/languages/languageProvider";
-import { sendPostRequest } from "@/services/api";
+import { useReadingPlanApi } from "../services";
 
 export interface UserPlanReadingPlan {
   planId: string; title: string; description: string; totalDays?: number;
@@ -19,6 +19,7 @@ export function useUserPlansPage() {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { t, isRtl } = useLanguage();
+  const api = useReadingPlanApi();
   const [activeTab, setActiveTab] = useState<"progress" | "browse">("progress");
   const [allPlans, setAllPlans] = useState<UserPlanReadingPlan[]>([]);
   const [userPlans, setUserPlans] = useState<UserPlan[]>([]);
@@ -30,15 +31,15 @@ export function useUserPlansPage() {
     setLoading(true);
     try {
       const [allRes, userRes] = await Promise.all([
-        sendPostRequest("reading-plans", "get-all", {}),
-        sendPostRequest("reading-plans", "get-user-plans", {}),
+        api.getAllPlans({}),
+        api.getUserPlans(),
       ]);
       if (allRes.returnCode === 200) {
         const plansData = allRes.returnData?.plans ?? allRes.returnData;
         setAllPlans(Array.isArray(plansData) ? plansData : []);
       }
       if (userRes.returnCode === 200 && Array.isArray(userRes.returnData)) {
-        setUserPlans(userRes.returnData);
+        setUserPlans(userRes.returnData as unknown as UserPlan[]);
       }
     } catch { /* ignore */ } finally {
       setLoading(false);
@@ -49,7 +50,7 @@ export function useUserPlansPage() {
 
   const startPlan = useCallback(async (planId: string) => {
     try {
-      const res = await sendPostRequest("reading-plans", "start", { planId });
+      const res = await api.startPlan(planId);
       if (res.returnCode === 200) {
         toast({ title: t.readingPlan?.toastStarted || "Plan started!" });
         await loadData();
@@ -59,24 +60,40 @@ export function useUserPlansPage() {
     } catch {
       toast({ title: t.common?.error || "Error", variant: "destructive" });
     }
-  }, [toast, t, loadData]);
+  }, [toast, t, loadData, api]);
 
   const removePlan = useCallback(async (planId: string) => {
     try {
-      const res = await sendPostRequest("reading-plans", "remove", { planId });
+      const res = await api.removePlan(planId);
       if (res.returnCode === 200) {
         toast({ title: t.readingPlan?.toastRemoved || "Plan removed" });
         setRemoveModal(null);
         await loadData();
       }
     } catch { /* ignore */ }
-  }, [toast, t, loadData]);
+  }, [toast, t, loadData, api]);
 
   const filteredPlans = allPlans.filter((p) => catFilter === "all" || p.category === catFilter);
 
   return {
-    activeTab, setActiveTab, allPlans, userPlans, loading, catFilter, setCatFilter,
-    removeModal, setRemoveModal, startPlan, removePlan, filteredPlans,
-    navigate, t, isRtl,
+    data: {
+      activeTab,
+      allPlans,
+      userPlans,
+      loading,
+      catFilter,
+      removeModal,
+      filteredPlans,
+      navigate,
+      t,
+      isRtl,
+    },
+    actions: {
+      setActiveTab,
+      setCatFilter,
+      setRemoveModal,
+      startPlan,
+      removePlan,
+    },
   };
 }

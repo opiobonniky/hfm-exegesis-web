@@ -11,51 +11,50 @@ import { PlanQuizTab } from "../components/PlanQuizTab";
 import { PageLoadingState } from "../components";
 
 const PlanDetail = () => {
-  const h = usePlanDetailPage();
+  const { data, actions } = usePlanDetailPage();
 
-  if (h.loadingPlan) {
-    return <PageLoadingState message={h.loadingMessage} />;
+  if (data.loadingPlan) {
+    return <PageLoadingState message={data.loadingMessage} />;
   }
 
-  if (!h.plan) {
-    return <PageLoadingState message={h.planNotFoundMessage} />;
+  if (!data.plan) {
+    return <PageLoadingState message={data.planNotFoundMessage} />;
   }
 
 
   return (
     <Gate tier="legacy_sower" featureName="Reading Plans" featureDescription="View reading plan details.">
-      <PageLayout isRtl={h.isRtl} accentColor="primary">
+      <PageLayout isRtl={data.isRtl} accentColor="primary">
         <PlanDetailHeader
-          plan={h.plan} isAdmin={h.isAdmin} isRtl={h.isRtl} lang={h.lang} activeTab={h.activeTab}
-          setActiveTab={h.setActiveTab} navigate={h.navigate} t={h.t} pct={h.pct}
-          displayQuizAccuracy={h.displayQuizAccuracy} displayAnsweredQuestions={h.displayAnsweredQuestions}
-          displayCorrectAnswers={h.displayCorrectAnswers} displayWrongAnswers={h.displayWrongAnswers}
-          totalReflections={h.totalReflections} configuredDays={h.configuredDays} configuredPct={h.configuredPct}
-          totalQuizCount={h.totalQuizCount}
+          plan={data.plan} isAdmin={data.isAdmin} isRtl={data.isRtl} lang={data.lang} activeTab={data.activeTab}
+          setActiveTab={actions.setActiveTab} navigate={data.navigate} t={data.t} pct={data.pct}
+          displayQuizAccuracy={data.displayQuizAccuracy} displayAnsweredQuestions={data.displayAnsweredQuestions}
+          displayCorrectAnswers={data.displayCorrectAnswers} displayWrongAnswers={data.displayWrongAnswers}
+          totalReflections={data.totalReflections} configuredDays={data.configuredDays} configuredPct={data.configuredPct}
+          totalQuizCount={data.totalQuizCount}
         />
 
-        {h.activeTab === "overview" && (
-          <PlanOverviewTab plan={h.plan} lang={h.lang} isAdmin={h.isAdmin} adminStats={h.adminStats}
-            displayQuizAccuracy={h.displayQuizAccuracy} displayAnsweredQuestions={h.displayAnsweredQuestions}
-            displayCorrectAnswers={h.displayCorrectAnswers} displayWrongAnswers={h.displayWrongAnswers}
-            totalReflections={h.totalReflections} configuredDays={h.configuredDays} t={h.t} />
+        {data.activeTab === "overview" && (
+          <PlanOverviewTab plan={data.plan} lang={data.lang} isAdmin={data.isAdmin} adminStats={data.adminStats}
+            displayQuizAccuracy={data.displayQuizAccuracy} displayAnsweredQuestions={data.displayAnsweredQuestions}
+            displayCorrectAnswers={data.displayCorrectAnswers} displayWrongAnswers={data.displayWrongAnswers}
+            totalReflections={data.totalReflections} configuredDays={data.configuredDays} t={data.t} />
         )}
-        {h.activeTab === "admin" && h.isAdmin && (
-          <PlanAdminTab adminStats={h.adminStats} filteredUsers={h.filteredUsers} userSearchTerm={h.userSearchTerm}
-            setUserSearchFilter={h.setUserSearchFilter} plan={h.plan} isRtl={h.isRtl} lang={h.lang} t={h.t} />
+        {data.activeTab === "admin" && data.isAdmin && (
+          <PlanAdminTab adminStats={data.adminStats} filteredUsers={data.filteredUsers} userSearchTerm={data.userSearchTerm}
+            setUserSearchFilter={actions.setUserSearchFilter} plan={data.plan} isRtl={data.isRtl} lang={data.lang} t={data.t} />
         )}
-        {h.activeTab === "schedule" && (
-          <PlanScheduleTab loadingPlan={h.loadingPlan} days={h.days} completedDayNums={h.completedDayNums}
-            questionsEnabled={h.plan.questions_enabled} totalDays={h.plan.total_days} />
+        {data.activeTab === "schedule" && (
+          <PlanScheduleTab loadingPlan={data.loadingPlan} days={data.days} completedDayNums={data.completedDayNums}
+            questionsEnabled={data.plan.questions_enabled} totalDays={data.plan.total_days} />
         )}
-        {h.activeTab === "quiz" && (
-          <PlanQuizTab questionsEnabled={h.plan.questions_enabled} loadingPlan={h.loadingPlan}
-            allQuizDays={h.allQuizDays} t={h.t} />
+        {data.activeTab === "quiz" && (
+          <PlanQuizTab questionsEnabled={data.plan.questions_enabled} loadingPlan={data.loadingPlan}
+            allQuizDays={data.allQuizDays} t={data.t} />
         )}
       </PageLayout>
     </Gate>
   );
-}
-;
+};
 
 export default PlanDetail;

@@ -51,14 +51,31 @@ export function useUserDashboard() {
       if (plansRes.returnCode === 200) setReadingPlans(plansRes.returnData?.slice(0, 3) ?? []);
       if (readHistoryRes.returnCode === 200 && readHistoryRes.returnData?.readHistories?.length > 0) {
         const hist = readHistoryRes.returnData.readHistories[0];
-        setLastRead({ bookName: hist.bookName, chapter: hist.chapter, updatedOn: hist.updatedOn || hist.createdOn });
+        const lastRead: UserDashboardActivity = {
+          id: String(hist.id ?? ""),
+          type: "read",
+          title: hist.bookName,
+          description: "Continue reading",
+          updatedOn: hist.updatedOn || hist.createdOn,
+          bookName: hist.bookName,
+          chapter: hist.chapter,
+        };
+        setLastRead(lastRead);
       }
       if (journalListRes.returnCode === 200 && journalListRes.returnData?.entries?.length > 0) {
         setLatestEntry(journalListRes.returnData.entries[0]);
       }
       if (verseRes.returnCode === 200 && verseRes.returnData) {
         const v = verseRes.returnData;
-        setDailyVerse({ bookName: v.bookName, chapter: v.chapter, verseNumber: v.verseNumber, reflection: v.reflection });
+        setDailyVerse({
+          id: v.id,
+          bookName: v.bookName,
+          chapter: v.chapter,
+          verseNumber: v.verseNumber,
+          verseText: v.verseText ?? v.verse_text ?? v.text ?? "",
+          reflection: v.reflection ?? "",
+          displayDate: v.displayDate ?? "",
+        });
       }
       // Parallel background fetches
       const [sessionRes, exegesisRes, devotionRes] = await Promise.allSettled([
@@ -95,3 +112,5 @@ export function useUserDashboard() {
     loading, fetchAll,
   };
 }
+
+export type UserDashboardPageModel = ReturnType<typeof useUserDashboard>;

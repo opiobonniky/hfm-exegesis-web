@@ -11,58 +11,57 @@ import { ReadingPlanPagination } from "../components/ReadingPlanPagination";
 import { CreatePlanButton, PlansGrid } from "../components";
 
 const ReadingPlans = () => {
-  const p = useReadingPlansPage();
+  const { data, actions } = useReadingPlansPage();
   const navigate = useNavigate();
 
-    return (
+  return (
     <Gate tier="legacy_sower" featureName="Reading Plans" featureDescription="Track your daily Bible reading progress with personalized reading plans.">
-      <PageLayout isRtl={p.isRtl} accentColor="teal">
+      <PageLayout isRtl={data.isRtl} accentColor="teal">
         <PageHeader
           icon={null}
-          title={p.pageTitle}
-          subtitle={p.pageSubtitle}
+          title={data.pageTitle}
+          subtitle={data.pageSubtitle}
           action={
             <CreatePlanButton
-              label={p.createPlanLabel}
+              label={data.createPlanLabel}
               onClick={() => navigate("/admin/plans/new")}
             />
           }
         />
 
         <ReadingPlanFilters
-          search={p.search} setSearch={p.setSearch}
-          catFilter={p.catFilter} setCatFilter={p.setCatFilter}
-          t={p.t} isRtl={p.isRtl}
+          search={data.search} setSearch={actions.setSearch}
+          catFilter={data.catFilter} setCatFilter={actions.setCatFilter}
+          t={data.t} isRtl={data.isRtl}
         />
 
-        {p.loading ? (
+        {data.loading ? (
           <LoadingState />
-        ) : p.plans.length === 0 ? (
+        ) : data.plans.length === 0 ? (
           <EmptyState
-            title={p.noPlansTitle}
-            message={p.noPlansDesc}
+            title={data.noPlansTitle}
+            message={data.noPlansDesc}
             actionLabel="Create Plan"
             onAction={() => navigate("/admin/plans/new")}
           />
         ) : (
           <>
             <PlansGrid
-              plans={p.plans}
-              isRtl={p.isRtl}
-              t={p.t}
+              plans={data.plans}
+              isRtl={data.isRtl}
+              t={data.t}
               onPress={(planId) => navigate(routes.readingPlanDetail.path.replace(":planId", planId))}
             />
             <ReadingPlanPagination
-              page={p.page || 1} setPage={p.setPage || (() => {})}
-              totalPages={p.totalPages || 1} hasNext={p.hasNext || false} hasPrevious={p.hasPrevious || false}
-              t={p.t}
+              page={data.page || 1} setPage={actions.setPage || (() => {})}
+              totalPages={data.totalPages || 1} hasNext={data.hasNext || false} hasPrevious={data.hasPrevious || false}
+              t={data.t}
             />
           </>
         )}
       </PageLayout>
     </Gate>
   );
-}
-;
+};
 
 export default ReadingPlans;

@@ -9,7 +9,7 @@ function getStoredTheme(): ThemeMode {
   if (stored === "light" || stored === "dark") {
     return stored;
   }
-  return "dark";
+  return "light";
 }
 
 function applyThemeClass(mode: ThemeMode) {

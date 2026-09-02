@@ -2,8 +2,8 @@ import { useState, useEffect, useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/components/languages/languageProvider";
-import { sendPostRequest } from "@/services/api";
-import type { ReadingPlan } from "../types";
+import { useReadingPlanApi } from "../services";
+import type { ReadingPlan, UserPlanItem } from "../types";
 
 export type Tab = "progress" | "browse";
 
@@ -21,6 +21,8 @@ export function useBibleReadingPlanPage() {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { t, isRtl } = useLanguage();
+  const api = useReadingPlanApi();
+
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<Tab>("progress");
   const [plans, setPlans] = useState<ReadingPlan[]>([]);
@@ -38,12 +40,12 @@ export function useBibleReadingPlanPage() {
     setLoading(load);
     try {
       const [allRes, userRes] = await Promise.all([
-        sendPostRequest("reading-plans", "get-all", {}),
-        sendPostRequest("reading-plans", "get-user-plans", {}),
+        api.getAllPlans({}),
+        api.getUserPlans(),
       ]);
       if (allRes.returnCode === 200 && allRes.returnData) {
         const plansData = allRes.returnData.plans ?? allRes.returnData;
-        const rawPlans = Array.isArray(plansData) ? plansData : [];
+        const rawPlans = Array.isArray(plansData) ? (plansData as any[]) : [];
         const normalizedPlans: ReadingPlan[] = rawPlans.map((p: any) => ({
           plan_id: p.plan_id ?? p.planId ?? "",
           planId: p.planId ?? p.plan_id ?? "",
@@ -60,9 +62,9 @@ export function useBibleReadingPlanPage() {
           questionsEnabled: p.questionsEnabled ?? p.questions_enabled ?? false,
           is_active: p.is_active ?? p.isActive ?? true,
           isActive: p.isActive ?? p.is_active ?? true,
-          started: p.started ?? false,
-          is_completed: p.is_completed ?? p.completed ?? false,
-          completed: p.completed ?? p.is_completed ?? false,
+          started: p.started ?? p.isStarted ?? false,
+          is_completed: p.is_completed ?? p.completed ?? p.userIsCompleted ?? false,
+          completed: p.completed ?? p.is_completed ?? p.userIsCompleted ?? false,
           completed_date: p.completed_date ?? null,
           completion_percentage: p.completion_percentage ?? 0,
           completed_days_count: p.completed_days_count ?? 0,
@@ -74,17 +76,17 @@ export function useBibleReadingPlanPage() {
           days_since_started: p.days_since_started ?? null,
           days_since_last_activity: p.days_since_last_activity ?? null,
           estimated_days_to_complete: p.estimated_days_to_complete ?? null,
-          avg_days_to_complete: p.avg_days_to_complete ?? null,
-          streak: p.streak ?? null,
+          avg_days_per_completion: p.avg_days_per_completion ?? p.avg_days_to_complete ?? null,
+          streak: p.streak ?? p.userStreak ?? null,
           plan_created_on: p.plan_created_on ?? "",
           days: p.days ?? [],
         }));
         setPlans(normalizedPlans);
         const userProgressMap: Record<string, UserProgress> = {};
         const startedPlans: ReadingPlan[] = [];
-        if (userRes.returnCode === 200 && userRes.returnData) {
-          (userRes.returnData as any[]).forEach((up) => {
-            const plan = normalizedPlans.find((p) => (p.planId || p.plan_id) === up.planId);
+        if (userRes.returnCode === 200 && Array.isArray(userRes.returnData)) {
+          (userRes.returnData as UserPlanItem[]).forEach((up) => {
+            const plan = normalizedPlans.find((x) => (x.planId || x.plan_id) === up.planId);
             if (plan) {
               startedPlans.push({
                 ...plan,
@@ -92,21 +94,24 @@ export function useBibleReadingPlanPage() {
                 is_completed: up.isCompleted,
                 completed: up.isCompleted,
                 streak: up.streak,
+                completed_days_count: up.completedDays,
+                total_days: up.totalDays ?? plan.total_days,
+                totalDays: up.totalDays ?? plan.totalDays,
               });
               userProgressMap[up.planId] = {
                 planId: up.planId,
-                startDate: up.startDate || new Date().toISOString(),
+                startDate: up.startDate ? String(up.startDate) : new Date().toISOString(),
                 completedDaysJson: JSON.stringify(Array.from({ length: up.completedDays || 0 }, (_, i) => i + 1)),
-                lastCompletedDate: up.lastCompletedDate || null,
+                lastCompletedDate: up.endDate ? String(up.endDate) : null,
                 streak: up.streak || 0,
                 isCompleted: up.isCompleted || false,
-                completedDate: up.completedDate || null,
+                completedDate: up.isCompleted ? (up.startDate ? String(up.startDate) : null) : null,
               };
             }
           });
         }
         setMyPlans(startedPlans);
-        setActivePlans(startedPlans.filter((p) => !(p.is_completed || p.completed)));
+        setActivePlans(startedPlans.filter((x) => !(x.is_completed || x.completed)));
         setUserProgress(Object.values(userProgressMap));
         setProgressMap(userProgressMap);
       }
@@ -115,7 +120,7 @@ export function useBibleReadingPlanPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [api]);
 
   useEffect(() => { loadData(); }, [loadData]);
 
@@ -126,7 +131,7 @@ export function useBibleReadingPlanPage() {
 
   const startPlan = async (plan: ReadingPlan) => {
     try {
-      const res = await sendPostRequest("reading-plans", "start", { planId: plan.planId || plan.plan_id });
+      const res = await api.startPlan(plan.planId || plan.plan_id);
       if (res.returnCode === 200) {
         toast({
           title: t.readingPlan?.toastStarted || "Plan started!",
@@ -144,7 +149,7 @@ export function useBibleReadingPlanPage() {
 
   const removePlan = async (plan: ReadingPlan) => {
     try {
-      const res = await sendPostRequest("reading-plans", "remove", { planId: plan.planId || plan.plan_id });
+      const res = await api.removePlan(plan.planId || plan.plan_id);
       if (res.returnCode === 200) {
         toast({ title: t.readingPlan?.toastRemoved || "Plan removed", description: t.readingPlan?.toastRemovedDesc || "Your progress has been lost." });
         await loadData(false);
@@ -161,10 +166,33 @@ export function useBibleReadingPlanPage() {
   };
 
   return {
-    loading, activeTab, setActiveTab, plans, myPlans, activePlans, progressMap, userProgress,
-    refreshing, onRefresh, startPlan, removePlan, getCompletedDays,
-    startPlanModalVisible, setStartPlanModalVisible, pendingPlan, setPendingPlan,
-    removePlanModalVisible, setRemovePlanModalVisible, planToRemove, setPlanToRemove,
-    navigate, t, isRtl,
+    data: {
+      loading,
+      activeTab,
+      plans,
+      myPlans,
+      activePlans,
+      progressMap,
+      userProgress,
+      refreshing,
+      startPlanModalVisible,
+      pendingPlan,
+      removePlanModalVisible,
+      planToRemove,
+      navigate,
+      t,
+      isRtl,
+    },
+    actions: {
+      setActiveTab,
+      onRefresh,
+      startPlan,
+      removePlan,
+      getCompletedDays,
+      setStartPlanModalVisible,
+      setPendingPlan,
+      setRemovePlanModalVisible,
+      setPlanToRemove,
+    },
   };
 }

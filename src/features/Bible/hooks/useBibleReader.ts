@@ -30,6 +30,7 @@ export interface Highlight {
   note?: string;
 }
 const INITIAL_CHAPTER_COUNT = 3;
+const INITIAL_PREVIOUS_CHAPTERS = 2;
 const parsePositiveInteger = (value: string | null) => {
   if (!value) return null;
   const parsed = Number.parseInt(value, 10);
@@ -41,14 +42,15 @@ export function useBibleReader() {
   const initialBook: BibleBookName = isBibleBook(searchParams.get("book"))
     ? (searchParams.get("book") as BibleBookName)
     : "Genesis";
-  const [selectedBook, setSelectedBook] = useState<BibleBookName>(initialBook);
-  const [selectedChapter, setSelectedChapter] = useState(
-    clampChapter(
-      initialBook,
-      parsePositiveInteger(searchParams.get("chapter")) ?? 1,
-    ),
+  const initialChapter = clampChapter(
+    initialBook,
+    parsePositiveInteger(searchParams.get("chapter")) ?? 1,
   );
-  const [loadStartChapter, setLoadStartChapter] = useState(1);
+  const [selectedBook, setSelectedBook] = useState<BibleBookName>(initialBook);
+  const [selectedChapter, setSelectedChapter] = useState(initialChapter);
+  const [loadStartChapter, setLoadStartChapter] = useState(
+    Math.max(1, initialChapter - INITIAL_PREVIOUS_CHAPTERS),
+  );
   const [selectedVerse, setSelectedVerse] = useState<number | null>(
     parsePositiveInteger(searchParams.get("verse")),
   );

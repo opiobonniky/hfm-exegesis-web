@@ -1,15 +1,12 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/components/languages/languageProvider";
-import { sendPostRequest } from "@/services/api";
+import { useReadingPlanApi } from "../services";
+import type { ReadingPlanListItem, ReadingPlansResponse } from "../types";
 
-export interface ReadingPlanItem {
-  planId: string; title: string; description: string; totalDays?: number; total_days?: number;
-  isActive?: boolean; is_active?: boolean; category?: string; planImage?: string;
-  started?: boolean; completed?: boolean; progress?: number; streak?: number;
-}
+export interface ReadingPlanItem extends ReadingPlanListItem {}
 
 export function useReadingPlansPage() {
   const { toast } = useToast();
@@ -17,6 +14,8 @@ export function useReadingPlansPage() {
   const { userInfo } = useAuth();
   const { t, isRtl } = useLanguage();
   const isAdmin = userInfo?.userRole === 1;
+  const api = useReadingPlanApi();
+
   const [plans, setPlans] = useState<ReadingPlanItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -35,17 +34,24 @@ export function useReadingPlansPage() {
   const loadPlans = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await sendPostRequest("reading-plans", "get-all", {});
-      const plansData = res.returnData?.plans ?? res.returnData;
-      if (res.returnCode === 200 && Array.isArray(plansData)) {
-        setPlans((plansData as any[]).map((p) => ({
-          ...p, started: p.started ?? false, completed: p.completed ?? false,
-          progress: p.progress ?? 0, streak: p.streak ?? 0,
-        })));
+      const res = await api.getAllPlans({ page, pageSize: 10 });
+      if (res.returnCode === 200 && res.returnData) {
         const rd = res.returnData;
-        if (rd.totalPages) setTotalPages(rd.totalPages);
-        if (rd.hasNext !== undefined) setHasNext(rd.hasNext);
-        if (rd.hasPrevious !== undefined) setHasPrevious(rd.hasPrevious);
+        const plansData = rd.plans ?? (rd as unknown as ReadingPlanListItem[]);
+        if (Array.isArray(plansData)) {
+          setPlans(plansData.map((p) => ({
+            ...p,
+            started: p.started ?? false,
+            completed: p.completed ?? p.userIsCompleted ?? false,
+            progress: p.progress ?? 0,
+            streak: p.streak ?? p.userStreak ?? 0,
+          })));
+        }
+        if (rd.totalPages) {
+          setTotalPages(rd.totalPages);
+          setHasNext(page < rd.totalPages);
+          setHasPrevious(page > 1);
+        }
       } else {
         toast({ title: t.readingPlan?.toastFailedLoad || "Failed to load", description: res.returnMessage, variant: "destructive" });
       }
@@ -54,7 +60,7 @@ export function useReadingPlansPage() {
     } finally {
       setLoading(false);
     }
-  }, [toast, t]);
+  }, [toast, t, api, page]);
 
   const pageTitle = useMemo(() => t.readingPlan?.readingPlans || "Reading Plans", [t]);
   const pageSubtitle = useMemo(() => t.readingPlan?.buildHabit || "Build a daily Bible habit", [t]);
@@ -68,7 +74,7 @@ export function useReadingPlansPage() {
     if (!deleteTarget || deleteConfirmText !== deleteTarget.title) return;
     setDeleting(true);
     try {
-      const res = await sendPostRequest("reading-plans", "delete", { planId: deleteTarget.planId });
+      const res = await api.deletePlan(deleteTarget.planId);
       if (res.returnCode === 200) {
         toast({ title: t.readingPlan?.toastPlanDeleted || "Deleted", description: t.readingPlan?.toastPlanDeletedDesc || "Plan deleted" });
         setDeleteTarget(null);
@@ -82,13 +88,13 @@ export function useReadingPlansPage() {
     } finally {
       setDeleting(false);
     }
-  }, [deleteTarget, deleteConfirmText, toast, t, loadPlans]);
+  }, [deleteTarget, deleteConfirmText, toast, t, loadPlans, api]);
 
   const handleEditSave = useCallback(async () => {
     if (!editTarget) return;
     setSaving(true);
     try {
-      const res = await sendPostRequest("reading-plans", "update", { planId: editTarget.planId, ...editForm });
+      const res = await api.updatePlan(editTarget.planId, editForm);
       if (res.returnCode === 200) {
         toast({ title: t.readingPlan?.toastPlanUpdated || "Updated", description: t.readingPlan?.toastPlanUpdatedDesc || "Plan updated" });
         setEditTarget(null);
@@ -102,14 +108,45 @@ export function useReadingPlansPage() {
     } finally {
       setSaving(false);
     }
-  }, [editTarget, editForm, toast, t, loadPlans]);
+  }, [editTarget, editForm, toast, t, loadPlans, api]);
 
   return {
-    plans, loading, search, setSearch, catFilter, setCatFilter,
-    page, setPage, totalPages, hasNext, hasPrevious,
-    deleteTarget, setDeleteTarget, deleteConfirmText, setDeleteConfirmText, deleting, handleDelete,
-    editTarget, setEditTarget, editForm, setEditForm, saving, handleEditSave,
-    pageTitle, pageSubtitle, createPlanLabel, noPlansTitle, noPlansDesc,
-    isAdmin, navigate, t, isRtl, loadPlans,
+    data: {
+      plans,
+      loading,
+      search,
+      catFilter,
+      page,
+      totalPages,
+      hasNext,
+      hasPrevious,
+      deleteTarget,
+      deleteConfirmText,
+      deleting,
+      editTarget,
+      editForm,
+      saving,
+      pageTitle,
+      pageSubtitle,
+      createPlanLabel,
+      noPlansTitle,
+      noPlansDesc,
+      isAdmin,
+      navigate,
+      t,
+      isRtl,
+    },
+    actions: {
+      setSearch,
+      setCatFilter,
+      setPage,
+      setDeleteTarget,
+      setDeleteConfirmText,
+      setEditTarget,
+      setEditForm,
+      handleDelete,
+      handleEditSave,
+      loadPlans,
+    },
   };
 }

@@ -3,8 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { getBookPrologue } from "@/services/bookProloguesApi";
 import type { BookPrologue } from "@/services/bookProloguesApi";
-import { sendPostRequest } from "@/services/api";
-import { markBookOverviewSeen } from "../services/bookOverviewSeen";
+import { bibleApi, markBookOverviewSeen } from "../services";
 
 const OT_COUNT = 39;
 const ORDINALS = [
@@ -97,11 +96,7 @@ export function useBookOverview() {
     let ignore = false;
     (async () => {
       try {
-        const res = await sendPostRequest<{ chapter?: number; verseNumber?: number }>(
-          "bible",
-          "get-last-read-position",
-          { bookName },
-        );
+        const res = await bibleApi.getLastReadPosition(bookName);
         if (res.returnCode === 200 && res.returnData) {
           const pos = res.returnData;
           if (!ignore && pos.chapter) setResumeChapter(pos.chapter);

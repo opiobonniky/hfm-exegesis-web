@@ -9,12 +9,13 @@ import UserBrowseTab from "../components/UserBrowseTab";
 import RemovePlanModal from "../components/RemovePlanModal";
 
 export default function UserPlans() {
-  const h = useUserPlansPage();
+  const { data, actions } = useUserPlansPage();
   const {
-    t, isRtl, navigate, activeTab, setActiveTab,
-    userPlans, loading, catFilter, setCatFilter,
-    removeModal, setRemoveModal, startPlan, removePlan, filteredPlans,
-  } = h;
+    t, isRtl, navigate, activeTab,
+    userPlans, loading, catFilter,
+    removeModal, filteredPlans,
+  } = data; 
+  const { setActiveTab, setCatFilter, setRemoveModal, startPlan, removePlan } = actions;
 
   const inProgressCount = userPlans.filter((p) => !p.isCompleted).length;
 
