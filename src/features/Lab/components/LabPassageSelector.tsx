@@ -2,7 +2,7 @@ import { useState } from "react";
 import { BookOpen, ChevronRight, Search, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MAX_CHAPTERS, SUGGESTED_PASSAGES } from "@/features/Lab/constants";
-import { BOOK_NAMES } from "@/hooks/useLabFlow";
+import { BOOK_NAMES } from "../constants";
 
 interface Props {
   bookName: string;

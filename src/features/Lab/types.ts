@@ -65,3 +65,38 @@ export interface LabChartItem {
   language?: string;
   strongsId?: string;
 }
+
+// ─── LabFlow types ──────────────────────────────────────────────────────────────
+export type LabStage = "passage" | "look" | "listen" | "learn" | "abide" | "apply" | "completed";
+export type PassageSubStage = "book" | "chapter" | "verse";
+export type LearnTab = "exegesis" | "language" | "history" | "prologue";
+
+export interface LabFlowState {
+  sessionId: string | null;
+  stage: LabStage;
+  completed: boolean;
+  loading: boolean;
+  saving: boolean;
+  error: string | null;
+  bookName: string;
+  chapter: string;
+  verseStart: string;
+  verseEnd: string;
+  passageRef: string;
+  lookNotes: string;
+  currentPromptIdx: number;
+  selectedRepeats: number;
+  repeatCount: number;
+  listenComplete: boolean;
+  learnNotes: string;
+  learnTab: LearnTab;
+  learnDataLoading: boolean;
+  reflection: string;
+  prayer: string;
+  appText: string;
+  tags: string;
+  isPublic: boolean;
+  journalEntryId: string | null;
+  challengeText: string;
+  resultsText: string;
+}

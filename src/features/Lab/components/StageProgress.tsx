@@ -1,7 +1,7 @@
 // Stage progress bar with clickable stage indicators
 import { Check, Timer } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { STAGE_ORDER } from "@/hooks/useLabFlow";
+import { STAGE_ORDER } from "../constants";
 
 const STAGE_ICONS: Record<string, any> = {
   look: () => <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>,

@@ -11,8 +11,10 @@ interface Props {
   h: ReturnType<typeof useLabFlowPage>;
 }
 
-export default function LabFlowStageContent({ h }: Props) {
-  const { lab } = h;
+export function LabFlowStageContent({ h }: Props) {
+  const { data, actions } = h;
+  const lab = data.lab;
+  const labActions = actions.lab;
 
   return (
     <div className="flex-1 overflow-y-auto">
@@ -30,13 +32,13 @@ export default function LabFlowStageContent({ h }: Props) {
             verseStart={lab.verseStart}
             verseEnd={lab.verseEnd}
             loading={lab.loading}
-            previewText={h.previewText}
-            previewLoading={h.previewLoading}
-            onSelectBook={(book) => lab.update({ bookName: book, chapter: "", verseStart: "", verseEnd: "" })}
-            onSelectChapter={(ch) => lab.update({ chapter: ch, verseStart: "", verseEnd: "" })}
-            onSelectVerseStart={(v) => lab.update({ verseStart: v })}
-            onSelectVerseEnd={(v) => lab.update({ verseEnd: v })}
-            onBeginStudy={lab.startSession}
+            previewText={data.previewText}
+            previewLoading={data.previewLoading}
+            onSelectBook={(book) => labActions.update({ bookName: book, chapter: "", verseStart: "", verseEnd: "" })}
+            onSelectChapter={(ch) => labActions.update({ chapter: ch, verseStart: "", verseEnd: "" })}
+            onSelectVerseStart={(v) => labActions.update({ verseStart: v })}
+            onSelectVerseEnd={(v) => labActions.update({ verseEnd: v })}
+            onBeginStudy={labActions.startSession}
           />
         )}
 
@@ -45,12 +47,12 @@ export default function LabFlowStageContent({ h }: Props) {
             passageRef={lab.passageRef}
             bookName={lab.bookName}
             chapter={lab.chapter}
-            passageVerses={h.passageVerses}
-            versesLoading={h.versesLoading}
+            passageVerses={data.passageVerses}
+            versesLoading={data.versesLoading}
             lookNotes={lab.lookNotes}
-            setLookNotes={(v) => lab.update({ lookNotes: v })}
+            setLookNotes={(v) => labActions.update({ lookNotes: v })}
             saving={lab.saving}
-            onAdvance={lab.advanceLook}
+            onAdvance={labActions.advanceLook}
           />
         )}
 
@@ -59,17 +61,17 @@ export default function LabFlowStageContent({ h }: Props) {
             passageRef={lab.passageRef}
             bookName={lab.bookName}
             chapter={lab.chapter}
-            passageVerses={h.passageVerses}
+            passageVerses={data.passageVerses}
             selectedRepeats={lab.selectedRepeats}
-            setSelectedRepeats={(v) => lab.update({ selectedRepeats: v })}
+            setSelectedRepeats={(v) => labActions.update({ selectedRepeats: v })}
             repeatCount={lab.repeatCount}
             listenComplete={lab.listenComplete}
             saving={lab.saving}
-            audio={h.audio}
-            onStartListening={h.startListeningWithTTS}
-            onAdvance={lab.advanceListen}
-            onReset={() => { h.audio.stopPlayback(); lab.resetListening(); }}
-            onSkip={() => { h.audio.stopPlayback(); lab.advanceListen(); }}
+            audio={data.audio}
+            onStartListening={actions.startListeningWithTTS}
+            onAdvance={labActions.advanceListen}
+            onReset={() => { data.audio.stopPlayback(); labActions.resetListening(); }}
+            onSkip={() => { data.audio.stopPlayback(); labActions.advanceListen(); }}
           />
         )}
 
@@ -80,35 +82,35 @@ export default function LabFlowStageContent({ h }: Props) {
             chapter={lab.chapter}
             verseStart={lab.verseStart}
             learnNotes={lab.learnNotes}
-            setLearnNotes={(v) => lab.update({ learnNotes: v })}
-            learnDataLoading={h.wordsLoading || h.resourcesLoading}
-            verseResources={h.verseResources}
-            bookPrologue={h.bookPrologue}
-            verseWords={h.verseWords}
-            translations={h.translations}
-            translationsLoading={h.translationsLoading}
+            setLearnNotes={(v) => labActions.update({ learnNotes: v })}
+            learnDataLoading={data.wordsLoading || data.resourcesLoading}
+            verseResources={data.verseResources}
+            bookPrologue={data.bookPrologue}
+            verseWords={data.verseWords}
+            translations={data.translations}
+            translationsLoading={data.translationsLoading}
             isPublic={lab.isPublic}
-            setIsPublic={(v) => lab.update({ isPublic: v })}
+            setIsPublic={(v) => labActions.update({ isPublic: v })}
             saving={lab.saving}
-            onAdvance={lab.advanceLearn}
-            onWordTap={h.handleWordTap}
+            onAdvance={labActions.advanceLearn}
+            onWordTap={actions.handleWordTap}
           />
         )}
 
         {lab.stage === "abide" && (
           <LabAbideStage
             reflection={lab.reflection}
-            setReflection={(v) => lab.update({ reflection: v })}
+            setReflection={(v) => labActions.update({ reflection: v })}
             prayer={lab.prayer}
-            setPrayer={(v) => lab.update({ prayer: v })}
+            setPrayer={(v) => labActions.update({ prayer: v })}
             appText={lab.appText}
-            setAppText={(v) => lab.update({ appText: v })}
+            setAppText={(v) => labActions.update({ appText: v })}
             tags={lab.tags}
-            setTags={(v) => lab.update({ tags: v })}
+            setTags={(v) => labActions.update({ tags: v })}
             isPublic={lab.isPublic}
-            setIsPublic={(v) => lab.update({ isPublic: v })}
+            setIsPublic={(v) => labActions.update({ isPublic: v })}
             saving={lab.saving}
-            onAdvance={lab.saveAbide}
+            onAdvance={labActions.saveAbide}
           />
         )}
 
@@ -118,21 +120,21 @@ export default function LabFlowStageContent({ h }: Props) {
             bookName={lab.bookName}
             chapter={lab.chapter}
             verseStart={lab.verseStart}
-            passageVerses={h.passageVerses}
+            passageVerses={data.passageVerses}
             challengeText={lab.challengeText}
-            setChallengeText={(v) => lab.update({ challengeText: v })}
+            setChallengeText={(v) => labActions.update({ challengeText: v })}
             resultsText={lab.resultsText}
-            setResultsText={(v) => lab.update({ resultsText: v })}
+            setResultsText={(v) => labActions.update({ resultsText: v })}
             saving={lab.saving}
-            onComplete={lab.saveApply}
-            onOpenBibleReader={() => h.openBibleReader(lab.bookName, lab.chapter)}
+            onComplete={labActions.saveApply}
+            onOpenBibleReader={() => actions.openBibleReader(lab.bookName, lab.chapter)}
           />
         )}
 
         {lab.stage === "completed" && (
           <LabCompletedStage
             passageRef={lab.passageRef}
-            onReset={lab.resetAll}
+            onReset={labActions.resetAll}
             journalEntryId={lab.journalEntryId}
           />
         )}

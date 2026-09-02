@@ -4,7 +4,8 @@
  */
 import { useState, useCallback, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { useLabFlow, STAGE_ORDER, LISTEN_OPTIONS, LOOK_PROMPTS } from "@/hooks/useLabFlow";
+import { useLabFlow } from "./useLabFlow";
+import { STAGE_ORDER, LISTEN_OPTIONS, LOOK_PROMPTS } from "../constants";
 import { getVerseWords, getStrongsEntry } from "@/services/strongsApi";
 import type { StrongsWordData, StrongsEntry as StrongsEntryType } from "@/services/strongsApi";
 import { getBookPrologue } from "@/services/bookProloguesApi";
@@ -14,15 +15,15 @@ import type { VerseResourceData, TranslationComparisonEntry } from "@/services/v
 import { bibleApi } from "@/services/bibleApi";
 import type { Verse } from "@/services/bibleApi";
 import { useAudioPlayer } from "@/hooks/useAudioPlayer";
-import { useCallback as useCallbackTTS } from "react";
 
 export function useLabFlowPage() {
   const navigate = useNavigate();
   const lab = useLabFlow();
   const audio = useAudioPlayer();
-  const chapterNumber = Number(lab.chapter);
-  const verseStartNumber = Number(lab.verseStart);
-  const verseEndNumber = Number(lab.verseEnd || lab.verseStart);
+  const chapterNumber = Number(lab.data.chapter);
+  const verseStartNumber = Number(lab.data.verseStart);
+  const verseEndNumber = Number(lab.data.verseEnd || lab.data.verseStart);
+
   const [passageVerses, setPassageVerses] = useState<Verse[]>([]);
   const [versesLoading, setVersesLoading] = useState(false);
   const [previewText, setPreviewText] = useState("");
@@ -44,18 +45,18 @@ export function useLabFlowPage() {
   const [showShortcuts, setShowShortcuts] = useState(false);
   const [shortcutHint, setShortcutHint] = useState<string | null>(null);
   const shortcutTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  //  EFFECTS — data fetching
+
   // Fetch passage verses when passage is selected
   useEffect(() => {
-    if (!lab.bookName || !lab.chapter || lab.stage === "passage") return;
+    if (!lab.data.bookName || !lab.data.chapter || lab.data.stage === "passage") return;
     let cancelled = false;
     const fetchVerses = async () => {
       setVersesLoading(true);
       try {
-        const verseData = await bibleApi.getVerses("BSB", lab.bookName, chapterNumber);
+        const verseData = await bibleApi.getVerses("BSB", lab.data.bookName, chapterNumber);
         if (cancelled) return;
         const data = verseData.verses || [];
-        const filtered = lab.verseEnd
+        const filtered = lab.data.verseEnd
           ? data.filter((v: Verse) => (v.verse ?? v.verseNumber) >= verseStartNumber && (v.verse ?? v.verseNumber) <= verseEndNumber)
           : data.filter((v: Verse) => (v.verse ?? v.verseNumber) === verseStartNumber);
         setPassageVerses(filtered);
@@ -64,76 +65,81 @@ export function useLabFlowPage() {
     };
     fetchVerses();
     return () => { cancelled = true; };
-  }, [lab.bookName, lab.chapter, lab.verseStart, lab.verseEnd, lab.stage, chapterNumber, verseStartNumber, verseEndNumber]);
+  }, [lab.data.bookName, lab.data.chapter, lab.data.verseStart, lab.data.verseEnd, lab.data.stage, chapterNumber, verseStartNumber, verseEndNumber]);
+
   // Fetch verse words (Strong's) when entering Learn stage
   useEffect(() => {
-    if (lab.stage !== "learn" || !lab.passageRef || passageVerses.length === 0) return;
+    if (lab.data.stage !== "learn" || !lab.data.passageRef || passageVerses.length === 0) return;
     let cancelled = false;
     const fetchWords = async () => {
       setWordsLoading(true);
       try {
-        const words = await getVerseWords(lab.bookName, chapterNumber, verseStartNumber, "BSB");
+        const words = await getVerseWords(lab.data.bookName, chapterNumber, verseStartNumber, "BSB");
         if (!cancelled) setVerseWords(words);
       } catch { if (!cancelled) setVerseWords([]); }
       finally { if (!cancelled) setWordsLoading(false); }
     };
     fetchWords();
     return () => { cancelled = true; };
-  }, [lab.stage, lab.passageRef, lab.bookName, chapterNumber, verseStartNumber, passageVerses]);
+  }, [lab.data.stage, lab.data.passageRef, lab.data.bookName, chapterNumber, verseStartNumber, passageVerses]);
+
   // Fetch book prologue when entering Learn stage
   useEffect(() => {
-    if (lab.stage !== "learn" || !lab.bookName) return;
+    if (lab.data.stage !== "learn" || !lab.data.bookName) return;
     let cancelled = false;
     const fetch = async () => {
       setPrologueLoading(true);
       try {
-        const p = await getBookPrologue(lab.bookName);
+        const p = await getBookPrologue(lab.data.bookName);
         if (!cancelled) setBookPrologue(p);
       } catch { if (!cancelled) setBookPrologue(null); }
       finally { if (!cancelled) setPrologueLoading(false); }
     };
     fetch();
     return () => { cancelled = true; };
-  }, [lab.stage, lab.bookName]);
+  }, [lab.data.stage, lab.data.bookName]);
+
   // Fetch verse resources when entering Learn stage
   useEffect(() => {
-    if (lab.stage !== "learn" || !lab.passageRef) return;
+    if (lab.data.stage !== "learn" || !lab.data.passageRef) return;
     let cancelled = false;
     const fetch = async () => {
       setResourcesLoading(true);
       try {
-        const r = await getVerseResources(lab.bookName, chapterNumber, verseStartNumber);
+        const r = await getVerseResources(lab.data.bookName, chapterNumber, verseStartNumber);
         if (!cancelled) setVerseResources(r);
       } catch { if (!cancelled) setVerseResources(null); }
       finally { if (!cancelled) setResourcesLoading(false); }
     };
     fetch();
     return () => { cancelled = true; };
-  }, [lab.stage, lab.passageRef, lab.bookName, lab.chapter, lab.verseStart, chapterNumber, verseStartNumber]);
+  }, [lab.data.stage, lab.data.passageRef, lab.data.bookName, lab.data.chapter, lab.data.verseStart, chapterNumber, verseStartNumber]);
+
   // Fetch translation comparison when entering Learn stage
   useEffect(() => {
-    if (lab.stage !== "learn" || !lab.passageRef) return;
+    if (lab.data.stage !== "learn" || !lab.data.passageRef) return;
     let cancelled = false;
     const fetch = async () => {
       setTranslationsLoading(true);
       setTranslationsError(false);
       try {
-        const t = await getTranslationComparison(lab.bookName, chapterNumber, verseStartNumber);
+        const t = await getTranslationComparison(lab.data.bookName, chapterNumber, verseStartNumber);
         if (!cancelled) setTranslations(t);
       } catch { if (!cancelled) { setTranslations(null); setTranslationsError(true); } }
       finally { if (!cancelled) setTranslationsLoading(false); }
     };
     fetch();
     return () => { cancelled = true; };
-  }, [lab.stage, lab.passageRef, lab.bookName, lab.chapter, lab.verseStart, chapterNumber, verseStartNumber]);
+  }, [lab.data.stage, lab.data.passageRef, lab.data.bookName, lab.data.chapter, lab.data.verseStart, chapterNumber, verseStartNumber]);
+
   // Preview text for passage selection
   useEffect(() => {
-    if (lab.stage !== "passage" || !lab.bookName || !lab.chapter || !lab.verseStart) { setPreviewText(""); return; }
+    if (lab.data.stage !== "passage" || !lab.data.bookName || !lab.data.chapter || !lab.data.verseStart) { setPreviewText(""); return; }
     let cancelled = false;
     const fetch = async () => {
       setPreviewLoading(true);
       try {
-        const verseData = await bibleApi.getVerses("BSB", lab.bookName, chapterNumber);
+        const verseData = await bibleApi.getVerses("BSB", lab.data.bookName, chapterNumber);
         const data = verseData.verses || [];
         const filtered = data.filter((v: Verse) => (v.verse ?? v.verseNumber) >= verseStartNumber && (v.verse ?? v.verseNumber) <= verseEndNumber);
         setPreviewText(filtered.map((v: Verse) => `${v.verse ?? v.verseNumber}. ${v.text}`).join("\n"));
@@ -142,8 +148,8 @@ export function useLabFlowPage() {
     };
     fetch();
     return () => { cancelled = true; };
-  }, [lab.stage, lab.bookName, lab.chapter, lab.verseStart, lab.verseEnd, chapterNumber, verseStartNumber, verseEndNumber]);
-  //  HANDLERS
+  }, [lab.data.stage, lab.data.bookName, lab.data.chapter, lab.data.verseStart, lab.data.verseEnd, chapterNumber, verseStartNumber, verseEndNumber]);
+
   const handleWordTap = useCallback(async (strongsId: string) => {
     setWordModalOpen(true);
     setWordLoadingDetail(true);
@@ -153,36 +159,40 @@ export function useLabFlowPage() {
     } catch { setSelectedWord(null); }
     finally { setWordLoadingDetail(false); }
   }, []);
+
   const formatStudyAsText = useCallback(() => {
     const lines: string[] = [];
-    lines.push(`Bible Study: ${lab.passageRef || `${lab.bookName} ${lab.chapter}:${lab.verseStart}${lab.verseEnd ? `-${lab.verseEnd}` : ""}`}`);
+    lines.push(`Bible Study: ${lab.data.passageRef || `${lab.data.bookName} ${lab.data.chapter}:${lab.data.verseStart}${lab.data.verseEnd ? `-${lab.data.verseEnd}` : ""}`}`);
     lines.push("-".repeat(50));
-    if (lab.lookNotes) { lines.push("LOOK — Observations"); try { const parsed = JSON.parse(lab.lookNotes); if (typeof parsed === "object" && parsed !== null) { Object.entries(parsed).filter(([_, v]) => (v as string).trim()).forEach(([key, val]) => { lines.push(`${Number(key) + 1}. ${val}`); }); } } catch { lines.push(lab.lookNotes); } lines.push(""); }
-    if (lab.learnNotes) { lines.push("LEARN — Study Notes"); lines.push(lab.learnNotes); lines.push(""); }
-    if (lab.reflection) { lines.push("REFLECTION"); lines.push(lab.reflection); lines.push(""); }
-    if (lab.prayer) { lines.push("PRAYER"); lines.push(lab.prayer); lines.push(""); }
-    if (lab.appText) { lines.push("APPLICATION"); lines.push(lab.appText); lines.push(""); }
+    if (lab.data.lookNotes) { lines.push("LOOK — Observations"); try { const parsed = JSON.parse(lab.data.lookNotes); if (typeof parsed === "object" && parsed !== null) { Object.entries(parsed).filter(([_, v]) => (v as string).trim()).forEach(([key, val]) => { lines.push(`${Number(key) + 1}. ${val}`); }); } } catch { lines.push(lab.data.lookNotes); } lines.push(""); }
+    if (lab.data.learnNotes) { lines.push("LEARN — Study Notes"); lines.push(lab.data.learnNotes); lines.push(""); }
+    if (lab.data.reflection) { lines.push("REFLECTION"); lines.push(lab.data.reflection); lines.push(""); }
+    if (lab.data.prayer) { lines.push("PRAYER"); lines.push(lab.data.prayer); lines.push(""); }
+    if (lab.data.appText) { lines.push("APPLICATION"); lines.push(lab.data.appText); lines.push(""); }
     lines.push("Created with Exegesis Bible App");
     return lines.join("\n");
-  }, [lab]);
+  }, [lab.data]);
+
   const handleCopy = useCallback(async () => {
     try { await navigator.clipboard.writeText(formatStudyAsText()); setCopied(true); setTimeout(() => setCopied(false), 2500); } catch { setCopied(false); }
   }, [formatStudyAsText]);
+
   const handleShare = useCallback(async () => {
     setSharing(true);
     try {
-      if (navigator.share) await navigator.share({ title: `Bible Study: ${lab.passageRef}`, text: formatStudyAsText() });
+      if (navigator.share) await navigator.share({ title: `Bible Study: ${lab.data.passageRef}`, text: formatStudyAsText() });
       else await navigator.clipboard.writeText(formatStudyAsText());
     } catch { setSharing(false); } finally { setSharing(false); }
-  }, [lab.passageRef, formatStudyAsText]);
+  }, [lab.data.passageRef, formatStudyAsText]);
+
   const goBack = useCallback(() => {
-    if (lab.stage === "passage" || lab.completed) {
+    if (lab.data.stage === "passage" || lab.data.completed) {
       navigate("/lab");
     } else {
-      lab.saveCurrentProgress();
+      lab.actions.saveCurrentProgress();
       navigate("/lab");
     }
-  }, [lab.stage, lab.completed, lab.saveCurrentProgress, navigate]);
+  }, [lab.data.stage, lab.data.completed, lab.actions.saveCurrentProgress, navigate]);
 
   const openBibleReader = useCallback((bookName: string, chapter: string) => {
     navigate(`/bible-reader?book=${bookName}&chapter=${chapter}`);
@@ -196,11 +206,11 @@ export function useLabFlowPage() {
 
   // When passage completes one full read-through, increment repeat count
   useEffect(() => {
-    if (audio.passageComplete && lab.stage === "listen" && !lab.listenComplete) {
-      lab.incrementRepeat();
+    if (audio.passageComplete && lab.data.stage === "listen" && !lab.data.listenComplete) {
+      lab.actions.incrementRepeat();
       // Auto-start next repeat if not done
-      const nextCount = lab.repeatCount + 1;
-      if (nextCount < lab.selectedRepeats) {
+      const nextCount = lab.data.repeatCount + 1;
+      if (nextCount < lab.data.selectedRepeats) {
         setTimeout(() => {
           audio.startPlayback(passageVerses.map((v) => ({ text: v.text })), 0);
         }, 800);
@@ -213,38 +223,62 @@ export function useLabFlowPage() {
     if (shortcutTimeoutRef.current) clearTimeout(shortcutTimeoutRef.current);
     shortcutTimeoutRef.current = setTimeout(() => setShortcutHint(null), 2000);
   }, []);
+
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
       if (e.key === "?") { e.preventDefault(); setShowShortcuts((p) => !p); return; }
-      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") { e.preventDefault(); if (lab.stage === "look") lab.advanceLook(); else if (lab.stage === "listen") lab.advanceListen(); else if (lab.stage === "learn") lab.advanceLearn(); else if (lab.stage === "abide") lab.saveAbide(); else if (lab.stage === "apply") lab.saveApply(); }
-      if ((e.ctrlKey || e.metaKey) && e.key === "s") { e.preventDefault(); if (lab.stage !== "passage" && lab.stage !== "completed") lab.saveCurrentProgress(); showShortcutHint("Progress saved!"); }
-      if (lab.stage === "completed" && e.key.toLowerCase() === "r") { e.preventDefault(); lab.resetAll(); }
+      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") { e.preventDefault(); if (lab.data.stage === "look") lab.actions.advanceLook(); else if (lab.data.stage === "listen") lab.actions.advanceListen(); else if (lab.data.stage === "learn") lab.actions.advanceLearn(); else if (lab.data.stage === "abide") lab.actions.saveAbide(); else if (lab.data.stage === "apply") lab.actions.saveApply(); }
+      if ((e.ctrlKey || e.metaKey) && e.key === "s") { e.preventDefault(); if (lab.data.stage !== "passage" && lab.data.stage !== "completed") lab.actions.saveCurrentProgress(); showShortcutHint("Progress saved!"); }
+      if (lab.data.stage === "completed" && e.key.toLowerCase() === "r") { e.preventDefault(); lab.actions.resetAll(); }
       const num = parseInt(e.key);
-      if (num >= 1 && num <= STAGE_ORDER.length) { const target = STAGE_ORDER[num - 1]; const currentIdx = STAGE_ORDER.indexOf(lab.stage); if (num - 1 < currentIdx) { lab.goToStage(target); showShortcutHint(`Jumped to ${target}`); } }
+      if (num >= 1 && num <= STAGE_ORDER.length) { const target = STAGE_ORDER[num - 1]; const currentIdx = STAGE_ORDER.indexOf(lab.data.stage); if (num - 1 < currentIdx) { lab.actions.goToStage(target); showShortcutHint(`Jumped to ${target}`); } }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, [lab, showShortcutHint]);
+
   return {
-    navigate, lab, isRtl: false, // lab provides isRtl
-    // Passage data
-    passageVerses, versesLoading, previewText, previewLoading,
-    // Words
-    verseWords, wordsLoading, wordModalOpen, setWordModalOpen, selectedWord, wordLoadingDetail,
-    // Resources
-    verseResources, resourcesLoading, translations, translationsLoading, translationsError,
-    // Prologue
-    bookPrologue, prologueLoading,
-    // Actions
-    handleWordTap, handleCopy, handleShare, copied, sharing,
-    goBack, openBibleReader,
-    // Listen TTS
-    audio, startListeningWithTTS,
-    // Shortcuts
-    showShortcuts, setShowShortcuts, shortcutHint,
-    // Constants re-export
-    STAGE_ORDER, LISTEN_OPTIONS, LOOK_PROMPTS,
+    data: {
+      lab: lab.data,
+      isRtl: false,
+      passageVerses,
+      versesLoading,
+      previewText,
+      previewLoading,
+      verseWords,
+      wordsLoading,
+      wordModalOpen,
+      selectedWord,
+      wordLoadingDetail,
+      verseResources,
+      resourcesLoading,
+      translations,
+      translationsLoading,
+      translationsError,
+      bookPrologue,
+      prologueLoading,
+      copied,
+      sharing,
+      showShortcuts,
+      shortcutHint,
+      audio,
+      STAGE_ORDER,
+      LISTEN_OPTIONS,
+      LOOK_PROMPTS,
+    },
+    actions: {
+      lab: lab.actions,
+      setWordModalOpen,
+      handleWordTap,
+      handleCopy,
+      handleShare,
+      goBack,
+      openBibleReader,
+      startListeningWithTTS,
+      setShowShortcuts,
+      showShortcutHint,
+    },
   };
 }
 

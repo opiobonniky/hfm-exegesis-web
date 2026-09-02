@@ -1,6 +1,6 @@
 import { Ear, Play, Pause, Square, RotateCcw, SkipForward, Volume2, CheckCircle2, Brain, Loader2, Mic, Gauge } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { LISTEN_OPTIONS } from "@/hooks/useLabFlow";
+import { LISTEN_OPTIONS } from "../constants";
 import type { AudioPlayerState, AudioPlayerActions } from "@/hooks/useAudioPlayer";
 
 interface Verse { verseNumber: number; text: string; }

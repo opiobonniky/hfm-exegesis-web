@@ -7,71 +7,71 @@ import {
 } from "../components";
 
 export default function LabDictionary() {
-  const p = useLabDictionaryPage();
+  const {data, actions} = useLabDictionaryPage();
 
   return (
     <LabPageWrapper>
-      <LabDictionaryHeader onGoBack={p.goBack} />
+      <LabDictionaryHeader onGoBack={actions.goBack} />
       <LabDictionaryWorkspace>
-        <LabModeTabs mode={p.mode} onModeChange={p.setMode} />
-        {p.mode === "search" ? (
+        <LabModeTabs mode={data.mode} onModeChange={actions.setMode} />
+        {data.mode === "search" ? (
           <LabSearchPanel
-            searchQuery={p.searchQuery}
-            onSearchQueryChange={p.setSearchQuery}
-            results={p.results}
-            loading={p.loading}
-            searched={p.searched}
-            resultTotal={p.resultTotal}
-            searchLangCounts={p.searchLangCounts}
-            onWordClick={p.openWordDetailById}
+            searchQuery={data.searchQuery}
+            onSearchQueryChange={actions.setSearchQuery}
+            results={data.results}
+            loading={data.loading}
+            searched={data.searched}
+            resultTotal={data.resultTotal}
+            searchLangCounts={data.searchLangCounts}
+            onWordClick={actions.openWordDetailById}
           />
-        ) : p.mode === "verse" ? (
+        ) : data.mode === "verse" ? (
           <LabVersePanel
-            verseBook={p.verseBook}
-            onVerseBookChange={p.setVerseBook}
-            verseChapter={p.verseChapter}
-            onVerseChapterChange={p.setVerseChapter}
-            verseNum={p.verseNum}
-            onVerseNumChange={p.setVerseNum}
-            verseWordsLoading={p.verseWordsLoading}
-            verseWordsLoaded={p.verseWordsLoaded}
-            verseWords={p.verseWords}
-            verseWordsTotal={p.verseWordsTotal}
-            onLoadVerseWords={p.loadSelectedVerse}
-            onWordClick={p.openWordDetailById}
+            verseBook={data.verseBook}
+            onVerseBookChange={actions.setVerseBook}
+            verseChapter={data.verseChapter}
+            onVerseChapterChange={actions.setVerseChapter}
+            verseNum={data.verseNum}
+            onVerseNumChange={actions.setVerseNum}
+            verseWordsLoading={data.verseWordsLoading}
+            verseWordsLoaded={data.verseWordsLoaded}
+            verseWords={data.verseWords}
+            verseWordsTotal={data.verseWordsTotal}
+            onLoadVerseWords={actions.loadSelectedVerse}
+            onWordClick={actions.openWordDetailById}
           />
         ) : (
           <LabBrowsePanel
-            selectedBook={p.selectedBook}
-            onBookChange={p.handleBookChange}
-            browseLoading={p.browseLoading}
-            browseLoaded={p.browseLoaded}
-            browseWords={p.browseWords}
-            browseTotal={p.browseTotal}
-            browsePage={p.browsePage}
-            browseHasNext={p.browseHasNext}
-            onLoadMore={p.loadMoreBookWords}
-            chartData={p.chartData}
-            chartMode={p.chartMode}
-            onChartModeChange={p.setChartMode}
-            langFilter={p.langFilter}
-            onLangFilterChange={p.setLangFilter}
-            langCounts={p.langCounts}
-            onWordClick={p.openWordDetailById}
+            selectedBook={data.selectedBook}
+            onBookChange={actions.handleBookChange}
+            browseLoading={data.browseLoading}
+            browseLoaded={data.browseLoaded}
+            browseWords={data.browseWords}
+            browseTotal={data.browseTotal}
+            browsePage={data.browsePage}
+            browseHasNext={data.browseHasNext}
+            onLoadMore={actions.loadMoreBookWords}
+            chartData={data.chartData}
+            chartMode={data.chartMode}
+            onChartModeChange={actions.setChartMode}
+            langFilter={data.langFilter}
+            onLangFilterChange={actions.setLangFilter}
+            langCounts={data.langCounts}
+            onWordClick={actions.openWordDetailById}
           />
         )}
       </LabDictionaryWorkspace>
       <WordDetailSheet
-        open={p.detailOpen}
-        onOpenChange={p.setDetailOpen}
-        wordEntry={p.selectedWord}
-        strongsId={p.selectedWord?.strongsId || null}
+        open={data.detailOpen}
+        onOpenChange={actions.setDetailOpen}
+        wordEntry={data.selectedWord}
+        strongsId={data.selectedWord?.strongsId || null}
       />
       <WordStudyDialog
-        open={p.dialogOpen}
-        onOpenChange={p.setDialogOpen}
-        strongsId={p.dialogStrongsId}
-        surfaceText={p.dialogSurfaceText || undefined}
+        open={data.dialogOpen}
+        onOpenChange={actions.setDialogOpen}
+        strongsId={data.dialogStrongsId}
+        surfaceText={data.dialogSurfaceText || undefined}
       />
     </LabPageWrapper>
   );

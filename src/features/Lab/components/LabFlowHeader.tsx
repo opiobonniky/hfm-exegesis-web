@@ -1,7 +1,7 @@
 import { ArrowLeft, Save, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { STAGE_ORDER } from "@/hooks/useLabFlow";
-import type { LabStage } from "@/hooks/useLabFlow";
+import { STAGE_ORDER } from "../constants";
+import type { LabStage } from "../types";
 
 interface Props {
   passageRef: string;
@@ -21,7 +21,7 @@ const STAGE_META: Record<string, { label: string; icon: string }> = {
   apply: { label: "Apply", icon: "✅" },
 };
 
-export default function LabFlowHeader({ passageRef, stage, saving, completed, onBack, onSave, onGoToStage }: Props) {
+export function LabFlowHeader({ passageRef, stage, saving, completed, onBack, onSave, onGoToStage }: Props) {
   const currentIdx = STAGE_ORDER.indexOf(stage as any);
 
   return (

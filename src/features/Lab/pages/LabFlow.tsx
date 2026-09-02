@@ -6,22 +6,22 @@ import { useLabFlowPage } from "../hooks";
 import { LabFlowHeader, LabFlowLayout, LabFlowLoading, LabFlowStageContent } from "../components";
 
 export default function LabFlow() {
-  const p = useLabFlowPage();
+  const { data, actions } = useLabFlowPage();
 
-  if (p.lab.loading) return <LabFlowLoading />;
+  if (data.lab.loading) return <LabFlowLoading />;
 
   return (
-    <LabFlowLayout isRtl={p.isRtl}>
+    <LabFlowLayout isRtl={data.isRtl}>
       <LabFlowHeader
-        passageRef={p.lab.passageRef}
-        stage={p.lab.stage}
-        saving={p.lab.saving}
-        completed={p.lab.completed}
-        onBack={p.goBack}
-        onSave={p.lab.saveCurrentProgress}
-        onGoToStage={p.lab.goToStage}
+        passageRef={data.lab.passageRef}
+        stage={data.lab.stage}
+        saving={data.lab.saving}
+        completed={data.lab.completed}
+        onBack={actions.goBack}
+        onSave={actions.lab.saveCurrentProgress}
+        onGoToStage={actions.lab.goToStage}
       />
-      <LabFlowStageContent h={p} />
+      <LabFlowStageContent h={{ data, actions }} />
     </LabFlowLayout>
   );
 }

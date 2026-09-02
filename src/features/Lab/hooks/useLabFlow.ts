@@ -5,87 +5,10 @@ import {
   getSession,
   saveStageProgress,
   saveProgress,
-  abandonSession,
-  ExegesisSession,
 } from "@/services/exegesisApi";
 import { sendPostRequest } from "@/services/api";
-
-export type LabStage = "passage" | "look" | "listen" | "learn" | "abide" | "apply" | "completed";
-export type PassageSubStage = "book" | "chapter" | "verse";
-export type LearnTab = "exegesis" | "language" | "history" | "prologue";
-
-export const STAGE_ORDER: LabStage[] = ["look", "listen", "learn", "abide", "apply"];
-
-export const LISTEN_OPTIONS = [
-  { label: "1x", value: 1 },
-  { label: "2x", value: 2 },
-  { label: "3x", value: 3 },
-  { label: "5x", value: 5 },
-  { label: "10x", value: 10 },
-];
-
-export const LOOK_PROMPTS = [
-  "What specific words or phrases stand out to you in this passage?",
-  "Who is speaking? Who is listening or being addressed?",
-  "What commands, promises, warnings, or truths do you see?",
-  "What is repeated in this passage?",
-  "What contrasts do you notice (light/darkness, before/after, etc.)?",
-  "What questions does this passage raise in your mind?",
-];
-
-export const LEARN_TABS: { key: LearnTab; label: string }[] = [
-  { key: "exegesis", label: "Study Notes" },
-  { key: "language", label: "Original Language" },
-  { key: "history", label: "Historical Context" },
-  { key: "prologue", label: "Book Prologue" },
-];
-
-export const BOOK_NAMES = [
-  "Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy",
-  "Joshua", "Judges", "Ruth", "1 Samuel", "2 Samuel",
-  "1 Kings", "2 Kings", "1 Chronicles", "2 Chronicles", "Ezra",
-  "Nehemiah", "Esther", "Job", "Psalms", "Proverbs",
-  "Ecclesiastes", "Song of Solomon", "Isaiah", "Jeremiah", "Lamentations",
-  "Ezekiel", "Daniel", "Hosea", "Joel", "Amos",
-  "Obadiah", "Jonah", "Micah", "Nahum", "Habakkuk",
-  "Zephaniah", "Haggai", "Zechariah", "Malachi",
-  "Matthew", "Mark", "Luke", "John", "Acts",
-  "Romans", "1 Corinthians", "2 Corinthians", "Galatians", "Ephesians",
-  "Philippians", "Colossians", "1 Thessalonians", "2 Thessalonians",
-  "1 Timothy", "2 Timothy", "Titus", "Philemon", "Hebrews",
-  "James", "1 Peter", "2 Peter", "1 John", "2 John",
-  "3 John", "Jude", "Revelation",
-];
-
-interface LabFlowState {
-  sessionId: string | null;
-  stage: LabStage;
-  completed: boolean;
-  loading: boolean;
-  saving: boolean;
-  error: string | null;
-  bookName: string;
-  chapter: string;
-  verseStart: string;
-  verseEnd: string;
-  passageRef: string;
-  lookNotes: string;
-  currentPromptIdx: number;
-  selectedRepeats: number;
-  repeatCount: number;
-  listenComplete: boolean;
-  learnNotes: string;
-  learnTab: LearnTab;
-  learnDataLoading: boolean;
-  reflection: string;
-  prayer: string;
-  appText: string;
-  tags: string;
-  isPublic: boolean;
-  journalEntryId: string | null;
-  challengeText: string;
-  resultsText: string;
-}
+import { BOOK_NAMES } from "../constants";
+import type { LabStage, LabFlowState } from "../types";
 
 export function useLabFlow() {
   const [searchParams] = useSearchParams();
@@ -115,7 +38,7 @@ export function useLabFlow() {
     repeatCount: 0,
     listenComplete: false,
     learnNotes: "",
-    learnTab: "exegesis" as LearnTab,
+    learnTab: "exegesis",
     learnDataLoading: false,
     reflection: "",
     prayer: "",
@@ -129,10 +52,6 @@ export function useLabFlow() {
 
   const stateRef = useRef(state);
   stateRef.current = state;
-
-  const repeatCountRef = useRef(0);
-
-  useEffect(() => { repeatCountRef.current = state.repeatCount; }, [state.repeatCount]);
 
   const update = useCallback((partial: Partial<LabFlowState>) => {
     setState((prev) => {
@@ -451,80 +370,6 @@ export function useLabFlow() {
       incrementRepeat,
       resetListening,
     },
-    BOOK_NAMES,
-  };
-}
-
-export type LabFlowPageModel = ReturnType<typeof useLabFlow>;
-
-      if (res.returnCode === 200 && res.returnData) {
-        const data = res.returnData as any;
-        update({
-          stage: "completed",
-          completed: true,
-          saving: false,
-          journalEntryId:
-            data.journalEntryId ||
-            data.journalEntry?.id ||
-            data.session?.journalEntryId || null,
-        });
-      } else {
-        update({ stage: "completed", completed: true, saving: false });
-      }
-    } catch {
-      update({ stage: "completed", completed: true, saving: false });
-    }
-  }, [update]);
-
-  // ── Reset everything for a new study ──
-  const resetAll = useCallback(() => {
-    setState({
-      sessionId: null,
-      stage: "passage",
-      completed: false,
-      loading: false,
-      saving: false,
-      error: null,
-      bookName: "",
-      chapter: "",
-      verseStart: "",
-      verseEnd: "",
-      passageRef: "",
-      lookNotes: "",
-      currentPromptIdx: 0,
-      selectedRepeats: 3,
-      repeatCount: 0,
-      listenComplete: false,
-      learnNotes: "",
-      learnTab: "exegesis",
-      learnDataLoading: false,
-      reflection: "",
-      prayer: "",
-      appText: "",
-      tags: "",
-      isPublic: false,
-      journalEntryId: null,
-
-      challengeText: "",
-      resultsText: "",
-    });
-  }, []);
-
-  return {
-    ...state,
-    update,
-    startSession: startSessionAction,
-    goToStage,
-    saveCurrentProgress,
-    advanceLook,
-    advanceListen,
-    advanceLearn,
-    saveAbide,
-    saveApply,
-    resetAll,
-    startListening,
-    incrementRepeat,
-    resetListening,
     BOOK_NAMES,
   };
 }

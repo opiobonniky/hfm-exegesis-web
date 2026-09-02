@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Eye, BookOpen, MessageSquareQuote, ChevronLeft, ChevronRight, Copy, Check, Share2, NotebookPen, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { LOOK_PROMPTS } from "@/hooks/useLabFlow";
+import { LOOK_PROMPTS } from "../constants";
 
 interface Verse { verseNumber: number; text: string; }
 
