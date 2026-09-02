@@ -7,12 +7,7 @@ export interface JournalModerationEntry {
   isPublic: boolean; isPublished: boolean; flags: number;
   createdAt: string; updatedAt: string;
 }
-export const FILTERS = [
-  { label: "All", value: "all" },
-  { label: "Public", value: "public" },
-  { label: "Flagged", value: "flagged" },
-  { label: "Unpublished", value: "unpublished" },
-];
+
 export function useAdminJournalModerationPage() {
   const { toast } = useToast();
   const [entries, setEntries] = useState<JournalModerationEntry[]>([]);

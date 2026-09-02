@@ -7,7 +7,7 @@
 #   3. Pages must NOT contain inline business logic (useCallback, useMemo, async handlers)
 #   4. Pages must NOT define types/interfaces (interface X, type X = ...)
 #   5. Pages must NOT define constants (const UPPER_CASE = ..., const XxxArray = [...])
-#   6. Pages must NOT have TypeScript errors (tsc --noEmit)
+#   6. Pages must NOT have TypeScript errors (tsc --project tsconfig.app.json)
 #   7. Pages must NOT have className on styled components or raw HTML elements
 #   8. Pages must NOT have inline .map() or array rendering
 #   9. Pages must NOT use motion.* components (motion.div, motion.span, etc.)
@@ -32,7 +32,8 @@ FAILED_FILES=()
 
 # ── Run TypeScript check once and cache errors per file ──
 TS_ERROR_FILE=$(mktemp)
-if npx tsc --noEmit 2>"$TS_ERROR_FILE"; then
+trap 'rm -f "$TS_ERROR_FILE"' EXIT
+if npx tsc --noEmit --project tsconfig.app.json --pretty false >"$TS_ERROR_FILE" 2>&1; then
   TS_CLEAN=true
 else
   TS_CLEAN=false
@@ -41,7 +42,7 @@ fi
 declare -A TS_ERRORS
 if [ "$TS_CLEAN" = false ] && [ -s "$TS_ERROR_FILE" ]; then
   while IFS= read -r line; do
-    fpath=$(echo "$line" | grep -oP '^\S+\.tsx' || true)
+    fpath=$(echo "$line" | grep -oP '^\S+\.(?:ts|tsx)' || true)
     if [ -n "$fpath" ]; then
       if [ -z "${TS_ERRORS[$fpath]+x}" ]; then
         TS_ERRORS[$fpath]="$line"
@@ -52,7 +53,6 @@ $line"
     fi
   done < "$TS_ERROR_FILE"
 fi
-rm -f "$TS_ERROR_FILE"
 
 check_page() {
   local file="$1"
@@ -177,7 +177,7 @@ echo ""
 if [ "$TS_CLEAN" = true ]; then
   echo -e "${GREEN}✓ TypeScript: no errors${NC}"
 else
-  error_count=$(wc -l < "$TS_ERROR_FILE" 2>/dev/null || echo 0)
+  error_count=$(grep -c 'error TS[0-9]\+:' "$TS_ERROR_FILE" 2>/dev/null || echo 0)
   echo -e "${RED}✗ TypeScript: $error_count error(s) found${NC}"
   for fpath in "${!TS_ERRORS[@]}"; do
     count=$(echo "${TS_ERRORS[$fpath]}" | wc -l | tr -d '[:space:]')
@@ -218,12 +218,17 @@ echo "════════════════════════�
 echo -e " Results: ${GREEN}$PASS passed${NC}, ${RED}$FAIL failed${NC}"
 echo "═══════════════════════════════════════════════════════════"
 
-if [ $FAIL -gt 0 ]; then
+if [ $FAIL -gt 0 ] || [ "$TS_CLEAN" = false ]; then
   echo ""
-  echo -e "${RED}Files that need refactoring:${NC}"
-  for f in "${FAILED_FILES[@]}"; do
-    echo -e "  ${RED}• $f${NC}"
-  done
+  if [ $FAIL -gt 0 ]; then
+    echo -e "${RED}Files that need refactoring:${NC}"
+    for f in "${FAILED_FILES[@]}"; do
+      echo -e "  ${RED}• $f${NC}"
+    done
+  fi
+  if [ "$TS_CLEAN" = false ]; then
+    echo -e "${RED}App TypeScript check failed; resolve the diagnostics listed above.${NC}"
+  fi
   exit 1
 else
   echo ""

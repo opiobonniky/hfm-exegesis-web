@@ -1,25 +1,10 @@
 // JournalEntryCard — renders a single journal entry in the grid
 "use client";
 
-import { BookOpen, Clock, Star, Trash2, Edit2 } from "lucide-react";
+import { Clock, Star, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-
-export interface JournalEntryData {
-  id: number;
-  title: string;
-  content: string;
-  bookName?: string;
-  chapter?: number;
-  verseNumber?: number | null;
-  category?: string;
-  mood?: string | null;
-  isFavorite?: boolean;
-  source?: string;
-  tags?: string | null;
-  createdOn?: string;
-  updatedOn?: string;
-}
+import type { JournalPageEntry } from "../hooks/useJournalPageFull";
 
 const CATEGORY_COLORS: Record<string, { bg: string; text: string; dot: string }> = {
   reflection: { bg: "bg-amber-50 dark:bg-amber-950/30", text: "text-amber-700 dark:text-amber-300", dot: "bg-amber-500" },
@@ -42,12 +27,12 @@ function formatDate(dateStr?: string): string {
 }
 
 interface JournalEntryCardProps {
-  entry: JournalEntryData;
+  entry: JournalPageEntry;
   selectionMode?: boolean;
   selected?: boolean;
   onSelect?: (id: number) => void;
   onView: (id: number) => void;
-  onDelete?: (entry: JournalEntryData) => void;
+  onDelete?: (entry: JournalPageEntry) => void;
 }
 
 export function JournalEntryCard({

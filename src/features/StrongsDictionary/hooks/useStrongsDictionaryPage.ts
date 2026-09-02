@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { sendPostRequest } from "@/services/api";
 
@@ -135,7 +136,11 @@ export function useStrongsDictionaryPage() {
     browseByBook(false);
   };
 
+  const navigate = useNavigate();
+  const goBack = useCallback(() => navigate(-1), [navigate]);
+
   return {
+    goBack,
     mode, setMode, langFilter, setLangFilter,
     searchQuery, setSearchQuery, searchResults, searchLoading, searchCount, executeSearch, loadMoreSearch,
     selectedBook, setSelectedBook, browseWords, browseLoading, browseCount, loadMoreBrowse,

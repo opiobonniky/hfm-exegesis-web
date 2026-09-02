@@ -6,7 +6,7 @@ import type { DailyItem } from "../types";
 
 interface Props {
   item: DailyItem;
-  onView?: () => void;
+  onView: (item: DailyItem) => void;
   onEdit: (item: DailyItem) => void;
   onDelete: (item: DailyItem) => void;
 }
@@ -34,7 +34,7 @@ export function DailyContentCard({ item, onView, onEdit, onDelete }: Props) {
   return (
     <div className="p-4 border border-border/40 rounded-xl bg-card hover:bg-muted/10 hover:border-primary/20 transition-all duration-200 space-y-2">
       <div className="flex items-start justify-between gap-3">
-        <div className="flex-1 min-w-0 cursor-pointer" onClick={onView}>
+        <div className="flex-1 min-w-0 cursor-pointer" onClick={() => onView(item)}>
           <div className="flex items-center gap-2 flex-wrap mb-1">
             <Badge variant="outline" className="text-[10px] bg-muted/50">
               {item.displayDate ? new Date(item.displayDate).toLocaleDateString() : "—"}
@@ -53,12 +53,10 @@ export function DailyContentCard({ item, onView, onEdit, onDelete }: Props) {
           {item.creatorName && <p className="text-[10px] text-muted-foreground/60 mt-1">by {item.creatorName}</p>}
         </div>
         <div className="flex items-center gap-1 shrink-0">
-          {onView && (
-            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary"
-              onClick={onView}>
-              <Eye className="w-4 h-4 text-foreground/60" />
-            </Button>
-          )}
+          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary"
+            onClick={() => onView(item)}>
+            <Eye className="w-4 h-4 text-foreground/60" />
+          </Button>
           <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary"
             onClick={() => onEdit(item)}>
             <Edit2 className="w-4 h-4 text-foreground/60" />

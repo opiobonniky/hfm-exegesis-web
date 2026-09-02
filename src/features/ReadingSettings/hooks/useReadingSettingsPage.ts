@@ -13,7 +13,7 @@ export const FONT_SIZES: { value: FontSize; label: string; px: string }[] = [
 export function useReadingSettingsPage() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { theme, setTheme } = useTheme();
+  const { themeMode, setThemeMode } = useTheme();
   const [saving, setSaving] = useState(false);
   const [fontSize, setFontSize] = useState<FontSize>("medium");
   const [showVerseNumbers, setShowVerseNumbers] = useState(true);
@@ -31,5 +31,6 @@ export function useReadingSettingsPage() {
       toast({ title: "Error", variant: "destructive" });
     } finally { setSaving(false); }
   }, [fontSizePx, showVerseNumbers, autoPlayVerse, navigate, toast]);
-  return { navigate, saving, fontSize, setFontSize, showVerseNumbers, setShowVerseNumbers, autoPlayVerse, setAutoPlayVerse, fontSizePx, handleSave, theme, setTheme };
+  const goBack = useCallback(() => navigate(-1), [navigate]);
+  return { goBack, saving, fontSize, setFontSize, showVerseNumbers, setShowVerseNumbers, autoPlayVerse, setAutoPlayVerse, fontSizePx, handleSave, theme: themeMode, setTheme: setThemeMode };
 }

@@ -5,20 +5,21 @@ import { Search as SearchIcon, X, Globe } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import SearchFilters from "./SearchFilters";
+import type { SearchScope } from "@/services/searchApi";
 
 interface SearchHeaderProps {
   isRtl: boolean;
-  scope: string;
-  handleScopeChange: (s: string) => void;
+  scope: SearchScope;
+  handleScopeChange: (s: SearchScope) => void;
   handleBookFilter: (b: string) => void;
   bookName: string;
   BOOK_NAMES: string[];
-  covenant: string;
-  handleCovenantChange: (c: string) => void;
+  covenant: "all" | "ot" | "nt";
+  handleCovenantChange: (c: "all" | "ot" | "nt") => void;
   scopeLocked: boolean;
   inputRef: React.RefObject<HTMLInputElement | null>;
   query: string;
-  setQuery: (q: string, scope: string) => void;
+  setQuery: (q: string, scope?: SearchScope) => void;
   clearQuery: () => void;
   translation: string;
   setTranslation: (t: string) => void;

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { sendPostRequest } from "@/services/api";
 
@@ -27,5 +27,8 @@ export function useLabReviewPage() {
     return () => { cancelled = true; };
   }, [sessionId]);
 
-  return { navigate, sessionId, session, loading, error, activeStage, setActiveStage };
+  const goBack = useCallback(() => navigate(-1), [navigate]);
+  return { goBack, sessionId, session, loading, error, activeStage, setActiveStage };
 }
+
+export type LabReviewPageModel = ReturnType<typeof useLabReviewPage>;

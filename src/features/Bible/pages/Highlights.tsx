@@ -12,6 +12,7 @@ export default function Highlights() {
     <BiblePageLayout
       title="My Highlights"
       count={h.highlights.length}
+      contentCount={h.filtered.length}
       isRtl={h.isRtl}
       searchQuery={h.searchQuery}
       onSearchChange={h.setSearchQuery}

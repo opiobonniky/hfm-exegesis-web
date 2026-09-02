@@ -1,7 +1,6 @@
 // AdminJournalModeration — thin page composing hook + components (no inline HTML)
 "use client";
 
-import { useNavigate } from "react-router-dom";
 import { BookOpen } from "lucide-react";
 import { useAdminJournalModeration } from "../hooks/useAdminJournalModeration";
 import {
@@ -16,7 +15,6 @@ import { JournalDeleteDialog } from "../components/JournalDeleteDialog";
 
 export default function AdminJournalModeration() {
   const h = useAdminJournalModeration();
-  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-background">
@@ -24,9 +22,7 @@ export default function AdminJournalModeration() {
         title="Journal Moderation"
         subtitle={`${h.totalCount || h.entries.length} entries`}
         icon={<BookOpen className="w-5 h-5 text-primary" />}
-        onBack={() => window.history.back()}
-        onAdd={() => {}}
-        addLabel=""
+        onBack={h.goBack}
       />
 
       <AdminPageContent>
@@ -51,11 +47,9 @@ export default function AdminJournalModeration() {
             loadingMore={h.loadingMore}
             hasMore={h.hasMore}
             sentinelRef={h.sentinelRef}
-            onTogglePublication={(entry) => h.handleTogglePublication(entry)}
-            onDelete={(entry) => h.setDeleteTarget(entry)}
-            onView={(entry) =>
-              navigate(`/admin/journal-moderation/${entry.id}`)
-            }
+            onTogglePublication={h.handleTogglePublication}
+            onDelete={h.requestDelete}
+            onView={h.viewEntry}
           />
         )}
       </AdminPageContent>
@@ -64,7 +58,7 @@ export default function AdminJournalModeration() {
         open={!!h.deleteTarget}
         title={h.deleteTarget?.title || null}
         deleting={h.deleting}
-        onOpenChange={(o) => !o && h.setDeleteTarget(null)}
+        onOpenChange={h.handleDeleteDialogChange}
         onConfirm={h.handleDelete}
       />
     </div>

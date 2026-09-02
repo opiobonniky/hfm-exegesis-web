@@ -1,17 +1,19 @@
 import { BookText, Download, Plus, CheckSquare, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { routes } from "@/components/Routes/routes";
+import type { JournalPageStats, JournalViewMode } from "../hooks/useJournalPageFull";
 
 interface Props {
-  t: any; isRtl: boolean; navigate: (p: string) => void;
-  stats: { totalEntries: number; entriesThisWeek: number } | null;
-  viewMode: string; selectionMode: boolean; setSelectionMode: (v: boolean) => void;
-  selectedIds: Set<number>; setShowExportModal: (v: boolean) => void;
-  exitSelectionMode: () => void;
+  stats: JournalPageStats | null;
+  viewMode: JournalViewMode;
+  selectionMode: boolean;
+  selectedCount: number;
+  onToggleSelectionMode: () => void;
+  onExport: () => void;
+  onCreate: () => void;
 }
 
-export function JournalHeader({ t, isRtl, navigate, stats, viewMode, selectionMode, setSelectionMode, selectedIds, setShowExportModal, exitSelectionMode }: Props) {
+export function JournalHeader({ stats, viewMode, selectionMode, selectedCount, onToggleSelectionMode, onExport, onCreate }: Props) {
   return (
     <div className="border-b border-border/60 dark:border-stone-800/60 bg-card/50 dark:bg-stone-900/50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6">
@@ -29,14 +31,14 @@ export function JournalHeader({ t, isRtl, navigate, stats, viewMode, selectionMo
           </div>
           {viewMode === "my" && (
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" onClick={() => selectionMode ? exitSelectionMode() : setSelectionMode(true)}
+              <Button variant="outline" size="sm" onClick={onToggleSelectionMode}
                 className={cn("rounded-xl border-border dark:border-stone-800 text-xs", selectionMode && "bg-foreground/10 text-foreground border-border")}>
                 {selectionMode ? <X className="w-4 h-4" /> : <CheckSquare className="w-4 h-4" />}{selectionMode ? "Cancel" : "Select"}
               </Button>
-              <Button variant="outline" size="sm" onClick={() => setShowExportModal(true)} className="rounded-xl border-border dark:border-stone-800 text-xs gap-1.5">
-                <Download className="w-4 h-4" />{selectedIds.size > 0 ? `Export (${selectedIds.size})` : "Export"}
+              <Button variant="outline" size="sm" onClick={onExport} className="rounded-xl border-border dark:border-stone-800 text-xs gap-1.5">
+                <Download className="w-4 h-4" />{selectedCount > 0 ? `Export (${selectedCount})` : "Export"}
               </Button>
-              <Button size="sm" onClick={() => navigate(routes.newJournalEntry.path)} className="rounded-xl bg-foreground/10 hover:bg-foreground/20 text-foreground gap-2 text-xs">
+              <Button size="sm" onClick={onCreate} className="rounded-xl bg-foreground/10 hover:bg-foreground/20 text-foreground gap-2 text-xs">
                 <Plus className="w-4 h-4" />New Entry
               </Button>
             </div>

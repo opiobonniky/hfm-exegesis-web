@@ -15,6 +15,7 @@ export default function History() {
       <BiblePageLayout
         title="Reading History"
         count={h.history.length}
+        contentCount={h.filtered.length}
         isRtl={h.isRtl}
         searchQuery={h.searchQuery}
         onSearchChange={h.setSearchQuery}

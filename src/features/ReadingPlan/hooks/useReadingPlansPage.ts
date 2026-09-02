@@ -56,6 +56,12 @@ export function useReadingPlansPage() {
     }
   }, [toast, t]);
 
+  const pageTitle = useMemo(() => t.readingPlan?.readingPlans || "Reading Plans", [t]);
+  const pageSubtitle = useMemo(() => t.readingPlan?.buildHabit || "Build a daily Bible habit", [t]);
+  const createPlanLabel = useMemo(() => t.readingPlan?.createPlan || "Create Plan", [t]);
+  const noPlansTitle = useMemo(() => t.readingPlan?.noPlansYet || "No plans yet", [t]);
+  const noPlansDesc = useMemo(() => t.readingPlan?.noPlansDesc || "Create your first reading plan to get started.", [t]);
+
   useEffect(() => { loadPlans(); }, [loadPlans]);
 
   const handleDelete = useCallback(async () => {
@@ -103,6 +109,7 @@ export function useReadingPlansPage() {
     page, setPage, totalPages, hasNext, hasPrevious,
     deleteTarget, setDeleteTarget, deleteConfirmText, setDeleteConfirmText, deleting, handleDelete,
     editTarget, setEditTarget, editForm, setEditForm, saving, handleEditSave,
+    pageTitle, pageSubtitle, createPlanLabel, noPlansTitle, noPlansDesc,
     isAdmin, navigate, t, isRtl, loadPlans,
   };
 }

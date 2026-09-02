@@ -1,5 +1,6 @@
 // useLoginPage — all state, effects, and API logic for Login page
 import { useState, useEffect, useCallback } from "react";
+import type { ChangeEvent, FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -68,7 +69,7 @@ export function useLoginPage() {
   }, [processGoogleResult, toast, t]);
 
   // ─── Email/Password Login ──────────────────────────────────────────────────
-  const handleLogin = useCallback(async (e: React.FormEvent) => {
+  const handleLogin = useCallback(async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!email || !password) { toast({ title: "Please fill in all fields", variant: "destructive" }); return; }
     setIsLoading(true);
@@ -100,10 +101,66 @@ export function useLoginPage() {
     }
   }, [toast, t]);
 
+  const handleEmailChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
+    setEmail(event.target.value);
+  }, []);
+  const handlePasswordChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
+    setPassword(event.target.value);
+  }, []);
+  const handleEmailFocus = useCallback((id: string | null) => {
+    setEmailFocused(Boolean(id));
+  }, []);
+  const handlePasswordFocus = useCallback((id: string | null) => {
+    setPasswordFocused(Boolean(id));
+  }, []);
+  const handleEmailBlur = useCallback(() => setEmailFocused(false), []);
+  const handlePasswordBlur = useCallback(() => setPasswordFocused(false), []);
+  const taglineParts = (t.auth?.experienceTheWord || "Experience the {word} like never before.").split("{word}");
+
   return {
-    navigate, t, isRtl, setLanguage, currentLang, langLoading,
-    email, setEmail, password, setPassword, showPassword, setShowPassword,
-    isLoading, isGoogleLoading, emailFocused, setEmailFocused,
-    passwordFocused, setPasswordFocused, handleLogin, handleGoogleLogin,
+    isRtl,
+    setLanguage,
+    currentLang,
+    langLoading,
+    email,
+    password,
+    showPassword,
+    setShowPassword,
+    isLoading,
+    isGoogleLoading,
+    emailFocused,
+    passwordFocused,
+    handleLogin,
+    handleGoogleLogin,
+    handleEmailChange,
+    handlePasswordChange,
+    handleEmailFocus,
+    handlePasswordFocus,
+    handleEmailBlur,
+    handlePasswordBlur,
+    taglineStart: taglineParts[0],
+    taglineEnd: taglineParts[1],
+    wordLabel: t.auth?.word || "Word",
+    quote: t.auth?.lampToMyFeet || "Your word is a lamp for my feet, a light on my path.",
+    attribution: t.auth?.psalmReference || "Psalm 119:105",
+    title: t.auth?.signIn || "Welcome Back!",
+    subtitle: t.auth?.dontHaveAccount || "Sign in to continue your journey.",
+    languageLabels: {
+      primary: t.languageGroups?.primary,
+      european: t.languageGroups?.european,
+      indian: t.languageGroups?.indian,
+      other: t.languageGroups?.other,
+    },
+    emailLabel: t.common?.email || "Email Address",
+    passwordLabel: t.common?.password || "Password",
+    forgotPasswordLabel: t.auth?.forgotPassword || "Forgot password?",
+    signInLabel: (t.auth?.signIn || "SIGN IN").toUpperCase(),
+    termsLabel: t.auth?.agreeToTerms || "By continuing, you agree to our",
+    termsLinkLabel: t.auth?.terms || "Terms of Service",
+    privacyLabel: "and",
+    privacyLinkLabel: t.auth?.privacyPolicy || "Privacy Policy",
+    additionalNote: t.auth?.fullVersionComing || "Full version arriving with public launch.",
   };
 }
+
+export type LoginPageModel = ReturnType<typeof useLoginPage>;

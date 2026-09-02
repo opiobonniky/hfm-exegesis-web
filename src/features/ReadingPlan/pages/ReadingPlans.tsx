@@ -2,32 +2,30 @@ import { useNavigate } from "react-router-dom";
 import Gate from "@/components/Gate";
 import { PageLayout } from "@/components/PageLayout";
 import { PageHeader } from "@/components/PageHeader";
-import { StatChips } from "@/components/StatChips";
 import { LoadingState } from "@/components/ui/LoadingState";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
 import { routes } from "@/components/Routes/routes";
 import { useReadingPlansPage } from "../hooks/useReadingPlansPage";
-import { ReadingPlanCard } from "../components/ReadingPlanCard";
 import { ReadingPlanFilters } from "../components/ReadingPlanFilters";
 import { ReadingPlanPagination } from "../components/ReadingPlanPagination";
+import { CreatePlanButton, PlansGrid } from "../components";
 
 const ReadingPlans = () => {
   const p = useReadingPlansPage();
   const navigate = useNavigate();
 
-  return (
+    return (
     <Gate tier="legacy_sower" featureName="Reading Plans" featureDescription="Track your daily Bible reading progress with personalized reading plans.">
       <PageLayout isRtl={p.isRtl} accentColor="teal">
         <PageHeader
           icon={null}
-          title={p.t.readingPlan?.readingPlans || "Reading Plans"}
-          subtitle={p.t.readingPlan?.buildHabit || "Build a daily Bible habit"}
+          title={p.pageTitle}
+          subtitle={p.pageSubtitle}
           action={
-            <Button onClick={() => navigate("/admin/plans/new")} className="gap-2">
-              <Plus className="w-4 h-4" />{p.t.readingPlan?.createPlan || "Create Plan"}
-            </Button>
+            <CreatePlanButton
+              label={p.createPlanLabel}
+              onClick={() => navigate("/admin/plans/new")}
+            />
           }
         />
 
@@ -41,24 +39,19 @@ const ReadingPlans = () => {
           <LoadingState />
         ) : p.plans.length === 0 ? (
           <EmptyState
-            title={p.t.readingPlan?.noPlansYet || "No plans yet"}
-            message={p.t.readingPlan?.noPlansDesc || "Create your first reading plan to get started."}
+            title={p.noPlansTitle}
+            message={p.noPlansDesc}
             actionLabel="Create Plan"
             onAction={() => navigate("/admin/plans/new")}
           />
         ) : (
           <>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {p.plans.map((plan) => (
-                <ReadingPlanCard
-                  key={plan.planId}
-                  plan={plan}
-                  isRtl={p.isRtl}
-                  t={p.t}
-                  onPress={() => navigate(routes.readingPlanDetail.path.replace(":planId", plan.planId))}
-                />
-              ))}
-            </div>
+            <PlansGrid
+              plans={p.plans}
+              isRtl={p.isRtl}
+              t={p.t}
+              onPress={(planId) => navigate(routes.readingPlanDetail.path.replace(":planId", planId))}
+            />
             <ReadingPlanPagination
               page={p.page || 1} setPage={p.setPage || (() => {})}
               totalPages={p.totalPages || 1} hasNext={p.hasNext || false} hasPrevious={p.hasPrevious || false}
@@ -69,6 +62,7 @@ const ReadingPlans = () => {
       </PageLayout>
     </Gate>
   );
-};
+}
+;
 
 export default ReadingPlans;

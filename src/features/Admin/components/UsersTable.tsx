@@ -4,29 +4,17 @@ import { Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { UserRowCard } from "./UserRowCard";
-
-interface UserItem {
-  id: string;
-  firstName?: string;
-  lastName?: string;
-  username: string;
-  email: string;
-  userRole: number;
-  status: boolean;
-  emailVerified: boolean;
-  profilePhotoUrl?: string | null;
-  lastLogin?: string | null;
-}
+import type { AdminUser } from "../types";
 
 interface UsersTableProps {
-  users: UserItem[];
+  users: AdminUser[];
   actionLoading: string | null;
   loadingMore: boolean;
   hasMore: boolean;
   sentinelRef: RefObject<HTMLDivElement>;
-  onToggleStatus: (user: UserItem) => void;
-  onToggleVerification: (user: UserItem) => void;
-  onView: (user: UserItem) => void;
+  onToggleStatus: (user: AdminUser) => void;
+  onToggleVerification: (user: AdminUser) => void;
+  onView: (user: AdminUser) => void;
 }
 
 export function UsersTable({

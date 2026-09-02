@@ -72,7 +72,7 @@ export function useBibleReader() {
   const chapterRefs = useRef<Record<string, HTMLDivElement>>({});
   const verseRefs = useRef<Record<string, HTMLSpanElement | null>>({});
 
-  const { language } = useLanguage();
+  const { lang: language } = useLanguage();
 
   useEffect(() => {
     import("@/services/bibleApi").then(({ bibleApi }) => {

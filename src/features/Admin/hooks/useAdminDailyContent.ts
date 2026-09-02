@@ -1,12 +1,19 @@
 // useAdminDailyContent — list + delete logic for AdminDailyContent page
 import { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { sendPostRequest } from "@/services/api";
 import type { DailyItem } from "../types";
 import type { ContentType } from "../constants";
+import {
+  DAILY_CONTENT_ADD_ROUTES,
+  DAILY_CONTENT_VIEW_ROUTES,
+  PAGE_SIZE,
+} from "../constants";
 
 export function useAdminDailyContent() {
+  const navigate = useNavigate();
   const { t, isRtl } = useLanguage();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("verses");
@@ -28,7 +35,7 @@ export function useAdminDailyContent() {
     setLoading(true);
     try {
       const res = await sendPostRequest("admin", getAction(type, "get-all"), {
-        page: p, size: 12,
+        page: p, size: PAGE_SIZE,
         ...(searchDate ? { startDate: searchDate, endDate: searchDate } : { smartDefault: false }),
       });
       if (res?.returnCode === 200 && res?.returnData) {
@@ -60,8 +67,58 @@ export function useAdminDailyContent() {
 
   const typeLabel = activeTab === "verses" ? "Verse" : activeTab === "devotions" ? "Devotion" : "Exegesis";
 
+  const goBack = useCallback(() => navigate("/admin"), [navigate]);
+
+  const handleTabChange = useCallback((v: string) => {
+    setActiveTab(v);
+    setPage(0);
+  }, []);
+
+  const handleSearchDateChange = useCallback((v: string) => {
+    setSearchDate(v);
+    setPage(0);
+  }, []);
+
+  const handleClearDate = useCallback(() => {
+    setSearchDate("");
+    setPage(0);
+  }, []);
+
+  const handleDeleteOpenChange = useCallback((open: boolean) => {
+    if (!open) setDeleteTarget(null);
+  }, []);
+
+  const getStateKey = (tab: string): string =>
+    tab === "verses" ? "verse" : tab === "devotions" ? "devotion" : "exegesis";
+
+  const makeTabHandlers = (tab: string) => ({
+    handleAdd: () => {
+      const path = DAILY_CONTENT_ADD_ROUTES[tab];
+      if (path) navigate(path);
+    },
+    handleEdit: (item: DailyItem) => {
+      const path = DAILY_CONTENT_ADD_ROUTES[tab];
+      if (path) {
+        navigate(path, { state: { [getStateKey(tab)]: item } });
+      }
+    },
+    handleView: (item: DailyItem) => {
+      const basePath = DAILY_CONTENT_VIEW_ROUTES[tab];
+      if (basePath) {
+        const paramKey = getStateKey(tab);
+        navigate(`${basePath}?${paramKey}=${encodeURIComponent(JSON.stringify(item))}`);
+      }
+    },
+  });
+
+  const verses = makeTabHandlers("verses");
+  const devotions = makeTabHandlers("devotions");
+  const exegesis = makeTabHandlers("exegesis");
+
   return {
-    t, isRtl, activeTab, setActiveTab, content, total, page, setPage, loading, searchDate, setSearchDate,
+    t, isRtl, activeTab, content, total, page, setPage, loading, searchDate,
     typeLabel, deleteTarget, setDeleteTarget, deleting, confirmDelete,
+    handleTabChange, handleSearchDateChange, handleClearDate, handleDeleteOpenChange,
+    goBack, verses, devotions, exegesis,
   };
 }

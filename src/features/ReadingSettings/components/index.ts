@@ -1,1 +1,6 @@
-// Component barrel export
+export {
+  ReadingSettingsHeader,
+  FontSizeSection,
+  DisplayOptionsSection,
+  ThemeSection,
+} from "./ReadingSettingsComponents";

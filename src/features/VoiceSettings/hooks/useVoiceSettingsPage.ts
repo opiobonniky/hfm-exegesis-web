@@ -21,6 +21,7 @@ export const EDGE_VOICES = [
   { id: "en-AU-NatashaNeural", name: "Natasha", gender: "Female", accent: "Australian" },
   { id: "en-IE-EmilyNeural", name: "Emily", gender: "Female", accent: "Irish" },
 ];
+export const EDGE_VOICE_OPTIONS = EDGE_VOICES.map((v) => ({ id: v.id, name: v.name, gender: v.gender, accent: v.accent }));
 export const RATE_SNAPS = [0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0];
 export const PITCH_SNAPS = [0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0];
 const PREVIEW_TEXT = "For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life.";
@@ -69,5 +70,6 @@ export function useVoiceSettingsPage() {
   }, [settings, navigate, toast]);
   const updateSetting = <K extends keyof VoiceSettingsData>(key: K, value: VoiceSettingsData[K]) =>
     setSettings((s) => ({ ...s, [key]: value }));
-  return { loading, saving, isPlaying, settings, updateSetting, handlePreview, stopPreview, handleSave, navigate };
+  const goBack = useCallback(() => navigate(-1), [navigate]);
+  return { loading, saving, isPlaying, settings, updateSetting, handlePreview, stopPreview, handleSave, goBack };
 }

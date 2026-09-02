@@ -3,13 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { sendPostRequest } from "@/services/api";
 import { routes } from "@/components/Routes/routes";
+import type { LabSession } from "../types";
 
-interface ExegesisSession { id: string; bookName: string; chapter: number; verseStart: number; verseEnd: number; currentStage: string; completed: boolean; createdAt: string; updatedAt: string; }
 export function useLabHome() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [activeSession, setActiveSession] = useState<ExegesisSession | null>(null);
-  const [history, setHistory] = useState<ExegesisSession[]>([]);
+  const [activeSession, setActiveSession] = useState<LabSession | null>(null);
+  const [history, setHistory] = useState<LabSession[]>([]);
   const [loading, setLoading] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [onboardingStep, setOnboardingStep] = useState(0);
@@ -46,8 +46,15 @@ export function useLabHome() {
     if (verse) params.set("verseStart", String(verse));
     navigate(`/lab/flow?${params.toString()}`);
   }, [navigate]);
+  const goBack = useCallback(() => navigate(-1), [navigate]);
+  const openNewStudy = useCallback(() => navigate(routes.labFlow.path), [navigate]);
+  const completedCount = history.filter((session) => session.completed || session.currentStage === "completed").length;
+  const inProgressCount = history.length - completedCount;
   return {
-    navigate, activeSession, history, loading, showOnboarding, onboardingStep, setOnboardingStep,
+    goBack, activeSession, history, loading, showOnboarding, onboardingStep, setOnboardingStep,
     dismissOnboarding, handleResumeStudy, handleReviewStudy, handleNewStudy, refresh: loadData,
+    openNewStudy, completedCount, inProgressCount,
   };
 }
+
+export type LabHomePageModel = ReturnType<typeof useLabHome>;

@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { sendPostRequest } from "@/services/api";
+import { useNavigate } from "react-router-dom";
 
 export interface JournalModerationEntry {
   id: number;
@@ -17,6 +18,7 @@ export interface JournalModerationEntry {
 
 export function useAdminJournalModeration() {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [entries, setEntries] = useState<JournalModerationEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -137,6 +139,17 @@ export function useAdminJournalModeration() {
     loadEntries(np, search, true);
   }, [page, search, loadEntries]);
 
+  const goBack = useCallback(() => navigate(-1), [navigate]);
+  const viewEntry = useCallback((entry: JournalModerationEntry) => {
+    navigate(`/admin/journal-moderation/${entry.id}`);
+  }, [navigate]);
+  const requestDelete = useCallback((entry: JournalModerationEntry) => {
+    setDeleteTarget(entry);
+  }, []);
+  const handleDeleteDialogChange = useCallback((open: boolean) => {
+    if (!open) setDeleteTarget(null);
+  }, []);
+
   return {
     entries,
     loading,
@@ -147,12 +160,15 @@ export function useAdminJournalModeration() {
     totalCount,
     sentinelRef,
     deleteTarget,
-    setDeleteTarget,
     deleting,
     actionLoading,
     handleSearch,
     handleTogglePublication,
     handleDelete,
     loadMore,
+    goBack,
+    viewEntry,
+    requestDelete,
+    handleDeleteDialogChange,
   };
 }

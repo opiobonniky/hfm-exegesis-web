@@ -1,7 +1,6 @@
 "use client";
 
-import { User, Star, Lock, Sliders, Bell } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { useSettingsPage } from "../hooks/useSettingsPage";
 import { ProfileTab } from "../components/ProfileTab";
@@ -11,38 +10,18 @@ import { NotificationsTab } from "../components/NotificationsTab";
 import SettingsHeader from "../components/SettingsHeader";
 import SettingsLoading from "../components/SettingsLoading";
 import AdditionalDetailsTab from "../components/AdditionalDetailsTab";
-
-const TAB_ICONS = { profile: User, additional: Star, password: Lock, preferences: Sliders, notifications: Bell };
+import { SettingsTabBar, SettingsContentWrapper, SettingsContentArea, SettingsBottomSpacer } from "../components";
 
 export default function Settings() {
   const h = useSettingsPage();
   if (h.loading) return <SettingsLoading />;
 
-  const tabs = [
-    { value: "profile", label: "Profile", short: "Profile" },
-    { value: "additional", label: "Details", short: "Details" },
-    { value: "password", label: "Password", short: "Pass" },
-    { value: "preferences", label: "Reading", short: "Read" },
-    { value: "notifications", label: "Notifications", short: "Notify" },
-  ];
-
   return (
-    <div dir={h.isRtl ? "rtl" : "ltr"} className="min-h-full bg-background">
+    <SettingsContentWrapper isRtl={h.isRtl}>
       <SettingsHeader />
-      <div className="max-w-6xl mx-auto px-3 sm:px-4 lg:px-6 py-6">
+      <SettingsContentArea>
         <Tabs defaultValue="profile" className="w-full">
-          <TabsList className="flex w-full max-w-2xl mb-6 bg-muted/50 p-1 rounded-xl overflow-x-auto">
-            {tabs.map(({ value, label, short }) => {
-              const Icon = TAB_ICONS[value as keyof typeof TAB_ICONS];
-              return (
-                <TabsTrigger key={value} value={value} className="rounded-lg gap-1.5 sm:gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm shrink-0">
-                  <Icon className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">{label}</span>
-                  <span className="sm:hidden text-[10px]">{short}</span>
-                </TabsTrigger>
-              );
-            })}
-          </TabsList>
+          <SettingsTabBar />
 
           <TabsContent value="profile">
             <Card className="border-none shadow-none bg-transparent">
@@ -88,8 +67,8 @@ export default function Settings() {
             </Card>
           </TabsContent>
         </Tabs>
-        <div className="h-8" />
-      </div>
-    </div>
+        <SettingsBottomSpacer />
+      </SettingsContentArea>
+    </SettingsContentWrapper>
   );
 }

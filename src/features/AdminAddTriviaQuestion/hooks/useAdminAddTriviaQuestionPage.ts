@@ -43,5 +43,6 @@ export function useAdminAddTriviaQuestionPage() {
     } catch { toast({ title: "Error", variant: "destructive" }); }
     finally { setSaving(false); }
   }, [form, isEditing, navigate, toast]);
-  return { form, setForm, saving, loading, isEditing, updateOption, addOption, removeOption, handleSave, navigate };
+  const goBack = useCallback(() => navigate(-1), [navigate]);
+  return { form, setForm, saving, loading, isEditing, updateOption, addOption, removeOption, handleSave, goBack };
 }

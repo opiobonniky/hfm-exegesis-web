@@ -20,6 +20,9 @@ export function useLabFlowPage() {
   const navigate = useNavigate();
   const lab = useLabFlow();
   const audio = useAudioPlayer();
+  const chapterNumber = Number(lab.chapter);
+  const verseStartNumber = Number(lab.verseStart);
+  const verseEndNumber = Number(lab.verseEnd || lab.verseStart);
   const [passageVerses, setPassageVerses] = useState<Verse[]>([]);
   const [versesLoading, setVersesLoading] = useState(false);
   const [previewText, setPreviewText] = useState("");
@@ -49,19 +52,19 @@ export function useLabFlowPage() {
     const fetchVerses = async () => {
       setVersesLoading(true);
       try {
-        const verseData = await bibleApi.getVerses("BSB", lab.bookName, lab.chapter);
+        const verseData = await bibleApi.getVerses("BSB", lab.bookName, chapterNumber);
         if (cancelled) return;
         const data = verseData.verses || [];
         const filtered = lab.verseEnd
-          ? data.filter((v: Verse) => (v.verse ?? v.verseNumber) >= lab.verseStart && (v.verse ?? v.verseNumber) <= lab.verseEnd)
-          : data.filter((v: Verse) => (v.verse ?? v.verseNumber) === lab.verseStart);
+          ? data.filter((v: Verse) => (v.verse ?? v.verseNumber) >= verseStartNumber && (v.verse ?? v.verseNumber) <= verseEndNumber)
+          : data.filter((v: Verse) => (v.verse ?? v.verseNumber) === verseStartNumber);
         setPassageVerses(filtered);
       } catch { if (!cancelled) setPassageVerses([]); }
       finally { if (!cancelled) setVersesLoading(false); }
     };
     fetchVerses();
     return () => { cancelled = true; };
-  }, [lab.bookName, lab.chapter, lab.verseStart, lab.verseEnd, lab.stage]);
+  }, [lab.bookName, lab.chapter, lab.verseStart, lab.verseEnd, lab.stage, chapterNumber, verseStartNumber, verseEndNumber]);
   // Fetch verse words (Strong's) when entering Learn stage
   useEffect(() => {
     if (lab.stage !== "learn" || !lab.passageRef || passageVerses.length === 0) return;
@@ -69,15 +72,14 @@ export function useLabFlowPage() {
     const fetchWords = async () => {
       setWordsLoading(true);
       try {
-        const text = passageVerses.map((v) => v.text).join(" ");
-        const words = await getVerseWords(text);
+        const words = await getVerseWords(lab.bookName, chapterNumber, verseStartNumber, "BSB");
         if (!cancelled) setVerseWords(words);
       } catch { if (!cancelled) setVerseWords([]); }
       finally { if (!cancelled) setWordsLoading(false); }
     };
     fetchWords();
     return () => { cancelled = true; };
-  }, [lab.stage, lab.passageRef, passageVerses]);
+  }, [lab.stage, lab.passageRef, lab.bookName, chapterNumber, verseStartNumber, passageVerses]);
   // Fetch book prologue when entering Learn stage
   useEffect(() => {
     if (lab.stage !== "learn" || !lab.bookName) return;
@@ -100,14 +102,14 @@ export function useLabFlowPage() {
     const fetch = async () => {
       setResourcesLoading(true);
       try {
-        const r = await getVerseResources(lab.bookName, lab.chapter, lab.verseStart);
+        const r = await getVerseResources(lab.bookName, chapterNumber, verseStartNumber);
         if (!cancelled) setVerseResources(r);
       } catch { if (!cancelled) setVerseResources(null); }
       finally { if (!cancelled) setResourcesLoading(false); }
     };
     fetch();
     return () => { cancelled = true; };
-  }, [lab.stage, lab.passageRef, lab.bookName, lab.chapter, lab.verseStart]);
+  }, [lab.stage, lab.passageRef, lab.bookName, lab.chapter, lab.verseStart, chapterNumber, verseStartNumber]);
   // Fetch translation comparison when entering Learn stage
   useEffect(() => {
     if (lab.stage !== "learn" || !lab.passageRef) return;
@@ -116,14 +118,14 @@ export function useLabFlowPage() {
       setTranslationsLoading(true);
       setTranslationsError(false);
       try {
-        const t = await getTranslationComparison(lab.bookName, lab.chapter, lab.verseStart, lab.verseEnd);
+        const t = await getTranslationComparison(lab.bookName, chapterNumber, verseStartNumber);
         if (!cancelled) setTranslations(t);
       } catch { if (!cancelled) { setTranslations(null); setTranslationsError(true); } }
       finally { if (!cancelled) setTranslationsLoading(false); }
     };
     fetch();
     return () => { cancelled = true; };
-  }, [lab.stage, lab.passageRef, lab.bookName, lab.chapter, lab.verseStart, lab.verseEnd]);
+  }, [lab.stage, lab.passageRef, lab.bookName, lab.chapter, lab.verseStart, chapterNumber, verseStartNumber]);
   // Preview text for passage selection
   useEffect(() => {
     if (lab.stage !== "passage" || !lab.bookName || !lab.chapter || !lab.verseStart) { setPreviewText(""); return; }
@@ -131,17 +133,16 @@ export function useLabFlowPage() {
     const fetch = async () => {
       setPreviewLoading(true);
       try {
-        const verseData = await bibleApi.getVerses("BSB", lab.bookName, lab.chapter);
+        const verseData = await bibleApi.getVerses("BSB", lab.bookName, chapterNumber);
         const data = verseData.verses || [];
-        const end = lab.verseEnd || lab.verseStart;
-        const filtered = data.filter((v: Verse) => (v.verse ?? v.verseNumber) >= lab.verseStart && (v.verse ?? v.verseNumber) <= end);
+        const filtered = data.filter((v: Verse) => (v.verse ?? v.verseNumber) >= verseStartNumber && (v.verse ?? v.verseNumber) <= verseEndNumber);
         setPreviewText(filtered.map((v: Verse) => `${v.verse ?? v.verseNumber}. ${v.text}`).join("\n"));
       } catch { if (!cancelled) setPreviewText(""); }
       finally { if (!cancelled) setPreviewLoading(false); }
     };
     fetch();
     return () => { cancelled = true; };
-  }, [lab.stage, lab.bookName, lab.chapter, lab.verseStart, lab.verseEnd]);
+  }, [lab.stage, lab.bookName, lab.chapter, lab.verseStart, lab.verseEnd, chapterNumber, verseStartNumber, verseEndNumber]);
   //  HANDLERS
   const handleWordTap = useCallback(async (strongsId: string) => {
     setWordModalOpen(true);
@@ -174,6 +175,19 @@ export function useLabFlowPage() {
       else await navigator.clipboard.writeText(formatStudyAsText());
     } catch { setSharing(false); } finally { setSharing(false); }
   }, [lab.passageRef, formatStudyAsText]);
+  const goBack = useCallback(() => {
+    if (lab.stage === "passage" || lab.completed) {
+      navigate("/lab");
+    } else {
+      lab.saveCurrentProgress();
+      navigate("/lab");
+    }
+  }, [lab.stage, lab.completed, lab.saveCurrentProgress, navigate]);
+
+  const openBibleReader = useCallback((bookName: string, chapter: string) => {
+    navigate(`/bible-reader?book=${bookName}&chapter=${chapter}`);
+  }, [navigate]);
+
   // Listen stage TTS playback
   const startListeningWithTTS = useCallback(() => {
     if (passageVerses.length === 0) return;
@@ -224,6 +238,7 @@ export function useLabFlowPage() {
     bookPrologue, prologueLoading,
     // Actions
     handleWordTap, handleCopy, handleShare, copied, sharing,
+    goBack, openBibleReader,
     // Listen TTS
     audio, startListeningWithTTS,
     // Shortcuts
@@ -232,3 +247,5 @@ export function useLabFlowPage() {
     STAGE_ORDER, LISTEN_OPTIONS, LOOK_PROMPTS,
   };
 }
+
+export type LabFlowPageModel = ReturnType<typeof useLabFlowPage>;

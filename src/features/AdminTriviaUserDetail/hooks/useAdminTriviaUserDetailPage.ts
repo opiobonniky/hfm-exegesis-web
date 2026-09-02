@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { sendPostRequest } from "@/services/api";
+import { routes } from "@/components/Routes/routes";
 
 export interface TriviaUserDetail {
   userId: number; username: string; email: string; score: number;
@@ -23,5 +24,8 @@ export function useAdminTriviaUserDetailPage() {
     finally { setLoading(false); }
   }, [userId, toast, navigate]);
   useEffect(() => { fetchDetail(); }, [fetchDetail]);
-  return { detail, loading, navigate };
+  const goBack = useCallback(() => {
+    navigate(routes.adminTrivia.path);
+  }, [navigate]);
+  return { detail, loading, navigate, goBack };
 }

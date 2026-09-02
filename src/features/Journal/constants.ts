@@ -91,3 +91,12 @@ export const MOOD_EMOJI_MAP: Record<string, { label: string; emoji: string }> = 
   motivated: { label: "Motivated", emoji: "💪" }, hopeful: { label: "Hopeful", emoji: "🌟" },
   challenged: { label: "Challenged", emoji: "🧗" }, blessed: { label: "Blessed", emoji: "✨" },
 };
+
+export const MOOD_MAP: Record<string, { value: string; key: string; emoji: string }> = Object.fromEntries(
+  MOODS.map((m) => [m.value, m])
+);
+
+export function getMoodLabel(t: any, v: string): string {
+  const m = MOODS.find((x) => x.value === v);
+  return m ? (t.journal as any)?.[m.key] || v : v;
+}

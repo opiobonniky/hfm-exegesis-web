@@ -12,7 +12,7 @@ export function useVerseExplanationsPage() {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { userInfo } = useAuth();
-  const { t } = useLanguage();
+  const { t, isRtl } = useLanguage();
   const isAdmin = userInfo?.userRole === 1;
   const [explanations, setExplanations] = useState<VerseExplanation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -53,7 +53,7 @@ export function useVerseExplanationsPage() {
       });
       if (res.returnCode === 200) {
         setExplanations((p) => p.filter((e) => e.id !== deleteTarget.id));
-        toast({ title: t.verseExplanations?.deleteSuccess || "Deleted" });
+        toast({ title: t.verseExplanations?.deletedToast || "Deleted" });
         setDeleteTarget(null);
       } else {
         toast({ title: t.verseExplanations?.deleteFailed || "Failed to delete", variant: "destructive" });
@@ -70,7 +70,7 @@ export function useVerseExplanationsPage() {
     ? `${deleteTarget.bookName} ${deleteTarget.chapter}:${deleteTarget.verseNumber}`
     : "";
   return {
-    t, isAdmin,
+    t, isRtl, isAdmin,
     explanations, filtered, loading, search, setSearch,
     bookFilter, setBookFilter,
     deleteTarget, setDeleteTarget, deleting, confirmDelete, closeDelete,

@@ -40,7 +40,7 @@ export default function LabLookStage({
   };
 
   const verseRange = passageVerses.length === 0 ? null
-    : passageVerses[0].verseNumber === passageVerses[passageVerses.length - 1].number
+    : passageVerses[0].verseNumber === passageVerses[passageVerses.length - 1].verseNumber
       ? `v. ${passageVerses[0].verseNumber}`
       : `vv. ${passageVerses[0].verseNumber}–${passageVerses[passageVerses.length - 1].verseNumber}`;
 

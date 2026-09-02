@@ -53,3 +53,5 @@ export { ForgotPasswordFooter } from "./ForgotPasswordFooter";
 export { ForgotPasswordContentWrapper } from "./ForgotPasswordContentWrapper";
 export { OnboardingSlidesGrid } from "./OnboardingSlidesGrid";
 export { LandingContentWrapper } from "./LandingContentWrapper";
+export { LoginBrandedPanel } from "./LoginBrandedPanel";
+export { LoginFormContent } from "./LoginFormContent";

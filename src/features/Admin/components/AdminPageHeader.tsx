@@ -8,7 +8,7 @@ interface Props {
   subtitle?: string;
   icon: ReactNode;
   onBack: () => void;
-  onAdd: () => void;
+  onAdd?: () => void;
   addLabel?: string;
 }
 
@@ -44,17 +44,19 @@ export function AdminPageHeader({
               )}
             </div>
           </div>
-          <Button
-            onClick={onAdd}
-            className="gap-1.5 sm:gap-2 shrink-0 text-xs sm:text-sm"
-            size="sm"
-          >
-            <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />{" "}
-            <span className="hidden sm:inline">{addLabel}</span>
-            <span className="sm:hidden">
-              {addLabel.length > 6 ? addLabel.slice(0, 5) + "…" : addLabel}
-            </span>
-          </Button>
+          {onAdd && (
+            <Button
+              onClick={onAdd}
+              className="gap-1.5 sm:gap-2 shrink-0 text-xs sm:text-sm"
+              size="sm"
+            >
+              <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />{" "}
+              <span className="hidden sm:inline">{addLabel}</span>
+              <span className="sm:hidden">
+                {addLabel.length > 6 ? addLabel.slice(0, 5) + "…" : addLabel}
+              </span>
+            </Button>
+          )}
         </div>
       </div>
     </div>

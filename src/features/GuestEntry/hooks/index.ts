@@ -1,1 +1,1 @@
-// Hook barrel export
+export { useGuestEntryPage } from "./useGuestEntryPage";

@@ -11,7 +11,7 @@ const VerseExplanations = () => {
   const h = useVerseExplanationsPage();
 
   return (
-    <BiblePageLayout isRtl={h.t.layoutDirection === "rtl"}>
+    <BiblePageLayout isRtl={h.isRtl}>
       <BiblePageInner>
         <PageHeader
           title={h.t.verseExplanations?.title || "Verse Explanations"}

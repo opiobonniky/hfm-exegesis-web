@@ -1,74 +1,53 @@
-// Login — thin compositor using shared Auth components (1 root div only)
-import { Mail, Lock } from "lucide-react";
+// Login — thin compositor using a page hook and focused render components
 import logoImage from "@/assets/logos/exegesis_bg_rm.png";
-import lordsbookLogo from "@/assets/logos/lordsbook.png";
-import googleIcon from "@/assets/icons/google-icon.svg";
 import { useLoginPage } from "../hooks/useLoginPage";
-import FloatingInput from "../components/FloatingInput";
-import {
-  AuthBrandedPanel, AuthFormWrapper, AuthLoadingButton, AuthLanguagePicker,
-  AuthLogo, AuthFormHeader, AuthDivider, AuthSocialButtons,
-  AuthForgotPasswordLink, AuthFooter, AuthHighlightText,
-} from "../components";
+import { LoginBrandedPanel, LoginFormContent } from "../components";
 
 export default function Login() {
   const p = useLoginPage();
-  const {
-    t, isRtl, setLanguage, currentLang, langLoading, navigate,
-    email, setEmail, password, setPassword,
-    showPassword, setShowPassword,
-    isLoading, isGoogleLoading,
-    emailFocused, setEmailFocused,
-    passwordFocused, setPasswordFocused,
-    handleLogin, handleGoogleLogin,
-  } = p;
-
-  const taglineParts = (t.auth?.experienceTheWord || "Experience the {word} like never before.").split("{word}");
 
   return (
-    <div className="min-h-screen flex bg-background overflow-hidden" dir={isRtl ? "rtl" : "ltr"}>
-      <AuthBrandedPanel
-        isRtl={isRtl}
-        tagline={
-          <>
-            {taglineParts[0]}
-            <AuthHighlightText text={t.auth?.word || "Word"} />
-            {taglineParts[1]}
-          </>
-        }
-        quote={t.auth?.lampToMyFeet || "Your word is a lamp for my feet, a light on my path."}
-        attribution={t.auth?.psalmReference || "Psalm 119:105"}
+    <div className="min-h-screen flex bg-background overflow-hidden" dir={p.isRtl ? "rtl" : "ltr"}>
+      <LoginBrandedPanel
+        isRtl={p.isRtl}
+        taglineStart={p.taglineStart}
+        taglineEnd={p.taglineEnd}
+        wordLabel={p.wordLabel}
+        quote={p.quote}
+        attribution={p.attribution}
       />
-
-      <AuthFormWrapper>
-        <AuthLogo src={logoImage} linkTo="/" />
-        <AuthFormHeader title={t.auth?.signIn || "Welcome Back!"} subtitle={t.auth?.dontHaveAccount || "Sign in to continue your journey."} />
-        <AuthLanguagePicker currentLang={currentLang} langLoading={langLoading} onLanguageChange={setLanguage}
-          labels={{ primary: t.languageGroups?.primary, european: t.languageGroups?.european, indian: t.languageGroups?.indian, other: t.languageGroups?.other }} />
-
-        <form onSubmit={(e) => { e.preventDefault(); handleLogin(e); }} className="space-y-4 anim-fade" style={{ animationDelay: "0.2s" }}>
-          <FloatingInput id="email" label={t.common?.email || "Email Address"} icon={Mail}
-            value={email} onChange={(e) => setEmail(e.target.value)}
-            focused={emailFocused} setFocused={(id) => setEmailFocused(!!id)}
-            handleBlur={() => setEmailFocused(false)} error="" touched={false} type="text" autoComplete="username" />
-          <FloatingInput id="password" label={t.common?.password || "Password"} icon={Lock}
-            value={password} onChange={(e) => setPassword(e.target.value)}
-            focused={passwordFocused} setFocused={(id) => setPasswordFocused(!!id)}
-            handleBlur={() => setPasswordFocused(false)} error="" touched={false}
-            type={showPassword ? "text" : "password"} autoComplete="current-password"
-            isPassword showPassword={showPassword} setShowPassword={setShowPassword} />
-          <AuthForgotPasswordLink label={t.auth?.forgotPassword || "Forgot password?"} />
-          <AuthLoadingButton loading={isLoading}>{(t.auth?.signIn || "SIGN IN").toUpperCase()}</AuthLoadingButton>
-        </form>
-
-        <AuthFooter
-          termsLabel={t.auth?.agreeToTerms || "By continuing, you agree to our"}
-          termsLinkLabel={t.auth?.terms || "Terms of Service"}
-          privacyLabel="and"
-          privacyLinkLabel={t.auth?.privacyPolicy || "Privacy Policy"}
-          additionalNote={t.auth?.fullVersionComing || "Full version arriving with public launch."}
-        />
-      </AuthFormWrapper>
+      <LoginFormContent
+        logoSrc={logoImage}
+        currentLang={p.currentLang}
+        langLoading={p.langLoading}
+        setLanguage={p.setLanguage}
+        languageLabels={p.languageLabels}
+        title={p.title}
+        subtitle={p.subtitle}
+        email={p.email}
+        emailLabel={p.emailLabel}
+        emailFocused={p.emailFocused}
+        handleEmailChange={p.handleEmailChange}
+        handleEmailFocus={p.handleEmailFocus}
+        handleEmailBlur={p.handleEmailBlur}
+        password={p.password}
+        passwordLabel={p.passwordLabel}
+        passwordFocused={p.passwordFocused}
+        handlePasswordChange={p.handlePasswordChange}
+        handlePasswordFocus={p.handlePasswordFocus}
+        handlePasswordBlur={p.handlePasswordBlur}
+        showPassword={p.showPassword}
+        setShowPassword={p.setShowPassword}
+        handleLogin={p.handleLogin}
+        forgotPasswordLabel={p.forgotPasswordLabel}
+        isLoading={p.isLoading}
+        signInLabel={p.signInLabel}
+        termsLabel={p.termsLabel}
+        termsLinkLabel={p.termsLinkLabel}
+        privacyLabel={p.privacyLabel}
+        privacyLinkLabel={p.privacyLinkLabel}
+        additionalNote={p.additionalNote}
+      />
     </div>
   );
 }

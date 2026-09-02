@@ -42,6 +42,8 @@ export function useDailyReadingPage() {
   const dayNumber = Number(day) || 1;
   const currentDayIdx = dayNumber - 1;
 
+  const planTitleText = useMemo(() => planTitle || t.readingPlan?.dailyReadingTitle || "Daily Reading", [planTitle, t]);
+
   useEffect(() => {
     if (!planId) return;
     let cancelled = false;
@@ -166,7 +168,7 @@ export function useDailyReadingPage() {
 
   return {
     navigate, isRtl, loading, assignment, notYetAdded, isCompleted,
-    planTitle, totalDays, dayNumber, currentDayIdx, ponderedReflections,
+    planTitle: planTitleText, totalDays, dayNumber, currentDayIdx, ponderedReflections,
     currentQ, selected, showResult, isReviewing, quizDone, correctCount,
     isSubmitting, submittedIds, showConfetti, lastAnswerCorrect, revealedCorrectAnswer,
     allReflectionsPondered, canComplete,

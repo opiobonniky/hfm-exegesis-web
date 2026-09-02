@@ -1,6 +1,7 @@
 import { Play, CheckCircle2, FileText, ChevronRight, ScrollText } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import type { LabSession } from "../types";
 
 const STATUS_LABELS: Record<string, string> = { look: "Look Stage", listen: "Listen Stage", learn: "Learn Stage", abide: "Abide Stage" };
 const TimeAgo = (d: string) => {
@@ -13,8 +14,8 @@ const TimeAgo = (d: string) => {
 };
 
 interface Props {
-  history: any[];
-  handleResumeStudy: (s: any) => void;
+  history: LabSession[];
+  handleResumeStudy: (sessionId: string) => void;
   handleReviewStudy: (id: string) => void;
 }
 
@@ -32,7 +33,7 @@ export function LabHistoryList({ history, handleResumeStudy, handleReviewStudy }
           const isCompleted = session.currentStage === "completed";
           const statusLabel = isActive ? STATUS_LABELS[session.currentStage] || session.currentStage : isCompleted ? "Completed" : "Abandoned";
           return (
-            <button key={session.id} onClick={() => isActive ? handleResumeStudy(session) : handleReviewStudy(session.id)}
+            <button key={session.id} onClick={() => isActive ? handleResumeStudy(session.id) : handleReviewStudy(session.id)}
               className={cn("w-full rounded-xl bg-card border transition-all hover:bg-muted/50 active:scale-[0.98] overflow-hidden group text-left",
                 isActive ? "border-l-[3px] border-l-primary border-border/60" : "border-border/50")}>
               <div className="p-3.5 flex items-center gap-3">

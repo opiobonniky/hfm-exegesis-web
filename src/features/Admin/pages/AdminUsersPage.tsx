@@ -1,7 +1,6 @@
-// AdminUsersPage — thin page composing hook + components (no inline HTML)
+// AdminUsersPage — thin page composing hook + components
 "use client";
 
-import { useNavigate } from "react-router-dom";
 import { Users } from "lucide-react";
 import { useAdminUsers } from "../hooks/useAdminUsers";
 import { AdminPageHeader, AdminEmptyState, AdminLoadingGrid, AdminSearchBar, AdminPageContent } from "../components";
@@ -9,7 +8,6 @@ import { UsersTable } from "../components/UsersTable";
 
 export default function AdminUsersPage() {
   const h = useAdminUsers();
-  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-background">
@@ -17,8 +15,8 @@ export default function AdminUsersPage() {
         title="User Management"
         subtitle={`${h.totalCount || h.users.length} users`}
         icon={<Users className="w-5 h-5 text-primary" />}
-        onBack={() => window.history.back()}
-        onAdd={() => navigate("/admin/users/create")}
+        onBack={h.goBack}
+        onAdd={h.openCreateUser}
         addLabel="Add User"
       />
 
@@ -26,7 +24,6 @@ export default function AdminUsersPage() {
         <AdminSearchBar
           value={h.search}
           onChange={h.setSearch}
-          onSearch={() => {}}
           placeholder="Search users..."
         />
 
@@ -45,9 +42,9 @@ export default function AdminUsersPage() {
             loadingMore={h.loadingMore}
             hasMore={h.hasMore}
             sentinelRef={h.sentinelRef}
-            onToggleStatus={(user) => h.handleToggleStatus(user)}
-            onToggleVerification={(user) => h.handleToggleVerification(user)}
-            onView={(user) => navigate(`/admin/users/${user.id}`)}
+            onToggleStatus={h.handleToggleStatus}
+            onToggleVerification={h.handleToggleVerification}
+            onView={h.viewUser}
           />
         )}
       </AdminPageContent>

@@ -43,6 +43,10 @@ export default function LabLearnStage({
   isPublic, setIsPublic, saving, onAdvance, onWordTap,
 }: Props) {
   const [activeTab, setActiveTab] = useState<LearnTab>("exegesis");
+  const historicalContext = verseResources?.commentaries?.[0]?.text;
+  const geography = verseResources?.studyTools?.find((tool) => tool.toolType === "geography")?.description;
+  const theology = verseResources?.relatedTopics?.map((topic) => topic.name).join(", ");
+  const prologue = bookPrologue?.summary || bookPrologue?.background;
 
   return (
     <div className="space-y-5">
@@ -132,9 +136,9 @@ export default function LabLearnStage({
         {activeTab === "history" && (
           <div className="p-4 space-y-3">
             <h3 className="text-sm font-bold text-foreground">Historical Context</h3>
-            {verseResources?.commentary ? (
+            {historicalContext ? (
               <div className="p-3 rounded-lg bg-muted/20 border border-border/30">
-                <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">{verseResources.commentary}</p>
+                <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">{historicalContext}</p>
               </div>
             ) : (
               <p className="text-xs text-muted-foreground py-4 text-center">Historical context data not available for this passage.</p>
@@ -146,9 +150,9 @@ export default function LabLearnStage({
         {activeTab === "geography" && (
           <div className="p-4 space-y-3">
             <h3 className="text-sm font-bold text-foreground">Geography</h3>
-            {verseResources?.geography ? (
+            {geography ? (
               <div className="p-3 rounded-lg bg-muted/20 border border-border/30">
-                <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">{verseResources.geography}</p>
+                <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">{geography}</p>
               </div>
             ) : (
               <p className="text-xs text-muted-foreground py-4 text-center">Geography data not available.</p>
@@ -160,9 +164,9 @@ export default function LabLearnStage({
         {activeTab === "theology" && (
           <div className="p-4 space-y-3">
             <h3 className="text-sm font-bold text-foreground">Theological Themes</h3>
-            {verseResources?.theology ? (
+            {theology ? (
               <div className="p-3 rounded-lg bg-muted/20 border border-border/30">
-                <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">{verseResources.theology}</p>
+                <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">{theology}</p>
               </div>
             ) : (
               <p className="text-xs text-muted-foreground py-4 text-center">Theological themes data not available.</p>
@@ -178,7 +182,7 @@ export default function LabLearnStage({
               <div className="space-y-2">
                 {verseResources.crossReferences.map((ref, idx) => (
                   <div key={idx} className="p-3 rounded-lg bg-muted/20 border border-border/30">
-                    <p className="text-xs font-bold text-primary mb-1">{ref.reference}</p>
+                    <p className="text-xs font-bold text-primary mb-1">{ref.ref}</p>
                     <p className="text-sm text-foreground/80 italic">{ref.text}</p>
                   </div>
                 ))}
@@ -193,9 +197,9 @@ export default function LabLearnStage({
         {activeTab === "prologue" && (
           <div className="p-4 space-y-3">
             <h3 className="text-sm font-bold text-foreground">Book Prologue — {bookName}</h3>
-            {bookPrologue?.content ? (
+            {prologue ? (
               <div className="p-3 rounded-lg bg-muted/20 border border-border/30">
-                <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">{bookPrologue.content}</p>
+                <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">{prologue}</p>
               </div>
             ) : (
               <p className="text-xs text-muted-foreground py-4 text-center">No book prologue available.</p>

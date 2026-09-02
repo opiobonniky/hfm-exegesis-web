@@ -25,6 +25,11 @@ export function useVerseResources() {
       ? requestedTab
       : "commentaries";
   const [activeTab, setActiveTab] = useState<TabKey>(initialTab);
+  const handleTabChange = useCallback((key: string) => {
+    if (["commentaries", "crossReferences", "wordStudies", "dictionary", "translations", "interlinear", "topics"].includes(key)) {
+      setActiveTab(key as TabKey);
+    }
+  }, []);
   const [data, setData] = useState<VerseResourceData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -103,6 +108,7 @@ export function useVerseResources() {
     verseRef,
     activeTab,
     setActiveTab,
+    handleTabChange,
     data,
     loading,
     error,

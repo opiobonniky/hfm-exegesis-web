@@ -1,5 +1,5 @@
 // LabFlow constants — chapter counts, stage config, passage suggestions
-import { Eye, Ear, Heart, BookText } from "lucide-react";
+import { Eye, Ear, Heart, BookText, Search, LibraryBig } from "lucide-react";
 
 export const STAGE_ICONS: Record<string, any> = {
   look: Eye, listen: Ear, learn: BookText, abide: Heart,
@@ -43,5 +43,33 @@ export const MAX_CHAPTERS: Record<string, number> = {
   Ephesians: 6, Philippians: 4, Colossians: 4, "1 Thessalonians": 5,
   "2 Thessalonians": 3, "1 Timothy": 6, "2 Timothy": 4, Titus: 3,
   Philemon: 1, Hebrews: 13, James: 5, "1 Peter": 5, "2 Peter": 3,
-  "1 John": 5, "2 John": 1, "3 John": 1, Jude: 1, Revelation: 22,
+  "1 John": 5, "2 John": 1, "3 John": 1, Jude: 1,   Revelation: 22,
 };
+
+export const LAB_ERRORS = {
+  SESSION_NOT_FOUND: "Session not found",
+  LOAD_FAILED: "Failed to load session",
+};
+
+export type LabMode = "search" | "browse" | "verse";
+export const LAB_MODE_TABS: Array<{ id: LabMode; icon: any; label: string }> = [
+  { id: "search", icon: Search, label: "Search" },
+  { id: "browse", icon: LibraryBig, label: "Browse by Book" },
+  { id: "verse", icon: BookText, label: "By Verse" },
+];
+export const SEARCH_HINTS = ["love", "faith", "grace", "word", "light", "logos", "agape"];
+export const LAB_BROWSE_PAGE_SIZE = 100;
+
+// LabHome constants
+export const STAGE_META = [
+  { key: "look", label: "Look", desc: "Read and observe", time: "5 min" },
+  { key: "listen", label: "Listen", desc: "Meditate and reflect", time: "5 min" },
+  { key: "learn", label: "Learn", desc: "Study and understand", time: "5 min" },
+  { key: "abide", label: "Abide", desc: "Apply and pray", time: "5 min" },
+];
+
+export const ONBOARDING_STEPS = [
+  { title: "Welcome to Exegesis Lab", desc: "A 4-step guided journey through Scripture.", bg: "bg-primary/10", color: "text-primary" },
+  { title: "Look, Listen, Learn, Abide", desc: "Each stage guides you deeper into the Word.", bg: "bg-amber-100", color: "text-amber-600" },
+  { title: "Start Your Journey", desc: "Choose a passage and begin studying.", bg: "bg-emerald-100", color: "text-emerald-600" },
+];

@@ -35,7 +35,7 @@ export function AddExplanationReferenceSection({ model: h }: Props) {
           </SelectTrigger>
           <SelectContent className="max-h-64">
             {BIBLE_BOOKS.map((book) => (
-              <SelectItem key={book} value={book}>{book}</SelectItem>
+              <SelectItem key={book.bookName} value={book.bookName}>{book.bookName}</SelectItem>
             ))}
           </SelectContent>
         </Select>

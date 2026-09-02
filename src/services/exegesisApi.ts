@@ -27,6 +27,8 @@ export interface ExegesisSession {
   strongsIds: string | null;
   isPublic: boolean | null;
   journalEntryId: string | null;
+  challengeText?: string | null;
+  resultsText?: string | null;
   createdOn: string;
   updatedOn: string;
 }

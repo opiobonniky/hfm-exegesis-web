@@ -27,7 +27,7 @@ export default function VerseResources() {
         goToReader={h.goToReader}
         statsRow={h.data ? <ResourceStatsRow data={h.data} /> : undefined}
         tabBar={h.visibleTabs.length > 0 ? (
-          <ResourceTabBar tabs={RESOURCE_TABS} activeTab={h.activeTab} onTabChange={h.setActiveTab} visibleTabs={h.visibleTabs} />
+          <ResourceTabBar tabs={RESOURCE_TABS} activeTab={h.activeTab} onTabChange={h.handleTabChange} visibleTabs={h.visibleTabs} />
         ) : undefined}
       />
 

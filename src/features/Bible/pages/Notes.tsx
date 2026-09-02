@@ -14,6 +14,7 @@ export default function Notes() {
       <BiblePageLayout
         title="My Notes"
         count={h.notes.length}
+        contentCount={h.filtered.length}
         isRtl={h.isRtl}
         searchQuery={h.searchQuery}
         onSearchChange={h.setSearchQuery}
@@ -38,9 +39,10 @@ export default function Notes() {
 
       <EditNoteDialog
         open={!!h.editingNote}
-        bookName={h.editingNote?.bookName}
-        chapter={h.editingNote?.chapter}
-        verseNumber={h.editingNote?.verseNumber}
+        mode="edit"
+        verseRef={h.editingNote
+          ? `${h.editingNote.bookName} ${h.editingNote.chapter}:${h.editingNote.verseNumber}`
+          : undefined}
         text={h.editText}
         saving={h.saving}
         onTextChange={h.setEditText}

@@ -13,6 +13,7 @@ export default function Favorites() {
     <BiblePageLayout
       title="My Favorites"
       count={h.favorites.length}
+      contentCount={h.filtered.length}
       isRtl={h.isRtl}
       searchQuery={h.searchQuery}
       onSearchChange={h.setSearchQuery}

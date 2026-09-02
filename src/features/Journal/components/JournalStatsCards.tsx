@@ -1,7 +1,8 @@
 import { PenLine, Star, TrendingUp, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
+import type { JournalPageStats } from "../hooks/useJournalPageFull";
 
-interface Props { stats: { totalEntries: number; favoriteCount: number; entriesThisWeek: number; entriesThisMonth: number } }
+interface Props { stats: JournalPageStats }
 
 export function JournalStatsCards({ stats }: Props) {
   const cards = [

@@ -2,15 +2,14 @@ import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { sendGetRequest, sendPostRequest } from "@/services/api";
 import type { StrongsEntry as StrongsWordEntry } from "@/services/strongsApi";
+import { LAB_BROWSE_PAGE_SIZE } from "../constants";
+import type { LabChartItem, LabChartMode, LabDictionaryMode } from "../types";
 
 type WordEntry = StrongsWordEntry;
-type Mode = "search" | "browse" | "verse";
-type ChartMode = "frequency" | "partOfSpeech";
-const BROWSE_PAGE_SIZE = 100;
 export function useLabDictionaryPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [mode, setMode] = useState<Mode>("search");
+  const [mode, setMode] = useState<LabDictionaryMode>("search");
   const [searchQuery, setSearchQuery] = useState("");
   const [results, setResults] = useState<WordEntry[]>([]);
   const [loading, setLoading] = useState(false);
@@ -31,7 +30,7 @@ export function useLabDictionaryPage() {
   const [verseWordsLoading, setVerseWordsLoading] = useState(false);
   const [verseWordsLoaded, setVerseWordsLoaded] = useState(false);
   const [verseWordsTotal, setVerseWordsTotal] = useState(0);
-  const [chartMode, setChartMode] = useState<ChartMode>("frequency");
+  const [chartMode, setChartMode] = useState<LabChartMode>("frequency");
   const [langFilter, setLangFilter] = useState("all");
   const [selectedWord, setSelectedWord] = useState<WordEntry | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
@@ -61,7 +60,7 @@ export function useLabDictionaryPage() {
     if (!book) return;
     setBrowseLoading(true); if (!append) setBrowseLoaded(false);
     try {
-      const res = await sendGetRequest("strongs", `book-words/${encodeURIComponent(book)}`, { limit: BROWSE_PAGE_SIZE, offset: page * BROWSE_PAGE_SIZE });
+      const res = await sendGetRequest("strongs", `book-words/${encodeURIComponent(book)}`, { limit: LAB_BROWSE_PAGE_SIZE, offset: page * LAB_BROWSE_PAGE_SIZE });
       if (res.returnCode === 200 && res.returnData) {
         const rd = res.returnData as any; const newData = rd.data || [];
         setBrowseWords((prev) => (append ? [...prev, ...newData] : newData));
@@ -113,11 +112,11 @@ export function useLabDictionaryPage() {
       const groups: Record<string, typeof validWords> = {};
       for (const w of validWords) { const pos = w.partOfSpeech || "other"; if (!groups[pos]) groups[pos] = []; groups[pos].push(w); }
       const posOrder = ["noun", "verb", "adjective", "adverb", "preposition", "conjunction", "pronoun", "particle", "article", "other"];
-      const result: Array<any> = [];
-      for (const pos of posOrder) { if (!groups[pos]) continue; result.push(...groups[pos].sort((a, b) => (b.usageCount ?? 0) - (a.usageCount ?? 0)).slice(0, 5).map((w) => ({ word: w.originalWord || w.transliteration || w.strongsId, transliteration: w.transliteration, definition: w.shortDefinition, usageCount: w.usageCount ?? 0, strongsId: w.strongsId, language: w.language, partOfSpeech: pos }))); }
+      const result: LabChartItem[] = [];
+      for (const pos of posOrder) { if (!groups[pos]) continue; result.push(...groups[pos].sort((a, b) => (b.usageCount ?? 0) - (a.usageCount ?? 0)).slice(0, 5).map((w) => ({ word: w.originalWord || w.transliteration || w.strongsId, count: w.usageCount ?? 0, strongsId: w.strongsId, language: w.language }))); }
       return result;
     }
-    return validWords.sort((a, b) => (b.usageCount ?? 0) - (a.usageCount ?? 0)).slice(0, 20).map((w) => ({ word: w.originalWord || w.transliteration || w.strongsId, transliteration: w.transliteration, definition: w.shortDefinition, usageCount: w.usageCount ?? 0, strongsId: w.strongsId, language: w.language, partOfSpeech: w.partOfSpeech || "" }));
+    return validWords.sort((a, b) => (b.usageCount ?? 0) - (a.usageCount ?? 0)).slice(0, 20).map((w) => ({ word: w.originalWord || w.transliteration || w.strongsId, count: w.usageCount ?? 0, strongsId: w.strongsId, language: w.language }));
   }, [browseWords, chartMode, langFilter]);
   const openWordDialog = useCallback((strongsId: string, surfaceText?: string) => { setDialogStrongsId(strongsId); setDialogSurfaceText(surfaceText || ""); setDialogOpen(true); }, []);
   const openWordDetail = useCallback(async (word: WordEntry) => {
@@ -126,8 +125,15 @@ export function useLabDictionaryPage() {
     catch { setSelectedWord(word); } finally { setDetailLoading(false); }
   }, []);
   const openWordDetailById = useCallback((strongsId: string) => { const word = browseWords.find((w) => w.strongsId === strongsId); if (word) openWordDetail(word); }, [browseWords, openWordDetail]);
+  const goBack = useCallback(() => navigate(-1), [navigate]);
+  const loadSelectedVerse = useCallback(() => {
+    if (verseBook && verseChapter && verseNum) loadVerseWords(verseBook, verseChapter, verseNum);
+  }, [verseBook, verseChapter, verseNum, loadVerseWords]);
+  const loadMoreBookWords = useCallback(() => {
+    loadBookWords(selectedBook, browsePage + 1, true);
+  }, [selectedBook, browsePage, loadBookWords]);
   return {
-    navigate, mode, setMode, searchQuery, setSearchQuery, results, loading, searched, resultTotal,
+    goBack, mode, setMode, searchQuery, setSearchQuery, results, loading, searched, resultTotal,
     selectedBook, handleBookChange, browseWords, browseLoading, browseLoaded, browseTotal, browsePage, browseHasNext,
     setBrowsePage, loadBookWords,
     verseBook, setVerseBook, verseChapter, setVerseChapter, verseNum, setVerseNum,
@@ -135,5 +141,8 @@ export function useLabDictionaryPage() {
     chartMode, setChartMode, langFilter, setLangFilter, langCounts, searchLangCounts, chartData,
     selectedWord, setSelectedWord, detailLoading, detailOpen, setDetailOpen, openWordDetail, openWordDetailById,
     dialogOpen, setDialogOpen, dialogStrongsId, dialogSurfaceText, openWordDialog,
+    loadSelectedVerse, loadMoreBookWords,
   };
 }
+
+export type LabDictionaryPageModel = ReturnType<typeof useLabDictionaryPage>;

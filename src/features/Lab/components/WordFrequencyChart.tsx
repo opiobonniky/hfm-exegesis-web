@@ -1,12 +1,12 @@
 import { BarChart3 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import type { LabChartItem, LabChartMode } from "../types";
 
-interface ChartItem { word: string; count: number; language?: string; strongsId?: string; }
 interface Props {
-  data: ChartItem[];
+  data: LabChartItem[];
   onWordClick: (id: string) => void;
-  mode: string;
-  onModeChange: (m: string) => void;
+  mode: LabChartMode;
+  onModeChange: (mode: LabChartMode) => void;
   langFilter: string;
   onLangFilterChange: (f: string) => void;
   langCounts: Record<string, number>;
@@ -21,7 +21,7 @@ export function WordFrequencyChart({ data, onWordClick, mode, onModeChange, lang
           <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Word Frequency</span>
         </div>
         <div className="flex items-center gap-1">
-          {["frequency", "partOfSpeech"].map((m) => (
+          {(["frequency", "partOfSpeech"] as LabChartMode[]).map((m) => (
             <button key={m} onClick={() => onModeChange(m)}
               className={cn("px-2 py-0.5 rounded text-[10px] font-semibold transition-colors", mode === m ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted")}>
               {m === "frequency" ? "Freq" : "POS"}

@@ -1,1 +1,6 @@
-// Component barrel export
+export {
+  StrongsHeader,
+  StrongsSearchTab,
+  StrongsBrowseTab,
+  StrongsFavoritesTab,
+} from "./StrongsDictionaryComponents";

@@ -3,9 +3,10 @@ import { BookOpen, FileText, BookmarkCheck, Search, ChevronDown } from "lucide-r
 import { cn } from "@/lib/utils";
 import type { SearchScope } from "@/services/searchApi";
 
-const SCOPES: SearchScope[] = ["bible", "journal", "topics", "lemma"];
+const SCOPES: SearchScope[] = ["bible", "strongs", "journal", "topics", "lemma"];
 const SCOPE_LABELS: Record<SearchScope, string> = {
   bible: "Bible",
+  strongs: "Strong's",
   journal: "Journal",
   topics: "Topics",
   lemma: "Lemma",
@@ -13,6 +14,7 @@ const SCOPE_LABELS: Record<SearchScope, string> = {
 function ScopeIcon({ scope }: { scope: SearchScope }) {
   switch (scope) {
     case "bible": return <BookOpen className="w-3.5 h-3.5" />;
+    case "strongs": return <Search className="w-3.5 h-3.5" />;
     case "journal": return <FileText className="w-3.5 h-3.5" />;
     case "topics": return <BookmarkCheck className="w-3.5 h-3.5" />;
     case "lemma": return <Search className="w-3.5 h-3.5" />;

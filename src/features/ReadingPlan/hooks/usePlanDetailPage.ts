@@ -84,11 +84,34 @@ export function usePlanDetailPage() {
   const totalQuizCount = days.reduce((s, d) => s + d.quizQuestions.length, 0);
   const configuredPct = plan && plan.total_days > 0 ? Math.round((configuredDays / plan.total_days) * 100) : 0;
 
+  const loadingMessage = useMemo(() => t.readingPlan?.loadingPlan || "Loading plan...", [t]);
+  const planNotFoundMessage = useMemo(() => t.readingPlan?.planNotFound || "Plan not found", [t]);
+
+  const pct = useMemo(() => Math.round(plan?.completion_percentage ?? 0), [plan]);
+
+  const displayQuizAccuracy = useMemo(() => {
+    return isAdmin && adminStats ? adminStats.globalQuizAccuracy : Math.round(plan?.quiz_accuracy_percentage ?? 0);
+  }, [isAdmin, adminStats, plan]);
+
+  const displayAnsweredQuestions = useMemo(() => {
+    return isAdmin && adminStats ? adminStats.totalQuizAnswers : (plan?.user_answered_questions ?? 0);
+  }, [isAdmin, adminStats, plan]);
+
+  const displayCorrectAnswers = useMemo(() => {
+    return isAdmin && adminStats ? adminStats.totalQuizCorrect : (plan?.user_correct_answers ?? 0);
+  }, [isAdmin, adminStats, plan]);
+
+  const displayWrongAnswers = useMemo(() => {
+    return (displayAnsweredQuestions as number) - (displayCorrectAnswers as number);
+  }, [displayAnsweredQuestions, displayCorrectAnswers]);
+
   return {
     plan, adminStats, days, loadingPlan, loadingAdminStats,
     userSearchTerm, setUserSearchFilter, activeTab, setActiveTab,
     filteredUsers, completedDayNums, totalReflections, configuredDays,
     allQuizDays, totalQuizCount, configuredPct,
+    loadingMessage, planNotFoundMessage,
+    pct, displayQuizAccuracy, displayAnsweredQuestions, displayCorrectAnswers, displayWrongAnswers,
     isAdmin, navigate, t, isRtl, lang,
   };
 }

@@ -1,10 +1,12 @@
 import { BookOpen, Play, ChevronRight, Clock, Timer, Sparkles, Cross } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import type { LabSession } from "../types";
 
 interface Props {
-  activeSession: any; navigate: (p: string) => void; routes: any;
-  handleResumeStudy: (s: any) => void;
+  activeSession: LabSession | null;
+  onStartStudy: () => void;
+  handleResumeStudy: (sessionId: string) => void;
 }
 
 const STATUS_LABELS: Record<string, string> = { look: "Look Stage", listen: "Listen Stage", learn: "Learn Stage", abide: "Abide Stage" };
@@ -18,7 +20,7 @@ const TimeAgo = (d: string) => {
   return `${Math.floor(hrs / 24)}d ago`;
 };
 
-export function LabHomeHero({ activeSession, navigate, routes, handleResumeStudy }: Props) {
+export function LabHomeHero({ activeSession, onStartStudy, handleResumeStudy }: Props) {
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-primary/[0.04] via-primary/[0.01] to-transparent border-b border-border/30">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -39,7 +41,7 @@ export function LabHomeHero({ activeSession, navigate, routes, handleResumeStudy
         <h2 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight mb-2">Study the Word</h2>
         <p className="text-sm text-muted-foreground/70 max-w-md mx-auto mb-3">A 4-step guided journey through Scripture — from observation to application.</p>
         {activeSession && !activeSession.completed && (
-          <button onClick={() => handleResumeStudy(activeSession)}
+          <button onClick={() => handleResumeStudy(activeSession.id)}
             className="w-full rounded-xl bg-gradient-to-r from-primary to-primary/90 p-4 text-left mb-4 shadow-lg shadow-primary/25 group transition-all hover:shadow-xl active:scale-[0.99]">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
@@ -58,7 +60,7 @@ export function LabHomeHero({ activeSession, navigate, routes, handleResumeStudy
           </button>
         )}
         <div className="flex flex-col items-center gap-3">
-          <Button onClick={() => navigate(routes.labFlow.path)} className="gap-2 h-12 px-7 rounded-xl shadow-lg shadow-primary/25 text-sm font-bold" size="lg">
+          <Button onClick={onStartStudy} className="gap-2 h-12 px-7 rounded-xl shadow-lg shadow-primary/25 text-sm font-bold" size="lg">
             <Play className="w-4 h-4 fill-current" />Start New Study
           </Button>
           {!activeSession && <p className="text-[10px] text-muted-foreground/50">Choose a passage and begin your journey</p>}

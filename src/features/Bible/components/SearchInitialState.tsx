@@ -1,6 +1,7 @@
 // Search initial state — history, popular searches, suggestions
 import { Clock, Trash2, TrendingUp, Search, X } from "lucide-react";
-import { SUGGESTIONS, type SearchScope } from "@/hooks/useSearch";
+import { SUGGESTIONS } from "@/hooks/useSearch";
+import type { SearchScope } from "@/services/searchApi";
 
 interface SearchInitialStateProps {
   scope: SearchScope;

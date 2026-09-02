@@ -4,27 +4,17 @@ import { Loader2, Globe, Lock, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { JournalEntryRow } from "./JournalEntryRow";
-
-interface JournalEntry {
-  id: number;
-  title: string;
-  content?: string;
-  bookName?: string;
-  chapter?: number;
-  category?: string;
-  isPublished?: boolean;
-  createdOn?: string;
-}
+import type { JournalModerationEntry } from "../hooks/useAdminJournalModeration";
 
 interface JournalTableProps {
-  entries: JournalEntry[];
+  entries: JournalModerationEntry[];
   actionLoading: number | null;
   loadingMore: boolean;
   hasMore: boolean;
   sentinelRef: RefObject<HTMLDivElement>;
-  onTogglePublication: (entry: JournalEntry) => void;
-  onDelete: (entry: JournalEntry) => void;
-  onView: (entry: JournalEntry) => void;
+  onTogglePublication: (entry: JournalModerationEntry) => void;
+  onDelete: (entry: JournalModerationEntry) => void;
+  onView: (entry: JournalModerationEntry) => void;
 }
 
 export function JournalTable({

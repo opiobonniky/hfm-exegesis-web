@@ -1,7 +1,6 @@
-// AdminVerseExplanations — thin page composing hook + components (no inline HTML)
+// AdminVerseExplanations — thin page composing hook + components
 "use client";
 
-import { useNavigate } from "react-router-dom";
 import { Lightbulb } from "lucide-react";
 import { useAdminVerseExplanationsPage } from "../hooks/useAdminVerseExplanationsPage";
 import {
@@ -12,12 +11,11 @@ import {
   AdminPageContent,
 } from "../components";
 import { VerseExplanationTable } from "../components/VerseExplanationTable";
-import { VerseExplanationFormDialog } from "../components/VerseExplanationFormDialog";import { VerseExplanationDeleteDialog } from "../components/VerseExplanationDeleteDialog";
-import { VERSE_EXPLANATION_EMPTY_FORM } from "../constants";
+import { VerseExplanationFormDialog } from "../components/VerseExplanationFormDialog";
+import { VerseExplanationDeleteDialog } from "../components/VerseExplanationDeleteDialog";
 
 export default function AdminVerseExplanations() {
   const h = useAdminVerseExplanationsPage();
-  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-background">
@@ -25,8 +23,8 @@ export default function AdminVerseExplanations() {
         title="Verse Explanations Manager"
         subtitle="Manage verse explanations and study notes"
         icon={<Lightbulb className="w-5 h-5 text-primary" />}
-        onBack={() => navigate("/admin")}
-        onAdd={() => h.openEdit()}
+        onBack={h.goBack}
+        onAdd={h.openEdit}
         addLabel="Add"
       />
 
@@ -47,7 +45,7 @@ export default function AdminVerseExplanations() {
             message={
               h.search ? "Try a different search" : "Create your first explanation"
             }
-            onAction={!h.search ? () => h.openEdit() : undefined}
+            onAction={!h.search ? h.openEdit : undefined}
           />
         ) : (
           <VerseExplanationTable
@@ -55,15 +53,9 @@ export default function AdminVerseExplanations() {
             loadingMore={h.loadingMore}
             hasMore={h.hasMore}
             sentinelRef={h.sentinelRef}
-            onView={(item) =>
-              navigate(
-                `/admin/verse-explanations/${encodeURIComponent(
-                  item.bookName,
-                )}/${item.chapter}/${item.verseNumber}`,
-              )
-            }
-            onEdit={(item) => h.openEdit(item)}
-            onDelete={(item) => h.setDeleteItem(item)}
+            onView={h.viewItem}
+            onEdit={h.openEdit}
+            onDelete={h.requestDelete}
           />
         )}
       </AdminPageContent>
@@ -76,10 +68,7 @@ export default function AdminVerseExplanations() {
         saving={h.saving}
         onFormChange={h.setEditForm}
         onSave={h.handleSave}
-        onClose={() => {
-          h.setEditItem(null);
-          h.setEditForm(VERSE_EXPLANATION_EMPTY_FORM);
-        }}
+        onClose={h.closeEditForm}
       />
 
       <VerseExplanationDeleteDialog
@@ -89,7 +78,7 @@ export default function AdminVerseExplanations() {
         verseNumber={h.deleteItem?.verseNumber}
         deleting={h.deleting === h.deleteItem?.id}
         deletingId={h.deleting}
-        onOpenChange={(o) => !o && h.setDeleteItem(null)}
+        onOpenChange={h.closeDeleteDialog}
         onConfirm={h.handleDelete}
       />
     </div>

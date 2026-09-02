@@ -1,11 +1,13 @@
 // useAdminUsers — list + infinite scroll + search + toggle actions for admin users
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { sendPostRequest } from "@/services/api";
 import type { AdminUser } from "../types";
 import { USERS_PAGE_SIZE, USER_SEARCH_DEBOUNCE_MS } from "../constants";
 
 export function useAdminUsers() {
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
@@ -131,6 +133,10 @@ export function useAdminUsers() {
     [toast],
   );
 
+  const goBack = useCallback(() => navigate(-1), [navigate]);
+  const openCreateUser = useCallback(() => navigate("/admin/users/create"), [navigate]);
+  const viewUser = useCallback((user: AdminUser) => navigate(`/admin/users/${user.id}`), [navigate]);
+
   return {
     users,
     loading,
@@ -143,5 +149,8 @@ export function useAdminUsers() {
     sentinelRef,
     handleToggleStatus,
     handleToggleVerification,
+    goBack,
+    openCreateUser,
+    viewUser,
   };
 }

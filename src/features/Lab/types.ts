@@ -40,3 +40,28 @@ export interface WordResult {
   partOfSpeech: string;
   language: string;
 }
+
+export interface LabSession {
+  id: string;
+  bookName: string;
+  chapter: number;
+  verseStart: number;
+  verseEnd: number;
+  passageRef?: string;
+  currentStage: string;
+  completed: boolean;
+  createdAt: string;
+  updatedAt: string;
+  createdOn?: string;
+  updatedOn?: string;
+}
+
+export type LabDictionaryMode = "search" | "browse" | "verse";
+export type LabChartMode = "frequency" | "partOfSpeech";
+
+export interface LabChartItem {
+  word: string;
+  count: number;
+  language?: string;
+  strongsId?: string;
+}
