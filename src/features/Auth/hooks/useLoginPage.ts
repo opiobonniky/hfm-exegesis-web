@@ -11,7 +11,9 @@ import { getDeviceInfo, getClientIP } from "@/lib/utils";
 import { GoogleAuthProvider, signInWithPopup, getRedirectResult } from "firebase/auth";
 import { auth, googleProvider } from "@/firebaseConfiguration/config";
 
-export function useLoginPage() {
+import { LoginPageModel } from "../types";
+
+export function useLoginPage(): LoginPageModel {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { setUserInfo, userInfo, loading: authLoading } = useAuth();

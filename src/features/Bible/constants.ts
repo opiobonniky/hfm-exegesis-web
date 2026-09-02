@@ -30,3 +30,48 @@ export function clampChapter(book: BibleBookName, chapter: number): number {
   if (!Number.isFinite(chapter)) return 1;
   return Math.min(Math.max(Math.trunc(chapter), 1), BIBLE_BOOK_CHAPTERS[book]);
 }
+
+export const LAB_STAGE_CONFIG = [
+  {
+    stage: "look",
+    icon: "Eye",
+    titleKey: "look",
+    titleFallback: "Look",
+    descKey: "lookDescription",
+    descFallback: "Observe what the passage says",
+  },
+  {
+    stage: "listen",
+    icon: "Ear",
+    titleKey: "listen",
+    titleFallback: "Listen",
+    descKey: "listenDescription",
+    descFallback: "Attend to what God is revealing",
+  },
+  {
+    stage: "learn",
+    icon: "GraduationCap",
+    titleKey: "learn",
+    titleFallback: "Learn",
+    descKey: "learnDescription",
+    descFallback: "Explore context and meaning",
+  },
+  {
+    stage: "abide",
+    icon: "Heart",
+    titleKey: "abide",
+    titleFallback: "Abide",
+    descKey: "abideDescription",
+    descFallback: "Reflect and remain in the Word",
+  },
+  {
+    stage: "apply",
+    icon: "CheckCircle2",
+    titleKey: "apply",
+    titleFallback: "Apply",
+    descKey: "applyDescription",
+    descFallback: "Put this truth into practice",
+  },
+];
+
+export const AUDIO_SPEED_OPTIONS = [0.75, 1, 1.25, 1.5, 1.75, 2];

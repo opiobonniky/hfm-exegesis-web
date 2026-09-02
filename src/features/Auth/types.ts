@@ -38,3 +38,52 @@ export interface GoogleAuthData {
   credential: string;
   clientId: string;
 }
+
+export interface MenuItem {
+  label: string;
+  href?: string;
+  icon: React.ElementType;
+  description?: string;
+  mobileColor?: string;
+  subItems?: { label: string; href: string }[];
+}
+
+export interface LoginPageModel {
+  isRtl: boolean;
+  setLanguage: (lang: string) => Promise<void>;
+  currentLang: string;
+  langLoading: boolean;
+  email: string;
+  password: string;
+  showPassword: boolean;
+  setShowPassword: (v: boolean) => void;
+  isLoading: boolean;
+  isGoogleLoading: boolean;
+  emailFocused: boolean;
+  passwordFocused: boolean;
+  handleLogin: (e: React.FormEvent<HTMLFormElement>) => Promise<void>;
+  handleGoogleLogin: () => Promise<void>;
+  handleEmailChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handlePasswordChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleEmailFocus: (id: string | null) => void;
+  handlePasswordFocus: (id: string | null) => void;
+  handleEmailBlur: () => void;
+  handlePasswordBlur: () => void;
+  taglineStart: string;
+  taglineEnd: string;
+  wordLabel: string;
+  quote: string;
+  attribution: string;
+  title: string;
+  subtitle: string;
+  languageLabels: Record<string, string | undefined>;
+  emailLabel: string;
+  passwordLabel: string;
+  forgotPasswordLabel: string;
+  signInLabel: string;
+  termsLabel: string;
+  termsLinkLabel: string;
+  privacyLabel: string;
+  privacyLinkLabel: string;
+  additionalNote: string;
+}

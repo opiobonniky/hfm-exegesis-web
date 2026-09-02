@@ -15,7 +15,7 @@ import { hasSeenBookOverview, markBookOverviewSeen } from "../services/bookOverv
 import type {
   LabStage,
   VerseActionTarget,
-} from "../components/VerseActionSheet";
+} from "../types";
 
 const MIN_FONT_SIZE = 12;
 const MAX_FONT_SIZE = 40;

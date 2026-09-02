@@ -9,67 +9,37 @@ import { AuthLogo } from "./AuthLogo";
 import FloatingInput from "./FloatingInput";
 import type { LoginPageModel } from "../hooks/useLoginPage";
 
-type LoginFormContentProps = Pick<
-  LoginPageModel,
-  | "currentLang"
-  | "langLoading"
-  | "setLanguage"
-  | "languageLabels"
-  | "title"
-  | "subtitle"
-  | "email"
-  | "emailLabel"
-  | "emailFocused"
-  | "handleEmailChange"
-  | "handleEmailFocus"
-  | "handleEmailBlur"
-  | "password"
-  | "passwordLabel"
-  | "passwordFocused"
-  | "handlePasswordChange"
-  | "handlePasswordFocus"
-  | "handlePasswordBlur"
-  | "showPassword"
-  | "setShowPassword"
-  | "handleLogin"
-  | "forgotPasswordLabel"
-  | "isLoading"
-  | "signInLabel"
-  | "termsLabel"
-  | "termsLinkLabel"
-  | "privacyLabel"
-  | "privacyLinkLabel"
-  | "additionalNote"
-> & {
+interface LoginFormContentProps {
+  p: LoginPageModel;
   logoSrc: string;
-};
+}
 
-export function LoginFormContent(props: LoginFormContentProps) {
+export function LoginFormContent({ p, logoSrc }: LoginFormContentProps) {
   return (
     <AuthFormWrapper>
-      <AuthLogo src={props.logoSrc} linkTo="/" />
-      <AuthFormHeader title={props.title} subtitle={props.subtitle} />
+      <AuthLogo src={logoSrc} linkTo="/" />
+      <AuthFormHeader title={p.title} subtitle={p.subtitle} />
       <AuthLanguagePicker
-        currentLang={props.currentLang}
-        langLoading={props.langLoading}
-        onLanguageChange={props.setLanguage}
-        labels={props.languageLabels}
+        currentLang={p.currentLang}
+        langLoading={p.langLoading}
+        onLanguageChange={p.setLanguage}
+        labels={p.languageLabels}
       />
 
       <form
-        onSubmit={props.handleLogin}
+        onSubmit={p.handleLogin}
         className="space-y-4 anim-fade"
         style={{ animationDelay: "0.2s" }}
       >
         <FloatingInput
           id="email"
-          label={props.emailLabel}
+          label={p.emailLabel}
           icon={Mail}
-          value={props.email}
-          onChange={props.handleEmailChange}
-          focused={props.emailFocused}
-          setFocused={props.handleEmailFocus}
-          handleBlur={props.handleEmailBlur}
+          value={p.email}
+          onChange={p.handleEmailChange}
+          focused={p.emailFocused}
+          setFocused={p.handleEmailFocus}
+          handleBlur={p.handleEmailBlur}
           error=""
           touched={false}
           type="text"
@@ -77,33 +47,33 @@ export function LoginFormContent(props: LoginFormContentProps) {
         />
         <FloatingInput
           id="password"
-          label={props.passwordLabel}
+          label={p.passwordLabel}
           icon={Lock}
-          value={props.password}
-          onChange={props.handlePasswordChange}
-          focused={props.passwordFocused}
-          setFocused={props.handlePasswordFocus}
-          handleBlur={props.handlePasswordBlur}
+          value={p.password}
+          onChange={p.handlePasswordChange}
+          focused={p.passwordFocused}
+          setFocused={p.handlePasswordFocus}
+          handleBlur={p.handlePasswordBlur}
           error=""
           touched={false}
-          type={props.showPassword ? "text" : "password"}
+          type={p.showPassword ? "text" : "password"}
           autoComplete="current-password"
           isPassword
-          showPassword={props.showPassword}
-          setShowPassword={props.setShowPassword}
+          showPassword={p.showPassword}
+          setShowPassword={p.setShowPassword}
         />
-        <AuthForgotPasswordLink label={props.forgotPasswordLabel} />
-        <AuthLoadingButton loading={props.isLoading}>
-          {props.signInLabel}
+        <AuthForgotPasswordLink label={p.forgotPasswordLabel} />
+        <AuthLoadingButton loading={p.isLoading}>
+          {p.signInLabel}
         </AuthLoadingButton>
       </form>
 
       <AuthFooter
-        termsLabel={props.termsLabel}
-        termsLinkLabel={props.termsLinkLabel}
-        privacyLabel={props.privacyLabel}
-        privacyLinkLabel={props.privacyLinkLabel}
-        additionalNote={props.additionalNote}
+        termsLabel={p.termsLabel}
+        termsLinkLabel={p.termsLinkLabel}
+        privacyLabel={p.privacyLabel}
+        privacyLinkLabel={p.privacyLinkLabel}
+        additionalNote={p.additionalNote}
       />
     </AuthFormWrapper>
   );

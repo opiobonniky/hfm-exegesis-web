@@ -90,3 +90,12 @@ export interface Translation {
 export type CovenantFilter = "all" | "ot" | "nt";
 export type ActivityType = "all" | "highlights" | "notes" | "favorites" | "history";
 export type TabKey = "commentaries" | "crossReferences" | "wordStudies" | "dictionary" | "translations" | "interlinear" | "topics";
+
+export type VerseActionTarget = {
+  book: string;
+  chapter: number;
+  verse: number;
+  text: string;
+};
+
+export type LabStage = "look" | "listen" | "learn" | "abide" | "apply";
