@@ -1,6 +1,6 @@
 import { AuthBrandedPanel } from "./AuthBrandedPanel";
 import { AuthHighlightText } from "./AuthHighlightText";
-import type { LoginPageModel } from "../hooks/useLoginPage";
+import type { LoginPageModel } from "../types";
 
 type LoginBrandedPanelProps = Pick<
   LoginPageModel,

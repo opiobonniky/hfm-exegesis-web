@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ChevronDown, ChevronRight, X, ArrowRight } from "lucide-react";
+import { ChevronDown, ChevronRight, X, ArrowRight, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LanguageSelector } from "./LanguageSelector";
 import { MenuItem } from "../types";
@@ -8,6 +8,7 @@ import { LANGUAGE_NAMES, type Language } from "@/components/languages/type";
 import { hexToRgba } from "../utils"; // Assuming this helper is moved to utils
 
 interface MobileNavMenuProps {
+  mobileMenuOpen: boolean;
   mobileMenuOpen: boolean;
   setMobileMenuOpen: (v: boolean) => void;
   menuPanelRef: React.RefObject<HTMLDivElement | null>;

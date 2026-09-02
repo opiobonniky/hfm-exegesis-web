@@ -164,5 +164,3 @@ export function useLoginPage(): LoginPageModel {
     additionalNote: t.auth?.fullVersionComing || "Full version arriving with public launch.",
   };
 }
-
-export type LoginPageModel = ReturnType<typeof useLoginPage>;

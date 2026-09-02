@@ -7,7 +7,7 @@ import { AuthLanguagePicker } from "./AuthLanguagePicker";
 import { AuthLoadingButton } from "./AuthLoadingButton";
 import { AuthLogo } from "./AuthLogo";
 import FloatingInput from "./FloatingInput";
-import type { LoginPageModel } from "../hooks/useLoginPage";
+import { LoginPageModel } from "../types";
 
 interface LoginFormContentProps {
   p: LoginPageModel;

@@ -58,44 +58,31 @@ export const BOOK_NAMES = [
 ];
 
 interface LabFlowState {
-  // Session
   sessionId: string | null;
   stage: LabStage;
   completed: boolean;
   loading: boolean;
   saving: boolean;
   error: string | null;
-
-  // Passage selection
   bookName: string;
   chapter: string;
   verseStart: string;
   verseEnd: string;
   passageRef: string;
-
-  // Look stage
   lookNotes: string;
   currentPromptIdx: number;
-
-  // Listen stage
   selectedRepeats: number;
   repeatCount: number;
   listenComplete: boolean;
-
-  // Learn stage
   learnNotes: string;
   learnTab: LearnTab;
   learnDataLoading: boolean;
-
-  // Abide stage
   reflection: string;
   prayer: string;
   appText: string;
   tags: string;
   isPublic: boolean;
   journalEntryId: string | null;
-
-  // Apply stage
   challengeText: string;
   resultsText: string;
 }
@@ -103,7 +90,6 @@ interface LabFlowState {
 export function useLabFlow() {
   const [searchParams] = useSearchParams();
 
-  // Initialize from URL params if resuming
   const initialBook = searchParams.get("book") || "";
   const initialChapter = searchParams.get("chapter") || "";
   const initialVs = searchParams.get("verseStart") || "";
@@ -118,31 +104,25 @@ export function useLabFlow() {
     loading: false,
     saving: false,
     error: null,
-
     bookName: initialBook,
     chapter: initialChapter,
     verseStart: initialVs,
     verseEnd: initialVe,
     passageRef: "",
-
     lookNotes: "",
     currentPromptIdx: 0,
-
     selectedRepeats: 3,
     repeatCount: 0,
     listenComplete: false,
-
     learnNotes: "",
     learnTab: "exegesis" as LearnTab,
     learnDataLoading: false,
-
     reflection: "",
     prayer: "",
     appText: "",
     tags: "",
     isPublic: false,
     journalEntryId: null,
-
     challengeText: "",
     resultsText: "",
   });
@@ -152,7 +132,6 @@ export function useLabFlow() {
 
   const repeatCountRef = useRef(0);
 
-  // Sync refs
   useEffect(() => { repeatCountRef.current = state.repeatCount; }, [state.repeatCount]);
 
   const update = useCallback((partial: Partial<LabFlowState>) => {
@@ -163,7 +142,6 @@ export function useLabFlow() {
     });
   }, []);
 
-  // ── Load session on mount if resuming ──
   useEffect(() => {
     if (!initialSessionId) return;
     (async () => {
@@ -198,9 +176,8 @@ export function useLabFlow() {
         update({ loading: false, error: "Failed to load session" });
       }
     })();
-  }, [initialSessionId]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [initialSessionId]);
 
-  // ── Passage selection ──
   const startSessionAction = useCallback(async () => {
     const { bookName, chapter, verseStart, verseEnd } = stateRef.current;
     if (!bookName || !chapter) {
@@ -238,20 +215,14 @@ export function useLabFlow() {
     }
   }, [update]);
 
-  // ── Navigate between stages ──
-  const goToStage = useCallback(
-    (stage: LabStage) => {
-      update({ stage });
-    },
-    [update],
-  );
+  const goToStage = useCallback((stage: LabStage) => {
+    update({ stage });
+  }, [update]);
 
-  // ── Save stage and advance ──
   const saveAndAdvance = useCallback(
     async (nextStage: LabStage, data: Record<string, any> = {}) => {
       const { sessionId, stage } = stateRef.current;
       if (!sessionId) {
-        // No session yet — just advance
         update({ stage: nextStage });
         return;
       }
@@ -270,14 +241,12 @@ export function useLabFlow() {
         update({ stage: nextStage, saving: false });
       } catch (e: any) {
         update({ saving: false, error: e?.message || "Failed to save" });
-        // Still advance even if save fails
         update({ stage: nextStage });
       }
     },
     [update],
   );
 
-  // ── Save progress without advancing ──
   const saveCurrentProgress = useCallback(
     async (silent = false) => {
       const st = stateRef.current;
@@ -316,7 +285,6 @@ export function useLabFlow() {
         }
         await saveProgress(st.sessionId, body);
       } catch {
-        // Silently ignore save errors
       } finally {
         update({ saving: false });
       }
@@ -324,7 +292,6 @@ export function useLabFlow() {
     [update],
   );
 
-  // ── Listen controls ──
   const startListening = useCallback(() => {
     update({
       repeatCount: 0,
@@ -351,25 +318,21 @@ export function useLabFlow() {
     });
   }, [update]);
 
-  // ── Look stage actions ──
   const advanceLook = useCallback(async (notesOverride?: string) => {
     const lookNotes = notesOverride ?? stateRef.current.lookNotes;
     await saveAndAdvance("listen", { notes: lookNotes });
   }, [saveAndAdvance]);
 
-  // ── Listen stage actions ──
   const advanceListen = useCallback(async () => {
     const { selectedRepeats } = stateRef.current;
     await saveAndAdvance("learn", { repeats: selectedRepeats });
   }, [saveAndAdvance]);
 
-  // ── Learn stage actions ──
   const advanceLearn = useCallback(async () => {
     const { learnNotes, isPublic } = stateRef.current;
     await saveAndAdvance("abide", { notes: learnNotes, isPublic });
   }, [saveAndAdvance]);
 
-  // ── Abide stage: save and advance to Apply ──
   const saveAbide = useCallback(async () => {
     const st = stateRef.current;
     if (!st.sessionId) {
@@ -399,7 +362,6 @@ export function useLabFlow() {
     }
   }, [update]);
 
-  // ── Apply stage: save and complete ──
   const saveApply = useCallback(async () => {
     const st = stateRef.current;
     if (!st.sessionId) {
@@ -421,6 +383,80 @@ export function useLabFlow() {
           resultsText: st.resultsText,
         },
       );
+      if (res.returnCode === 200 && res.returnData) {
+        const data = res.returnData as any;
+        update({
+          stage: "completed",
+          completed: true,
+          saving: false,
+          journalEntryId:
+            data.journalEntryId ||
+            data.journalEntry?.id ||
+            data.session?.journalEntryId || null,
+        });
+      } else {
+        update({ stage: "completed", completed: true, saving: false });
+      }
+    } catch {
+      update({ stage: "completed", completed: true, saving: false });
+    }
+  }, [update]);
+
+  const resetAll = useCallback(() => {
+    setState({
+      sessionId: null,
+      stage: "passage",
+      completed: false,
+      loading: false,
+      saving: false,
+      error: null,
+      bookName: "",
+      chapter: "",
+      verseStart: "",
+      verseEnd: "",
+      passageRef: "",
+      lookNotes: "",
+      currentPromptIdx: 0,
+      selectedRepeats: 3,
+      repeatCount: 0,
+      listenComplete: false,
+      learnNotes: "",
+      learnTab: "exegesis",
+      learnDataLoading: false,
+      reflection: "",
+      prayer: "",
+      appText: "",
+      tags: "",
+      isPublic: false,
+      journalEntryId: null,
+      challengeText: "",
+      resultsText: "",
+    });
+  }, []);
+
+  return {
+    data: state,
+    actions: {
+      update,
+      startSession: startSessionAction,
+      goToStage,
+      saveCurrentProgress,
+      advanceLook,
+      advanceListen,
+      advanceLearn,
+      saveAbide,
+      saveApply,
+      resetAll,
+      startListening,
+      incrementRepeat,
+      resetListening,
+    },
+    BOOK_NAMES,
+  };
+}
+
+export type LabFlowPageModel = ReturnType<typeof useLabFlow>;
+
       if (res.returnCode === 200 && res.returnData) {
         const data = res.returnData as any;
         update({

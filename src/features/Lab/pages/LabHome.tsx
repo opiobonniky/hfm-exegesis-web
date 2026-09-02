@@ -1,49 +1,59 @@
 import { useLabHome } from "../hooks";
-import { 
-  LabHistoryList, LabHomeEmpty, LabHomeFooter, LabHomeHeader, 
-  LabHomeHero, LabHomeLoading, LabHomeMethod, LabHomeOnboarding, 
-  LabHomeStats, LabHomeWorkspace, LabPageWrapper 
+import {
+  LabHistoryList,
+  LabHomeEmpty,
+  LabHomeFooter,
+  LabHomeHeader,
+  LabHomeHero,
+  LabHomeLoading,
+  LabHomeMethod,
+  LabHomeOnboarding,
+  LabHomeStats,
+  LabHomeWorkspace,
+  LabPageWrapper,
 } from "../components";
 
 export default function LabHomePage() {
-  const p = useLabHome();
+  const {data, actions} = useLabHome();
+
+  if (data.loading) return <LabHomeLoading />;
+
+  
 
   return (
     <LabPageWrapper>
       <LabHomeHeader />
-      {p.loading ? (
-        <LabHomeLoading />
-      ) : (
-        <LabHomeWorkspace>
-          <LabHomeHero
-            activeSession={p.activeSession}
-            onStartStudy={p.openNewStudy}
-            handleResumeStudy={p.handleResumeStudy}
+
+      <LabHomeWorkspace>
+        <LabHomeHero
+          activeSession={data.activeSession}
+          onStartStudy={actions.openNewStudy}
+          handleResumeStudy={actions.handleResumeStudy}
+        />
+        {data.history.length > 0 && (
+          <LabHomeStats
+            completedCount={data.completedCount}
+            totalCount={data.history.length}
+            inProgressCount={data.inProgressCount}
           />
-          {p.history.length > 0 && (
-            <LabHomeStats
-              completedCount={p.completedCount}
-              totalCount={p.history.length}
-              inProgressCount={p.inProgressCount}
-            />
-          )}
-          <LabHomeMethod />
-          {p.history.length > 0 && (
-            <LabHistoryList
-              history={p.history}
-              handleResumeStudy={p.handleResumeStudy}
-              handleReviewStudy={p.handleReviewStudy}
-            />
-          )}
-          {!p.activeSession && p.history.length === 0 && <LabHomeEmpty />}
-          <LabHomeFooter historyCount={p.history.length} />
-        </LabHomeWorkspace>
-      )}
-      {p.showOnboarding && (
+        )}
+        <LabHomeMethod />
+        {data.history.length > 0 && (
+          <LabHistoryList
+            history={data.history}
+            handleResumeStudy={actions.handleResumeStudy}
+            handleReviewStudy={actions.handleReviewStudy}
+          />
+        )}
+        {!data.activeSession && data.history.length === 0 && <LabHomeEmpty />}
+        <LabHomeFooter historyCount={data.history.length} />
+      </LabHomeWorkspace>
+
+      {data.showOnboarding && (
         <LabHomeOnboarding
-          onDismiss={p.dismissOnboarding}
-          step={p.onboardingStep}
-          onStepChange={p.setOnboardingStep}
+          onDismiss={actions.dismissOnboarding}
+          step={data.onboardingStep}
+          onStepChange={actions.setOnboardingStep}
         />
       )}
     </LabPageWrapper>

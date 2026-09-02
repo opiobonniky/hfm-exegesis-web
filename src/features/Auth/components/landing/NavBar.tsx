@@ -5,10 +5,10 @@ import { useLanguage } from "@/components/languages/languageProvider";
 import { LANGUAGE_NAMES, type Language } from "@/components/languages/type";
 import logoImage from "@/assets/logos/exegesis_bg_rm.png";
 import type { RefObject } from "react";
-import { MenuItem } from "../types";
-import { LanguageSelector } from "./LanguageSelector";
-import { NavMenuItem } from "./NavMenuItem";
-import { MobileNavMenu } from "./MobileNavMenu";
+import { MenuItem } from "../../types";
+import { LanguageSelector } from "../LanguageSelector";
+import { NavMenuItem } from "../NavMenuItem";
+import { MobileNavMenu } from "../MobileNavMenu";
 
 interface NavBarProps {
   scrolled: boolean;
