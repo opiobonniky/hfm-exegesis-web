@@ -7,6 +7,7 @@ import {
   NotificationToggle,
   NotificationTimePicker,
   NotificationCardContent,
+  NotificationSettingsLoading,
 } from "../components";
 
 export default function NotificationSettings() {
