@@ -138,7 +138,7 @@ export const bibleApi = {
     const response = await api.post(`${BASE_URL}/${translationId}/verses-batch`, {
       bookName,
       chapters,
-    });
+    }, { timeout: 60000 });
     if (response.data.success) {
       return response.data.data;
     }
@@ -153,7 +153,7 @@ export const bibleApi = {
     const response = await api.post(`${BASE_URL}/${translationId}/verses`, {
       bookName,
       chapter,
-    });
+    }, { timeout: 60000 });
     if (response.data.success) {
       return response.data.data;
     }

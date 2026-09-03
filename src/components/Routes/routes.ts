@@ -237,9 +237,16 @@ export const routes = {
     requiresLayout: true,
     title: "Edit Reading Plan",
   },
+  addVerseExplanation: {
+    path: "/admin/add-verse-explanation",
+    component: AddExplanation,
+    isProtected: true,
+    requiresLayout: true,
+    title: "Add Verse Explanation",
+  },
   editVerseExplanation: {
     path: "/admin/edit-verse-explanation/:bookName/:chapter/:verseNumber",
-    component: AdminVerseExplanations,
+    component: AddExplanation,
     isProtected: true,
     requiresLayout: true,
     title: "Edit Verse Explanation",

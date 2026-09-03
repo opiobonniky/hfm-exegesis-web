@@ -1,153 +1,277 @@
-// useAddExplanation — all state + API logic for AddVerseExplanation page
+// useAddExplanation — structured editor hook for add/edit verse explanations
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { useLanguage } from "@/components/languages/languageProvider";
 import { sendPostRequest } from "@/services/api";
-import { routes } from "@/components/Routes/routes";
-import { getVerseText } from "@/utilities/bibleUtils";
+import { BIBLE_BOOKS } from "@/data/staticData";
+
+export interface WordStudyItem {
+  strongsId: string;
+  surfaceText: string;
+  customDefinition: string;
+  sortOrder: number;
+}
+
+export interface CrossRefItem {
+  bookName: string;
+  chapter: number;
+  verseNumber: number;
+  referenceText: string;
+  commentary: string;
+  sortOrder: number;
+}
+
+export interface ExplanationForm {
+  bookName: string;
+  chapter: string;
+  verseNumber: string;
+  bibleVersion: string;
+  exegesis: {
+    explanationText: string;
+    applicationText: string;
+  };
+  studyMetadata: {
+    introduction: string;
+    backgroundAuthor: string;
+    backgroundBook: string;
+    backgroundContext: string;
+    finalThoughts: string;
+  };
+  wordStudies: WordStudyItem[];
+  practicalApps: { applicationText: string; sortOrder: number }[];
+  crossReferences: CrossRefItem[];
+  themes: { themeName: string; sortOrder: number }[];
+}
+
+const EMPTY_FORM: ExplanationForm = {
+  bookName: "",
+  chapter: "",
+  verseNumber: "",
+  bibleVersion: "BSB",
+  exegesis: { explanationText: "", applicationText: "" },
+  studyMetadata: { introduction: "", backgroundAuthor: "", backgroundBook: "", backgroundContext: "", finalThoughts: "" },
+  wordStudies: [],
+  practicalApps: [],
+  crossReferences: [],
+  themes: [],
+};
 
 export function useAddExplanation() {
-  const { t, isRtl } = useLanguage();
   const { toast } = useToast();
   const navigate = useNavigate();
-  type Params = { bookName?: string; chapter?: string; verseNumber?: string };
-  const params = useParams<Params>();
-  const qBook = params.bookName ? decodeURIComponent(params.bookName) : "";
-  const qCh = params.chapter ? Number(params.chapter) : 1;
-  const qVn = params.verseNumber ? Number(params.verseNumber) : 1;
+  const params = useParams<{ bookName?: string; chapter?: string; verseNumber?: string }>();
   const isEditMode = !!params.bookName && !!params.chapter && !!params.verseNumber;
 
-  const [bookName, setBookName] = useState(qBook);
-  const [chapter, setChapter] = useState<number>(Number.isFinite(qCh) ? qCh : 1);
-  const [verseNumber, setVerseNumber] = useState<number>(Number.isFinite(qVn) ? qVn : 1);
-  const [bibleVersion, setBibleVersion] = useState("");
-  const [explanation, setExplanation] = useState("");
-  const [learnMore, setLearnMore] = useState("");
+  const [form, setForm] = useState<ExplanationForm>(EMPTY_FORM);
   const [loadingExisting, setLoadingExisting] = useState(false);
   const [existingFound, setExistingFound] = useState(false);
   const [existingId, setExistingId] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
-  const [verseText, setVerseText] = useState<string | null>(null);
-  const [prompts, setPrompts] = useState<{ id: number; prompt: string; category: string }[]>([]);
-  const [promptsLoading, setPromptsLoading] = useState(false);
-  const [selectedPromptIds, setSelectedPromptIds] = useState<number[]>([]);
-  const NONE_VALUE = "__NONE__";
+  const [activeTab, setActiveTab] = useState("reference");
+
+  // Load existing explanation in edit mode
+  useEffect(() => {
+    if (!isEditMode || !params.bookName || !params.chapter || !params.verseNumber) return;
+    setLoadingExisting(true);
+    sendPostRequest("bible", "get-verse-explanation", {
+      bookName: decodeURIComponent(params.bookName),
+      chapter: Number(params.chapter),
+      verseNumber: Number(params.verseNumber),
+    })
+      .then((res) => {
+        if (res?.returnCode === 200 && res.returnData) {
+          const d = res.returnData;
+          setForm({
+            bookName: d.bookName || "",
+            chapter: String(d.chapter || ""),
+            verseNumber: String(d.verseNumber || ""),
+            bibleVersion: d.bibleVersion || "BSB",
+            exegesis: d.exegesis || { explanationText: "", applicationText: "" },
+            studyMetadata: d.studyMetadata || { introduction: "", backgroundAuthor: "", backgroundBook: "", backgroundContext: "", finalThoughts: "" },
+            wordStudies: d.wordStudies || [],
+            practicalApps: d.practicalApps || [],
+            crossReferences: d.crossReferences || [],
+            themes: d.themes || [],
+          });
+          setExistingFound(true);
+          setExistingId(d.id ?? null);
+        } else {
+          toast({ title: "Not found", variant: "destructive" });
+          navigate("/admin/verse-explanations");
+        }
+      })
+      .catch(() => {
+        toast({ title: "Failed to load", variant: "destructive" });
+        navigate("/admin/verse-explanations");
+      })
+      .finally(() => setLoadingExisting(false));
+  }, [isEditMode, params.bookName, params.chapter, params.verseNumber]); // eslint-disable-line
+
+  const updateField = useCallback(
+    <K extends keyof ExplanationForm>(key: K, value: ExplanationForm[K]) => {
+      setForm((prev) => ({ ...prev, [key]: value }));
+    },
+    [],
+  );
+
+  const updateNested = useCallback(
+    (parent: string, child: string, value: any) => {
+      setForm((prev) => {
+        const p = prev as any;
+        return { ...prev, [parent]: { ...p[parent], [child]: value } };
+      });
+    },
+    [],
+  );
+
+  // Word studies
+  const addWordStudy = useCallback(() => {
+    setForm((prev) => ({
+      ...prev,
+      wordStudies: [...prev.wordStudies, { strongsId: "", surfaceText: "", customDefinition: "", sortOrder: prev.wordStudies.length }],
+    }));
+  }, []);
+  const removeWordStudy = useCallback((i: number) => {
+    setForm((prev) => ({ ...prev, wordStudies: prev.wordStudies.filter((_, idx) => idx !== i) }));
+  }, []);
+  const updateWordStudy = useCallback((i: number, field: keyof WordStudyItem, value: string | number) => {
+    setForm((prev) => {
+      const next = [...prev.wordStudies];
+      next[i] = { ...next[i], [field]: value };
+      return { ...prev, wordStudies: next };
+    });
+  }, []);
+
+  // Practical apps
+  const addPracticalApp = useCallback(() => {
+    setForm((prev) => ({
+      ...prev,
+      practicalApps: [...prev.practicalApps, { applicationText: "", sortOrder: prev.practicalApps.length }],
+    }));
+  }, []);
+  const removePracticalApp = useCallback((i: number) => {
+    setForm((prev) => ({ ...prev, practicalApps: prev.practicalApps.filter((_, idx) => idx !== i) }));
+  }, []);
+  const updatePracticalApp = useCallback((i: number, value: string) => {
+    setForm((prev) => {
+      const next = [...prev.practicalApps];
+      next[i] = { ...next[i], applicationText: value };
+      return { ...prev, practicalApps: next };
+    });
+  }, []);
+
+  // Cross references
+  const addCrossRef = useCallback(() => {
+    setForm((prev) => ({
+      ...prev,
+      crossReferences: [...prev.crossReferences, { bookName: "", chapter: 0, verseNumber: 0, referenceText: "", commentary: "", sortOrder: prev.crossReferences.length }],
+    }));
+  }, []);
+  const removeCrossRef = useCallback((i: number) => {
+    setForm((prev) => ({ ...prev, crossReferences: prev.crossReferences.filter((_, idx) => idx !== i) }));
+  }, []);
+  const updateCrossRef = useCallback((i: number, field: keyof CrossRefItem, value: string | number) => {
+    setForm((prev) => {
+      const next = [...prev.crossReferences];
+      next[i] = { ...next[i], [field]: value };
+      return { ...prev, crossReferences: next };
+    });
+  }, []);
+
+  // Themes
+  const addTheme = useCallback(() => {
+    setForm((prev) => ({
+      ...prev,
+      themes: [...prev.themes, { themeName: "", sortOrder: prev.themes.length }],
+    }));
+  }, []);
+  const removeTheme = useCallback((i: number) => {
+    setForm((prev) => ({ ...prev, themes: prev.themes.filter((_, idx) => idx !== i) }));
+  }, []);
+  const updateTheme = useCallback((i: number, value: string) => {
+    setForm((prev) => {
+      const next = [...prev.themes];
+      next[i] = { ...next[i], themeName: value };
+      return { ...prev, themes: next };
+    });
+  }, []);
 
   const isValid =
-    (bookName ?? "").trim() !== "" &&
-    chapter >= 1 &&
-    verseNumber >= 1 &&
-    (explanation ?? "").trim().length >= 20;
-
-  const validationItems = [
-    { label: t.verseExplanations.clBookSelected, ok: (bookName ?? "").trim() !== "" },
-    { label: t.verseExplanations.clValidChapter, ok: chapter >= 1 },
-    { label: t.verseExplanations.clValidVerse, ok: verseNumber >= 1 },
-    {
-      label: t.verseExplanations.clExplanationWords,
-      ok: (explanation ?? "").trim().split(/\s+/).length >= 20,
-    },
-  ];
-
-  const fetchPrompts = async (bn: string, ch: number, vn?: number) => {
-    if (!bn || !ch) return;
-    setPromptsLoading(true);
-    try {
-      const res = await sendPostRequest("journal", "prompts/get-all", { bookName: bn, chapter: ch, isActive: true });
-      if (res.returnCode === 200 && res.returnData) {
-        setPrompts(vn ? res.returnData.filter((p: any) => !p.verseNumber || p.verseNumber === vn) : res.returnData);
-      }
-    } catch (e) {
-      console.error("Error fetching prompts:", e);
-    } finally {
-      setPromptsLoading(false);
-    }
-  };
-
-  const fetchExisting = async (bn: string, ch: number, vn: number) => {
-    if (!bn || !ch || !vn) return;
-    setLoadingExisting(true);
-    setExistingFound(false);
-    setExistingId(null);
-    try {
-      const res = await sendPostRequest("bible", "get-verse-explanation", { bookName: bn, chapter: ch, verseNumber: vn });
-      if (res.returnCode === 200 && res.returnData) {
-        const d = res.returnData;
-        setBibleVersion(d.bibleVersion ?? "");
-        setExplanation(d.explanation ?? "");
-        setLearnMore(d.learnMore ?? "");
-        setExistingFound(true);
-        setExistingId(d.id ?? null);
-        if (d.promptIds) {
-          try {
-            const parsed = JSON.parse(d.promptIds);
-            if (Array.isArray(parsed)) setSelectedPromptIds(parsed.map(Number));
-          } catch {}
-        }
-      }
-    } catch {} finally {
-      setLoadingExisting(false);
-    }
-  };
-
-  useEffect(() => { if (isEditMode) fetchExisting(qBook, qCh, qVn); }, [isEditMode]);
-  useEffect(() => { setVerseText(getVerseText(bookName, Number(chapter), Number(verseNumber))); }, [bookName, chapter, verseNumber]);
-  useEffect(() => { if (bookName && chapter) fetchPrompts(bookName, chapter, verseNumber); }, [bookName, chapter, verseNumber]);
-
-  const handleVerseBlur = useCallback(() => {
-    if (!isEditMode && bookName && chapter && verseNumber) fetchExisting(bookName, chapter, verseNumber);
-  }, [isEditMode, bookName, chapter, verseNumber]);
+    form.bookName.trim() !== "" &&
+    Number(form.chapter) >= 1 &&
+    Number(form.verseNumber) >= 1 &&
+    form.exegesis.explanationText.trim().length >= 20;
 
   const handleSave = useCallback(async () => {
-    if (!isValid) return;
+    if (!isValid || saving) return;
     setSaving(true);
-    setSaved(false);
     try {
-      const payload: any = { bookName, chapter, verseNumber, bibleVersion, explanation, learnMore, promptIds: selectedPromptIds };
-      if (existingFound && existingId) payload.id = existingId;
+      const payload: any = {
+        bookName: form.bookName,
+        chapter: Number(form.chapter),
+        verseNumber: Number(form.verseNumber),
+        bibleVersion: form.bibleVersion,
+        exegesis: form.exegesis,
+        studyMetadata: form.studyMetadata,
+        wordStudies: form.wordStudies,
+        practicalApps: form.practicalApps,
+        crossReferences: form.crossReferences,
+        themes: form.themes,
+      };
+      if (existingFound && existingId) {
+        payload.id = existingId;
+      }
       const res = await sendPostRequest("bible", "add-verse-explanation", payload);
-      if (res.returnCode === 200) {
-        setSaved(true);
+      if (res?.returnCode === 200 || res?.status === 200) {
         toast({
-          title: existingFound ? t.verseExplanations.toastExplanationUpdated : t.verseExplanations.toastExplanationCreated,
-          description: t.verseExplanations.toastSavedDesc.replace("{bookName}", bookName).replace("{chapter}", String(chapter)).replace("{verseNumber}", String(verseNumber)),
+          title: existingFound ? "Updated" : "Created",
+          description: `${form.bookName} ${form.chapter}:${form.verseNumber} saved`,
         });
-        setTimeout(() => navigate(routes.verseExplanations.path), 1500);
+        navigate("/admin/verse-explanations");
       } else {
-        toast({ title: t.verseExplanations.toastSaveFailed, description: res.returnMessage, variant: "destructive" });
+        toast({ title: "Error", description: res?.returnMessage || "Failed to save", variant: "destructive" });
       }
     } catch (e: any) {
-      toast({ title: t.verseExplanations.toastNetworkError, description: e.message, variant: "destructive" });
+      toast({ title: "Network error", description: e.message, variant: "destructive" });
     } finally {
       setSaving(false);
     }
-  }, [isValid, bookName, chapter, verseNumber, bibleVersion, explanation, learnMore, selectedPromptIds, existingFound, existingId, toast, t, navigate]);
+  }, [form, isValid, saving, existingFound, toast, navigate]);
 
-  const togglePrompt = useCallback((id: number) => {
-    setSelectedPromptIds((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]);
-  }, []);
+  const goBack = useCallback(() => navigate("/admin/verse-explanations"), [navigate]);
 
   return {
-    // Form state
-    bookName, setBookName, chapter, setChapter, verseNumber, setVerseNumber,
-    bibleVersion, setBibleVersion, explanation, setExplanation, learnMore, setLearnMore,
-    verseText, prompts, promptsLoading, selectedPromptIds, togglePrompt,
-    NONE_VALUE,
-    // UI state
-    loadingExisting, existingFound, saving, saved, isValid, isRtl, isEditMode,
-    validationItems,
-    showExplanationWarning:
-      (explanation ?? "").trim().length > 0 &&
-      (explanation ?? "").trim().length < 20,
+    form,
+    isEditMode,
+    loadingExisting,
+    saving,
+    activeTab,
+    setActiveTab,
+    isValid,
+    updateField,
+    updateNested,
+    // Word studies
+    addWordStudy,
+    removeWordStudy,
+    updateWordStudy,
+    // Practical apps
+    addPracticalApp,
+    removePracticalApp,
+    updatePracticalApp,
+    // Cross references
+    addCrossRef,
+    removeCrossRef,
+    updateCrossRef,
+    // Themes
+    addTheme,
+    removeTheme,
+    updateTheme,
     // Actions
-    handleSave, handleVerseBlur,
-    // Route params
-    qBook, qCh, qVn,
-    // i18n
-    t,
+    handleSave,
+    goBack,
+    // Book list
+    filteredBooks: form.bookName
+      ? BIBLE_BOOKS.filter((b) => b.toLowerCase().includes(form.bookName.toLowerCase()))
+      : BIBLE_BOOKS,
   };
 }
-
-export type AddExplanationPageModel = ReturnType<typeof useAddExplanation>;
