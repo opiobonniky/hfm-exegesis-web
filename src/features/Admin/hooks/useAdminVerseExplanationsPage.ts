@@ -6,7 +6,9 @@ import { VERSE_EXPLANATION_EMPTY_FORM } from "../constants";
 
 interface VerseExplanation {
   id: number; bookName: string; chapter: number; verseNumber: number;
-  explanation: string; learnMore: string | null; isPublished: boolean;
+  bibleVersion: string; sortOrder: number;
+  exegesis: any; studyMetadata: any; wordStudies: any[];
+  practicalApps: any[]; crossReferences: any[]; themes: any[];
   createdOn: string; updatedOn: string | null;
 }
 const EMPTY_FORM = VERSE_EXPLANATION_EMPTY_FORM;
@@ -22,7 +24,21 @@ export function useAdminVerseExplanationsPage() {
   const [editForm, setEditForm] = useState(EMPTY_FORM);
   const [deleteItem, setDeleteItem] = useState<VerseExplanation | null>(null);
   const openEdit = useCallback((item?: VerseExplanation) => {
-    if (item) { setEditItem(item); setEditForm({ bookName: item.bookName, chapter: String(item.chapter), verseNumber: String(item.verseNumber), explanation: item.explanation, learnMore: item.learnMore || "", isPublished: item.isPublished }); }
+    if (item) { 
+      setEditItem(item); 
+      setEditForm({ 
+        bookName: item.bookName, 
+        chapter: String(item.chapter), 
+        verseNumber: String(item.verseNumber),
+        bibleVersion: item.bibleVersion || "BSB",
+        exegesis: item.exegesis || { explanationText: "", applicationText: "" },
+        studyMetadata: item.studyMetadata || { introduction: "", backgroundAuthor: "", backgroundBook: "", backgroundContext: "", finalThoughts: "" },
+        wordStudies: item.wordStudies || [],
+        practicalApps: item.practicalApps || [],
+        crossReferences: item.crossReferences || [],
+        themes: item.themes || [],
+      }); 
+    }
     else { setEditItem(null); setEditForm(EMPTY_FORM); }
   }, []);
   const closeEditForm = useCallback(() => { setEditItem(null); setEditForm(EMPTY_FORM); }, []);
@@ -32,8 +48,12 @@ export function useAdminVerseExplanationsPage() {
     navigate(`/admin/verse-explanations/${encodeURIComponent(item.bookName)}/${item.chapter}/${item.verseNumber}`);
   }, [navigate]);
   const handleSave = useCallback(async () => {
-    if (!editForm.bookName || !editForm.chapter || !editForm.verseNumber || !editForm.explanation) return;
-    const ok = await save({ bookName: editForm.bookName, chapter: parseInt(editForm.chapter), verseNumber: parseInt(editForm.verseNumber), explanation: editForm.explanation, learnMore: editForm.learnMore || null }, editItem?.id);
+    if (!editForm.bookName || !editForm.chapter || !editForm.verseNumber || !editForm.exegesis.explanationText) return;
+    const ok = await save({ 
+      ...editForm, 
+      chapter: parseInt(editForm.chapter), 
+      verseNumber: parseInt(editForm.verseNumber) 
+    }, editItem?.id);
     if (ok) { setEditItem(null); setEditForm(EMPTY_FORM); }
   }, [editForm, editItem, save]);
   const handleDelete = useCallback(async () => {
@@ -42,8 +62,8 @@ export function useAdminVerseExplanationsPage() {
     if (ok) setDeleteItem(null);
   }, [deleteItem, remove]);
   const filteredBooks: string[] = !editForm.bookName ? [...BIBLE_BOOKS] : BIBLE_BOOKS.filter((b) => b.toLowerCase().includes(editForm.bookName.toLowerCase()));
-  const requestDelete = useCallback((item: { id: number; bookName: string; chapter: number; verseNumber: number; explanation: string; learnMore?: string; isPublished: boolean }) => {
-    setDeleteItem({ ...item, learnMore: item.learnMore ?? null, createdOn: "", updatedOn: null });
+  const requestDelete = useCallback((item: VerseExplanation) => {
+    setDeleteItem(item);
   }, []);
   return {
     items, loading, search, setSearch, hasMore, loadingMore, saving, deleting, sentinelRef, refresh, loadMore,

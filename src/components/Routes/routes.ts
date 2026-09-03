@@ -238,12 +238,13 @@ export const routes = {
     title: "Edit Reading Plan",
   },
   editVerseExplanation: {
-    path: "/add-verse-explanation/:bookName/:chapter/:verseNumber",
-    component: AddExplanation,
+    path: "/admin/edit-verse-explanation/:bookName/:chapter/:verseNumber",
+    component: AdminVerseExplanations,
     isProtected: true,
     requiresLayout: true,
     title: "Edit Verse Explanation",
   },
+
 
   readingPlanDetail: {
     path: "/reading-plan-detail/:planId",

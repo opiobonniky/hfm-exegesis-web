@@ -28,5 +28,8 @@ export const DEFAULT_VERSE_COUNT = 31;
 export const PROLOGUE_EMPTY_FORM = { bookName: "", title: "", content: "", isPublished: true };
 
 export const VERSE_EXPLANATION_EMPTY_FORM = {
-  bookName: "", chapter: "", verseNumber: "", explanation: "", learnMore: "", isPublished: true,
+  bookName: "", chapter: "", verseNumber: "", bibleVersion: "BSB",
+  exegesis: { explanationText: "", applicationText: "" },
+  studyMetadata: { introduction: "", backgroundAuthor: "", backgroundBook: "", backgroundContext: "", finalThoughts: "" },
+  wordStudies: [], practicalApps: [], crossReferences: [], themes: [],
 };
