@@ -8,11 +8,12 @@ import type { SubscriptionTier } from "../types";
 interface Props {
   tiers: SubscriptionTier[];
   loading: boolean;
+  counts?: Record<string, number>;
   onEdit: (tier: SubscriptionTier) => void;
   onDelete: (id: string) => void;
 }
 
-export function TiersTab({ tiers, loading, onEdit, onDelete }: Props) {
+export function TiersTab({ tiers, loading, counts, onEdit, onDelete }: Props) {
   return (
     <Card className="border-border/50">
       <CardHeader>
@@ -45,6 +46,7 @@ export function TiersTab({ tiers, loading, onEdit, onDelete }: Props) {
                 description={tier.description}
                 features={tier.features}
                 isActive={tier.isActive}
+                memberCount={counts?.[tier.id.replace(/_monthly$/, "")] ?? counts?.[tier.id]}
                 onEdit={() => onEdit(tier)}
                 onDelete={() => onDelete(tier.id)}
               />

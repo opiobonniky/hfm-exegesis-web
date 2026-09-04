@@ -164,7 +164,7 @@ export default function LabPassageSelector({
               <div className="rounded-xl border border-border/40 bg-muted/20 p-4">
                 <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2">Passage Preview</p>
                 {previewLoading ? (
-                  <div className="space-y-2">{[1, 2, 3].map((i) => <div key={i} className="h-4 bg-muted rounded animate-pulse" />)}</div>
+                  <div className="space-y-2">{[1, 2, 3].map((i) => <div key={i} className="h-4 bg-[hsl(var(--skeleton))] rounded animate-pulse" />)}</div>
                 ) : previewText ? (
                   <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">{previewText}</p>
                 ) : (

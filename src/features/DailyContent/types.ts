@@ -192,6 +192,14 @@ export interface DailyExegesisSeriesItem {
   displayDate: string;
 }
 
+export type VerseExplanationStepId = "reference" | "exegesis" | "study" | "extras";
+
+export interface VerseExplanationStep {
+  id: VerseExplanationStepId;
+  label: string;
+  description: string;
+}
+
 export interface DevotionPaginationProps {
   page: number;
   totalPages: number;

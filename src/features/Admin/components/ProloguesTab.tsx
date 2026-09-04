@@ -91,7 +91,7 @@ export default function ProloguesTab({ state }: ProloguesTabProps) {
       {prologuesLoading ? (
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-16 rounded-xl bg-muted animate-pulse" />
+            <div key={i} className="h-16 rounded-xl bg-[hsl(var(--skeleton))] animate-pulse" />
           ))}
         </div>
       ) : filteredPrologues.length === 0 ? (

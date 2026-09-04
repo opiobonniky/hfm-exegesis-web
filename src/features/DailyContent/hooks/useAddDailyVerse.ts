@@ -5,13 +5,11 @@ import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { sendPostRequest } from "@/services/api";
+import { bibleApi } from "@/services/bibleApi";
 import { routes } from "@/components/Routes/routes";
 import {
-  getVerseText,
   getBooksByTestament,
   getChaptersForBook,
-  getVersesCountForChapter,
-  setActiveVersion,
 } from "@/utilities/bibleUtils";
 import { BIBLE_VERSIONS } from "@/assets/bibleVersion/json/bibleVersions";
 import type { DailyVersePayload } from "../types";
@@ -51,6 +49,43 @@ const EDITING_FIELDS: (keyof VerseFormFields)[] = [
   "wordStudies", "practicalApplications", "keyThemes", "crossReferences",
   "finalThoughts", "takeaways",
 ];
+
+/** Plain-text fields derived from an existing verse explanation */
+export interface MappedExplanationFields {
+  explanation: string;
+  application: string;
+  verseIntroduction: string;
+  learnMore: string;
+  backgroundAuthor: string;
+  backgroundBook: string;
+  backgroundContext: string;
+  finalThoughts: string;
+  wordStudies: string;
+  practicalApplications: string;
+  keyThemes: string;
+  crossReferences: string;
+}
+
+/** Shape of the records nested inside a VerseExplanation returned by the API */
+interface VerseExplanationRecord {
+  exegesis?: { explanationText?: string; applicationText?: string };
+  studyMetadata?: {
+    introduction?: string;
+    backgroundAuthor?: string;
+    backgroundBook?: string;
+    backgroundContext?: string;
+    finalThoughts?: string;
+  };
+  wordStudies?: Array<{ surfaceText?: string; strongsId?: string; customDefinition?: string }>;
+  practicalApps?: Array<{ applicationText?: string }>;
+  themes?: Array<{ themeName?: string }>;
+  crossReferences?: Array<{
+    bookName?: string;
+    chapter?: number;
+    verseNumber?: number;
+    referenceText?: string;
+  }>;
+}
 
 export function useAddDailyVerse() {
   const { toast } = useToast();
@@ -108,12 +143,52 @@ export function useAddDailyVerse() {
     payload: any;
   }>({ open: false, conflict: null, payload: null });
 
+  // Auto-populate from an existing verse explanation (loaded when a verse is picked)
+  const [explanationSource, setExplanationSource] = useState<MappedExplanationFields | null>(null);
+  const [explanationLoading, setExplanationLoading] = useState(false);
+  const [explanationApplied, setExplanationApplied] = useState(false);
+  const [explanationError, setExplanationError] = useState(false);
+
   const books = useMemo(() => getBooksByTestament(testament as "Old" | "New"), [testament]);
   const chapters = useMemo(() => getChaptersForBook(book), [book]);
-  const maxVerses = useMemo(
-    () => (book && chapter ? getVersesCountForChapter(book, Number(chapter)) : 0),
-    [book, chapter],
-  );
+
+  // Fetch the chapter's verse list from the backend (reliable for every book,
+  // including BSB's "Psalm" vs "Psalms" naming) to populate the verse count.
+  const [verseCount, setVerseCount] = useState(0);
+  const [chapterVerses, setChapterVerses] = useState<Record<number, string>>({});
+  useEffect(() => {
+    let active = true;
+    if (!book || !chapter) {
+      setVerseCount(0);
+      setChapterVerses({});
+      return;
+    }
+    setIsVerseLoading(true);
+    bibleApi
+      .getVerses(bibleVersion || "BSB", book, Number(chapter))
+      .then((vd) => {
+        if (!active) return;
+        const verses = vd?.verses || [];
+        const map: Record<number, string> = {};
+        verses.forEach((v) => {
+          map[v.verseNumber] = v.text;
+        });
+        setChapterVerses(map);
+        setVerseCount(verses.length);
+      })
+      .catch(() => {
+        if (!active) return;
+        setVerseCount(0);
+        setChapterVerses({});
+      })
+      .finally(() => {
+        if (active) setIsVerseLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [book, chapter, bibleVersion]);
+  const maxVerses = verseCount;
 
   const TESTAMENTS = useMemo(
     () => [
@@ -123,18 +198,141 @@ export function useAddDailyVerse() {
     [t],
   );
 
+  // Set verse text reliably once a verse is selected (from the cached chapter).
   useEffect(() => {
     if (!book || !chapter || !verseNumber || isVerseEditing) {
       if (!isVerseEditing) setVerseText("");
       return;
     }
+    const text = chapterVerses[Number(verseNumber)];
+    if (typeof text === "string") {
+      setVerseText(text);
+      return;
+    }
     setIsVerseLoading(true);
-    setActiveVersion(bibleVersion).then(() => {
-      const text = getVerseText(book, Number(chapter), Number(verseNumber));
-      setVerseText(text || "Verse not found.");
-      setIsVerseLoading(false);
-    });
-  }, [book, chapter, verseNumber, bibleVersion, isVerseEditing]);
+    bibleApi
+      .getVerse(bibleVersion || "BSB", book, Number(chapter), Number(verseNumber))
+      .then((v) => {
+        if (v?.text) setVerseText(v.text);
+        else setVerseText("Verse not found.");
+      })
+      .catch(() => setVerseText("Verse not found."))
+      .finally(() => setIsVerseLoading(false));
+  }, [book, chapter, verseNumber, bibleVersion, isVerseEditing, chapterVerses]);
+
+  // Map an existing verse explanation record onto the daily-verse fields.
+  const mapExplanationToFields = useCallback((d: VerseExplanationRecord | null | undefined): MappedExplanationFields => {
+    const exegesis = d?.exegesis || {};
+    const study = d?.studyMetadata || {};
+    const wordStudies = (d?.wordStudies || []).map(
+      (ws) => [ws.surfaceText, ws.strongsId, ws.customDefinition]
+        .filter(Boolean).join(" | "),
+    ).filter(Boolean).join("\n");
+    const practicalApplications = (d?.practicalApps || [])
+      .map((pa) => (pa.applicationText || "").trim())
+      .filter(Boolean).join("\n");
+    const keyThemes = (d?.themes || [])
+      .map((th) => (th.themeName || "").trim())
+      .filter(Boolean).join("\n");
+    const crossReferences = (d?.crossReferences || [])
+      .map((cr) => {
+        const base = [cr.bookName, cr.chapter, cr.verseNumber].filter(Boolean).join(" ");
+        return [base, cr.referenceText].filter(Boolean).join(" — ");
+      })
+      .filter(Boolean)
+      .join("\n");
+
+    return {
+      explanation: exegesis.explanationText || "",
+      application: exegesis.applicationText || "",
+      verseIntroduction: study.introduction || "",
+      learnMore: "",
+      backgroundAuthor: study.backgroundAuthor || "",
+      backgroundBook: study.backgroundBook || "",
+      backgroundContext: study.backgroundContext || "",
+      finalThoughts: study.finalThoughts || "",
+      wordStudies,
+      practicalApplications,
+      keyThemes,
+      crossReferences,
+    };
+  }, []);
+
+  // Fetch an existing explanation for the selected verse and auto-populate
+  // the still-empty daily-verse fields (never clobber user input).
+  useEffect(() => {
+    let active = true;
+    if (!book || !chapter || !verseNumber || isEditing) {
+      setExplanationSource(null);
+      setExplanationApplied(false);
+      setExplanationError(false);
+      return;
+    }
+    setExplanationLoading(true);
+    setExplanationError(false);
+    sendPostRequest("bible", "get-verse-explanation", {
+      bookName: book,
+      chapter: Number(chapter),
+      verseNumber: Number(verseNumber),
+    })
+      .then((res) => {
+        if (!active) return;
+        if (res?.returnCode === 200 && res.returnData) {
+          const fields = mapExplanationToFields(res.returnData as VerseExplanationRecord);
+          setExplanationSource(fields);
+          setExplanationApplied(true);
+          applyFieldsIfEmpty(fields);
+        } else {
+          setExplanationSource(null);
+          setExplanationError(true);
+        }
+      })
+      .catch(() => {
+        if (!active) return;
+        setExplanationSource(null);
+        setExplanationError(true);
+      })
+      .finally(() => {
+        if (active) setExplanationLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [book, chapter, verseNumber, isEditing]);
+
+  // Fill only fields the user hasn't typed into yet.
+  const applyFieldsIfEmpty = (fields: MappedExplanationFields) => {
+    if (fields.explanation && !explanation) setExplanation(fields.explanation);
+    if (fields.application && !application) setApplication(fields.application);
+    if (fields.verseIntroduction && !verseIntroduction) setVerseIntroduction(fields.verseIntroduction);
+    if (fields.backgroundAuthor && !backgroundAuthor) setBackgroundAuthor(fields.backgroundAuthor);
+    if (fields.backgroundBook && !backgroundBook) setBackgroundBook(fields.backgroundBook);
+    if (fields.backgroundContext && !backgroundContext) setBackgroundContext(fields.backgroundContext);
+    if (fields.finalThoughts && !finalThoughts) setFinalThoughts(fields.finalThoughts);
+    if (fields.wordStudies && !wordStudies) setWordStudies(fields.wordStudies);
+    if (fields.practicalApplications && !practicalApplications) setPracticalApplications(fields.practicalApplications);
+    if (fields.keyThemes && !keyThemes) setKeyThemes(fields.keyThemes);
+    if (fields.crossReferences && !crossReferences) setCrossReferences(fields.crossReferences);
+  };
+
+  // Overwrite all mapped fields with the loaded explanation content.
+  const applyExplanation = useCallback((fields: MappedExplanationFields) => {
+    if (!fields) return;
+    setExplanation(fields.explanation || "");
+    setApplication(fields.application || "");
+    setVerseIntroduction(fields.verseIntroduction || "");
+    setLearnMore(fields.learnMore || "");
+    setBackgroundAuthor(fields.backgroundAuthor || "");
+    setBackgroundBook(fields.backgroundBook || "");
+    setBackgroundContext(fields.backgroundContext || "");
+    setFinalThoughts(fields.finalThoughts || "");
+    setWordStudies(fields.wordStudies || "");
+    setPracticalApplications(fields.practicalApplications || "");
+    setKeyThemes(fields.keyThemes || "");
+    setCrossReferences(fields.crossReferences || "");
+    setExplanationApplied(true);
+  }, []);
 
   // Sync time with date
   useEffect(() => {
@@ -279,6 +477,9 @@ export function useAddDailyVerse() {
     // Derived
     books, chapters, maxVerses, TESTAMENTS,
     saveDisabled, isEditing,
+    // Explanation auto-populate
+    explanationSource, explanationLoading, explanationApplied, explanationError,
+    applyExplanation,
     // Actions
     handleSave, handleConflictUpdate,
     // Conflict dialog

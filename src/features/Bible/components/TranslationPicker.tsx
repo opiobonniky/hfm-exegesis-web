@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 import { useLanguage } from "@/components/languages/languageProvider";
 
 interface TranslationPickerProps {
-  translations: { id: string; name: string }[];
+  translations: { id: string; name: string; language?: string }[];
   selectedId: string;
   onSelect: (id: string) => void;
   open: boolean;
@@ -28,10 +28,22 @@ export default function TranslationPicker({
   search,
   onSearchChange,
 }: TranslationPickerProps) {
-  const { t, isRtl } = useLanguage();
-  const filtered = translations.filter(
-    (tr) => !search || tr.name.toLowerCase().includes(search.toLowerCase()),
-  );
+  const { t, isRtl, lang } = useLanguage();
+  const filtered = translations
+    .filter(
+      (tr) => !search || tr.name.toLowerCase().includes(search.toLowerCase()),
+    )
+    .sort((a, b) => {
+      // Pin the currently active translation to the very top
+      const aActive = a.id === selectedId ? 0 : 1;
+      const bActive = b.id === selectedId ? 0 : 1;
+      if (aActive !== bActive) return aActive - bActive;
+      // Current-language translations before others
+      const aLang = (a.language || '').toLowerCase() === String(lang).toLowerCase() ? 0 : 1;
+      const bLang = (b.language || '').toLowerCase() === String(lang).toLowerCase() ? 0 : 1;
+      if (aLang !== bLang) return aLang - bLang;
+      return a.name.localeCompare(b.name);
+    });
   return (
     <Popover open={open} onOpenChange={onOpenChange}>
       <PopoverTrigger asChild>

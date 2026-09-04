@@ -110,7 +110,7 @@ export default function BookPicker({
         {loading ? (
           <div className="space-y-2 p-2">
             {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="h-8 rounded-lg bg-muted animate-pulse" />
+              <div key={i} className="h-8 rounded-lg bg-[hsl(var(--skeleton))] animate-pulse" />
             ))}
           </div>
         ) : (

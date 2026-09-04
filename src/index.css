@@ -46,6 +46,8 @@
     --input: 220 20% 83%;
     --ring: 203 31% 35%;
 
+    --skeleton: 220 16% 88%;
+
     --radius: 0.75rem;
 
     --sidebar-background: 220 14% 98%;
@@ -99,6 +101,8 @@
     --input: 217 33% 17%;
     --ring: 212 63% 56%;
 
+    --skeleton: 220 26% 16%;
+
     --sidebar-background: 240 6% 10%;
     --sidebar-foreground: 240 5% 96%;
     --sidebar-primary: 212 63% 56%;
@@ -144,6 +148,8 @@
     --info-foreground: 0 0% 100%;
 
     --border: 42 20% 20%;
+
+    --skeleton: 248 18% 16%;
     --input: 42 20% 20%;
     --ring: 42 70% 55%;
 

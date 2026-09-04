@@ -1,13 +1,13 @@
-// PrologueDetailContent — renders all prologue fields as sections
+// PrologueDetailContent — renders all prologue fields as beautiful sections
 "use client";
 
 import {
   ScrollText, User, MapPin, Calendar, BookOpen, Target,
   MessageCircle, Lightbulb, Users, BookMarked, Quote, Church,
+  Sparkles, GraduationCap, Landmark, Layers,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DetailSection } from "./DetailSection";
 import type { BookPrologueDetail } from "../hooks/useBookPrologueDetail";
 
 export function PrologueDetailContent({ item }: { item: BookPrologueDetail }) {
@@ -15,22 +15,24 @@ export function PrologueDetailContent({ item }: { item: BookPrologueDetail }) {
   return (
     <>
       {/* Title card */}
-      <Card>
+      <Card className="shadow-sm">
         <CardContent className="pt-6">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-              <ScrollText className="w-6 h-6 text-primary" />
+          <div className="flex items-start gap-4">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary shadow-inner">
+              <ScrollText className="w-7 h-7" />
             </div>
-            <div>
-              <h2 className="text-xl font-bold">{p.title || p.bookName}</h2>
-              <div className="flex items-center gap-2 mt-1 flex-wrap">
+            <div className="min-w-0">
+              <h2 className="text-2xl font-bold tracking-tight text-foreground">
+                {p.title || p.bookName}
+              </h2>
+              <div className="mt-2 flex flex-wrap items-center gap-2">
                 {p.author && (
-                  <Badge variant="outline" className="text-xs gap-1">
+                  <Badge variant="outline" className="gap-1.5 text-xs">
                     <User className="w-3 h-3" /> {p.author}
                   </Badge>
                 )}
-                {p.chapters && (
-                  <Badge variant="secondary" className="text-xs gap-1">
+                {p.chapters != null && (
+                  <Badge variant="secondary" className="gap-1.5 text-xs">
                     <BookOpen className="w-3 h-3" /> {p.chapters} chapters
                   </Badge>
                 )}
@@ -43,74 +45,105 @@ export function PrologueDetailContent({ item }: { item: BookPrologueDetail }) {
         </CardContent>
       </Card>
 
-      {/* Author detail */}
+      {/* Narrative long-form sections in a nicely spaced flow */}
       {p.authorDetail && (
-        <DetailSection icon={<User className="w-4 h-4" />} title="About the Author">
-          <p className="text-sm leading-relaxed text-foreground/80 whitespace-pre-wrap">{p.authorDetail}</p>
-        </DetailSection>
+        <LongTextCard
+          icon={<User className="w-4 h-4" />}
+          title="About the Author"
+          accent="sky"
+        >
+          {p.authorDetail}
+        </LongTextCard>
       )}
 
-      {/* Summary */}
       {p.summary && (
-        <DetailSection icon={<MessageCircle className="w-4 h-4" />} title="Summary">
-          <p className="text-sm leading-relaxed text-foreground/80 whitespace-pre-wrap">{p.summary}</p>
-        </DetailSection>
+        <LongTextCard
+          icon={<MessageCircle className="w-4 h-4" />}
+          title="Summary"
+          accent="indigo"
+        >
+          {p.summary}
+        </LongTextCard>
       )}
 
-      {/* Key Theme */}
-      {p.keyTheme && (
-        <DetailSection icon={<Target className="w-4 h-4" />} title="Key Theme">
-          <p className="text-sm leading-relaxed text-foreground/80 whitespace-pre-wrap">{p.keyTheme}</p>
-        </DetailSection>
-      )}
-
-      {/* Purpose */}
       {p.purpose && (
-        <DetailSection icon={<Lightbulb className="w-4 h-4" />} title="Purpose">
-          <p className="text-sm leading-relaxed text-foreground/80 whitespace-pre-wrap">{p.purpose}</p>
-        </DetailSection>
+        <LongTextCard
+          icon={<Target className="w-4 h-4" />}
+          title="Purpose"
+          accent="emerald"
+        >
+          {p.purpose}
+        </LongTextCard>
       )}
 
-      {/* Background */}
+      {p.keyTheme && (
+        <LongTextCard
+          icon={<Sparkles className="w-4 h-4" />}
+          title="Key Theme"
+          accent="amber"
+        >
+          {p.keyTheme}
+        </LongTextCard>
+      )}
+
       {p.background && (
-        <DetailSection icon={<BookOpen className="w-4 h-4" />} title="Historical Background">
-          <p className="text-sm leading-relaxed text-foreground/80 whitespace-pre-wrap">{p.background}</p>
-        </DetailSection>
+        <LongTextCard
+          icon={<Landmark className="w-4 h-4" />}
+          title="Historical Background"
+          accent="violet"
+        >
+          {p.background}
+        </LongTextCard>
       )}
 
-      {/* Lessons */}
       {p.lessons && (
-        <DetailSection icon={<Lightbulb className="w-4 h-4" />} title="Key Lessons">
-          <p className="text-sm leading-relaxed text-foreground/80 whitespace-pre-wrap">{p.lessons}</p>
-        </DetailSection>
+        <LongTextCard
+          icon={<GraduationCap className="w-4 h-4" />}
+          title="Key Lessons"
+          accent="teal"
+        >
+          {p.lessons}
+        </LongTextCard>
       )}
 
-      {/* Christ Connection */}
       {p.christConnection && (
-        <DetailSection icon={<Church className="w-4 h-4" />} title="Christ Connection">
-          <p className="text-sm leading-relaxed text-foreground/80 whitespace-pre-wrap">{p.christConnection}</p>
-        </DetailSection>
+        <LongTextCard
+          icon={<Church className="w-4 h-4" />}
+          title="Christ Connection"
+          accent="rose"
+        >
+          {p.christConnection}
+        </LongTextCard>
       )}
 
-      {/* Applications */}
+      {/* Applications — numbered list */}
       {p.applications && p.applications.length > 0 && (
         <PrologueApplications applications={p.applications} />
       )}
 
-      {/* Key Scripture */}
+      {/* Key Scripture — decorative quote cards */}
       {p.keyScripture && p.keyScripture.length > 0 && (
         <PrologueKeyScripture scriptures={p.keyScripture} />
       )}
 
       {/* Main Themes */}
       {p.mainThemes && p.mainThemes.length > 0 && (
-        <DetailSection icon={<Tag className="w-4 h-4" />} title="Main Themes">
-          <div className="flex flex-wrap gap-2">
-            {p.mainThemes.map((t, i) => (
-              <Badge key={i} variant="secondary" className="text-xs">{t}</Badge>
-            ))}
-          </div>
-        </DetailSection>
+        <Card className="shadow-sm">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+              <Layers className="w-4 h-4" /> Main Themes
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-2">
+              {p.mainThemes.map((t, i) => (
+                <Badge key={i} variant="secondary" className="px-3 py-1 text-xs">
+                  {t}
+                </Badge>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       {/* Key People */}
@@ -133,7 +166,7 @@ export function PrologueDetailContent({ item }: { item: BookPrologueDetail }) {
         />
       )}
 
-      {/* Structure */}
+      {/* Structure — timeline */}
       {p.structure && p.structure.length > 0 && (
         <PrologueStructure structure={p.structure} />
       )}
@@ -141,33 +174,71 @@ export function PrologueDetailContent({ item }: { item: BookPrologueDetail }) {
   );
 }
 
-/* ─── Sub-components ─── */
-
-function Tag({ className }: { className?: string }) {
+/* ─── Section card with colored accent bar for long text ─── */
+function LongTextCard({
+  icon,
+  title,
+  accent,
+  children,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  accent: "sky" | "indigo" | "emerald" | "amber" | "violet" | "teal" | "rose";
+  children: string;
+}) {
+  const accentMap: Record<string, string> = {
+    sky: "border-l-sky-500",
+    indigo: "border-l-indigo-500",
+    emerald: "border-l-emerald-500",
+    amber: "border-l-amber-500",
+    violet: "border-l-violet-500",
+    teal: "border-l-teal-500",
+    rose: "border-l-rose-500",
+  };
+  const iconMap: Record<string, string> = {
+    sky: "bg-sky-500/10 text-sky-600",
+    indigo: "bg-indigo-500/10 text-indigo-600",
+    emerald: "bg-emerald-500/10 text-emerald-600",
+    amber: "bg-amber-500/10 text-amber-600",
+    violet: "bg-violet-500/10 text-violet-600",
+    teal: "bg-teal-500/10 text-teal-600",
+    rose: "bg-rose-500/10 text-rose-600",
+  };
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z" />
-      <circle cx="7.5" cy="7.5" r=".5" fill="currentColor" />
-    </svg>
+    <Card className={`overflow-hidden border-l-4 ${accentMap[accent]} shadow-sm`}>
+      <CardHeader className="flex-row items-center gap-2 space-y-0 pb-2">
+        <span className={`flex h-7 w-7 items-center justify-center rounded-lg ${iconMap[accent]}`}>
+          {icon}
+        </span>
+        <CardTitle className="text-sm font-semibold text-foreground">
+          {title}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/80">
+          {children}
+        </p>
+      </CardContent>
+    </Card>
   );
 }
 
 function PrologueApplications({ applications }: { applications: string[] }) {
   return (
-    <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+    <Card className="shadow-sm overflow-hidden">
+      <CardHeader className="bg-gradient-to-r from-emerald-500/10 to-transparent pb-3">
+        <CardTitle className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
           <Lightbulb className="w-4 h-4" /> Key Applications for Today
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <ul className="space-y-2">
+        <ul className="space-y-3">
           {applications.map((app, i) => (
-            <li key={i} className="flex items-start gap-2 text-sm text-foreground/80">
-              <span className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
-                <span className="text-[10px] font-bold text-primary">{i + 1}</span>
+            <li key={i} className="flex items-start gap-3 text-sm text-foreground/80">
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 text-white mt-0.5">
+                <span className="text-[11px] font-bold">{i + 1}</span>
               </span>
-              {app}
+              <span className="leading-relaxed">{app}</span>
             </li>
           ))}
         </ul>
@@ -176,20 +247,34 @@ function PrologueApplications({ applications }: { applications: string[] }) {
   );
 }
 
-function PrologueKeyScripture({ scriptures }: { scriptures: Array<{ reference: string; text: string }> }) {
+function PrologueKeyScripture({
+  scriptures,
+}: {
+  scriptures: Array<{ reference: string; text: string }>;
+}) {
   return (
-    <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+    <Card className="shadow-sm overflow-hidden">
+      <CardHeader className="bg-gradient-to-r from-sky-500/10 to-transparent pb-3">
+        <CardTitle className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
           <Quote className="w-4 h-4" /> Key Scripture
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
         {scriptures.map((s, i) => (
-          <div key={i} className="p-3 rounded-lg bg-muted/30 border border-border/50">
-            <p className="text-sm italic text-foreground/80 mb-1">"{s.text}"</p>
-            <p className="text-xs font-medium text-primary">{s.reference}</p>
-          </div>
+          <figure
+            key={i}
+            className="relative rounded-xl border border-border/60 bg-gradient-to-br from-sky-500/[0.06] to-transparent p-4 pl-8"
+          >
+            <span className="absolute left-3 top-3 text-2xl leading-none text-sky-400/60 select-none">
+              &ldquo;
+            </span>
+            <blockquote className="pl-1 text-sm italic leading-relaxed text-foreground/85">
+              {s.text}
+            </blockquote>
+            <figcaption className="mt-2 pl-1 text-xs font-bold text-sky-600">
+              — {s.reference}
+            </figcaption>
+          </figure>
         ))}
       </CardContent>
     </Card>
@@ -197,7 +282,10 @@ function PrologueKeyScripture({ scriptures }: { scriptures: Array<{ reference: s
 }
 
 function PrologueBadgeList({
-  icon, title, items, variant,
+  icon,
+  title,
+  items,
+  variant,
 }: {
   icon: React.ReactNode;
   title: string;
@@ -205,16 +293,18 @@ function PrologueBadgeList({
   variant: "default" | "secondary" | "outline";
 }) {
   return (
-    <Card>
+    <Card className="shadow-sm">
       <CardHeader className="pb-3">
-        <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
           {icon} {title}
         </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="flex flex-wrap gap-2">
           {items.map((item, i) => (
-            <Badge key={i} variant={variant} className="text-xs">{item}</Badge>
+            <Badge key={i} variant={variant} className="px-3 py-1 text-xs">
+              {item}
+            </Badge>
           ))}
         </div>
       </CardContent>
@@ -222,22 +312,27 @@ function PrologueBadgeList({
   );
 }
 
-function PrologueStructure({ structure }: { structure: Array<{ range: string; title: string }> }) {
+function PrologueStructure({
+  structure,
+}: {
+  structure: Array<{ range: string; title: string }>;
+}) {
   return (
-    <Card>
+    <Card className="shadow-sm">
       <CardHeader className="pb-3">
-        <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
           <BookOpen className="w-4 h-4" /> Chapter Structure
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-2 max-h-60 overflow-y-auto">
+        <div className="relative space-y-3 max-h-72 overflow-y-auto pl-2">
           {structure.map((s, i) => (
-            <div key={i} className="flex items-center gap-3 p-2 rounded-lg border border-border/50 hover:bg-muted/30 text-sm">
-              <span className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                <span className="text-xs font-bold text-primary">{s.range}</span>
+            <div key={i} className="relative flex items-start gap-3">
+              <span className="absolute -left-2 top-4 h-3 w-3 rounded-full border-2 border-primary bg-background" />
+              <span className="flex w-14 shrink-0 items-center justify-center rounded-lg bg-primary/10 px-1 py-1.5 text-center text-xs font-bold text-primary">
+                {s.range}
               </span>
-              <span className="text-foreground/80">{s.title}</span>
+              <span className="pt-1.5 text-sm text-foreground/80">{s.title}</span>
             </div>
           ))}
         </div>

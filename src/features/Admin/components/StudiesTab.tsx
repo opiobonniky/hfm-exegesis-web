@@ -53,7 +53,7 @@ export default function StudiesTab({ state }: StudiesTabProps) {
       {studiesLoading ? (
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-20 rounded-xl bg-muted animate-pulse" />
+            <div key={i} className="h-20 rounded-xl bg-[hsl(var(--skeleton))] animate-pulse" />
           ))}
         </div>
       ) : studies.length === 0 ? (

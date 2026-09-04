@@ -6,6 +6,36 @@ export const FILTERED_PAGE_SIZE = 12;
 
 export const BIBLE_VERSIONS = ["KJV", "NIV", "ESV", "NASB", "NLT", "NKJV", "CSB", "RSV", "ASV", "AMP", "MSG", "WEB"];
 
+export const VERSE_EXPLANATION_STEP_ORDER = [
+  "reference",
+  "exegesis",
+  "study",
+  "extras",
+] as const;
+
+export const VERSE_EXPLANATION_STEPS = [
+  {
+    id: "reference",
+    label: "Reference",
+    description: "Verse & translation",
+  },
+  {
+    id: "exegesis",
+    label: "Exegesis",
+    description: "Main insight",
+  },
+  {
+    id: "study",
+    label: "Study",
+    description: "Context & word study",
+  },
+  {
+    id: "extras",
+    label: "Extras",
+    description: "Applications & themes",
+  },
+] as const;
+
 export const PRESETS = (t?: any) => [
   { value: "thisWeek", label: t?.dailyVerse?.thisWeek || "This Week" },
   { value: "thisMonth", label: t?.dailyVerse?.thisMonth || "This Month" },

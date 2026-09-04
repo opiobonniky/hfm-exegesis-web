@@ -1,4 +1,4 @@
-// useVerseExplanationList — page-based pagination hook for verse explanation admin
+// useVerseExplanationList — supports initial load + load-more (infinite scroll)
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -28,14 +28,18 @@ export function useVerseExplanationList(pageSize = 20) {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [data, setData] = useState<PageData>({ items: [], totalCount: 0, page: 1, pageSize, totalPages: 0 });
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true); // initial load / refreshing
+  const [loadingMore, setLoadingMore] = useState(false); // load-more state
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [deleting, setDeleting] = useState<number | null>(null);
 
   const fetchPage = useCallback(
     async (pageNum: number, q: string) => {
-      setLoading(true);
+      const append = pageNum > 1;
+      if (append) setLoadingMore(true);
+      else setLoading(true);
+
       try {
         const res = await sendPostRequest("bible", "get-all-verses-explanation", {
           page: pageNum,
@@ -43,28 +47,47 @@ export function useVerseExplanationList(pageSize = 20) {
           search: q || undefined,
         });
         const rd = res?.returnData || res?.data;
-        const items = rd?.explanations || [];
+        const items: VerseExplanationListItem[] = rd?.explanations || [];
         const totalCount = rd?.totalCount ?? 0;
         const totalPages = rd?.totalPages ?? Math.ceil(totalCount / pageSize);
-        setData({ items, totalCount, page: pageNum, pageSize, totalPages });
-      } catch {
+
+        setData((prev) => ({
+          items: append ? [...prev.items, ...items] : items,
+          totalCount,
+          page: pageNum,
+          pageSize,
+          totalPages,
+        }));
+      } catch (err) {
+        console.error(err);
         toast({ title: "Error", description: "Failed to load verse explanations", variant: "destructive" });
       } finally {
-        setLoading(false);
+        if (append) setLoadingMore(false);
+        else setLoading(false);
       }
     },
     [pageSize, toast],
   );
 
+  // initial load / page change / search
   useEffect(() => {
     fetchPage(page, search);
-  }, [page]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [page, search]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const refresh = useCallback(() => {
-    fetchPage(page, search);
-  }, [page, search, fetchPage]);
+    setPage(1);
+    fetchPage(1, search);
+  }, [search, fetchPage]);
 
-  const goToPage = useCallback((p: number) => setPage(p), []);
+  const goToPage = useCallback((p: number) => {
+    // explicit navigation to a page - replace items
+    setPage(p);
+  }, []);
+
+  const loadMore = useCallback(() => {
+    // only load more if there are pages remaining
+    setPage((prev) => prev + 1);
+  }, []);
 
   const deleteItem = useCallback(
     async (item: VerseExplanationListItem) => {
@@ -113,9 +136,14 @@ export function useVerseExplanationList(pageSize = 20) {
     return () => clearTimeout(t);
   }, [searchInput]);
 
+  const hasMore = data.page < data.totalPages;
+
   return {
     data,
     loading,
+    loadingMore,
+    hasMore,
+    loadMore,
     search: searchInput,
     setSearch: setSearchInput,
     page,

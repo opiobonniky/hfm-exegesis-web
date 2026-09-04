@@ -4,16 +4,16 @@
 import { TabsContent } from "@/components/ui/tabs";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { useAdminSubscriptions } from "../hooks/useAdminSubscriptions";
-import {
-  SubscriptionTierCard,
-  TierFormDialog,
-} from "../components";
 import { AdminSubscriptionsHeader } from "../components/AdminSubscriptionsHeader";
-import { AdminTriviaTabs } from "../components/AdminTriviaTabs";
+import { AdminSubscriptionsTabs } from "../components/AdminSubscriptionsTabs";
+import { SubscriptionsSummaryCards } from "../components/SubscriptionsSummaryCards";
 import { TiersTab } from "../components/TiersTab";
 import { SubscribersTable } from "../components/SubscribersTable";
 import { SuspendUserDialog } from "../components/SuspendUserDialog";
 import { DeleteTierDialog } from "../components/DeleteTierDialog";
+import { ManageUserDialog } from "../components/ManageUserDialog";
+import { RefundUserDialog } from "../components/RefundUserDialog";
+import { TierFormDialog } from "../components/TierFormDialog";
 
 const AdminSubscriptions = () => {
   const { isRtl } = useLanguage();
@@ -28,26 +28,30 @@ const AdminSubscriptions = () => {
         onCreateTier={h.openCreateTier}
       />
 
-      <AdminTriviaTabs activeTab={h.activeTab} onTabChange={h.setActiveTab}>
+      <AdminSubscriptionsTabs activeTab={h.activeTab} onTabChange={h.setActiveTab}>
         <TabsContent value="tiers" className="space-y-4">
           <TiersTab
             tiers={h.tiers}
             loading={h.tiersLoading}
+            counts={h.summary?.tierCounts}
             onEdit={h.openEditTier}
             onDelete={(id) => h.setDeleteTier(id)}
           />
         </TabsContent>
 
         <TabsContent value="subscribers" className="space-y-4">
+          <SubscriptionsSummaryCards summary={h.summary} loading={h.subsLoading} />
           <SubscribersTable
             subscribers={h.subscribers}
             loading={h.subsLoading}
             syncing={h.syncing}
             onSyncStripe={h.handleSyncStripe}
             onSuspend={h.setSuspendDialog}
+            onManage={h.setManageDialog}
+            onRefund={h.setRefundDialog}
           />
         </TabsContent>
-      </AdminTriviaTabs>
+      </AdminSubscriptionsTabs>
 
       {/* Dialogs */}
       <TierFormDialog
@@ -70,6 +74,21 @@ const AdminSubscriptions = () => {
         loading={h.suspendLoading}
         onOpenChange={(o) => !o && h.setSuspendDialog(null)}
         onConfirm={h.toggleSuspend}
+      />
+
+      <ManageUserDialog
+        user={h.manageDialog}
+        tiers={h.tiers}
+        loading={h.manageLoading}
+        onOpenChange={(o) => !o && h.setManageDialog(null)}
+        onSave={h.saveManage}
+      />
+
+      <RefundUserDialog
+        user={h.refundDialog}
+        loading={h.refundLoading}
+        onOpenChange={(o) => !o && h.setRefundDialog(null)}
+        onConfirm={h.confirmRefund}
       />
     </div>
   );

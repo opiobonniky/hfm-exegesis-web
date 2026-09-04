@@ -24,9 +24,10 @@ export default function VerseExplanationDetail() {
           variant: h.item.isPublished !== false ? "default" : "secondary",
         }}
         onBack={() => h.navigate("/admin/verse-explanations")}
+        containerClassName="max-w-full mx-auto px-3 sm:px-4 lg:px-6"
       />
 
-      <DetailContent>
+      <DetailContent className="max-w-full mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6">
         <VerseExplanationDetailContent item={h.item} />
 
         <DetailMetadataGrid

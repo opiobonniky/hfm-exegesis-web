@@ -46,6 +46,7 @@ export { SaveActionsRow } from "./SaveActionsRow";
 export { InlineLoadingIndicator } from "./InlineLoadingIndicator";
 export { FieldLabelWithCounter } from "./FieldLabelWithCounter";
 export { InlineWarning } from "./InlineWarning";
+export { ExplanationAutoFillBanner } from "./ExplanationAutoFillBanner";
 export { DetailSection } from "./DetailSection";
 export { VerseTextDisplay } from "./VerseTextDisplay";
 export { DetailTitleBlock } from "./DetailTitleBlock";

@@ -3,7 +3,6 @@ import axios, {
   InternalAxiosRequestConfig,
   AxiosResponse,
 } from "axios";
-import { _ } from "vitest/dist/chunks/reporters.d.BFLkQcL6.js";
 
 interface GenericResponse<T = any> {
   success: boolean;
@@ -15,16 +14,26 @@ interface GenericResponse<T = any> {
   returnData?: T;
 }
 
+// Backend origin used for all API calls.
+// Resolution order (highest priority first):
+//   1. VITE_API_URL — explicit override via .env / CI / runtime (recommended)
+//   2. Local dev backend while running `npm run dev` / `vite` (Vite sets DEV=true)
+//   3. Production backend (deployed / preview / production builds)
 const getBaseURL = () => {
+  const configured = import.meta.env.VITE_API_URL;
+  if (configured) return configured.replace(/\/+$/, "");
+
   if (import.meta.env.DEV) {
     return "http://localhost:5001";
-  } else {
-    return "https://exegesisbackend-production.up.railway.app/";
   }
-  // return "https://exegesisbackend-production.up.railway.app/";
+  return "https://exegesisbackend-production.up.railway.app";
 };
 
 const BASE_URL = getBaseURL();
+
+// Visible in the browser console + on-screen so it's never ambiguous where
+// requests are going (dev vs production). Useful for the "wrong backend" bug.
+export const API_BASE_URL = BASE_URL;
 export const TOKEN_KEY = "auth_token";
 export const USER_KEY = "user_data";
 
@@ -36,6 +45,12 @@ const api: AxiosInstance = axios.create({
     Accept: "application/json",
   },
 });
+
+// Throttle for the "subscription expired" prompt (ms). Prevents a storm of
+// toasts/redirects when several gated requests fail at once, while still
+// reminding the user again if they ignore the prompt.
+const SUBSCRIPTION_EXPIRED_COOLDOWN_MS = 90000;
+let lastSubscriptionExpiredAt = 0;
 
 // Request interceptor
 api.interceptors.request.use(
@@ -93,14 +108,30 @@ api.interceptors.response.use(
       console.error("Session Expired. Please login again.");
       window.dispatchEvent(new CustomEvent("session-expired"));
     }
+    // Detect an expired subscription (backend returns 403 "Subscription expired"
+    // from requireTier). Fire a global event once per cooldown window so the app
+    // can notify the user and redirect them back to the subscription page.
+    const isExpired =
+      responseData &&
+      (responseData.returnCode === 403 || responseData.status === 403) &&
+      typeof responseData.returnMessage === "string" &&
+      /expired/i.test(responseData.returnMessage);
+    const now = Date.now();
+    if (
+      isExpired &&
+      hasToken &&
+      now - lastSubscriptionExpiredAt > SUBSCRIPTION_EXPIRED_COOLDOWN_MS
+    ) {
+      lastSubscriptionExpiredAt = now;
+      window.dispatchEvent(new CustomEvent("subscription-expired", { detail: responseData }));
+    }
     return Promise.reject(error);
   },
 );
 
 /**
  * Custom error class that includes backend returnMessage
- */
-export class ApiError extends Error {
+ */export class ApiError extends Error {
   constructor(
     message: string,
     public returnCode?: number,

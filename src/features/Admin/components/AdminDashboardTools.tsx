@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { ADMIN_TOOLS } from "../constants";
 import type { LucideIcon } from "lucide-react";
+import { StatsSectionHeading } from "./AdminDashboardStats";
 
 const ICON_MAP: Record<string, LucideIcon> = {
   Sparkles,
@@ -23,41 +24,59 @@ interface Props {
 
 export function AdminDashboardTools({ onNavigate }: Props) {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      {ADMIN_TOOLS.map((tool) => {
-        const Icon = ICON_MAP[tool.icon] || Sparkles;
-        return (
-          <button
-            key={tool.path}
-            onClick={() => onNavigate(tool.path)}
-            className="group text-left w-full"
-          >
-            <Card className="border-border/50 h-full hover:border-primary/30 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 cursor-pointer">
-              <CardContent className="p-5 sm:p-6">
-                <div className="flex items-start gap-4">
-                  <div
-                    className={cn(
-                      "w-12 h-12 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-110",
-                      tool.color,
-                    )}
-                  >
-                    <Icon className="w-6 h-6" />
+    <section className="space-y-3">
+      <StatsSectionHeading
+        title="Management Tools"
+        subtitle="Jump into any admin area"
+      />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {ADMIN_TOOLS.map((tool, index) => {
+          const Icon = ICON_MAP[tool.icon] || Sparkles;
+          return (
+            <button
+              key={tool.path}
+              onClick={() => onNavigate(tool.path)}
+              className="group text-left w-full"
+            >
+              <Card className="relative border-border h-full hover:border-primary/40 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 cursor-pointer overflow-hidden">
+                <div
+                  className={cn(
+                    "absolute -right-10 -top-10 h-32 w-32 rounded-full blur-2xl opacity-25 transition-opacity duration-200 group-hover:opacity-40",
+                    tool.color.replace(/dark:bg-[^\s]+/, "").replace("text-", "bg-").split(/\s+/)[0],
+                  )}
+                />
+                <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-primary/[0.05] to-transparent pointer-events-none" />
+                <CardContent className="relative p-5 sm:p-6">
+                  <div className="flex items-start gap-4">
+                    <div
+                      className={cn(
+                        "w-12 h-12 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-110",
+                        tool.color,
+                      )}
+                    >
+                      <Icon className="w-6 h-6" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-2">
+                        <h3 className="font-semibold text-sm sm:text-base mb-1">
+                          {tool.title}
+                        </h3>
+                        <span className="text-[10px] font-bold text-muted-foreground/40">
+                          {String(index + 1).padStart(2, "0")}
+                        </span>
+                      </div>
+                      <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                        {tool.description}
+                      </p>
+                    </div>
+                    <ArrowRight className="w-4 h-4 text-muted-foreground/40 group-hover:text-primary group-hover:translate-x-0.5 transition-all duration-200 shrink-0 mt-1" />
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-sm sm:text-base mb-1">
-                      {tool.title}
-                    </h3>
-                    <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                      {tool.description}
-                    </p>
-                  </div>
-                  <ArrowRight className="w-4 h-4 text-muted-foreground/40 group-hover:text-primary group-hover:translate-x-0.5 transition-all duration-200 shrink-0 mt-1" />
-                </div>
-              </CardContent>
-            </Card>
-          </button>
-        );
-      })}
-    </div>
+                </CardContent>
+              </Card>
+            </button>
+          );
+        })}
+      </div>
+    </section>
   );
 }

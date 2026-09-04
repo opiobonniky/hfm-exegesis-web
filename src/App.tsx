@@ -9,6 +9,7 @@ import { AppLayout } from "@/components/AppLayout";
 import PublicLayout from "@/components/PublicLayout";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { RouteSuspense } from "@/components/RouteSuspense";
+import { SubscriptionExpiredHandler } from "@/components/SubscriptionExpiredHandler";
 import { PageSkeleton } from "@/components/ui/skeletons";
 import SplashScreen from "@/components/SplashScreen";
 import { Loader2 } from "lucide-react";
@@ -158,6 +159,7 @@ const App = () => {
           <TooltipProvider>
             <Toaster />
             <Sonner />
+            <SubscriptionExpiredHandler />
             <AppRoutes />
           </TooltipProvider>
         </LanguageProvider>

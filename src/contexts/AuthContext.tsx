@@ -26,6 +26,7 @@ type AuthContextType = {
   logout: () => void;
   subscriptionTier: string;
   accessExpiresAt: string | null;
+  subscriptionLoading: boolean;
   fetchSubscriptionStatus: () => Promise<void>;
 };
 
@@ -45,8 +46,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const navigate = useNavigate(); // ← add this back
   // ── Fetch subscription status from backend ──
+  const [subscriptionLoading, setSubscriptionLoading] = useState(false);
   const fetchSubscriptionStatus = useCallback(async () => {
     try {
+      setSubscriptionLoading(true);
       const res = await sendPostRequest("subscriptions", "status", {});
       if (res.returnCode === 200 && res.returnData) {
         const tier = res.returnData.subscriptionTier || "free";
@@ -58,6 +61,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       }
     } catch {
       // Non-critical — fall back to cached or default
+    } finally {
+      setSubscriptionLoading(false);
     }
   }, []);
 
@@ -167,6 +172,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     logout,
     subscriptionTier,
     accessExpiresAt,
+    subscriptionLoading,
     fetchSubscriptionStatus,
   }), [
     userInfo,
@@ -175,6 +181,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     logout,
     subscriptionTier,
     accessExpiresAt,
+    subscriptionLoading,
     fetchSubscriptionStatus,
   ]);
 

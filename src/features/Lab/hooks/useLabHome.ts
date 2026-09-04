@@ -39,7 +39,7 @@ export function useLabHome() {
   }, [getActiveSession, getSessions]);
   useEffect(() => {
     loadData();
-  }, [loadData]);
+  }, []);
   const handleResumeStudy = useCallback(
     (sessionId: string) => {
       navigate(`/lab/flow?sessionId=${sessionId}`);

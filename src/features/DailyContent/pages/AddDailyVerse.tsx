@@ -13,6 +13,7 @@ import {
   DailyContentFormActions, DailyContentFormCard,
   PublishToggle, PageContentWrapper,
   AddDailyVerseHeader, AddDailyVerseConflictDialog,
+  ExplanationAutoFillBanner,
 } from "../components";
 import { routes } from "@/components/Routes/routes";
 
@@ -52,6 +53,8 @@ const AddDailyVerse = () => {
             bibleVersion={h.bibleVersion} t={h.t}
           />
         </Section>
+
+        <ExplanationAutoFillBanner model={h} />
 
         <Section title="Verse Content">
           <RequiredContentFields

@@ -6,13 +6,11 @@ import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { sendPostRequest } from "@/services/api";
+import { bibleApi } from "@/services/bibleApi";
 import { routes } from "@/components/Routes/routes";
 import {
   getBooksByTestament,
   getChaptersForBook,
-  getVersesCountForChapter,
-  getVerseText,
-  setActiveVersion,
 } from "@/utilities/bibleUtils";
 import { parseStructuredField } from "../helpers/contentDetailHelpers";
 
@@ -74,10 +72,44 @@ export function useAddDailyDevotion() {
   // Derived
   const books = useMemo(() => getBooksByTestament(testament as "Old" | "New"), [testament]);
   const chapters = useMemo(() => getChaptersForBook(book), [book]);
-  const maxVerses = useMemo(
-    () => (book && chapter ? getVersesCountForChapter(book, Number(chapter)) : 0),
-    [book, chapter],
-  );
+
+  // Fetch the chapter's verse list from the backend (reliable for every book,
+  // including BSB's "Psalm" vs "Psalms" naming) to populate the verse count.
+  const [verseCount, setVerseCount] = useState(0);
+  const [chapterVerses, setChapterVerses] = useState<Record<number, string>>({});
+  useEffect(() => {
+    let active = true;
+    if (!book || !chapter) {
+      setVerseCount(0);
+      setChapterVerses({});
+      return;
+    }
+    setIsVerseLoading(true);
+    bibleApi
+      .getVerses(bibleVersion || "BSB", book, Number(chapter))
+      .then((vd) => {
+        if (!active) return;
+        const verses = vd?.verses || [];
+        const map: Record<number, string> = {};
+        verses.forEach((v) => {
+          map[v.verseNumber] = v.text;
+        });
+        setChapterVerses(map);
+        setVerseCount(verses.length);
+      })
+      .catch(() => {
+        if (!active) return;
+        setVerseCount(0);
+        setChapterVerses({});
+      })
+      .finally(() => {
+        if (active) setIsVerseLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [book, chapter, bibleVersion]);
+  const maxVerses = verseCount;
   const testamentOptions = useMemo(() => [
     { value: "Old", label: t.dailyVerse.oldTestament },
     { value: "New", label: t.dailyVerse.newTestament },
@@ -100,16 +132,24 @@ export function useAddDailyDevotion() {
     { value: "NIV", label: "NIV" },
   ], []);
 
-  // Auto-fetch verse text
+  // Set verse text reliably once a verse is selected (from the cached chapter).
   useEffect(() => {
     if (!book || !chapter || !verseNumber) { setVerseText(""); return; }
+    const text = chapterVerses[Number(verseNumber)];
+    if (typeof text === "string") {
+      setVerseText(text);
+      return;
+    }
     setIsVerseLoading(true);
-    setActiveVersion(bibleVersion).then(() => {
-      const text = getVerseText(book, Number(chapter), Number(verseNumber));
-      setVerseText(text || "Verse not found.");
-      setIsVerseLoading(false);
-    });
-  }, [book, chapter, verseNumber, bibleVersion]);
+    bibleApi
+      .getVerse(bibleVersion || "BSB", book, Number(chapter), Number(verseNumber))
+      .then((v) => {
+        if (v?.text) setVerseText(v.text);
+        else setVerseText("Verse not found.");
+      })
+      .catch(() => setVerseText("Verse not found."))
+      .finally(() => setIsVerseLoading(false));
+  }, [book, chapter, verseNumber, bibleVersion, chapterVerses]);
 
   // Sync time with date
   useEffect(() => {

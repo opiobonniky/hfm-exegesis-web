@@ -12,6 +12,8 @@ interface VerseExplanationItem {
   explanation: string;
   learnMore?: string;
   isPublished: boolean;
+  bibleVersion?: string;
+  createdOn?: string | null;
 }
 
 interface VerseExplanationTableProps {
@@ -35,68 +37,42 @@ export function VerseExplanationTable({
 }: VerseExplanationTableProps) {
   return (
     <>
-      {/* Desktop table */}
-      <div className="hidden md:block border rounded-lg overflow-hidden">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b bg-muted/50">
-              <th className="text-left p-3 text-sm font-medium">Reference</th>
-              <th className="text-left p-3 text-sm font-medium">Explanation</th>
-              <th className="text-left p-3 text-sm font-medium hidden lg:table-cell">
-                Learn More
-              </th>
-              <th className="text-left p-3 text-sm font-medium">Status</th>
-              <th className="text-right p-3 text-sm font-medium">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.map((item) => (
-              <tr
-                key={item.id}
-                className="border-b last:border-0 hover:bg-muted/30 transition-colors"
-              >
-                <td className="p-3">
-                  <div className="font-medium">
-                    {item.bookName} {item.chapter}:{item.verseNumber}
-                  </div>
-                </td>
-                <td className="p-3">
-                  <p className="text-sm text-muted-foreground line-clamp-2">
-                    {item.explanation}
-                  </p>
-                </td>
-                <td className="p-3 hidden lg:table-cell">
-                  <p className="text-sm text-muted-foreground line-clamp-2">
-                    {item.learnMore || "—"}
-                  </p>
-                </td>
-                <td className="p-3">
-                  <Badge variant={item.isPublished ? "default" : "secondary"}>
-                    {item.isPublished ? "Published" : "Draft"}
-                  </Badge>
-                </td>
-                <td className="p-3 text-right">
-                  <div className="flex items-center justify-end gap-1">
-                    <Button variant="ghost" size="icon" onClick={() => onView(item)} title="View">
-                      <Eye className="w-4 h-4" />
-                    </Button>
-                    <Button variant="ghost" size="icon" onClick={() => onEdit(item)}>
-                      <Edit2 className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => onDelete(item)}
-                      className="text-destructive hover:text-destructive"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      {/* Desktop card grid */}
+      <div className="hidden md:grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {items.map((item) => (
+          <div key={item.id} className="border rounded-xl p-4 bg-card flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between gap-2">
+                <div>
+                  <div className="text-sm font-semibold">{item.bookName} {item.chapter}:{item.verseNumber}</div>
+                  <div className="text-xs text-muted-foreground mt-1">{item.bibleVersion || 'BSB'}</div>
+                </div>
+                <Badge variant={item.isPublished ? 'default' : 'secondary'} className="text-[10px]">{item.isPublished ? 'Published' : 'Draft'}</Badge>
+              </div>
+
+              <div className="mt-3">
+                <p className="text-sm text-muted-foreground line-clamp-3">{item.explanation || 'No explanation provided.'}</p>
+              </div>
+
+              <div className="mt-3">
+                <h4 className="text-xs uppercase text-muted-foreground font-medium">Learn More</h4>
+                <p className="text-xs text-muted-foreground line-clamp-2 mt-1">{item.learnMore || '—'}</p>
+              </div>
+            </div>
+
+            <div className="mt-4 flex items-center justify-end gap-2">
+              <Button variant="ghost" size="icon" onClick={() => onView(item)} title="View">
+                <Eye className="w-4 h-4" />
+              </Button>
+              <Button variant="ghost" size="icon" onClick={() => onEdit(item)}>
+                <Edit2 className="w-4 h-4" />
+              </Button>
+              <Button variant="ghost" size="icon" className="text-destructive" onClick={() => onDelete(item)}>
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* Mobile card list */}
@@ -111,6 +87,7 @@ export function VerseExplanationTable({
                 <p className="text-xs text-muted-foreground line-clamp-2 mt-1">
                   {item.explanation}
                 </p>
+                <p className="text-xs text-muted-foreground mt-2">{item.bibleVersion || "BSB"} • {item.createdOn ? new Date(item.createdOn).toLocaleDateString() : ""}</p>
               </div>
               <Badge
                 variant={item.isPublished ? "default" : "secondary"}

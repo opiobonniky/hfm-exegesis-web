@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useLanguage } from "@/components/languages/languageProvider";
-import { sendPostRequest } from "@/services/api";
+import { sendPostRequest, API_BASE_URL } from "@/services/api";
 import { bibleApi } from "@/services/bibleApi";
 import {
   BIBLE_BOOK_CHAPTERS,
@@ -10,7 +10,7 @@ import {
   isBibleBook,
   type BibleBookName,
 } from "../constants";
-import { getFreeBibleIdsForLanguage } from "../services/freeBibleTranslations";
+
 
 export interface TranslationOption {
   id: string;
@@ -78,20 +78,16 @@ export function useBibleReader() {
 
   useEffect(() => {
     import("@/services/bibleApi").then(({ bibleApi }) => {
-      bibleApi.getTranslations()
+      bibleApi.getTranslations(language)
         .then((data) => {
-          // Filter translations to only show those matching the current language
-          const freeIds = getFreeBibleIdsForLanguage(language);
-          const filtered = (data || []).filter((t: TranslationOption) =>
-            freeIds.includes(t.id)
-          );
-          // Always include the currently selected translation even if not in the free list
-          const currentInList = filtered.some((t: TranslationOption) => t.id === versionId);
+          // Always include the currently selected translation even if not in the list
+          const list = data || [];
+          const currentInList = list.some((t: TranslationOption) => t.id === versionId);
           if (!currentInList && versionId) {
-            const current = (data || []).find((t: TranslationOption) => t.id === versionId);
-            if (current) filtered.unshift(current);
+            const current = list.find((t: TranslationOption) => t.id === versionId);
+            if (current) list.unshift(current);
           }
-          setAvailableTranslations(filtered.length > 0 ? filtered : data || []);
+          setAvailableTranslations(list.length > 0 ? list : data || []);
         })
         .catch((error) =>
           console.error("Failed to load Bible translations:", error),
@@ -149,7 +145,9 @@ export function useBibleReader() {
     )
       .catch((error) => {
         console.error(error);
-        setLoadError("Unable to load this passage. Please try again.");
+        setLoadError(
+          `Unable to load this passage. ${error?.message || "Network error"}. Backend: ${API_BASE_URL}`,
+        );
       })
       .finally(() => setLoading(false));
   }, [fetchChapters, loadStartChapter, reloadToken, selectedBook, versionId]);
@@ -290,6 +288,7 @@ export function useBibleReader() {
     loadingMore,
     loadError,
     hasMore,
+    apiBaseUrl: API_BASE_URL,
     availableTranslations,
     backendBooks: BIBLE_BOOKS,
     booksLoading: false,

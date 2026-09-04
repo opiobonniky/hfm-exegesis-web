@@ -12,12 +12,8 @@ import {
   AdminSearchBar,
   AdminPageContent,
 } from "../components";
-import { PROLOGUE_EMPTY_FORM } from "../constants";
 import { PrologueGrid } from "../components/PrologueGrid";
-import { PrologueFormDialog } from "../components/PrologueFormDialog";
 import { PrologueDeleteDialog } from "../components/PrologueDeleteDialog";
-
-
 
 export default function AdminBookPrologues() {
   const h = useAdminBookProloguesPage();
@@ -30,7 +26,7 @@ export default function AdminBookPrologues() {
         subtitle={`${h.totalCount} prologues`}
         icon={<ScrollText className="w-5 h-5 text-primary" />}
         onBack={() => navigate("/admin")}
-        onAdd={() => h.openEdit()}
+        onAdd={() => navigate("/admin/add-book-prologue")}
         addLabel="Add Prologue"
       />
 
@@ -53,7 +49,7 @@ export default function AdminBookPrologues() {
                 ? "Try a different search term"
                 : "Create your first book prologue"
             }
-            onAction={!h.search ? () => h.openEdit() : undefined}
+            onAction={!h.search ? () => navigate("/admin/add-book-prologue") : undefined}
           />
         ) : (
           <>
@@ -62,7 +58,11 @@ export default function AdminBookPrologues() {
               loadingMore={false}
               hasMore={h.hasMore}
               sentinelRef={h.sentinelRef}
-              onEdit={(item) => h.openEdit(item)}
+              onEdit={(item) =>
+                navigate(
+                  `/admin/edit-book-prologue/${encodeURIComponent(item.bookName)}`,
+                )
+              }
               onDelete={(item) => h.setDeleteItem(item)}
               onView={(item) =>
                 navigate(
@@ -80,20 +80,6 @@ export default function AdminBookPrologues() {
           </>
         )}
       </AdminPageContent>
-
-      <PrologueFormDialog
-        open={!!h.editItem || h.editForm.bookName !== ""}
-        editMode={!!h.editItem}
-        form={h.editForm}
-        filteredBooks={h.filteredBooks}
-        saving={h.saving}
-        onFormChange={h.updateFormField}
-        onSave={h.handleSave}
-        onClose={() => {
-          h.setEditItem(null);
-          h.setEditForm(PROLOGUE_EMPTY_FORM);
-        }}
-      />
 
       <PrologueDeleteDialog
         open={!!h.deleteItem}

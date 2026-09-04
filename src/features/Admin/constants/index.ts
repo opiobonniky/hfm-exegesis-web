@@ -9,3 +9,4 @@ export * from "./dailyContent";
 export * from "./users";
 export * from "./bible";
 export * from "./calendar";
+export * from "./bookPrologue";

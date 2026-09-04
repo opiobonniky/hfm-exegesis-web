@@ -45,15 +45,32 @@ export function formatTierLabel(tier: string): string {
 }
 
 export function useSubscription() {
-  const { subscriptionTier, accessExpiresAt, fetchSubscriptionStatus, userInfo } = useAuth();
+  const {
+    subscriptionTier,
+    accessExpiresAt,
+    fetchSubscriptionStatus,
+    userInfo,
+    subscriptionLoading,
+  } = useAuth();
 
   const raw = subscriptionTier || "free";
   const level = tierLevel(raw);
   const isAdminUser = userInfo?.userRole === 1;
 
   /** True if the user's tier meets or exceeds the required tier, or user is admin. */
-  const hasAccess = (minTier: SubscriptionTier): boolean =>
-    isAdminUser || level >= tierLevel(minTier);
+  const hasAccess = (minTier: SubscriptionTier): boolean => {
+    if (isAdminUser) return true;
+    if (level < tierLevel(minTier)) return false;
+    // A paid tier is only usable while its access has not expired.
+    if (accessExpiresAt && new Date(accessExpiresAt).getTime() < Date.now()) {
+      return false;
+    }
+    return true;
+  };
+
+  /** True if the user is on a paid tier whose access has expired. */
+  const isExpired =
+    !isAdminUser && level > 0 && !!accessExpiresAt && new Date(accessExpiresAt).getTime() < Date.now();
 
   /** True if the user is on the Free Reader plan (or not logged in). */
   const isFree = level === 0;
@@ -90,6 +107,8 @@ export function useSubscription() {
     isCovenantSower,
     isPayingUser,
     isAdminUser,
+    isExpired,
+    subscriptionLoading,
     tierLabel,
     expiresLabel,
   };

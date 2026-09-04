@@ -38,7 +38,7 @@ export default function ResourcesTab({ state }: ResourcesTabProps) {
     return (
       <div className="space-y-4">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="h-24 rounded-xl bg-muted animate-pulse" />
+          <div key={i} className="h-24 rounded-xl bg-[hsl(var(--skeleton))] animate-pulse" />
         ))}
       </div>
     );

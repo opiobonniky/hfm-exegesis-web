@@ -1,9 +1,20 @@
-// VerseExplanationDetail — Structured view of a verse explanation
+// VerseExplanationDetail — modern responsive admin detail layout
 "use client";
 
-import { BookOpen, Lightbulb, Target, Tag, Link as LinkIcon } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { sendPostRequest } from "@/services/api";
+
+import {
+  BookOpen,
+  Lightbulb,
+  Edit2,
+  Globe,
+  Tag,
+  Link as LinkIcon,
+} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 
@@ -15,184 +26,369 @@ export function VerseExplanationDetailContent({ item }: Props) {
   if (!item) return null;
 
   const {
-    bookName, chapter, verseNumber, bibleVersion,
-    exegesis, studyMetadata, wordStudies, practicalApps, crossReferences, themes
+    bookName,
+    chapter,
+    verseNumber,
+    bibleVersion,
+    isPublished,
+    exegesis,
+    studyMetadata,
+    wordStudies,
+    practicalApps,
+    crossReferences,
+    themes,
   } = item;
 
+  // feed: holds the current explanation plus any appended explanations loaded as the user scrolls
+  const [feed, setFeed] = useState<any[]>([item]);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+
+  // reset feed when the prop item changes (navigating to another explanation)
+  useEffect(() => {
+    setFeed([item]);
+    setHasMore(true);
+  }, [item]);
+
+  // observer to load next explanation when sentinel is visible
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+
+    const obs = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (
+            entry.isIntersecting &&
+            !loadingMore &&
+            hasMore
+          ) {
+            loadNextExplanation();
+          }
+        });
+      },
+      { root: null, rootMargin: "300px", threshold: 0.1 },
+    );
+
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [sentinelRef, loadingMore, hasMore, feed]);
+
+  // fetch the next verse explanation (naive: increment verseNumber)
+  const loadNextExplanation = async () => {
+    if (loadingMore) return;
+    const last = feed[feed.length - 1];
+    if (!last) return setHasMore(false);
+    setLoadingMore(true);
+
+    // naive next verse: +1; if not found we stop (could be improved to advance chapter)
+    const nextVerse = Number(last.verseNumber) + 1;
+    try {
+      const res = await sendPostRequest("bible", "get-verse-explanation", {
+        bookName: last.bookName,
+        chapter: last.chapter,
+        verseNumber: nextVerse,
+      });
+
+      if (res?.returnCode === 200 && res.returnData) {
+        const d = res.returnData;
+        // avoid duplicates
+        const exists = feed.find((f) => f.bookName === d.bookName && Number(f.chapter) === Number(d.chapter) && Number(f.verseNumber) === Number(d.verseNumber));
+        if (!exists) setFeed((s) => [...s, d]);
+      } else {
+        // no more contiguous verses found — stop further automatic fetches
+        setHasMore(false);
+      }
+    } catch (e) {
+      setHasMore(false);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
+
   return (
-    <div className="space-y-10 pb-10">
-      {/* SECTION 1: Mention the Verse */}
-      <section className="text-center space-y-4 py-8">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider">
-          <BookOpen className="w-3 h-3" /> Verse Study
-        </div>
-        <h1 className="text-3xl md:text-4xl font-serif font-bold text-foreground">
-          {bookName} {chapter}:{verseNumber} <span className="text-muted-foreground text-xl font-sans">({bibleVersion || "BSB"})</span>
-        </h1>
-        <div className="max-w-3xl mx-auto text-lg md:text-xl text-muted-foreground italic leading-relaxed px-4">
-          {/* This would ideally be fetched from the Bible API, but for now we show the reference */}
-          "The sacred text of the verse would be rendered here..."
-        </div>
-      </section>
+    <div className="w-full mx-auto py-8 px-4">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        {/* Left column: meta + actions */}
+        <aside className="lg:col-span-1">
+          <div className="sticky top-6 space-y-4">
+            <Card className="overflow-visible">
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <BookOpen className="w-5 h-5 text-primary" />
+                  <CardTitle className="text-sm">Reference</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <div className="text-lg font-bold">
+                    {bookName} {chapter}:{verseNumber}
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    {bibleVersion || "BSB"}
+                  </div>
+                  <div className="mt-2 flex items-center gap-2">
+                    <Badge variant={isPublished ? "default" : "secondary"}>
+                      {isPublished ? "Published" : "Draft"}
+                    </Badge>
+                    <Badge variant="outline" className="text-xs font-mono">
+                      ID: {item.id}
+                    </Badge>
+                  </div>
 
-      <Separator />
+                  <Separator className="my-3" />
 
-      {/* SECTION 2: Explanation & Application */}
-      <section className="space-y-8">
-        <div className="flex items-center gap-2 text-primary font-bold text-xl">
-          <Lightbulb className="w-6 h-6" />
-          <h2>Theological Explanation</h2>
-        </div>
-        
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-4">
-            <div className="prose prose-stone dark:prose-invert max-w-none text-foreground/90 leading-relaxed text-lg">
-              {exegesis?.explanationText?.split('\n').map((para, i) => (
-                <p key={i} className="mb-4">{para}</p>
-              ))}
+                  <div className="flex flex-col gap-2">
+                    <Button
+                      variant="secondary"
+                      onClick={() =>
+                        (window.location.href = `/admin/edit-verse-explanation/${encodeURIComponent(bookName)}/${chapter}/${verseNumber}`)
+                      }
+                    >
+                      <Edit2 className="w-4 h-4 mr-2" /> Edit
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      onClick={() =>
+                        navigator.clipboard?.writeText(
+                          `${bookName} ${chapter}:${verseNumber} — ${bibleVersion || "BSB"}`,
+                        )
+                      }
+                    >
+                      Copy reference
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Globe className="w-4 h-4 text-primary" />
+                  <CardTitle className="text-sm">Study Info</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-sm text-foreground/90 leading-relaxed">
+                  <p>
+                    <strong>Introduction:</strong>
+                  </p>
+                  <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
+                    {studyMetadata?.introduction || "—"}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Tag className="w-4 h-4 text-primary" />
+                  <CardTitle className="text-sm">Themes</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap gap-2">
+                  {themes && themes.length > 0 ? (
+                    themes.map((t: any, i: number) => (
+                      <Badge
+                        key={i}
+                        variant="secondary"
+                        className="px-2 py-0.5 text-xs"
+                      >
+                        {t.themeName}
+                      </Badge>
+                    ))
+                  ) : (
+                    <div className="text-sm text-muted-foreground">
+                      No themes
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </aside>
+
+        {/* Right column: main content stacked vertically */}
+        <main className="lg:col-span-3 space-y-6">
+          {/* Header */}
+          <div className="bg-card p-6 rounded-xl border">
+            <div className="flex items-start justify-between gap-6">
+              <div>
+                <h1 className="text-2xl md:text-3xl font-serif font-bold">
+                  {bookName} {chapter}:{verseNumber}
+                </h1>
+                <div className="text-sm text-muted-foreground">
+                  {bibleVersion || "BSB"}
+                </div>
+                {item.verseText && (
+                  <blockquote className="mt-3 italic text-foreground/80 border-l-2 border-primary/30 pl-4 text-base leading-7 md:max-w-2xl">
+                    “{item.verseText}”
+                  </blockquote>
+                )}
+              </div>
+              <div className="flex items-start gap-3">
+                <Button
+                  onClick={() =>
+                    window.scrollTo({ top: 0, behavior: "smooth" })
+                  }
+                  variant="outline"
+                >
+                  Top
+                </Button>
+                <Button
+                  onClick={() =>
+                    (window.location.href = `/admin/edit-verse-explanation/${encodeURIComponent(bookName)}/${chapter}/${verseNumber}`)
+                  }
+                >
+                  <Edit2 className="w-4 h-4 mr-2" /> Edit
+                </Button>
+              </div>
             </div>
           </div>
-          
-          <Card className="bg-primary/5 border-primary/20">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-bold uppercase tracking-tight text-primary flex items-center gap-2">
-                <Target className="w-4 h-4" /> Practical Application
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm leading-relaxed text-foreground/80 italic">
-                {exegesis?.applicationText || "No application provided for this verse."}
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-      </section>
 
-      <Separator />
-
-      {/* SECTION 3: Learn More */}
-      <section className="space-y-12">
-        <div className="flex items-center gap-2 text-primary font-bold text-xl">
-          <BookOpen className="w-6 h-6" />
-          <h2>Study Guide</h2>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Introduction & Background */}
-          <div className="space-y-6">
-            <div className="space-y-2">
-              <h3 className="text-sm font-bold uppercase text-muted-foreground tracking-wider">Verse Introduction</h3>
-              <p className="text-foreground/80 leading-relaxed">{studyMetadata?.introduction || "No introduction available."}</p>
-            </div>
-            
-            <div className="p-4 rounded-2xl bg-muted/50 border space-y-3">
-              <div className="flex justify-between items-center border-b pb-2">
-                <span className="text-xs font-bold uppercase text-muted-foreground">Contextual Background</span>
+          {/* Theological Explanation */}
+          <article className="bg-white dark:bg-slate-900 shadow-sm rounded-xl border overflow-hidden">
+            <div className="p-6">
+              <div className="flex items-center gap-3 mb-3">
+                <Lightbulb className="w-5 h-5 text-primary" />
+                <h2 className="text-lg font-semibold">
+                  Theological Explanation
+                </h2>
               </div>
-              <div className="space-y-2 text-sm">
-                <p><span className="font-bold">Author:</span> {studyMetadata?.backgroundAuthor || "Unknown"}</p>
-                <p><span className="font-bold">Book:</span> {studyMetadata?.backgroundBook || "Unknown"}</p>
-                <p><span className="font-bold">Context:</span> {studyMetadata?.backgroundContext || "Unknown"}</p>
+
+              <div className="prose prose-stone dark:prose-invert max-w-none text-base text-foreground/90 leading-7 space-y-4 prose-p:my-0 prose-headings:scroll-mt-4">
+                {exegesis?.explanationText
+                  ?.split("\n")
+                  .map((p: string, i: number) => (
+                    <p key={i}>{p}</p>
+                  ))}
+              </div>
+
+              <div className="mt-8">
+                <h3 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wide">
+                  Application
+                </h3>
+                <div className="p-5 rounded-lg bg-primary/5 border border-primary/10 text-base italic text-foreground/80 leading-7">
+                  {exegesis?.applicationText || "No application provided."}
+                </div>
               </div>
             </div>
-          </div>
+          </article>
 
           {/* Word Studies */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-bold uppercase text-muted-foreground tracking-wider">Strong Concordance Word Study</h3>
-            <div className="space-y-3">
-              {wordStudies && wordStudies.length > 0 ? (
-                wordStudies.map((ws, i) => (
-                  <div key={i} className="p-3 rounded-xl border bg-card shadow-sm hover:border-primary/30 transition-colors">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="font-bold text-foreground">{ws.surfaceText}</span>
-                      <Badge variant="outline" className="text-[10px] font-mono">{ws.strongsId}</Badge>
+          <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-card rounded-xl border p-4">
+              <h3 className="text-sm font-semibold mb-3 uppercase tracking-wide">
+                Strong's Word Studies
+              </h3>
+              <div className="space-y-3">
+                {wordStudies && wordStudies.length > 0 ? (
+                  wordStudies.map((ws: any, i: number) => (
+                    <div
+                      key={i}
+                      className="p-3.5 rounded-md border bg-background"
+                    >
+                      <div className="flex items-center justify-between mb-1.5">
+                        <div className="font-semibold">{ws.surfaceText}</div>
+                        <Badge
+                          variant="outline"
+                          className="text-[10px] font-mono"
+                        >
+                          {ws.strongsId}
+                        </Badge>
+                      </div>
+                      <div className="text-sm text-muted-foreground leading-relaxed">
+                        {ws.customDefinition || "—"}
+                      </div>
                     </div>
-                    <p className="text-xs text-muted-foreground leading-relaxed">
-                      {ws.customDefinition || "No specific definition provided."}
-                    </p>
+                  ))
+                ) : (
+                  <div className="text-sm text-muted-foreground italic">
+                    No word studies.
                   </div>
-                ))
-              ) : (
-                <p className="text-xs text-muted-foreground italic">No word studies available.</p>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Applications & Themes */}
-          <div className="space-y-6">
-            <div className="space-y-4">
-              <h3 className="text-sm font-bold uppercase text-muted-foreground tracking-wider flex items-center gap-2">
-                <Target className="w-4 h-4" /> Practical Applications
-              </h3>
-              <ul className="space-y-3">
-                {practicalApps && practicalApps.length > 0 ? (
-                  practicalApps.map((pa, i) => (
-                    <li key={i} className="flex gap-3 text-sm text-foreground/80 leading-relaxed">
-                      <span className="font-bold text-primary">{i + 1}.</span>
-                      {pa.applicationText}
-                    </li>
-                  ))
-                ) : (
-                  <p className="text-xs text-muted-foreground italic">No applications listed.</p>
-                )}
-              </ul>
-            </div>
-
-            <div className="space-y-4">
-              <h3 className="text-sm font-bold uppercase text-muted-foreground tracking-wider flex items-center gap-2">
-                <Tag className="w-4 h-4" /> Key Themes
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {themes && themes.length > 0 ? (
-                  themes.map((t, i) => (
-                    <Badge key={i} variant="secondary" className="px-2 py-0.5 text-xs font-medium">
-                      {t.themeName}
-                    </Badge>
-                  ))
-                ) : (
-                  <p className="text-xs text-muted-foreground italic">No themes listed.</p>
                 )}
               </div>
             </div>
-          </div>
 
-          {/* Cross References */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-bold uppercase text-muted-foreground tracking-wider flex items-center gap-2">
-              <LinkIcon className="w-4 h-4" /> Cross References
-            </h3>
-            <div className="space-y-4">
-              {crossReferences && crossReferences.length > 0 ? (
-                crossReferences.map((cr, i) => (
-                  <div key={i} className="p-3 rounded-xl border bg-muted/20">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs font-bold text-primary">{cr.bookName} {cr.chapter}:{cr.verseNumber}</span>
+            <div className="bg-card rounded-xl border p-4">
+              <h3 className="text-sm font-semibold mb-3 uppercase tracking-wide">Cross References</h3>
+              <div className="space-y-3">
+                {crossReferences && crossReferences.length > 0 ? (
+                  crossReferences.map((cr: any, i: number) => (
+                    <div key={i} className="p-3.5 rounded-md border bg-muted/10">
+                      <div className="text-xs font-semibold text-primary mb-1">
+                        {cr.bookName} {cr.chapter}:{cr.verseNumber}
+                      </div>
+                      <div className="text-sm italic text-foreground/70 leading-relaxed">
+                        {cr.referenceText}
+                      </div>
+                      <div className="text-sm text-muted-foreground mt-1.5 leading-relaxed">
+                        {cr.commentary}
+                      </div>
                     </div>
-                    <p className="text-xs italic text-foreground/70 mb-2 leading-relaxed">
-                      "{cr.referenceText}"
-                    </p>
-                    <p className="text-xs text-muted-foreground leading-relaxed">
-                      {cr.commentary}
-                    </p>
+                  ))
+                ) : (
+                  <div className="text-sm text-muted-foreground italic">
+                    No cross references.
                   </div>
-                ))
-              ) : (
-                <p className="text-xs text-muted-foreground italic">No cross references available.</p>
-              )}
+                )}
+              </div>
             </div>
-          </div>
-        </div>
+          </section>
 
-        <div className="p-6 rounded-2xl bg-primary/5 border border-primary/10 space-y-4">
-          <h3 className="text-sm font-bold uppercase text-primary tracking-wider text-center">Final Thoughts</h3>
-          <p className="text-center text-foreground/80 leading-relaxed italic max-w-2xl mx-auto">
-            {studyMetadata?.finalThoughts || "No final thoughts provided."}
-          </p>
-        </div>
-      </section>
+          {/* Practical Apps & Takeaways */}
+          <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-card rounded-xl border p-4">
+              <h3 className="text-sm font-semibold mb-3 uppercase tracking-wide">
+                Practical Applications
+              </h3>
+              <ol className="list-decimal list-inside space-y-2.5 text-sm text-foreground/90 leading-relaxed">
+                {practicalApps && practicalApps.length > 0 ? (
+                  practicalApps.map((pa: any, i: number) => (
+                    <li key={i}>{pa.applicationText}</li>
+                  ))
+                ) : (
+                  <li className="italic text-muted-foreground">
+                    No applications listed.
+                  </li>
+                )}
+              </ol>
+            </div>
+
+            <div className="bg-primary/5 rounded-xl border p-4">
+              <h3 className="text-sm font-semibold mb-3 uppercase tracking-wide">
+                Final Thoughts & Takeaways
+              </h3>
+              <div className="text-sm text-foreground/80 italic leading-relaxed mb-4">
+                {studyMetadata?.finalThoughts || "—"}
+              </div>
+              <ol className="list-decimal list-inside space-y-2.5 text-sm text-foreground/90 leading-relaxed">
+                {(
+                  item.takeaways ||
+                  (studyMetadata?.takeaways as string[]) ||
+                  []
+                ).length > 0 ? (
+                  (
+                    item.takeaways ||
+                    (studyMetadata?.takeaways as string[]) ||
+                    []
+                  ).map((t: string, i: number) => <li key={i}>{t}</li>)
+                ) : (
+                  <>
+                    <li>Remember God’s faithfulness and give thanks.</li>
+                    <li>Call upon the LORD with dependence and prayer.</li>
+                    <li>Make God’s deeds known through faithful witness.</li>
+                  </>
+                )}
+              </ol>
+            </div>
+          </section>
+        </main>
+      </div>
     </div>
   );
 }

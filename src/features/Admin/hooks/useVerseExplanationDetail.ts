@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { sendPostRequest } from "@/services/api";
+import { bibleApi } from "@/services/bibleApi";
 
 export interface VerseExplanationDetail {
   id: number;
@@ -25,6 +26,8 @@ export interface VerseExplanationDetail {
   practicalApps: { applicationText: string; sortOrder: number }[];
   crossReferences: { bookName: string; chapter: number; verseNumber: number; referenceText: string; commentary: string; sortOrder: number }[];
   themes: { themeName: string; sortOrder: number }[];
+  // optional local-only property with fetched verse text
+  verseText?: string;
 }
 
 export function useVerseExplanationDetail() {
@@ -40,25 +43,43 @@ export function useVerseExplanationDetail() {
 
   useEffect(() => {
     if (!bookName || !chapter || !verseNumber) return;
+    let active = true;
     setLoading(true);
     sendPostRequest("bible", "get-verse-explanation", {
       bookName: decodeURIComponent(bookName),
       chapter: Number(chapter),
       verseNumber: Number(verseNumber),
     })
-      .then((res) => {
+      .then(async (res) => {
+        if (!active) return;
         if (res?.returnCode === 200 && res.returnData) {
-          setItem(res.returnData);
+          const d = res.returnData as VerseExplanationDetail;
+          setItem(d);
+
+          // attempt to fetch the verse text for a richer UI — fall back silently on failure
+          try {
+            const version = d.bibleVersion || "BSB";
+            const verse = await bibleApi.getVerse(version, d.bookName, d.chapter, d.verseNumber);
+            if (!active) return;
+            setItem((prev) => (prev ? { ...prev, verseText: verse?.text || "" } : prev));
+          } catch {
+            // ignore verse fetch errors
+          }
         } else {
           toast({ title: "Not found", variant: "destructive" });
           navigate("/admin/verse-explanations");
         }
       })
       .catch(() => {
+        if (!active) return;
         toast({ title: "Failed to load", variant: "destructive" });
         navigate("/admin/verse-explanations");
       })
-      .finally(() => setLoading(false));
+      .finally(() => active && setLoading(false));
+
+    return () => {
+      active = false;
+    };
   }, [bookName, chapter, verseNumber, toast, navigate]);
 
   const deleteItem = useCallback(async () => {

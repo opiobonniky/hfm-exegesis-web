@@ -1,7 +1,7 @@
 // DetailPageLayout — reusable wrapper for all admin detail pages
 "use client";
 
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import type { ReactNode } from "react";
@@ -32,10 +32,12 @@ export function DetailPageHeader({
   badge,
   onBack,
   actions,
-}: DetailPageHeaderProps) {
+  containerClassName,
+}: DetailPageHeaderProps & { containerClassName?: string }) {
+  const containerClass = containerClassName || 'max-w-3xl mx-auto px-3 sm:px-4 lg:px-6';
   return (
     <div className="border-b bg-card">
-      <div className="max-w-3xl mx-auto px-3 sm:px-4 lg:px-6">
+      <div className={containerClass}>
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center gap-3">
             <Button variant="ghost" size="icon" onClick={onBack}>
@@ -63,9 +65,10 @@ export function DetailPageHeader({
 }
 
 /* ─── Content container ─── */
-export function DetailContent({ children }: { children: ReactNode }) {
+export function DetailContent({ children, className = "" }: { children: ReactNode; className?: string }) {
+  const base = className || 'max-w-3xl mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6';
   return (
-    <div className="max-w-3xl mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6">
+    <div className={base}>
       {children}
     </div>
   );
@@ -89,5 +92,20 @@ export function DetailBackButton({
         <ArrowLeft className="w-4 h-4" /> {label}
       </Button>
     </div>
+  );
+}
+
+/* ─── Edit button (header action) ─── */
+export function DetailEditButton({
+  label = "Edit",
+  onClick,
+}: {
+  label?: string;
+  onClick: () => void;
+}) {
+  return (
+    <Button variant="outline" size="sm" onClick={onClick} className="gap-1.5">
+      <Pencil className="w-3.5 h-3.5" /> {label}
+    </Button>
   );
 }

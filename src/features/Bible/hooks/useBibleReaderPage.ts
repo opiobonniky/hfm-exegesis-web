@@ -8,6 +8,7 @@ import {
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { toast } from "@/components/ui/sonner";
+import { API_BASE_URL } from "@/services/api";
 import { useAudioPlayer } from "@/hooks/useAudioPlayer";
 import { BIBLE_BOOKS } from "../constants";
 import { useBibleReader } from "./useBibleReader";
@@ -684,6 +685,8 @@ export function useBibleReaderPage() {
   const hasSelection = reader.selectedVerses.length > 0;
 
   return {
+    apiBaseUrl: API_BASE_URL,
+
     // ── Layout ──────────────────────────────────────────────────────────
     layout: {
       dir: isRtl ? ("rtl" as const) : ("ltr" as const),

@@ -5,6 +5,8 @@ export interface Translation {
   name: string;
   shortName: string;
   year?: string | null;
+  language?: string | null;
+  languageName?: string | null;
   description: string | null;
   copyright: string | null;
   link: string | null;
@@ -77,8 +79,9 @@ export interface ChapterVerseData {
 const BASE_URL = "/translations";
 
 export const bibleApi = {
-  getTranslations: async (): Promise<Translation[]> => {
-    const response = await api.post(`${BASE_URL}/`);
+  getTranslations: async (language?: string): Promise<Translation[]> => {
+    const langParam = language ? `?language=${encodeURIComponent(language)}` : '';
+    const response = await api.get(`${BASE_URL}/catalog${langParam}`);
     if (response.data.success) {
       return response.data.data;
     }

@@ -1,5 +1,5 @@
 // SubscriptionTierCard — tier list item for subscription management
-import { Edit2, Trash2 } from "lucide-react";
+import { Edit2, Trash2, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -11,11 +11,12 @@ interface Props {
   description: string | null;
   features: string[];
   isActive: boolean;
+  memberCount?: number;
   onEdit: () => void;
   onDelete: () => void;
 }
 
-export function SubscriptionTierCard({ name, price, interval, description, features, isActive, onEdit, onDelete }: Props) {
+export function SubscriptionTierCard({ name, price, interval, description, features, isActive, memberCount, onEdit, onDelete }: Props) {
   return (
     <div className="p-4 hover:bg-muted/20 transition-colors">
       <div className="flex items-start justify-between gap-3">
@@ -29,6 +30,12 @@ export function SubscriptionTierCard({ name, price, interval, description, featu
             )}
           </div>
           <p className="text-sm font-bold text-primary">${price}/{interval === "none" ? "free" : interval}</p>
+          {typeof memberCount === "number" && (
+            <div className="flex items-center gap-1 mt-0.5 text-xs text-muted-foreground">
+              <Users className="w-3.5 h-3.5" />
+              {memberCount} member{memberCount === 1 ? "" : "s"}
+            </div>
+          )}
           {description && <p className="text-xs text-muted-foreground mt-0.5">{description}</p>}
           {features.length > 0 && (
             <div className="flex flex-wrap gap-1 mt-1.5">

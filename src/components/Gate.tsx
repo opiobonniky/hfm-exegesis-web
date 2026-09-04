@@ -1,10 +1,17 @@
 // ── Gate ──────────────────────────────────────────────────────────────────────
 // Wraps children behind a subscription tier check. If the user's tier meets the
-// requirement, children render normally. Otherwise, a LockedFeatureBadge is
-// shown (upsell prompt to upgrade).
+// requirement (and is not expired), children render normally. Otherwise, the
+// user is automatically redirected to the /sower subscription page. While the
+// subscription status is still loading a loading state is shown (never a blank
+// screen), and a LockedFeatureBadge is rendered as an immediate fallback while
+// the redirect resolves.
 
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useSubscription, formatTierLabel } from "@/hooks/useSubscription";
 import LockedFeatureBadge from "./LockedFeatureBadge";
+import { LoadingState } from "@/components/ui/LoadingState";
+import { routes } from "@/components/Routes/routes";
 
 export interface GateProps {
   children: React.ReactNode;
@@ -28,8 +35,19 @@ export function Gate({
   className,
   showChildrenWhenLocked = false,
 }: GateProps) {
-  const { hasAccess } = useSubscription();
+  const { hasAccess, subscriptionLoading } = useSubscription();
+  const navigate = useNavigate();
   const userHasAccess = hasAccess(tier);
+
+  // Automatically redirect the user to the subscription page when they have no
+  // subscription or their subscription has expired. Wait for the subscription
+  // status to load first so we don't redirect paying users before it resolves.
+  useEffect(() => {
+    if (subscriptionLoading) return;
+    if (userHasAccess) return;
+    if (showChildrenWhenLocked) return;
+    navigate(routes.sower.path, { replace: true });
+  }, [subscriptionLoading, userHasAccess, showChildrenWhenLocked, navigate]);
 
   if (userHasAccess) return <>{children}</>;
   if (showChildrenWhenLocked) return <>{children}</>;
@@ -38,6 +56,12 @@ export function Gate({
     legacy_sower: "Legacy Sower Feature",
     covenant_sower: "Covenant Sower Feature",
   };
+
+  // While the subscription status is loading, keep showing a spinner rather
+  // than a blank screen or a premature redirect.
+  if (subscriptionLoading) {
+    return <LoadingState />;
+  }
 
   return (
     <LockedFeatureBadge

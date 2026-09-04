@@ -66,7 +66,7 @@ const adminNavItems: NavItem[] = [
 
   {
     title: "sidebar.explanations",
-    url: routes.verseExplanations.path,
+    url: routes.adminVerseExplanations.path,
     icon: BookMarked,
   },
   {
@@ -108,7 +108,11 @@ const userNavItems: NavItem[] = [
     icon: SproutIcon,
   },
   { title: "sidebar.readingPlans", url: routes.userPlans.path, icon: BookOpen },
-  { title: "sidebar.highlights", url: routes.highlights.path, icon: Highlighter },
+  {
+    title: "sidebar.highlights",
+    url: routes.highlights.path,
+    icon: Highlighter,
+  },
   { title: "sidebar.notes", url: routes.notes.path, icon: FileText },
   { title: "sidebar.favorites", url: routes.favorites.path, icon: Star },
   { title: "sidebar.history", url: routes.history.path, icon: Clock },

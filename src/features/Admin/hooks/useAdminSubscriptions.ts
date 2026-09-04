@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { sendPostRequest } from "@/services/api";
-import type { SubscriptionTier, SubscribedUser } from "../types";
+import type { SubscriptionTier, SubscribedUser, SubscriptionsSummary } from "../types";
 
 export function useAdminSubscriptions() {
   const { toast } = useToast();
@@ -11,7 +11,7 @@ export function useAdminSubscriptions() {
   const [tiers, setTiers] = useState<SubscriptionTier[]>([]);
   const [tiersLoading, setTiersLoading] = useState(true);
   const [tierDialog, setTierDialog] = useState(false);
-  const [tierForm, setTierForm] = useState<any>({});
+  const [tierForm, setTierForm] = useState<Record<string, unknown>>({});
   const [tierSaving, setTierSaving] = useState(false);
   const [deleteTier, setDeleteTier] = useState<string | null>(null);
   const [seeding, setSeeding] = useState(false);
@@ -19,8 +19,13 @@ export function useAdminSubscriptions() {
   const [subscribers, setSubscribers] = useState<SubscribedUser[]>([]);
   const [subsLoading, setSubsLoading] = useState(false);
   const [syncing, setSyncing] = useState(false);
+  const [summary, setSummary] = useState<SubscriptionsSummary | null>(null);
   const [suspendDialog, setSuspendDialog] = useState<SubscribedUser | null>(null);
   const [suspendLoading, setSuspendLoading] = useState(false);
+  const [manageDialog, setManageDialog] = useState<SubscribedUser | null>(null);
+  const [manageLoading, setManageLoading] = useState(false);
+  const [refundDialog, setRefundDialog] = useState<SubscribedUser | null>(null);
+  const [refundLoading, setRefundLoading] = useState(false);
 
   const loadTiers = useCallback(async () => {
     setTiersLoading(true);
@@ -35,7 +40,10 @@ export function useAdminSubscriptions() {
     setSubsLoading(true);
     try {
       const res = await sendPostRequest("admin", "get-subscriptions-users", {});
-      if (res?.returnCode === 200 && res?.returnData?.subscribedUsers) setSubscribers(res.returnData.subscribedUsers);
+      if (res?.returnCode === 200) {
+        if (res?.returnData?.subscribedUsers) setSubscribers(res.returnData.subscribedUsers);
+        if (res?.returnData?.summary) setSummary(res.returnData.summary);
+      }
     } catch { toast({ title: "Failed to load subscribers", variant: "destructive" }); }
     finally { setSubsLoading(false); }
   }, [toast]);
@@ -50,6 +58,7 @@ export function useAdminSubscriptions() {
 
   const openEditTier = useCallback((tier: SubscriptionTier) => {
     setTierForm({ ...tier, features: Array.isArray(tier.features) ? tier.features.join("\n") : "" });
+    setTierDialog(true);
   }, []);
 
   const saveTier = useCallback(async () => {
@@ -102,12 +111,39 @@ export function useAdminSubscriptions() {
     finally { setSuspendLoading(false); }
   }, [suspendDialog, toast, loadSubscribers]);
 
+  const saveManage = useCallback(async (data: { subscriptionTier: string; accessExpiresAt?: string | null }) => {
+    if (!manageDialog) return;
+    setManageLoading(true);
+    try {
+      const res = await sendPostRequest("admin", "subscriptions/update-user", {
+        userId: manageDialog.id,
+        ...data,
+      });
+      if (res?.returnCode === 200) { toast({ title: "Subscription updated" }); setManageDialog(null); loadSubscribers(); }
+      else { toast({ title: "Update failed", description: res?.returnMessage, variant: "destructive" }); }
+    } catch { toast({ title: "Error updating subscription", variant: "destructive" }); }
+    finally { setManageLoading(false); }
+  }, [manageDialog, toast, loadSubscribers]);
+
+  const confirmRefund = useCallback(async (reason: string) => {
+    if (!refundDialog) return;
+    setRefundLoading(true);
+    try {
+      const res = await sendPostRequest("admin", "subscriptions/refund", { userId: refundDialog.id, reason });
+      if (res?.returnCode === 200) { toast({ title: "Refund processed", description: "Subscription cancelled" }); setRefundDialog(null); loadSubscribers(); }
+      else { toast({ title: "Refund failed", description: res?.returnMessage, variant: "destructive" }); }
+    } catch { toast({ title: "Error processing refund", variant: "destructive" }); }
+    finally { setRefundLoading(false); }
+  }, [refundDialog, toast, loadSubscribers]);
+
   return {
     activeTab, setActiveTab, tiers, tiersLoading, tierDialog, setTierDialog, tierForm, setTierForm,
-    tierSaving, deleteTier, setDeleteTier, seeding, subscribers, subsLoading, syncing,
+    tierSaving, deleteTier, setDeleteTier, seeding, subscribers, subsLoading, syncing, summary,
     suspendDialog, setSuspendDialog, suspendLoading,
+    manageDialog, setManageDialog, manageLoading, saveManage,
+    refundDialog, setRefundDialog, refundLoading, confirmRefund,
     openCreateTier, openEditTier, saveTier, confirmDeleteTier, handleSeed, handleSyncStripe, toggleSuspend,
     data: { tiers, subscribers },
-    actions: { loadTiers, loadSubscribers, openCreateTier, openEditTier, saveTier, confirmDeleteTier, handleSeed, handleSyncStripe, toggleSuspend },
+    actions: { loadTiers, loadSubscribers, openCreateTier, openEditTier, saveTier, confirmDeleteTier, handleSeed, handleSyncStripe, toggleSuspend, saveManage, confirmRefund },
   };
 }

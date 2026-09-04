@@ -7,10 +7,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Combobox } from "@/components/ui/combobox";
 import { BIBLE_VERSIONS } from "@/assets/bibleVersion/json/bibleVersions";
-import {
-  getVerseText, getBooksByTestament, getChaptersForBook,
-  getVersesCountForChapter, setActiveVersion,
-} from "@/utilities/bibleUtils";
+import { getBooksByTestament, getChaptersForBook } from "@/utilities/bibleUtils";
+import { bibleApi } from "@/services/bibleApi";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { TESTAMENTS } from "../constants";
 import type { EditState } from "../types";
@@ -46,18 +44,42 @@ export default function EditVerseDialog({
     [localState.book],
   );
 
-  const maxVerses = useMemo(
-    () => (!localState.book || !localState.chapter)
-      ? 0
-      : getVersesCountForChapter(localState.book, Number(localState.chapter)) || 0,
-    [localState.book, localState.chapter],
-  );
+  const [verseCount, setVerseCount] = useState(0);
+  const [chapterVerses, setChapterVerses] = useState<Record<number, string>>({});
+  useEffect(() => {
+    let active = true;
+    if (!localState.book || !localState.chapter) {
+      setVerseCount(0);
+      setChapterVerses({});
+      return;
+    }
+    bibleApi
+      .getVerses(localState.bibleVersion || "BSB", localState.book, Number(localState.chapter))
+      .then((vd) => {
+        if (!active) return;
+        const verses = vd?.verses || [];
+        const map: Record<number, string> = {};
+        verses.forEach((v) => {
+          map[v.verseNumber] = v.text;
+        });
+        setChapterVerses(map);
+        setVerseCount(verses.length);
+      })
+      .catch(() => {
+        if (!active) return;
+        setVerseCount(0);
+        setChapterVerses({});
+      });
+    return () => {
+      active = false;
+    };
+  }, [localState.book, localState.chapter, localState.bibleVersion]);
+  const maxVerses = verseCount;
 
   const verseTextValue = useMemo(() => {
     if (!localState.bookName || !localState.chapter || !localState.verseNumber) return "";
-    if (localState.bibleVersion) setActiveVersion(localState.bibleVersion);
-    return getVerseText(localState.bookName, Number(localState.chapter), Number(localState.verseNumber)) || "";
-  }, [localState.bookName, localState.chapter, localState.verseNumber, localState.bibleVersion]);
+    return chapterVerses[Number(localState.verseNumber)] || "";
+  }, [localState.bookName, localState.chapter, localState.verseNumber, chapterVerses]);
 
   useEffect(() => { onVerseTextChange(verseTextValue); }, [verseTextValue, onVerseTextChange]);
 

@@ -29,7 +29,7 @@ interface AudioProps {
 
 /* ─── Translation Props ──────────────────────────────────────────────────── */
 interface TranslationProps {
-  translations: { id: string; name: string }[];
+  translations: { id: string; name: string; language?: string }[];
   selectedId: string;
   onSelect: (id: string) => void;
   open: boolean;

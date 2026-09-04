@@ -118,6 +118,23 @@ export const isFormValid = (type: ContentType, form: any): boolean => {
 export const dateToTimeString = (date: Date): string =>
   `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
 
+const READABLE_MONTHS = [
+  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  "Jul", "Aug", "Sept", "Oct", "Nov", "Dec",
+];
+
+export const formatReadableDate = (
+  input: string | Date | null | undefined,
+): string => {
+  if (!input) return "—";
+  const d = new Date(input);
+  if (isNaN(d.getTime())) return "—";
+  const month = READABLE_MONTHS[d.getMonth()];
+  const day = d.getDate();
+  const year = d.getFullYear();
+  return `${month} ${day}, ${year}`;
+};
+
 export const applyTimeToDate = (date: Date, time: string): Date => {
   const [hours, minutes] = time.split(":").map(Number);
   if (isNaN(hours) || isNaN(minutes)) return date;

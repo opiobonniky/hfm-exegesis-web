@@ -3,9 +3,21 @@ import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { bibleApi, mapTranslationId } from "@/services/bibleApi";
+import { API_BASE_URL } from "@/services/api";
 import { routes } from "@/components/Routes/routes";
+import { BIBLE_BOOKS } from "../constants";
 
 import type { LibraryBookInfo, CovenantFilter } from "../types";
+
+// Local 66-book fallback so the Library never renders empty if the backend is
+// unreachable / misconfigured (e.g. wrong base URL pointing at production).
+const LOCAL_BOOKS: LibraryBookInfo[] = BIBLE_BOOKS.map((entry) => ({
+  bookNumber: entry.bookNumber,
+  bookName: entry.bookName,
+  testament: entry.bookNumber <= 39 ? "Old" : "New",
+  chaptersCount: entry.maxChapter,
+  totalVerses: 0,
+}));
 const OT_ORDER = ["Genesis","Exodus","Leviticus","Numbers","Deuteronomy","Joshua","Judges","Ruth","1 Samuel","2 Samuel","1 Kings","2 Kings","1 Chronicles","2 Chronicles","Ezra","Nehemiah","Esther","Job","Psalms","Proverbs","Ecclesiastes","Song of Solomon","Isaiah","Jeremiah","Lamentations","Ezekiel","Daniel","Hosea","Joel","Amos","Obadiah","Jonah","Micah","Nahum","Habakkuk","Zephaniah","Haggai","Zechariah","Malachi"];
 const NT_ORDER = ["Matthew","Mark","Luke","John","Acts","Romans","1 Corinthians","2 Corinthians","Galatians","Ephesians","Philippians","Colossians","1 Thessalonians","2 Thessalonians","1 Timothy","2 Timothy","Titus","Philemon","Hebrews","James","1 Peter","2 Peter","1 John","2 John","3 John","Jude","Revelation"];
 export function useBibleLibrary() {
@@ -14,6 +26,7 @@ export function useBibleLibrary() {
   const searchRef = useRef<HTMLInputElement>(null);
   const [books, setBooks] = useState<LibraryBookInfo[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [covenant, setCovenant] = useState<CovenantFilter>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedBook, setExpandedBook] = useState<string | null>(null);
@@ -28,7 +41,16 @@ export function useBibleLibrary() {
           if (ani !== -1 && bni !== -1) return ani - bni;
           return ai !== -1 ? -1 : bni !== -1 ? 1 : a.bookName.localeCompare(b.bookName);
         }));
-      } catch (e) { console.error(e); } finally { setLoading(false); }
+        setLoadError(null);
+      } catch (e) {
+        console.error(e);
+        // Backend unreachable — fall back to the canonical 66-book list so the
+        // Library stays usable and the OT/NT tabs still work.
+        setBooks(LOCAL_BOOKS);
+        setLoadError(
+          `Unable to reach the Bible server. Showing the standard 66-book list (${API_BASE_URL}).`,
+        );
+      } finally { setLoading(false); }
     })();
   }, []);
   const filteredBooks = useMemo(() => {
@@ -61,6 +83,7 @@ export function useBibleLibrary() {
   return {
     isRtl, searchRef,
     books, filteredBooks, loading, stats, tabs,
+    loadError, apiBaseUrl: API_BASE_URL,
     covenant, selectCovenant,
     searchQuery, setSearchQuery, clearSearch,
     expandedBook, toggleExpand, goToChapter, goToBookOverview,

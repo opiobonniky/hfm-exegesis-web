@@ -5,6 +5,7 @@ import {
   DEFAULT_VERSION_ID,
   type BibleVersion,
 } from '../assets/bibleVersion/json/bibleVersions';
+import { BIBLE_BOOK_CHAPTERS } from '../features/Bible/constants';
 
 /* ------------------------------------------------------------------ */
 /*  Active-version cache (lazy-loaded)                                  */
@@ -270,11 +271,12 @@ export const getBooksByTestament = (
 export const getChaptersForBook = (book: string): number[] => {
   if (!book) return [];
 
-  const allBooks = getBibleBooks();
-  const found = allBooks.find((b) => b.name === book);
-  if (!found) return [];
+  // Use the static per-book chapter counts so chapters are available
+  // immediately, without depending on the lazily-loaded verse data.
+  const chapters = BIBLE_BOOK_CHAPTERS[book as keyof typeof BIBLE_BOOK_CHAPTERS];
+  if (!chapters) return [];
 
-  return Array.from({ length: found.chapters }, (_, i) => i + 1);
+  return Array.from({ length: chapters }, (_, i) => i + 1);
 };
 
 export const getVersesCountForChapter = (

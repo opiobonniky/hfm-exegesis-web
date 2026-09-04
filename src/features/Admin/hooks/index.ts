@@ -11,5 +11,6 @@ export { useAdminJournalModeration } from "./useAdminJournalModeration";
 export { useAdminReadingPlans } from "./useAdminReadingPlans";
 export { useVerseExplanationDetail } from "./useVerseExplanationDetail";
 export { useBookPrologueDetail } from "./useBookPrologueDetail";
+export { useAddBookPrologue } from "./useAddBookPrologue";
 export { useJournalEntryAdminDetail } from "./useJournalEntryAdminDetail";
 export { useAdminReadingPlanDetail } from "./useAdminReadingPlanDetail";

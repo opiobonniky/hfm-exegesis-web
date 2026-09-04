@@ -51,6 +51,7 @@ const AdminDailyContent = lazy(() => import("@/features/Admin/pages/AdminDailyCo
 const AdminSubscriptions = lazy(() => import("@/features/Admin/pages/AdminSubscriptions"));
 
 const AdminBookPrologues = lazy(() => import("@/features/Admin/pages/AdminBookPrologues"));
+const AddBookPrologue = lazy(() => import("@/features/Admin/pages/AddBookPrologue"));
 const AdminVerseExplanations = lazy(() => import("@/features/Admin/pages/AdminVerseExplanations"));
 const AdminTriviaPerformance = lazy(() => import("@/features/Admin/pages/AdminTriviaPerformance"));
 const DailyVerseDetail = lazy(() => import("@/features/DailyContent/pages/DailyVerseDetail"));
@@ -471,6 +472,20 @@ export const routes = {
     isProtected: true,
     requiresLayout: true,
     title: "Book Prologues Manager",
+  },
+  addBookPrologue: {
+    path: "/admin/add-book-prologue",
+    component: AddBookPrologue,
+    isProtected: true,
+    requiresLayout: true,
+    title: "Add Book Prologue",
+  },
+  editBookPrologue: {
+    path: "/admin/edit-book-prologue/:bookName",
+    component: AddBookPrologue,
+    isProtected: true,
+    requiresLayout: true,
+    title: "Edit Book Prologue",
   },
   bookPrologueDetail: {
     path: "/admin/book-prologues/:bookName",

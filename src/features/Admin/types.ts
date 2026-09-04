@@ -96,8 +96,32 @@ export interface SubscribedUser {
   subscriptionTier: string;
   accessExpiresAt: string | null;
   isSuspended: boolean;
+  isExpired?: boolean;
+  status?: string;
   source: string;
   outOfSync: boolean;
+  createdOn?: string | null;
+  legacySowerSlot?: number | null;
+  stripeCustomerId?: string | null;
+  stripeSubscriptionId?: string | null;
+  stripeTier?: string | null;
+  stripeStatus?: string | null;
+  stripeCurrentPeriodEnd?: string | null;
+  syncIssue?: string | null;
+}
+
+export interface SubscriptionsSummary {
+  totalInDB: number;
+  totalInStripe: number;
+  active: number;
+  suspended: number;
+  expired: number;
+  paid: number;
+  expiringSoon: number;
+  outOfSync: number;
+  stripeOnly: number;
+  autoSynced: number;
+  tierCounts?: Record<string, number>;
 }
 
 export interface ActivitySession {
@@ -235,3 +259,80 @@ export interface UserActivitySession {
   success: boolean;
   failureReason: string | null;
 }
+
+// ─── Book Prologue Editor Types ────────────────────────────────────────────────
+
+export type PrologueStepId = "basic" | "context" | "themes" | "extra";
+
+export interface PrologueStep {
+  id: PrologueStepId;
+  label: string;
+  description: string;
+}
+
+export interface PrologueEditorForm {
+  bookName: string;
+  title: string;
+  content: string;
+  author: string;
+  authorDetail: string;
+  audience: string;
+  dateWritten: string;
+  locationWritten: string;
+  purpose: string;
+  keyTheme: string;
+  summary: string;
+  background: string;
+  lessons: string;
+  chapters: string;
+  christConnection: string;
+  applications: string[];
+  keyScriptures: KeyScriptureEntry[];
+  mainThemes: string[];
+  keyPeople: string[];
+  keyVerses: string[];
+  isPublished: boolean;
+}
+
+export interface KeyScriptureEntry {
+  bookName: string;
+  chapter: number | null;
+  verse: number | null;
+  translation: string;
+  reference: string;
+  text: string;
+}
+
+/** Flat model consumed by all AddBookPrologue editor components.
+ *  Built in the page by spreading `{...data, ...actions}` from the hook. */
+export interface AddBookPrologueModel {
+  form: PrologueEditorForm;
+  isEditMode: boolean;
+  loadingExisting: boolean;
+  saving: boolean;
+  activeStep: PrologueStepId;
+  currentStepIndex: number;
+  currentStep: PrologueStepId;
+  stepOrder: readonly PrologueStepId[];
+  steps: PrologueStep[];
+  stepCompletion: Record<PrologueStepId, boolean>;
+  completionPercent: number;
+  canAdvanceFromCurrent: boolean;
+  isValid: boolean;
+  filteredBooks: string[];
+  setActiveStep: (step: PrologueStepId) => void;
+  goToStep: (step: PrologueStepId) => void;
+  goNext: () => void;
+  goPrevious: () => void;
+  updateField: <K extends keyof PrologueEditorForm>(key: K, value: PrologueEditorForm[K]) => void;
+  updateArrayItem: (field: keyof PrologueEditorForm, index: number, value: string) => void;
+  addArrayItem: (field: keyof PrologueEditorForm) => void;
+  removeArrayItem: (field: keyof PrologueEditorForm, index: number) => void;
+  removeKeyScripture: (index: number) => void;
+  addKeyScripture: () => void;
+  updateKeyScripture: (index: number, patch: Partial<KeyScriptureEntry>) => void;
+  pickVerseForKeyScripture: (index: number, verse: number) => void;
+  handleSave: () => void;
+  goBack: () => void;
+}
+
