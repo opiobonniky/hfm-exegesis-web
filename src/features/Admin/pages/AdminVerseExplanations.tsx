@@ -4,7 +4,10 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Lightbulb } from "lucide-react";
-import { useVerseExplanationList, type VerseExplanationListItem } from "../hooks/useVerseExplanationList";
+import {
+  useVerseExplanationList,
+  type VerseExplanationListItem,
+} from "../hooks/useVerseExplanationList";
 import {
   AdminPageHeader,
   AdminPageContent,
@@ -21,7 +24,8 @@ const PAGE_SIZE = 20;
 export default function AdminVerseExplanations() {
   const navigate = useNavigate();
   const h = useVerseExplanationList(PAGE_SIZE);
-  const [deleteTarget, setDeleteTarget] = useState<VerseExplanationListItem | null>(null);
+  const [deleteTarget, setDeleteTarget] =
+    useState<VerseExplanationListItem | null>(null);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
 
   // intersection observer to trigger loadMore when sentinel is visible
@@ -32,7 +36,12 @@ export default function AdminVerseExplanations() {
     const obs = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting && h.hasMore && !h.loadingMore && !h.loading) {
+          if (
+            entry.isIntersecting &&
+            h.hasMore &&
+            !h.loadingMore &&
+            !h.loading
+          ) {
             h.loadMore();
           }
         });
@@ -44,18 +53,39 @@ export default function AdminVerseExplanations() {
     return () => obs.disconnect();
   }, [sentinelRef, h.hasMore, h.loadingMore, h.loading, h.loadMore]);
 
-  // Map API items to table shape
-  const tableItems = h.data.items.map((it) => ({
-    id: it.id,
-    bookName: it.bookName,
-    chapter: it.chapter,
-    verseNumber: it.verseNumber,
-    explanation: it.exegesis?.explanationText || "",
-    learnMore: (it as any).studyMetadata?.introduction || (it as any).studyMetadata?.finalThoughts || undefined,
-    isPublished: typeof (it as any).isPublished === "boolean" ? (it as any).isPublished : true,
-    bibleVersion: it.bibleVersion || "BSB",
-    createdOn: it.createdOn,
-  }));
+  // Map API items to card shape
+  const tableItems = h.data.items.map((it) => {
+    const studyMetadata = (it as any).studyMetadata || {};
+    const takeaways = Array.isArray(studyMetadata.takeaways)
+      ? studyMetadata.takeaways.filter(
+          (item: unknown) => typeof item === "string" && item.trim(),
+        )
+      : typeof studyMetadata.takeaways === "string"
+        ? [studyMetadata.takeaways]
+        : [];
+    const learnMoreSource = [
+      studyMetadata.introduction,
+      studyMetadata.finalThoughts,
+      takeaways.join(" "),
+    ].find((value) => typeof value === "string" && value.trim());
+
+    return {
+      id: it.id,
+      bookName: it.bookName,
+      chapter: it.chapter,
+      verseNumber: it.verseNumber,
+      explanation: it.exegesis?.explanationText || "",
+      learnMore: learnMoreSource
+        ? String(learnMoreSource).replace(/\s+/g, " ").trim()
+        : undefined,
+      isPublished:
+        typeof (it as any).isPublished === "boolean"
+          ? (it as any).isPublished
+          : true,
+      bibleVersion: it.bibleVersion || "BSB",
+      createdOn: it.createdOn,
+    };
+  });
 
   return (
     <div className="min-h-screen bg-background">
@@ -69,7 +99,11 @@ export default function AdminVerseExplanations() {
       />
 
       <AdminPageContent>
-        <AdminSearchBar value={h.search} onChange={h.setSearch} placeholder="Search by book name..." />
+        <AdminSearchBar
+          value={h.search}
+          onChange={h.setSearch}
+          placeholder="Search by book name..."
+        />
 
         {h.loading && h.data.items.length === 0 ? (
           <AdminLoadingGrid />

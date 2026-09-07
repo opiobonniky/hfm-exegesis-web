@@ -22,6 +22,30 @@ interface Props {
   item: any;
 }
 
+const parseTakeaways = (value: unknown): string[] => {
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => (typeof item === "string" ? item.trim() : String(item ?? "").trim()))
+      .filter(Boolean);
+  }
+
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    if (!trimmed) return [];
+
+    try {
+      const parsed = JSON.parse(trimmed);
+      if (Array.isArray(parsed)) return parseTakeaways(parsed);
+    } catch {
+      // ignore and fall through to a single-item array
+    }
+
+    return [trimmed];
+  }
+
+  return [];
+};
+
 export function VerseExplanationDetailContent({ item }: Props) {
   if (!item) return null;
 
@@ -38,6 +62,7 @@ export function VerseExplanationDetailContent({ item }: Props) {
     crossReferences,
     themes,
   } = item;
+  const takeaways = parseTakeaways(studyMetadata?.takeaways ?? item.takeaways);
 
   // feed: holds the current explanation plus any appended explanations loaded as the user scrolls
   const [feed, setFeed] = useState<any[]>([item]);
@@ -367,16 +392,8 @@ export function VerseExplanationDetailContent({ item }: Props) {
                 {studyMetadata?.finalThoughts || "—"}
               </div>
               <ol className="list-decimal list-inside space-y-2.5 text-sm text-foreground/90 leading-relaxed">
-                {(
-                  item.takeaways ||
-                  (studyMetadata?.takeaways as string[]) ||
-                  []
-                ).length > 0 ? (
-                  (
-                    item.takeaways ||
-                    (studyMetadata?.takeaways as string[]) ||
-                    []
-                  ).map((t: string, i: number) => <li key={i}>{t}</li>)
+                {takeaways.length > 0 ? (
+                  takeaways.map((t: string, i: number) => <li key={i}>{t}</li>)
                 ) : (
                   <>
                     <li>Remember God’s faithfulness and give thanks.</li>

@@ -26,6 +26,11 @@ interface VerseExplanationTableProps {
   onDelete: (item: VerseExplanationItem) => void;
 }
 
+const summarizeText = (value?: string) => {
+  if (!value) return "—";
+  return value.replace(/\s+/g, " ").trim();
+};
+
 export function VerseExplanationTable({
   items,
   loadingMore,
@@ -40,34 +45,62 @@ export function VerseExplanationTable({
       {/* Desktop card grid */}
       <div className="hidden md:grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {items.map((item) => (
-          <div key={item.id} className="border rounded-xl p-4 bg-card flex flex-col justify-between">
+          <div
+            key={item.id}
+            className="border rounded-xl p-4 bg-card flex flex-col justify-between"
+          >
             <div>
               <div className="flex items-center justify-between gap-2">
                 <div>
-                  <div className="text-sm font-semibold">{item.bookName} {item.chapter}:{item.verseNumber}</div>
-                  <div className="text-xs text-muted-foreground mt-1">{item.bibleVersion || 'BSB'}</div>
+                  <div className="text-sm font-semibold">
+                    {item.bookName} {item.chapter}:{item.verseNumber}
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-1">
+                    {item.bibleVersion || "BSB"}
+                  </div>
                 </div>
-                <Badge variant={item.isPublished ? 'default' : 'secondary'} className="text-[10px]">{item.isPublished ? 'Published' : 'Draft'}</Badge>
+                <Badge
+                  variant={item.isPublished ? "default" : "secondary"}
+                  className="text-[10px]"
+                >
+                  {item.isPublished ? "Published" : "Draft"}
+                </Badge>
               </div>
 
               <div className="mt-3">
-                <p className="text-sm text-muted-foreground line-clamp-3">{item.explanation || 'No explanation provided.'}</p>
+                <p className="text-sm text-muted-foreground line-clamp-3">
+                  {item.explanation || "No explanation provided."}
+                </p>
               </div>
 
               <div className="mt-3">
-                <h4 className="text-xs uppercase text-muted-foreground font-medium">Learn More</h4>
-                <p className="text-xs text-muted-foreground line-clamp-2 mt-1">{item.learnMore || '—'}</p>
+                <h4 className="text-xs uppercase text-muted-foreground font-medium">
+                  Learn More
+                </h4>
+                <p className="text-xs text-muted-foreground line-clamp-2 mt-1">
+                  {summarizeText(item.learnMore)}
+                </p>
               </div>
             </div>
 
             <div className="mt-4 flex items-center justify-end gap-2">
-              <Button variant="ghost" size="icon" onClick={() => onView(item)} title="View">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => onView(item)}
+                title="View"
+              >
                 <Eye className="w-4 h-4" />
               </Button>
               <Button variant="ghost" size="icon" onClick={() => onEdit(item)}>
                 <Edit2 className="w-4 h-4" />
               </Button>
-              <Button variant="ghost" size="icon" className="text-destructive" onClick={() => onDelete(item)}>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-destructive"
+                onClick={() => onDelete(item)}
+              >
                 <Trash2 className="w-4 h-4" />
               </Button>
             </div>
@@ -87,7 +120,12 @@ export function VerseExplanationTable({
                 <p className="text-xs text-muted-foreground line-clamp-2 mt-1">
                   {item.explanation}
                 </p>
-                <p className="text-xs text-muted-foreground mt-2">{item.bibleVersion || "BSB"} • {item.createdOn ? new Date(item.createdOn).toLocaleDateString() : ""}</p>
+                <p className="text-xs text-muted-foreground mt-2">
+                  {item.bibleVersion || "BSB"} •{" "}
+                  {item.createdOn
+                    ? new Date(item.createdOn).toLocaleDateString()
+                    : ""}
+                </p>
               </div>
               <Badge
                 variant={item.isPublished ? "default" : "secondary"}

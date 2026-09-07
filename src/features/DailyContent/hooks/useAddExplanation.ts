@@ -25,6 +25,32 @@ export interface CrossRefItem {
   sortOrder: number;
 }
 
+const parseTakeaways = (value: unknown): string[] => {
+  if (Array.isArray(value)) {
+    return value
+      .map((item) =>
+        typeof item === "string" ? item.trim() : String(item ?? "").trim(),
+      )
+      .filter(Boolean);
+  }
+
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    if (!trimmed) return [];
+
+    try {
+      const parsed = JSON.parse(trimmed);
+      if (Array.isArray(parsed)) return parseTakeaways(parsed);
+    } catch {
+      // fall back to treating the raw string as one takeaway
+    }
+
+    return [trimmed];
+  }
+
+  return [];
+};
+
 export interface ExplanationForm {
   bookName: string;
   chapter: string;
@@ -40,6 +66,7 @@ export interface ExplanationForm {
     backgroundBook: string;
     backgroundContext: string;
     finalThoughts: string;
+    takeaways: string[];
   };
   wordStudies: WordStudyItem[];
   practicalApps: { applicationText: string; sortOrder: number }[];
@@ -53,7 +80,14 @@ const EMPTY_FORM: ExplanationForm = {
   verseNumber: "",
   bibleVersion: "BSB",
   exegesis: { explanationText: "", applicationText: "" },
-  studyMetadata: { introduction: "", backgroundAuthor: "", backgroundBook: "", backgroundContext: "", finalThoughts: "" },
+  studyMetadata: {
+    introduction: "",
+    backgroundAuthor: "",
+    backgroundBook: "",
+    backgroundContext: "",
+    finalThoughts: "",
+    takeaways: [],
+  },
   wordStudies: [],
   practicalApps: [],
   crossReferences: [],
@@ -63,28 +97,42 @@ const EMPTY_FORM: ExplanationForm = {
 export function useAddExplanation() {
   const { toast } = useToast();
   const navigate = useNavigate();
-  const params = useParams<{ bookName?: string; chapter?: string; verseNumber?: string }>();
-  const isEditMode = !!params.bookName && !!params.chapter && !!params.verseNumber;
+  const params = useParams<{
+    bookName?: string;
+    chapter?: string;
+    verseNumber?: string;
+  }>();
+  const isEditMode =
+    !!params.bookName && !!params.chapter && !!params.verseNumber;
 
   const [form, setForm] = useState<ExplanationForm>(EMPTY_FORM);
   const [loadingExisting, setLoadingExisting] = useState(false);
   const [existingFound, setExistingFound] = useState(false);
   const [existingId, setExistingId] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState<VerseExplanationStepId>("reference");
-  const [translationOptions, setTranslationOptions] = useState<Translation[]>([]);
+  const [activeTab, setActiveTab] =
+    useState<VerseExplanationStepId>("reference");
+  const [translationOptions, setTranslationOptions] = useState<Translation[]>(
+    [],
+  );
   const [selectedVerseText, setSelectedVerseText] = useState("");
   const [verseTextLoading, setVerseTextLoading] = useState(false);
   const [chapterVerseCount, setChapterVerseCount] = useState(0);
   const [verseOptions, setVerseOptions] = useState<number[]>([]);
   const [verseOptionsLoading, setVerseOptionsLoading] = useState(false);
-  const [crossRefVerseOptions, setCrossRefVerseOptions] = useState<Record<number, { key: string; verses: number[] }>>({});
-  const [crossRefVerseLoading, setCrossRefVerseLoading] = useState<Record<number, boolean>>({});
+  const [crossRefVerseOptions, setCrossRefVerseOptions] = useState<
+    Record<number, { key: string; verses: number[] }>
+  >({});
+  const [crossRefVerseLoading, setCrossRefVerseLoading] = useState<
+    Record<number, boolean>
+  >({});
 
   const maxChapterNumber = useMemo(() => {
     const bookName = form.bookName.trim();
     if (!bookName) return 1;
-    return BIBLE_BOOK_CHAPTERS[bookName as keyof typeof BIBLE_BOOK_CHAPTERS] ?? 1;
+    return (
+      BIBLE_BOOK_CHAPTERS[bookName as keyof typeof BIBLE_BOOK_CHAPTERS] ?? 1
+    );
   }, [form.bookName]);
 
   const maxVerseNumber = chapterVerseCount || 1;
@@ -95,12 +143,17 @@ export function useAddExplanation() {
   );
 
   const currentStep = useMemo(
-    () => VERSE_EXPLANATION_STEP_ORDER[Math.max(0, currentStepIndex)] ?? "reference",
+    () =>
+      VERSE_EXPLANATION_STEP_ORDER[Math.max(0, currentStepIndex)] ??
+      "reference",
     [currentStepIndex],
   );
 
   const referenceComplete = useMemo(
-    () => form.bookName.trim() !== "" && Number(form.chapter) >= 1 && Number(form.verseNumber) >= 1,
+    () =>
+      form.bookName.trim() !== "" &&
+      Number(form.chapter) >= 1 &&
+      Number(form.verseNumber) >= 1,
     [form.bookName, form.chapter, form.verseNumber],
   );
 
@@ -110,8 +163,15 @@ export function useAddExplanation() {
   );
 
   const studyComplete = useMemo(
-    () => form.studyMetadata.introduction.trim().length > 0 || form.wordStudies.length > 0 || form.themes.length > 0,
-    [form.studyMetadata.introduction, form.wordStudies.length, form.themes.length],
+    () =>
+      form.studyMetadata.introduction.trim().length > 0 ||
+      form.wordStudies.length > 0 ||
+      form.themes.length > 0,
+    [
+      form.studyMetadata.introduction,
+      form.wordStudies.length,
+      form.themes.length,
+    ],
   );
 
   const stepCompletion: Record<VerseExplanationStepId, boolean> = useMemo(
@@ -125,24 +185,42 @@ export function useAddExplanation() {
   );
 
   const completionPercent = useMemo(
-    () => Math.round((Object.values(stepCompletion).filter(Boolean).length / VERSE_EXPLANATION_STEP_ORDER.length) * 100),
+    () =>
+      Math.round(
+        (Object.values(stepCompletion).filter(Boolean).length /
+          VERSE_EXPLANATION_STEP_ORDER.length) *
+          100,
+      ),
     [stepCompletion],
   );
 
-  const goToStep = useCallback((stepId: VerseExplanationStepId) => setActiveTab(stepId), []);
+  const goToStep = useCallback(
+    (stepId: VerseExplanationStepId) => setActiveTab(stepId),
+    [],
+  );
 
   const goNext = useCallback(() => {
-    const nextIndex = Math.min(VERSE_EXPLANATION_STEP_ORDER.length - 1, currentStepIndex + 1);
-    if (nextIndex !== currentStepIndex) goToStep(VERSE_EXPLANATION_STEP_ORDER[nextIndex]);
+    const nextIndex = Math.min(
+      VERSE_EXPLANATION_STEP_ORDER.length - 1,
+      currentStepIndex + 1,
+    );
+    if (nextIndex !== currentStepIndex)
+      goToStep(VERSE_EXPLANATION_STEP_ORDER[nextIndex]);
   }, [currentStepIndex, goToStep]);
 
   const goPrevious = useCallback(() => {
     const prevIndex = Math.max(0, currentStepIndex - 1);
-    if (prevIndex !== currentStepIndex) goToStep(VERSE_EXPLANATION_STEP_ORDER[prevIndex]);
+    if (prevIndex !== currentStepIndex)
+      goToStep(VERSE_EXPLANATION_STEP_ORDER[prevIndex]);
   }, [currentStepIndex, goToStep]);
 
   const canAdvanceFromCurrent = useMemo(
-    () => (currentStep === "reference" ? referenceComplete : currentStep === "exegesis" ? exegesisComplete : true),
+    () =>
+      currentStep === "reference"
+        ? referenceComplete
+        : currentStep === "exegesis"
+          ? exegesisComplete
+          : true,
     [currentStep, referenceComplete, exegesisComplete],
   );
 
@@ -153,9 +231,13 @@ export function useAddExplanation() {
       .then((translations) => {
         if (!active) return;
         setTranslationOptions(translations || []);
-        const validCurrent = (translations || []).some((item) => item.id === form.bibleVersion);
+        const validCurrent = (translations || []).some(
+          (item) => item.id === form.bibleVersion,
+        );
         if (!form.bibleVersion || !validCurrent) {
-          const fallback = (translations || []).find((item) => item.id === "BSB") ?? translations?.[0];
+          const fallback =
+            (translations || []).find((item) => item.id === "BSB") ??
+            translations?.[0];
           if (fallback) {
             setForm((prev) => ({ ...prev, bibleVersion: fallback.id }));
           }
@@ -177,14 +259,22 @@ export function useAddExplanation() {
     const verseNumber = Number(form.verseNumber);
     const bibleVersion = form.bibleVersion?.trim();
 
-    if (!bookName || !bibleVersion || !Number.isFinite(chapter) || chapter < 1) {
+    if (
+      !bookName ||
+      !bibleVersion ||
+      !Number.isFinite(chapter) ||
+      chapter < 1
+    ) {
       setSelectedVerseText("");
       setChapterVerseCount(0);
       setVerseOptions([]);
       return;
     }
 
-    const safeChapter = Math.min(Math.max(Math.trunc(chapter), 1), maxChapterNumber);
+    const safeChapter = Math.min(
+      Math.max(Math.trunc(chapter), 1),
+      maxChapterNumber,
+    );
     if (safeChapter !== chapter) {
       setForm((prev) => ({ ...prev, chapter: String(safeChapter) }));
     }
@@ -202,15 +292,27 @@ export function useAddExplanation() {
         setVerseOptions(verses.map((v) => v.verseNumber));
 
         if (Number.isFinite(verseNumber) && verseNumber > totalVerses) {
-          setForm((prev) => ({ ...prev, verseNumber: String(totalVerses || 1) }));
+          setForm((prev) => ({
+            ...prev,
+            verseNumber: String(totalVerses || 1),
+          }));
         }
 
-        if (!Number.isFinite(verseNumber) || verseNumber < 1 || verseNumber > totalVerses) {
+        if (
+          !Number.isFinite(verseNumber) ||
+          verseNumber < 1 ||
+          verseNumber > totalVerses
+        ) {
           setSelectedVerseText("");
           return;
         }
 
-        return bibleApi.getVerse(bibleVersion, bookName, safeChapter, verseNumber);
+        return bibleApi.getVerse(
+          bibleVersion,
+          bookName,
+          safeChapter,
+          verseNumber,
+        );
       })
       .then((verse) => {
         if (!active) return;
@@ -231,11 +333,23 @@ export function useAddExplanation() {
     return () => {
       active = false;
     };
-  }, [form.bookName, form.chapter, form.verseNumber, form.bibleVersion, maxChapterNumber]);
+  }, [
+    form.bookName,
+    form.chapter,
+    form.verseNumber,
+    form.bibleVersion,
+    maxChapterNumber,
+  ]);
 
   // Load existing explanation in edit mode
   useEffect(() => {
-    if (!isEditMode || !params.bookName || !params.chapter || !params.verseNumber) return;
+    if (
+      !isEditMode ||
+      !params.bookName ||
+      !params.chapter ||
+      !params.verseNumber
+    )
+      return;
     setLoadingExisting(true);
     sendPostRequest("bible", "get-verse-explanation", {
       bookName: decodeURIComponent(params.bookName),
@@ -250,8 +364,18 @@ export function useAddExplanation() {
             chapter: String(d.chapter || ""),
             verseNumber: String(d.verseNumber || ""),
             bibleVersion: d.bibleVersion || "BSB",
-            exegesis: d.exegesis || { explanationText: "", applicationText: "" },
-            studyMetadata: d.studyMetadata || { introduction: "", backgroundAuthor: "", backgroundBook: "", backgroundContext: "", finalThoughts: "" },
+            exegesis: d.exegesis || {
+              explanationText: "",
+              applicationText: "",
+            },
+            studyMetadata: {
+              introduction: d.studyMetadata?.introduction || "",
+              backgroundAuthor: d.studyMetadata?.backgroundAuthor || "",
+              backgroundBook: d.studyMetadata?.backgroundBook || "",
+              backgroundContext: d.studyMetadata?.backgroundContext || "",
+              finalThoughts: d.studyMetadata?.finalThoughts || "",
+              takeaways: parseTakeaways(d.studyMetadata?.takeaways),
+            },
             wordStudies: d.wordStudies || [],
             practicalApps: d.practicalApps || [],
             crossReferences: d.crossReferences || [],
@@ -292,29 +416,49 @@ export function useAddExplanation() {
   const addWordStudy = useCallback(() => {
     setForm((prev) => ({
       ...prev,
-      wordStudies: [...prev.wordStudies, { strongsId: "", surfaceText: "", customDefinition: "", sortOrder: prev.wordStudies.length }],
+      wordStudies: [
+        ...prev.wordStudies,
+        {
+          strongsId: "",
+          surfaceText: "",
+          customDefinition: "",
+          sortOrder: prev.wordStudies.length,
+        },
+      ],
     }));
   }, []);
   const removeWordStudy = useCallback((i: number) => {
-    setForm((prev) => ({ ...prev, wordStudies: prev.wordStudies.filter((_, idx) => idx !== i) }));
+    setForm((prev) => ({
+      ...prev,
+      wordStudies: prev.wordStudies.filter((_, idx) => idx !== i),
+    }));
   }, []);
-  const updateWordStudy = useCallback((i: number, field: keyof WordStudyItem, value: string | number) => {
-    setForm((prev) => {
-      const next = [...prev.wordStudies];
-      next[i] = { ...next[i], [field]: value };
-      return { ...prev, wordStudies: next };
-    });
-  }, []);
+  const updateWordStudy = useCallback(
+    (i: number, field: keyof WordStudyItem, value: string | number) => {
+      setForm((prev) => {
+        const next = [...prev.wordStudies];
+        next[i] = { ...next[i], [field]: value };
+        return { ...prev, wordStudies: next };
+      });
+    },
+    [],
+  );
 
   // Practical apps
   const addPracticalApp = useCallback(() => {
     setForm((prev) => ({
       ...prev,
-      practicalApps: [...prev.practicalApps, { applicationText: "", sortOrder: prev.practicalApps.length }],
+      practicalApps: [
+        ...prev.practicalApps,
+        { applicationText: "", sortOrder: prev.practicalApps.length },
+      ],
     }));
   }, []);
   const removePracticalApp = useCallback((i: number) => {
-    setForm((prev) => ({ ...prev, practicalApps: prev.practicalApps.filter((_, idx) => idx !== i) }));
+    setForm((prev) => ({
+      ...prev,
+      practicalApps: prev.practicalApps.filter((_, idx) => idx !== i),
+    }));
   }, []);
   const updatePracticalApp = useCallback((i: number, value: string) => {
     setForm((prev) => {
@@ -328,11 +472,24 @@ export function useAddExplanation() {
   const addCrossRef = useCallback(() => {
     setForm((prev) => ({
       ...prev,
-      crossReferences: [...prev.crossReferences, { bookName: "", chapter: 0, verseNumber: 0, referenceText: "", commentary: "", sortOrder: prev.crossReferences.length }],
+      crossReferences: [
+        ...prev.crossReferences,
+        {
+          bookName: "",
+          chapter: 0,
+          verseNumber: 0,
+          referenceText: "",
+          commentary: "",
+          sortOrder: prev.crossReferences.length,
+        },
+      ],
     }));
   }, []);
   const removeCrossRef = useCallback((i: number) => {
-    setForm((prev) => ({ ...prev, crossReferences: prev.crossReferences.filter((_, idx) => idx !== i) }));
+    setForm((prev) => ({
+      ...prev,
+      crossReferences: prev.crossReferences.filter((_, idx) => idx !== i),
+    }));
     setCrossRefVerseOptions((cur) => {
       const next: Record<number, { key: string; verses: number[] }> = {};
       Object.keys(cur).forEach((key) => {
@@ -352,13 +509,16 @@ export function useAddExplanation() {
       return next;
     });
   }, []);
-  const updateCrossRef = useCallback((i: number, field: keyof CrossRefItem, value: string | number) => {
-    setForm((prev) => {
-      const next = [...prev.crossReferences];
-      next[i] = { ...next[i], [field]: value };
-      return { ...prev, crossReferences: next };
-    });
-  }, []);
+  const updateCrossRef = useCallback(
+    (i: number, field: keyof CrossRefItem, value: string | number) => {
+      setForm((prev) => {
+        const next = [...prev.crossReferences];
+        next[i] = { ...next[i], [field]: value };
+        return { ...prev, crossReferences: next };
+      });
+    },
+    [],
+  );
 
   // Set a cross-reference verse and auto-fill its quoted text
   const pickCrossRefVerse = useCallback(
@@ -380,7 +540,6 @@ export function useAddExplanation() {
     },
     [updateCrossRef],
   );
-
 
   // Load verse options for cross references once book+chapter are set.
   // Cached by the (book:chapter) key so changing book/chapter refetches.
@@ -406,10 +565,14 @@ export function useAddExplanation() {
         })
         .catch(() => {
           if (!active) return;
-          setCrossRefVerseOptions((cur) => ({ ...cur, [index]: { key, verses: [] } }));
+          setCrossRefVerseOptions((cur) => ({
+            ...cur,
+            [index]: { key, verses: [] },
+          }));
         })
         .finally(() => {
-          if (active) setCrossRefVerseLoading((cur) => ({ ...cur, [index]: false }));
+          if (active)
+            setCrossRefVerseLoading((cur) => ({ ...cur, [index]: false }));
         });
     });
     return () => {
@@ -417,16 +580,21 @@ export function useAddExplanation() {
     };
   }, [form.crossReferences, form.bibleVersion, crossRefVerseOptions]);
 
-
   // Themes
   const addTheme = useCallback(() => {
     setForm((prev) => ({
       ...prev,
-      themes: [...prev.themes, { themeName: "", sortOrder: prev.themes.length }],
+      themes: [
+        ...prev.themes,
+        { themeName: "", sortOrder: prev.themes.length },
+      ],
     }));
   }, []);
   const removeTheme = useCallback((i: number) => {
-    setForm((prev) => ({ ...prev, themes: prev.themes.filter((_, idx) => idx !== i) }));
+    setForm((prev) => ({
+      ...prev,
+      themes: prev.themes.filter((_, idx) => idx !== i),
+    }));
   }, []);
   const updateTheme = useCallback((i: number, value: string) => {
     setForm((prev) => {
@@ -461,7 +629,11 @@ export function useAddExplanation() {
       if (existingFound && existingId) {
         payload.id = existingId;
       }
-      const res = await sendPostRequest("bible", "add-verse-explanation", payload);
+      const res = await sendPostRequest(
+        "bible",
+        "add-verse-explanation",
+        payload,
+      );
       if (res?.returnCode === 200 || res?.status === 200) {
         toast({
           title: existingFound ? "Updated" : "Created",
@@ -469,16 +641,27 @@ export function useAddExplanation() {
         });
         navigate("/admin/verse-explanations");
       } else {
-        toast({ title: "Error", description: res?.returnMessage || "Failed to save", variant: "destructive" });
+        toast({
+          title: "Error",
+          description: res?.returnMessage || "Failed to save",
+          variant: "destructive",
+        });
       }
     } catch (e: any) {
-      toast({ title: "Network error", description: e.message, variant: "destructive" });
+      toast({
+        title: "Network error",
+        description: e.message,
+        variant: "destructive",
+      });
     } finally {
       setSaving(false);
     }
   }, [form, isValid, saving, existingFound, toast, navigate]);
 
-  const goBack = useCallback(() => navigate("/admin/verse-explanations"), [navigate]);
+  const goBack = useCallback(
+    () => navigate("/admin/verse-explanations"),
+    [navigate],
+  );
 
   return {
     form,
@@ -532,7 +715,9 @@ export function useAddExplanation() {
     goBack,
     // Book list
     filteredBooks: form.bookName
-      ? BIBLE_BOOKS.filter((b) => b.toLowerCase().includes(form.bookName.toLowerCase()))
+      ? BIBLE_BOOKS.filter((b) =>
+          b.toLowerCase().includes(form.bookName.toLowerCase()),
+        )
       : BIBLE_BOOKS,
   };
 }
