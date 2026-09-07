@@ -4,17 +4,38 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 interface Props {
-  backgroundAuthor: string; setBackgroundAuthor: (v: string) => void;
-  backgroundBook: string; setBackgroundBook: (v: string) => void;
-  backgroundContext: string; setBackgroundContext: (v: string) => void;
+  backgroundAuthor: string;
+  setBackgroundAuthor: (v: string) => void;
+  backgroundBook: string;
+  setBackgroundBook: (v: string) => void;
+  backgroundContext: string;
+  setBackgroundContext: (v: string) => void;
   isRtl: boolean;
 }
 
 export function BackgroundSection(p: Props) {
   const fields = [
-    { label: "Background — Author", icon: <User className="h-4 w-4 text-purple-500" />, value: p.backgroundAuthor, onChange: p.setBackgroundAuthor, placeholder: "Who wrote the book and why does that matter?" },
-    { label: "Background — Book", icon: <BookOpen className="h-4 w-4 text-indigo-500" />, value: p.backgroundBook, onChange: p.setBackgroundBook, placeholder: "Summarize the book and its major purpose..." },
-    { label: "Background — Context", icon: <MapPin className="h-4 w-4 text-orange-500" />, value: p.backgroundContext, onChange: p.setBackgroundContext, placeholder: "Describe the immediate historical and literary context..." },
+    {
+      label: "Background — Author",
+      icon: <User className="h-4 w-4 text-purple-500" />,
+      value: p.backgroundAuthor,
+      onChange: p.setBackgroundAuthor,
+      placeholder: "Who wrote the book and why does that matter?",
+    },
+    {
+      label: "Background — Book",
+      icon: <BookOpen className="h-4 w-4 text-indigo-500" />,
+      value: p.backgroundBook,
+      onChange: p.setBackgroundBook,
+      placeholder: "Summarize the book and its major purpose...",
+    },
+    {
+      label: "Background — Context",
+      icon: <MapPin className="h-4 w-4 text-orange-500" />,
+      value: p.backgroundContext,
+      onChange: p.setBackgroundContext,
+      placeholder: "Describe the immediate historical and literary context...",
+    },
   ];
 
   return (
@@ -28,8 +49,8 @@ export function BackgroundSection(p: Props) {
             value={f.value}
             onChange={(e) => f.onChange(e.target.value)}
             placeholder={f.placeholder}
-            rows={4}
-            className="resize-none"
+            rows={7}
+            className="min-h-[160px] resize-y leading-7"
           />
         </div>
       ))}

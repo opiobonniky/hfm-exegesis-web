@@ -2,10 +2,21 @@
 
 export type ContentType = "verse" | "devotion" | "exegesis";
 
-export const CONTENT_TYPE_LABELS: Record<ContentType, { label: string; plural: string; icon: string }> = {
+export const CONTENT_TYPE_LABELS: Record<
+  ContentType,
+  { label: string; plural: string; icon: string }
+> = {
   verse: { label: "Daily Verse", plural: "Daily Verses", icon: "Sun" },
-  devotion: { label: "Daily Devotion", plural: "Daily Devotions", icon: "Sprout" },
-  exegesis: { label: "Daily Exegesis", plural: "Daily Exegesis", icon: "BookOpen" },
+  devotion: {
+    label: "Daily Devotion",
+    plural: "Daily Devotions",
+    icon: "Sprout",
+  },
+  exegesis: {
+    label: "Daily Exegesis",
+    plural: "Daily Exegesis",
+    icon: "BookOpen",
+  },
 };
 
 export const TAB_VALUE_MAP: Record<string, ContentType> = {
@@ -23,16 +34,33 @@ export const CONTENT_TABS = [
 export const API_ACTIONS = {
   getVerseAll: "get-all-daily-verses",
   addAction: (type: ContentType) => {
-    const prefix = type === "verse" ? "daily-verse" : type === "devotion" ? "daily-devotion" : "daily-exegesis";
+    const prefix =
+      type === "verse"
+        ? "daily-verse"
+        : type === "devotion"
+          ? "daily-devotion"
+          : "daily-exegesis";
     return `add-${prefix}`;
   },
   deleteAction: (type: ContentType) => {
-    const prefix = type === "verse" ? "daily-verse" : type === "devotion" ? "daily-devotion" : "daily-exegesis";
+    const prefix =
+      type === "verse"
+        ? "daily-verse"
+        : type === "devotion"
+          ? "daily-devotion"
+          : "daily-exegesis";
     return `delete-${prefix}`;
   },
   getAction: (type: ContentType, action: string) => {
-    const prefix = type === "verse" ? "daily-verse" : type === "devotion" ? "daily-devotion" : "daily-exegesis";
+    const prefix =
+      type === "verse"
+        ? "daily-verse"
+        : type === "devotion"
+          ? "daily-devotion"
+          : "daily-exegesis";
     if (type === "verse" && action === "get-all") return "get-all-daily-verses";
+    if (type === "devotion" && action === "get-all")
+      return "get-all-daily-devotions";
     return `${action}-${prefix}`;
   },
 } as const;

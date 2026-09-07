@@ -27,27 +27,47 @@ export function useAdminDailyContent() {
 
   const getAction = useCallback((type: ContentType, action: string) => {
     if (type === "verse" && action === "get-all") return "get-all-daily-verses";
-    const prefix = type === "verse" ? "daily-verse" : type === "devotion" ? "daily-devotion" : "daily-exegesis";
+    if (type === "devotion" && action === "get-all")
+      return "get-all-daily-devotions";
+    const prefix =
+      type === "verse"
+        ? "daily-verse"
+        : type === "devotion"
+          ? "daily-devotion"
+          : "daily-exegesis";
     return `${action}-${prefix}`;
   }, []);
 
-  const loadContent = useCallback(async (type: ContentType, p: number) => {
-    setLoading(true);
-    try {
-      const res = await sendPostRequest("admin", getAction(type, "get-all"), {
-        page: p, size: PAGE_SIZE,
-        ...(searchDate ? { startDate: searchDate, endDate: searchDate } : { smartDefault: false }),
-      });
-      if (res?.returnCode === 200 && res?.returnData) {
-        setContent(res.returnData.content || []);
-        setTotal(res.returnData.totalElements || 0);
+  const loadContent = useCallback(
+    async (type: ContentType, p: number) => {
+      setLoading(true);
+      try {
+        const res = await sendPostRequest("admin", getAction(type, "get-all"), {
+          page: p,
+          size: PAGE_SIZE,
+          ...(searchDate
+            ? { startDate: searchDate, endDate: searchDate }
+            : { smartDefault: false }),
+        });
+        if (res?.returnCode === 200 && res?.returnData) {
+          setContent(res.returnData.content || []);
+          setTotal(res.returnData.totalElements || 0);
+        }
+      } catch {
+        toast({ title: "Failed to load content", variant: "destructive" });
+      } finally {
+        setLoading(false);
       }
-    } catch { toast({ title: "Failed to load content", variant: "destructive" }); }
-    finally { setLoading(false); }
-  }, [searchDate, getAction, toast]);
+    },
+    [searchDate, getAction, toast],
+  );
 
   useEffect(() => {
-    const typeMap: Record<string, ContentType> = { verses: "verse", devotions: "devotion", exegesis: "exegesis" };
+    const typeMap: Record<string, ContentType> = {
+      verses: "verse",
+      devotions: "devotion",
+      exegesis: "exegesis",
+    };
     loadContent(typeMap[activeTab] || "verse", page);
   }, [activeTab, page, loadContent]);
 
@@ -55,17 +75,42 @@ export function useAdminDailyContent() {
     if (!deleteTarget) return;
     setDeleting(true);
     try {
-      const type: ContentType = activeTab === "verses" ? "verse" : activeTab === "devotions" ? "devotion" : "exegesis";
+      const type: ContentType =
+        activeTab === "verses"
+          ? "verse"
+          : activeTab === "devotions"
+            ? "devotion"
+            : "exegesis";
       const action = getAction(type, "delete");
-      const idKey = type === "verse" ? "verseId" : type === "devotion" ? "devotionId" : "exegesisId";
-      const res = await sendPostRequest("admin", action, { [idKey]: deleteTarget.id });
-      if (res?.returnCode === 200) { toast({ title: "Deleted" }); setDeleteTarget(null); loadContent(type, page); }
-      else { toast({ title: "Delete failed", variant: "destructive" }); }
-    } catch { toast({ title: "Error deleting", variant: "destructive" }); }
-    finally { setDeleting(false); }
+      const idKey =
+        type === "verse"
+          ? "verseId"
+          : type === "devotion"
+            ? "devotionId"
+            : "exegesisId";
+      const res = await sendPostRequest("admin", action, {
+        [idKey]: deleteTarget.id,
+      });
+      if (res?.returnCode === 200) {
+        toast({ title: "Deleted" });
+        setDeleteTarget(null);
+        loadContent(type, page);
+      } else {
+        toast({ title: "Delete failed", variant: "destructive" });
+      }
+    } catch {
+      toast({ title: "Error deleting", variant: "destructive" });
+    } finally {
+      setDeleting(false);
+    }
   }, [deleteTarget, activeTab, getAction, toast, loadContent, page]);
 
-  const typeLabel = activeTab === "verses" ? "Verse" : activeTab === "devotions" ? "Devotion" : "Exegesis";
+  const typeLabel =
+    activeTab === "verses"
+      ? "Verse"
+      : activeTab === "devotions"
+        ? "Devotion"
+        : "Exegesis";
 
   const goBack = useCallback(() => navigate("/admin"), [navigate]);
 
@@ -106,7 +151,9 @@ export function useAdminDailyContent() {
       const basePath = DAILY_CONTENT_VIEW_ROUTES[tab];
       if (basePath) {
         const paramKey = getStateKey(tab);
-        navigate(`${basePath}?${paramKey}=${encodeURIComponent(JSON.stringify(item))}`);
+        navigate(
+          `${basePath}?${paramKey}=${encodeURIComponent(JSON.stringify(item))}`,
+        );
       }
     },
   });
@@ -116,9 +163,27 @@ export function useAdminDailyContent() {
   const exegesis = makeTabHandlers("exegesis");
 
   return {
-    t, isRtl, activeTab, content, total, page, setPage, loading, searchDate,
-    typeLabel, deleteTarget, setDeleteTarget, deleting, confirmDelete,
-    handleTabChange, handleSearchDateChange, handleClearDate, handleDeleteOpenChange,
-    goBack, verses, devotions, exegesis,
+    t,
+    isRtl,
+    activeTab,
+    content,
+    total,
+    page,
+    setPage,
+    loading,
+    searchDate,
+    typeLabel,
+    deleteTarget,
+    setDeleteTarget,
+    deleting,
+    confirmDelete,
+    handleTabChange,
+    handleSearchDateChange,
+    handleClearDate,
+    handleDeleteOpenChange,
+    goBack,
+    verses,
+    devotions,
+    exegesis,
   };
 }

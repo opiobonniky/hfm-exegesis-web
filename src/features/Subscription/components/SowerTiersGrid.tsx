@@ -11,7 +11,7 @@ interface SowerTiersGridProps {
   isPaying: boolean;
   isLegacySower: boolean;
   isCovenantSower: boolean;
-  checkoutLoading: boolean;
+  checkoutLoading: string | null;
   portalLoading: boolean;
   onSubscribe: (id: TierId) => void;
   onManage: () => void;

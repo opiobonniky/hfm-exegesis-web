@@ -10,13 +10,28 @@ import { SowerFooter } from "../components/SowerFooter";
 
 export default function SowerPage() {
   const h = useSowerPage();
-  const { billingInterval, setBillingInterval, checkoutLoading, portalLoading, isPayingUser, tierLabel, handleSubscribe, handleManageSubscription } = h;
-  const isLegacySower = tierLabel === "legacy_sower";
-  const isCovenantSower = tierLabel === "covenant_sower";
+  const {
+    billingInterval,
+    setBillingInterval,
+    checkoutLoading,
+    portalLoading,
+    isPayingUser,
+    isLegacySower,
+    isCovenantSower,
+    handleSubscribe,
+    handleManageSubscription,
+  } = h;
 
   return (
-    <div className="min-h-screen bg-background" style={{ fontFamily: "'DM Sans', 'Inter', system-ui, sans-serif" }} dir={h.isRtl ? "rtl" : "ltr"}>
-      <SowerHero billingInterval={billingInterval} setBillingInterval={setBillingInterval} />
+    <div
+      className="min-h-screen bg-background"
+      style={{ fontFamily: "'DM Sans', 'Inter', system-ui, sans-serif" }}
+      dir={h.isRtl ? "rtl" : "ltr"}
+    >
+      <SowerHero
+        billingInterval={billingInterval}
+        setBillingInterval={setBillingInterval}
+      />
       <SowerTiersGrid
         billingInterval={billingInterval}
         isPaying={isPayingUser}

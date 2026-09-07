@@ -15,7 +15,13 @@ export { ExegesisContent } from "./ExegesisContent";
 export { ExegesisHeader } from "./ExegesisHeader";
 export { DailyContentEmptyState } from "./DailyContentEmptyState";
 export { CollapsibleSection } from "./CollapsibleSection";
-export { SectionLabel, TextBlock, ListBlock, WordStudiesBlock, TagsBlock } from "./ContentDetailBlocks";
+export {
+  SectionLabel,
+  TextBlock,
+  ListBlock,
+  WordStudiesBlock,
+  TagsBlock,
+} from "./ContentDetailBlocks";
 export { DailyContentPageHeader } from "./DailyContentPageHeader";
 export { DailyContentFormActions } from "./DailyContentFormActions";
 export { DailyContentDetailHeader } from "./DailyContentDetailHeader";
@@ -47,6 +53,8 @@ export { InlineLoadingIndicator } from "./InlineLoadingIndicator";
 export { FieldLabelWithCounter } from "./FieldLabelWithCounter";
 export { InlineWarning } from "./InlineWarning";
 export { ExplanationAutoFillBanner } from "./ExplanationAutoFillBanner";
+export { AddDailyVerseWorkspace } from "./AddDailyVerseWorkspace";
+export { GuidedTabs, GuidedTab } from "./GuidedTabs";
 export { DetailSection } from "./DetailSection";
 export { VerseTextDisplay } from "./VerseTextDisplay";
 export { DetailTitleBlock } from "./DetailTitleBlock";
