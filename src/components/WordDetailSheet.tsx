@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   BookText,
@@ -14,6 +14,7 @@ import {
   Copy,
   Check,
   Shuffle,
+  Link2,
 } from "lucide-react";
 import {
   Sheet,
@@ -33,6 +34,7 @@ import WordComparisonDialog from "@/components/WordComparisonDialog";
 import { BIBLE_BOOKS, getLangColor, getLangLetter, getLangScript } from "@/data/staticData";
 import { getChaptersForBook, getVersesCountForChapter, getVerseText } from "@/utilities/bibleUtils";
 import { getVersionById } from "@/assets/bibleVersion/json/bibleVersions";
+import { getVerseResources, type Crossref } from "@/services/verseResourcesApi";
 
 // ── Types ──
 
@@ -104,7 +106,9 @@ export function WordDetailSheet({
 
   // ── Derive entry & display values (MUST be before any useCallback that references them) ──
   const entry: (StrongsEntry & { adminExplanation?: string | null; verseCount?: number; verseReferences?: VerseRef[] | null }) | null =
-    wordEntry ?? fetchedEntry;
+    wordEntry || fetchedEntry
+      ? { ...(wordEntry || {}), ...(fetchedEntry || {}) }
+      : null;
 
   // Derive display values
   const displayTitle =
@@ -123,7 +127,54 @@ export function WordDetailSheet({
   const displayAdminExplanation = entry?.adminExplanation || "";
   const displayStrongsId = entry?.strongsId || strongsId || "";
   const displayVerseCount = entry?.verseCount || verseAttachments?.length || 0;
-  const displayVerseReferences: VerseRef[] = entry?.verseReferences || verseAttachments || [];
+  const displayVerseReferences = useMemo<VerseRef[]>(
+    () => entry?.verseReferences || verseAttachments || [],
+    [entry?.verseReferences, verseAttachments],
+  );
+  const exegesisCrossReferences = useMemo(
+    () => (entry?.contextualStudies || []).flatMap((study) => study.crossReferences || []),
+    [entry?.contextualStudies],
+  );
+  const [verseCrossReferences, setVerseCrossReferences] = useState<Crossref[]>([]);
+  const [crossReferencesLoading, setCrossReferencesLoading] = useState(false);
+
+  useEffect(() => {
+    if (!open || displayVerseReferences.length === 0) {
+      setVerseCrossReferences([]);
+      return;
+    }
+
+    let cancelled = false;
+    setCrossReferencesLoading(true);
+
+    const loadVerseCrossReferences = async () => {
+      const references = await Promise.all(
+        displayVerseReferences.slice(0, 10).map(async (ref) => {
+          if (!ref.verse) return [];
+          const resources = await getVerseResources(ref.bookName, ref.chapter, ref.verse);
+          return resources?.crossReferences || [];
+        }),
+      );
+
+      if (!cancelled) {
+        const seen = new Set<string>();
+        setVerseCrossReferences(
+          references.flat().filter((ref) => {
+            const key = `${ref.ref}|${ref.text}`;
+            if (seen.has(key)) return false;
+            seen.add(key);
+            return true;
+          }),
+        );
+        setCrossReferencesLoading(false);
+      }
+    };
+
+    loadVerseCrossReferences();
+    return () => {
+      cancelled = true;
+    };
+  }, [open, displayVerseReferences]);
 
   // ── Dialog state ──
   const [showWordDialog, setShowWordDialog] = useState(false);
@@ -234,7 +285,7 @@ export function WordDetailSheet({
   }, [open, verseRef, translationBadge, wordEntry, fetchedEntry, verseAttachments]);
 
   useEffect(() => {
-    if (!open || !strongsId || wordEntry) return;
+    if (!open || !strongsId) return;
 
     let cancelled = false;
     setLoading(true);
@@ -245,7 +296,11 @@ export function WordDetailSheet({
       .then((result) => {
         if (cancelled) return;
         if (result) {
-          setFetchedEntry(result);
+          setFetchedEntry((previous) => ({
+            ...(wordEntry || {}),
+            ...(previous || {}),
+            ...result,
+          }) as StrongsEntry);
         } else {
           setError(true);
         }
@@ -606,6 +661,75 @@ export function WordDetailSheet({
                       );
                     })}
                   </div>
+                </div>
+              )}
+
+              {exegesisCrossReferences.length > 0 && (
+                <div className="rounded-lg bg-card border border-sky-200/60 dark:border-sky-900/60 p-3">
+                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1">
+                    <Link2 className="w-3 h-3 text-sky-600" />
+                    Exegesis Cross References
+                    <Badge variant="outline" className="text-[8px] font-mono px-1 py-0 ml-auto">
+                      {exegesisCrossReferences.length}
+                    </Badge>
+                  </p>
+                  <div className="space-y-2">
+                    {exegesisCrossReferences.map((ref, i) => (
+                      <button
+                        key={`${ref.ref}-${i}`}
+                        type="button"
+                        className="block w-full border-l-2 border-sky-400/60 pl-3 text-left hover:bg-muted/30 rounded-r-md p-1 transition-colors"
+                        onClick={() => {
+                          const parsed = parseRef(ref.ref);
+                          if (!parsed) return;
+                          onOpenChange(false);
+                          navigate(`/bible-reader?book=${encodeURIComponent(parsed.book)}&chapter=${parsed.chapter}&verse=${parsed.verse}`);
+                        }}
+                      >
+                        <span className="text-xs font-bold text-sky-700 dark:text-sky-400">{ref.ref}</span>
+                        {ref.text && <span className="mt-0.5 block text-xs text-muted-foreground">{ref.text}</span>}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {displayVerseReferences.length > 0 && (crossReferencesLoading || verseCrossReferences.length > 0) && (
+                <div className="rounded-lg bg-card border border-sky-200/60 dark:border-sky-900/60 p-3">
+                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1">
+                    <Link2 className="w-3 h-3 text-sky-600" />
+                    Verse Cross References
+                    {!crossReferencesLoading && (
+                      <Badge variant="outline" className="text-[8px] font-mono px-1 py-0 ml-auto">
+                        {verseCrossReferences.length}
+                      </Badge>
+                    )}
+                  </p>
+                  {crossReferencesLoading ? (
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      Loading verse references...
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {verseCrossReferences.map((ref, i) => (
+                        <button
+                          key={`${ref.ref}-${i}`}
+                          type="button"
+                          className="block w-full border-l-2 border-sky-400/60 pl-3 text-left hover:bg-muted/30 rounded-r-md p-1 transition-colors"
+                          onClick={() => {
+                            const parsed = parseRef(ref.ref);
+                            if (!parsed) return;
+                            onOpenChange(false);
+                            navigate(`/bible-reader?book=${encodeURIComponent(parsed.book)}&chapter=${parsed.chapter}&verse=${parsed.verse}`);
+                          }}
+                        >
+                          <span className="text-xs font-bold text-sky-700 dark:text-sky-400">{ref.ref}</span>
+                          {ref.text && <span className="mt-0.5 block text-xs text-muted-foreground">{ref.text}</span>}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
 

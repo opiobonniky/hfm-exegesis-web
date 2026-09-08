@@ -46,6 +46,7 @@ const LabHome = lazy(() => import("@/features/Lab/pages/LabHome"));
 const LabReview = lazy(() => import("@/features/Lab/pages/LabReview"));
 const AdminDashboard = lazy(() => import("@/features/Admin/pages/AdminDashboard"));
 const AdminStudyTools = lazy(() => import("@/features/Admin/pages/AdminStudyTools"));
+const AddStudyResource = lazy(() => import("@/features/Admin/pages/AddStudyResource"));
 const AdminTrivia = lazy(() => import("@/features/Admin/pages/AdminTrivia"));
 const AdminDailyContent = lazy(() => import("@/features/Admin/pages/AdminDailyContent"));
 const AdminSubscriptions = lazy(() => import("@/features/Admin/pages/AdminSubscriptions"));
@@ -444,6 +445,13 @@ export const routes = {
     isProtected: true,
     requiresLayout: true,
     title: "Study Tools Admin",
+  },
+  addStudyResource: {
+    path: "/admin/study-tools/add",
+    component: AddStudyResource,
+    isProtected: true,
+    requiresLayout: true,
+    title: "Add Study Resource",
   },
   adminTrivia: {
     path: "/admin/trivia",

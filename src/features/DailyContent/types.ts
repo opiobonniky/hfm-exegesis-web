@@ -7,6 +7,7 @@ export interface DailyVerseItem {
   verseNumber: number;
   bibleVersion?: string;
   verseText?: string | null;
+  text?: string | null;
   displayDate: string | Record<string, never>;
   displayTime: string | Record<string, never>;
   reflection?: string | null;
@@ -85,10 +86,17 @@ export interface EditState {
 }
 
 export const EMPTY_EDIT: EditState = {
-  bookName: "", chapter: "", verseNumber: "", bibleVersion: "BSB",
-  explanation: "", reflection: "", learnMore: "",
-  application: "", verseIntroduction: "",
-  displayDate: new Date().toISOString().split("T")[0], isPublished: true,
+  bookName: "",
+  chapter: "",
+  verseNumber: "",
+  bibleVersion: "BSB",
+  explanation: "",
+  reflection: "",
+  learnMore: "",
+  application: "",
+  verseIntroduction: "",
+  displayDate: new Date().toISOString().split("T")[0],
+  isPublished: true,
 };
 
 export interface DailyDevotionItem {
@@ -192,7 +200,11 @@ export interface DailyExegesisSeriesItem {
   displayDate: string;
 }
 
-export type VerseExplanationStepId = "reference" | "exegesis" | "study" | "extras";
+export type VerseExplanationStepId =
+  | "reference"
+  | "exegesis"
+  | "study"
+  | "extras";
 
 export interface VerseExplanationStep {
   id: VerseExplanationStepId;

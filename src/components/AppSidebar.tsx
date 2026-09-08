@@ -119,7 +119,7 @@ const userNavItems: NavItem[] = [
   { title: "sidebar.journal", url: routes.journal.path, icon: PenLine },
   {
     title: "sidebar.exegesisLab",
-    url: routes.dictionary.path,
+    url: routes.strongsDictionary.path,
     icon: Microscope,
   },
   { title: "sidebar.studyBible", url: routes.studyBible.path, icon: BookText },

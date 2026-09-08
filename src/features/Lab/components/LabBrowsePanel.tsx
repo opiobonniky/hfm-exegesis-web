@@ -1,11 +1,9 @@
 import { BookText, BookOpen, Loader2, LibraryBig } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { BIBLE_BOOKS } from "@/data/staticData";
 import { WordResultItem } from "./WordResultItem";
 import { WordFrequencyChart } from "./WordFrequencyChart";
 import { LanguageStatsBar } from "./LanguageStatsBar";
+import { LabBookSearchField } from "./LabBookSearchField";
 import type { StrongsWordEntry } from "@/data/staticData";
 import type { LabChartItem, LabChartMode } from "../types";
 
@@ -41,7 +39,7 @@ export function LabBrowsePanel({
         <p className="text-sm text-muted-foreground text-center max-w-sm mt-1">Select a book of the Bible to see all the original language words used in it.</p>
       </div>
       <div className="max-w-xs mx-auto w-full">
-        <Select value={selectedBook} onValueChange={onBookChange}><SelectTrigger className="h-11 text-sm rounded-xl border-border/60"><SelectValue placeholder="Choose a book..." /></SelectTrigger><SelectContent className="max-h-64">{BIBLE_BOOKS.map((b) => <SelectItem key={b} value={b} className="text-sm">{b}</SelectItem>)}</SelectContent></Select>
+        <LabBookSearchField value={selectedBook} onChange={onBookChange} />
       </div>
       {browseLoading && <div className="flex items-center justify-center py-16"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>}
       {!browseLoading && browseLoaded && browseWords.length > 0 && (
@@ -49,9 +47,27 @@ export function LabBrowsePanel({
           {chartData.length > 0 && <WordFrequencyChart data={chartData} onWordClick={onWordClick} mode={chartMode} onModeChange={onChartModeChange} langFilter={langFilter} onLangFilterChange={onLangFilterChange} langCounts={langCounts} />}
           <LanguageStatsBar counts={langCounts} label={`${selectedBook} — ${browseTotal} unique book words`} icon={<LibraryBig className="w-3.5 h-3.5 text-primary" />} />
           <div className="flex items-center justify-between"><p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">All Words ({browseWords.length} of {browseTotal})</p></div>
-          <ScrollArea className="max-h-[45vh] pr-1">
-            <div className="space-y-1.5">{browseWords.map((w) => <WordResultItem key={w.strongsId} word={w} onClick={() => onWordClick(w.strongsId)} />)}</div>
-          </ScrollArea>
+          <div
+            className="max-h-[45vh] overflow-y-auto pr-1"
+            onScroll={(event) => {
+              const element = event.currentTarget;
+              const isNearBottom =
+                element.scrollHeight - element.scrollTop - element.clientHeight < 96;
+              if (isNearBottom && browseHasNext && !browseLoading) onLoadMore();
+            }}
+          >
+            <div className="space-y-1.5">
+              {browseWords.map((w) => (
+                <WordResultItem key={w.strongsId} word={w} onClick={() => onWordClick(w.strongsId)} />
+              ))}
+            </div>
+            {browseLoading && browseWords.length > 0 && (
+              <div className="flex items-center justify-center py-3">
+                <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                <span className="ml-2 text-xs text-muted-foreground">Loading more words...</span>
+              </div>
+            )}
+          </div>
           {browseHasNext && (
             <div className="flex items-center justify-center pt-1 pb-2">
               <Button variant="outline" size="sm" onClick={onLoadMore} disabled={browseLoading} className="gap-1.5 text-xs h-8">

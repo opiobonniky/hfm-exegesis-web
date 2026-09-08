@@ -167,6 +167,7 @@ export interface VerseRef {
 
 export interface StrongsWordEntry {
   strongsId: string;
+  surfaceText?: string | null;
   originalWord: string | null;
   transliteration: string | null;
   shortDefinition: string;

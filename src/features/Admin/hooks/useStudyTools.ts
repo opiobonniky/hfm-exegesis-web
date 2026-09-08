@@ -1,5 +1,5 @@
 // Admin useStudyTools — useStudyTools state and API logic
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { sendPostRequest } from "@/services/api";
 import { bibleApi } from "@/services/bibleApi";
@@ -11,6 +11,9 @@ import {
 } from "@/utilities/bibleUtils";
 import { BIBLE_BOOKS } from "@/data/staticData";
 import type { StrongsWordEntry } from "@/data/staticData";
+import { verseResourcesApi } from "../services/studyToolsApi";
+import { wordStudyApi } from "../services/studyToolsApi";
+import { getActiveVersionId } from "@/utilities/bibleUtils";
 
 // ── Types ──
 export type WordEntry = StrongsWordEntry;
@@ -63,6 +66,9 @@ export function useStudyTools() {
   const [activeTab, setActiveTab] = useState("words");
   const [words, setWords] = useState<WordEntry[]>([]);
   const [wordsLoading, setWordsLoading] = useState(false);
+  const [wordsLoadingMore, setWordsLoadingMore] = useState(false);
+  const [wordsHasMore, setWordsHasMore] = useState(true);
+  const wordsPageRef = useRef(0);
   const [wordSearch, setWordSearch] = useState("");
   const [editWord, setEditWord] = useState<WordEntry | null>(null);
   const [editSheetOpen, setEditSheetOpen] = useState(false);
@@ -72,6 +78,8 @@ export function useStudyTools() {
   const [verseNum, setVerseNum] = useState(0);
   const [verseChapList, setVerseChapList] = useState<number[]>([]);
   const [verseNumList, setVerseNumList] = useState<number[]>([]);
+  const [verseText, setVerseText] = useState("");
+  const [verseTextLoading, setVerseTextLoading] = useState(false);
   const [currentResource, setCurrentResource] = useState<VerseResource | null>(null);
   const [resourcesLoading, setResourcesLoading] = useState(false);
   const [resourceSaving, setResourceSaving] = useState(false);
@@ -99,20 +107,110 @@ export function useStudyTools() {
   const confirmSyncActionRef = useRef<(() => Promise<void>) | null>(null);
   const { handleError } = useAdminErrorHandler();
 
-  const searchWords = useCallback(async (query: string) => {
-    if (!query.trim()) return;
-    setWordsLoading(true);
+  useEffect(() => {
+    if (!verseBook || !verseChapter || !verseNum) {
+      setVerseText("");
+      return;
+    }
+
+    let active = true;
+    setVerseTextLoading(true);
+    bibleApi.getVerse(getActiveVersionId(), verseBook, verseChapter, verseNum)
+      .then((verse) => {
+        if (active) setVerseText(verse.text || "");
+      })
+      .catch(() => {
+        if (active) setVerseText("");
+      })
+      .finally(() => {
+        if (active) setVerseTextLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [verseBook, verseChapter, verseNum]);
+
+  const loadWordsPage = useCallback(async (query: string, page: number, append: boolean) => {
+    append ? setWordsLoadingMore(true) : setWordsLoading(true);
     try {
-      const res = await sendPostRequest("strongs", "admin/search-words", { query, page: 0, size: 50 });
-      if (res.returnCode === 200) setWords(res.returnData?.words || []);
+      const res = await wordStudyApi.search(query, undefined, page, 30);
+      if (res.returnCode === 200) {
+        const pageData = res.returnData?.data || res.returnData?.content || res.returnData?.words || [];
+        setWords((previous) => append ? [...previous, ...pageData] : pageData);
+        setWordsHasMore(res.returnData?.hasNext ?? pageData.length === 30);
+        wordsPageRef.current = page;
+      }
     } catch (e) { handleError(e, "load words"); }
-    finally { setWordsLoading(false); }
+    finally {
+      setWordsLoading(false);
+      setWordsLoadingMore(false);
+    }
+  }, [handleError]);
+
+  const searchWords = useCallback(async (query: string) => {
+    await loadWordsPage(query.trim(), 0, false);
+  }, [loadWordsPage]);
+
+  const loadMoreWords = useCallback(async () => {
+    if (wordsLoading || wordsLoadingMore || !wordsHasMore) return;
+    await loadWordsPage(wordSearch.trim(), wordsPageRef.current + 1, true);
+  }, [loadWordsPage, wordSearch, wordsHasMore, wordsLoading, wordsLoadingMore]);
+
+  const loadVerseWords = useCallback(async (book: string, chapter: number, verse?: number) => {
+    setWordsLoading(true);
+    setWordsHasMore(false);
+    wordsPageRef.current = 0;
+    try {
+      const res = await sendPostRequest("strongs", "admin/get-verse-words", {
+        bookName: book,
+        chapter,
+        verse,
+        translation: getActiveVersionId(),
+      });
+      if (res.returnCode === 200) {
+        const verseWords = res.returnData?.words || res.returnData?.content || res.returnData || [];
+        const resource = verse ? await verseResourcesApi.getByReference(book, chapter, verse) : null;
+        const resourceWords = resource?.returnData?.wordStudies || [];
+        const attachedWords = resourceWords.map((study: any) => ({
+          strongsId: study.strongs || study.strongsId,
+          originalWord: study.word || null,
+          transliteration: study.transliteration || null,
+          shortDefinition: study.meaning || "Verse-specific word study",
+          fullDefinition: study.meaning || null,
+          language: study.strongs?.startsWith("H") ? "hebrew" : "greek",
+          partOfSpeech: null,
+          grammaticalCase: null,
+          gender: null,
+          number: null,
+          usageCount: null,
+          crossReferences: null,
+          adminExplanation: study.meaning || null,
+          hasVerseStudy: true,
+          verseStudyNote: study.meaning || null,
+        }));
+        const merged = [...verseWords, ...attachedWords].filter((word, index, all) =>
+          word.strongsId && all.findIndex((candidate) => candidate.strongsId === word.strongsId) === index
+        );
+        setWords(merged);
+      }
+    } catch (e) {
+      handleError(e, "load verse words");
+    } finally {
+      setWordsLoading(false);
+    }
   }, [handleError]);
 
   const loadResource = useCallback(async (book: string, chapter: number, verse: number) => {
     setResourcesLoading(true);
+    setCurrentResource(null);
+    setWordStudies([]);
+    setCommentaries([]);
+    setCrossRefs([]);
+    setDictTerms([]);
+    setTopics([]);
     try {
-      const res = await sendPostRequest("strongs", "admin/get-verse-resource", { bookName: book, chapter, verseStart: verse });
+      const res = await verseResourcesApi.getByReference(book, chapter, verse);
       if (res.returnCode === 200 && res.returnData) {
         const r = res.returnData;
         setCurrentResource(r);
@@ -125,6 +223,40 @@ export function useStudyTools() {
     } catch (e) { handleError(e, "load verse resource"); }
     finally { setResourcesLoading(false); }
   }, [handleError]);
+
+  const saveResource = useCallback(async () => {
+    if (!verseBook || !verseChapter || !verseNum) return false;
+    setResourceSaving(true);
+    try {
+      const res = await verseResourcesApi.upsert({
+        id: currentResource?.id || undefined,
+        bookName: verseBook,
+        chapter: verseChapter,
+        verseStart: verseNum,
+        verseEnd: verseNum,
+        wordStudies,
+        commentaries,
+        crossReferences: crossRefs,
+        dictionaryTerms: dictTerms,
+        relatedTopics: topics,
+        interlinearWords: currentResource?.interlinearWords || [],
+      });
+      if (res.returnCode === 200) {
+        await loadResource(verseBook, verseChapter, verseNum);
+        return true;
+      }
+      return false;
+    } catch (e) {
+      handleError(e, "save verse resource");
+      return false;
+    } finally {
+      setResourceSaving(false);
+    }
+  }, [
+    commentaries, crossRefs, currentResource?.id, currentResource?.interlinearWords,
+    dictTerms, handleError, loadResource, topics, verseBook, verseChapter,
+    verseNum, wordStudies,
+  ]);
 
   const loadPrologues = useCallback(async () => {
     setProloguesLoading(true);
@@ -165,13 +297,15 @@ export function useStudyTools() {
     // Words
     words, setWords, wordsLoading, wordSearch, setWordSearch, editWord, setEditWord,
     editSheetOpen, setEditSheetOpen, saving, setSaving, searchWords, detailWord, setDetailWord,
-    detailSheetOpen, setDetailSheetOpen,
+    detailSheetOpen, setDetailSheetOpen, loadVerseWords, loadMoreWords,
+    wordsLoadingMore, wordsHasMore,
     // Verse selector
     verseBook, handleBookChange, verseChapter, handleChapterChange, verseNum, setVerseNum,
-    verseChapList, verseNumList,
+    verseChapList, verseNumList, verseText, verseTextLoading,
     // Resources
     currentResource, setCurrentResource, resourcesLoading, loadResource,
     resourceSaving, setResourceSaving,
+    saveResource,
     // CRUD arrays
     wordStudies, setWordStudies, commentaries, setCommentaries,
     crossRefs, setCrossRefs, dictTerms, setDictTerms, topics, setTopics,

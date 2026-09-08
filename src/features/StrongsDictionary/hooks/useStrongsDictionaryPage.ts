@@ -1,7 +1,21 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { sendPostRequest } from "@/services/api";
+import { sendGetRequest, sendPostRequest } from "@/services/api";
+import { searchStrongs } from "../services";
+
+export interface ContextualStudy {
+  surfaceText: string | null;
+  customDefinition: string | null;
+  sortOrder: number;
+  reference: {
+    bookName: string;
+    chapter: number;
+    verseNumber: number;
+    bibleVersion: string | null;
+  } | null;
+  themes: string[];
+}
 
 export interface StrongsWord {
   strongsNumber: string;
@@ -14,6 +28,7 @@ export interface StrongsWord {
   language: "hebrew" | "greek";
   bdbEntry?: string;
   relatedWords?: string[];
+  contextualStudies?: ContextualStudy[];
 }
 
 const PAGE_SIZE = 20;
@@ -35,71 +50,130 @@ export function useStrongsDictionaryPage() {
   const [favorites, setFavorites] = useState<StrongsWord[]>([]);
   const [favLoading, setFavLoading] = useState(false);
   const [selectedWord, setSelectedWord] = useState<StrongsWord | null>(null);
+  const searchRequestRef = useRef(0);
+  const searchPageRef = useRef(0);
+  const searchFilterRef = useRef("all");
+  const submittedQueryRef = useRef("");
+  const completedSearchKeyRef = useRef("");
+
+  searchPageRef.current = searchPage;
+  searchFilterRef.current = langFilter;
 
   const executeSearch = useCallback(
-    async (reset = true) => {
-      if (!searchQuery.trim()) return;
-      const page = reset ? 0 : searchPage;
+    async (queryOverride?: string, reset = true) => {
+      const query = (queryOverride ?? submittedQueryRef.current).trim();
+      if (!query) return;
+      const page = reset ? 0 : searchPageRef.current + 1;
+      submittedQueryRef.current = query;
+      const language =
+        searchFilterRef.current === "all"
+          ? ""
+          : searchFilterRef.current;
+      const searchKey = `${query.toLowerCase()}|${language}|${page}`;
+      if (reset && completedSearchKeyRef.current === searchKey) return;
+      const requestId = ++searchRequestRef.current;
       setSearchLoading(true);
       try {
-        const res = await sendPostRequest("strongs", "search", {
-          query: searchQuery.trim(),
-          language: langFilter,
-          page,
-          size: PAGE_SIZE,
+        const res = await searchStrongs({
+          query,
+          language: language || undefined,
+          limit: PAGE_SIZE,
+          offset: page * PAGE_SIZE,
         });
-        if (res.data?.returnCode === 200) {
-          const data = res.data.returnData;
-          setSearchResults(reset ? data.words : [...searchResults, ...data.words]);
-          setSearchCount(data.total || 0);
-          if (reset) setSearchPage(0);
+        if (requestId !== searchRequestRef.current) return;
+        if (res.returnCode === 200) {
+          const data = res.returnData;
+          const words = (data?.data || []).map((word: any) => ({
+            strongsNumber: word.strongsId,
+            hebrewWord: word.originalWord || "",
+            transliteration: word.transliteration || "",
+            pronunciation: word.pronunciation || "",
+            meaning: word.shortDefinition || "",
+            strongsDef: word.fullDefinition || word.shortDefinition || "",
+            kjvOccurrences: word.usageCount || 0,
+            language: word.language === "hebrew" ? "hebrew" : "greek",
+            bdbEntry: word.adminExplanation || undefined,
+            contextualStudies: word.contextualStudies || [],
+          }));
+          setSearchResults((previous) =>
+            reset ? words : [...previous, ...words],
+          );
+          setSearchCount(data?.total || 0);
+          setSearchPage(page);
+          completedSearchKeyRef.current = searchKey;
         }
       } catch {
-        toast({ title: "Error", description: "Search failed", variant: "destructive" });
+        if (requestId === searchRequestRef.current) {
+          toast({
+            title: "Error",
+            description: "Search failed",
+            variant: "destructive",
+          });
+        }
       } finally {
-        setSearchLoading(false);
+        if (requestId === searchRequestRef.current) setSearchLoading(false);
       }
     },
-    [searchQuery, langFilter, searchPage, searchResults, toast],
+    [],
   );
 
   const browseByBook = useCallback(
-    async (reset = true) => {
-      if (!selectedBook) return;
-      const page = reset ? 0 : browsePage;
+    async (reset = true, bookOverride?: string) => {
+      const book = bookOverride || selectedBook;
+      if (!book) return;
+      const page = reset ? 0 : browsePage + 1;
       setBrowseLoading(true);
+      if (reset) setBrowseWords([]);
       try {
-        const res = await sendPostRequest("strongs", "browse", {
-          book: selectedBook,
-          language: langFilter,
-          page,
-          size: PAGE_SIZE,
+        const res = await sendGetRequest("strongs", `book-words/${encodeURIComponent(book)}`, {
+          lang: langFilter === "all" ? undefined : langFilter,
+          limit: PAGE_SIZE,
+          offset: page * PAGE_SIZE,
         });
-        if (res.data?.returnCode === 200) {
-          const data = res.data.returnData;
-          setBrowseWords(reset ? data.words : [...browseWords, ...data.words]);
-          setBrowseCount(data.total || 0);
-          if (reset) setBrowsePage(0);
+        if (res.returnCode === 200) {
+          const data = res.returnData;
+          const words = (data?.data || []).map((word: any) => ({
+            strongsNumber: word.strongsId,
+            hebrewWord: word.originalWord || "",
+            transliteration: word.transliteration || "",
+            pronunciation: word.pronunciation || "",
+            meaning: word.shortDefinition || "",
+            strongsDef: word.fullDefinition || word.shortDefinition || "",
+            kjvOccurrences: word.usageCount || 0,
+            language: word.language === "hebrew" ? "hebrew" : "greek",
+            bdbEntry: word.adminExplanation || undefined,
+            contextualStudies: word.contextualStudies || [],
+          }));
+          setBrowseWords((previous) => reset ? words : [...previous, ...words]);
+          setBrowseCount(data?.total || 0);
+          setBrowsePage(page);
         }
       } catch {
-        toast({ title: "Error", description: "Browse failed", variant: "destructive" });
+        toast({
+          title: "Error",
+          description: "Browse failed",
+          variant: "destructive",
+        });
       } finally {
         setBrowseLoading(false);
       }
     },
-    [selectedBook, langFilter, browsePage, browseWords, toast],
+    [selectedBook, langFilter, browsePage, toast],
   );
 
-  useEffect(() => {
-    if (mode === "browse" && selectedBook) browseByBook(true);
-  }, [mode, selectedBook, langFilter]);
+  const loadSelectedBook = useCallback(
+    (book: string) => browseByBook(true, book),
+    [browseByBook],
+  );
 
   const loadFavorites = useCallback(async () => {
     setFavLoading(true);
     try {
       const res = await sendPostRequest("strongs", "get-favorites", {});
       if (res.data?.returnCode === 200) setFavorites(res.data.returnData || []);
-    } catch { /* ignore */ } finally {
+    } catch {
+      /* ignore */
+    } finally {
       setFavLoading(false);
     }
   }, []);
@@ -115,24 +189,29 @@ export function useStrongsDictionaryPage() {
           strongsNumber: word.strongsNumber,
         });
         if (favorites.some((f) => f.strongsNumber === word.strongsNumber)) {
-          setFavorites((prev) => prev.filter((f) => f.strongsNumber !== word.strongsNumber));
+          setFavorites((prev) =>
+            prev.filter((f) => f.strongsNumber !== word.strongsNumber),
+          );
         } else {
           setFavorites((prev) => [...prev, word]);
         }
-      } catch { /* ignore */ }
+      } catch {
+        /* ignore */
+      }
     },
     [favorites],
   );
 
-  const isFavorited = (num: string) => favorites.some((f) => f.strongsNumber === num);
+  const isFavorited = useCallback(
+    (num: string) => favorites.some((f) => f.strongsNumber === num),
+    [favorites],
+  );
 
   const loadMoreSearch = () => {
-    setSearchPage((p) => p + 1);
-    executeSearch(false);
+    executeSearch(undefined, false);
   };
 
   const loadMoreBrowse = () => {
-    setBrowsePage((p) => p + 1);
     browseByBook(false);
   };
 
@@ -141,11 +220,29 @@ export function useStrongsDictionaryPage() {
 
   return {
     goBack,
-    mode, setMode, langFilter, setLangFilter,
-    searchQuery, setSearchQuery, searchResults, searchLoading, searchCount, executeSearch, loadMoreSearch,
-    selectedBook, setSelectedBook, browseWords, browseLoading, browseCount, loadMoreBrowse,
-    favorites, favLoading,
-    selectedWord, setSelectedWord,
-    toggleFavorite, isFavorited,
+    mode,
+    setMode,
+    langFilter,
+    setLangFilter,
+    searchQuery,
+    setSearchQuery,
+    searchResults,
+    searchLoading,
+    searchCount,
+    executeSearch,
+    loadMoreSearch,
+    selectedBook,
+    setSelectedBook,
+    loadSelectedBook,
+    browseWords,
+    browseLoading,
+    browseCount,
+    loadMoreBrowse,
+    favorites,
+    favLoading,
+    selectedWord,
+    setSelectedWord,
+    toggleFavorite,
+    isFavorited,
   };
 }

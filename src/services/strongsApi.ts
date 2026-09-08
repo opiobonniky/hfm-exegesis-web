@@ -99,6 +99,19 @@ export interface StrongsEntry {
     adminExplanation?: string | null;
   }> | null;
   verseCount?: number;
+  contextualStudies?: Array<{
+    surfaceText: string | null;
+    customDefinition: string | null;
+    sortOrder: number;
+    reference: {
+      bookName: string;
+      chapter: number;
+      verseNumber: number;
+      bibleVersion: string | null;
+    } | null;
+    themes: string[];
+    crossReferences: Array<{ ref: string; text: string }>;
+  }>;
 }
 
 // ── API Functions ───────────────────────────────────────────────────────────────

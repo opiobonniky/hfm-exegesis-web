@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Plus, X, BookOpen, MessageSquare,
   Link, BookText, Tag,
@@ -8,6 +8,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Combobox } from "@/components/ui/combobox";
+import { BIBLE_BOOKS } from "@/data/staticData";
 import type { useStudyTools } from "../hooks/useStudyTools";
 
 type StudyToolsState = ReturnType<typeof useStudyTools>;
@@ -22,9 +24,23 @@ export default function ResourcesTab({ state }: ResourcesTabProps) {
     wordStudies, setWordStudies, commentaries, setCommentaries,
     crossRefs, setCrossRefs, dictTerms, setDictTerms,
     topics, setTopics,
+    verseBook, handleBookChange, verseChapter, handleChapterChange, verseNum, setVerseNum,
+    verseChapList, verseNumList, loadResource,
   } = state;
 
   const [activeSection, setActiveSection] = useState<"commentaries" | "crossRefs" | "wordStudies" | "dictionary" | "topics">("commentaries");
+
+  useEffect(() => {
+    if (verseBook && verseChapter && verseNum) {
+      loadResource(verseBook, verseChapter, verseNum);
+    } else {
+      setWordStudies([]);
+      setCommentaries([]);
+      setCrossRefs([]);
+      setDictTerms([]);
+      setTopics([]);
+    }
+  }, [loadResource, setCommentaries, setCrossRefs, setDictTerms, setTopics, setWordStudies, verseBook, verseChapter, verseNum]);
 
   const SECTIONS = [
     { key: "commentaries" as const, label: "Commentaries", icon: MessageSquare, count: commentaries.length },
@@ -46,6 +62,17 @@ export default function ResourcesTab({ state }: ResourcesTabProps) {
 
   return (
     <div className="space-y-5">
+      <div className="rounded-2xl border bg-card p-4">
+        <div className="mb-3">
+          <h2 className="font-semibold">Filter by verse</h2>
+          <p className="text-sm text-muted-foreground">Select a verse to load only its saved study resources.</p>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-3">
+          <Combobox options={BIBLE_BOOKS.map((book) => ({ value: book, label: book }))} value={verseBook} onChange={(value) => value && handleBookChange(value)} placeholder="Select book" width="w-full" />
+          <Combobox options={verseChapList.map((chapter) => ({ value: String(chapter), label: `Chapter ${chapter}` }))} value={verseChapter ? String(verseChapter) : ""} onChange={(value) => value && handleChapterChange(Number(value))} placeholder="Select chapter" disabled={!verseBook} width="w-full" />
+          <Combobox options={verseNumList.map((verse) => ({ value: String(verse), label: `Verse ${verse}` }))} value={verseNum ? String(verseNum) : ""} onChange={(value) => value && setVerseNum(Number(value))} placeholder="Select verse" disabled={!verseChapter} width="w-full" />
+        </div>
+      </div>
       <div className="flex flex-wrap gap-2">
         {SECTIONS.map((s) => {
           const Icon = s.icon;

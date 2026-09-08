@@ -3,7 +3,7 @@ import { sendPostRequest } from "@/services/api";
 
 export const wordStudyApi = {
   search: (query: string, language?: string, page = 0, size = 20) =>
-    sendPostRequest("strongs", "admin/search-words", { query, language, page, size }),
+    sendPostRequest("strongs", "admin/list-entries", { search: query, language, page, pageSize: size }),
   getDetail: (strongsNumber: string) =>
     sendPostRequest("strongs", "get-word-detail", { strongsNumber }),
   create: (data: any) =>
@@ -16,11 +16,11 @@ export const wordStudyApi = {
 
 export const verseResourcesApi = {
   getByReference: (book: string, chapter: number, verse: number) =>
-    sendPostRequest("strongs", "admin/get-verse-resource", { bookName: book, chapter, verseStart: verse }),
+    sendPostRequest("verse-resources", "get", { bookName: book, chapter, verseNumber: verse }),
   upsert: (data: any) =>
-    sendPostRequest("strongs", "admin/upsert-verse-resource", data),
+    sendPostRequest("verse-resources", "upsert", data),
   delete: (id: number) =>
-    sendPostRequest("strongs", "admin/delete-verse-resource", { id }),
+    sendPostRequest("verse-resources", "delete", { id }),
   list: (page = 0, size = 20, search = "") =>
     sendPostRequest("strongs", "admin/list-resources", { page, size, search }),
 };

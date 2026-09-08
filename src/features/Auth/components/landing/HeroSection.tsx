@@ -20,12 +20,17 @@ export function HeroSection() {
       </div>
       <div className="relative z-10 text-center px-4 sm:px-6 w-full max-w-5xl mx-auto pt-20 sm:pt-24 lg:pt-28 pb-12">
         <motion.div initial={{ opacity: 0, y: 40, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: 0.9, ease: [0.25, 0.1, 0.25, 1] }}>
-          <div className="w-28 h-28 mx-auto mb-6 lg:hidden">
-            <img src={logoImage} alt="Exegesis" className="w-full h-full object-contain" loading="lazy" />
+          <div className="w-60 h-60 sm:w-72 sm:h-72 mx-auto mb-8 sm:mb-10 lg:hidden rounded-[3.5rem] bg-[radial-gradient(circle,rgba(255,255,255,0.82)_0%,rgba(255,255,255,0.64)_45%,rgba(255,255,255,0.28)_72%,transparent_92%)] p-7 sm:p-8 shadow-[0_18px_40px_rgba(0,0,0,0.2)] backdrop-blur-md">
+            <img
+              src={logoImage}
+              alt="Exegesis"
+              className="w-full h-full object-contain drop-shadow-2xl"
+              loading="lazy"
+            />
           </div>
           <h1 className="text-lg sm:text-2xl md:text-4xl lg:text-5xl xl:text-6xl font-black text-white leading-[1.1] tracking-tighter whitespace-nowrap uppercase text-center w-full">
             {t.landing?.welcome || "Welcome To The"}{" "}
-            <span className="text-brand-accent">{t.landing?.heroTitle || "Exegesis Project"}</span>
+            <span className="text-brand-primary">{t.landing?.heroTitle || "Exegesis Project"}</span>
           </h1>
           <p className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-3xl text-white/80 font-bold tracking-wider mt-4 uppercase whitespace-nowrap">
             {t.landing?.heroSubtitle || "Search The Scriptures Daily"}

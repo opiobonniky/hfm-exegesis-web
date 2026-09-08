@@ -16,16 +16,32 @@ export function useUserDailyVerse() {
   const [liked, setLiked] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const loadVerse = useCallback(async (isRefresh = false) => {
-    if (isRefresh) setRefreshing(true); else setLoading(true);
-    try {
-      const res = await sendPostRequest("bible", "get-todays-verse", {});
-      if (res?.returnCode === 200 && res?.returnData) setVerse(res.returnData);
-      else toast({ title: "No verse available today", variant: "destructive" });
-    } catch { toast({ title: "Failed to load verse", variant: "destructive" }); }
-    finally { setLoading(false); setRefreshing(false); }
-  }, [toast]);
-  useEffect(() => { loadVerse(); }, [loadVerse]);
+  const loadVerse = useCallback(
+    async (isRefresh = false) => {
+      if (isRefresh) setRefreshing(true);
+      else setLoading(true);
+      try {
+        const res = await sendPostRequest("bible", "get-todays-verse", {});
+        if (res?.returnCode === 200 && res?.returnData) {
+          const data = res.returnData;
+          setVerse({
+            ...data,
+            verseText: data.verseText || data.text || null,
+          });
+        } else
+          toast({ title: "No verse available today", variant: "destructive" });
+      } catch {
+        toast({ title: "Failed to load verse", variant: "destructive" });
+      } finally {
+        setLoading(false);
+        setRefreshing(false);
+      }
+    },
+    [toast],
+  );
+  useEffect(() => {
+    loadVerse();
+  }, [loadVerse]);
   // Track scroll for sticky header styling
   useEffect(() => {
     const el = scrollRef.current;
@@ -37,28 +53,40 @@ export function useUserDailyVerse() {
   const handleCopy = useCallback(() => {
     if (!verse) return;
     const ref = `${verse.bookName} ${verse.chapter}:${verse.verseNumber}`;
-    const text = verse.verseText ? `\u201C${verse.verseText}\u201D \u2014 ${ref}` : ref;
-    navigator.clipboard.writeText(text).then(() =>
-      toast({ title: "Copied to clipboard" })
-    );
+    const text = verse.verseText
+      ? `\u201C${verse.verseText}\u201D \u2014 ${ref}`
+      : ref;
+    navigator.clipboard
+      .writeText(text)
+      .then(() => toast({ title: "Copied to clipboard" }));
   }, [verse, toast]);
   const handleShare = useCallback(async () => {
     if (!verse) return;
     const ref = `${verse.bookName} ${verse.chapter}:${verse.verseNumber}`;
     const text = `\u201C${verse.verseText || ""}\u201D \u2014 ${ref}\n\nvia Exegesis Bible App`;
     if (navigator.share) {
-      try { await navigator.share({ text }); } catch {}
+      try {
+        await navigator.share({ text });
+      } catch {}
     } else {
-      navigator.clipboard.writeText(text).then(() =>
-        toast({ title: "Copied to clipboard" })
-      );
+      navigator.clipboard
+        .writeText(text)
+        .then(() => toast({ title: "Copied to clipboard" }));
     }
   }, [verse, toast]);
   return {
-    t, isRtl,
-    verse, loading, refreshing, liked, setLiked,
-    scrolled, scrollRef, navigate,
+    t,
+    isRtl,
+    verse,
+    loading,
+    refreshing,
+    liked,
+    setLiked,
+    scrolled,
+    scrollRef,
+    navigate,
     refresh: () => loadVerse(true),
-    handleCopy, handleShare,
+    handleCopy,
+    handleShare,
   };
 }

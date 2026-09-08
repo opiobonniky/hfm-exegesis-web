@@ -6,12 +6,13 @@
  *   const { handleError } = useAdminErrorHandler();
  *   try { ... } catch (e) { handleError(e, "load users"); }
  */
+import { useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
 
 export function useAdminErrorHandler() {
   const { toast } = useToast();
 
-  const handleError = (error: unknown, context: string) => {
+  const handleError = useCallback((error: unknown, context: string) => {
     const message =
       error instanceof Error ? error.message : "An unexpected error occurred";
 
@@ -22,7 +23,7 @@ export function useAdminErrorHandler() {
       description: message,
       variant: "destructive",
     });
-  };
+  }, [toast]);
 
   return { handleError };
 }

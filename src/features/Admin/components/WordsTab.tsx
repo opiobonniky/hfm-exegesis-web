@@ -1,6 +1,7 @@
 "use client";
 
-import { Search, Loader2, Plus, BookText } from "lucide-react";
+import { useEffect, useRef } from "react";
+import { Search, Loader2, BookText, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Combobox } from "@/components/ui/combobox";
@@ -18,10 +19,37 @@ interface WordsTabProps {
 export function WordsTab({ state }: WordsTabProps) {
   const {
     words, wordsLoading, wordSearch, setWordSearch, searchWords,
+    loadVerseWords,
+    loadMoreWords, wordsLoadingMore, wordsHasMore,
     verseBook, handleBookChange, verseChapter, handleChapterChange,
-    verseNum, setVerseNum, verseChapList, verseNumList,
+    verseNum, setVerseNum, verseChapList, verseNumList, verseText, verseTextLoading,
     detailWord, setDetailWord, detailSheetOpen, setDetailSheetOpen,
   } = state;
+
+  useEffect(() => {
+    const query = wordSearch.trim();
+    const timer = window.setTimeout(() => {
+      if (!verseBook || !verseChapter || !verseNum) void searchWords(query);
+    }, 350);
+    return () => window.clearTimeout(timer);
+  }, [searchWords, verseBook, verseChapter, verseNum, wordSearch]);
+
+  useEffect(() => {
+    if (verseBook && verseChapter) {
+      void loadVerseWords(verseBook, verseChapter, verseNum || undefined);
+    }
+  }, [loadVerseWords, verseBook, verseChapter, verseNum]);
+
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const target = loadMoreRef.current;
+    if (!target) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting && (!verseBook || !verseChapter || !verseNum)) void loadMoreWords();
+    }, { rootMargin: "240px" });
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, [loadMoreWords, verseBook, verseChapter, verseNum]);
 
   return (
     <div className="space-y-5">
@@ -33,6 +61,31 @@ export function WordsTab({ state }: WordsTabProps) {
             Browse words by book, chapter, or verse
           </p>
         </div>
+        {verseBook && verseChapter && verseNum && (
+          <div className="relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/10 via-card to-card p-5 shadow-sm">
+            <div className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-primary/10 blur-2xl" />
+            <div className="relative flex items-start gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
+                <BookText className="h-5 w-5" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-bold uppercase tracking-wider text-primary">Selected verse</p>
+                <h2 className="mt-1 text-lg font-bold">{verseBook} {verseChapter}:{verseNum}</h2>
+                {verseTextLoading ? (
+                  <div className="mt-2 h-5 w-72 max-w-full animate-pulse rounded bg-muted" />
+                ) : verseText ? (
+                  <p className="mt-2 font-serif text-sm italic leading-relaxed text-foreground/80">“{verseText}”</p>
+                ) : (
+                  <p className="mt-2 text-sm text-muted-foreground">Showing Strong&apos;s words attached to this verse.</p>
+                )}
+                <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-background/70 px-2.5 py-1 text-xs font-medium text-muted-foreground">
+                  <Sparkles className="h-3.5 w-3.5 text-primary" />
+                  {words.length} {words.length === 1 ? "word" : "words"} available for this verse
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
         <div className="flex flex-wrap items-end gap-2 w-full">
           <div className="flex-1 min-w-[140px]">
             <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Book</label>
@@ -73,7 +126,7 @@ export function WordsTab({ state }: WordsTabProps) {
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="Search Strong's words..."
+            placeholder="            Search all Strong&apos;s words..."
             value={wordSearch}
             onChange={(e) => setWordSearch(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && searchWords(wordSearch)}
@@ -93,23 +146,35 @@ export function WordsTab({ state }: WordsTabProps) {
           ))}
         </div>
       ) : words.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div className="space-y-3">
+          {verseBook && verseChapter && verseNum && (
+            <p className="px-1 text-xs font-medium text-muted-foreground">
+              Strong&apos;s entries and verse-specific study notes
+            </p>
+          )}
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {words.map((w) => (
             <WordCard
-              key={w.strongsNumber}
+              key={`${w.strongsId}-${w.verseNumber ?? "entry"}`}
               word={w}
               onClick={() => { setDetailWord(w); setDetailSheetOpen(true); }}
             />
           ))}
+          </div>
         </div>
       ) : (
         <div className="text-center py-12 text-muted-foreground">
-          <p className="text-sm">No words found. Search by Strong's number or browse by verse.</p>
+          <p className="text-sm">No words found in the current search or verse.</p>
         </div>
       )}
+      <div ref={loadMoreRef} className="flex min-h-10 items-center justify-center">
+        {wordsLoadingMore && <Loader2 className="h-5 w-5 animate-spin text-primary" />}
+        {!wordsLoadingMore && words.length > 0 && !wordsHasMore && <p className="text-xs text-muted-foreground">You&apos;ve reached the end of the word list.</p>}
+      </div>
       {/* Detail Sheet */}
       <WordDetailSheet
         word={detailWord}
+        wordEntry={detailWord}
         open={detailSheetOpen}
         onOpenChange={setDetailSheetOpen}
       />

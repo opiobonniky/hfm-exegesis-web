@@ -23,7 +23,7 @@ export function VerseContent({ verse, accent = "hsl(var(--primary))", liked, onC
   const crossRefs = parseList(verse.crossReferences);
   const takeaways = parseList(verse.takeaways);
   return (
-    <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
+    <div className="max-w-7xl mx-auto px-4 py-6 space-y-6">
       <div className="text-center space-y-3">
         <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto">
           <BookOpen className="w-6 h-6 text-primary" />

@@ -16,7 +16,7 @@ export default function AdminStudyTools() {
   return (
     <div className="min-h-screen bg-background">
       <AdminPageContent className="py-6 space-y-6">
-        <StudyToolsHeader onBack={() => s.navigate(-1)} />
+        <StudyToolsHeader onBack={() => s.navigate(-1)} onAddResource={() => s.navigate("/admin/study-tools/add")} />
 
         <Tabs value={s.activeTab} onValueChange={s.setActiveTab}>
           <TabsList>

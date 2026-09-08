@@ -1,4 +1,5 @@
-import { Search, BookOpen, Heart, Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ArrowLeft, Search, BookOpen, Heart, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -14,9 +15,18 @@ interface StrongsHeaderProps {
 
 export function StrongsHeader({ onBack }: StrongsHeaderProps) {
   return (
-    <div>
-      <h1>Strong's Dictionary</h1>
-      <p>Browse Hebrew and Greek word definitions from Strong's Concordance</p>
+    <div className="relative overflow-hidden rounded-3xl border border-primary/20 bg-primary/[0.08] p-5 shadow-sm sm:p-8">
+      <div className="absolute -right-16 -top-20 h-48 w-48 rounded-full bg-primary/10 blur-3xl" />
+      <div className="relative flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+      <div>
+        <p className="text-xs font-bold uppercase tracking-[0.25em] text-primary">Scripture tools / word study</p>
+        <h1 className="mt-2 text-3xl font-black tracking-tight sm:text-5xl">Strong&apos;s Dictionary</h1>
+        <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">Explore Hebrew and Greek words with definitions, verse context, and explanation notes captured from the study library.</p>
+      </div>
+      <Button variant="outline" size="sm" onClick={onBack} className="relative w-fit gap-2 bg-background/70">
+        <ArrowLeft className="h-4 w-4" /> Back
+      </Button>
+      </div>
     </div>
   );
 }
@@ -29,7 +39,7 @@ interface StrongsSearchTabProps {
   selectedWord: StrongsWord | null;
   isFavorited: (num: string) => boolean;
   onSetSearchQuery: (q: string) => void;
-  onExecuteSearch: () => void;
+  onExecuteSearch: (query?: string) => void;
   onSetSelectedWord: (w: StrongsWord) => void;
   onToggleFavorite: (w: StrongsWord) => void;
   onLoadMore: () => void;
@@ -48,21 +58,38 @@ export function StrongsSearchTab({
   onToggleFavorite,
   onLoadMore,
 }: StrongsSearchTabProps) {
+  const [draftQuery, setDraftQuery] = useState(searchQuery);
+
+  useEffect(() => {
+    setDraftQuery(searchQuery);
+  }, [searchQuery]);
+
+  const submitSearch = () => {
+    const query = draftQuery.trim();
+    if (!query) return;
+    if (query === searchQuery.trim()) {
+      onExecuteSearch(query);
+      return;
+    }
+    onSetSearchQuery(query);
+    onExecuteSearch(query);
+  };
+
   return (
     <div className="space-y-4">
-      <div className="flex gap-2">
+      <div className="rounded-2xl border bg-muted/30 p-2 shadow-inner sm:flex sm:gap-2">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input placeholder="Search by word, Strong's number, or meaning..." value={searchQuery}
-            onChange={(e) => onSetSearchQuery(e.target.value)} className="pl-9"
-            onKeyDown={(e) => e.key === "Enter" && onExecuteSearch()} />
+          <Input placeholder="Search by word, Strong's number, or meaning..." value={draftQuery}
+            onChange={(e) => setDraftQuery(e.target.value)} className="pl-9"
+            onKeyDown={(e) => e.key === "Enter" && submitSearch()} />
         </div>
-        <Button onClick={onExecuteSearch} disabled={searchLoading}>
+        <Button onClick={submitSearch} disabled={searchLoading} className="mt-2 w-full sm:mt-0 sm:w-auto">
           {searchLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Search"}
         </Button>
       </div>
       {searchResults.length > 0 && (
-        <p>{searchCount} result{searchCount !== 1 ? "s" : ""} found</p>
+        <p className="text-sm font-medium text-muted-foreground">{searchCount} result{searchCount !== 1 ? "s" : ""} found</p>
       )}
       <div className="grid gap-3">
         {searchResults.map((w) => (
@@ -88,6 +115,7 @@ interface StrongsBrowseTabProps {
   selectedWord: StrongsWord | null;
   isFavorited: (num: string) => boolean;
   onSetSelectedBook: (book: string) => void;
+  onLoadBook: (book: string) => void;
   onSetSelectedWord: (w: StrongsWord) => void;
   onToggleFavorite: (w: StrongsWord) => void;
   onLoadMore: () => void;
@@ -101,6 +129,7 @@ export function StrongsBrowseTab({
   selectedWord,
   isFavorited,
   onSetSelectedBook,
+  onLoadBook,
   onSetSelectedWord,
   onToggleFavorite,
   onLoadMore,
@@ -109,7 +138,13 @@ export function StrongsBrowseTab({
     <div className="space-y-4">
       <div>
         <label>Select a Book</label>
-        <Select value={selectedBook} onValueChange={onSetSelectedBook}>
+        <Select
+          value={selectedBook}
+          onValueChange={(book) => {
+            onSetSelectedBook(book);
+            onLoadBook(book);
+          }}
+        >
           <SelectTrigger className="w-full"><SelectValue placeholder="Choose a Bible book" /></SelectTrigger>
           <SelectContent>{BIBLE_BOOKS.map((book) => (<SelectItem key={book} value={book}>{book}</SelectItem>))}</SelectContent>
         </Select>

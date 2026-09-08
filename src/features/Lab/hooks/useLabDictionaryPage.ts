@@ -59,7 +59,7 @@ export function useLabDictionaryPage() {
         setLoading(false);
       }
     },
-    [searchWords],
+    [],
   );
 
   useEffect(() => {
@@ -258,10 +258,12 @@ export function useLabDictionaryPage() {
   );
   const openWordDetailById = useCallback(
     (strongsId: string) => {
-      const word = browseWords.find((w) => w.strongsId === strongsId);
+      const word = [...results, ...browseWords, ...verseWords].find(
+        (entry) => entry.strongsId === strongsId,
+      );
       if (word) openWordDetail(word);
     },
-    [browseWords, openWordDetail],
+    [browseWords, openWordDetail, results, verseWords],
   );
   const goBack = useCallback(() => navigate(-1), [navigate]);
   const loadSelectedVerse = useCallback(() => {
@@ -269,8 +271,15 @@ export function useLabDictionaryPage() {
       loadVerseWordsAction(verseBook, verseChapter, verseNum);
   }, [verseBook, verseChapter, verseNum, loadVerseWordsAction]);
   const loadMoreBookWords = useCallback(() => {
+    if (!selectedBook || browseLoading || !browseHasNext) return;
     loadBookWordsAction(selectedBook, browsePage + 1, true);
-  }, [selectedBook, browsePage, loadBookWordsAction]);
+  }, [
+    selectedBook,
+    browseLoading,
+    browseHasNext,
+    browsePage,
+    loadBookWordsAction,
+  ]);
 
   return {
     data: {
