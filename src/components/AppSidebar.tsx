@@ -183,13 +183,16 @@ function PillNavItem({
         return (
           <div
             className={cn(
-              "flex items-center w-full transition-all duration-200 rounded-xl",
+              "relative flex items-center w-full overflow-hidden transition-all duration-200 rounded-xl border border-transparent",
               collapsed ? "justify-center p-1" : "gap-3 p-2",
               active
-                ? "bg-accent/10 dark:bg-accent/15 shadow-sm cathedral:bg-primary/10 cathedral:dark:bg-primary/15"
-                : "hover:bg-accent/5 dark:hover:bg-accent/8 cathedral:hover:bg-primary/5 cathedral:dark:hover:bg-primary/8",
+                ? "border-primary/20 bg-gradient-to-r from-primary/15 via-primary/8 to-transparent shadow-sm dark:from-primary/20 dark:via-primary/10"
+                : "hover:border-primary/20 hover:bg-gradient-to-r hover:from-primary/8 hover:to-transparent dark:hover:from-primary/12",
             )}
           >
+            {active && (
+              <span className="absolute inset-y-2 left-0 w-0.5 rounded-full bg-gradient-to-b from-primary via-primary/60 to-primary shadow-[0_0_10px_hsl(var(--primary)/0.55)] rtl:left-auto rtl:right-0" />
+            )}
             {/* Icon container */}
             <div
               className={cn(
@@ -197,8 +200,8 @@ function PillNavItem({
                 "rounded-lg",
                 collapsed ? "w-9 h-9" : "w-8 h-8",
                 active
-                  ? "bg-accent text-accent-foreground shadow-[0_2px_8px_rgba(232,163,23,0.25)] cathedral:bg-primary cathedral:text-primary-foreground cathedral:shadow-[0_2px_8px_hsl(var(--primary)/0.25)]"
-                  : "bg-transparent group-hover:bg-accent/10 dark:group-hover:bg-accent/15 cathedral:group-hover:bg-primary/10 cathedral:dark:group-hover:bg-primary/15",
+                  ? "bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-[0_4px_12px_hsl(var(--primary)/0.28)]"
+                  : "bg-muted/35 group-hover:bg-primary/10 dark:bg-muted/20 dark:group-hover:bg-primary/15",
               )}
             >
               <Icon
@@ -206,8 +209,8 @@ function PillNavItem({
                   "transition-all duration-200",
                   collapsed ? "w-4 h-4" : "w-3.5 h-3.5",
                   active
-                    ? "text-accent-foreground cathedral:text-primary-foreground"
-                    : "text-foreground/40 group-hover:text-accent/80 dark:group-hover:text-accent/70 cathedral:text-foreground/40 cathedral:group-hover:text-primary/80 cathedral:dark:group-hover:text-primary/70",
+                    ? "text-primary-foreground"
+                    : "text-foreground/40 group-hover:text-primary/80 dark:group-hover:text-primary/70",
                   !active && collapsed && "group-hover:scale-110",
                 )}
               />
@@ -229,7 +232,7 @@ function PillNavItem({
 
             {/* Active dot */}
             {active && !collapsed && (
-              <span className="ml-auto w-1 h-1 rounded-full bg-accent shrink-0 shadow-[0_0_4px_rgba(232,163,23,0.4)] cathedral:bg-primary cathedral:shadow-[0_0_4px_hsl(var(--primary)/0.4)]" />
+              <span className="ml-auto w-1 h-1 rounded-full bg-primary shrink-0 shadow-[0_0_4px_hsl(var(--primary)/0.4)]" />
             )}
           </div>
         );
@@ -243,10 +246,10 @@ function PillNavItem({
 function SectionDivider({ collapsed }: { collapsed: boolean }) {
   if (collapsed)
     return (
-      <div className="mx-auto my-3 w-4 h-px bg-border/50 cathedral:bg-primary/30" />
+      <div className="mx-auto my-3 h-px w-5 bg-gradient-to-r from-transparent via-primary/35 to-transparent cathedral:via-primary/50" />
     );
   return (
-    <div className="mx-3 my-3 h-px bg-gradient-to-r from-border/60 via-border/30 to-transparent cathedral:from-primary/30 cathedral:via-primary/15 cathedral:to-transparent" />
+    <div className="mx-3 my-3 h-px bg-gradient-to-r from-primary/35 via-primary/15 to-transparent" />
   );
 }
 
@@ -321,21 +324,24 @@ function BibleNavItem({
     >
       <div
         className={cn(
-          "flex items-center w-full transition-all duration-200 rounded-xl",
+          "relative flex items-center w-full overflow-hidden transition-all duration-200 rounded-xl border border-transparent",
           collapsed ? "justify-center p-1" : "gap-3 p-2",
           active
-            ? "bg-accent/10 dark:bg-accent/15 shadow-sm cathedral:bg-primary/10 cathedral:dark:bg-primary/15"
-            : "hover:bg-accent/5 dark:hover:bg-accent/8 cathedral:hover:bg-primary/5 cathedral:dark:hover:bg-primary/8",
+            ? "border-primary/20 bg-gradient-to-r from-primary/15 via-primary/8 to-transparent shadow-sm dark:from-primary/20 dark:via-primary/10"
+            : "hover:border-primary/20 hover:bg-gradient-to-r hover:from-primary/8 hover:to-transparent dark:hover:from-primary/12",
         )}
       >
+        {active && (
+          <span className="absolute inset-y-2 left-0 w-0.5 rounded-full bg-gradient-to-b from-primary via-primary/60 to-primary shadow-[0_0_10px_hsl(var(--primary)/0.55)] rtl:left-auto rtl:right-0" />
+        )}
         <div
           className={cn(
             "flex items-center justify-center shrink-0 transition-all duration-300",
             "rounded-lg",
             collapsed ? "w-9 h-9" : "w-8 h-8",
             active
-              ? "bg-accent text-accent-foreground shadow-[0_2px_8px_rgba(232,163,23,0.25)] cathedral:bg-primary cathedral:text-primary-foreground cathedral:shadow-[0_2px_8px_hsl(var(--primary)/0.25)]"
-              : "bg-transparent group-hover:bg-accent/10 dark:group-hover:bg-accent/15 cathedral:group-hover:bg-primary/10 cathedral:dark:group-hover:bg-primary/15",
+              ? "bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-[0_4px_12px_hsl(var(--primary)/0.28)]"
+              : "bg-muted/35 group-hover:bg-primary/10 dark:bg-muted/20 dark:group-hover:bg-primary/15",
           )}
         >
           <BookText
@@ -343,8 +349,8 @@ function BibleNavItem({
               "transition-all duration-200",
               collapsed ? "w-4 h-4" : "w-3.5 h-3.5",
               active
-                ? "text-accent-foreground cathedral:text-primary-foreground"
-                : "text-foreground/40 group-hover:text-accent/80 dark:group-hover:text-accent/70 cathedral:text-foreground/40 cathedral:group-hover:text-primary/80 cathedral:dark:group-hover:text-primary/70",
+                ? "text-primary-foreground"
+                : "text-foreground/40 group-hover:text-primary/80 dark:group-hover:text-primary/70",
               !active && collapsed && "group-hover:scale-110",
             )}
           />
@@ -364,7 +370,7 @@ function BibleNavItem({
         )}
 
         {active && !collapsed && (
-          <span className="ml-auto w-1 h-1 rounded-full bg-accent shrink-0 shadow-[0_0_4px_rgba(232,163,23,0.4)] cathedral:bg-primary cathedral:shadow-[0_0_4px_hsl(var(--primary)/0.4)]" />
+          <span className="ml-auto w-1 h-1 rounded-full bg-primary shrink-0 shadow-[0_0_4px_hsl(var(--primary)/0.4)]" />
         )}
       </div>
     </button>
@@ -494,7 +500,8 @@ export function AppSidebar() {
           isRtl
             ? "border-l border-border/50 [&>div]:border-l-0"
             : "border-r border-border/50 [&>div]:border-r-0",
-          "transition-all duration-300 ease-out",
+          "bg-gradient-to-b from-background via-background to-primary/[0.035] shadow-[4px_0_24px_rgba(15,23,42,0.04)] transition-all duration-300 ease-out dark:to-primary/[0.06] dark:shadow-[4px_0_24px_rgba(0,0,0,0.12)]",
+          "[&>div]:bg-gradient-to-b [&>div]:from-sidebar [&>div]:via-sidebar [&>div]:to-primary/[0.07] dark:[&>div]:to-primary/[0.12]",
           collapsed ? "w-[68px]" : "w-64",
         )}
         collapsible="icon"
@@ -508,7 +515,7 @@ export function AppSidebar() {
           <NavLink
             to={isAdmin ? routes.dashboard.path : routes.home.path}
             className={cn(
-              "group block transition-all duration-200",
+              "group relative block overflow-hidden rounded-2xl border border-primary/10 bg-gradient-to-br from-primary/[0.08] via-transparent to-indigo-500/[0.06] p-2 transition-all duration-200 hover:border-primary/25 hover:shadow-sm dark:from-primary/[0.12] dark:to-indigo-500/[0.1]",
               collapsed ? "mx-auto" : "",
             )}
           >
@@ -536,9 +543,10 @@ export function AppSidebar() {
         {/* ═══════════════════════════════════════════════════════════════════
            NAVIGATION
            ═══════════════════════════════════════════════════════════════════ */}
-        <SidebarContent className="sidebar-scroll px-2 py-1 overflow-y-auto overflow-x-hidden">
+        <SidebarContent className="sidebar-scroll relative overflow-y-auto overflow-x-hidden bg-gradient-to-b from-primary/[0.025] via-transparent to-primary/[0.05] px-2 py-2 dark:from-primary/[0.07] dark:to-primary/[0.08]">
+          <div className="pointer-events-none absolute inset-x-2 top-0 h-24 rounded-2xl bg-gradient-to-b from-primary/[0.08] via-primary/[0.025] to-transparent blur-sm dark:from-primary/[0.12] dark:via-primary/[0.04]" />
           {/* ── Main Menu ── */}
-          <nav>
+          <nav className="relative rounded-2xl border border-primary/[0.08] bg-gradient-to-br from-primary/[0.05] via-transparent to-primary/[0.025] p-1 dark:border-primary/[0.14] dark:from-primary/[0.08] dark:to-primary/[0.05]">
             <ul
               className={cn("flex flex-col", collapsed ? "gap-1" : "gap-0.5")}
             >
@@ -550,7 +558,7 @@ export function AppSidebar() {
 
           {/* ── Manage / Settings section for all users ── */}
           <SectionDivider collapsed={collapsed} />
-          <nav>
+          <nav className="relative rounded-2xl border border-primary/[0.08] bg-gradient-to-br from-primary/[0.035] via-transparent to-primary/[0.025] p-1 dark:border-primary/[0.14] dark:from-primary/[0.07] dark:to-primary/[0.05]">
             <ul
               className={cn("flex flex-col", collapsed ? "gap-1" : "gap-0.5")}
             >
@@ -571,8 +579,8 @@ export function AppSidebar() {
           <button
             onClick={logout}
             className={cn(
-              "door-hover flex items-center w-full rounded-xl transition-all duration-200",
-              "text-foreground/30 hover:text-red-400 hover:bg-red-500/8",
+              "door-hover flex items-center w-full rounded-xl border border-transparent transition-all duration-200",
+              "text-foreground/45 hover:border-red-500/15 hover:bg-gradient-to-r hover:from-red-500/10 hover:to-transparent hover:text-red-500",
               collapsed ? "justify-center p-2" : "gap-3 px-3 py-2.5",
             )}
           >
