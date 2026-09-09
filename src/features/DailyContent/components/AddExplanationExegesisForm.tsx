@@ -1,20 +1,17 @@
 import { Lightbulb } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import type { ReturnType } from "react";
-import { useAddExplanation } from "../hooks/useAddExplanation";
+import type { AddExplanationExegesisFormProps } from "../types";
 import { CharCount } from "./CharCount";
-
-type Model = ReturnType<typeof useAddExplanation>;
-
-interface Props {
-  model: Model;
-}
 
 const EXPLANATION_MAX = 20000;
 const APPLICATION_MAX = 10000;
 
-export function AddExplanationExegesisForm({ model: h }: Props) {
+export function AddExplanationExegesisForm({ explanationText, applicationText, updateNested }: AddExplanationExegesisFormProps) {
+  const h = {
+    form: { exegesis: { explanationText, applicationText } },
+    updateNested,
+  };
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-2 text-sky-600">

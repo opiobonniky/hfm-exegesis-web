@@ -320,6 +320,8 @@ export interface AddBookPrologueModel {
   canAdvanceFromCurrent: boolean;
   isValid: boolean;
   filteredBooks: string[];
+  bookOptions: Array<{ value: string; label: string; group: string }>;
+  chapterOptions: number[][];
   setActiveStep: (step: PrologueStepId) => void;
   goToStep: (step: PrologueStepId) => void;
   goNext: () => void;
@@ -335,4 +337,3 @@ export interface AddBookPrologueModel {
   handleSave: () => void;
   goBack: () => void;
 }
-

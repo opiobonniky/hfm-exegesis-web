@@ -11,7 +11,8 @@ import { StudyToolsHeader } from "../components/StudyToolsHeader";
 import { AdminPageContent } from "../components/AdminPageContent";
 
 export default function AdminStudyTools() {
-  const s = useStudyTools();
+  const { data, actions } = useStudyTools();
+  const s = { ...data, ...actions };
 
   return (
     <div className="min-h-screen bg-background">

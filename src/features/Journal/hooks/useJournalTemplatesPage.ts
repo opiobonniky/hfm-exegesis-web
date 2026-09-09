@@ -77,9 +77,7 @@ export function useJournalTemplatesPage() {
   const saveDisabled = saving || !formData.name.trim() || formData.prompts.filter(p => p.trim()).length === 0;
 
   return {
-    t, templates, loading, dialogOpen, setDialogOpen,
-    deleteDialog, setDeleteDialog, deleting, saving,
-    formData, setFormData, saveDisabled,
-    handleSave, handleDelete, openAddDialog,
+    data: { t, templates, loading, dialogOpen, deleteDialog, deleting, saving, formData, saveDisabled },
+    actions: { setDialogOpen, setDeleteDialog, setFormData, handleSave, handleDelete, openAddDialog },
   };
 }

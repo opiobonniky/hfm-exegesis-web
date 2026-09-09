@@ -1,4 +1,3 @@
-import { useNavigate } from "react-router-dom";
 import Gate from "@/components/Gate";
 import { PageLayout } from "@/components/PageLayout";
 import { PageHeader } from "@/components/PageHeader";
@@ -8,11 +7,10 @@ import { routes } from "@/components/Routes/routes";
 import { useReadingPlansPage } from "../hooks/useReadingPlansPage";
 import { ReadingPlanFilters } from "../components/ReadingPlanFilters";
 import { ReadingPlanPagination } from "../components/ReadingPlanPagination";
-import { CreatePlanButton, PlansGrid } from "../components";
+import { CreatePlanButton, DeletePlanModal, PlansGrid } from "../components";
 
-const ReadingPlans = () => {
+export default function ReadingPlans() {
   const { data, actions } = useReadingPlansPage();
-  const navigate = useNavigate();
 
   return (
     <Gate tier="legacy_sower" featureName="Reading Plans" featureDescription="Track your daily Bible reading progress with personalized reading plans.">
@@ -24,7 +22,7 @@ const ReadingPlans = () => {
           action={
             <CreatePlanButton
               label={data.createPlanLabel}
-              onClick={() => navigate("/admin/plans/new")}
+              onClick={() => data.navigate(routes.addReadingPlan.path)}
             />
           }
         />
@@ -42,7 +40,7 @@ const ReadingPlans = () => {
             title={data.noPlansTitle}
             message={data.noPlansDesc}
             actionLabel="Create Plan"
-            onAction={() => navigate("/admin/plans/new")}
+            onAction={() => data.navigate("/admin/plans/new")}
           />
         ) : (
           <>
@@ -50,7 +48,8 @@ const ReadingPlans = () => {
               plans={data.plans}
               isRtl={data.isRtl}
               t={data.t}
-              onPress={(planId) => navigate(routes.readingPlanDetail.path.replace(":planId", planId))}
+              onPress={(planId) => data.navigate(routes.readingPlanDetail.path.replace(":planId", planId))}
+              onDelete={actions.setDeleteTarget}
             />
             <ReadingPlanPagination
               page={data.page || 1} setPage={actions.setPage || (() => {})}
@@ -59,9 +58,19 @@ const ReadingPlans = () => {
             />
           </>
         )}
+        <DeletePlanModal
+          visible={!!data.deleteTarget}
+          plan={data.deleteTarget}
+          confirmationText={data.deleteConfirmText}
+          deleting={data.deleting}
+          onConfirmationTextChange={actions.setDeleteConfirmText}
+          onConfirm={actions.handleDelete}
+          onClose={() => {
+            actions.setDeleteTarget(null);
+            actions.setDeleteConfirmText("");
+          }}
+        />
       </PageLayout>
     </Gate>
   );
-};
-
-export default ReadingPlans;
+}

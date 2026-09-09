@@ -71,5 +71,5 @@ export function useVoiceSettingsPage() {
   const updateSetting = <K extends keyof VoiceSettingsData>(key: K, value: VoiceSettingsData[K]) =>
     setSettings((s) => ({ ...s, [key]: value }));
   const goBack = useCallback(() => navigate(-1), [navigate]);
-  return { loading, saving, isPlaying, settings, updateSetting, handlePreview, stopPreview, handleSave, goBack };
+  return { data: { loading, saving, isPlaying, settings }, actions: { updateSetting, handlePreview, stopPreview, handleSave, goBack } };
 }

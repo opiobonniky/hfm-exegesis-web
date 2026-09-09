@@ -98,5 +98,5 @@ export function useVerseExplanationDetail() {
     }
   }, [item, toast, navigate]);
 
-  return { item, loading, navigate, deleteItem };
+  return { data: { item, loading }, actions: { navigate, deleteItem } };
 }

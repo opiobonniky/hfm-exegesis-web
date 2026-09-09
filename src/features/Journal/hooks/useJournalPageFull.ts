@@ -224,18 +224,25 @@ export function useJournalPageFull() {
   const hasActiveFilters = !!(search || category !== "all" || bookName || source || strongsId || startDate || endDate);
 
   return {
-    t, isRtl, handleTierBadgeClick, sowerPortalLoading,
-    entries, stats, loading, page, totalPages, hasNext, hasPrevious,
-    search, handleSearchChange, category, setCategory, bookName, setBookName, source, setSource,
-    strongsId, setStrongsId, startDate, setStartDate, endDate, setEndDate,
-    viewMode, handleViewModeChange, showFilters, setShowFilters,
-    deleteDialog, deleting, handleDelete, openDeleteDialog, closeDeleteDialog, handleDeleteDialogOpenChange,
-    showExportModal, openExportDialog, closeExportDialog, handleExportDialogOpenChange,
-    selectionMode, selectedIds, toggleSelectionMode, exitSelectionMode,
-    toggleEntrySelection, toggleSelectAll, clearSelection,
-    handlePreviousPage, handleNextPage, viewEntry, createEntry,
-    hasActiveFilters, clearAllFilters, refresh,
+    data: {
+      t, isRtl, sowerPortalLoading, entries, stats, loading, page, totalPages,
+      hasNext, hasPrevious, search, category, bookName, source, strongsId,
+      startDate, endDate, viewMode, showFilters, deleteDialog, deleting,
+      showExportModal, selectionMode, selectedIds, hasActiveFilters,
+    },
+    actions: {
+      handleTierBadgeClick, handleSearchChange, setCategory, setBookName,
+      setSource, setStrongsId, setStartDate, setEndDate, handleViewModeChange,
+      setShowFilters, handleDelete, openDeleteDialog, closeDeleteDialog,
+      handleDeleteDialogOpenChange, openExportDialog, closeExportDialog,
+      handleExportDialogOpenChange, toggleSelectionMode, exitSelectionMode,
+      toggleEntrySelection, toggleSelectAll, clearSelection,
+      handlePreviousPage, handleNextPage, viewEntry, createEntry,
+      clearAllFilters, refresh,
+    },
   };
 }
 
-export type JournalPageModel = ReturnType<typeof useJournalPageFull>;
+export type JournalPageModel =
+  ReturnType<typeof useJournalPageFull>["data"] &
+  ReturnType<typeof useJournalPageFull>["actions"];

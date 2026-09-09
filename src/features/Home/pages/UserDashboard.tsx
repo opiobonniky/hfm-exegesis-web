@@ -9,7 +9,8 @@ import {
 } from "../components";
 
 export default function UserDashboard() {
-  const d = useUserDashboard();
+  const { data, actions } = useUserDashboard();
+  const d = { ...data, ...actions };
 
   if (d.loading) return <DashboardSkeleton />;
 

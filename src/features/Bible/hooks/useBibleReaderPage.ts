@@ -43,7 +43,8 @@ export function useBibleReaderPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { isRtl } = useLanguage();
-  const reader = useBibleReader();
+  const { data: readerData, actions: readerActions } = useBibleReader();
+  const reader = { ...readerData, ...readerActions };
   const audio = useAudioPlayer();
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -685,6 +686,7 @@ export function useBibleReaderPage() {
   const hasSelection = reader.selectedVerses.length > 0;
 
   return {
+    data: {
     apiBaseUrl: API_BASE_URL,
 
     // ── Layout ──────────────────────────────────────────────────────────
@@ -833,5 +835,7 @@ export function useBibleReaderPage() {
       onSave: handleSaveNote,
       onDelete: handleDeleteNote,
     },
+    },
+    actions: {},
   };
 }

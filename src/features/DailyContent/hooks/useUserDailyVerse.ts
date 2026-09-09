@@ -75,18 +75,7 @@ export function useUserDailyVerse() {
     }
   }, [verse, toast]);
   return {
-    t,
-    isRtl,
-    verse,
-    loading,
-    refreshing,
-    liked,
-    setLiked,
-    scrolled,
-    scrollRef,
-    navigate,
-    refresh: () => loadVerse(true),
-    handleCopy,
-    handleShare,
+    data: { t, isRtl, verse, loading, refreshing, liked, scrolled, scrollRef, navigate },
+    actions: { setLiked, refresh: () => loadVerse(true), handleCopy, handleShare },
   };
 }

@@ -13,7 +13,8 @@ import AdditionalDetailsTab from "../components/AdditionalDetailsTab";
 import { SettingsTabBar, SettingsContentWrapper, SettingsContentArea, SettingsBottomSpacer } from "../components";
 
 export default function Settings() {
-  const h = useSettingsPage();
+  const { data, actions } = useSettingsPage();
+  const h = { ...data, ...actions };
   if (h.loading) return <SettingsLoading />;
 
   return (

@@ -7,7 +7,8 @@ import { AdminPageHeader, AdminEmptyState, AdminLoadingGrid, AdminSearchBar, Adm
 import { UsersTable } from "../components/UsersTable";
 
 export default function AdminUsersPage() {
-  const h = useAdminUsers();
+  const { data, actions } = useAdminUsers();
+  const h = { ...data, ...actions };
 
   return (
     <div className="min-h-screen bg-background">

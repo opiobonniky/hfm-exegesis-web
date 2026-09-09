@@ -10,7 +10,9 @@ import {
 } from "../components";
 
 export default function OnboardingPage() {
-  const { slide, goNext, goPrev } = useOnboardingPage();
+  const { data, actions } = useOnboardingPage();
+  const { slide } = data;
+  const { goNext, goPrev } = actions;
   const totalSlides = SLIDES.length;
   const isFirst = slide === 0;
   const isLast = slide === totalSlides - 1;

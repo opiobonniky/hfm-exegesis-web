@@ -6,10 +6,10 @@ import {
   Sparkles,
 } from "lucide-react";
 import type { ReactNode } from "react";
-import type { AddDailyVersePageModel } from "../hooks/useAddDailyVerse";
+import type { AddDailyVersePageViewModel } from "../hooks/useAddDailyVerse";
 
 interface Props {
-  model: AddDailyVersePageModel;
+  model: AddDailyVersePageViewModel;
   children: ReactNode;
 }
 

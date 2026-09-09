@@ -19,10 +19,10 @@ export function BookPrologueHero({
   const published = item.isPublished !== false;
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border bg-gradient-to-br from-primary via-primary/90 to-indigo-600 text-primary-foreground shadow-lg">
+    <div className="relative overflow-hidden rounded-3xl border border-primary/20 bg-gradient-to-br from-primary via-primary/90 to-indigo-600 text-primary-foreground shadow-xl shadow-primary/10">
       <div className="absolute inset-0 opacity-[0.12] pointer-events-none bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.9),transparent_60%)]" />
 
-      <div className="relative px-6 py-8 sm:px-8 sm:py-10">
+      <div className="relative px-4 py-5 sm:px-8 sm:py-10">
         <div className="flex items-center justify-between gap-4">
           <Button
             variant="ghost"
@@ -48,7 +48,7 @@ export function BookPrologueHero({
           </div>
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight leading-none">
+              <h1 className="break-words text-3xl font-extrabold leading-none tracking-tight sm:text-4xl">
                 {item.bookName}
               </h1>
               <Badge

@@ -6,9 +6,9 @@ import {
   saveStageProgress,
   saveProgress,
 } from "@/services/exegesisApi";
-import { sendPostRequest } from "@/services/api";
 import { BOOK_NAMES } from "../constants";
 import type { LabStage, LabFlowState } from "../types";
+import { saveAbideProgress, saveApplyProgress } from "../services/save-flow-progress";
 
 export function useLabFlow() {
   const [searchParams] = useSearchParams();
@@ -268,7 +268,7 @@ export function useLabFlow() {
         abideTags: st.tags,
         isPublic: st.isPublic,
       });
-      await sendPostRequest("exegesis", `${st.sessionId}/abide`, {
+      await saveAbideProgress(st.sessionId, {
         reflection: st.reflection,
         prayer: st.prayer,
         application: st.appText,
@@ -294,16 +294,12 @@ export function useLabFlow() {
         challengeText: st.challengeText,
         resultsText: st.resultsText,
       });
-      const res = await sendPostRequest(
-        "exegesis",
-        `${st.sessionId}/apply`,
-        {
-          challengeText: st.challengeText,
-          resultsText: st.resultsText,
-        },
-      );
-      if (res.returnCode === 200 && res.returnData) {
-        const data = res.returnData as any;
+      const result = await saveApplyProgress(st.sessionId, {
+        challengeText: st.challengeText,
+        resultsText: st.resultsText,
+      });
+      if (result) {
+        const data = result as any;
         update({
           stage: "completed",
           completed: true,

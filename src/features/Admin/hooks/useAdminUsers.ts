@@ -137,7 +137,7 @@ export function useAdminUsers() {
   const openCreateUser = useCallback(() => navigate("/admin/users/create"), [navigate]);
   const viewUser = useCallback((user: AdminUser) => navigate(`/admin/users/${user.id}`), [navigate]);
 
-  return {
+  return { data: {
     users,
     loading,
     loadingMore,
@@ -151,6 +151,7 @@ export function useAdminUsers() {
     handleToggleVerification,
     goBack,
     openCreateUser,
-    viewUser,
-  };
+  }, actions: {
+    setSearch, handleToggleStatus, handleToggleVerification, goBack, openCreateUser, viewUser,
+  } };
 }

@@ -13,7 +13,7 @@ import { BIBLE_BOOKS } from "@/data/staticData";
 import { Combobox } from "@/components/ui/combobox";
 import type { useStudyTools } from "../hooks/useStudyTools";
 
-type StudyToolsState = ReturnType<typeof useStudyTools>;
+type StudyToolsState = ReturnType<typeof useStudyTools>["data"] & ReturnType<typeof useStudyTools>["actions"];
 
 interface ProloguesTabProps {
   state: StudyToolsState;

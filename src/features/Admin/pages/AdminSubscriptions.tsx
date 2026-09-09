@@ -17,7 +17,8 @@ import { TierFormDialog } from "../components/TierFormDialog";
 
 const AdminSubscriptions = () => {
   const { isRtl } = useLanguage();
-  const h = useAdminSubscriptions();
+  const { data, actions } = useAdminSubscriptions();
+  const h = { ...data, ...actions };
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6" dir={isRtl ? "rtl" : "ltr"}>

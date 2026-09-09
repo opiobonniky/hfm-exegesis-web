@@ -228,6 +228,9 @@ export function useDailyReadingPage() {
     : !quizDone && assignment?.quizQuestions?.length
       ? "Finish the quiz before completing this day."
       : undefined;
+  const chapters = assignment?.chapters || [];
+  const reflections = assignment?.reflections || [];
+  const quizQuestions = assignment?.quizQuestions || [];
 
   return {
     data: {
@@ -235,6 +238,9 @@ export function useDailyReadingPage() {
       isRtl,
       loading,
       assignment,
+      chapters,
+      reflections,
+      quizQuestions,
       notYetAdded,
       isCompleted,
       planTitle: planTitleText,

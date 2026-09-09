@@ -7,7 +7,8 @@ import { TriviaDetailContent, TriviaDetailActions } from "../components/TriviaDe
 import { useTriviaDetail } from "../hooks/useTriviaDetail";
 
 export default function TriviaDetail() {
-  const h = useTriviaDetail();
+  const { data, actions } = useTriviaDetail();
+  const h = { ...data, ...actions };
 
   if (h.loading) return <DetailLoading />;
   if (!h.question) return null;

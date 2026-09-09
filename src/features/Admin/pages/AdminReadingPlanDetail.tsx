@@ -11,7 +11,8 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar } from "lucide-react";
 
 export default function AdminReadingPlanDetail() {
-  const h = useAdminReadingPlanDetail();
+  const { data, actions } = useAdminReadingPlanDetail();
+  const h = { ...data, ...actions };
 
   if (h.loading) return <DetailLoading />;
   if (!h.item) return null;

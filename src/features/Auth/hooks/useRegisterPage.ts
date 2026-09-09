@@ -110,9 +110,13 @@ export function useRegisterPage() {
   }, [setUserInfo, navigate, toast]);
 
   return {
-    t, isRtl, navigate, step, setStep, formData, showPassword, setShowPassword,
-    isLoading, isGoogleLoading, focusedField, setFocusedField,
-    touchedFields, dirtyFields, getFieldError, handleChange, handleBlur,
-    handleSubmit, handleGoogleLogin,
+    data: {
+      t, isRtl, step, formData, showPassword, isLoading, isGoogleLoading,
+      focusedField, touchedFields, dirtyFields,
+    },
+    actions: {
+      navigate, setStep, setShowPassword, setFocusedField, getFieldError, handleChange,
+      handleBlur, handleSubmit, handleGoogleLogin,
+    },
   };
 }

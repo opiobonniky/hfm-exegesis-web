@@ -3,18 +3,13 @@
  */
 import { BookOpen, PenLine } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
-interface Props {
-  canOpenBible: boolean;
-  onOpenBible: () => void;
-  onSaveToJournal: () => void;
-}
+import type { DailyExegesisActionsProps } from "../types";
 
 export function DailyExegesisActions({
   canOpenBible,
   onOpenBible,
   onSaveToJournal,
-}: Props) {
+}: DailyExegesisActionsProps) {
   return (
     <div className="flex flex-col sm:flex-row gap-3 mt-8">
       <Button

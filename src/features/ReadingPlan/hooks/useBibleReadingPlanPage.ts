@@ -164,6 +164,15 @@ export function useBibleReadingPlanPage() {
   const getCompletedDays = (pr: UserProgress): number[] => {
     try { return pr.completedDaysJson ? JSON.parse(pr.completedDaysJson) : []; } catch { return []; }
   };
+  const statItems = [
+    { label: t.readingPlan?.totalPlans || "Total Plans", value: plans.length, color: "text-teal-700 dark:text-teal-400", bg: "bg-teal-50 dark:bg-teal-950/30 border-teal-100 dark:border-teal-800/40" },
+    { label: t.readingPlan?.activeLabel || "Active", value: activePlans.length, color: "text-emerald-700 dark:text-emerald-400", bg: "bg-emerald-50 dark:bg-emerald-950/30 border-emerald-100 dark:border-emerald-800/40" },
+    { label: t.readingPlan?.quizEnabled || "Quiz Enabled", value: plans.filter((plan) => plan.questionsEnabled).length, color: "text-violet-700 dark:text-violet-400", bg: "bg-violet-50 dark:bg-violet-950/30 border-violet-100 dark:border-violet-800/40" },
+  ];
+  const tabs = [
+    { key: "progress", label: t.readingPlan?.tabProgress || "My Progress", badge: activePlans.length > 0 ? activePlans.length : undefined },
+    { key: "browse", label: t.readingPlan?.browsePlans || "Browse Plans" },
+  ];
 
   return {
     data: {
@@ -182,6 +191,8 @@ export function useBibleReadingPlanPage() {
       navigate,
       t,
       isRtl,
+      statItems,
+      tabs,
     },
     actions: {
       setActiveTab,

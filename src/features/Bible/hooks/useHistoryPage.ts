@@ -169,14 +169,18 @@ export function useHistoryPage() {
   }, []);
 
   return {
-    t, isRtl, loading, history, filtered, grouped, searchQuery, setSearchQuery,
-    filterBook, setFilterBook, deleting, clearingAll, deleteModal,
-    confirmDelete, goToReader, formatTimeAgo, refresh: loadData,
-    openClearAllDialog, openDeleteDialog, closeDeleteDialog,
-    deleteDialogTitle: deleteModal.type === "all" ? "Clear All History" : "Delete History Item",
-    deleteDialogDescription: deleteModal.type === "all"
+    data: {
+      t, isRtl, loading, history, filtered, grouped, searchQuery, filterBook, deleting,
+      clearingAll, deleteModal,
+      deleteDialogTitle: deleteModal.type === "all" ? "Clear All History" : "Delete History Item",
+      deleteDialogDescription: deleteModal.type === "all"
       ? `This will permanently delete all ${history.length} reading history items. This action cannot be undone.`
       : `Remove "${deleteModal.itemName}" from your reading history?`,
-    deleteDialogConfirmLabel: deleteModal.type === "all" ? "Clear All" : "Delete",
+      deleteDialogConfirmLabel: deleteModal.type === "all" ? "Clear All" : "Delete",
+    },
+    actions: {
+      setSearchQuery, setFilterBook, confirmDelete, goToReader, formatTimeAgo, refresh: loadData,
+      openClearAllDialog, openDeleteDialog, closeDeleteDialog,
+    },
   };
 }

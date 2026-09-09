@@ -11,7 +11,8 @@ import {
 } from "../components";
 
 export default function NotificationSettings() {
-  const h = useNotificationSettingsPage();
+  const { data, actions } = useNotificationSettingsPage();
+  const h = { ...data, ...actions };
 
   if (h.loading) return (
     <NotificationSettingsLayout>

@@ -10,7 +10,8 @@ import { EditNoteDialog } from "../components/EditNoteDialog";
 const IS_DEV = import.meta.env.DEV;
 
 export default function BibleReader() {
-  const h = useBibleReaderPage();
+  const { data, actions } = useBibleReaderPage();
+  const h = { ...data, ...actions };
 
   return (
     <div

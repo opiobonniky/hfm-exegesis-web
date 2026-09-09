@@ -1,23 +1,11 @@
-import { useState, type ReactElement, type ReactNode } from "react";
+import { useState } from "react";
 import { ArrowLeft, ArrowRight, Check, Circle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-
-export interface GuidedTabProps {
-  title: string;
-  description?: string;
-  children: ReactNode;
-}
+import type { GuidedTabProps, GuidedTabsProps } from "../types";
 
 export function GuidedTab({ children }: GuidedTabProps) {
   return <>{children}</>;
-}
-
-interface GuidedTabsProps {
-  children: ReactElement<GuidedTabProps>[];
-  validateStep: (step: number) => boolean;
-  continueLabel?: string;
-  backLabel?: string;
 }
 
 export function GuidedTabs({

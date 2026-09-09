@@ -104,8 +104,7 @@ export function useHighlightsPage() {
   const getColor = useCallback((colorId: number) => HIGHLIGHT_COLORS[colorId] || HIGHLIGHT_COLORS[1], []);
 
   return {
-    t, isRtl, loading, highlights, filtered, grouped, searchQuery, setSearchQuery,
-    filterBook, setFilterBook, deleting, verseTextMap, getColor,
-    deleteHighlight, goToReader, refresh: loadData,
+    data: { t, isRtl, loading, highlights, filtered, grouped, searchQuery, filterBook, deleting, verseTextMap },
+    actions: { setSearchQuery, setFilterBook, getColor, deleteHighlight, goToReader, refresh: loadData },
   };
 }

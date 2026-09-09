@@ -12,7 +12,7 @@ export interface UserPlanReadingPlan {
 
 export interface UserPlan {
   planId: string; startDate: string; completedDays: number; streak: number;
-  isCompleted: boolean; plan?: UserPlanReadingPlan;
+  isCompleted: boolean; planName: string; totalDays: number; plan?: UserPlanReadingPlan;
 }
 
 export function useUserPlansPage() {
@@ -74,6 +74,7 @@ export function useUserPlansPage() {
   }, [toast, t, loadData, api]);
 
   const filteredPlans = allPlans.filter((p) => catFilter === "all" || p.category === catFilter);
+  const inProgressCount = userPlans.filter((plan) => !plan.isCompleted).length;
 
   return {
     data: {
@@ -87,6 +88,7 @@ export function useUserPlansPage() {
       navigate,
       t,
       isRtl,
+      inProgressCount,
     },
     actions: {
       setActiveTab,

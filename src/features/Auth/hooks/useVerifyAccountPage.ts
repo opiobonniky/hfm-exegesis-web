@@ -46,5 +46,8 @@ export function useVerifyAccountPage() {
     } catch { toast({ title: "Failed to resend", variant: "destructive" }); }
     finally { setIsResending(false); }
   }, [email, toast]);
-  return { t, isRtl, email, setEmail, code, setCode, isLoading, isResending, success, error, handleVerify, handleResend };
+  return {
+    data: { t, isRtl, email, code, isLoading, isResending, success, error },
+    actions: { setEmail, setCode, handleVerify, handleResend },
+  };
 }

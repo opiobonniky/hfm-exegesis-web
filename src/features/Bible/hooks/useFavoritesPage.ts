@@ -92,8 +92,7 @@ export function useFavoritesPage() {
   }, []);
 
   return {
-    t, isRtl, loading, favorites, filtered, searchQuery, setSearchQuery,
-    filterBook, setFilterBook, deleting, verseTextMap,
-    deleteFavorite, goToReader, formatDate, refresh: loadData,
+    data: { t, isRtl, loading, favorites, filtered, searchQuery, filterBook, deleting, verseTextMap },
+    actions: { setSearchQuery, setFilterBook, deleteFavorite, goToReader, formatDate, refresh: loadData },
   };
 }

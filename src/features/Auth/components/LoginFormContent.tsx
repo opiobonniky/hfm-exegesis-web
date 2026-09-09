@@ -5,6 +5,9 @@ import { AuthFormHeader } from "./AuthFormHeader";
 import { AuthFormWrapper } from "./AuthFormWrapper";
 import { AuthLanguagePicker } from "./AuthLanguagePicker";
 import { AuthLoadingButton } from "./AuthLoadingButton";
+import { AuthDivider } from "./AuthDivider";
+import { AuthAccountLink } from "./AuthAccountLink";
+import { RegisterGoogleButton } from "./RegisterGoogleButton";
 import { AuthLogo } from "./AuthLogo";
 import FloatingInput from "./FloatingInput";
 import { LoginPageModel } from "../types";
@@ -67,6 +70,19 @@ export function LoginFormContent({ p, logoSrc }: LoginFormContentProps) {
           {p.signInLabel}
         </AuthLoadingButton>
       </form>
+
+      <div className="mt-5 space-y-4">
+        <AuthDivider label={p.signInWithGoogleLabel} />
+        <RegisterGoogleButton
+          label={p.signInWithGoogleLabel}
+          isLoading={p.isGoogleLoading}
+          onClick={p.handleGoogleLogin}
+        />
+        <p className="text-center text-sm text-muted-foreground">
+          {p.registerPromptLabel}{" "}
+          <AuthAccountLink to="/register" label={p.registerLabel} />
+        </p>
+      </div>
 
       <AuthFooter
         termsLabel={p.termsLabel}

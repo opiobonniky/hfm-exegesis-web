@@ -18,5 +18,5 @@ export function useOnboardingPage() {
 
   const finish = useCallback(() => { navigate("/user-dashboard"); }, [navigate]);
 
-  return { slide, transitioning, goNext, goPrev, finish };
+  return { data: { slide, transitioning }, actions: { goNext, goPrev, finish } };
 }

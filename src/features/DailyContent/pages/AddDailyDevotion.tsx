@@ -1,80 +1,120 @@
-"use client";
-
-/**
- * AddDailyDevotion — add/edit daily devotion with all rich content fields.
- * All state in useAddDailyDevotion hook, UI split into section components.
- * Single root div — no inline HTML beyond components.
- */
 import { Sun, BookOpen } from "lucide-react";
 import { useAddDailyDevotion } from "../hooks/useAddDailyDevotion";
 import {
-  StructuredContentSection, CollapsibleSection as Section,
-  DailyContentPageHeader, DailyContentFormActions, DailyContentFormCard,
-  PublishToggle, PageContentWrapper, DateTimeFields,
-  AddDailyDevotionCoreSections, AddDailyDevotionReferenceSection,
-  AddDailyDevotionContentFields, AddDailyDevotionBackgroundSection,
+  CollapsibleSection as Section,
+  AddDailyDevotionCoreSections,
+  AddDailyDevotionReferenceSection,
+  AddDailyDevotionContentFields,
+  AddDailyDevotionBackgroundSection,
+  DailyContentFormActions,
+  PublishToggle,
+  DateTimeFields,
+  StructuredContentSection,
+  DailyContentFormCard,
+  DailyContentPageHeader,
+  PageContentWrapper,
 } from "../components";
 
-const AddDailyDevotion = () => {
-  const h = useAddDailyDevotion();
+export default function AddDailyDevotion() {
+  const { data, actions } = useAddDailyDevotion();
 
   return (
-    <PageContentWrapper isRtl={h.isRtl}>
+    <PageContentWrapper isRtl={data.isRtl}>
       <DailyContentPageHeader
         backTo="/daily-devotions"
-        backLabel={h.t.common.back}
+        backLabel={data.t.common.back}
         icon={Sun}
-        title={h.pageTitle}
-        subtitle={h.t.devotions.addPageSubtitle}
+        title={data.pageTitle}
+        subtitle={data.t.devotions.addPageSubtitle}
       />
-
       <DailyContentFormCard
         icon={BookOpen}
-        title={h.t.devotions.devotionDetails}
-        description={h.t.devotions.devotionDetailsDesc}
+        title={data.t.devotions.devotionDetails}
+        description={data.t.devotions.devotionDetailsDesc}
+        onSubmit={actions.handleSave}
       >
-        <form onSubmit={h.handleSave} className="space-y-8">
-          <AddDailyDevotionCoreSections model={h} />
-          <AddDailyDevotionReferenceSection model={h} />
-          <AddDailyDevotionContentFields model={h} />
-          <AddDailyDevotionBackgroundSection model={h} />
-
-          <Section title="Rich Content" defaultOpen={false}>
-            <StructuredContentSection
-              wordStudies={h.wordStudies} setWordStudies={h.setWordStudies}
-              practicalApplications={h.practicalApplications} setPracticalApplications={h.setPracticalApplications}
-              keyThemes={h.keyThemes} setKeyThemes={h.setKeyThemes}
-              crossReferences={h.crossReferences} setCrossReferences={h.setCrossReferences}
-              finalThoughts={h.finalThoughts} setFinalThoughts={h.setFinalThoughts}
-              takeaways={h.takeaways} setTakeaways={h.setTakeaways}
-              isRtl={h.isRtl}
-            />
-          </Section>
-
-          <Section title="Schedule & Publish">
-            <PublishToggle
-              published={h.published}
-              onCheckedChange={h.setPublished}
-              publishedLabel="Published"
-              publishedDesc="Show to all users"
-            />
-            <DateTimeFields
-              selectedDate={h.selectedDate} setSelectedDate={h.setSelectedDate}
-              selectedTime={h.selectedTime} handleTimeChange={h.handleTimeChange}
-            />
-          </Section>
-
-          <DailyContentFormActions
-            cancelTo="/daily-devotions"
-            cancelLabel={h.t.common.cancel}
-            saveLabel={h.saveLabel}
-            disabled={h.saveDisabled}
-            onSave={h.handleSave}
+        <AddDailyDevotionCoreSections
+          title={data.title}
+          content={data.content}
+          setTitle={actions.setTitle}
+          setContent={actions.setContent}
+        />
+        <AddDailyDevotionReferenceSection
+          testament={data.testament}
+          book={data.book}
+          chapter={data.chapter}
+          verseNumber={data.verseNumber}
+          bibleVersion={data.bibleVersion}
+          testamentOptions={data.testamentOptions}
+          bookOptions={data.bookOptions}
+          chapterOptions={data.chapterOptions}
+          bibleVersionOptions={data.bibleVersionOptions}
+          setTestament={actions.setTestament}
+          setBook={actions.setBook}
+          setChapter={actions.setChapter}
+          setVerseNumber={actions.setVerseNumber}
+          setBibleVersion={actions.setBibleVersion}
+          t={data.t}
+        />
+        <AddDailyDevotionContentFields
+          explanation={data.explanation}
+          application={data.application}
+          verseIntroduction={data.verseIntroduction}
+          learnMore={data.learnMore}
+          contentPlaceholder={data.t.devotions.contentPlaceholder}
+          setExplanation={actions.setExplanation}
+          setApplication={actions.setApplication}
+          setVerseIntroduction={actions.setVerseIntroduction}
+          setLearnMore={actions.setLearnMore}
+        />
+        <AddDailyDevotionBackgroundSection
+          backgroundAuthor={data.backgroundAuthor}
+          backgroundBook={data.backgroundBook}
+          backgroundContext={data.backgroundContext}
+          setBackgroundAuthor={actions.setBackgroundAuthor}
+          setBackgroundBook={actions.setBackgroundBook}
+          setBackgroundContext={actions.setBackgroundContext}
+        />
+        <Section title="Rich Content" defaultOpen={false}>
+          <StructuredContentSection
+            wordStudies={data.wordStudies}
+            setWordStudies={actions.setWordStudies}
+            practicalApplications={data.practicalApplications}
+            setPracticalApplications={actions.setPracticalApplications}
+            keyThemes={data.keyThemes}
+            setKeyThemes={actions.setKeyThemes}
+            crossReferences={data.crossReferences}
+            setCrossReferences={actions.setCrossReferences}
+            finalThoughts={data.finalThoughts}
+            setFinalThoughts={actions.setFinalThoughts}
+            takeaways={data.takeaways}
+            setTakeaways={actions.setTakeaways}
+            bibleVersion={data.bibleVersion}
+            isRtl={data.isRtl}
           />
-        </form>
+        </Section>
+        <Section title="Schedule & Publish">
+          <PublishToggle
+            published={data.published}
+            onCheckedChange={actions.setPublished}
+            publishedLabel="Published"
+            publishedDesc="Show to all users"
+          />
+          <DateTimeFields
+            selectedDate={data.selectedDate}
+            setSelectedDate={actions.setSelectedDate}
+            selectedTime={data.selectedTime}
+            handleTimeChange={actions.handleTimeChange}
+          />
+        </Section>
+        <DailyContentFormActions
+          cancelTo="/daily-devotions"
+          cancelLabel={data.t.common.cancel}
+          saveLabel={data.saveLabel}
+          disabled={data.saveDisabled}
+          onSave={actions.handleSave}
+        />
       </DailyContentFormCard>
     </PageContentWrapper>
   );
-};
-
-export default AddDailyDevotion;
+}

@@ -13,14 +13,8 @@ import { ReadingPlanProgressTab } from "../components/ReadingPlanProgressTab";
 import { ReadingPlanBrowseTab } from "../components/ReadingPlanBrowseTab";
 import { StartPlanModal, RemovePlanModal } from "../components/PlanModals";
 
-const BibleReadingPlan = () => {
+export default function BibleReadingPlan() {
   const { data, actions } = useBibleReadingPlanPage();
-
-  const stats = {
-    total: data.plans.length,
-    active: data.activePlans.length,
-    withQuiz: data.plans.filter((p) => p.questionsEnabled).length,
-  };
 
   return (
     <Gate tier="legacy_sower" featureName="Reading Plans" featureDescription="Track your daily Bible reading progress with personalized reading plans.">
@@ -33,18 +27,11 @@ const BibleReadingPlan = () => {
         />
 
         <StatChips
-          items={[
-            { label: data.t.readingPlan?.totalPlans || "Total Plans", value: stats.total, color: "text-teal-700 dark:text-teal-400", bg: "bg-teal-50 dark:bg-teal-950/30 border-teal-100 dark:border-teal-800/40" },
-            { label: data.t.readingPlan?.activeLabel || "Active", value: stats.active, color: "text-emerald-700 dark:text-emerald-400", bg: "bg-emerald-50 dark:bg-emerald-950/30 border-emerald-100 dark:border-emerald-800/40" },
-            { label: data.t.readingPlan?.quizEnabled || "Quiz Enabled", value: stats.withQuiz, color: "text-violet-700 dark:text-violet-400", bg: "bg-violet-50 dark:bg-violet-950/30 border-violet-100 dark:border-violet-800/40" },
-          ]}
+          items={data.statItems}
         />
 
         <TabBar
-          tabs={[
-            { key: "progress", label: data.t.readingPlan?.tabProgress || "My Progress", badge: data.activePlans.length > 0 ? data.activePlans.length : undefined },
-            { key: "browse", label: data.t.readingPlan?.browsePlans || "Browse Plans" },
-          ]}
+          tabs={data.tabs}
           active={data.activeTab}
           onTabChange={(key) => actions.setActiveTab(key as "progress" | "browse")}
           accentColor="teal"
@@ -93,6 +80,4 @@ const BibleReadingPlan = () => {
       </PageLayout>
     </Gate>
   );
-};
-
-export default BibleReadingPlan;
+}

@@ -4,8 +4,8 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/components/languages/languageProvider";
-import { sendPostRequest } from "@/services/api";
 import { routes } from "@/components/Routes/routes";
+import { saveDailyExegesis } from "../services/add-daily-content-service";
 
 export function useAddDailyExegesis() {
   const { t, isRtl } = useLanguage();
@@ -59,8 +59,8 @@ export function useAddDailyExegesis() {
 
   const saveDisabled = !title.trim() || !passageReference.trim() || !teachingBody.trim();
 
-  const handleSave = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSave = useCallback(async (e?: React.FormEvent) => {
+    e?.preventDefault();
     if (saveDisabled) {
       toast({ title: "Missing fields", description: "Title, passage reference, and teaching body are required", variant: "destructive" });
       return;
@@ -80,7 +80,7 @@ export function useAddDailyExegesis() {
       ...(isEditing ? { id: editingExegesis?.id } : {}),
     };
     try {
-      const res = await sendPostRequest("admin", "add-daily-exegesis", payload);
+      const res = await saveDailyExegesis(payload);
       if (res.returnCode === 200) {
         toast({ title: isEditing ? "Updated" : "Created", description: `Exegesis ${isEditing ? "updated" : "created"} successfully` });
         navigate(routes.dailyExegesis.path);
@@ -97,25 +97,19 @@ export function useAddDailyExegesis() {
   ]);
 
   return {
-    // Required
-    title, setTitle,
-    passageReference, setPassageReference,
-    teachingBody, setTeachingBody,
-    // Optional
-    introduction, setIntroduction,
-    contextSummary, setContextSummary,
-    application, setApplication,
-    prayer, setPrayer,
-    tags, setTags,
-    // Date/publish
-    selectedDate, setSelectedDate,
-    selectedTime, handleTimeChange,
-    published, setPublished,
-    // Derived
-    saveDisabled, isEditing,
-    // Actions
-    handleSave,
-    // Helpers
-    t, isRtl, navigate,
+    data: {
+      title, passageReference, teachingBody, introduction, contextSummary,
+      application, prayer, tags, selectedDate, selectedTime, published,
+      saveDisabled, isEditing, t, isRtl,
+    },
+    actions: {
+      setTitle, setPassageReference, setTeachingBody, setIntroduction,
+      setContextSummary, setApplication, setPrayer, setTags,
+      setSelectedDate, handleTimeChange, setPublished, handleSave,
+    },
   };
 }
+
+export type AddDailyExegesisPageModel = ReturnType<typeof useAddDailyExegesis>;
+export type AddDailyExegesisPageData = AddDailyExegesisPageModel["data"];
+export type AddDailyExegesisPageActions = AddDailyExegesisPageModel["actions"];

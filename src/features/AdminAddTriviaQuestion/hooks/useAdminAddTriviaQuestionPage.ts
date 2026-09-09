@@ -44,5 +44,8 @@ export function useAdminAddTriviaQuestionPage() {
     finally { setSaving(false); }
   }, [form, isEditing, navigate, toast]);
   const goBack = useCallback(() => navigate(-1), [navigate]);
-  return { form, setForm, saving, loading, isEditing, updateOption, addOption, removeOption, handleSave, goBack };
+  return {
+    data: { form, saving, loading, isEditing },
+    actions: { setForm, updateOption, addOption, removeOption, handleSave, goBack },
+  };
 }

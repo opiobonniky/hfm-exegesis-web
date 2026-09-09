@@ -8,54 +8,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { ReturnType } from "react";
-import { BIBLE_BOOK_CHAPTERS, type BibleBookName } from "@/features/Bible/constants";
-import { useAddExplanation } from "../hooks/useAddExplanation";
+import type { AddExplanationReferenceFormProps } from "../types";
 
-type Model = ReturnType<typeof useAddExplanation>;
-
-interface Props {
-  model: Model;
-}
-
-const isBibleBookName = (name: string): name is BibleBookName =>
-  name in BIBLE_BOOK_CHAPTERS;
-
-export function AddExplanationReferenceForm({ model: h }: Props) {
-  const bookOptions = Object.entries(BIBLE_BOOK_CHAPTERS).map(([name], i) => ({
-    value: name,
-    label: name,
-    group: i < 39 ? "Old Testament" : "New Testament",
-  }));
-
-  const chapterOptions = isBibleBookName(h.form.bookName)
-    ? Array.from(
-        { length: BIBLE_BOOK_CHAPTERS[h.form.bookName] },
-        (_, idx) => idx + 1,
-      )
-    : [];
-
-  const translationOptions = (h.translationOptions || [])
-    .filter((t) => t.languageName || t.language)
-    .sort((a, b) => {
-      const aLabel = (a.languageName || a.language || "").toLowerCase();
-      const bLabel = (b.languageName || b.language || "").toLowerCase();
-      if (aLabel === "english") return -1;
-      if (bLabel === "english") return 1;
-      return (
-        aLabel.localeCompare(bLabel) ||
-        (a.name || a.shortName).localeCompare(b.name || b.shortName)
-      );
-    })
-    .map((t) => ({
-      value: t.id,
-      label: `${t.shortName || t.name} ${t.year ? `(${t.year})` : ""}`.trim(),
-      group: t.languageName || t.language || "Other",
-    }));
-
-  const selectedVerse = h.form.verseNumber ? Number(h.form.verseNumber) : null;
-  const verseLoadingForTrigger =
-    h.verseOptionsLoading && h.verseOptions.length === 0;
+export function AddExplanationReferenceForm(props: AddExplanationReferenceFormProps) {
+  const { bookName, chapter, verseNumber, bibleVersion, sortedTranslationOptions, bookOptions, chapterOptions, verseOptions, verseOptionsLoading, verseTextLoading, selectedVerseText, maxChapterNumber, maxVerseNumber, selectedVerse, verseLoadingForTrigger, updateField } = props;
+  const h = {
+    form: { bookName, chapter, verseNumber, bibleVersion },
+    verseOptions,
+    verseOptionsLoading,
+    verseTextLoading,
+    selectedVerseText,
+    maxChapterNumber,
+    maxVerseNumber,
+    updateField,
+  };
 
   return (
     <div className="space-y-6">
@@ -88,7 +54,7 @@ export function AddExplanationReferenceForm({ model: h }: Props) {
               <SelectValue placeholder="Select a Bible version" />
             </SelectTrigger>
             <SelectContent>
-              {translationOptions.map((t) => (
+              {sortedTranslationOptions.map((t) => (
                 <SelectItem key={t.value} value={t.value}>
                   {t.label}
                 </SelectItem>

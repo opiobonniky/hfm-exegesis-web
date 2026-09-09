@@ -122,10 +122,13 @@ export function useForgotPasswordPage() {
   }, [email, code, newPassword, getFieldError, toast, t, navigate]);
 
   return {
-    t, isRtl, navigate,
-    email, setEmail, code, setCode, newPassword, setNewPassword,
-    confirmPassword, setConfirmPassword, showPassword, setShowPassword,
-    step, setStep, isLoading, focusedField, setFocusedField, touchedFields,
-    getFieldError, handleBlur, handleRequestReset, handleResetPassword,
+    data: {
+      t, isRtl, email, code, newPassword, confirmPassword, showPassword, step,
+      isLoading, focusedField, touchedFields,
+    },
+    actions: {
+      navigate, setEmail, setCode, setNewPassword, setConfirmPassword, setShowPassword,
+      setStep, setFocusedField, getFieldError, handleBlur, handleRequestReset, handleResetPassword,
+    },
   };
 }

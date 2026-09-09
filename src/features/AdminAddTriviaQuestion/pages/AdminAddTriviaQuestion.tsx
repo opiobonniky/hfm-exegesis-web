@@ -11,7 +11,8 @@ import {
 } from "../components";
 
 export default function AdminAddTriviaQuestionPage() {
-  const h = useAdminAddTriviaQuestionPage();
+  const { data, actions } = useAdminAddTriviaQuestionPage();
+  const h = { ...data, ...actions };
 
   if (h.loading) return <TriviaQuestionLoading />;
 

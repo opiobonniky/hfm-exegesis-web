@@ -14,7 +14,8 @@ import { JournalTable } from "../components/JournalTable";
 import { JournalDeleteDialog } from "../components/JournalDeleteDialog";
 
 export default function AdminJournalModeration() {
-  const h = useAdminJournalModeration();
+  const { data, actions } = useAdminJournalModeration();
+  const h = { ...data, ...actions };
 
   return (
     <div className="min-h-screen bg-background">

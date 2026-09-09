@@ -15,6 +15,9 @@
     "setup:hooks": "git config core.hooksPath .githooks",
     "typecheck": "tsc --noEmit --pretty",
     "typecheck:app": "tsc --noEmit --project tsconfig.app.json --pretty",
+    "validate:pages": "bash scripts/validate-pages.sh",
+    "validate:hooks": "bash scripts/validate-hooks.sh",
+    "validate:components": "bash scripts/validate-components.sh",
     "lint:colors": "node scripts/check-hardcoded-colors.js",
     "lint:colors:verbose": "node scripts/check-hardcoded-colors.js --verbose"
   },

@@ -128,9 +128,7 @@ export function useNotesPage() {
   }, []);
 
   return {
-    t, isRtl, loading, notes, filtered, grouped, searchQuery, setSearchQuery,
-    filterBook, setFilterBook, deleting, editingNote, editText, setEditText,
-    saving, verseTextMap,
-    deleteNote, openEdit, closeEdit, saveNote, goToReader, formatDate, refresh: loadData,
+    data: { t, isRtl, loading, notes, filtered, grouped, searchQuery, filterBook, deleting, editingNote, editText, saving, verseTextMap },
+    actions: { setSearchQuery, setFilterBook, setEditText, deleteNote, openEdit, closeEdit, saveNote, goToReader, formatDate, refresh: loadData },
   };
 }

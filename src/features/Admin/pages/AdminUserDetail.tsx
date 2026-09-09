@@ -13,7 +13,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AdminPageContent } from "../components/AdminPageContent";
 
 export default function AdminUserDetail() {
-  const h = useAdminUserDetail();
+  const { data, actions } = useAdminUserDetail();
+  const h = { ...data, ...actions };
 
   if (h.loading) return <Skeleton className="h-96" />;
   if (!h.user) return null;

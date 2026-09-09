@@ -23,7 +23,8 @@ const PAGE_SIZE = 20;
 
 export default function AdminVerseExplanations() {
   const navigate = useNavigate();
-  const h = useVerseExplanationList(PAGE_SIZE);
+  const { data, actions } = useVerseExplanationList(PAGE_SIZE);
+  const h = { ...data, ...actions };
   const [deleteTarget, setDeleteTarget] =
     useState<VerseExplanationListItem | null>(null);
   const sentinelRef = useRef<HTMLDivElement | null>(null);

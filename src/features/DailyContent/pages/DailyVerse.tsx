@@ -9,7 +9,8 @@ import { DeleteVerseDialog, ConflictVerseDialog } from "../components/VerseDialo
 import { useDailyVersePage } from "../hooks/useDailyVersePage";
 
 export default function DailyVerse() {
-  const p = useDailyVersePage();
+  const { data, actions } = useDailyVersePage();
+  const p = { ...data, ...actions };
 
   if (p.loading) return <DailyVerseLoadingSkeleton />;
 

@@ -3,20 +3,9 @@ import { Calendar, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import type { ExegesisHeroProps } from "../types";
 
-interface Exegesis {
-  id: number; title: string; passageReference: string; displayDate: string; isPublished: boolean;
-}
-interface Props {
-  item: Exegesis;
-  series: Exegesis[];
-  onSelect: (item: Exegesis) => void;
-  onOpenBible: () => void;
-  displayDate: string;
-  isUpcoming: boolean;
-  canOpenBible: boolean;
-}
-export function ExegesisHero({ item, series, onSelect, onOpenBible, displayDate, isUpcoming, canOpenBible }: Props) {
+export function ExegesisHero({ item, series, onSelect, onOpenBible, displayDate, isUpcoming, canOpenBible }: ExegesisHeroProps) {
   return (
     <>
       <section className="bg-gradient-to-r from-primary to-indigo-600 text-white py-10">

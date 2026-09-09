@@ -1,22 +1,10 @@
-// ExegesisContent — renders Introduction, Context, Teaching, Application, Prayer sections
+import type { ExegesisContentProps } from "../types";
+import { DAILY_EXEGESIS_SECTIONS } from "../constants/dailyExegesis";
 
-interface Exegesis {
-  introduction: string; contextSummary: string; teachingBody: string;
-  application: string; prayer: string;
-}
-
-const SECTIONS: { key: keyof Exegesis; title: string }[] = [
-  { key: "introduction", title: "Introduction" },
-  { key: "contextSummary", title: "Context Summary" },
-  { key: "teachingBody", title: "Teaching" },
-  { key: "application", title: "Application" },
-  { key: "prayer", title: "Prayer" },
-];
-
-export function ExegesisContent({ item }: { item: Exegesis }) {
+export function ExegesisContent({ item }: ExegesisContentProps) {
   return (
     <div className="space-y-6 mt-6">
-      {SECTIONS.map(({ key, title }) => (
+      {DAILY_EXEGESIS_SECTIONS.map(({ key, title }) => (
         <section key={key}>
           <h2 className="text-lg font-semibold mb-2 text-foreground">{title}</h2>
           <p className="whitespace-pre-wrap text-muted-foreground leading-6">

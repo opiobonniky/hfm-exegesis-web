@@ -23,5 +23,5 @@ export function useGoogleRegister() {
     finally { setLoading(false); }
   }, [firstName, lastName, toast, navigate]);
 
-  return { firstName, setFirstName, lastName, setLastName, loading, error, handleRegister };
+  return { data: { firstName, lastName, loading, error }, actions: { setFirstName, setLastName, handleRegister } };
 }

@@ -20,6 +20,7 @@ import {
   FileText,
   Star,
   Clock,
+  ScrollText,
 } from "lucide-react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -62,6 +63,16 @@ const adminNavItems: NavItem[] = [
     title: "sidebar.dailyContentAdmin",
     url: routes.adminDailyContent.path,
     icon: CalendarDays,
+  },
+  {
+    title: "sidebar.journalModeration",
+    url: routes.adminJournalModeration.path,
+    icon: PenLine,
+  },
+  {
+    title: "sidebar.bookPrologues",
+    url: routes.adminBookPrologues.path,
+    icon: ScrollText,
   },
 
   {
@@ -137,6 +148,8 @@ const getNavTitle = (t: any, key: string): string => {
   if (parts.length === 2 && t[parts[0]] && t[parts[0]][parts[1]]) {
     return t[parts[0]][parts[1]];
   }
+  if (key === "sidebar.journalModeration") return "Journal Moderation";
+  if (key === "sidebar.bookPrologues") return "Book Prologues";
   return key;
 };
 

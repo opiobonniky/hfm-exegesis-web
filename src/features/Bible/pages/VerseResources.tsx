@@ -6,7 +6,8 @@ import { RESOURCE_TABS, ResourceTabBar, ResourceStatsRow, CommentariesView, Cros
 import { BiblePageLayout, VerseResourcesErrorState, VerseResourcesHero, VerseResourcesContent } from "../components";
 
 export default function VerseResources() {
-  const h = useVerseResources();
+  const { data, actions } = useVerseResources();
+  const h = { ...data, ...actions };
 
   if (h.loading) return <LoadingSkeleton />;
 

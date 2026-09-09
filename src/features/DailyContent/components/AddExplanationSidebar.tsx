@@ -1,29 +1,14 @@
 import { BookOpen, CheckCircle2, Lightbulb, Tag, Target } from "lucide-react";
-import type { ReturnType } from "react";
-import { useAddExplanation } from "../hooks/useAddExplanation";
-import type { VerseExplanationStepId } from "../types";
-
-type Model = ReturnType<typeof useAddExplanation>;
-
-interface Props {
-  model: Model;
-  currentStep: VerseExplanationStepId;
-  currentStepIndex: number;
-  stepCompletion: Record<VerseExplanationStepId, boolean>;
-  referenceComplete: boolean;
-  exegesisComplete: boolean;
-  onStepChange: (step: VerseExplanationStepId) => void;
-}
+import type { AddExplanationSidebarProps } from "../types";
 
 export function AddExplanationSidebar({
-  model: h,
   currentStep,
   currentStepIndex,
   stepCompletion,
   referenceComplete,
   exegesisComplete,
   onStepChange,
-}: Props) {
+}: AddExplanationSidebarProps) {
   const steps = [
     { id: "reference", label: "Reference", description: "Verse & translation", icon: BookOpen },
     { id: "exegesis", label: "Exegesis", description: "Main insight", icon: Lightbulb },

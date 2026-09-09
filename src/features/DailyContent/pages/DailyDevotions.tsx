@@ -10,7 +10,8 @@ import { DevotionEditDialog } from "../components/DevotionEditDialog";
 import { DevotionDeleteDialog } from "../components/DevotionDeleteDialog";
 
 export default function DailyDevotions() {
-  const h = useDailyDevotionsPage();
+  const { data, actions } = useDailyDevotionsPage();
+  const h = { ...data, ...actions };
 
   return (
     <div className="space-y-6">

@@ -13,7 +13,8 @@ import FloatingInput from "../components/FloatingInput";
 import { Mail, Lock, User, Phone } from "lucide-react";
 
 export default function Register() {
-  const p = useRegisterPage();
+  const { data, actions } = useRegisterPage();
+  const p = { ...data, ...actions };
   const {
     t, isRtl, step, setStep, formData, showPassword, setShowPassword,
     isLoading, isGoogleLoading, focusedField, setFocusedField,

@@ -8,7 +8,9 @@ import { MinistrySection } from "../components/MinistrySection";
 import { EmergencyContactSection } from "../components/EmergencyContactSection";
 
 export default function ExtendedProfilePage() {
-  const { loading, saving, form, updateField, handleSave, goBack } = useExtendedProfilePage();
+  const { data, actions } = useExtendedProfilePage();
+  const { loading, saving, form } = data;
+  const { updateField, handleSave, goBack } = actions;
 
   if (loading) {
     return (

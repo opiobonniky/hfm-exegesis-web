@@ -38,21 +38,19 @@ export function DetailPageHeader({
   return (
     <div className="border-b bg-card">
       <div className={containerClass}>
-        <div className="flex items-center justify-between h-16">
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" onClick={onBack}>
+        <div className="flex flex-col gap-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:min-h-16 sm:py-0">
+          <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+            <Button variant="ghost" size="icon" onClick={onBack} className="shrink-0">
               <ArrowLeft className="w-5 h-5" />
             </Button>
-            <div>
-              <h1 className="text-lg font-semibold flex items-center gap-2">
+            <div className="min-w-0">
+              <h1 className="flex items-center gap-2 text-base font-semibold sm:text-lg">
                 {icon} {title}
               </h1>
-              {subtitle && (
-                <p className="text-xs text-muted-foreground">{subtitle}</p>
-              )}
+              {subtitle && <p className="truncate text-xs text-muted-foreground">{subtitle}</p>}
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex w-full flex-wrap items-center gap-2 pl-11 sm:w-auto sm:justify-end sm:pl-0">
             {badge && (
               <Badge variant={badge.variant || "default"}>{badge.label}</Badge>
             )}
@@ -68,7 +66,7 @@ export function DetailPageHeader({
 export function DetailContent({ children, className = "" }: { children: ReactNode; className?: string }) {
   const base = className || 'max-w-3xl mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6';
   return (
-    <div className={base}>
+    <div className={`${base} min-w-0`}>
       {children}
     </div>
   );

@@ -105,7 +105,7 @@ export function useStudyTools() {
   const [confirmSyncDesc, setConfirmSyncDesc] = useState("");
   const [syncingAllRefs, setSyncingAllRefs] = useState(false);
   const confirmSyncActionRef = useRef<(() => Promise<void>) | null>(null);
-  const { handleError } = useAdminErrorHandler();
+  const { actions: { handleError } } = useAdminErrorHandler();
 
   useEffect(() => {
     if (!verseBook || !verseChapter || !verseNum) {
@@ -293,7 +293,7 @@ export function useStudyTools() {
     } else setVerseNumList([]);
   }, [verseBook]);
 
-  return {
+  return { data: {
     // Words
     words, setWords, wordsLoading, wordSearch, setWordSearch, editWord, setEditWord,
     editSheetOpen, setEditSheetOpen, saving, setSaving, searchWords, detailWord, setDetailWord,
@@ -321,6 +321,13 @@ export function useStudyTools() {
     confirmSyncActionRef,
     // Tab
     activeTab, setActiveTab,
-    navigate,
-  };
+  }, actions: {
+    setWords, setWordSearch, setEditWord, setEditSheetOpen, setSaving, searchWords,
+    setDetailWord, setDetailSheetOpen, loadVerseWords, loadMoreWords, handleBookChange,
+    handleChapterChange, setVerseNum, setCurrentResource, loadResource, setResourceSaving,
+    saveResource, setWordStudies, setCommentaries, setCrossRefs, setDictTerms, setTopics,
+    setPrologueSearch, setPrologueViewMode, setSelectedPrologueBook, setEditPrologue,
+    setPrologueSheetOpen, loadPrologues, setStudiesSearch, loadStudies, setConfirmSyncOpen,
+    setConfirmSyncLabel, setConfirmSyncDesc, setSyncingAllRefs, setActiveTab, navigate,
+  } };
 }

@@ -1,10 +1,10 @@
 import { Sun } from "lucide-react";
 import { routes } from "@/components/Routes/routes";
-import type { AddDailyVersePageModel } from "../hooks/useAddDailyVerse";
+import type { AddDailyVersePageViewModel } from "../hooks/useAddDailyVerse";
 import { DailyContentPageHeader } from "./DailyContentPageHeader";
 
 interface Props {
-  model: AddDailyVersePageModel;
+  model: AddDailyVersePageViewModel;
 }
 
 export function AddDailyVerseHeader({ model: h }: Props) {

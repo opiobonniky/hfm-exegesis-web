@@ -23,6 +23,14 @@ interface VerseExplanation {
 const EMPTY_FORM = VERSE_EXPLANATION_EMPTY_FORM;
 export function useAdminVerseExplanationsPage() {
   const navigate = useNavigate();
+  const { data: crudData, actions: crudActions } = useAdminCrud<VerseExplanation>({
+    route: "bible",
+    listAction: "get-all-verses-explanation",
+    saveAction: "add-verse-explanation",
+    deleteAction: "delete-verse-explanation",
+    listKey: "explanations",
+    totalKey: "totalCount",
+  });
   const {
     items,
     loading,
@@ -37,14 +45,7 @@ export function useAdminVerseExplanationsPage() {
     loadMore,
     save,
     remove,
-  } = useAdminCrud<VerseExplanation>({
-    route: "bible",
-    listAction: "get-all-verses-explanation",
-    saveAction: "add-verse-explanation",
-    deleteAction: "delete-verse-explanation",
-    listKey: "explanations",
-    totalKey: "totalCount",
-  });
+  } = { ...crudData, ...crudActions };
   const [editItem, setEditItem] = useState<VerseExplanation | null>(null);
   const [editForm, setEditForm] = useState(EMPTY_FORM);
   const [deleteItem, setDeleteItem] = useState<VerseExplanation | null>(null);
@@ -123,7 +124,7 @@ export function useAdminVerseExplanationsPage() {
   const requestDelete = useCallback((item: VerseExplanation) => {
     setDeleteItem(item);
   }, []);
-  return {
+  return { data: {
     items,
     loading,
     search,
@@ -149,6 +150,8 @@ export function useAdminVerseExplanationsPage() {
     viewItem,
     closeEditForm,
     closeDeleteDialog,
-    requestDelete,
-  };
+  }, actions: {
+    setSearch, setEditItem, setEditForm, setDeleteItem, refresh, loadMore, openEdit,
+    handleSave, handleDelete, goBack, viewItem, closeEditForm, closeDeleteDialog, requestDelete,
+  } };
 }

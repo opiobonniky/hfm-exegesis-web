@@ -7,7 +7,8 @@ import {
 } from "../components";
 
 const Founders = () => {
-  const { t } = useHimFirstMediaPage();
+  const { data } = useHimFirstMediaPage();
+  const { t } = data;
 
   return (
     <HimFirstMediaPageLayout>

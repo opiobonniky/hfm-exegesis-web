@@ -7,6 +7,7 @@ import BookOverviewEmpty from "../components/BookOverviewEmpty";
 import BookOverviewStartCTA from "../components/BookOverviewStartCTA";
 
 export default function BookOverview() {
+  const { data, actions } = useBookOverview();
   const {
     bookName,
     prologue,
@@ -18,7 +19,7 @@ export default function BookOverview() {
     hasReturnUrl,
     onStartReading,
     onBack,
-  } = useBookOverview();
+  } = { ...data, ...actions };
 
   return (
     <div className="h-full flex flex-col bg-background">

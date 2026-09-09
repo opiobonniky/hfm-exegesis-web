@@ -165,7 +165,7 @@ export function useTriviaPage() {
   }, [navigate, phase, question, selectedAnswer, result, score, stats, loading, error, difficulty, totalCount, streak, questionIdsSeen]);
 
   // RETURN
-  return {
+  return { data: {
     // Core state
     navigate, isRtl, phase, question, selectedAnswer, result, score, stats,
     loading, error, difficulty, totalCount, streak,
@@ -182,6 +182,10 @@ export function useTriviaPage() {
     handleSelect, handleSelectDaily, handleDismissDaily,
     startDailyChallenge, handleDailyBackToPlan,
     handleDismissWithCancel, handleReferencePress,
-    setShowStarBurst, setShowMilestone,
-  };
+  }, actions: {
+    setDifficulty, startQuiz, fetchQuestion, reset, nextQuestion: () => nextQuestion(),
+    handleSelect, handleSelectDaily, handleDismissDaily, startDailyChallenge,
+    handleDailyBackToPlan, handleDismissWithCancel, handleReferencePress,
+    setShowStarBurst, setShowMilestone, clearUnlocked, resetLeaderboard,
+  } };
 }

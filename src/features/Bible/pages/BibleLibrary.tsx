@@ -9,7 +9,8 @@ import {
 const IS_DEV = import.meta.env.DEV;
 
 export default function BibleLibrary() {
-  const h = useBibleLibrary();
+  const { data, actions } = useBibleLibrary();
+  const h = { ...data, ...actions };
 
   if (h.loading) return <BibleLibraryLoading />;
 

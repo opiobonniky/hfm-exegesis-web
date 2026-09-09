@@ -27,6 +27,7 @@ export function useDailyDevotionDetailPage() {
     : null;
 
   return {
+    data: {
     devotion,
     goBack,
     editDevotion,
@@ -42,5 +43,7 @@ export function useDailyDevotionDetailPage() {
     keyThemes: parseList(devotion?.keyThemes),
     crossReferences: parseList(devotion?.crossReferences),
     takeaways: parseList(devotion?.takeaways),
+    },
+    actions: { goBack, editDevotion },
   };
 }

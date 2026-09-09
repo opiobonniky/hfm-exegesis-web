@@ -27,5 +27,8 @@ export function useAdminTriviaPerformancePage() {
     finally { setLoading(false); }
   }, [toast]);
   useEffect(() => { loadAll(); }, [loadAll]);
-  return { tab, setTab, overview, users, questions, loading, search, setSearch, loadAll };
+  return {
+    data: { tab, overview, users, questions, loading, search },
+    actions: { setTab, setSearch, loadAll },
+  };
 }

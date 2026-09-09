@@ -7,7 +7,8 @@ import { CreateUserForm } from "../components/CreateUserForm";
 import { AdminPageContent } from "../components/AdminPageContent";
 
 export default function AdminCreateUser() {
-  const h = useAdminCreateUser();
+  const { data, actions } = useAdminCreateUser();
+  const h = { ...data, ...actions };
 
   return (
     <div className="min-h-screen bg-background">

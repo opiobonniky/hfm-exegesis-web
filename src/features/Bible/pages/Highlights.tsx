@@ -6,7 +6,8 @@ import { BiblePageLayout } from "../components/BiblePageLayout";
 import { HighlightsList } from "../components";
 
 export default function Highlights() {
-  const h = useHighlightsPage();
+  const { data, actions } = useHighlightsPage();
+  const h = { ...data, ...actions };
 
   return (
     <BiblePageLayout

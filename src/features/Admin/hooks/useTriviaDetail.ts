@@ -47,5 +47,5 @@ export function useTriviaDetail() {
       .finally(() => setLoading(false));
   }, [questionId, toast, navigate]);
 
-  return { question, loading, navigate };
+  return { data: { question, loading }, actions: { navigate } };
 }

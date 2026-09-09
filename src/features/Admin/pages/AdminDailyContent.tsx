@@ -14,7 +14,8 @@ import { AdminDailyContentHeader } from "../components/AdminDailyContentHeader";
 import { PaginationControls } from "../components/PaginationControls";
 
 const AdminDailyContent = () => {
-  const h = useAdminDailyContent();
+  const { data, actions } = useAdminDailyContent();
+  const h = { ...data, ...actions };
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">

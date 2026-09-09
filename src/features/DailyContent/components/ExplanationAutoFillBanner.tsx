@@ -4,10 +4,10 @@
  */
 import { BookOpenCheck, Loader2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { AddDailyVersePageModel } from "../hooks/useAddDailyVerse";
+import type { AddDailyVersePageViewModel } from "../hooks/useAddDailyVerse";
 
 interface Props {
-  model: AddDailyVersePageModel;
+  model: AddDailyVersePageViewModel;
 }
 
 export function ExplanationAutoFillBanner({ model: h }: Props) {

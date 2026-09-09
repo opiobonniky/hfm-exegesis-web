@@ -6,7 +6,8 @@ import {
 } from "../components";
 
 const Leadership = () => {
-  const { t } = useHimFirstMediaPage();
+  const { data } = useHimFirstMediaPage();
+  const { t } = data;
 
   return (
     <HimFirstMediaPageLayout>

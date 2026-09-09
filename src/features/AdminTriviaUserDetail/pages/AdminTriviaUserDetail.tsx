@@ -11,7 +11,8 @@ import {
 import { getStats } from "../constants";
 
 export default function AdminTriviaUserDetailPage() {
-  const h = useAdminTriviaUserDetailPage();
+  const { data, actions } = useAdminTriviaUserDetailPage();
+  const h = { ...data, ...actions };
 
   if (h.loading) return <LoadingSkeleton />;
   if (!h.detail) return <EmptyState onGoBack={h.goBack} />;

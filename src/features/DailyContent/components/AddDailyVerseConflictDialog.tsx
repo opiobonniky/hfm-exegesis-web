@@ -8,10 +8,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import type { AddDailyVersePageModel } from "../hooks/useAddDailyVerse";
+import type { AddDailyVersePageViewModel } from "../hooks/useAddDailyVerse";
 
 interface Props {
-  model: AddDailyVersePageModel;
+  model: AddDailyVersePageViewModel;
 }
 
 export function AddDailyVerseConflictDialog({ model: h }: Props) {

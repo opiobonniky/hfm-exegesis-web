@@ -81,6 +81,9 @@ export interface LoginPageModel {
   passwordLabel: string;
   forgotPasswordLabel: string;
   signInLabel: string;
+  registerPromptLabel: string;
+  registerLabel: string;
+  signInWithGoogleLabel: string;
   termsLabel: string;
   termsLinkLabel: string;
   privacyLabel: string;

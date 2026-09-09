@@ -88,7 +88,7 @@ export interface JournalDetailPageModel {
   formatDateShort: (date: string) => string;
 }
 
-export function useJournalDetail(): JournalDetailPageModel {
+export function useJournalDetail() {
   const navigate = useNavigate();
   const { entryId } = useParams<{ entryId: string }>();
   const { t, isRtl } = useLanguage();
@@ -250,11 +250,16 @@ export function useJournalDetail(): JournalDetailPageModel {
   const isOwner = Boolean(userInfo?.id && entry && String(userInfo.id) === String(entry.userId));
 
   return {
-    t, isRtl, entry, loading, deleting, showDeleteDialog, copied, exporting,
-    updatingFavorite, studiedWordSheetOpen, selectedStudiedWord, isOwner,
-    catMeta, moodInfo, tagsArray, reflectionSections, goBack, handleEdit,
-    handleShare, handleCopy, handleDelete, handleExportPdf, handleToggleFavorite,
-    openDeleteDialog, closeDeleteDialog, handleDeleteDialogChange,
-    handleStudiedWordSheetChange, openWordStudy, formatDate, formatDateShort,
+    data: {
+      t, isRtl, entry, loading, deleting, showDeleteDialog, copied, exporting,
+      updatingFavorite, studiedWordSheetOpen, selectedStudiedWord, isOwner,
+      catMeta, moodInfo, tagsArray, reflectionSections,
+    },
+    actions: {
+      goBack, handleEdit, handleShare, handleCopy, handleDelete,
+      handleExportPdf, handleToggleFavorite, openDeleteDialog, closeDeleteDialog,
+      handleDeleteDialogChange, handleStudiedWordSheetChange, openWordStudy,
+      formatDate, formatDateShort,
+    },
   };
 }

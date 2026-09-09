@@ -53,9 +53,7 @@ export function useGoogleRegisterPage() {
   }, [state, phoneNumber, username, toast, setUserInfo, navigate]);
 
   return {
-    t, isRtl, state, phoneNumber, setPhoneNumber,
-    username, setUsername, password, setPassword,
-    confirmPassword, setConfirmPassword, showPassword, setShowPassword,
-    passwordMismatch, loading, error, handleRegister,
+    data: { t, isRtl, state, phoneNumber, username, password, confirmPassword, showPassword, passwordMismatch, loading, error },
+    actions: { setPhoneNumber, setUsername, setPassword, setConfirmPassword, setShowPassword, handleRegister },
   };
 }

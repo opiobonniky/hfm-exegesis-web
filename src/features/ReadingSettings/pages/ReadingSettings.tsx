@@ -9,7 +9,8 @@ import {
 } from "../components";
 
 export default function ReadingSettingsPage() {
-  const h = useReadingSettingsPage();
+  const { data, actions } = useReadingSettingsPage();
+  const h = { ...data, ...actions };
 
   return (
     <div className="space-y-6 p-6 max-w-2xl mx-auto">

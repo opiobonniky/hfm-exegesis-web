@@ -239,27 +239,18 @@ export function useDailyVersePage() {
   const refresh = useCallback(() => loadVerses(page), [loadVerses, page]);
 
   return {
-    t, isRtl, navigate, isAdmin,
-    // Listing
-    verses, loading, page, setPage, total, totalPages,
-    hasNext, hasPrevious, selectedIndex, setSelectedIndex,
-    selectedVerse, todayVerse,
-    // Filters
-    fromDate, setFromDate, toDate, setToDate,
-    activePreset, filterError, isFiltered, futureCount,
-    validateAndApply, clearFilter, applyPreset,
-    // Edit
-    editOpen, setEditOpen, editState, setEditState,
-    editVerseText, setEditVerseText, isSaving,
-    openEdit, handleSave, handleConflictUpdate,
-    // Delete
-    deleteOpen, setDeleteOpen, deleteTarget, setDeleteTarget,
-    isDeleting, handleDelete, openDelete,
-    // Conflict
-    conflictDialog, setConflictDialog, setConflictOpen,
-    // Navigate
-    openInBible, openInJournal, openAddVerse, openVerseDetails,
-    // Refresh
-    refresh,
+    data: {
+      t, isRtl, navigate, isAdmin, verses, loading, page, total, totalPages,
+      hasNext, hasPrevious, selectedIndex, selectedVerse, todayVerse, fromDate, toDate,
+      activePreset, filterError, isFiltered, futureCount, editOpen, editState,
+      editVerseText, isSaving, deleteOpen, deleteTarget, isDeleting, conflictDialog,
+    },
+    actions: {
+      setPage, setSelectedIndex, setFromDate, setToDate, validateAndApply, clearFilter,
+      applyPreset, setEditOpen, setEditState, setEditVerseText, openEdit, handleSave,
+      handleConflictUpdate, setDeleteOpen, setDeleteTarget, handleDelete, openDelete,
+      setConflictDialog, setConflictOpen, openInBible, openInJournal, openAddVerse,
+      openVerseDetails, refresh,
+    },
   };
 }

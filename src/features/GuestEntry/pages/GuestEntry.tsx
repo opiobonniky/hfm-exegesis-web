@@ -7,7 +7,7 @@ import { FeatureGrid } from "../components/FeatureGrid";
 import { ActionButtons } from "../components/ActionButtons";
 
 export default function GuestEntryPage() {
-  const { navigate } = useGuestEntryPage();
+  const { actions: { navigate } } = useGuestEntryPage();
 
   return (
     <GuestEntryLayout>

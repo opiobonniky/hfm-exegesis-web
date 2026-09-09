@@ -144,7 +144,7 @@ export function useBookOverview() {
     navigate(-1);
   }, [returnUrl, navigate]);
 
-  return {
+  return { data: {
     bookName,
     prologue,
     loading,
@@ -154,7 +154,5 @@ export function useBookOverview() {
     designation,
     testamentLabel,
     hasReturnUrl: !!returnUrl,
-    onStartReading,
-    onBack,
-  };
+  }, actions: { onStartReading, onBack } };
 }

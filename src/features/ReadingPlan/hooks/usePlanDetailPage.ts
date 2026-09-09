@@ -56,7 +56,12 @@ export function usePlanDetailPage() {
     try {
       const resp = await api.getPlanDetail(planId ?? "");
       if (resp.returnCode === 200 && resp.returnData) {
-        const data = resp.returnData;
+        const rawData = resp.returnData;
+        const data: PlanDetail = {
+          ...rawData,
+          planId: rawData.planId ?? rawData.plan_id ?? planId ?? "",
+          plan_id: rawData.plan_id ?? rawData.planId ?? planId ?? "",
+        };
         setPlan(data);
         if (data.days && Array.isArray(data.days)) {
           const mapped: PlanDetailDay[] = data.days.map((d: any) => ({

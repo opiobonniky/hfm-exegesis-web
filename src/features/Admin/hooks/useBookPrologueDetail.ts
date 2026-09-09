@@ -61,5 +61,5 @@ export function useBookPrologueDetail() {
       .finally(() => setLoading(false));
   }, [bookName, toast, navigate]);
 
-  return { item, loading, navigate };
+  return { data: { item, loading }, actions: { navigate } };
 }

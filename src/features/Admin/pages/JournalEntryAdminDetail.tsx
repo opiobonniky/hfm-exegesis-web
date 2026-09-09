@@ -9,7 +9,8 @@ import { JournalDetailContent, JournalDetailHeader } from "../components/Journal
 import { AdminDeleteDialog } from "../components/AdminDeleteDialog";
 
 export default function JournalEntryAdminDetail() {
-  const h = useJournalEntryAdminDetail();
+  const { data, actions } = useJournalEntryAdminDetail();
+  const h = { ...data, ...actions };
 
   if (h.loading) return <DetailLoading />;
   if (!h.item) return null;

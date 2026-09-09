@@ -5,17 +5,7 @@
 import { Calendar, Clock, CheckCircle, XCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { fmtDate } from "../helpers/contentDetailHelpers";
-
-interface Props {
-  isPublished: boolean;
-  /** Optional reference badge text */
-  reference?: string | null;
-  /** Optional extra badge */
-  extraBadge?: string | null;
-  displayDate?: string;
-  createdOn?: string;
-  updatedOn?: string;
-}
+import type { DailyContentDetailMetaProps } from "../types";
 
 export function DailyContentDetailMeta({
   isPublished,
@@ -24,7 +14,7 @@ export function DailyContentDetailMeta({
   displayDate,
   createdOn,
   updatedOn,
-}: Props) {
+}: DailyContentDetailMetaProps) {
   return (
     <>
       <div className="flex items-center gap-2 flex-wrap">

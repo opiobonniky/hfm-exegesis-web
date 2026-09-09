@@ -9,7 +9,8 @@ import { BookPrologueHero } from "../components/BookPrologueHero";
 import { BookProloguePageShell } from "../components/BookProloguePageShell";
 
 export default function BookPrologueDetail() {
-  const h = useBookPrologueDetail();
+  const { data, actions } = useBookPrologueDetail();
+  const h = { ...data, ...actions };
 
   if (h.loading) return <DetailLoading />;
   if (!h.item) return null;

@@ -11,9 +11,7 @@ import { getDeviceInfo, getClientIP } from "@/lib/utils";
 import { GoogleAuthProvider, signInWithPopup, getRedirectResult } from "firebase/auth";
 import { auth, googleProvider } from "@/firebaseConfiguration/config";
 
-import { LoginPageModel } from "../types";
-
-export function useLoginPage(): LoginPageModel {
+export function useLoginPage() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { setUserInfo, userInfo, loading: authLoading } = useAuth();
@@ -120,6 +118,7 @@ export function useLoginPage(): LoginPageModel {
   const taglineParts = (t.auth?.experienceTheWord || "Experience the {word} like never before.").split("{word}");
 
   return {
+    data: {
     isRtl,
     setLanguage,
     currentLang,
@@ -157,10 +156,19 @@ export function useLoginPage(): LoginPageModel {
     passwordLabel: t.common?.password || "Password",
     forgotPasswordLabel: t.auth?.forgotPassword || "Forgot password?",
     signInLabel: (t.auth?.signIn || "SIGN IN").toUpperCase(),
+    registerPromptLabel: t.auth?.dontHaveAccount || "Don't have an account?",
+    registerLabel: t.auth?.register || "Register",
+    signInWithGoogleLabel: t.auth?.signInWithGoogle || "Continue with Google",
     termsLabel: t.auth?.agreeToTerms || "By continuing, you agree to our",
     termsLinkLabel: t.auth?.terms || "Terms of Service",
     privacyLabel: "and",
     privacyLinkLabel: t.auth?.privacyPolicy || "Privacy Policy",
     additionalNote: t.auth?.fullVersionComing || "Full version arriving with public launch.",
+    },
+    actions: {
+      navigate, setEmail, setPassword, setShowPassword, setIsLoading, setIsGoogleLoading,
+      setEmailFocused, setPasswordFocused, handleLogin, handleGoogleLogin, handleEmailChange,
+      handlePasswordChange, handleEmailFocus, handlePasswordFocus, handleEmailBlur, handlePasswordBlur,
+    },
   };
 }

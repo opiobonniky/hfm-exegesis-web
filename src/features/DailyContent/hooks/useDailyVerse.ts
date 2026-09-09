@@ -24,5 +24,8 @@ export function useDailyVerse() {
     }
   }, [page]);
 
-  return { verses, loading, page, totalPages, setPage, fetchVerses };
+  return {
+    data: { verses, loading, page, totalPages },
+    actions: { setPage, fetchVerses },
+  };
 }

@@ -26,15 +26,19 @@ export function useAdminJournalModeration() {
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [totalCount, setTotalCount] = useState(0);
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  const loadingMoreRef = useRef(false);
   const [deleteTarget, setDeleteTarget] = useState<JournalModerationEntry | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [actionLoading, setActionLoading] = useState<number | null>(null);
-  const sentinelRef = useRef<HTMLDivElement>(null);
 
   const loadEntries = useCallback(
     async (pageNum: number, q: string, append = false) => {
-      if (append) setLoadingMore(true);
-      else setLoading(true);
+      if (append) {
+        if (loadingMoreRef.current) return;
+        loadingMoreRef.current = true;
+        setLoadingMore(true);
+      } else setLoading(true);
       try {
         const res = await sendPostRequest("journal", "admin/get-all", {
           page: pageNum + 1,
@@ -44,17 +48,20 @@ export function useAdminJournalModeration() {
         const data = res?.returnData;
         const items: JournalModerationEntry[] =
           data?.entries || data?.content || data || [];
-        setEntries((prev) => (append ? [...prev, ...items] : items));
+        setEntries((previous) => (append ? [...previous, ...items] : items));
         const total = data?.totalCount ?? items.length;
         setTotalCount(total);
         const apiPage = data?.page ?? pageNum + 1;
-        const totalPages = Math.ceil(total / 20);
-        setHasMore(apiPage < totalPages);
+        setHasMore(data?.hasNext ?? apiPage < Math.ceil(total / 20));
+        setPage(pageNum);
       } catch {
         toast({ title: "Failed to load entries", variant: "destructive" });
       } finally {
         setLoading(false);
-        setLoadingMore(false);
+        if (append) {
+          loadingMoreRef.current = false;
+          setLoadingMore(false);
+        }
       }
     },
     [toast],
@@ -64,28 +71,27 @@ export function useAdminJournalModeration() {
     loadEntries(0, search);
   }, []);
 
-  // Infinite scroll observer
+  const handleSearch = useCallback(() => {
+    loadEntries(0, search);
+  }, [search, loadEntries]);
+
+  const loadMore = useCallback(() => {
+    if (!hasMore || loadingMoreRef.current) return;
+    void loadEntries(page + 1, search, true);
+  }, [hasMore, loadEntries, page, search]);
+
   useEffect(() => {
     const sentinel = sentinelRef.current;
     if (!sentinel || !hasMore || loadingMore) return;
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && hasMore && !loadingMore) {
-          const nextPage = page + 1;
-          setPage(nextPage);
-          loadEntries(nextPage, search, true);
-        }
+        if (entry.isIntersecting) loadMore();
       },
-      { rootMargin: "200px" },
+      { rootMargin: "0px 0px 320px 0px", threshold: 0 },
     );
     observer.observe(sentinel);
     return () => observer.disconnect();
-  }, [hasMore, loadingMore, page, search, loadEntries]);
-
-  const handleSearch = useCallback(() => {
-    setPage(0);
-    loadEntries(0, search);
-  }, [search, loadEntries]);
+  }, [hasMore, loadingMore, loadMore]);
 
   const handleTogglePublication = useCallback(
     async (entry: JournalModerationEntry) => {
@@ -118,7 +124,7 @@ export function useAdminJournalModeration() {
     if (!deleteTarget) return;
     setDeleting(true);
     try {
-      const res = await sendPostRequest("journal", "delete", {
+      const res = await sendPostRequest("journal", "admin/delete", {
         id: deleteTarget.id,
       });
       if (res.returnCode === 200) {
@@ -133,12 +139,6 @@ export function useAdminJournalModeration() {
     }
   }, [deleteTarget, toast]);
 
-  const loadMore = useCallback(() => {
-    const np = page + 1;
-    setPage(np);
-    loadEntries(np, search, true);
-  }, [page, search, loadEntries]);
-
   const goBack = useCallback(() => navigate(-1), [navigate]);
   const viewEntry = useCallback((entry: JournalModerationEntry) => {
     navigate(`/admin/journal-moderation/${entry.id}`);
@@ -150,14 +150,14 @@ export function useAdminJournalModeration() {
     if (!open) setDeleteTarget(null);
   }, []);
 
-  return {
+  return { data: {
     entries,
     loading,
     loadingMore,
     search,
     setSearch,
-    hasMore,
     totalCount,
+    hasMore,
     sentinelRef,
     deleteTarget,
     deleting,
@@ -165,10 +165,11 @@ export function useAdminJournalModeration() {
     handleSearch,
     handleTogglePublication,
     handleDelete,
-    loadMore,
     goBack,
     viewEntry,
     requestDelete,
-    handleDeleteDialogChange,
-  };
+  }, actions: {
+    setSearch, handleSearch, handleTogglePublication, handleDelete, goBack, viewEntry,
+    requestDelete, handleDeleteDialogChange,
+  } };
 }

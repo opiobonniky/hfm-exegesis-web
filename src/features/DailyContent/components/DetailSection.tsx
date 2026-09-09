@@ -1,12 +1,7 @@
 /**
  * DetailSection — groups content blocks with optional title in detail pages.
  */
-import { ReactNode } from "react";
-
-interface DetailSectionProps {
-  title?: string;
-  children: ReactNode;
-}
+import type { DetailSectionProps } from "../types";
 
 export function DetailSection({ title, children }: DetailSectionProps) {
   return (

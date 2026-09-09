@@ -9,7 +9,8 @@ import {
 import { Mail, ArrowRight, KeyRound } from "lucide-react";
 
 const VerifyAccount = () => {
-  const p = useVerifyAccountPage();
+  const { data, actions } = useVerifyAccountPage();
+  const p = { ...data, ...actions };
   const { t, isRtl, email, setEmail, code, setCode, isLoading, isResending, handleVerify, handleResend } = p;
 
   return (

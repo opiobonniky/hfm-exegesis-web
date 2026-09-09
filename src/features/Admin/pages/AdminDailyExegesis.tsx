@@ -14,7 +14,8 @@ import { ExegesisDeleteDialog } from "../components/ExegesisDeleteDialog";
 
 export default function AdminDailyExegesis() {
   const navigate = useNavigate();
-  const h = useAdminDailyExegesis();
+  const { data, actions } = useAdminDailyExegesis();
+  const h = { ...data, ...actions };
 
   return (
     <div className="min-h-screen bg-background">

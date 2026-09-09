@@ -1,5 +1,5 @@
 // useAdminBookProloguesPage — list + CRUD for book prologues (uses bookName as key)
-import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { BIBLE_BOOKS } from "@/data/staticData";
@@ -27,16 +27,20 @@ const EMPTY_FORM = {
   mainThemes: [] as string[], keyPeople: [] as string[], keyVerses: [] as string[],
   content: "", isPublished: true,
 };
-const PAGE_SIZE = 12;
+const PAGE_SIZE = 24;
 
 export function useAdminBookProloguesPage() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [allItems, setAllItems] = useState<BookPrologue[]>([]);
+  const [items, setItems] = useState<BookPrologue[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [totalCount, setTotalCount] = useState(0);
   const sentinelRef = useRef<HTMLDivElement>(null);
+  const loadingMoreRef = useRef(false);
 
   // Edit dialog
   const [editItem, setEditItem] = useState<BookPrologue | null>(null);
@@ -47,72 +51,68 @@ export function useAdminBookProloguesPage() {
   const [deleting, setDeleting] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
-  const load = useCallback(async () => {
-    setLoading(true);
+  const load = useCallback(async (pageNum = 0, query = "", append = false) => {
+    if (append) {
+      if (loadingMoreRef.current) return;
+      loadingMoreRef.current = true;
+      setLoadingMore(true);
+    }
+    else setLoading(true);
     try {
       const res = await sendPostRequest("book-prologues", "admin/get-all", {
-        page: 0,
-        size: 1000,
+        page: pageNum,
+        pageSize: PAGE_SIZE,
+        search: query.trim() || undefined,
       });
       const data = res?.returnData || res?.data;
-      const raw = Array.isArray(data) ? data : data?.data || [];
-      setAllItems(raw);
+      const raw: BookPrologue[] = Array.isArray(data) ? data : data?.data || [];
+      setItems((previous) => (append ? [...previous, ...raw] : raw));
+      setTotalCount(data?.total ?? raw.length);
+      setHasMore(data?.hasNext ?? raw.length === PAGE_SIZE);
+      setPage(pageNum);
     } catch {
       toast({ title: "Failed to load prologues", variant: "destructive" });
     } finally {
       setLoading(false);
+      if (append) {
+        loadingMoreRef.current = false;
+        setLoadingMore(false);
+      }
     }
   }, [toast]);
 
   useEffect(() => {
-    load();
-    setPage(0);
-  }, []);
+    const timer = window.setTimeout(() => load(0, search), 250);
+    return () => window.clearTimeout(timer);
+  }, [search, load]);
 
-  // Client-side search filtering
-  const filteredItems = useMemo(() => {
-    if (!search.trim()) return allItems;
-    const q = search.toLowerCase();
-    return allItems.filter(
-      (item) =>
-        item.bookName?.toLowerCase().includes(q) ||
-        item.title?.toLowerCase().includes(q),
-    );
-  }, [allItems, search]);
+  const loadMore = useCallback(() => {
+    if (!hasMore || loadingMoreRef.current) return;
+    void load(page + 1, search, true);
+  }, [hasMore, load, page, search]);
 
-  // Client-side pagination
-  const items = useMemo(() => {
-    return filteredItems.slice(0, (page + 1) * PAGE_SIZE);
-  }, [filteredItems, page]);
-
-  const hasMore = items.length < filteredItems.length;
-  const totalPages = Math.max(1, Math.ceil(filteredItems.length / PAGE_SIZE));
-  const currentPage = Math.min(page + 1, totalPages);
-
-  // Infinite scroll observer
   useEffect(() => {
     const sentinel = sentinelRef.current;
-    if (!sentinel || !hasMore) return;
+    if (!sentinel || !hasMore || loadingMore) return;
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && hasMore) {
-          setPage((p) => p + 1);
+        if (entry.isIntersecting && hasMore && !loadingMore) {
+          loadMore();
         }
       },
-      { rootMargin: "200px" },
+      { rootMargin: "0px 0px 320px 0px", threshold: 0 },
     );
     observer.observe(sentinel);
     return () => observer.disconnect();
-  }, [hasMore]);
+  }, [hasMore, loadingMore, loadMore]);
 
   const updateFormField = useCallback((field: string, value: any) => {
     setEditForm((prev) => ({ ...prev, [field]: value }));
   }, []);
 
   const refresh = useCallback(() => {
-    setPage(0);
-    load();
-  }, [load]);
+    load(0, search);
+  }, [load, search]);
 
   const openEdit = useCallback((item?: BookPrologue) => {
     if (item) {
@@ -207,18 +207,15 @@ export function useAdminBookProloguesPage() {
         b.toLowerCase().includes(editForm.bookName.toLowerCase()),
       );
 
-  return {
+  return { data: {
     items,
-    allItems,
     loading,
+    loadingMore,
+    loadMore,
     search,
     setSearch,
     hasMore,
-    page,
-    setPage,
-    totalPages,
-    currentPage,
-    totalCount: filteredItems.length,
+    totalCount,
     saving,
     deleting,
     sentinelRef,
@@ -235,5 +232,8 @@ export function useAdminBookProloguesPage() {
     handleDelete,
     filteredBooks,
     navigate,
-  };
+  }, actions: {
+    loadMore, setSearch, setEditItem, setEditForm, setDeleteItem, refresh,
+    updateFormField, openEdit, handleSave, handleDelete,
+  } };
 }

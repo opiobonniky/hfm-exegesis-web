@@ -77,7 +77,12 @@ export function PlanDetailHeader({
               <Layers className="w-3 h-3" />{catLabel}
             </span>
             <button
-              onClick={() => navigate(routes.editReadingPlan.path.replace(":planId", plan.plan_id))}
+              onClick={() => {
+                const currentPlanId = plan.planId ?? plan.plan_id;
+                if (currentPlanId) {
+                  navigate(routes.editReadingPlan.path.replace(":planId", currentPlanId));
+                }
+              }}
               className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border border-violet-200 bg-violet-50 text-violet-700 text-sm font-semibold hover:bg-violet-100 transition-colors"
             >
               <Pencil className="w-4 h-4" />{t.readingPlan.editPlan}

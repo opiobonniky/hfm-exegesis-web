@@ -20,7 +20,8 @@ function VoiceLoadingSpinner() {
 }
 
 export default function VoiceSettingsPage() {
-  const h = useVoiceSettingsPage();
+  const { data, actions } = useVoiceSettingsPage();
+  const h = { ...data, ...actions };
 
   if (h.loading) return <VoiceLoadingSpinner />;
 

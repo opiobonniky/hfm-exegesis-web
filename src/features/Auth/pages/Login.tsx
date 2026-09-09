@@ -4,7 +4,8 @@ import { useLoginPage } from "../hooks/useLoginPage";
 import { LoginBrandedPanel, LoginFormContent } from "../components";
 
 export default function Login() {
-  const p = useLoginPage();
+  const { data, actions } = useLoginPage();
+  const p = { ...data, ...actions };
 
   return (
     <div className="min-h-screen flex bg-background overflow-hidden" dir={p.isRtl ? "rtl" : "ltr"}>

@@ -15,7 +15,8 @@ import {
 } from "../components/TriviaPerformanceTabs";
 
 export default function AdminTriviaPerformance() {
-  const h = useAdminTriviaPerformancePage();
+  const { data, actions } = useAdminTriviaPerformancePage();
+  const h = { ...data, ...actions };
   const navigate = useNavigate();
 
   return (

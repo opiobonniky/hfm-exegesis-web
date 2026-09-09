@@ -32,7 +32,7 @@ export function PrologueGrid({
 }: PrologueGridProps) {
   return (
     <>
-      <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {items.map((item) => (
           <PrologueCard
             key={item.bookName}
@@ -45,7 +45,7 @@ export function PrologueGrid({
       </div>
 
       {/* Infinite scroll sentinel */}
-      <div ref={sentinelRef} className="h-4" />
+      <div ref={sentinelRef} className="h-2 w-full" aria-hidden="true" />
       {loadingMore && (
         <div className="flex items-center justify-center py-4">
           <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />

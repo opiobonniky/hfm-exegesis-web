@@ -47,5 +47,5 @@ export function useNotificationSettingsPage() {
       toast({ title: "Error", variant: "destructive" });
     } finally { setSaving(false); }
   }, [settings, navigate, toast]);
-  return { loading, saving, settings, handleToggle, updateSettings, handleSave, navigate };
+  return { data: { loading, saving, settings }, actions: { handleToggle, updateSettings, handleSave, navigate } };
 }

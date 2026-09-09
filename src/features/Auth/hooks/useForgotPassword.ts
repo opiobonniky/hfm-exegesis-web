@@ -21,5 +21,5 @@ export function useForgotPassword() {
     finally { setLoading(false); }
   }, [email, toast]);
 
-  return { email, setEmail, loading, sent, error, handleSubmit };
+  return { data: { email, loading, sent, error }, actions: { setEmail, handleSubmit } };
 }

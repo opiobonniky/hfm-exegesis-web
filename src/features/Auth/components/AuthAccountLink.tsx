@@ -3,15 +3,20 @@
  * Replaces raw <button className="..."> in pages.
  */
 
+import { Link } from "react-router-dom";
+
 interface AuthAccountLinkProps {
-  onClick: () => void;
+  to?: string;
+  onClick?: () => void;
   label: string;
 }
 
-export function AuthAccountLink({ onClick, label }: AuthAccountLinkProps) {
-  return (
-    <button onClick={onClick} className="w-full text-sm font-semibold text-white/50 hover:text-white/80 transition-colors py-2">
-      {label}
-    </button>
-  );
+export function AuthAccountLink({ to, onClick, label }: AuthAccountLinkProps) {
+  const className = "font-semibold text-primary hover:text-primary/80 transition-colors";
+
+  if (to) {
+    return <Link to={to} className={className}>{label}</Link>;
+  }
+
+  return <button type="button" onClick={onClick} className={className}>{label}</button>;
 }

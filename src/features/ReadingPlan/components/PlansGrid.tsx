@@ -1,19 +1,16 @@
 // PlansGrid — renders reading plan cards from plans array
 import { ReadingPlanCard } from "./ReadingPlanCard";
-
-interface Plan {
-  planId: string;
-  [key: string]: unknown;
-}
+import type { ReadingPlanListItem } from "../types";
 
 interface PlansGridProps {
-  plans: Plan[];
+  plans: ReadingPlanListItem[];
   isRtl: boolean;
-  t: Record<string, unknown>;
+  t: any;
   onPress: (planId: string) => void;
+  onDelete: (plan: ReadingPlanListItem) => void;
 }
 
-export function PlansGrid({ plans, isRtl, t, onPress }: PlansGridProps) {
+export function PlansGrid({ plans, isRtl, t, onPress, onDelete }: PlansGridProps) {
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       {plans.map((plan) => (
@@ -23,6 +20,7 @@ export function PlansGrid({ plans, isRtl, t, onPress }: PlansGridProps) {
           isRtl={isRtl}
           t={t}
           onPress={() => onPress(plan.planId)}
+          onDelete={() => onDelete(plan)}
         />
       ))}
     </div>

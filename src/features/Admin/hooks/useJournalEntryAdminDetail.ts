@@ -36,7 +36,7 @@ export function useJournalEntryAdminDetail() {
   useEffect(() => {
     if (!entryId) return;
     setLoading(true);
-    sendPostRequest("journal", "get", { id: Number(entryId) })
+    sendPostRequest("journal", "admin/get", { id: Number(entryId) })
       .then((res) => {
         if (res?.returnCode === 200 && res.returnData) {
           setItem(res.returnData);
@@ -56,7 +56,7 @@ export function useJournalEntryAdminDetail() {
     if (!item) return;
     setDeleting(true);
     try {
-      const res = await sendPostRequest("journal", "delete", { id: item.id });
+      const res = await sendPostRequest("journal", "admin/delete", { id: item.id });
       if (res.returnCode === 200) {
         toast({ title: "Deleted" });
         navigate("/admin/journal-moderation");
@@ -88,13 +88,12 @@ export function useJournalEntryAdminDetail() {
     }
   }, [item, toast]);
 
-  return {
+  return { data: {
     item,
     loading,
     deleting,
     confirmDelete, setConfirmDelete,
     navigate,
     handleDelete,
-    handleTogglePublication,
-  };
+  }, actions: { setConfirmDelete, handleDelete, handleTogglePublication, navigate } };
 }

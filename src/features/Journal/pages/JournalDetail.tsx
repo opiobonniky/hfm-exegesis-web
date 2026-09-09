@@ -6,7 +6,8 @@ import JournalDetailTopBar from "../components/JournalDetailTopBar";
 import JournalDetailWordSheet from "../components/JournalDetailWordSheet";
 
 export default function JournalDetailPage() {
-  const p = useJournalDetail();
+  const { data, actions } = useJournalDetail();
+  const p = { ...data, ...actions };
 
   if (p.loading) return <JournalDetailLoadingSkeleton />;
   if (!p.entry) return null;

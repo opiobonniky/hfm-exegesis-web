@@ -1,4 +1,6 @@
 // ─── Daily Content Types ───────────────────────────────────────────────────────
+import type { FormEventHandler, ReactElement, ReactNode } from "react";
+import type { LucideIcon } from "lucide-react";
 
 export interface DailyVerseItem {
   id: number;
@@ -194,6 +196,211 @@ export interface DailyExegesisFull {
   isPublished: boolean;
 }
 
+export interface GuidedTabProps {
+  title: string;
+  description?: string;
+  children: ReactNode;
+}
+
+export interface GuidedTabsProps {
+  children: ReactElement<GuidedTabProps>[];
+  validateStep: (step: number) => boolean;
+  continueLabel?: string;
+  backLabel?: string;
+}
+
+export interface DailyExegesisPageData {
+  isRtl: boolean;
+  loading: boolean;
+  error: string | null;
+  item: DailyExegesisFull;
+  series: DailyExegesisFull[];
+  displayDate: string;
+  isUpcoming: boolean;
+  canOpenBible: boolean;
+  t: {
+    dailyExegesis?: {
+      title?: string;
+      subtitle?: string;
+    };
+  };
+  title: string;
+  subtitle: string;
+}
+
+export interface DailyExegesisPageActions {
+  refresh: () => void;
+  goBack: () => void;
+  openInBible: () => void;
+  saveToLedger: () => void;
+  selectSeriesItem: (item: DailyExegesisFull) => void;
+}
+
+export interface DailyExegesisPageLayoutProps {
+  isRtl: boolean;
+  children: ReactNode;
+}
+
+export interface DailyExegesisLayoutProps {
+  children: ReactNode;
+}
+
+export interface ExegesisHeaderProps {
+  onBack: () => void;
+  title: string;
+  subtitle: string;
+}
+
+export interface ExegesisHeroProps {
+  item: DailyExegesisFull;
+  series: DailyExegesisFull[];
+  onSelect: (item: DailyExegesisFull) => void;
+  onOpenBible: () => void;
+  displayDate: string;
+  isUpcoming: boolean;
+  canOpenBible: boolean;
+}
+
+export interface ExegesisContentProps {
+  item: Pick<DailyExegesisFull, "introduction" | "contextSummary" | "teachingBody" | "application" | "prayer">;
+}
+
+export interface DailyExegesisActionsProps {
+  canOpenBible: boolean;
+  onOpenBible: () => void;
+  onSaveToJournal: () => void;
+}
+
+export interface DailyExegesisErrorProps {
+  message: string;
+  onRetry: () => void;
+}
+
+export interface DailyExegesisDetailData {
+  exegesis: DailyExegesisFull | null;
+  displayDate: string;
+}
+
+export interface DailyExegesisDetailActions {
+  goBack: () => void;
+  openEdit: () => void;
+}
+
+export interface DailyContentDetailHeaderProps {
+  title: string;
+  subtitle: string;
+  icon?: LucideIcon;
+  onBack: () => void;
+  onEdit?: () => void;
+  editLabel?: string;
+}
+
+export interface DailyContentDetailEmptyProps {
+  icon: LucideIcon;
+  title: string;
+  message: string;
+  onBack: () => void;
+  backLabel?: string;
+}
+
+export interface DailyContentDetailMetaProps {
+  isPublished: boolean;
+  reference?: string | null;
+  extraBadge?: string | null;
+  displayDate?: string;
+  createdOn?: string;
+  updatedOn?: string;
+}
+
+export interface DetailSectionProps {
+  title?: string;
+  children: ReactNode;
+}
+
+export interface DetailTitleBlockProps {
+  title: string;
+  children?: ReactNode;
+}
+
+export interface DetailPageLayoutProps {
+  children: ReactNode;
+}
+
+export interface TextBlockProps {
+  label: string;
+  value?: string | null;
+  icon?: LucideIcon;
+}
+
+export interface TagsBlockProps {
+  tags?: string | null;
+}
+
+export interface AddDailyDevotionCoreSectionsProps {
+  title: string;
+  content: string;
+  setTitle: (value: string) => void;
+  setContent: (value: string) => void;
+}
+
+export interface AddDailyDevotionReferenceSectionProps {
+  testament: string;
+  book: string;
+  chapter: string;
+  verseNumber: string;
+  bibleVersion: string;
+  testamentOptions: Array<{ value: string; label: string }>;
+  bookOptions: Array<{ value: string; label: string }>;
+  chapterOptions: Array<{ value: string; label: string }>;
+  bibleVersionOptions: Array<{ value: string; label: string }>;
+  setTestament: (value: string) => void;
+  setBook: (value: string) => void;
+  setChapter: (value: string) => void;
+  setVerseNumber: (value: string) => void;
+  setBibleVersion: (value: string) => void;
+  t: { dailyVerse: { selectBook: string; selectChapter: string }; devotions: { selectTestament: string } };
+}
+
+export interface AddDailyDevotionContentFieldsProps {
+  explanation: string;
+  application: string;
+  verseIntroduction: string;
+  learnMore: string;
+  contentPlaceholder?: string;
+  setExplanation: (value: string) => void;
+  setApplication: (value: string) => void;
+  setVerseIntroduction: (value: string) => void;
+  setLearnMore: (value: string) => void;
+}
+
+export interface AddDailyDevotionBackgroundSectionProps {
+  backgroundAuthor: string;
+  backgroundBook: string;
+  backgroundContext: string;
+  setBackgroundAuthor: (value: string) => void;
+  setBackgroundBook: (value: string) => void;
+  setBackgroundContext: (value: string) => void;
+}
+
+export interface AddDailyDevotionFormProps {
+  data: unknown;
+  actions: unknown;
+}
+
+export interface DailyContentFormCardProps {
+  icon: LucideIcon;
+  title: string;
+  description: string;
+  children: ReactNode;
+  contentClassName?: string;
+  onSubmit?: FormEventHandler<HTMLFormElement>;
+}
+
+export interface AddDailyExegesisFormProps {
+  data: unknown;
+  actions: unknown;
+}
+
 export interface DailyExegesisSeriesItem {
   id: number;
   title: string;
@@ -205,6 +412,148 @@ export type VerseExplanationStepId =
   | "exegesis"
   | "study"
   | "extras";
+
+export interface WordStudyItem {
+  strongsId: string;
+  surfaceText: string;
+  customDefinition: string;
+  sortOrder: number;
+}
+
+export interface CrossRefItem {
+  bookName: string;
+  chapter: number;
+  verseNumber: number;
+  referenceText: string;
+  commentary: string;
+  sortOrder: number;
+}
+
+export interface ExplanationForm {
+  bookName: string;
+  chapter: string;
+  verseNumber: string;
+  bibleVersion: string;
+  exegesis: {
+    explanationText: string;
+    applicationText: string;
+  };
+  studyMetadata: {
+    introduction: string;
+    backgroundAuthor: string;
+    backgroundBook: string;
+    backgroundContext: string;
+    finalThoughts: string;
+    takeaways: string[];
+  };
+  wordStudies: WordStudyItem[];
+  practicalApps: { applicationText: string; sortOrder: number }[];
+  crossReferences: CrossRefItem[];
+  themes: { themeName: string; sortOrder: number }[];
+}
+
+export interface AddExplanationHeaderBarProps {
+  isEditMode: boolean;
+  isValid: boolean;
+  saving: boolean;
+  goBack: () => void;
+  handleSave: () => void;
+}
+
+export interface AddExplanationProgressCardProps {
+  bookName: string;
+  chapter: string;
+  verseNumber: string;
+  completionPercent: number;
+}
+
+export interface AddExplanationSidebarProps {
+  currentStep: VerseExplanationStepId;
+  currentStepIndex: number;
+  stepCompletion: Record<VerseExplanationStepId, boolean>;
+  referenceComplete: boolean;
+  exegesisComplete: boolean;
+  onStepChange: (step: VerseExplanationStepId) => void;
+}
+
+export interface AddExplanationReferenceFormProps {
+  bookName: string;
+  chapter: string;
+  verseNumber: string;
+  bibleVersion: string;
+  sortedTranslationOptions: Array<{ value: string; label: string; group: string }>;
+  verseOptions: number[];
+  verseOptionsLoading: boolean;
+  verseTextLoading: boolean;
+  selectedVerseText: string;
+  maxChapterNumber: number;
+  maxVerseNumber: number;
+  bookOptions: Array<{ value: string; label: string; group: string }>;
+  chapterOptions: number[];
+  selectedVerse: number | null;
+  verseLoadingForTrigger: boolean;
+  updateField: (key: keyof Pick<ExplanationForm, "bookName" | "chapter" | "verseNumber" | "bibleVersion">, value: string) => void;
+}
+
+export interface AddExplanationExegesisFormProps {
+  explanationText: string;
+  applicationText: string;
+  updateNested: (parent: "exegesis", child: "explanationText" | "applicationText", value: string) => void;
+}
+
+export interface AddExplanationStudyFormProps {
+  introduction: string;
+  backgroundAuthor: string;
+  backgroundBook: string;
+  backgroundContext: string;
+  wordStudies: WordStudyItem[];
+  updateNested: (parent: "studyMetadata", child: "introduction" | "backgroundAuthor" | "backgroundBook" | "backgroundContext", value: string) => void;
+  addWordStudy: () => void;
+  removeWordStudy: (index: number) => void;
+  updateWordStudy: (index: number, field: keyof WordStudyItem, value: string | number) => void;
+}
+
+export interface AddExplanationExtrasFormProps {
+  practicalApps: ExplanationForm["practicalApps"];
+  crossReferences: CrossRefItem[];
+  themes: ExplanationForm["themes"];
+  takeaways: string[];
+  finalThoughts: string;
+  crossRefVerseOptions: Record<number, { key: string; verses: number[] }>;
+  crossRefVerseLoading: Record<number, boolean>;
+  crossReferenceBookOptions: Array<{ value: string; label: string; group: string }>;
+  crossReferenceChapterOptions: Record<number, number[]>;
+  crossReferenceVerseLoading: Record<number, boolean>;
+  updatePracticalApp: (index: number, value: string) => void;
+  addPracticalApp: () => void;
+  removePracticalApp: (index: number) => void;
+  addCrossRef: () => void;
+  removeCrossRef: (index: number) => void;
+  updateCrossRef: (index: number, field: keyof CrossRefItem, value: string | number) => void;
+  pickCrossRefVerse: (index: number, verse: number) => void;
+  addTheme: () => void;
+  removeTheme: (index: number) => void;
+  updateTheme: (index: number, value: string) => void;
+  updateTakeaways: (takeaways: string[]) => void;
+  updateFinalThoughts: (value: string) => void;
+}
+
+export interface AddExplanationWorkspaceProps {
+  data: unknown;
+  actions: unknown;
+}
+
+export interface AddExplanationFooterActionsProps {
+  isValid: boolean;
+  saving: boolean;
+  isEditMode: boolean;
+  handleSave: () => void;
+  currentStepIndex: number;
+  stepCount: number;
+  onBack: () => void;
+  onNext: () => void;
+  canAdvance: boolean;
+}
 
 export interface VerseExplanationStep {
   id: VerseExplanationStepId;

@@ -147,7 +147,7 @@ export function useSowerPage() {
     if (billingInterval === "month") return p.interval === "month";
     return p.interval === "year";
   });
-  return {
+  return { data: {
     t,
     isRtl,
     plans,
@@ -163,8 +163,7 @@ export function useSowerPage() {
     isCovenantSower,
     tierLabel,
     filteredPlans,
-    handleSubscribe,
-    handleManageSubscription,
-    navigate,
-  };
+  }, actions: {
+    setBillingInterval, openFaq, setOpenFaq, handleSubscribe, handleManageSubscription, navigate,
+  } };
 }

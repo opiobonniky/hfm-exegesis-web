@@ -15,7 +15,8 @@ import { AdminTriviaHeader } from "../components/AdminTriviaHeader";
 import { AdminTriviaTabs } from "../components/AdminTriviaTabs";
 
 const AdminTrivia = () => {
-  const h = useAdminTrivia();
+  const { data, actions } = useAdminTrivia();
+  const h = { ...data, ...actions };
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6" dir={h.isRtl ? "rtl" : "ltr"}>

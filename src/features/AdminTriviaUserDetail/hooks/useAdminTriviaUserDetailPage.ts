@@ -27,5 +27,5 @@ export function useAdminTriviaUserDetailPage() {
   const goBack = useCallback(() => {
     navigate(routes.adminTrivia.path);
   }, [navigate]);
-  return { detail, loading, navigate, goBack };
+  return { data: { detail, loading }, actions: { navigate, goBack } };
 }

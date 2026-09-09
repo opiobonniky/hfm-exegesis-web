@@ -1,12 +1,7 @@
 /**
  * DetailTitleBlock — title + meta for detail pages.
  */
-import { ReactNode } from "react";
-
-interface DetailTitleBlockProps {
-  title: string;
-  children?: ReactNode;
-}
+import type { DetailTitleBlockProps } from "../types";
 
 export function DetailTitleBlock({ title, children }: DetailTitleBlockProps) {
   return (

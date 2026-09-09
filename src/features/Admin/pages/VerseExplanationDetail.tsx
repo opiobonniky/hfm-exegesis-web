@@ -8,7 +8,8 @@ import { DetailMetadataGrid } from "../components/DetailSection";
 import { VerseExplanationDetailContent } from "../components/VerseExplanationDetailContent";
 
 export default function VerseExplanationDetail() {
-  const h = useVerseExplanationDetail();
+  const { data, actions } = useVerseExplanationDetail();
+  const h = { ...data, ...actions };
 
   if (h.loading) return <DetailLoading />;
   if (!h.item) return null;

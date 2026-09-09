@@ -6,7 +6,8 @@ import { UserVerseStickyHeader } from "../components/UserVerseStickyHeader";
 import { fmtDate, isToday } from "../helpers";
 
 export default function UserDailyVerse() {
-  const h = useUserDailyVerse();
+  const { data, actions } = useUserDailyVerse();
+  const h = { ...data, ...actions };
 
   if (h.loading) return <VerseLoadingSkeleton />;
   if (!h.verse) return <VerseEmptyState onBack={() => h.navigate(-1)} />;

@@ -137,13 +137,16 @@ export function useAdminSubscriptions() {
   }, [refundDialog, toast, loadSubscribers]);
 
   return {
-    activeTab, setActiveTab, tiers, tiersLoading, tierDialog, setTierDialog, tierForm, setTierForm,
-    tierSaving, deleteTier, setDeleteTier, seeding, subscribers, subsLoading, syncing, summary,
-    suspendDialog, setSuspendDialog, suspendLoading,
-    manageDialog, setManageDialog, manageLoading, saveManage,
-    refundDialog, setRefundDialog, refundLoading, confirmRefund,
-    openCreateTier, openEditTier, saveTier, confirmDeleteTier, handleSeed, handleSyncStripe, toggleSuspend,
-    data: { tiers, subscribers },
-    actions: { loadTiers, loadSubscribers, openCreateTier, openEditTier, saveTier, confirmDeleteTier, handleSeed, handleSyncStripe, toggleSuspend, saveManage, confirmRefund },
+    data: {
+      activeTab, tiers, tiersLoading, tierDialog, tierForm, tierSaving, deleteTier, seeding,
+      subscribers, subsLoading, syncing, summary, suspendDialog, suspendLoading,
+      manageDialog, manageLoading, refundDialog, refundLoading,
+    },
+    actions: {
+      setActiveTab, setTierDialog, setTierForm, setDeleteTier, setSuspendDialog,
+      setManageDialog, saveManage, setRefundDialog, confirmRefund, openCreateTier,
+      openEditTier, saveTier, confirmDeleteTier, handleSeed, handleSyncStripe, toggleSuspend,
+      loadTiers, loadSubscribers,
+    },
   };
 }

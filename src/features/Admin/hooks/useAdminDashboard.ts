@@ -4,7 +4,7 @@ import { homeApi } from "../../Home/services/homeApi";
 import { useAdminErrorHandler } from "./useAdminErrorHandler";
 
 export function useAdminDashboard() {
-  const { handleError } = useAdminErrorHandler();
+  const { actions: { handleError } } = useAdminErrorHandler();
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -17,5 +17,5 @@ export function useAdminDashboard() {
     finally { setLoading(false); }
   }, [handleError]);
 
-  return { stats, loading, fetchStats };
+  return { data: { stats, loading }, actions: { fetchStats } };
 }

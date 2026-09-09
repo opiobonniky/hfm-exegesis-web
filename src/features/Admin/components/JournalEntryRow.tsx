@@ -1,5 +1,5 @@
 // JournalEntryRow — single entry row for journal moderation table
-import { Globe, Lock, Trash2, Eye, Loader2 } from "lucide-react";
+import { Globe, Lock, Trash2, Eye, Loader2, CalendarDays } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import type { JournalModerationEntry } from "../hooks/useAdminJournalModeration";
@@ -20,24 +20,32 @@ export function JournalEntryRow({
   onView,
 }: Props) {
   const isLoading = actionLoading === entry.id;
+  const createdDate = entry.createdOn ? new Date(entry.createdOn) : null;
+  const formattedDate = createdDate && !Number.isNaN(createdDate.getTime())
+    ? new Intl.DateTimeFormat("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    }).format(createdDate)
+    : "—";
 
   return (
-    <tr className="border-b last:border-0 hover:bg-muted/30 transition-colors">
-      <td className="p-3">
-        <div className="font-medium text-sm line-clamp-1">
+    <tr className="group border-b last:border-0 transition-colors hover:bg-primary/[0.03]">
+      <td className="max-w-0 p-4 pl-5">
+        <button type="button" onClick={onView} title={entry.title || "Untitled"} className="block w-full text-left">
+        <div className="line-clamp-2 break-words text-sm font-semibold leading-5 transition-colors group-hover:text-primary">
           {entry.title || "Untitled"}
         </div>
-        {entry.bookName && (
-          <div className="text-xs text-muted-foreground">
-            {entry.bookName} {entry.chapter}
-          </div>
-        )}
+        <div className="mt-1 truncate text-xs text-muted-foreground">
+          {entry.bookName ? `${entry.bookName} ${entry.chapter || ""}` : entry.category || "Journal entry"}
+        </div>
+        </button>
       </td>
-      <td className="p-3 hidden md:table-cell">
-        <Badge variant="secondary">{entry.category || "general"}</Badge>
+      <td className="p-4">
+        <Badge variant="secondary" className="rounded-full">{entry.category || "general"}</Badge>
       </td>
-      <td className="p-3">
-        <Badge variant={entry.isPublished ? "default" : "outline"}>
+      <td className="p-4">
+        <Badge variant={entry.isPublished ? "default" : "outline"} className="rounded-full">
           {entry.isPublished ? (
             <Globe className="w-3 h-3 mr-1" />
           ) : (
@@ -46,14 +54,13 @@ export function JournalEntryRow({
           {entry.isPublished ? "Public" : "Private"}
         </Badge>
       </td>
-      <td className="p-3 hidden lg:table-cell">
-        <span className="text-xs text-muted-foreground">
-          {entry.createdOn
-            ? new Date(entry.createdOn).toLocaleDateString()
-            : "—"}
+      <td className="p-4">
+        <span className="flex items-center gap-1.5 whitespace-nowrap text-xs text-muted-foreground">
+          <CalendarDays className="h-3.5 w-3.5" />
+          {formattedDate}
         </span>
       </td>
-      <td className="p-3 text-right">
+      <td className="p-4 pr-5 text-right">
         <div className="flex items-center justify-end gap-1">
           <Button
             variant="ghost"

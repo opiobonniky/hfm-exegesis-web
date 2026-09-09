@@ -152,14 +152,17 @@ export function useDailyDevotionsPage() {
   };
 
   return {
-    t, isRtl, navigate, isAdmin,
-    devotions, loading, page, setPage, total, totalPages, hasNext, hasPrevious, selectedIndex, setSelectedIndex,
-    fromDate, setFromDate, toDate, setToDate, activePreset, setActivePreset, filterError, setFilterError,
-    isFiltered: fromDate !== "" || toDate !== "",
-    applyPreset, clearFilter, applyFilter,
-    editOpen, setEditOpen, editState, setEditState, isSaving, openEdit, handleSave,
-    deleteOpen, setDeleteOpen, deleteTarget, isDeleting, handleDelete, openDelete,
-    emptyMessage, addLabel, paginationLabels, showPagination: totalPages > 1,
-    refresh,
+    data: {
+      t, isRtl, navigate, isAdmin, devotions, loading, page, total, totalPages,
+      hasNext, hasPrevious, selectedIndex, fromDate, toDate, activePreset, filterError,
+      isFiltered: fromDate !== "" || toDate !== "", editOpen, editState, isSaving,
+      deleteOpen, deleteTarget, isDeleting, emptyMessage, addLabel, paginationLabels,
+      showPagination: totalPages > 1,
+    },
+    actions: {
+      setPage, setSelectedIndex, setFromDate, setToDate, setActivePreset, setFilterError,
+      applyPreset, clearFilter, applyFilter, setEditOpen, setEditState, openEdit,
+      handleSave, setDeleteOpen, handleDelete, openDelete, refresh,
+    },
   };
 }

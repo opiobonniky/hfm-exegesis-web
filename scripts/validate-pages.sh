@@ -2,7 +2,7 @@
 # validate-pages.sh — Validates that all feature pages follow the clean compositor pattern.
 #
 # Rules (based on DailyVerse.tsx as exemplar):
-#   1. Pages must NOT contain more than 1 raw <div> tag (root wrapper only)
+#   1. Pages may use at most one raw <div>, and it must be the root wrapper
 #   2. Pages must NOT contain React hooks (useState, useMemo, useCallback, useEffect, useRef)
 #   3. Pages must NOT contain inline business logic (useCallback, useMemo, async handlers)
 #   4. Pages must NOT define types/interfaces (interface X, type X = ...)
@@ -14,6 +14,10 @@
 #  10. Pages must NOT have styled <button> or <a> elements
 #  11. Pages must NOT have inline data arrays (const xxx = [...]) for component props
 #      — data arrays belong in constants.ts, pages just import and pass to components
+#  12. Pages must NOT render native HTML tags other than the optional root <div>
+#      — visual markup belongs in standalone components with explicit props
+#  13. Pages must not contain derived/local business logic; only hook model destructuring is allowed
+#  14. Pages should compose standalone components directly; nested page markup belongs in components
 #
 # Usage: bash scripts/validate-pages.sh
 # Exit code: 0 if all pages pass, 1 if any fail
@@ -29,20 +33,43 @@ PASS=0
 FAIL=0
 WARN=0
 FAILED_FILES=()
+TARGET="${1:-}"
+
+if [ "$TARGET" = "--help" ] || [ "$TARGET" = "-h" ]; then
+  printf 'Usage: %s [page-file-or-directory]\n' "$0"
+  printf 'With no argument, validates all feature pages.\n'
+  exit 0
+fi
 
 # ── Run TypeScript check once and cache errors per file ──
 TS_ERROR_FILE=$(mktemp)
 trap 'rm -f "$TS_ERROR_FILE"' EXIT
-if npx tsc --noEmit --project tsconfig.app.json --pretty false >"$TS_ERROR_FILE" 2>&1; then
-  TS_CLEAN=true
+if [ -n "$TARGET" ]; then
+  if [ -f "$TARGET" ]; then
+    TYPE_SCOPE=$(basename "$TARGET" .tsx)
+    TYPE_SCOPE_PATTERN="$TYPE_SCOPE|use${TYPE_SCOPE}|${TYPE_SCOPE/Form/}Form|AddDailyDevotion|AddDailyExegesis"
+  else
+    TYPE_SCOPE="$TARGET"
+    TYPE_SCOPE_PATTERN="$TARGET"
+  fi
+  npx tsc --noEmit --project tsconfig.app.json --pretty false >"$TS_ERROR_FILE" 2>&1 || true
+  if grep -Eq "$TYPE_SCOPE_PATTERN" "$TS_ERROR_FILE"; then
+    TS_CLEAN=false
+  else
+    TS_CLEAN=true
+  fi
 else
-  TS_CLEAN=false
+  if npx tsc --noEmit --project tsconfig.app.json --pretty false >"$TS_ERROR_FILE" 2>&1; then
+    TS_CLEAN=true
+  else
+    TS_CLEAN=false
+  fi
 fi
 
 declare -A TS_ERRORS
 if [ "$TS_CLEAN" = false ] && [ -s "$TS_ERROR_FILE" ]; then
   while IFS= read -r line; do
-    fpath=$(echo "$line" | grep -oP '^\S+\.(?:ts|tsx)' || true)
+    fpath=$(echo "$line" | grep -oP '^\S+\.(?:tsx|ts)' || true)
     if [ -n "$fpath" ]; then
       if [ -z "${TS_ERRORS[$fpath]+x}" ]; then
         TS_ERRORS[$fpath]="$line"
@@ -59,10 +86,13 @@ check_page() {
   local relpath="$file"
   local issues=()
 
+  if ! grep -qE 'export[[:space:]]+default[[:space:]]+function|export[[:space:]]+default[[:space:]]+[A-Z][A-Za-z0-9_]*' "$file"; then
+    issues+=("RULE0: Page must export a default page component")
+  fi
+
   # ── RULE 1: Max 1 raw <div> (root wrapper) ──
-  div_count=$(grep -cE '<div\b' "$file" 2>/dev/null || true)
+  div_count=$(grep -oE '<div\b' "$file" 2>/dev/null | wc -l | tr -d ' ' || true)
   div_count=${div_count:-0}
-  div_count=$(echo "$div_count" | head -1 | tr -d '[:space:]')
   if [ "$div_count" -gt 1 ]; then
     issues+=("RULE1: Has $div_count raw <div> tags (max 1 allowed — the root wrapper)")
   fi
@@ -155,6 +185,42 @@ $constants2"; fi
     issues+=("RULE11: Contains inline data array — move to constants.ts")
   fi
 
+  # ── RULE 12: Pages may only use an optional root <div> ──
+  # Lowercase JSX tags are native HTML elements. Components use PascalCase and
+  # are intentionally allowed here because pages are composition boundaries.
+  native_tags=$(grep -oE '<[a-z][a-zA-Z0-9.-]*\b' "$file" 2>/dev/null \
+    | sed -E 's/^<//' \
+    | grep -v '^div$' \
+    | sort -u \
+    | tr '\n' ', ' \
+    || true)
+  if [ -n "$native_tags" ]; then
+    issues+=("RULE12: Contains native HTML tags (${native_tags%, }); move markup into standalone components")
+  fi
+
+  # ── RULE 13: No page-local derived/business logic ──
+  # A page may obtain its model from a hook. Derived values, handlers, and
+  # transformations belong in the hook or a component with explicit props.
+  local_logic=$(grep -nE '^\s*(const|let|var)\s+[A-Za-z_$][A-Za-z0-9_$]*\s*=' "$file" 2>/dev/null \
+    | grep -vE '= use[A-Z][A-Za-z0-9_]*\(' \
+    | grep -vE '= (true|false|null|undefined|""|'\'''\''|`)' \
+    | head -5 \
+    || true)
+  if [ -n "$local_logic" ]; then
+    issues+=("RULE13: Contains page-local logic; move derived values and handlers into the hook or child components")
+  fi
+
+  # ── RULE 14: Reject page-local component declarations ──
+  # Pages compose imported components; standalone components belong under
+  # components/ and receive all render data/actions through props.
+  local_components=$(grep -nE '^\s*(export\s+)?(function|const)\s+[A-Z][A-Za-z0-9_]*\s*(=|\()' "$file" 2>/dev/null \
+    | grep -vE '^\s*(export\s+)?default\s+function' \
+    | head -5 \
+    || true)
+  if [ -n "$local_components" ]; then
+    issues+=("RULE14: Declares page-local components; move them to components/ and pass explicit props")
+  fi
+
   if [ ${#issues[@]} -eq 0 ]; then
     echo -e "${GREEN}✅ PASS${NC} $relpath"
     PASS=$((PASS + 1))
@@ -186,32 +252,13 @@ else
 fi
 echo ""
 
-echo -e "${YELLOW}Checking Admin pages...${NC}"
-for f in $(find src/features/Admin/pages -name "*.tsx" 2>/dev/null | sort); do
-  check_page "$f"
-done
-
-echo ""
-echo -e "${YELLOW}Checking DailyContent pages...${NC}"
-for f in $(find src/features/DailyContent/pages -name "*.tsx" 2>/dev/null | sort); do
-  check_page "$f"
-done
-
-echo ""
-echo -e "${YELLOW}Checking Auth pages...${NC}"
-for f in $(find src/features/Auth/pages -name "*.tsx" 2>/dev/null | sort); do
-  check_page "$f"
-done
-
-echo ""
-echo -e "${YELLOW}Checking other feature pages...${NC}"
-for f in $(find src/features -path "*/pages/*.tsx" \
-  ! -path "*/Admin/*" \
-  ! -path "*/DailyContent/*" \
-  ! -path "*/Auth/*" \
-  2>/dev/null | sort); do
-  check_page "$f"
-done
+if [ -n "$TARGET" ] && [ -f "$TARGET" ]; then
+  check_page "$TARGET"
+elif [ -n "$TARGET" ] && [ -d "$TARGET" ]; then
+  while IFS= read -r f; do check_page "$f"; done < <(find "$TARGET" -name "*.tsx" -type f | sort)
+else
+  while IFS= read -r f; do check_page "$f"; done < <(find src/features -path "*/pages/*.tsx" -type f | sort)
+fi
 
 echo ""
 echo "═══════════════════════════════════════════════════════════"

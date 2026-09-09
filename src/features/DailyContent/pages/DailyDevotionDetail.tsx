@@ -16,7 +16,8 @@ import {
 import { useDailyDevotionDetailPage } from "../hooks/useDailyDevotionDetailPage";
 
 export default function DailyDevotionDetail() {
-  const p = useDailyDevotionDetailPage();
+  const { data, actions } = useDailyDevotionDetailPage();
+  const p = { ...data, ...actions };
 
   if (!p.devotion) {
     return (

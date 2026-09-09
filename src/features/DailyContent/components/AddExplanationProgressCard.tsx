@@ -1,15 +1,7 @@
 import { CheckCircle2, Sparkles } from "lucide-react";
-import type { ReturnType } from "react";
-import { useAddExplanation } from "../hooks/useAddExplanation";
+import type { AddExplanationProgressCardProps } from "../types";
 
-type Model = ReturnType<typeof useAddExplanation>;
-
-interface Props {
-  model: Model;
-  completionPercent: number;
-}
-
-export function AddExplanationProgressCard({ model: h, completionPercent }: Props) {
+export function AddExplanationProgressCard({ bookName, chapter, verseNumber, completionPercent }: AddExplanationProgressCardProps) {
   return (
     <div className="mb-6 grid gap-4 md:grid-cols-[1.2fr_0.8fr]">
       <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
@@ -17,7 +9,7 @@ export function AddExplanationProgressCard({ model: h, completionPercent }: Prop
           <div>
             <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">Verse reference</p>
             <h2 className="mt-2 text-2xl font-semibold text-foreground">
-              {h.form.bookName ? `${h.form.bookName} ${h.form.chapter || "?"}:${h.form.verseNumber || "?"}` : "Choose a passage"}
+              {bookName ? `${bookName} ${chapter || "?"}:${verseNumber || "?"}` : "Choose a passage"}
             </h2>
           </div>
           <div className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-300">

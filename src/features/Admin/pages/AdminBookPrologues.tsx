@@ -3,7 +3,6 @@
 
 import { useNavigate } from "react-router-dom";
 import { ScrollText } from "lucide-react";
-import { PaginationControls } from "../components/PaginationControls";
 import { useAdminBookProloguesPage } from "../hooks/useAdminBookProloguesPage";
 import {
   AdminPageHeader,
@@ -16,7 +15,8 @@ import { PrologueGrid } from "../components/PrologueGrid";
 import { PrologueDeleteDialog } from "../components/PrologueDeleteDialog";
 
 export default function AdminBookPrologues() {
-  const h = useAdminBookProloguesPage();
+  const { data, actions } = useAdminBookProloguesPage();
+  const h = { ...data, ...actions };
   const navigate = useNavigate();
 
   return (
@@ -34,7 +34,7 @@ export default function AdminBookPrologues() {
         <AdminSearchBar
           value={h.search}
           onChange={h.setSearch}
-          onSearch={() => {}}
+          onSearch={() => h.refresh()}
           placeholder="Search by book name..."
         />
 
@@ -55,7 +55,7 @@ export default function AdminBookPrologues() {
           <>
             <PrologueGrid
               items={h.items}
-              loadingMore={false}
+              loadingMore={h.loadingMore}
               hasMore={h.hasMore}
               sentinelRef={h.sentinelRef}
               onEdit={(item) =>
@@ -71,12 +71,6 @@ export default function AdminBookPrologues() {
               }
             />
 
-            <PaginationControls
-              page={h.currentPage}
-              total={h.totalCount}
-              pageSize={12}
-              onPageChange={h.setPage}
-            />
           </>
         )}
       </AdminPageContent>

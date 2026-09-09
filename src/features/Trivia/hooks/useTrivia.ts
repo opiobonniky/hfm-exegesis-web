@@ -24,5 +24,5 @@ export function useTrivia() {
     }
   }, [page]);
 
-  return { questions, loading, page, totalPages, setPage, fetchQuestions };
+  return { data: { questions, loading, page, totalPages }, actions: { setPage, fetchQuestions } };
 }

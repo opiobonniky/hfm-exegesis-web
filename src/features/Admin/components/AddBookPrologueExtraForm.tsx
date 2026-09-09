@@ -14,7 +14,6 @@ import {
 } from "@/components/ui/select";
 import { Combobox } from "@/components/ui/combobox";
 import { Plus, Trash2, Loader2 } from "lucide-react";
-import { BIBLE_BOOK_CHAPTERS, type BibleBookName } from "@/features/Bible/constants";
 import { bibleApi } from "@/services/bibleApi";
 import type { AddBookPrologueModel } from "../types";
 
@@ -29,9 +28,6 @@ const TRANSLATIONS = [
   { id: "ESV", label: "English Standard Version (ESV)" },
   { id: "NASB", label: "New American Standard Bible (NASB)" },
 ];
-
-const isBibleBookName = (name: string): name is BibleBookName =>
-  name in BIBLE_BOOK_CHAPTERS;
 
 export function AddBookPrologueExtraForm({ model: h }: Props) {
   const { keyScriptures } = h.form;
@@ -58,12 +54,6 @@ export function AddBookPrologueExtraForm({ model: h }: Props) {
         });
     });
   }, [keyScriptures, verseOptions]);
-
-  const bookOptions = Object.entries(BIBLE_BOOK_CHAPTERS).map(([name], i) => ({
-    value: name,
-    label: name,
-    group: i < 39 ? "Old Testament" : "New Testament",
-  }));
 
   if (keyScriptures.length === 0) {
     return (
@@ -93,12 +83,7 @@ export function AddBookPrologueExtraForm({ model: h }: Props) {
       </div>
 
       {keyScriptures.map((entry, i) => {
-        const chapterOptions = isBibleBookName(entry.bookName)
-          ? Array.from(
-              { length: BIBLE_BOOK_CHAPTERS[entry.bookName] },
-              (_, idx) => idx + 1,
-            )
-          : [];
+        const chapterOptions = h.chapterOptions[i] || [];
         const verses = verseOptions[i] || [];
         return (
           <div
@@ -144,7 +129,7 @@ export function AddBookPrologueExtraForm({ model: h }: Props) {
             <div className="space-y-2">
               <Label className="text-xs font-medium text-foreground">Book</Label>
               <Combobox
-                options={bookOptions}
+                options={h.bookOptions}
                 value={entry.bookName || undefined}
                 onChange={(v) =>
                   h.updateKeyScripture(i, {

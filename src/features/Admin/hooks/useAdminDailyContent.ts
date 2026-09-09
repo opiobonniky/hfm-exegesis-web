@@ -162,7 +162,7 @@ export function useAdminDailyContent() {
   const devotions = makeTabHandlers("devotions");
   const exegesis = makeTabHandlers("exegesis");
 
-  return {
+  return { data: {
     t,
     isRtl,
     activeTab,
@@ -185,5 +185,8 @@ export function useAdminDailyContent() {
     verses,
     devotions,
     exegesis,
-  };
+  }, actions: {
+    setPage, setDeleteTarget, confirmDelete, handleTabChange, handleSearchDateChange,
+    handleClearDate, handleDeleteOpenChange, goBack,
+  } };
 }

@@ -2,7 +2,7 @@ import { JournalListPageLayout } from "../components/JournalListPageLayout";
 import { useJournalPageFull } from "../hooks/useJournalPageFull";
 
 export default function Journal() {
-  const page = useJournalPageFull();
+  const { data, actions } = useJournalPageFull();
 
-  return <JournalListPageLayout page={page} />;
+  return <JournalListPageLayout page={{ ...data, ...actions }} />;
 }

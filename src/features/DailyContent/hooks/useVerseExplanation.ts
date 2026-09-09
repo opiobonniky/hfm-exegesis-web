@@ -20,5 +20,8 @@ export function useVerseExplanation() {
     finally { setLoading(false); }
   }, [page]);
 
-  return { explanations, loading, page, totalPages, setPage, fetchExplanations };
+  return {
+    data: { explanations, loading, page, totalPages },
+    actions: { setPage, fetchExplanations },
+  };
 }

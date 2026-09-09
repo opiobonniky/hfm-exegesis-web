@@ -2,27 +2,10 @@
 import { useState, useCallback, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/components/languages/languageProvider";
-import { sendPostRequest } from "@/services/api";
 import { parsePassage, fmtDate } from "../helpers";
+import { DAILY_EXEGESIS_FALLBACK } from "../constants/dailyExegesis";
+import { getDailyExegesis } from "../services/daily-exegesis-service";
 import type { DailyExegesisFull } from "../types";
-
-const FALLBACK: DailyExegesisFull = {
-  id: 0,
-  title: "The Word That Leads Us Home",
-  passageReference: "John 15:4-5",
-  introduction: "Daily Exegesis will appear here once it is published.",
-  contextSummary:
-    "This placeholder keeps the screen useful while content is being prepared.",
-  teachingBody:
-    "The Lordsbook Daily Exegesis is designed to give the reader a focused passage, a short explanation, and a clear path into prayer and application.",
-  application:
-    "Read slowly, ask what the passage reveals about God, and write one faithful response in your journal.",
-  prayer: "Lord, open my eyes to Your Word and teach me to abide faithfully today.",
-  tags: "daily,exegesis",
-  displayDate: new Date().toISOString(),
-  createdOn: new Date().toISOString(),
-  isPublished: true,
-};
 
 export function useDailyExegesisPage() {
   const navigate = useNavigate();
@@ -36,12 +19,9 @@ export function useDailyExegesisPage() {
     setLoading(true);
     setError(null);
     try {
-      const [todayRes, listRes] = await Promise.all([
-        sendPostRequest("bible", "get-todays-exegesis", {}),
-        sendPostRequest("bible", "get-daily-exegesis-list", { page: 0, size: 10 }),
-      ]);
-      if (todayRes?.returnCode === 200) setExegesis(todayRes.returnData);
-      if (listRes?.returnCode === 200) setSeries(listRes.returnData?.content || []);
+      const result = await getDailyExegesis();
+      setExegesis(result.item);
+      setSeries(result.series);
     } catch {
       setError("Failed to load exegesis");
     } finally {
@@ -54,7 +34,7 @@ export function useDailyExegesisPage() {
   }, [loadExegesis]);
 
   // ── Derived values ──
-  const item = exegesis ?? FALLBACK;
+  const item = exegesis ?? DAILY_EXEGESIS_FALLBACK;
 
   const passage = useMemo(
     () => parsePassage(item.passageReference),
@@ -105,24 +85,30 @@ export function useDailyExegesisPage() {
     navigate(`/journal/new?${params.toString()}`);
   }, [item, passage, navigate]);
 
+  const selectSeriesItem = useCallback((selected: DailyExegesisFull) => {
+    setExegesis(selected);
+  }, []);
+
   return {
-    // Language
-    t,
-    isRtl,
-    // State
-    loading,
-    error,
-    item,
-    series,
-    // Derived
-    passage,
-    isUpcoming,
-    displayDate,
-    canOpenBible: !!passage,
-    // Actions
-    refresh: loadExegesis,
-    goBack,
-    openInBible,
-    saveToLedger,
+    data: {
+      t,
+      isRtl,
+      loading,
+      error,
+      item,
+      series,
+      displayDate,
+      isUpcoming,
+      canOpenBible: !!passage,
+      title: t.dailyExegesis?.title || "Daily Exegesis",
+      subtitle: t.dailyExegesis?.subtitle || "Lordsbook teaching",
+    },
+    actions: {
+      refresh: loadExegesis,
+      goBack,
+      openInBible,
+      saveToLedger,
+      selectSeriesItem,
+    },
   };
 }

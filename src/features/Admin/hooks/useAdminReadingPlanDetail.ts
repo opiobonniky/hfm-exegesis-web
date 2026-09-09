@@ -62,5 +62,5 @@ export function useAdminReadingPlanDetail() {
       .finally(() => setLoading(false));
   }, [planId, toast, navigate]);
 
-  return { item, loading, navigate };
+  return { data: { item, loading }, actions: { navigate } };
 }

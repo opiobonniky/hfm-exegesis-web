@@ -5,7 +5,8 @@ import {
 } from "../components";
 
 const OurVision = () => {
-  const { t } = useHimFirstMediaPage();
+  const { data } = useHimFirstMediaPage();
+  const { t } = data;
 
   return (
     <HimFirstMediaPageLayout>

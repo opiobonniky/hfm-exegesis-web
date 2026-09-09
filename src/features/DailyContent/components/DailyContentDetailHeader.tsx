@@ -2,19 +2,9 @@
  * DailyContentDetailHeader — shared sticky header for DailyContent detail pages.
  * Replaces the repeated sticky header + back button + title + edit button pattern.
  */
-import { ReactNode } from "react";
 import { ArrowLeft, Edit3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { LucideIcon } from "lucide-react";
-
-interface Props {
-  title: string;
-  subtitle: string;
-  icon?: LucideIcon;
-  onBack: () => void;
-  onEdit?: () => void;
-  editLabel?: string;
-}
+import type { DailyContentDetailHeaderProps } from "../types";
 
 export function DailyContentDetailHeader({
   title,
@@ -23,7 +13,7 @@ export function DailyContentDetailHeader({
   onBack,
   onEdit,
   editLabel = "Edit",
-}: Props) {
+}: DailyContentDetailHeaderProps) {
   return (
     <header className="sticky top-0 z-30 bg-background/95 backdrop-blur-sm border-b border-border">
       <div className="flex items-center gap-3 px-4 sm:px-6 py-3">

@@ -25,5 +25,5 @@ export function useAdminErrorHandler() {
     });
   }, [toast]);
 
-  return { handleError };
+  return { data: {}, actions: { handleError } };
 }

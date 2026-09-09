@@ -653,7 +653,7 @@ export function useAddDailyVerse() {
           );
 
   return {
-    // State
+    data: {
     testament,
     setTestament,
     book,
@@ -727,7 +727,17 @@ export function useAddDailyVerse() {
     // Helpers
     t,
     isRtl,
+    },
+    actions: {
+    setTestament, setBook, setChapter, setVerseNumber, setBibleVersion, setPublished,
+    setSelectedDate, handleTimeChange, setVerseText, setIsVerseEditing, setExplanation,
+    setLearnMore, setApplication, setVerseIntroduction, setBackgroundAuthor, setBackgroundBook,
+    setBackgroundContext, setWordStudies, setPracticalApplications, setKeyThemes,
+    setCrossReferences, setFinalThoughts, setTakeaways, validateStep, applyExplanation,
+    handleSave, handleConflictUpdate, closeConflict, handleConflictOpenChange, viewExisting,
+    },
   };
 }
 
 export type AddDailyVersePageModel = ReturnType<typeof useAddDailyVerse>;
+export type AddDailyVersePageViewModel = AddDailyVersePageModel["data"] & AddDailyVersePageModel["actions"];

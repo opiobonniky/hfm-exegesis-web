@@ -1,17 +1,8 @@
 /**
  * DailyContentFormCard — replaces the repeated Card + CardHeader + CardContent pattern.
  */
-import { ReactNode } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { LucideIcon } from "lucide-react";
-
-interface DailyContentFormCardProps {
-  icon: LucideIcon;
-  title: string;
-  description: string;
-  children: ReactNode;
-  contentClassName?: string;
-}
+import type { DailyContentFormCardProps } from "../types";
 
 export function DailyContentFormCard({
   icon: Icon,
@@ -19,6 +10,7 @@ export function DailyContentFormCard({
   description,
   children,
   contentClassName,
+  onSubmit,
 }: DailyContentFormCardProps) {
   return (
     <Card className="border-border/40 shadow-md">
@@ -30,7 +22,7 @@ export function DailyContentFormCard({
         <CardDescription>{description}</CardDescription>
       </CardHeader>
       <CardContent className={contentClassName ?? "pt-6 space-y-6"}>
-        {children}
+        {onSubmit ? <form onSubmit={onSubmit}>{children}</form> : children}
       </CardContent>
     </Card>
   );

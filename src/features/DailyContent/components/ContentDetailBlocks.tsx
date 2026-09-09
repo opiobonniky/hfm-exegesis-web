@@ -1,6 +1,7 @@
 // Shared detail view blocks for content detail pages
 import { GraduationCap } from "lucide-react";
 import { parseWordStudies } from "../helpers/contentDetailHelpers";
+import type { TagsBlockProps, TextBlockProps } from "../types";
 
 // ── Section label ──
 export function SectionLabel({ children, icon: Icon }: { children: React.ReactNode; icon?: any }) {
@@ -13,7 +14,7 @@ export function SectionLabel({ children, icon: Icon }: { children: React.ReactNo
 }
 
 // ── Text block ──
-export function TextBlock({ label, value, icon }: { label: string; value?: string | null; icon?: any }) {
+export function TextBlock({ label, value, icon }: TextBlockProps) {
   if (!value?.trim()) return null;
   return (
     <div className="py-3 border-b border-border/30 last:border-0">
@@ -64,7 +65,7 @@ export function WordStudiesBlock({ value }: { value?: string | null }) {
 }
 
 // ── Tags block ──
-export function TagsBlock({ tags }: { tags?: string | null }) {
+export function TagsBlock({ tags }: TagsBlockProps) {
   if (!tags?.trim()) return null;
   const tagList = tags.split(",").map(t => t.trim()).filter(Boolean);
   if (tagList.length === 0) return null;

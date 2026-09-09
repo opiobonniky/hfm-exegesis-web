@@ -10,7 +10,6 @@ interface SaveButtonProps {
 export function SaveButton({ label, loading, onClick }: SaveButtonProps) {
   return (
     <button
-      size="sm"
       onClick={onClick}
       disabled={loading}
       className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-all disabled:opacity-50"

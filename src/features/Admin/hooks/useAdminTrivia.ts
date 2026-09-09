@@ -97,7 +97,7 @@ export function useAdminTrivia() {
     navigate(`/admin/trivia/${q.id}`);
   }, [navigate]);
 
-  return {
+  return { data: {
     t, isRtl, activeTab, setActiveTab, loading, questions, totalQuestions, questionPage, setQuestionPage,
     searchQuery, setSearchQuery, difficultyFilter, setDifficultyFilter, categoryFilter, setCategoryFilter,
     editDialog, setEditDialog, editForm, setEditForm, saving, optionsArray, setOptionsArray,
@@ -105,6 +105,10 @@ export function useAdminTrivia() {
     perfSearch, setPerfSearch, perfSortBy, setPerfSortBy, perfSortOrder, setPerfSortOrder,
     questionPerf, qpTotal, qpPage, setQpPage, qpSearch, setQpSearch, qpDifficulty, setQpDifficulty,
     qpSortBy, setQpSortBy, qpSortOrder, setQpSortOrder,
-    openCreateDialog, openEditDialog, onViewQuestion, handleSave, handleDelete,
-  };
+  }, actions: {
+    setActiveTab, setQuestionPage, setSearchQuery, setDifficultyFilter, setCategoryFilter,
+    setEditDialog, setEditForm, setOptionsArray, setDeleteTarget, setPerfPage, setPerfSearch,
+    setPerfSortBy, setPerfSortOrder, setQpPage, setQpSearch, setQpDifficulty, setQpSortBy,
+    setQpSortOrder, openCreateDialog, openEditDialog, onViewQuestion, handleSave, handleDelete,
+  } };
 }

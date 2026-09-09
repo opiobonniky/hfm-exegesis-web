@@ -278,7 +278,7 @@ export function useBibleReader() {
     },
     [],
   );
-  return {
+  return { data: {
     selectedBook,
     selectedChapter,
     selectedVerse,
@@ -299,15 +299,9 @@ export function useBibleReader() {
     loadMoreRef,
     chapterRefs,
     verseRefs,
-    navigateTo,
-    setVisibleChapter,
-    selectTranslation,
-    loadMore,
-    retryLoad: () => setReloadToken((v) => v + 1),
-    toggleVerse,
-    clearSelectedVerses,
-    toggleHighlight,
-    toggleFavorite,
-    saveNote,
-  };
+  }, actions: {
+    navigateTo, setVisibleChapter, selectTranslation, loadMore,
+    retryLoad: () => setReloadToken((v) => v + 1), toggleVerse, clearSelectedVerses,
+    toggleHighlight, toggleFavorite, saveNote,
+  } };
 }

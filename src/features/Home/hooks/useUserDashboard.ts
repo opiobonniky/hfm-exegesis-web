@@ -106,11 +106,14 @@ export function useUserDashboard() {
   const initial = name.charAt(0).toUpperCase();
 
   return {
-    navigate, isRtl, name, initial,
-    dailyVerse, verseText, readingPlans, stats, recentActivity,
-    lastRead, currentSession, dailyExegesis, dailyDevotion, latestEntry,
-    loading, fetchAll,
+    data: {
+      isRtl, name, initial, dailyVerse, verseText, readingPlans, stats, recentActivity,
+      lastRead, currentSession, dailyExegesis, dailyDevotion, latestEntry, loading,
+    },
+    actions: { navigate, fetchAll },
   };
 }
 
-export type UserDashboardPageModel = ReturnType<typeof useUserDashboard>;
+export type UserDashboardPageModel =
+  ReturnType<typeof useUserDashboard>["data"] &
+  ReturnType<typeof useUserDashboard>["actions"];

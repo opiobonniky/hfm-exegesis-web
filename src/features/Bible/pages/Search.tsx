@@ -10,7 +10,8 @@ import {
 } from "../components";
 
 export default function SearchPage() {
-  const h = useSearchPage();
+  const { data, actions } = useSearchPage();
+  const h = { ...data, ...actions };
 
   return (
     <BiblePageLayout isRtl={h.isRtl} className="flex flex-col">

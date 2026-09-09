@@ -5,7 +5,8 @@ import { DevotionStickyHeader } from "../components/DevotionStickyHeader";
 import { DevotionContent } from "../components/DevotionContent";
 
 export default function UserDevotions() {
-  const h = useUserDevotions();
+  const { data, actions } = useUserDevotions();
+  const h = { ...data, ...actions };
 
   if (h.loading) return <VerseLoadingSkeleton />;
   if (!h.devotion) return <DevotionEmptyState onBack={() => h.navigate(-1)} />;

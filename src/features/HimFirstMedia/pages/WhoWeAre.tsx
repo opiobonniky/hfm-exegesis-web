@@ -8,7 +8,8 @@ import {
 } from "../components";
 
 const WhoWeAre = () => {
-  const { t } = useHimFirstMediaPage();
+  const { data } = useHimFirstMediaPage();
+  const { t } = data;
 
   return (
     <HimFirstMediaPageLayout>

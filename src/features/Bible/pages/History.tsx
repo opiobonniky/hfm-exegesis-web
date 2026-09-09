@@ -8,7 +8,8 @@ import { DeleteConfirmDialog } from "../components/DeleteConfirmDialog";
 import { HistoryClearAction, HistoryList } from "../components";
 
 export default function History() {
-  const h = useHistoryPage();
+  const { data, actions } = useHistoryPage();
+  const h = { ...data, ...actions };
 
   return (
     <>

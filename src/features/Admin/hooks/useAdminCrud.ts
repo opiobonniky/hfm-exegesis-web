@@ -167,7 +167,7 @@ export function useAdminCrud<T extends { id: number }>(opts: UseAdminCrudOpts<T>
     [opts.route, opts.deleteAction, refresh, toast],
   );
 
-  return {
+  return { data: {
     items,
     loading,
     loadingMore,
@@ -175,11 +175,6 @@ export function useAdminCrud<T extends { id: number }>(opts: UseAdminCrudOpts<T>
     setSearch,
     hasMore,
     saving,
-    deleting,
-    sentinelRef,
-    refresh,
-    loadMore,
-    save,
-    remove,
-  };
+    deleting, sentinelRef,
+  }, actions: { refresh, loadMore, save, remove, setSearch } };
 }

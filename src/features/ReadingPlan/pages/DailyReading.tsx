@@ -7,15 +7,11 @@ import DailyReadingQuiz from "../components/DailyReadingQuiz";
 import { DailyCompletionButton } from "../components/DailyReadingCompletion";
 import { ConfettiOverlay } from "../components/ConfettiOverlay";
 import { NotYetAdded } from "../components/NotYetAdded";
-import { DailyReadingLayout, DailyReadingContent, DailyReadingGrid, DailyReadingMobileCompletion, DailyReadingJourney } from "../components";
+import { DailyReadingLayout, DailyReadingContent, DailyReadingGrid, DailyReadingMain, DailyReadingMobileCompletion, DailyReadingJourney } from "../components";
 import Gate from "@/components/Gate";
 
 export default function DailyReading() {
   const { data, actions } = useDailyReadingPage();
-  const chapters = data.assignment?.chapters || [];
-  const reflections = data.assignment?.reflections || [];
-  const quizQuestions = data.assignment?.quizQuestions || [];
-
   if (data.loading) {
     return <PageSkeleton />;
   }
@@ -59,20 +55,20 @@ export default function DailyReading() {
           featureDescription="Complete daily reading assignments with reflections and quizzes."
         >
           <DailyReadingGrid>
-            <main className="min-w-0 space-y-6">
+            <DailyReadingMain>
               <DailyReadingChapters
-                chapters={chapters}
+                chapters={data.chapters}
                 onOpenChapter={actions.openBibleReading}
               />
 
               <DailyReadingReflections
-                reflections={reflections}
+                reflections={data.reflections}
                 onAnswerChange={actions.updateReflectionAnswer}
               />
 
-              {quizQuestions.length > 0 && (
+              {data.quizQuestions.length > 0 && (
               <DailyReadingQuiz
-                questions={quizQuestions}
+                questions={data.quizQuestions}
                 currentQ={data.currentQ}
                 selected={data.selected}
                 showResult={data.showResult}
@@ -98,9 +94,21 @@ export default function DailyReading() {
                   incompleteMessage={data.incompleteMessage}
                 />
               </DailyReadingMobileCompletion>
-            </main>
+            </DailyReadingMain>
 
-            <DailyReadingJourney model={{ data, actions }} />
+            <DailyReadingJourney
+              chapters={data.chapters}
+              reflections={data.reflections}
+              quizQuestions={data.quizQuestions}
+              allReflectionsAnswered={data.allReflectionsAnswered}
+              quizDone={data.quizDone}
+              isCompleted={data.isCompleted}
+              canComplete={data.canComplete}
+              isSubmitting={data.isSubmitting}
+              dayNumber={data.dayNumber}
+              incompleteMessage={data.incompleteMessage}
+              onSubmit={actions.handleSubmitDay}
+            />
           </DailyReadingGrid>
         </Gate>
       </DailyReadingContent>

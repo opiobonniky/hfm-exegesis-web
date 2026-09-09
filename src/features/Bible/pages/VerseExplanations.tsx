@@ -8,7 +8,8 @@ import { DeleteConfirmDialog } from "../components/DeleteConfirmDialog";
 import { BiblePageLayout, BiblePageInner, DeletePreview, VerseExplanationsAddAction } from "../components";
 
 const VerseExplanations = () => {
-  const h = useVerseExplanationsPage();
+  const { data, actions } = useVerseExplanationsPage();
+  const h = { ...data, ...actions };
 
   return (
     <BiblePageLayout isRtl={h.isRtl}>

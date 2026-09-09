@@ -7,7 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { sendPostRequest } from "@/services/api";
 import type { useStudyTools } from "../hooks/useStudyTools";
 
-type StudyToolsState = ReturnType<typeof useStudyTools>;
+type StudyToolsState = ReturnType<typeof useStudyTools>["data"] & ReturnType<typeof useStudyTools>["actions"];
 
 interface StudiesTabProps {
   state: StudyToolsState;

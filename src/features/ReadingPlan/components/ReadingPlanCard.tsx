@@ -1,14 +1,16 @@
-import { BookOpen, Calendar, ArrowRight } from "lucide-react";
+import { BookOpen, Calendar, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import type { ReadingPlanListItem } from "../types";
 
 interface Props {
-  plan: any;
+  plan: ReadingPlanListItem;
   isRtl: boolean;
   t: any;
   onPress: () => void;
+  onDelete: () => void;
 }
 
-export function ReadingPlanCard({ plan, isRtl, t, onPress }: Props) {
+export function ReadingPlanCard({ plan, isRtl, t, onPress, onDelete }: Props) {
   const started = plan.started ?? false;
   const completed = plan.completed ?? false;
   const progress = plan.progress ?? 0;
@@ -35,8 +37,21 @@ export function ReadingPlanCard({ plan, isRtl, t, onPress }: Props) {
           </div>
           <p className="text-xs text-muted-foreground line-clamp-2">{plan.description}</p>
         </div>
-        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-          <BookOpen className="w-5 h-5 text-primary" />
+        <div className="flex items-center gap-2 shrink-0">
+          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+            <BookOpen className="w-5 h-5 text-primary" />
+          </div>
+          <button
+            type="button"
+            aria-label={`Delete ${plan.title}`}
+            onClick={(event) => {
+              event.stopPropagation();
+              onDelete();
+            }}
+            className="w-9 h-9 rounded-xl border border-red-200 text-red-600 flex items-center justify-center hover:bg-red-50 transition-colors"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
         </div>
       </div>
       <div className="flex items-center gap-3 text-[10px] text-muted-foreground">

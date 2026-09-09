@@ -86,11 +86,13 @@ export function useSettingsPage() {
   const handleFontSizeChange = (v: number) => { setReadingFontSize(v); localStorage.setItem("reading_font_size", String(v)); };
   const handleTranslationChange = (id: string) => { setPreferredTranslation(id); localStorage.setItem("preferred_translation", id); };
   return {
-    loading, isRtl, t, navigate, themeMode, setThemeMode,
-    isPayingUser, tierLabel, expiresLabel,
-    profile, handleProfileChange, savingProfile, handleSaveProfile, handleSowerAction, sowerPortalLoading,
-    savingPassword, handlePasswordChange,
-    notifications, handleNotificationChange,
-    readingFontSize, handleFontSizeChange, preferredTranslation, handleTranslationChange,
+    data: {
+      loading, isRtl, t, themeMode, isPayingUser, tierLabel, expiresLabel, profile,
+      savingProfile, sowerPortalLoading, savingPassword, notifications, readingFontSize, preferredTranslation,
+    },
+    actions: {
+      navigate, setThemeMode, handleProfileChange, handleSaveProfile, handleSowerAction,
+      handlePasswordChange, handleNotificationChange, handleFontSizeChange, handleTranslationChange,
+    },
   };
 }

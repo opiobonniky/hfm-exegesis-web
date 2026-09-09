@@ -7,23 +7,12 @@ import { bibleApi, type Translation } from "@/services/bibleApi";
 import { BIBLE_BOOKS } from "@/data/staticData";
 import { BIBLE_BOOK_CHAPTERS } from "@/features/Bible/constants";
 import { VERSE_EXPLANATION_STEP_ORDER } from "../constants";
-import type { VerseExplanationStepId } from "../types";
-
-export interface WordStudyItem {
-  strongsId: string;
-  surfaceText: string;
-  customDefinition: string;
-  sortOrder: number;
-}
-
-export interface CrossRefItem {
-  bookName: string;
-  chapter: number;
-  verseNumber: number;
-  referenceText: string;
-  commentary: string;
-  sortOrder: number;
-}
+import type {
+  CrossRefItem,
+  ExplanationForm,
+  VerseExplanationStepId,
+  WordStudyItem,
+} from "../types";
 
 const parseTakeaways = (value: unknown): string[] => {
   if (Array.isArray(value)) {
@@ -50,29 +39,6 @@ const parseTakeaways = (value: unknown): string[] => {
 
   return [];
 };
-
-export interface ExplanationForm {
-  bookName: string;
-  chapter: string;
-  verseNumber: string;
-  bibleVersion: string;
-  exegesis: {
-    explanationText: string;
-    applicationText: string;
-  };
-  studyMetadata: {
-    introduction: string;
-    backgroundAuthor: string;
-    backgroundBook: string;
-    backgroundContext: string;
-    finalThoughts: string;
-    takeaways: string[];
-  };
-  wordStudies: WordStudyItem[];
-  practicalApps: { applicationText: string; sortOrder: number }[];
-  crossReferences: CrossRefItem[];
-  themes: { themeName: string; sortOrder: number }[];
-}
 
 const EMPTY_FORM: ExplanationForm = {
   bookName: "",
@@ -136,6 +102,89 @@ export function useAddExplanation() {
   }, [form.bookName]);
 
   const maxVerseNumber = chapterVerseCount || 1;
+
+  const bookOptions = useMemo(
+    () =>
+      Object.keys(BIBLE_BOOK_CHAPTERS).map((name, index) => ({
+        value: name,
+        label: name,
+        group: index < 39 ? "Old Testament" : "New Testament",
+      })),
+    [],
+  );
+
+  const chapterOptions = useMemo(() => {
+    const count =
+      BIBLE_BOOK_CHAPTERS[
+        form.bookName as keyof typeof BIBLE_BOOK_CHAPTERS
+      ];
+    return count
+      ? Array.from({ length: count }, (_, index) => index + 1)
+      : [];
+  }, [form.bookName]);
+
+  const selectedVerse = useMemo(
+    () => (form.verseNumber ? Number(form.verseNumber) : null),
+    [form.verseNumber],
+  );
+
+  const verseLoadingForTrigger = useMemo(
+    () => verseOptionsLoading && verseOptions.length === 0,
+    [verseOptionsLoading, verseOptions.length],
+  );
+
+  const sortedTranslationOptions = useMemo(
+    () =>
+      translationOptions
+        .filter((translation) => translation.languageName || translation.language)
+        .slice()
+        .sort((a, b) => {
+          const aLabel = (a.languageName || a.language || "").toLowerCase();
+          const bLabel = (b.languageName || b.language || "").toLowerCase();
+          if (aLabel === "english") return -1;
+          if (bLabel === "english") return 1;
+          return (
+            aLabel.localeCompare(bLabel) ||
+            (a.name || a.shortName).localeCompare(b.name || b.shortName)
+          );
+        })
+        .map((translation) => ({
+          value: translation.id,
+          label: `${translation.shortName || translation.name} ${
+            translation.year ? `(${translation.year})` : ""
+          }`.trim(),
+          group: translation.languageName || translation.language || "Other",
+        })),
+    [translationOptions],
+  );
+
+  const crossReferenceBookOptions = bookOptions;
+  const crossReferenceChapterOptions = useMemo(
+    () =>
+      Object.fromEntries(
+        form.crossReferences.map((reference, index) => {
+          const count =
+            BIBLE_BOOK_CHAPTERS[
+              reference.bookName as keyof typeof BIBLE_BOOK_CHAPTERS
+            ];
+          return [
+            index,
+            count ? Array.from({ length: count }, (_, chapter) => chapter + 1) : [],
+          ];
+        }),
+      ) as Record<number, number[]>,
+    [form.crossReferences],
+  );
+  const crossReferenceVerseLoading = useMemo(
+    () =>
+      Object.fromEntries(
+        form.crossReferences.map((_, index) => {
+          const verses = crossRefVerseOptions[index]?.verses || [];
+          return [index, Boolean(crossRefVerseLoading[index] && verses.length === 0)];
+        }),
+      ) as Record<number, boolean>,
+    [form.crossReferences, crossRefVerseOptions, crossRefVerseLoading],
+  );
 
   const currentStepIndex = useMemo(
     () => VERSE_EXPLANATION_STEP_ORDER.indexOf(activeTab),
@@ -664,60 +713,70 @@ export function useAddExplanation() {
   );
 
   return {
-    form,
-    isEditMode,
-    loadingExisting,
-    saving,
-    activeTab,
-    setActiveTab,
-    currentStepIndex,
-    currentStep,
-    referenceComplete,
-    exegesisComplete,
-    studyComplete,
-    stepCompletion,
-    completionPercent,
-    goToStep,
-    goNext,
-    goPrevious,
-    canAdvanceFromCurrent,
-    isValid,
-    updateField,
-    updateNested,
-    translationOptions,
-    selectedVerseText,
-    verseTextLoading,
-    maxChapterNumber,
-    maxVerseNumber,
-    verseOptions,
-    verseOptionsLoading,
-    // Word studies
-    addWordStudy,
-    removeWordStudy,
-    updateWordStudy,
-    // Practical apps
-    addPracticalApp,
-    removePracticalApp,
-    updatePracticalApp,
-    // Cross references
-    addCrossRef,
-    removeCrossRef,
-    updateCrossRef,
-    pickCrossRefVerse,
-    crossRefVerseOptions,
-    crossRefVerseLoading,
-    // Themes
-    addTheme,
-    removeTheme,
-    updateTheme,
-    // Actions
-    handleSave,
-    goBack,
-    // Book list
-    filteredBooks: form.bookName
-      ? BIBLE_BOOKS.filter((b) =>
-          b.toLowerCase().includes(form.bookName.toLowerCase()),
-        )
-      : BIBLE_BOOKS,
+    data: {
+      form,
+      isEditMode,
+      loadingExisting,
+      saving,
+      activeTab,
+      currentStepIndex,
+      currentStep,
+      referenceComplete,
+      exegesisComplete,
+      studyComplete,
+      stepCompletion,
+      completionPercent,
+      canAdvanceFromCurrent,
+      isValid,
+      translationOptions,
+      sortedTranslationOptions,
+      bookOptions,
+      chapterOptions,
+      selectedVerse,
+      verseLoadingForTrigger,
+      crossReferenceBookOptions,
+      crossReferenceChapterOptions,
+      crossReferenceVerseLoading,
+      selectedVerseText,
+      verseTextLoading,
+      maxChapterNumber,
+      maxVerseNumber,
+      verseOptions,
+      verseOptionsLoading,
+      crossRefVerseOptions,
+      crossRefVerseLoading,
+      filteredBooks: form.bookName
+        ? BIBLE_BOOKS.filter((b) =>
+            b.toLowerCase().includes(form.bookName.toLowerCase()),
+          )
+        : BIBLE_BOOKS,
+    },
+    actions: {
+      setActiveTab,
+      goToStep,
+      goNext,
+      goPrevious,
+      updateField,
+      updateNested,
+      addWordStudy,
+      removeWordStudy,
+      updateWordStudy,
+      addPracticalApp,
+      removePracticalApp,
+      updatePracticalApp,
+      addCrossRef,
+      removeCrossRef,
+      updateCrossRef,
+      pickCrossRefVerse,
+      addTheme,
+      removeTheme,
+      updateTheme,
+      handleSave,
+      goBack,
+    },
   };
 }
+
+export type AddExplanationPageModel = ReturnType<typeof useAddExplanation>;
+export type AddExplanationPageData = AddExplanationPageModel["data"];
+export type AddExplanationPageActions = AddExplanationPageModel["actions"];

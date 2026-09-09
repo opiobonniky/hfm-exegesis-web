@@ -55,6 +55,7 @@ export interface QuizQuestion {
 }
 
 export interface DayAssignment {
+  assignmentId?: string | number;
   dayNumber: number;
   title?: string;
   chapters: Chapter[];
@@ -112,6 +113,7 @@ export interface PlanMeta {
   questionsEnabled: boolean;
   category: string;
   difficulty: string;
+  isPublished?: boolean;
 }
 
 export interface PlanDaysResponse {
@@ -129,6 +131,7 @@ export interface PlanCreationResponse {
 
 export interface PlanDetail {
   planId: string;
+  plan_id?: string;
   plan_db_id: number;
   title: string;
   description: string;

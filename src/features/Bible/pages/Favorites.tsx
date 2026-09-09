@@ -7,7 +7,8 @@ import { BiblePageLayout } from "../components/BiblePageLayout";
 import { FavoritesList } from "../components";
 
 export default function Favorites() {
-  const h = useFavoritesPage();
+  const { data, actions } = useFavoritesPage();
+  const h = { ...data, ...actions };
 
   return (
     <BiblePageLayout

@@ -182,7 +182,7 @@ export function useAdminReadingPlans() {
     loadPlans(np, search, true);
   }, [page, search, loadPlans]);
 
-  return {
+  return { data: {
     plans,
     loading,
     loadingMore,
@@ -203,7 +203,9 @@ export function useAdminReadingPlans() {
     updateFormField,
     handleSave,
     handleDelete,
-    loadMore,
       items: undefined
-  };
+  }, actions: {
+    setSearch, setEditPlan, setEditForm, setDeletePlan, handleSearch, openEdit, closeEdit,
+    updateFormField, handleSave, handleDelete, loadMore,
+  } };
 }

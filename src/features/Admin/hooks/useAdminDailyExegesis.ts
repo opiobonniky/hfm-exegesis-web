@@ -141,9 +141,11 @@ export function useAdminDailyExegesis() {
     finally { setDeletingId(null); }
   }, [deleteTarget, toast, load]);
 
-  return {
+  return { data: {
     items, loading, loadingMore, page, setPage, hasMore, search, setSearch, saving, deletingId,
     sentinelRef, editItem, editForm, setEditForm, dialogOpen, deleteTarget, setDeleteTarget,
-    handleSearch, handleLoadMore, openEdit, closeDialog, handleSave, handleDelete,
-  };
+  }, actions: {
+    setPage, setSearch, setEditForm, setDeleteTarget, handleSearch, handleLoadMore,
+    openEdit, closeDialog, handleSave, handleDelete,
+  } };
 }

@@ -1,14 +1,9 @@
 /**
  * DailyExegesisPageLayout — page wrapper for DailyExegesis (loading + content states).
  */
-import { ReactNode } from "react";
+import type { DailyExegesisPageLayoutProps } from "../types";
 
-interface Props {
-  isRtl: boolean;
-  children: ReactNode;
-}
-
-export function DailyExegesisPageLayout({ isRtl, children }: Props) {
+export function DailyExegesisPageLayout({ isRtl, children }: DailyExegesisPageLayoutProps) {
   return (
     <div className="min-h-screen flex flex-col bg-background" dir={isRtl ? "rtl" : "ltr"}>
       {children}

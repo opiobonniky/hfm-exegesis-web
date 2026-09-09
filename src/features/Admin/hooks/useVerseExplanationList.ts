@@ -139,21 +139,9 @@ export function useVerseExplanationList(pageSize = 20) {
   const hasMore = data.page < data.totalPages;
 
   return {
-    data,
-    loading,
-    loadingMore,
-    hasMore,
-    loadMore,
-    search: searchInput,
-    setSearch: setSearchInput,
-    page,
-    goToPage,
-    refreshing: loading,
-    refresh,
-    deleteItem,
-    deleting,
-    viewItem,
-    editItem,
-    goBack,
+    data: { data, loading, loadingMore, hasMore, search: searchInput, page, refreshing: loading, deleting },
+    actions: {
+      loadMore, setSearch: setSearchInput, goToPage, refresh, deleteItem, viewItem, editItem, goBack,
+    },
   };
 }

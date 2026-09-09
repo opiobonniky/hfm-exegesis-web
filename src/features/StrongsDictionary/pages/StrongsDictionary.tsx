@@ -9,7 +9,8 @@ import {
 } from "../components";
 
 export default function StrongsDictionaryPage() {
-  const p = useStrongsDictionaryPage();
+  const { data, actions } = useStrongsDictionaryPage();
+  const p = { ...data, ...actions };
 
   return (
     <StrongsDictionaryShell>

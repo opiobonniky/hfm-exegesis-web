@@ -3,19 +3,24 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import type { ReturnType } from "react";
-import { useAddExplanation } from "../hooks/useAddExplanation";
+import type { AddExplanationStudyFormProps } from "../types";
 import { CharCount } from "./CharCount";
-
-type Model = ReturnType<typeof useAddExplanation>;
-
-interface Props {
-  model: Model;
-}
 
 const BACKGROUND_MAX = 10000;
 
-export function AddExplanationStudyForm({ model: h }: Props) {
+export function AddExplanationStudyForm(props: AddExplanationStudyFormProps) {
+  const { introduction, backgroundAuthor, backgroundBook, backgroundContext, wordStudies, updateNested, addWordStudy, removeWordStudy, updateWordStudy } = props;
+  const h = {
+    form: {
+      studyMetadata: { introduction, backgroundAuthor, backgroundBook, backgroundContext },
+      wordStudies,
+    },
+    updateNested,
+    addWordStudy,
+    removeWordStudy,
+    updateWordStudy,
+    updateField: () => undefined,
+  };
   return (
     <div className="space-y-8">
       <div className="flex items-center gap-2 text-sky-600">

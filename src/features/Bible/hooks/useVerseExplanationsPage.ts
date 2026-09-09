@@ -70,12 +70,13 @@ export function useVerseExplanationsPage() {
     ? `${deleteTarget.bookName} ${deleteTarget.chapter}:${deleteTarget.verseNumber}`
     : "";
   return {
-    t, isRtl, isAdmin,
-    explanations, filtered, loading, search, setSearch,
-    bookFilter, setBookFilter,
-    deleteTarget, setDeleteTarget, deleting, confirmDelete, closeDelete,
-    deleteDescription: `This will permanently delete the explanation for ${deleteReference}.`,
-    deleteReference,
-    goToAdd, goToEdit,
+    data: {
+      t, isRtl, isAdmin, explanations, filtered, loading, search, bookFilter,
+      deleteTarget, deleting, deleteDescription: `This will permanently delete the explanation for ${deleteReference}.`,
+      deleteReference,
+    },
+    actions: {
+      setSearch, setBookFilter, setDeleteTarget, confirmDelete, closeDelete, goToAdd, goToEdit,
+    },
   };
 }

@@ -12,7 +12,7 @@ import { Combobox } from "@/components/ui/combobox";
 import { BIBLE_BOOKS } from "@/data/staticData";
 import type { useStudyTools } from "../hooks/useStudyTools";
 
-type StudyToolsState = ReturnType<typeof useStudyTools>;
+type StudyToolsState = ReturnType<typeof useStudyTools>["data"] & ReturnType<typeof useStudyTools>["actions"];
 
 interface ResourcesTabProps {
   state: StudyToolsState;

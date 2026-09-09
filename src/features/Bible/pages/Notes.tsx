@@ -7,7 +7,8 @@ import { EditNoteDialog } from "../components/EditNoteDialog";
 import { NotesList } from "../components";
 
 export default function Notes() {
-  const h = useNotesPage();
+  const { data, actions } = useNotesPage();
+  const h = { ...data, ...actions };
 
   return (
     <>

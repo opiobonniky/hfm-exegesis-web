@@ -6,7 +6,6 @@ import { PageHeader } from "@/components/PageHeader";
 import { useEditReadingPlanPage } from "../hooks/useEditReadingPlanPage";
 import { EditPlanMetaSection } from "../components/EditPlanMetaSection";
 import { EditPlanDaysSection } from "../components/EditPlanDaysSection";
-import { EditQuizDeleteModal } from "../components/EditQuizDeleteModal";
 import { PageLoadingState } from "../components";
 import { SaveButton } from "../components/SaveButton";
 
@@ -39,18 +38,10 @@ export default function EditReadingPlan() {
           days={data.days}
           expandedDay={data.expandedDay}
           setExpandedDay={actions.setExpandedDay}
+          questionsEnabled={data.meta.questionsEnabled}
           updateDay={actions.updateDay}
-          updateChapter={actions.updateChapter}
           handleSaveDay={actions.handleSaveDay}
           savingDay={data.savingDay}
-          setDeleteQuizTarget={actions.setDeleteQuizTarget}
-        />
-
-        <EditQuizDeleteModal
-          visible={!!data.deleteQuizTarget}
-          deleting={data.deletingQuiz}
-          onConfirm={actions.handleDeleteQuiz}
-          onCancel={() => actions.setDeleteQuizTarget(null)}
         />
       </PageLayout>
     </Gate>

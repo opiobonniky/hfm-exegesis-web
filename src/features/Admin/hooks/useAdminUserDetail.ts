@@ -115,7 +115,7 @@ export function useAdminUserDetail() {
     }
   }, [user, toast, navigate]);
 
-  return {
+  return { data: {
     user,
     sessions,
     loading,
@@ -124,6 +124,5 @@ export function useAdminUserDetail() {
     handleToggleStatus,
     handleToggleVerification,
     handleDelete,
-    navigate,
-  };
+  }, actions: { handleToggleStatus, handleToggleVerification, handleDelete, navigate } };
 }

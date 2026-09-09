@@ -8,7 +8,7 @@ import { BIBLE_BOOKS } from "@/data/staticData";
 import type { useStudyTools } from "../hooks/useStudyTools";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-type Model = ReturnType<typeof useStudyTools>;
+type Model = ReturnType<typeof useStudyTools>["data"] & ReturnType<typeof useStudyTools>["actions"];
 
 interface StudyResourceEditorProps {
   model: Model;

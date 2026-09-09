@@ -80,12 +80,14 @@ export function useBibleLibrary() {
   const clearSearch = useCallback(() => { setSearchQuery(""); searchRef.current?.focus(); }, []);
   const selectCovenant = useCallback((v: CovenantFilter) => { setCovenant(v); setExpandedBook(null); }, []);
   const toggleExpand = useCallback((name: string) => setExpandedBook((prev) => prev === name ? null : name), []);
-  return {
+  return { data: {
     isRtl, searchRef,
     books, filteredBooks, loading, stats, tabs,
     loadError, apiBaseUrl: API_BASE_URL,
     covenant, selectCovenant,
     searchQuery, setSearchQuery, clearSearch,
-    expandedBook, toggleExpand, goToChapter, goToBookOverview,
-  };
+    expandedBook,
+  }, actions: {
+    selectCovenant, setSearchQuery, clearSearch, toggleExpand, goToChapter, goToBookOverview,
+  } };
 }

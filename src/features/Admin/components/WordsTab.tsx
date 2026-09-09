@@ -10,7 +10,7 @@ import WordCard from "@/components/WordCard";
 import WordDetailSheet from "@/components/WordDetailSheet";
 import type { useStudyTools } from "../hooks/useStudyTools";
 
-type StudyToolsState = ReturnType<typeof useStudyTools>;
+type StudyToolsState = ReturnType<typeof useStudyTools>["data"] & ReturnType<typeof useStudyTools>["actions"];
 
 interface WordsTabProps {
   state: StudyToolsState;

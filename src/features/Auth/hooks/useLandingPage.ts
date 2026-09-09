@@ -56,8 +56,7 @@ export function useLandingPage() {
   }, [userInfo, authLoading, navigate]);
 
   return {
-    navigate, dailyVerse, verseLoading, mobileMenuOpen, setMobileMenuOpen,
-    menuPanelRef, scrolled, expandedMobileSection, setExpandedMobileSection,
-    authLoading, userInfo,
+    data: { dailyVerse, verseLoading, mobileMenuOpen, menuPanelRef, scrolled, expandedMobileSection, authLoading, userInfo },
+    actions: { navigate, setMobileMenuOpen, setExpandedMobileSection },
   };
 }

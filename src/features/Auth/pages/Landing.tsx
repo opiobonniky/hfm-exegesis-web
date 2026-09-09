@@ -4,7 +4,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { LandingContentWrapper } from "../components";
 
 const Landing = () => {
-  const p = useLandingPage();
+  const { data, actions } = useLandingPage();
+  const p = { ...data, ...actions };
   const { navigate, mobileMenuOpen, setMobileMenuOpen, menuPanelRef, scrolled, expandedMobileSection, setExpandedMobileSection, authLoading } = p;
 
   const handleMenuClick = (href?: string) => {

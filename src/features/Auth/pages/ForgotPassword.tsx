@@ -9,9 +9,11 @@ import {
 } from "../components";
 import { AnimatePresence } from "framer-motion";
 import { Mail, KeyRound, Lock } from "lucide-react";
+import logoImage from "@/assets/logos/exegesis_bg_rm.png";
 
 export default function ForgotPassword() {
-  const h = useForgotPasswordPage();
+  const { data, actions } = useForgotPasswordPage();
+  const h = { ...data, ...actions };
   return (
     <div className="min-h-screen flex bg-muted overflow-hidden relative" dir={h.isRtl ? "rtl" : "ltr"}>
       <AuthAnimatedEntrance />
@@ -22,7 +24,7 @@ export default function ForgotPassword() {
             badgeLabel={h.step === "email" ? (h.t.auth?.accountRecovery || "Account Recovery") : (h.t.auth?.securityUpdate || "Security Update")}
             heading={h.step === "email" ? (h.t.auth?.forgotPassword || "Forgot Password?") : (h.t.auth?.resetPassword || "Reset Password")}
             description={h.step === "email" ? (h.t.auth?.enterEmailForRecovery || "Enter your email to receive a recovery code.") : (h.t.auth?.enterCodeAndPassword || "Enter the 6-digit code and your new password.")}
-            logoSrc={""}
+            logoSrc={logoImage}
           >
             <AnimatePresence mode="wait">
               {h.step === "email" ? (
@@ -72,7 +74,7 @@ export default function ForgotPassword() {
       </ForgotPasswordContentWrapper>
 
       <AuthBrandedPanelDesktop
-        logoSrc={""}
+        logoSrc={logoImage}
         heading={h.t.auth?.resetYourPath || "Reset your Path."}
         quote={h.t.auth?.lampToMyFeet || "Your word is a lamp for my feet, a light on my path."}
         attribution={h.t.auth?.psalmReference || "Psalm 119:105"}

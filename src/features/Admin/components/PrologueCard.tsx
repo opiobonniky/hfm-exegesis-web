@@ -33,11 +33,12 @@ export function PrologueCard({ item, onEdit, onDelete, onView }: Props) {
     : null;
 
   return (
-    <Card className="group hover:shadow-md transition-shadow">
-      <CardHeader className="pb-2">
+    <Card className="group overflow-hidden border-border/70 bg-card/95 shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-lg">
+      <div className="h-1 bg-gradient-to-r from-primary via-primary/70 to-indigo-500" />
+      <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex-1 min-w-0">
-            <CardTitle className="text-base truncate">{title}</CardTitle>
+            <CardTitle className="line-clamp-2 text-base leading-5">{title}</CardTitle>
             <div className="flex items-center gap-2 mt-1 flex-wrap">
               {item.author && (
                 <span className="text-xs text-muted-foreground flex items-center gap-1">
@@ -59,7 +60,7 @@ export function PrologueCard({ item, onEdit, onDelete, onView }: Props) {
           </Badge>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="pt-0">
         {/* Key theme */}
         {themePreview && (
           <div className="flex items-start gap-1.5 mb-2">
@@ -80,11 +81,11 @@ export function PrologueCard({ item, onEdit, onDelete, onView }: Props) {
         )}
 
         {/* Actions */}
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 border-t border-border/60 pt-3">
           <Button
             variant="ghost"
             size="icon"
-            className="h-7 w-7"
+            className="h-9 w-9 sm:h-8 sm:w-8"
             onClick={onView}
             title="View details"
           >
@@ -94,7 +95,7 @@ export function PrologueCard({ item, onEdit, onDelete, onView }: Props) {
             variant="outline"
             size="sm"
             onClick={onEdit}
-            className="gap-1"
+            className="min-h-9 gap-1"
           >
             <Edit2 className="w-3.5 h-3.5" /> Edit
           </Button>
@@ -102,7 +103,7 @@ export function PrologueCard({ item, onEdit, onDelete, onView }: Props) {
             variant="outline"
             size="sm"
             onClick={onDelete}
-            className="gap-1 text-destructive hover:text-destructive"
+            className="min-h-9 gap-1 text-destructive hover:text-destructive"
           >
             <Trash2 className="w-3.5 h-3.5" /> Delete
           </Button>

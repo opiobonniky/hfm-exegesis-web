@@ -5,14 +5,13 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/components/languages/languageProvider";
-import { sendPostRequest } from "@/services/api";
-import { bibleApi } from "@/services/bibleApi";
 import { routes } from "@/components/Routes/routes";
 import {
   getBooksByTestament,
   getChaptersForBook,
 } from "@/utilities/bibleUtils";
 import { parseStructuredField } from "../helpers/contentDetailHelpers";
+import { getDailyDevotionVerse, getDailyDevotionVerses, saveDailyDevotion } from "../services/add-daily-content-service";
 
 export function useAddDailyDevotion() {
   const { t, isRtl } = useLanguage();
@@ -85,8 +84,7 @@ export function useAddDailyDevotion() {
       return;
     }
     setIsVerseLoading(true);
-    bibleApi
-      .getVerses(bibleVersion || "BSB", book, Number(chapter))
+    getDailyDevotionVerses(bibleVersion || "BSB", book, Number(chapter))
       .then((vd) => {
         if (!active) return;
         const verses = vd?.verses || [];
@@ -141,8 +139,7 @@ export function useAddDailyDevotion() {
       return;
     }
     setIsVerseLoading(true);
-    bibleApi
-      .getVerse(bibleVersion || "BSB", book, Number(chapter), Number(verseNumber))
+    getDailyDevotionVerse(bibleVersion || "BSB", book, Number(chapter), Number(verseNumber))
       .then((v) => {
         if (v?.text) setVerseText(v.text);
         else setVerseText("Verse not found.");
@@ -207,7 +204,7 @@ export function useAddDailyDevotion() {
       takeaways: takeaways || null,
     };
     try {
-      const res = await sendPostRequest("admin", "add-daily-devotion", payload);
+      const res = await saveDailyDevotion(payload);
       if (res.returnCode === 200) {
         toast({ title: t.devotions.success, description: t.devotions.devotionSaved });
         navigate(routes.dailyDevotions.path);
@@ -226,47 +223,30 @@ export function useAddDailyDevotion() {
   ]);
 
   return {
-    // Required
-    title, setTitle,
-    content, setContent,
-    // Bible reference
-    testament, setTestament,
-    book, setBook,
-    chapter, setChapter,
-    verseNumber, setVerseNumber,
-    bibleVersion, setBibleVersion,
-    verseText, isVerseLoading,
-    books, chapters, maxVerses,
-    testamentOptions, bookOptions, chapterOptions, bibleVersionOptions,
-    // Date/time/publish
-    selectedDate, setSelectedDate,
-    selectedTime, handleTimeChange,
-    published, setPublished,
-    // Content fields
-    explanation, setExplanation,
-    application, setApplication,
-    verseIntroduction, setVerseIntroduction,
-    learnMore, setLearnMore,
-    // Background
-    backgroundAuthor, setBackgroundAuthor,
-    backgroundBook, setBackgroundBook,
-    backgroundContext, setBackgroundContext,
-    // Structured
-    wordStudies, setWordStudies,
-    practicalApplications, setPracticalApplications,
-    keyThemes, setKeyThemes,
-    crossReferences, setCrossReferences,
-    finalThoughts, setFinalThoughts,
-    takeaways, setTakeaways,
-    // Derived
-    saveDisabled, isEditing,
-    pageTitle: isEditing ? "Edit Devotion" : t.devotions.addDevotion,
-    saveLabel: isEditing ? "Update Devotion" : t.devotions.saveDevotion,
-    // Actions
-    handleSave,
-    // Helpers
-    t, isRtl, navigate,
+    data: {
+      title, content, testament, book, chapter, verseNumber, bibleVersion,
+      verseText, isVerseLoading, books, chapters, maxVerses,
+      testamentOptions, bookOptions, chapterOptions, bibleVersionOptions,
+      selectedDate, selectedTime, published, explanation, application,
+      verseIntroduction, learnMore, backgroundAuthor, backgroundBook,
+      backgroundContext, wordStudies, practicalApplications, keyThemes,
+      crossReferences, finalThoughts, takeaways, saveDisabled, isEditing,
+      pageTitle: isEditing ? "Edit Devotion" : t.devotions.addDevotion,
+      saveLabel: isEditing ? "Update Devotion" : t.devotions.saveDevotion,
+      t, isRtl,
+    },
+    actions: {
+      setTitle, setContent, setTestament, setBook, setChapter,
+      setVerseNumber, setBibleVersion, setSelectedDate, handleTimeChange,
+      setPublished, setExplanation, setApplication, setVerseIntroduction,
+      setLearnMore, setBackgroundAuthor, setBackgroundBook,
+      setBackgroundContext, setWordStudies, setPracticalApplications,
+      setKeyThemes, setCrossReferences, setFinalThoughts, setTakeaways,
+      handleSave,
+    },
   };
 }
 
 export type AddDailyDevotionPageModel = ReturnType<typeof useAddDailyDevotion>;
+export type AddDailyDevotionPageData = AddDailyDevotionPageModel["data"];
+export type AddDailyDevotionPageActions = AddDailyDevotionPageModel["actions"];

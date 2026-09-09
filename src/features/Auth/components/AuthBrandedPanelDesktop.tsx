@@ -13,7 +13,7 @@ interface AuthBrandedPanelDesktopProps {
 
 export function AuthBrandedPanelDesktop({ logoSrc, heading, quote, attribution, children }: AuthBrandedPanelDesktopProps) {
   return (
-    <motion.div initial={{ x: "100%", skewX: 5 }} animate={{ x: 0, skewX: 0 }}
+    <motion.div initial={{ x: "100%" }} animate={{ x: 0 }}
       className="hidden lg:flex lg:w-[45%] relative overflow-hidden bg-brand-dark z-10">
       <div className="absolute inset-0 pointer-events-none">
         <motion.div animate={{ scale: [1, 1.2, 1], rotate: [0, 90, 0], opacity: [0.3, 0.5, 0.3] }}
@@ -28,10 +28,10 @@ export function AuthBrandedPanelDesktop({ logoSrc, heading, quote, attribution, 
 
       <div className="relative z-10 flex flex-col items-center justify-center w-full px-20 text-center">
         <div className="space-y-16">
-          <motion.div initial={{ scale: 0, rotate: -45, opacity: 0 }} animate={{ scale: 1, rotate: 3, opacity: 1 }}
+          <motion.div initial={{ scale: 0, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
             transition={{ type: "spring", stiffness: 100, damping: 20, delay: 0.8 }} className="relative inline-block group">
             <div className="absolute inset-0 bg-primary/20 blur-[80px] rounded-full group-hover:bg-primary/30 transition-colors duration-500" />
-            <motion.div whileHover={{ rotate: 0, scale: 1.05 }}
+            <motion.div whileHover={{ scale: 1.05 }}
               className="relative w-56 h-56 rounded-[3.5rem] bg-card/5 backdrop-blur-3xl border border-white/10 flex items-center justify-center p-10 shadow-2xl transition-all duration-700">
               <img src={logoSrc} alt="Exegesis Logo" className="w-full h-full object-contain filter drop-shadow-2xl" />
             </motion.div>

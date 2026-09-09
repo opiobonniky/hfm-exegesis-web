@@ -10,7 +10,8 @@ import { AdminDashboardTools } from "../components/AdminDashboardTools";
 import { AdminDashboardQuickActions } from "../components/AdminDashboardQuickActions";
 
 const AdminDashboard = () => {
-  const h = useAdminDashboardPage();
+  const { data, actions } = useAdminDashboardPage();
+  const h = { ...data, ...actions };
   const navigate = useNavigate();
   const { isRtl } = useLanguage();
 

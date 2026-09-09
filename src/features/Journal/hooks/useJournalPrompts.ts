@@ -105,13 +105,16 @@ export function useJournalPrompts() {
   }, [formData.bookName]);
 
   return {
-    t, isRtl, isAdmin,
-    prompts, filteredPrompts, loading, search, setSearch, category, setCategory,
-    filterBook, setFilterBook, filterChapter, setFilterChapter, filterBookSearch, setFilterBookSearch,
-    dialogOpen, setDialogOpen, editingPrompt, formData, setFormData, saving, handleSave,
-    deleteDialog, setDeleteDialog, deleting, handleDelete,
-    books, chapters, verses, setChapters, setVerses, bookSearch, setBookSearch,
-    filteredBooks, handleBookChange, handleChapterChange,
-    openEdit, refresh: fetchPrompts,
+    data: {
+      t, isRtl, isAdmin, prompts, filteredPrompts, loading, search, category, filterBook,
+      filterChapter, filterBookSearch, dialogOpen, editingPrompt, formData, saving,
+      deleteDialog, deleting, books, chapters, verses, bookSearch, filteredBooks,
+    },
+    actions: {
+      setSearch, setCategory, setFilterBook, setFilterChapter, setFilterBookSearch,
+      setDialogOpen, setFormData, handleSave, setDeleteDialog, handleDelete, setChapters,
+      setVerses, setBookSearch, handleBookChange, handleChapterChange, openEdit,
+      refresh: fetchPrompts,
+    },
   };
 }

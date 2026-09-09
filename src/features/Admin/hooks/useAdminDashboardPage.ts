@@ -3,7 +3,7 @@ import { sendPostRequest } from "@/services/api";
 import { useAdminErrorHandler } from "./useAdminErrorHandler";
 
 export function useAdminDashboardPage() {
-  const { handleError } = useAdminErrorHandler();
+  const { actions: { handleError } } = useAdminErrorHandler();
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -18,5 +18,5 @@ export function useAdminDashboardPage() {
 
   useEffect(() => { loadStats(); }, [loadStats]);
 
-  return { stats, loading, loadStats };
+  return { data: { stats, loading }, actions: { loadStats } };
 }

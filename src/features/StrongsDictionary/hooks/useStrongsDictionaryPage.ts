@@ -218,7 +218,7 @@ export function useStrongsDictionaryPage() {
   const navigate = useNavigate();
   const goBack = useCallback(() => navigate(-1), [navigate]);
 
-  return {
+  return { data: {
     goBack,
     mode,
     setMode,
@@ -244,5 +244,8 @@ export function useStrongsDictionaryPage() {
     setSelectedWord,
     toggleFavorite,
     isFavorited,
-  };
+  }, actions: {
+    setLangFilter, setSearchQuery, executeSearch, loadMoreSearch,
+    setSelectedBook, loadSelectedBook, loadMoreBrowse, setSelectedWord, toggleFavorite,
+  } };
 }

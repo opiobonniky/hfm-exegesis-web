@@ -127,7 +127,7 @@ function getInitialEntry(
   };
 }
 
-export function useJournalEntryPage(): JournalEntryPageModel {
+export function useJournalEntryPage() {
   const navigate = useNavigate();
   const { entryId } = useParams<{ entryId: string }>();
   const [searchParams] = useSearchParams();
@@ -386,40 +386,18 @@ export function useJournalEntryPage(): JournalEntryPageModel {
   }, [entry.bookName, entry.chapter, entry.verseNumber, navigate]);
 
   return {
-    t,
-    isRtl,
-    isEditing,
-    isNewEntry,
-    entry,
-    loading,
-    saving,
-    wordCount,
-    testament,
-    books,
-    chapters,
-    verses,
-    verseText,
-    templates,
-    showTemplates,
-    goBack,
-    handleSave,
-    setShowTemplates,
-    handleApplyTemplate,
-    handleTitleChange,
-    handleContentChange,
-    handleCategoryChange,
-    handleMoodChange,
-    handleLearningsChange,
-    handleApplicationChange,
-    handleGratitudeChange,
-    handlePrayersChange,
-    handleTagsChange,
-    handleFavoriteChange,
-    handlePublishedChange,
-    handleTestamentChange,
-    handleBookChange,
-    handleChapterChange,
-    handleVerseChange,
-    handleOpenBibleReader,
+    data: {
+      t, isRtl, isEditing, isNewEntry, entry, loading, saving, wordCount,
+      testament, books, chapters, verses, verseText, templates, showTemplates,
+    },
+    actions: {
+      goBack, handleSave, setShowTemplates, handleApplyTemplate,
+      handleTitleChange, handleContentChange, handleCategoryChange,
+      handleMoodChange, handleLearningsChange, handleApplicationChange,
+      handleGratitudeChange, handlePrayersChange, handleTagsChange,
+      handleFavoriteChange, handlePublishedChange, handleTestamentChange,
+      handleBookChange, handleChapterChange, handleVerseChange,
+      handleOpenBibleReader,
+    },
   };
 }

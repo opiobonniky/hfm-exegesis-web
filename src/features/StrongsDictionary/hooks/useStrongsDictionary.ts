@@ -64,5 +64,8 @@ export function useStrongsDictionary() {
     }
   }, [toast]);
   const clearRecent = useCallback(() => { setRecentSearches([]); localStorage.removeItem("strongs-recent"); }, []);
-  return { query, setQuery, results, loading, selectedWord, setSelectedWord, search, language, setLanguage, recentSearches, clearRecent };
+  return {
+    data: { query, results, loading, selectedWord, language, recentSearches },
+    actions: { setQuery, setSelectedWord, search, setLanguage, clearRecent },
+  };
 }

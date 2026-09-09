@@ -71,12 +71,18 @@ export function useReadingPlansPage() {
   useEffect(() => { loadPlans(); }, [loadPlans]);
 
   const handleDelete = useCallback(async () => {
-    if (!deleteTarget || deleteConfirmText !== deleteTarget.title) return;
+    if (!deleteTarget || deleteConfirmText !== "DELETE") return;
     setDeleting(true);
     try {
       const res = await api.deletePlan(deleteTarget.planId);
       if (res.returnCode === 200) {
-        toast({ title: t.readingPlan?.toastPlanDeleted || "Deleted", description: t.readingPlan?.toastPlanDeletedDesc || "Plan deleted" });
+        const deletedTitle = deleteTarget.title;
+        const translatedDescription = t.readingPlan?.toastPlanDeletedDesc
+          ?.replace("{title}", deletedTitle);
+        toast({
+          title: t.readingPlan?.toastPlanDeleted || "Plan deleted",
+          description: translatedDescription || `${deletedTitle} removed`,
+        });
         setDeleteTarget(null);
         setDeleteConfirmText("");
         await loadPlans();

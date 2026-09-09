@@ -32,5 +32,8 @@ export function useReadingSettingsPage() {
     } finally { setSaving(false); }
   }, [fontSizePx, showVerseNumbers, autoPlayVerse, navigate, toast]);
   const goBack = useCallback(() => navigate(-1), [navigate]);
-  return { goBack, saving, fontSize, setFontSize, showVerseNumbers, setShowVerseNumbers, autoPlayVerse, setAutoPlayVerse, fontSizePx, handleSave, theme: themeMode, setTheme: setThemeMode };
+  return {
+    data: { saving, fontSize, showVerseNumbers, autoPlayVerse, fontSizePx, theme: themeMode },
+    actions: { goBack, setFontSize, setShowVerseNumbers, setAutoPlayVerse, handleSave, setTheme: setThemeMode },
+  };
 }

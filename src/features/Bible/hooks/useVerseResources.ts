@@ -101,7 +101,7 @@ export function useVerseResources() {
       `/bible-reader?book=${encodeURIComponent(bookName)}&chapter=${chapter}&verse=${verseNumber}`,
     );
   }, [navigate, bookName, chapter, verseNumber]);
-  return {
+  return { data: {
     bookName,
     chapter,
     verseNumber,
@@ -118,6 +118,5 @@ export function useVerseResources() {
     prologue,
     prologueLoading,
     visibleTabs,
-    goToReader,
-  };
+  }, actions: { setActiveTab, handleTabChange, goToReader } };
 }

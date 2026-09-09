@@ -17,7 +17,8 @@ import {
 } from "../components";
 
 export default function TriviaPage() {
-  const p = useTriviaPage();
+  const { data, actions } = useTriviaPage();
+  const p = { ...data, ...actions };
   return (
     <>
       <BadgeUnlockPanel badges={p.justUnlocked} onClose={p.clearUnlocked} />

@@ -5,6 +5,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { BIBLE_BOOKS } from "@/data/staticData";
 import { bibleApi } from "@/services/bibleApi";
+import { BIBLE_BOOK_CHAPTERS } from "@/features/Bible/constants";
 import {
   PROLOGUE_STEP_ORDER,
   PROLOGUE_STEPS,
@@ -256,6 +257,26 @@ export function useAddBookPrologue() {
   }, [form, isValid, saving, isEditMode, toast, navigate]);
 
   const goBack = useCallback(() => navigate("/admin/book-prologues"), [navigate]);
+  const bookOptions = useMemo(
+    () =>
+      Object.keys(BIBLE_BOOK_CHAPTERS).map((name, index) => ({
+        value: name,
+        label: name,
+        group: index < 39 ? "Old Testament" : "New Testament",
+      })),
+    [],
+  );
+  const chapterOptions = useMemo(
+    () =>
+      form.keyScriptures.map((entry) => {
+        const count =
+          BIBLE_BOOK_CHAPTERS[
+            entry.bookName as keyof typeof BIBLE_BOOK_CHAPTERS
+          ];
+        return count ? Array.from({ length: count }, (_, index) => index + 1) : [];
+      }),
+    [form.keyScriptures],
+  );
 
   return {
     data: {
@@ -273,6 +294,8 @@ export function useAddBookPrologue() {
       canAdvanceFromCurrent,
       isValid,
       filteredBooks,
+      bookOptions,
+      chapterOptions,
     },
     actions: {
       setActiveStep,

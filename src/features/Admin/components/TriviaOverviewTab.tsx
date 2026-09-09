@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { TriviaStatCard, difficultyColor } from "./index";
 import type { useAdminTrivia } from "../hooks/useAdminTrivia";
 
-export function TriviaOverviewTab({ h }: { h: ReturnType<typeof useAdminTrivia> }) {
+export function TriviaOverviewTab({ h }: { h: ReturnType<typeof useAdminTrivia>["data"] & ReturnType<typeof useAdminTrivia>["actions"] }) {
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">

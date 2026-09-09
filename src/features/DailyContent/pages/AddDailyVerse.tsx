@@ -27,7 +27,8 @@ import {
 import { routes } from "@/components/Routes/routes";
 
 const AddDailyVerse = () => {
-  const h = useAddDailyVerse();
+  const { data, actions } = useAddDailyVerse();
+  const h = { ...data, ...actions };
 
   return (
     <PageContentWrapper isRtl={h.isRtl} maxWidth="max-w-[1440px]">

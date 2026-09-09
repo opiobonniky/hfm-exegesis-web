@@ -18,34 +18,37 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { ReturnType } from "react";
-import {
-  BIBLE_BOOK_CHAPTERS,
-  type BibleBookName,
-} from "@/features/Bible/constants";
-import { useAddExplanation } from "../hooks/useAddExplanation";
+import type { AddExplanationExtrasFormProps } from "../types";
 import { CharCount } from "./CharCount";
-
-type Model = ReturnType<typeof useAddExplanation>;
-
-interface Props {
-  model: Model;
-}
-
-const isBibleBookName = (name: string): name is BibleBookName =>
-  name in BIBLE_BOOK_CHAPTERS;
-
-const bookOptions = Object.entries(BIBLE_BOOK_CHAPTERS).map(([name], i) => ({
-  value: name,
-  label: name,
-  group: i < 39 ? "Old Testament" : "New Testament",
-}));
 
 const APP_MAX = 5000;
 const COMMENTARY_MAX = 8000;
 const FINAL_THOUGHTS_MAX = 10000;
 
-export function AddExplanationExtrasForm({ model: h }: Props) {
+export function AddExplanationExtrasForm(props: AddExplanationExtrasFormProps) {
+  const {
+    practicalApps, crossReferences, themes, takeaways, finalThoughts,
+    crossRefVerseOptions, crossRefVerseLoading, updatePracticalApp,
+    crossReferenceBookOptions, crossReferenceChapterOptions, crossReferenceVerseLoading,
+    addPracticalApp, removePracticalApp, addCrossRef, removeCrossRef,
+    updateCrossRef, pickCrossRefVerse, addTheme, removeTheme, updateTheme,
+    updateTakeaways, updateFinalThoughts,
+  } = props;
+  const h = {
+    form: {
+      practicalApps, crossReferences, themes,
+      studyMetadata: { takeaways, finalThoughts },
+    },
+    crossRefVerseOptions,
+    crossRefVerseLoading,
+    updatePracticalApp, addPracticalApp, removePracticalApp,
+    addCrossRef, removeCrossRef, updateCrossRef, pickCrossRefVerse,
+    addTheme, removeTheme, updateTheme,
+    updateNested: (_parent: string, child: string, value: string[] | string) => {
+      if (child === "takeaways" && Array.isArray(value)) updateTakeaways(value);
+      if (child === "finalThoughts" && typeof value === "string") updateFinalThoughts(value);
+    },
+  };
   return (
     <div className="space-y-8">
       <div className="flex items-center gap-2 text-sky-600">
@@ -123,15 +126,9 @@ export function AddExplanationExtrasForm({ model: h }: Props) {
         ) : (
           <div className="space-y-3">
             {h.form.crossReferences.map((cr, i) => {
-              const chapterOptions = isBibleBookName(cr.bookName)
-                ? Array.from(
-                    { length: BIBLE_BOOK_CHAPTERS[cr.bookName] },
-                    (_, idx) => idx + 1,
-                  )
-                : [];
               const verses = h.crossRefVerseOptions[i]?.verses || [];
-              const verseLoading =
-                h.crossRefVerseLoading[i] && verses.length === 0;
+              const chapterOptions = crossReferenceChapterOptions[i] || [];
+              const verseLoading = crossReferenceVerseLoading[i] || false;
 
               return (
                 <div
@@ -146,7 +143,7 @@ export function AddExplanationExtrasForm({ model: h }: Props) {
                         </Label>
                       )}
                       <Combobox
-                        options={bookOptions}
+                        options={crossReferenceBookOptions}
                         value={cr.bookName || undefined}
                         onChange={(v) => {
                           h.updateCrossRef(i, "bookName", v);

@@ -1,21 +1,17 @@
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import type { AddDailyDevotionPageModel } from "../hooks/useAddDailyDevotion";
+import type { AddDailyDevotionCoreSectionsProps } from "../types";
 import { CollapsibleSection } from "./CollapsibleSection";
 import { FormField } from "./FormField";
 
-interface Props {
-  model: AddDailyDevotionPageModel;
-}
-
-export function AddDailyDevotionCoreSections({ model: h }: Props) {
+export function AddDailyDevotionCoreSections({ title, content, setTitle, setContent }: AddDailyDevotionCoreSectionsProps) {
   return (
     <>
       <CollapsibleSection title="Devotion Title">
         <FormField label="Title" required>
           <Input
-            value={h.title}
-            onChange={(event) => h.setTitle(event.target.value)}
+            value={title}
+            onChange={(event) => setTitle(event.target.value)}
             placeholder="Enter devotion title..."
             className="text-lg"
           />
@@ -25,8 +21,8 @@ export function AddDailyDevotionCoreSections({ model: h }: Props) {
       <CollapsibleSection title="Devotion Content">
         <FormField label="Content" required>
           <Textarea
-            value={h.content}
-            onChange={(event) => h.setContent(event.target.value)}
+            value={content}
+            onChange={(event) => setContent(event.target.value)}
             placeholder="Write your devotional message..."
             className="min-h-[200px] leading-relaxed resize-none"
           />

@@ -50,5 +50,5 @@ export function useExtendedProfilePage() {
   const updateField = <K extends keyof ExtendedProfileData>(key: K, val: ExtendedProfileData[K]) =>
     setForm((f) => ({ ...f, [key]: val }));
   const goBack = useCallback(() => navigate(-1), [navigate]);
-  return { loading, saving, form, updateField, handleSave, goBack };
+  return { data: { loading, saving, form }, actions: { updateField, handleSave, goBack } };
 }

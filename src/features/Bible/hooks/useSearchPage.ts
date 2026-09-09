@@ -116,7 +116,7 @@ export function useSearchPage() {
     },
     [setQuery, scope],
   );
-  return {
+  return { data: {
     t,
     isRtl,
     inputRef,
@@ -139,7 +139,7 @@ export function useSearchPage() {
     popularSearches,
     filteredBooks,
     BOOK_NAMES,
-    // Actions
+  }, actions: {
     handleSelect,
     handleStudy,
     handleSave,
@@ -154,5 +154,5 @@ export function useSearchPage() {
     removeHistoryItem,
     loadMore,
     CROSS_TRANSLATION_OPTIONS,
-  };
+  } };
 }

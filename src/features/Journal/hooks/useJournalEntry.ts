@@ -51,8 +51,10 @@ export function useJournalEntry(entryId?: string) {
   }, [title, content, mood, tags, bookName, chapter, verseNumber, isPrivate, entryId, toast, navigate]);
 
   return {
-    loading, saving, title, setTitle, content, setContent, mood, setMood,
-    tags, setTags, bookName, setBookName, chapter, setChapter,
-    verseNumber, setVerseNumber, isPrivate, setIsPrivate, handleSave,
+    data: { loading, saving, title, content, mood, tags, bookName, chapter, verseNumber, isPrivate },
+    actions: {
+      setTitle, setContent, setMood, setTags, setBookName, setChapter, setVerseNumber,
+      setIsPrivate, handleSave,
+    },
   };
 }

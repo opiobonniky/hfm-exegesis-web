@@ -20,5 +20,8 @@ export function useDailyDevotions() {
     finally { setLoading(false); }
   }, [page]);
 
-  return { devotions, loading, page, totalPages, setPage, fetchDevotions };
+  return {
+    data: { devotions, loading, page, totalPages },
+    actions: { setPage, fetchDevotions },
+  };
 }

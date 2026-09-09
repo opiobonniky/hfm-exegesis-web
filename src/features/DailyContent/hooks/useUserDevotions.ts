@@ -55,10 +55,7 @@ export function useUserDevotions() {
     }
   }, [devotion, toast]);
   return {
-    t, isRtl,
-    devotion, loading, refreshing, liked, setLiked,
-    scrolled, scrollRef, navigate,
-    refresh: () => loadDevotion(true),
-    handleCopy, handleShare,
+    data: { t, isRtl, devotion, loading, refreshing, liked, scrolled, scrollRef, navigate },
+    actions: { setLiked, refresh: () => loadDevotion(true), handleCopy, handleShare },
   };
 }

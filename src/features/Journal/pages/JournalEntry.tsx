@@ -4,7 +4,8 @@ import { TemplatesDialog } from "../components/TemplatesDialog";
 import { useJournalEntryPage } from "../hooks/useJournalEntryPage";
 
 export default function JournalEntryPage() {
-  const p = useJournalEntryPage();
+  const { data, actions } = useJournalEntryPage();
+  const p = { ...data, ...actions };
 
   return (
     <div

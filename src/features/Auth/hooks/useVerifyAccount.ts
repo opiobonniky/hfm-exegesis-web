@@ -43,5 +43,5 @@ export function useVerifyAccount() {
     finally { setLoading(false); }
   }, [toast]);
 
-  return { code, handleCodeChange, loading, error, success, handleVerify, handleResend };
+  return { data: { code, loading, error, success }, actions: { handleCodeChange, handleVerify, handleResend } };
 }

@@ -9,7 +9,8 @@ import { SowerFAQ } from "../components/SowerFAQ";
 import { SowerFooter } from "../components/SowerFooter";
 
 export default function SowerPage() {
-  const h = useSowerPage();
+  const { data, actions } = useSowerPage();
+  const h = { ...data, ...actions };
   const {
     billingInterval,
     setBillingInterval,

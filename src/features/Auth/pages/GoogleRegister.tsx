@@ -7,7 +7,8 @@ import {
 } from "../components";
 
 const GoogleRegister = () => {
-  const p = useGoogleRegisterPage();
+  const { data, actions } = useGoogleRegisterPage();
+  const p = { ...data, ...actions };
   const {
     t, isRtl, state, phoneNumber, setPhoneNumber,
     username, setUsername, password, setPassword,

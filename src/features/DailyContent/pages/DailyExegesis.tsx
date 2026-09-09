@@ -1,7 +1,5 @@
 // DailyExegesis — daily exegesis reader page (thin compositor, no logic)
 import { useDailyExegesisPage } from "../hooks/useDailyExegesisPage";
-import { RefreshCcw } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import {
   ExegesisHero,
   ExegesisContent,
@@ -10,56 +8,38 @@ import {
   DailyExegesisActions,
   DailyExegesisFooter,
   DailyExegesisLayout,
-  DailyExegesisPageLayout,
+  DailyExegesisError,
 } from "../components";
 
 export default function DailyExegesisPage() {
-  const h = useDailyExegesisPage();
-
-  if (h.loading) {
-    return (
-      <DailyExegesisPageLayout isRtl={h.isRtl}>
-        <ExegesisHeader onBack={h.goBack} t={h.t} />
-        <DailyExegesisLoading />
-      </DailyExegesisPageLayout>
-    );
-  }
+  const { data, actions } = useDailyExegesisPage();
 
   return (
-    <DailyExegesisPageLayout isRtl={h.isRtl}>
-      <ExegesisHeader onBack={h.goBack} t={h.t} />
-
-      <ExegesisHero
-        item={h.item}
-        series={h.series}
-        onSelect={() => {}}
-        onOpenBible={h.openInBible}
-        displayDate={h.displayDate}
-        isUpcoming={h.isUpcoming}
-        canOpenBible={h.canOpenBible}
-      />
-
-      <main className="flex-1 overflow-y-auto">
-        <DailyExegesisLayout>
-          {h.error && (
-            <Button
-              variant="outline"
-              onClick={h.refresh}
-              className="w-full mb-4 flex items-center gap-2 justify-center"
-            >
-              <RefreshCcw className="w-4 h-4" /> {h.error}
-            </Button>
-          )}
-          <ExegesisContent item={h.item} />
-          <DailyExegesisActions
-            canOpenBible={h.canOpenBible}
-            onOpenBible={h.openInBible}
-            onSaveToJournal={h.saveToLedger}
+    <div className="min-h-screen flex flex-col bg-background" dir={data.isRtl ? "rtl" : "ltr"}>
+      <ExegesisHeader onBack={actions.goBack} title={data.title} subtitle={data.subtitle} />
+      {data.loading ? <DailyExegesisLoading /> : (
+        <>
+          <ExegesisHero
+            item={data.item}
+            series={data.series}
+            onSelect={actions.selectSeriesItem}
+            onOpenBible={actions.openInBible}
+            displayDate={data.displayDate}
+            isUpcoming={data.isUpcoming}
+            canOpenBible={data.canOpenBible}
           />
-        </DailyExegesisLayout>
-      </main>
-
-      <DailyExegesisFooter />
-    </DailyExegesisPageLayout>
+          <DailyExegesisLayout>
+            {data.error && <DailyExegesisError message={data.error} onRetry={actions.refresh} />}
+            <ExegesisContent item={data.item} />
+            <DailyExegesisActions
+              canOpenBible={data.canOpenBible}
+              onOpenBible={actions.openInBible}
+              onSaveToJournal={actions.saveToLedger}
+            />
+          </DailyExegesisLayout>
+          <DailyExegesisFooter />
+        </>
+      )}
+    </div>
   );
 }

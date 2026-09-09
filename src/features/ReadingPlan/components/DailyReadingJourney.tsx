@@ -1,17 +1,33 @@
 import { BookOpen, Brain, MessageSquareText } from "lucide-react";
 import { DailyCompletionButton } from "./DailyReadingCompletion";
 import { DailyReadingJourneyItem } from "./DailyReadingJourneyItem";
-import type { DailyReadingPageModel } from "../hooks/useDailyReadingPage";
-
 interface Props {
-  model: DailyReadingPageModel;
+  chapters: Array<{ id: number; bookName: string; chapter: number }>;
+  reflections: Array<{ id: number; question: string; reflectionText: string }>;
+  quizQuestions: Array<{ id: number; question: string; options: string[]; correctAnswer: number }>;
+  allReflectionsAnswered: boolean;
+  quizDone: boolean;
+  isCompleted: boolean;
+  canComplete: boolean;
+  isSubmitting: boolean;
+  dayNumber: number;
+  incompleteMessage?: string;
+  onSubmit: () => void;
 }
 
-export function DailyReadingJourney({ model }: Props) {
-  const { data, actions } = model;
-  const chapters = data.assignment?.chapters || [];
-  const reflections = data.assignment?.reflections || [];
-  const quizQuestions = data.assignment?.quizQuestions || [];
+export function DailyReadingJourney({
+  chapters,
+  reflections,
+  quizQuestions,
+  allReflectionsAnswered,
+  quizDone,
+  isCompleted,
+  canComplete,
+  isSubmitting,
+  dayNumber,
+  incompleteMessage,
+  onSubmit,
+}: Props) {
   const answeredReflections = reflections.filter((reflection) => reflection.reflectionText.trim()).length;
 
   return (
@@ -31,25 +47,25 @@ export function DailyReadingJourney({ model }: Props) {
             icon={MessageSquareText}
             label="Reflect"
             detail={`${answeredReflections} of ${reflections.length} responses written`}
-            complete={data.allReflectionsAnswered}
+            complete={allReflectionsAnswered}
           />
           {quizQuestions.length > 0 && (
             <DailyReadingJourneyItem
               icon={Brain}
               label="Check understanding"
               detail={`${quizQuestions.length} ${quizQuestions.length === 1 ? "question" : "questions"}`}
-              complete={data.quizDone}
+              complete={quizDone}
             />
           )}
         </div>
         <div className="border-t border-border/60 bg-muted/20 p-4">
           <DailyCompletionButton
-            isCompleted={data.isCompleted}
-            canComplete={data.canComplete}
-            isSubmitting={data.isSubmitting}
-            dayNumber={data.dayNumber}
-            onSubmit={actions.handleSubmitDay}
-            incompleteMessage={data.incompleteMessage}
+            isCompleted={isCompleted}
+            canComplete={canComplete}
+            isSubmitting={isSubmitting}
+            dayNumber={dayNumber}
+            onSubmit={onSubmit}
+            incompleteMessage={incompleteMessage}
           />
         </div>
       </div>

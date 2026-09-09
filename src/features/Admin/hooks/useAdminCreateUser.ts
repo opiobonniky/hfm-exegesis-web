@@ -87,11 +87,7 @@ export function useAdminCreateUser() {
   }, [form, validate, toast, navigate]);
 
   return {
-    form,
-    updateField,
-    saving,
-    errors,
-    handleSubmit,
-    handleCancel: () => navigate("/admin/users"),
+    data: { form, saving, errors },
+    actions: { updateField, handleSubmit, handleCancel: () => navigate("/admin/users") },
   };
 }

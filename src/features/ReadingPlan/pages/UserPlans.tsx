@@ -10,62 +10,54 @@ import RemovePlanModal from "../components/RemovePlanModal";
 
 export default function UserPlans() {
   const { data, actions } = useUserPlansPage();
-  const {
-    t, isRtl, navigate, activeTab,
-    userPlans, loading, catFilter,
-    removeModal, filteredPlans,
-  } = data; 
-  const { setActiveTab, setCatFilter, setRemoveModal, startPlan, removePlan } = actions;
-
-  const inProgressCount = userPlans.filter((p) => !p.isCompleted).length;
 
   return (
-    <PageLayout isRtl={isRtl} accentColor="teal">
+    <PageLayout isRtl={data.isRtl} accentColor="teal">
       <PageHeader
         icon={<BookOpen className="h-5 w-5 text-teal-700" />}
         iconBg="bg-teal-100"
-        title={t.readingPlan?.readingPlans || "My Reading Plans"}
-        subtitle={t.readingPlan?.bibleReadingPlan || "Build a daily Bible habit"}
+        title={data.t.readingPlan?.readingPlans || "My Reading Plans"}
+        subtitle={data.t.readingPlan?.bibleReadingPlan || "Build a daily Bible habit"}
       />
 
       <TabBar
         tabs={[
-          { key: "progress", label: t.readingPlan?.progress || "My Progress", badge: inProgressCount > 0 ? inProgressCount : undefined },
-          { key: "browse", label: t.readingPlan?.browse || "Browse Plans" },
+          { key: "progress", label: data.t.readingPlan?.progress || "My Progress", badge: data.inProgressCount > 0 ? data.inProgressCount : undefined },
+          { key: "browse", label: data.t.readingPlan?.browse || "Browse Plans" },
         ]}
-        active={activeTab}
-        onTabChange={(key) => setActiveTab(key as "progress" | "browse")}
+        active={data.activeTab}
+        onTabChange={(key) => actions.setActiveTab(key as "progress" | "browse")}
         accentColor="teal"
       />
 
-      {loading ? (
+      {data.loading ? (
         <LoadingState />
-      ) : activeTab === "progress" ? (
+      ) : data.activeTab === "progress" ? (
         <UserProgressTab
-          userPlans={userPlans}
-          t={t}
-          onContinue={(planId) => navigate(`/reading-plan/${planId}`)}
-          onRemove={setRemoveModal}
-          onBrowse={() => setActiveTab("browse")}
+          userPlans={data.userPlans}
+          t={data.t}
+          onContinue={(planId) => data.navigate(`/reading-plan/${planId}`)}
+          onRemove={actions.setRemoveModal}
+          onBrowse={() => actions.setActiveTab("browse")}
         />
       ) : (
         <UserBrowseTab
-          plans={filteredPlans}
-          userPlans={userPlans}
-          loading={loading}
-          catFilter={catFilter}
-          t={t}
-          onCatFilter={setCatFilter}
-          onStartPlan={startPlan}
-          onViewDetail={(planId) => navigate(`/reading-plan/${planId}`)}
+          plans={data.filteredPlans}
+          userPlans={data.userPlans}
+          loading={data.loading}
+          catFilter={data.catFilter}
+          t={data.t}
+          onCatFilter={actions.setCatFilter}
+          onStartPlan={actions.startPlan}
+          onViewDetail={(planId) => data.navigate(`/reading-plan/${planId}`)}
         />
       )}
 
       <RemovePlanModal
-        open={!!removeModal}
-        t={t}
-        onConfirm={() => removePlan(removeModal!)}
-        onCancel={() => setRemoveModal(null)}
+        open={!!data.removeModal}
+        t={data.t}
+        onConfirm={() => data.removeModal && actions.removePlan(data.removeModal)}
+        onCancel={() => actions.setRemoveModal(null)}
       />
     </PageLayout>
   );
