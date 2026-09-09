@@ -3,18 +3,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { adminApi } from "../services/adminApi";
 import { useNavigate } from "react-router-dom";
-
-export interface JournalModerationEntry {
-  id: number;
-  title: string;
-  content: string;
-  bookName?: string;
-  chapter?: number;
-  category?: string;
-  isPublished: boolean;
-  userId: string;
-  createdOn: string;
-}
+import type { JournalModerationEntry } from "../types";
 
 export function useAdminJournalModeration() {
   const { toast } = useToast();

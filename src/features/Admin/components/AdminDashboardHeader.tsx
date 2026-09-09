@@ -8,15 +8,20 @@ interface Props {
 
 export function AdminDashboardHeader({ subtitle }: Props) {
   return (
-    <Card className="overflow-hidden border-border shadow-sm">
+    <Card className="overflow-hidden border-primary/20 shadow-md shadow-primary/10">
       <CardContent className="p-0">
-        <div className="relative bg-gradient-to-r from-primary via-primary/90 to-indigo-600 p-6 sm:p-8">
-          <div className="absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.9),transparent_55%)]" />
+        <div className="relative overflow-hidden bg-gradient-to-br from-primary via-indigo-600 to-violet-700 p-6 sm:p-8">
+          <div className="absolute -right-10 -top-20 h-64 w-64 rounded-full bg-white/15 blur-3xl" />
+          <div className="absolute -bottom-28 left-1/3 h-56 w-56 rounded-full bg-cyan-300/15 blur-3xl" />
+          <div className="absolute inset-0 opacity-20 pointer-events-none bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.9),transparent_50%)]" />
           <div className="relative flex flex-col sm:flex-row sm:items-center gap-5">
             <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-white/30 bg-white/15 text-primary-foreground shadow-inner">
               <LayoutDashboard className="w-7 h-7" />
             </div>
             <div>
+              <span className="mb-2 inline-flex items-center rounded-full border border-white/25 bg-white/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/80">
+                Control center
+              </span>
               <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-primary-foreground font-[family-name:var(--font-heading)]">
                 Admin Console
               </h1>

@@ -2,25 +2,9 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { adminApi } from "../services/adminApi";
+import type { UseAdminCrudOptions } from "../types";
 
-interface UseAdminCrudOpts<T> {
-  /** API route: "bible" | "admin" | "book-prologues" etc */
-  route: string;
-  /** API action: "get-all-verses-explanation" etc */
-  listAction: string;
-  saveAction: string;
-  deleteAction: string;
-  /** Key inside returnData that holds the items array.
-   *  e.g. "explanations", "plans", "entries", "content", "users", "data".
-   *  If omitted, the hook tries common keys automatically. */
-  listKey?: string;
-  /** Key inside returnData that holds the total count (default: "totalCount" | "totalElements" | "total") */
-  totalKey?: string;
-  /** Transform API response items to T[] */
-  mapItems?: (data: any) => T[];
-}
-
-export function useAdminCrud<T extends { id: number }>(opts: UseAdminCrudOpts<T>) {
+export function useAdminCrud<T extends { id: number }>(opts: UseAdminCrudOptions<T>) {
   const { toast } = useToast();
   const [items, setItems] = useState<T[]>([]);
   const [loading, setLoading] = useState(true);

@@ -25,24 +25,28 @@ export function AdminDashboardStats({ stats, loading }: Props) {
           value={value(stats?.totalUsers)}
           icon={Users}
           color="bg-primary/10 text-primary"
+          gradient="from-blue-50 via-white to-indigo-50 border-blue-200/80"
         />
         <StatCard
           label="Active Users"
           value={value(stats?.activeUsers)}
           icon={UserCheck}
           color="bg-emerald-500/10 text-emerald-600"
+          gradient="from-emerald-50 via-white to-teal-50 border-emerald-200/80"
         />
         <StatCard
           label="Verified"
           value={value(stats?.verifiedUsers)}
           icon={ShieldCheck}
           color="bg-sky-500/10 text-sky-600"
+          gradient="from-sky-50 via-white to-cyan-50 border-sky-200/80"
         />
         <StatCard
           label="Admins"
           value={value(stats?.adminCount)}
           icon={BarChart3}
           color="bg-violet-500/10 text-violet-600"
+          gradient="from-violet-50 via-white to-fuchsia-50 border-violet-200/80"
         />
       </div>
     </section>

@@ -15,3 +15,4 @@ export const CATEGORY_OPTIONS = [
 ] as const;
 
 export const TRIVIA_PAGE_SIZE = 20;
+export const TRIVIA_DIFFICULTIES = ["easy", "medium", "hard"] as const;

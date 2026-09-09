@@ -2,14 +2,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { adminApi } from "../services/adminApi";
-import type { DailyExegesis } from "../types";
-
-interface EditForm {
-  title: string; bookName: string; chapter: string; verseStart: string; verseEnd: string;
-  passageReference: string; introduction: string; contextSummary: string;
-  teachingBody: string; application: string; prayer: string; tags: string;
-  displayDate: string; isPublished: boolean;
-}
+import type { DailyExegesis, DailyExegesisEditForm as EditForm } from "../types";
 
 const EMPTY_FORM: EditForm = {
   title: "", bookName: "", chapter: "", verseStart: "", verseEnd: "",

@@ -6,9 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TriviaQuestionCard } from "./index";
-import { CATEGORY_OPTIONS, TRIVIA_PAGE_SIZE } from "../constants";
-
-const DIFFICULTIES = ["easy", "medium", "hard"];
+import { CATEGORY_OPTIONS, TRIVIA_DIFFICULTIES, TRIVIA_PAGE_SIZE } from "../constants";
 
 interface Props {
   h: {
@@ -48,7 +46,7 @@ export function TriviaQuestionsTab({ h }: Props) {
             <SelectTrigger className="h-9 w-32 text-sm"><SelectValue placeholder="Difficulty" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Difficulties</SelectItem>
-              {DIFFICULTIES.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}
+              {TRIVIA_DIFFICULTIES.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}
             </SelectContent>
           </Select>
           <Select value={h.categoryFilter} onValueChange={h.setCategoryFilter}>

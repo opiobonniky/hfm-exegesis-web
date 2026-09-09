@@ -2,25 +2,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { adminApi } from "../services/adminApi";
-
-export interface ReadingPlan {
-  planId: string;
-  id: number;
-  title: string;
-  description: string;
-  category: string;
-  durationDays: number;
-  isPublished: boolean;
-  createdOn: string;
-}
-
-export interface ReadingPlanForm {
-  title: string;
-  description: string;
-  category: string;
-  durationDays: string;
-  isPublished: boolean;
-}
+import type { ReadingPlan, ReadingPlanForm } from "../types";
 
 const EMPTY_FORM: ReadingPlanForm = {
   title: "",

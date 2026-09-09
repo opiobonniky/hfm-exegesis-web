@@ -3,26 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { adminApi } from "../services/adminApi";
-
-interface JournalAdminDetail {
-  id: number;
-  title: string;
-  content: string;
-  bookName?: string;
-  chapter?: number;
-  verseNumber?: number;
-  category?: string;
-  mood?: string;
-  prayers?: string;
-  gratitude?: string;
-  learnings?: string;
-  application?: string;
-  isPublished: boolean;
-  isFavorite?: boolean;
-  userId: string;
-  createdOn: string;
-  updatedOn?: string;
-}
+import type { JournalAdminDetail } from "../types";
 
 export function useJournalEntryAdminDetail() {
   const { entryId } = useParams<{ entryId: string }>();

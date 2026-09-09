@@ -40,8 +40,8 @@ check_hook() {
 
   local body
   body=$(sed -n '/^[[:space:]]*return[[:space:]]*{/,$p' "$file" 2>/dev/null || true)
-  if ! printf '%s\n' "$body" | grep -qE '[[:space:]]data[[:space:]]*:' ||
-     ! printf '%s\n' "$body" | grep -qE '[[:space:]]actions[[:space:]]*:'; then
+  if ! printf '%s\n' "$body" | grep -qE '[[:space:]]data([[:space:]]*:|[,}])' ||
+     ! printf '%s\n' "$body" | grep -qE '[[:space:]]actions([[:space:]]*:|[,}])'; then
     issues+=("RULE1: Public return must expose both data and actions")
   fi
 
@@ -54,6 +54,14 @@ check_hook() {
 
   if grep -qE 'adminApi\.' "$file" && ! grep -qE 'from[[:space:]]+["'\''](\.\./)+services/' "$file"; then
     issues+=("RULE5: Admin API access must come from a feature service module")
+  fi
+
+  if grep -qE '^[[:space:]]*(export[[:space:]]+)?(interface|type)[[:space:]]+[A-Za-z_$]' "$file"; then
+    issues+=("RULE6: Types/interfaces must be declared in the feature types.ts file")
+  fi
+
+  if grep -qE '^[[:space:]]*(export[[:space:]]+)?const[[:space:]]+[A-Z][A-Za-z0-9_$]*[[:space:]]*=' "$file"; then
+    issues+=("RULE7: Static constants must be declared in the feature constants file")
   fi
 
   if [ "${#issues[@]}" -eq 0 ]; then

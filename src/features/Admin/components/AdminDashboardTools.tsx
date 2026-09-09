@@ -18,6 +18,15 @@ const ICON_MAP: Record<string, LucideIcon> = {
   BookOpen,
 };
 
+const TOOL_GRADIENTS = [
+  "from-amber-50 via-white to-orange-50 border-amber-200/80 dark:from-amber-950/20 dark:via-card dark:to-orange-950/20",
+  "from-emerald-50 via-white to-teal-50 border-emerald-200/80 dark:from-emerald-950/20 dark:via-card dark:to-teal-950/20",
+  "from-rose-50 via-white to-pink-50 border-rose-200/80 dark:from-rose-950/20 dark:via-card dark:to-pink-950/20",
+  "from-sky-50 via-white to-cyan-50 border-sky-200/80 dark:from-sky-950/20 dark:via-card dark:to-cyan-950/20",
+  "from-violet-50 via-white to-fuchsia-50 border-violet-200/80 dark:from-violet-950/20 dark:via-card dark:to-fuchsia-950/20",
+  "from-indigo-50 via-white to-blue-50 border-indigo-200/80 dark:from-indigo-950/20 dark:via-card dark:to-blue-950/20",
+];
+
 interface Props {
   onNavigate: (path: string) => void;
 }
@@ -38,7 +47,10 @@ export function AdminDashboardTools({ onNavigate }: Props) {
               onClick={() => onNavigate(tool.path)}
               className="group text-left w-full"
             >
-              <Card className="relative border-border h-full hover:border-primary/40 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 cursor-pointer overflow-hidden">
+              <Card className={cn(
+                "relative h-full bg-gradient-to-br hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 cursor-pointer overflow-hidden",
+                TOOL_GRADIENTS[index % TOOL_GRADIENTS.length],
+              )}>
                 <div
                   className={cn(
                     "absolute -right-10 -top-10 h-32 w-32 rounded-full blur-2xl opacity-25 transition-opacity duration-200 group-hover:opacity-40",

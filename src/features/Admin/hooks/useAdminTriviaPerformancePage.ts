@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { adminApi } from "../services/adminApi";
-
-interface OverviewStats { totalUsers: number; totalQuestions: number; avgScore: number; }
-interface UserPerf { id: number; username: string; email: string; score: number; questionsAnswered: number; }
-interface QuestionPerf { id: number; question: string; correctAnswers: number; totalAnswers: number; }
+import type {
+  TriviaPerformanceOverview as OverviewStats,
+  TriviaPerformanceUser as UserPerf,
+  TriviaPerformanceQuestion as QuestionPerf,
+} from "../types";
 export function useAdminTriviaPerformancePage() {
   const { toast } = useToast();
   const [tab, setTab] = useState("overview");

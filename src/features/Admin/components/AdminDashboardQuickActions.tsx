@@ -15,6 +15,15 @@ const ICON_MAP: Record<string, LucideIcon> = {
   Users,
 };
 
+const ACTION_GRADIENTS = [
+  "from-amber-50/80 to-orange-50/80 hover:border-amber-300 dark:from-amber-950/20 dark:to-orange-950/20",
+  "from-emerald-50/80 to-teal-50/80 hover:border-emerald-300 dark:from-emerald-950/20 dark:to-teal-950/20",
+  "from-sky-50/80 to-cyan-50/80 hover:border-sky-300 dark:from-sky-950/20 dark:to-cyan-950/20",
+  "from-violet-50/80 to-fuchsia-50/80 hover:border-violet-300 dark:from-violet-950/20 dark:to-fuchsia-950/20",
+  "from-blue-50/80 to-indigo-50/80 hover:border-blue-300 dark:from-blue-950/20 dark:to-indigo-950/20",
+  "from-rose-50/80 to-pink-50/80 hover:border-rose-300 dark:from-rose-950/20 dark:to-pink-950/20",
+];
+
 interface Props {
   onNavigate: (path: string) => void;
 }
@@ -35,13 +44,16 @@ export function AdminDashboardQuickActions({ onNavigate }: Props) {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {ADMIN_QUICK_ACTIONS.map((action) => {
+            {ADMIN_QUICK_ACTIONS.map((action, index) => {
               const Icon = ICON_MAP[action.icon] || BookOpen;
               return (
                 <button
                   key={action.path}
                   onClick={() => onNavigate(action.path)}
-                  className="group relative flex items-center gap-3 p-3 rounded-xl border border-border hover:border-primary/40 hover:shadow-sm transition-all text-left overflow-hidden hover:-translate-y-0.5"
+                  className={cn(
+                    "group relative flex items-center gap-3 rounded-xl border bg-gradient-to-br p-3 text-left overflow-hidden transition-all hover:-translate-y-0.5 hover:shadow-sm",
+                    ACTION_GRADIENTS[index % ACTION_GRADIENTS.length],
+                  )}
                 >
                   <span
                     className={cn(

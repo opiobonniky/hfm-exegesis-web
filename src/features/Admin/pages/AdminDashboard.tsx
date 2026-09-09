@@ -15,7 +15,10 @@ const AdminDashboard = () => {
   const { isRtl } = useLanguage();
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-6" dir={isRtl ? "rtl" : "ltr"}>
+    <div
+      className="min-h-full bg-gradient-to-br from-slate-50/80 via-background to-primary/[0.03] p-4 sm:p-6 lg:p-8 space-y-7 dark:from-background dark:via-background dark:to-primary/[0.04]"
+      dir={isRtl ? "rtl" : "ltr"}
+    >
       <AdminDashboardHeader />
       <AdminDashboardStats stats={data.stats} loading={data.loading} />
       <AdminDashboardTools onNavigate={navigate} />

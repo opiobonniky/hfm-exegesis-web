@@ -16,18 +16,11 @@ import { Combobox } from "@/components/ui/combobox";
 import { Plus, Trash2, Loader2 } from "lucide-react";
 import { adminApi } from "../services/adminApi";
 import type { AddBookPrologueModel } from "../types";
+import { PROLOGUE_TRANSLATIONS } from "../constants";
 
 interface Props {
   state: AddBookPrologueModel;
 }
-
-const TRANSLATIONS = [
-  { id: "Berean", label: "Berean Standard Bible (BSB)" },
-  { id: "KJV", label: "King James Version (KJV)" },
-  { id: "NIV", label: "New International Version (NIV)" },
-  { id: "ESV", label: "English Standard Version (ESV)" },
-  { id: "NASB", label: "New American Standard Bible (NASB)" },
-];
 
 export function AddBookPrologueExtraForm({ state: h }: Props) {
   const { keyScriptures } = h.form;
@@ -117,7 +110,7 @@ export function AddBookPrologueExtraForm({ state: h }: Props) {
                   <SelectValue placeholder="Select translation" />
                 </SelectTrigger>
                 <SelectContent>
-                  {TRANSLATIONS.map((t) => (
+                  {PROLOGUE_TRANSLATIONS.map((t) => (
                     <SelectItem key={t.id} value={t.id}>
                       {t.label}
                     </SelectItem>

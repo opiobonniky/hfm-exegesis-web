@@ -3,36 +3,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { adminApi } from "../services/adminApi";
-
-interface DailyAssignment {
-  dayNumber: number;
-  title?: string;
-  description?: string;
-  bookName?: string;
-  chapterStart?: number;
-  chapterEnd?: number;
-  verseStart?: number;
-  verseEnd?: number;
-}
-
-interface QuizQuestion {
-  id: number;
-  question: string;
-  options: string;
-  correctAnswer: number;
-}
-
-interface ReadingPlanAdminDetail {
-  planId: string;
-  title: string;
-  description?: string;
-  category?: string;
-  durationDays?: number;
-  isPublished?: boolean;
-  createdOn?: string;
-  assignments?: DailyAssignment[];
-  questions?: QuizQuestion[];
-}
+import type { ReadingPlanAdminDetail } from "../types";
 
 export function useAdminReadingPlanDetail() {
   const { planId } = useParams<{ planId: string }>();

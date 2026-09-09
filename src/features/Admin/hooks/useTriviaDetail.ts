@@ -3,23 +3,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { adminApi } from "../services/adminApi";
-
-export interface TriviaQuestionDetail {
-  id: number;
-  question: string;
-  options?: string[];
-  optionsJson?: string;
-  correctAnswer: number;
-  explanation: string;
-  difficulty: string;
-  category: string;
-  isActive: boolean;
-  bookName?: string;
-  chapter?: number;
-  verseNumber?: number;
-  createdOn: string;
-  updatedOn: string;
-}
+import type { TriviaQuestionDetail } from "../types";
 
 export function useTriviaDetail() {
   const { questionId } = useParams<{ questionId: string }>();

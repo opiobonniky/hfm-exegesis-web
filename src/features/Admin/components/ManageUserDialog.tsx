@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { formatReadableDate } from "../utils";
 import type { SubscriptionTier, SubscribedUser } from "../types";
+import { SUBSCRIPTION_TIER_OPTIONS } from "../constants";
 
 interface Props {
   user: SubscribedUser | null;
@@ -16,14 +17,6 @@ interface Props {
   onOpenChange: (open: boolean) => void;
   onSave: (data: { subscriptionTier: string; accessExpiresAt?: string | null }) => void;
 }
-
-const TIER_OPTIONS = [
-  "free",
-  "legacy_sower",
-  "legacy_sower_monthly",
-  "covenant_sower",
-  "covenant_sower_monthly",
-];
 
 export function ManageUserDialog({ user, tiers, loading, onOpenChange, onSave }: Props) {
   const [tier, setTier] = useState<string>("free");
@@ -60,7 +53,7 @@ export function ManageUserDialog({ user, tiers, loading, onOpenChange, onSave }:
             <Select value={tier} onValueChange={setTier}>
               <SelectTrigger className="h-9 text-sm"><SelectValue /></SelectTrigger>
               <SelectContent>
-                {TIER_OPTIONS.map((t) => (
+                {SUBSCRIPTION_TIER_OPTIONS.map((t) => (
                   <SelectItem key={t} value={t}>
                     {tierNames.get(t) || t}
                   </SelectItem>

@@ -3,18 +3,7 @@ import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { adminApi } from "../services/adminApi";
-
-export interface CreateUserForm {
-  username: string;
-  email: string;
-  password: string;
-  firstName: string;
-  lastName: string;
-  phoneNumber: string;
-  gender: string;
-  dateOfBirth: string;
-  userRole: number; // 1 = Admin, 2 = User
-}
+import type { CreateUserForm } from "../types";
 
 const INITIAL_FORM: CreateUserForm = {
   username: "",

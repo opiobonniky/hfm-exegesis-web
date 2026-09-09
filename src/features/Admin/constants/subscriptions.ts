@@ -9,6 +9,14 @@ export const SUBSCRIPTION_PAGE_SIZE = 20;
 export const ACTIVITY_PAGE_SIZE = 20;
 export const DEVICE_FILTERS = ["all", "mobile", "desktop", "tablet"] as const;
 export const STATUS_FILTERS = ["all", "success", "failed", "online"] as const;
+export const SUBSCRIPTION_INTERVALS = ["month", "year", "none"] as const;
+export const SUBSCRIPTION_TIER_OPTIONS = [
+  "free",
+  "legacy_sower",
+  "legacy_sower_monthly",
+  "covenant_sower",
+  "covenant_sower_monthly",
+] as const;
 
 export const SUBSCRIPTION_TIER_COLORS: Record<string, string> = {
   free: "bg-gray-100 text-gray-700 dark:bg-gray-950/30 dark:text-gray-400",

@@ -8,15 +8,21 @@ interface Props {
   value: string | number;
   icon: LucideIcon;
   color: string;
+  gradient: string;
 }
 
 // color value is a Tailwind utility token like "bg-primary/10 text-primary".
 // We combine it with a soft gradient wash so each stat reads as its own color.
-export function StatCard({ label, value, icon: Icon, color }: Props) {
+export function StatCard({ label, value, icon: Icon, color, gradient }: Props) {
   return (
-    <Card className="relative overflow-hidden border-border shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
-      <div className="absolute inset-0 bg-gradient-to-br from-card via-card to-card" />
-      <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary to-primary/20" />
+    <Card
+      className={cn(
+        "relative overflow-hidden border shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md",
+        "bg-gradient-to-br dark:border-border dark:bg-card dark:from-card dark:via-card dark:to-card",
+        gradient,
+      )}
+    >
+      <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary/70 to-primary/10 dark:from-primary dark:to-primary/20" />
       <div
         className={cn(
           "absolute -right-8 -top-8 h-28 w-28 rounded-full blur-2xl opacity-20",

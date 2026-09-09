@@ -9,56 +9,19 @@ import {
   getVerseText,
 } from "@/utilities/bibleUtils";
 import { BIBLE_BOOKS } from "@/data/staticData";
-import type { StrongsWordEntry } from "@/data/staticData";
 import { verseResourcesApi } from "../services/studyToolsApi";
 import { wordStudyApi } from "../services/studyToolsApi";
 import { getActiveVersionId } from "@/utilities/bibleUtils";
 
-// ── Types ──
-export type WordEntry = StrongsWordEntry;
-
-export interface WordStudyItem {
-  word: string;
-  transliteration: string;
-  meaning: string;
-}
-
-export interface CommentaryItem {
-  author: string;
-  title: string;
-  text: string;
-}
-
-export interface CrossReferenceItem {
-  ref: string;
-  text: string;
-}
-
-export interface DictionaryTermItem {
-  term: string;
-  pronunciation: string;
-  definition: string;
-  description: string;
-}
-
-export interface TopicItem {
-  name: string;
-}
-
-export interface VerseResource {
-  id: number;
-  bookName: string;
-  chapter: number;
-  verseStart: number;
-  verseEnd: number | null;
-  commentaries: CommentaryItem[];
-  crossReferences: CrossReferenceItem[];
-  wordStudies: WordStudyItem[];
-  dictionaryTerms: DictionaryTermItem[];
-  interlinearWords: string[];
-  relatedTopics: TopicItem[];
-  createdOn?: string;
-}
+import type {
+  WordEntry,
+  StudyToolsWordStudyItem as WordStudyItem,
+  StudyToolsCommentaryItem as CommentaryItem,
+  StudyToolsCrossReferenceItem as CrossReferenceItem,
+  StudyToolsDictionaryTermItem as DictionaryTermItem,
+  StudyToolsTopicItem as TopicItem,
+  StudyToolsVerseResource as VerseResource,
+} from "../types";
 
 export function useStudyTools() {
   const navigate = useNavigate();

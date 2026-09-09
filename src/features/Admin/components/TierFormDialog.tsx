@@ -7,8 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-
-const INTERVALS = ["month", "year", "none"];
+import { SUBSCRIPTION_INTERVALS } from "../constants";
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -44,7 +43,7 @@ export function TierFormDialog({ open, onOpenChange, form, onFormChange, saving,
               <Label>Interval</Label>
               <Select value={form.interval || "month"} onValueChange={v => update({ interval: v })}>
                 <SelectTrigger className="h-9 text-sm"><SelectValue /></SelectTrigger>
-                <SelectContent>{INTERVALS.map(i => <SelectItem key={i} value={i}>{i}</SelectItem>)}</SelectContent>
+                <SelectContent>{SUBSCRIPTION_INTERVALS.map(i => <SelectItem key={i} value={i}>{i}</SelectItem>)}</SelectContent>
               </Select>
             </div>
             <div className="space-y-1.5">

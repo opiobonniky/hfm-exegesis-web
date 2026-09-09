@@ -75,6 +75,7 @@ export const getChaptersForBook = (book: string): number[] => {
 };
 
 export const DEFAULT_VERSE_COUNT = 31;
+export const VERSE_EXPLANATIONS_PAGE_SIZE = 20;
 
 // ── Form defaults ──
 export const PROLOGUE_EMPTY_FORM = {

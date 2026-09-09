@@ -44,3 +44,36 @@ export const PROLOGUE_FORM_EMPTY = {
   keyVerses: [] as string[],
   isPublished: true,
 };
+
+export const PROLOGUE_TRANSLATIONS = [
+  { id: "Berean", label: "Berean Standard Bible (BSB)" },
+  { id: "KJV", label: "King James Version (KJV)" },
+  { id: "NIV", label: "New International Version (NIV)" },
+  { id: "ESV", label: "English Standard Version (ESV)" },
+  { id: "NASB", label: "New American Standard Bible (NASB)" },
+] as const;
+
+export const ADMIN_BOOK_PROLOGUE_EMPTY_FORM = {
+  bookName: "",
+  title: "",
+  summary: "",
+  purpose: "",
+  keyTheme: "",
+  author: "",
+  authorDetail: "",
+  audience: "",
+  dateWritten: "",
+  locationWritten: "",
+  background: "",
+  lessons: "",
+  chapters: "",
+  christConnection: "",
+  applications: [] as string[],
+  keyScriptureRef: [] as string[],
+  keyScriptureText: [] as string[],
+  mainThemes: [] as string[],
+  keyPeople: [] as string[],
+  keyVerses: [] as string[],
+  content: "",
+  isPublished: true,
+};

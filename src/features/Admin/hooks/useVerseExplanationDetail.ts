@@ -3,31 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { adminApi } from "../services/adminApi";
-
-export interface VerseExplanationDetail {
-  id: number;
-  bookName: string;
-  chapter: number;
-  verseNumber: number;
-  bibleVersion: string;
-  isPublished?: boolean;
-  createdOn?: string;
-  updatedOn?: string;
-  exegesis: { explanationText: string; applicationText: string } | null;
-  studyMetadata: {
-    introduction: string;
-    backgroundAuthor: string;
-    backgroundBook: string;
-    backgroundContext: string;
-    finalThoughts: string;
-  } | null;
-  wordStudies: { strongsId: string; surfaceText: string; customDefinition: string; sortOrder: number }[];
-  practicalApps: { applicationText: string; sortOrder: number }[];
-  crossReferences: { bookName: string; chapter: number; verseNumber: number; referenceText: string; commentary: string; sortOrder: number }[];
-  themes: { themeName: string; sortOrder: number }[];
-  // optional local-only property with fetched verse text
-  verseText?: string;
-}
+import type { VerseExplanationDetail } from "../types";
 
 export function useVerseExplanationDetail() {
   const { bookName, chapter, verseNumber } = useParams<{

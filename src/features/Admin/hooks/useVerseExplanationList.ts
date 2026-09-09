@@ -3,26 +3,10 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { adminApi } from "../services/adminApi";
-
-export interface VerseExplanationListItem {
-  id: number;
-  bookName: string;
-  chapter: number;
-  verseNumber: number;
-  bibleVersion: string;
-  sortOrder: number;
-  exegesis: { explanationText: string; applicationText: string } | null;
-  createdOn: string;
-  updatedOn: string | null;
-}
-
-interface PageData {
-  items: VerseExplanationListItem[];
-  totalCount: number;
-  page: number;
-  pageSize: number;
-  totalPages: number;
-}
+import type {
+  VerseExplanationListItem,
+  VerseExplanationPageData as PageData,
+} from "../types";
 
 export function useVerseExplanationList(pageSize = 20) {
   const navigate = useNavigate();

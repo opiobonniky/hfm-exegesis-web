@@ -3,24 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { BIBLE_BOOKS } from "@/data/staticData";
 import { useAdminCrud } from "./useAdminCrud";
 import { VERSE_EXPLANATION_EMPTY_FORM } from "../constants";
-
-interface VerseExplanation {
-  id: number;
-  bookName: string;
-  chapter: number;
-  verseNumber: number;
-  bibleVersion: string;
-  sortOrder: number;
-  exegesis: any;
-  studyMetadata: any;
-  wordStudies: any[];
-  practicalApps: any[];
-  crossReferences: any[];
-  themes: any[];
-  createdOn: string;
-  updatedOn: string | null;
-}
-const EMPTY_FORM = VERSE_EXPLANATION_EMPTY_FORM;
+import type { AdminVerseExplanation as VerseExplanation } from "../types";
 export function useAdminVerseExplanationsPage() {
   const navigate = useNavigate();
   const { data: crudData, actions: crudActions } = useAdminCrud<VerseExplanation>({
@@ -47,7 +30,7 @@ export function useAdminVerseExplanationsPage() {
     remove,
   } = { ...crudData, ...crudActions };
   const [editItem, setEditItem] = useState<VerseExplanation | null>(null);
-  const [editForm, setEditForm] = useState(EMPTY_FORM);
+  const [editForm, setEditForm] = useState(VERSE_EXPLANATION_EMPTY_FORM);
   const [deleteItem, setDeleteItem] = useState<VerseExplanation | null>(null);
   const openEdit = useCallback((item?: VerseExplanation) => {
     if (item) {
@@ -73,12 +56,12 @@ export function useAdminVerseExplanationsPage() {
       });
     } else {
       setEditItem(null);
-      setEditForm(EMPTY_FORM);
+      setEditForm(VERSE_EXPLANATION_EMPTY_FORM);
     }
   }, []);
   const closeEditForm = useCallback(() => {
     setEditItem(null);
-    setEditForm(EMPTY_FORM);
+    setEditForm(VERSE_EXPLANATION_EMPTY_FORM);
   }, []);
   const closeDeleteDialog = useCallback(() => setDeleteItem(null), []);
   const goBack = useCallback(() => navigate("/admin"), [navigate]);
@@ -108,7 +91,7 @@ export function useAdminVerseExplanationsPage() {
     );
     if (ok) {
       setEditItem(null);
-      setEditForm(EMPTY_FORM);
+      setEditForm(VERSE_EXPLANATION_EMPTY_FORM);
     }
   }, [editForm, editItem, save]);
   const handleDelete = useCallback(async () => {

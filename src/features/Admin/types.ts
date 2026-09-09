@@ -1,5 +1,55 @@
 // ─── Admin Types ───────────────────────────────────────────────────────────────
 
+import type { StrongsWordEntry } from "@/data/staticData";
+
+export type WordEntry = StrongsWordEntry;
+export interface UseAdminCrudOptions<T> {
+  route: string;
+  listAction: string;
+  saveAction: string;
+  deleteAction: string;
+  listKey?: string;
+  totalKey?: string;
+  mapItems?: (data: any) => T[];
+}
+export interface StudyToolsWordStudyItem {
+  word: string;
+  transliteration: string;
+  meaning: string;
+}
+export interface StudyToolsCommentaryItem {
+  author: string;
+  title: string;
+  text: string;
+}
+export interface StudyToolsCrossReferenceItem {
+  ref: string;
+  text: string;
+}
+export interface StudyToolsDictionaryTermItem {
+  term: string;
+  pronunciation: string;
+  definition: string;
+  description: string;
+}
+export interface StudyToolsTopicItem {
+  name: string;
+}
+export interface StudyToolsVerseResource {
+  id: number;
+  bookName: string;
+  chapter: number;
+  verseStart: number;
+  verseEnd: number | null;
+  commentaries: StudyToolsCommentaryItem[];
+  crossReferences: StudyToolsCrossReferenceItem[];
+  wordStudies: StudyToolsWordStudyItem[];
+  dictionaryTerms: StudyToolsDictionaryTermItem[];
+  interlinearWords: string[];
+  relatedTopics: StudyToolsTopicItem[];
+  createdOn?: string;
+}
+
 export interface DailyItem {
   id: number;
   bookName?: string;
@@ -385,4 +435,234 @@ export interface BookPrologueDetail {
 
 export interface BookPrologueDetailData extends BookPrologueDetail {
   loading: boolean;
+}
+
+export interface DailyAssignment {
+  dayNumber: number;
+  title?: string;
+  description?: string;
+  bookName?: string;
+  chapterStart?: number;
+  chapterEnd?: number;
+  verseStart?: number;
+  verseEnd?: number;
+}
+
+export interface QuizQuestion {
+  id: number;
+  question: string;
+  options: string;
+  correctAnswer: number;
+}
+
+export interface ReadingPlanAdminDetail {
+  planId: string;
+  title: string;
+  description?: string;
+  category?: string;
+  durationDays?: number;
+  isPublished?: boolean;
+  createdOn?: string;
+  assignments?: DailyAssignment[];
+  questions?: QuizQuestion[];
+}
+
+export interface CreateUserForm {
+  username: string;
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  phoneNumber: string;
+  gender: string;
+  dateOfBirth: string;
+  userRole: number;
+}
+
+export interface AdminVerseExplanation {
+  id: number;
+  bookName: string;
+  chapter: number;
+  verseNumber: number;
+  bibleVersion: string;
+  sortOrder: number;
+  exegesis: { explanationText: string; applicationText: string } | null;
+  studyMetadata: {
+    introduction: string;
+    backgroundAuthor: string;
+    backgroundBook: string;
+    backgroundContext: string;
+    finalThoughts: string;
+    takeaways: any[];
+  } | null;
+  wordStudies: unknown[];
+  practicalApps: unknown[];
+  crossReferences: unknown[];
+  themes: unknown[];
+  createdOn: string;
+  updatedOn: string | null;
+}
+
+export interface TriviaPerformanceOverview {
+  totalUsers: number;
+  totalQuestions: number;
+  avgScore: number;
+}
+
+export interface TriviaPerformanceUser {
+  id: number;
+  username: string;
+  email: string;
+  score: number;
+  questionsAnswered: number;
+}
+
+export interface TriviaPerformanceQuestion {
+  id: number;
+  question: string;
+  correctAnswers: number;
+  totalAnswers: number;
+}
+
+export interface DailyExegesisEditForm {
+  title: string;
+  bookName: string;
+  chapter: string;
+  verseStart: string;
+  verseEnd: string;
+  passageReference: string;
+  introduction: string;
+  contextSummary: string;
+  teachingBody: string;
+  application: string;
+  prayer: string;
+  tags: string;
+  displayDate: string;
+  isPublished: boolean;
+}
+
+export interface JournalAdminDetail {
+  id: number;
+  title: string;
+  content: string;
+  bookName?: string;
+  chapter?: number;
+  verseNumber?: number;
+  category?: string;
+  mood?: string;
+  prayers?: string;
+  gratitude?: string;
+  learnings?: string;
+  application?: string;
+  isPublished: boolean;
+  isFavorite?: boolean;
+  userId: string;
+  createdOn: string;
+  updatedOn?: string;
+}
+
+export interface TriviaQuestionDetail {
+  id: number;
+  question: string;
+  options?: string[];
+  optionsJson?: string;
+  correctAnswer: number;
+  explanation: string;
+  difficulty: string;
+  category: string;
+  isActive: boolean;
+  bookName?: string;
+  chapter?: number;
+  verseNumber?: number;
+  createdOn: string;
+  updatedOn: string;
+}
+
+export interface VerseExplanationDetail {
+  id: number;
+  bookName: string;
+  chapter: number;
+  verseNumber: number;
+  bibleVersion: string;
+  isPublished?: boolean;
+  createdOn?: string;
+  updatedOn?: string;
+  exegesis: { explanationText: string; applicationText: string } | null;
+  studyMetadata: {
+    introduction: string;
+    backgroundAuthor: string;
+    backgroundBook: string;
+    backgroundContext: string;
+    finalThoughts: string;
+  } | null;
+  wordStudies: { strongsId: string; surfaceText: string; customDefinition: string; sortOrder: number }[];
+  practicalApps: { applicationText: string; sortOrder: number }[];
+  crossReferences: { bookName: string; chapter: number; verseNumber: number; referenceText: string; commentary: string; sortOrder: number }[];
+  themes: { themeName: string; sortOrder: number }[];
+  verseText?: string;
+}
+
+export interface ReadingPlan {
+  planId: string;
+  id: number;
+  title: string;
+  description: string;
+  category: string;
+  durationDays: number;
+  isPublished: boolean;
+  createdOn: string;
+}
+
+export interface ReadingPlanForm {
+  title: string;
+  description: string;
+  category: string;
+  durationDays: string;
+  isPublished: boolean;
+}
+
+export interface JournalModerationEntry {
+  id: number;
+  title: string;
+  content: string;
+  bookName?: string;
+  chapter?: number;
+  category?: string;
+  isPublished: boolean;
+  userId: string;
+  createdOn: string;
+}
+
+export interface AdminBookPrologue {
+  bookName: string;
+  title?: string;
+  summary?: string;
+  author?: string;
+  keyTheme?: string;
+  purpose?: string;
+  chapters?: number;
+  isPublished?: boolean;
+  createdOn?: string;
+  updatedOn?: string | null;
+  [key: string]: any;
+}
+
+export interface VerseExplanationListItem {
+  id: number;
+  bookName: string;
+  chapter: number;
+  verseNumber: number;
+  bibleVersion: string;
+  sortOrder: number;
+  exegesis: { explanationText: string; applicationText: string } | null;
+  createdOn: string;
+  updatedOn: string | null;
+}
+
+export interface VerseExplanationPageData {
+  items: VerseExplanationListItem[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
 }

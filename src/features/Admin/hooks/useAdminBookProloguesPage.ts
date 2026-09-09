@@ -4,30 +4,12 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { BIBLE_BOOKS } from "@/data/staticData";
 import { adminApi } from "../services/adminApi";
+import {
+  ADMIN_BOOK_PROLOGUES_PAGE_SIZE,
+  ADMIN_BOOK_PROLOGUE_EMPTY_FORM,
+} from "../constants";
+import type { AdminBookPrologue as BookPrologue } from "../types";
 
-export interface BookPrologue {
-  bookName: string;
-  title?: string;
-  summary?: string;
-  author?: string;
-  keyTheme?: string;
-  purpose?: string;
-  chapters?: number;
-  isPublished?: boolean;
-  createdOn?: string;
-  updatedOn?: string | null;
-  [key: string]: any; // allow all other fields
-}
-
-const EMPTY_FORM = {
-  bookName: "", title: "", summary: "", purpose: "", keyTheme: "",
-  author: "", authorDetail: "", audience: "", dateWritten: "", locationWritten: "",
-  background: "", lessons: "", chapters: "", christConnection: "",
-  applications: [] as string[], keyScriptureRef: [] as string[], keyScriptureText: [] as string[],
-  mainThemes: [] as string[], keyPeople: [] as string[], keyVerses: [] as string[],
-  content: "", isPublished: true,
-};
-const PAGE_SIZE = 24;
 
 export function useAdminBookProloguesPage() {
   const navigate = useNavigate();
@@ -44,7 +26,7 @@ export function useAdminBookProloguesPage() {
 
   // Edit dialog
   const [editItem, setEditItem] = useState<BookPrologue | null>(null);
-  const [editForm, setEditForm] = useState(EMPTY_FORM);
+  const [editForm, setEditForm] = useState(ADMIN_BOOK_PROLOGUE_EMPTY_FORM);
 
   // Delete dialog
   const [deleteItem, setDeleteItem] = useState<BookPrologue | null>(null);
@@ -61,14 +43,14 @@ export function useAdminBookProloguesPage() {
     try {
       const res = await adminApi.request("book-prologues", "admin/get-all", {
         page: pageNum,
-        pageSize: PAGE_SIZE,
+        pageSize: ADMIN_BOOK_PROLOGUES_PAGE_SIZE,
         search: query.trim() || undefined,
       });
       const data = res?.returnData || res?.data;
       const raw: BookPrologue[] = Array.isArray(data) ? data : data?.data || [];
       setItems((previous) => (append ? [...previous, ...raw] : raw));
       setTotalCount(data?.total ?? raw.length);
-      setHasMore(data?.hasNext ?? raw.length === PAGE_SIZE);
+      setHasMore(data?.hasNext ?? raw.length === ADMIN_BOOK_PROLOGUES_PAGE_SIZE);
       setPage(pageNum);
     } catch {
       toast({ title: "Failed to load prologues", variant: "destructive" });
@@ -136,7 +118,7 @@ export function useAdminBookProloguesPage() {
       });
     } else {
       setEditItem(null);
-      setEditForm(EMPTY_FORM);
+      setEditForm(ADMIN_BOOK_PROLOGUE_EMPTY_FORM);
     }
   }, []);
 
@@ -164,7 +146,7 @@ export function useAdminBookProloguesPage() {
       if (res?.returnCode === 200 || res?.status === 200) {
         toast({ title: editItem ? "Updated" : "Created" });
         setEditItem(null);
-        setEditForm(EMPTY_FORM);
+        setEditForm(ADMIN_BOOK_PROLOGUE_EMPTY_FORM);
         refresh();
       } else {
         throw new Error(res?.returnMessage || "Failed to save");
