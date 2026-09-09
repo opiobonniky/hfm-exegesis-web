@@ -1,5 +1,5 @@
 import { WordDetailSheet } from "@/components/WordDetailSheet";
-import type { JournalDetailSelectedWord } from "../hooks/useJournalDetail";
+import type { JournalDetailSelectedWord } from "../types";
 
 export interface JournalDetailWordSheetProps {
   open: boolean;

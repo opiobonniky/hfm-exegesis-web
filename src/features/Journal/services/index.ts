@@ -1,1 +1,1 @@
-// Journal services barrel export (empty after cleanup)
+export * from "./journalApi";

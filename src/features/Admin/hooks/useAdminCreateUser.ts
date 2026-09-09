@@ -2,7 +2,7 @@
 import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { sendPostRequest } from "@/services/api";
+import { adminApi } from "../services/adminApi";
 
 export interface CreateUserForm {
   username: string;
@@ -61,7 +61,7 @@ export function useAdminCreateUser() {
     if (!validate()) return;
     setSaving(true);
     try {
-      const res = await sendPostRequest("admin", "create-user", {
+      const res = await adminApi.request("admin", "create-user", {
         username: form.username.trim(),
         email: form.email.trim().toLowerCase(),
         password: form.password,

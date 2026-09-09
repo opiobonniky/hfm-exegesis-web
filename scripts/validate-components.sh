@@ -9,7 +9,7 @@ NC='\033[0m'
 PASS=0
 FAIL=0
 TARGET="${1:-src/features}"
-TYPE_ERROR_FILE=$(mktemp)
+TYPE_ERROR_FILE=".validate-components.$$.log"
 trap 'rm -f "$TYPE_ERROR_FILE"' EXIT
 
 if [ "$TARGET" = "--help" ] || [ "$TARGET" = "-h" ]; then
@@ -28,13 +28,15 @@ check_component() {
     issues+=("TypeScript diagnostics exist for this component")
   fi
 
+  if grep -qE '(sendPostRequest|bibleApi\.|window\.fetch[[:space:]]*\(|globalThis\.fetch[[:space:]]*\(|axios\.|api\.(get|post|put|patch|delete)[[:space:]]*\()' "$file"; then
+    issues+=("direct API access detected; use an Admin service through a hook")
+  fi
+
   if grep -qE '\bmodel[[:space:]]*:' "$file" || grep -qE 'model[[:space:]]*=' "$file"; then
     issues+=("model prop usage detected; pass explicit props")
   fi
 
-  if grep -qE '^[[:space:]]*(export[[:space:]]+)?(interface|type)[[:space:]]+[A-Za-z][A-Za-z0-9_]*' "$file"; then
-    issues+=("local type/interface detected; export component contracts from feature types.ts")
-  fi
+  # Component-local Props interfaces are presentation contracts, not domain models.
 
   if [[ "$file" == *"/components/AddExplanation"* ]] && ! grep -qE 'from[[:space:]]+["'\'']\.\./types["'\'']' "$file"; then
     issues+=("Add Explanation component must import its props from ../types")

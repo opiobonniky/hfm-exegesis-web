@@ -9,36 +9,34 @@ import { VerseExplanationDetailContent } from "../components/VerseExplanationDet
 
 export default function VerseExplanationDetail() {
   const { data, actions } = useVerseExplanationDetail();
-  const h = { ...data, ...actions };
-
-  if (h.loading) return <DetailLoading />;
-  if (!h.item) return null;
+  if (data.loading) return <DetailLoading />;
+  if (!data.item) return null;
 
   return (
     <div className="min-h-screen bg-background">
       <DetailPageHeader
         icon={<Lightbulb className="w-5 h-5 text-primary" />}
         title="Verse Explanation"
-        subtitle={`${h.item.bookName} ${h.item.chapter}:${h.item.verseNumber}`}
+        subtitle={`${data.item.bookName} ${data.item.chapter}:${data.item.verseNumber}`}
         badge={{
-          label: h.item.isPublished !== false ? "Published" : "Draft",
-          variant: h.item.isPublished !== false ? "default" : "secondary",
+          label: data.item.isPublished !== false ? "Published" : "Draft",
+          variant: data.item.isPublished !== false ? "default" : "secondary",
         }}
-        onBack={() => h.navigate("/admin/verse-explanations")}
+        onBack={() => actions.navigate("/admin/verse-explanations")}
         containerClassName="max-w-full mx-auto px-3 sm:px-4 lg:px-6"
       />
 
       <DetailContent className="max-w-full mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6">
-        <VerseExplanationDetailContent item={h.item} />
+        <VerseExplanationDetailContent item={data.item} />
 
         <DetailMetadataGrid
           fields={[
-            { label: "Created", value: h.item.createdOn, format: "datetime" },
-            { label: "Updated", value: h.item.updatedOn, format: "datetime" },
+            { label: "Created", value: data.item.createdOn, format: "datetime" },
+            { label: "Updated", value: data.item.updatedOn, format: "datetime" },
           ]}
         />
 
-        <DetailBackButton label="Back to Explanations" onClick={() => h.navigate("/admin/verse-explanations")} />
+        <DetailBackButton label="Back to Explanations" onClick={() => actions.navigate("/admin/verse-explanations")} />
       </DetailContent>
     </div>
   );

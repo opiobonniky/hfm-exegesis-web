@@ -8,33 +8,32 @@ import { useTriviaDetail } from "../hooks/useTriviaDetail";
 
 export default function TriviaDetail() {
   const { data, actions } = useTriviaDetail();
-  const h = { ...data, ...actions };
 
-  if (h.loading) return <DetailLoading />;
-  if (!h.question) return null;
+  if (data.loading) return <DetailLoading />;
+  if (!data.question) return null;
 
   return (
     <div className="min-h-screen bg-background">
       <DetailPageHeader
         icon={null}
         title="Trivia Question Detail"
-        subtitle={`Question #${h.question.id}`}
-        onBack={() => h.navigate("/admin/trivia")}
+        subtitle={`Question #${data.question.id}`}
+        onBack={() => actions.navigate("/admin/trivia")}
       />
 
       <DetailContent>
-        <TriviaDetailContent question={h.question} />
+        <TriviaDetailContent question={data.question} />
 
         <DetailMetadataGrid
           fields={[
-            { label: "Created", value: h.question.createdOn, format: "datetime" },
-            { label: "Updated", value: h.question.updatedOn, format: "datetime" },
+            { label: "Created", value: data.question.createdOn, format: "datetime" },
+            { label: "Updated", value: data.question.updatedOn, format: "datetime" },
           ]}
         />
 
         <TriviaDetailActions
-          onEdit={() => h.navigate(`/admin/trivia/edit/${h.question!.id}`)}
-          onBack={() => h.navigate("/admin/trivia")}
+          onEdit={() => actions.navigate(`/admin/trivia/edit/${data.question!.id}`)}
+          onBack={() => actions.navigate("/admin/trivia")}
         />
       </DetailContent>
     </div>

@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { BIBLE_BOOKS } from "@/data/staticData";
-import { sendPostRequest } from "@/services/api";
+import { adminApi } from "../services/adminApi";
 
 export interface BookPrologue {
   bookName: string;
@@ -59,7 +59,7 @@ export function useAdminBookProloguesPage() {
     }
     else setLoading(true);
     try {
-      const res = await sendPostRequest("book-prologues", "admin/get-all", {
+      const res = await adminApi.request("book-prologues", "admin/get-all", {
         page: pageNum,
         pageSize: PAGE_SIZE,
         search: query.trim() || undefined,
@@ -160,7 +160,7 @@ export function useAdminBookProloguesPage() {
         keyPeople: editForm.keyPeople.filter(Boolean), keyVerses: editForm.keyVerses.filter(Boolean),
         isPublished: editForm.isPublished,
       };
-      const res = await sendPostRequest("book-prologues", "admin/upsert", payload);
+      const res = await adminApi.request("book-prologues", "admin/upsert", payload);
       if (res?.returnCode === 200 || res?.status === 200) {
         toast({ title: editItem ? "Updated" : "Created" });
         setEditItem(null);
@@ -184,7 +184,7 @@ export function useAdminBookProloguesPage() {
     if (!deleteItem) return;
     setDeleting(deleteItem.bookName);
     try {
-      const res = await sendPostRequest("book-prologues", "admin/delete", {
+      const res = await adminApi.request("book-prologues", "admin/delete", {
         bookName: deleteItem.bookName,
       });
       if (res?.returnCode === 200 || res?.status === 200) {

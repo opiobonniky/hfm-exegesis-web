@@ -15,48 +15,46 @@ import { PaginationControls } from "../components/PaginationControls";
 
 const AdminDailyContent = () => {
   const { data, actions } = useAdminDailyContent();
-  const h = { ...data, ...actions };
-
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
       <AdminDailyContentHeader />
 
-      <Tabs value={h.activeTab} onValueChange={h.handleTabChange}>
+      <Tabs value={data.activeTab} onValueChange={actions.handleTabChange}>
         <DailyContentFilters
-          activeTab={h.activeTab}
-          onTabChange={h.handleTabChange}
-          searchDate={h.searchDate}
-          onSearchDateChange={h.handleSearchDateChange}
-          onClearDate={h.handleClearDate}
-          total={h.total}
+          activeTab={data.activeTab}
+          onTabChange={actions.handleTabChange}
+          searchDate={data.searchDate}
+          onSearchDateChange={actions.handleSearchDateChange}
+          onClearDate={actions.handleClearDate}
+          total={data.total}
         />
 
         <TabsContent value="verses" className="space-y-4">
           <ContentTabPanel
             tab="verses"
-            total={h.total}
-            searchDate={h.searchDate}
-            onSearchDateChange={h.handleSearchDateChange}
-            onClearDate={h.handleClearDate}
-            onAdd={h.verses.handleAdd}
+            total={data.total}
+            searchDate={data.searchDate}
+            onSearchDateChange={actions.handleSearchDateChange}
+            onClearDate={actions.handleClearDate}
+            onAdd={data.verses.handleAdd}
           >
-            {h.loading ? (
+            {data.loading ? (
               <ContentLoading />
-            ) : h.content.length === 0 ? (
-              <DailyContentEmptyState tab="verses" typeLabel={h.typeLabel} onAdd={h.verses.handleAdd} />
+            ) : data.content.length === 0 ? (
+              <DailyContentEmptyState tab="verses" typeLabel={data.typeLabel} onAdd={data.verses.handleAdd} />
             ) : (
               <DailyContentGrid
-                items={h.content}
-                onView={h.verses.handleView}
-                onEdit={h.verses.handleEdit}
-                onDelete={h.setDeleteTarget}
+                items={data.content}
+                onView={data.verses.handleView}
+                onEdit={data.verses.handleEdit}
+                onDelete={actions.setDeleteTarget}
               />
             )}
             <PaginationControls
-              page={h.page}
-              total={h.total}
+              page={data.page}
+              total={data.total}
               pageSize={PAGE_SIZE}
-              onPageChange={h.setPage}
+              onPageChange={actions.setPage}
             />
           </ContentTabPanel>
         </TabsContent>
@@ -64,29 +62,29 @@ const AdminDailyContent = () => {
         <TabsContent value="devotions" className="space-y-4">
           <ContentTabPanel
             tab="devotions"
-            total={h.total}
-            searchDate={h.searchDate}
-            onSearchDateChange={h.handleSearchDateChange}
-            onClearDate={h.handleClearDate}
-            onAdd={h.devotions.handleAdd}
+            total={data.total}
+            searchDate={data.searchDate}
+            onSearchDateChange={actions.handleSearchDateChange}
+            onClearDate={actions.handleClearDate}
+            onAdd={data.devotions.handleAdd}
           >
-            {h.loading ? (
+            {data.loading ? (
               <ContentLoading />
-            ) : h.content.length === 0 ? (
-              <DailyContentEmptyState tab="devotions" typeLabel={h.typeLabel} onAdd={h.devotions.handleAdd} />
+            ) : data.content.length === 0 ? (
+              <DailyContentEmptyState tab="devotions" typeLabel={data.typeLabel} onAdd={data.devotions.handleAdd} />
             ) : (
               <DailyContentGrid
-                items={h.content}
-                onView={h.devotions.handleView}
-                onEdit={h.devotions.handleEdit}
-                onDelete={h.setDeleteTarget}
+                items={data.content}
+                onView={data.devotions.handleView}
+                onEdit={data.devotions.handleEdit}
+                onDelete={actions.setDeleteTarget}
               />
             )}
             <PaginationControls
-              page={h.page}
-              total={h.total}
+              page={data.page}
+              total={data.total}
               pageSize={PAGE_SIZE}
-              onPageChange={h.setPage}
+              onPageChange={actions.setPage}
             />
           </ContentTabPanel>
         </TabsContent>
@@ -94,41 +92,41 @@ const AdminDailyContent = () => {
         <TabsContent value="exegesis" className="space-y-4">
           <ContentTabPanel
             tab="exegesis"
-            total={h.total}
-            searchDate={h.searchDate}
-            onSearchDateChange={h.handleSearchDateChange}
-            onClearDate={h.handleClearDate}
-            onAdd={h.exegesis.handleAdd}
+            total={data.total}
+            searchDate={data.searchDate}
+            onSearchDateChange={actions.handleSearchDateChange}
+            onClearDate={actions.handleClearDate}
+            onAdd={data.exegesis.handleAdd}
           >
-            {h.loading ? (
+            {data.loading ? (
               <ContentLoading />
-            ) : h.content.length === 0 ? (
-              <DailyContentEmptyState tab="exegesis" typeLabel={h.typeLabel} onAdd={h.exegesis.handleAdd} />
+            ) : data.content.length === 0 ? (
+              <DailyContentEmptyState tab="exegesis" typeLabel={data.typeLabel} onAdd={data.exegesis.handleAdd} />
             ) : (
               <DailyContentGrid
-                items={h.content}
-                onView={h.exegesis.handleView}
-                onEdit={h.exegesis.handleEdit}
-                onDelete={h.setDeleteTarget}
+                items={data.content}
+                onView={data.exegesis.handleView}
+                onEdit={data.exegesis.handleEdit}
+                onDelete={actions.setDeleteTarget}
               />
             )}
             <PaginationControls
-              page={h.page}
-              total={h.total}
+              page={data.page}
+              total={data.total}
               pageSize={PAGE_SIZE}
-              onPageChange={h.setPage}
+              onPageChange={actions.setPage}
             />
           </ContentTabPanel>
         </TabsContent>
       </Tabs>
 
       <AdminDeleteDialog
-        open={!!h.deleteTarget}
-        onOpenChange={h.handleDeleteOpenChange}
-        title={`Delete ${h.typeLabel}`}
+        open={!!data.deleteTarget}
+        onOpenChange={actions.handleDeleteOpenChange}
+        title={`Delete ${data.typeLabel}`}
         description="This action cannot be undone."
-        deleting={h.deleting}
-        onConfirm={h.confirmDelete}
+        deleting={data.deleting}
+        onConfirm={actions.confirmDelete}
       />
     </div>
   );

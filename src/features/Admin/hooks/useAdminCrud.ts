@@ -1,7 +1,7 @@
 // useAdminCrud — shared hook for admin listing pages (fetch, search, CRUD + infinite scroll)
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { sendPostRequest } from "@/services/api";
+import { adminApi } from "../services/adminApi";
 
 interface UseAdminCrudOpts<T> {
   /** API route: "bible" | "admin" | "book-prologues" etc */
@@ -37,7 +37,7 @@ export function useAdminCrud<T extends { id: number }>(opts: UseAdminCrudOpts<T>
       if (append) setLoadingMore(true);
       else setLoading(true);
       try {
-        const res = await sendPostRequest(opts.route, opts.listAction, {
+        const res = await adminApi.request(opts.route, opts.listAction, {
           page: pageNum + 1,
           pageSize: 20,
           search: q || undefined,
@@ -114,7 +114,7 @@ export function useAdminCrud<T extends { id: number }>(opts: UseAdminCrudOpts<T>
       setSaving(true);
       try {
         const payload = itemId ? { id: itemId, ...data } : data;
-        const res = await sendPostRequest(opts.route, opts.saveAction, payload);
+        const res = await adminApi.request(opts.route, opts.saveAction, payload);
         if (res?.returnCode === 200 || res?.status === 200) {
           toast({
             title: "Success",
@@ -144,7 +144,7 @@ export function useAdminCrud<T extends { id: number }>(opts: UseAdminCrudOpts<T>
     async (itemId: number) => {
       setDeleting(itemId);
       try {
-        const res = await sendPostRequest(opts.route, opts.deleteAction, {
+        const res = await adminApi.request(opts.route, opts.deleteAction, {
           id: itemId,
         });
         if (res?.returnCode === 200 || res?.status === 200) {

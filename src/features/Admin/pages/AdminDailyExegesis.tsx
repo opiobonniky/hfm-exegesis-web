@@ -15,54 +15,53 @@ import { ExegesisDeleteDialog } from "../components/ExegesisDeleteDialog";
 export default function AdminDailyExegesis() {
   const navigate = useNavigate();
   const { data, actions } = useAdminDailyExegesis();
-  const h = { ...data, ...actions };
 
   return (
     <div className="min-h-screen bg-background">
       <AdminDailyExegesisHeader
         // onBack={() => navigate("/admin")}
-        onAdd={() => h.openEdit()}
+        onAdd={() => actions.openEdit()}
       />
 
       <AdminPageContent className="py-6">
         <ExegesisSearchBar
-          value={h.search}
-          onChange={h.setSearch}
-          onSearch={h.handleSearch}
+          value={data.search}
+          onChange={actions.setSearch}
+          onSearch={actions.handleSearch}
         />
 
-        {h.loading && h.items.length === 0 ? (
+        {data.loading && data.items.length === 0 ? (
           <ExegesisLoadingGrid />
-        ) : h.items.length === 0 ? (
-          <ExegesisEmptyState search={h.search} onAdd={() => h.openEdit()} />
+        ) : data.items.length === 0 ? (
+          <ExegesisEmptyState search={data.search} onAdd={() => actions.openEdit()} />
         ) : (
           <ExegesisGrid
-            items={h.items}
-            loadingMore={h.loadingMore}
-            hasMore={h.hasMore}
-            sentinelRef={h.sentinelRef}
-            onEdit={(item) => h.openEdit(item)}
-            onDelete={(item) => h.setDeleteTarget(item)}
+            items={data.items}
+            loadingMore={data.loadingMore}
+            hasMore={data.hasMore}
+            sentinelRef={data.sentinelRef}
+            onEdit={(item) => actions.openEdit(item)}
+            onDelete={(item) => actions.setDeleteTarget(item)}
           />
         )}
       </AdminPageContent>
 
       <ExegesisFormDialog
-        open={h.dialogOpen}
-        editItem={h.editItem}
-        form={h.editForm}
-        onFormChange={h.setEditForm}
-        saving={h.saving}
-        onSave={h.handleSave}
-        onClose={h.closeDialog}
+        open={data.dialogOpen}
+        editItem={data.editItem}
+        form={data.editForm}
+        onFormChange={actions.setEditForm}
+        saving={data.saving}
+        onSave={actions.handleSave}
+        onClose={actions.closeDialog}
       />
 
       <ExegesisDeleteDialog
-        open={!!h.deleteTarget}
-        title={h.deleteTarget?.title || null}
-        deleting={h.deletingId === h.deleteTarget?.id}
-        onOpenChange={(o) => !o && h.setDeleteTarget(null)}
-        onConfirm={h.handleDelete}
+        open={!!data.deleteTarget}
+        title={data.deleteTarget?.title || null}
+        deleting={data.deletingId === data.deleteTarget?.id}
+        onOpenChange={(o) => !o && actions.setDeleteTarget(null)}
+        onConfirm={actions.handleDelete}
       />
     </div>
   );

@@ -1,94 +1,24 @@
-import { useCallback, useEffect, useMemo, useState, type ComponentType } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Heart, Lightbulb, Pencil, Star } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/components/languages/languageProvider";
-import type { Translations } from "@/components/languages/type";
 import { useAuth } from "@/contexts/AuthContext";
-import { sendPostRequest } from "@/services/api";
 import { CATEGORY_META, MOOD_EMOJI_MAP, formatDate } from "../constants";
+import {
+  deleteJournalEntry,
+  exportJournalEntry,
+  getJournalEntry,
+  toggleJournalFavorite,
+} from "../services";
+import type {
+  JournalDetailEntry,
+  JournalDetailPageModel,
+  JournalDetailReflectionSection,
+  JournalDetailSelectedWord,
+} from "../types";
 
-export interface JournalDetailEntry {
-  id: number;
-  userId: string;
-  title: string | null;
-  content: string | null;
-  bookName: string | null;
-  chapter: number | null;
-  verseNumber: number | null;
-  category: string;
-  mood: string | null;
-  prayers: string | null;
-  gratitude: string | null;
-  learnings: string | null;
-  application: string | null;
-  isPublished: boolean;
-  isFavorite: boolean;
-  tags: string | null;
-  strongsWords?: string | null;
-  createdOn: string;
-  updatedOn: string;
-}
-
-export interface JournalDetailCategoryMeta {
-  labelKey: string;
-  label: string;
-  color: string;
-}
-
-export interface JournalDetailMoodInfo {
-  label: string;
-  emoji: string;
-}
-
-export interface JournalDetailReflectionSection {
-  key: string;
-  icon: ComponentType<{ className?: string }>;
-  label: string;
-  subtitle: string;
-  content: string;
-  iconColor: string;
-}
-
-export interface JournalDetailSelectedWord {
-  strongsId: string;
-  surfaceText: string;
-}
-
-export interface JournalDetailPageModel {
-  t: Translations;
-  isRtl: boolean;
-  entry: JournalDetailEntry | null;
-  loading: boolean;
-  deleting: boolean;
-  showDeleteDialog: boolean;
-  copied: boolean;
-  exporting: boolean;
-  updatingFavorite: boolean;
-  studiedWordSheetOpen: boolean;
-  selectedStudiedWord: JournalDetailSelectedWord | null;
-  isOwner: boolean;
-  catMeta: JournalDetailCategoryMeta;
-  moodInfo: JournalDetailMoodInfo | null;
-  tagsArray: string[];
-  reflectionSections: JournalDetailReflectionSection[];
-  goBack: () => void;
-  handleEdit: () => void;
-  handleShare: () => Promise<void>;
-  handleCopy: () => Promise<void>;
-  handleDelete: () => Promise<void>;
-  handleExportPdf: () => Promise<void>;
-  handleToggleFavorite: () => Promise<void>;
-  openDeleteDialog: () => void;
-  closeDeleteDialog: () => void;
-  handleDeleteDialogChange: (open: boolean) => void;
-  handleStudiedWordSheetChange: (open: boolean) => void;
-  openWordStudy: (strongsId: string, surfaceText: string) => void;
-  formatDate: (date: string) => string;
-  formatDateShort: (date: string) => string;
-}
-
-export function useJournalDetail() {
+export function useJournalDetail(): JournalDetailPageModel {
   const navigate = useNavigate();
   const { entryId } = useParams<{ entryId: string }>();
   const { t, isRtl } = useLanguage();
@@ -107,7 +37,7 @@ export function useJournalDetail() {
   const fetchEntry = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await sendPostRequest("journal", "get", { id: entryId });
+      const response = await getJournalEntry(entryId);
       if (response?.returnCode === 200 && response.returnData) {
         setEntry(response.returnData as JournalDetailEntry);
       } else {
@@ -154,7 +84,7 @@ export function useJournalDetail() {
     if (!entry || updatingFavorite) return;
     setUpdatingFavorite(true);
     try {
-      const response = await sendPostRequest("journal", "toggle-favorite", { id: entry.id });
+      const response = await toggleJournalFavorite(entry.id);
       if (response?.returnCode === 200) {
         const isFavorite = !entry.isFavorite;
         setEntry((current) => current ? { ...current, isFavorite } : current);
@@ -173,7 +103,7 @@ export function useJournalDetail() {
     if (!entry) return;
     setDeleting(true);
     try {
-      const response = await sendPostRequest("journal", "delete", { id: entry.id });
+      const response = await deleteJournalEntry(entry.id);
       if (response?.returnCode === 200) {
         toast({ title: t.journal.entryDeleted || "Deleted" });
         navigate("/journal");
@@ -192,7 +122,7 @@ export function useJournalDetail() {
     if (!entry) return;
     setExporting(true);
     try {
-      const response = await sendPostRequest("journal", "export-one", { id: entry.id, format: "pdf" });
+      const response = await exportJournalEntry(entry.id);
       if (response?.returnCode !== 200 || !response.returnData) {
         toast({ title: "Export failed", variant: "destructive" });
         return;
@@ -241,11 +171,11 @@ export function useJournalDetail() {
   const reflectionSections = useMemo<JournalDetailReflectionSection[]>(() => {
     if (!entry) return [];
     return [
-      { key: "learnings", icon: Lightbulb, label: t.journal.whatILearned || "What I Learned", subtitle: t.journal.learnSubtitle || "Insights & revelations", content: entry.learnings, iconColor: "text-amber-500" },
-      { key: "application", icon: Pencil, label: t.journal.howIllApply || "How I'll Apply", subtitle: t.journal.applySubtitle || "Practical steps", content: entry.application, iconColor: "text-blue-500" },
-      { key: "gratitude", icon: Heart, label: t.journal.gratitude || "Gratitude", subtitle: t.journal.gratitudeSubtitle || "Counting blessings", content: entry.gratitude, iconColor: "text-rose-500" },
-      { key: "prayers", icon: Star, label: t.journal.prayers || "Prayers", subtitle: t.journal.prayerSubtitle || "Conversations with the Father", content: entry.prayers, iconColor: "text-violet-500" },
-    ].filter((section): section is JournalDetailReflectionSection => Boolean(section.content));
+      { key: "learnings", icon: Lightbulb, label: t.journal.whatILearned || "What I Learned", subtitle: t.journal.learnSubtitle || "Insights & revelations", content: entry.learnings || "", iconColor: "text-amber-500" },
+      { key: "application", icon: Pencil, label: t.journal.howIllApply || "How I'll Apply", subtitle: t.journal.applySubtitle || "Practical steps", content: entry.application || "", iconColor: "text-blue-500" },
+      { key: "gratitude", icon: Heart, label: t.journal.gratitude || "Gratitude", subtitle: t.journal.gratitudeSubtitle || "Counting blessings", content: entry.gratitude || "", iconColor: "text-rose-500" },
+      { key: "prayers", icon: Star, label: t.journal.prayers || "Prayers", subtitle: t.journal.prayerSubtitle || "Conversations with the Father", content: entry.prayers || "", iconColor: "text-violet-500" },
+    ].filter((section) => Boolean(section.content));
   }, [entry, t.journal]);
   const isOwner = Boolean(userInfo?.id && entry && String(userInfo.id) === String(entry.userId));
 

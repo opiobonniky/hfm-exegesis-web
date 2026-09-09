@@ -8,44 +8,43 @@ import { UsersTable } from "../components/UsersTable";
 
 export default function AdminUsersPage() {
   const { data, actions } = useAdminUsers();
-  const h = { ...data, ...actions };
 
   return (
     <div className="min-h-screen bg-background">
       <AdminPageHeader
         title="User Management"
-        subtitle={`${h.totalCount || h.users.length} users`}
+        subtitle={`${data.totalCount || data.users.length} users`}
         icon={<Users className="w-5 h-5 text-primary" />}
-        onBack={h.goBack}
-        onAdd={h.openCreateUser}
+        onBack={actions.goBack}
+        onAdd={actions.openCreateUser}
         addLabel="Add User"
       />
 
       <AdminPageContent>
         <AdminSearchBar
-          value={h.search}
-          onChange={h.setSearch}
+          value={data.search}
+          onChange={actions.setSearch}
           placeholder="Search users..."
         />
 
-        {h.loading && h.users.length === 0 ? (
+        {data.loading && data.users.length === 0 ? (
           <AdminLoadingGrid />
-        ) : h.users.length === 0 ? (
+        ) : data.users.length === 0 ? (
           <AdminEmptyState
             icon={<Users className="w-12 h-12" />}
             title="No users found"
-            description={h.search ? `No results for "${h.search}"` : undefined}
+            description={data.search ? `No results for "${data.search}"` : undefined}
           />
         ) : (
           <UsersTable
-            users={h.users}
-            actionLoading={h.actionLoading}
-            loadingMore={h.loadingMore}
-            hasMore={h.hasMore}
-            sentinelRef={h.sentinelRef}
-            onToggleStatus={h.handleToggleStatus}
-            onToggleVerification={h.handleToggleVerification}
-            onView={h.viewUser}
+            users={data.users}
+            actionLoading={data.actionLoading}
+            loadingMore={data.loadingMore}
+            hasMore={data.hasMore}
+            sentinelRef={data.sentinelRef}
+            onToggleStatus={actions.handleToggleStatus}
+            onToggleVerification={actions.handleToggleVerification}
+            onView={actions.viewUser}
           />
         )}
       </AdminPageContent>

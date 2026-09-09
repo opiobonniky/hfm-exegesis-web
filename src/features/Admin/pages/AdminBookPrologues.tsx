@@ -16,14 +16,13 @@ import { PrologueDeleteDialog } from "../components/PrologueDeleteDialog";
 
 export default function AdminBookPrologues() {
   const { data, actions } = useAdminBookProloguesPage();
-  const h = { ...data, ...actions };
   const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-background">
       <AdminPageHeader
         title="Book Prologues Manager"
-        subtitle={`${h.totalCount} prologues`}
+        subtitle={`${data.totalCount} prologues`}
         icon={<ScrollText className="w-5 h-5 text-primary" />}
         onBack={() => navigate("/admin")}
         onAdd={() => navigate("/admin/add-book-prologue")}
@@ -32,38 +31,38 @@ export default function AdminBookPrologues() {
 
       <AdminPageContent className="py-6">
         <AdminSearchBar
-          value={h.search}
-          onChange={h.setSearch}
-          onSearch={() => h.refresh()}
+          value={data.search}
+          onChange={actions.setSearch}
+          onSearch={() => actions.refresh()}
           placeholder="Search by book name..."
         />
 
-        {h.loading && h.items.length === 0 ? (
+        {data.loading && data.items.length === 0 ? (
           <AdminLoadingGrid />
-        ) : h.items.length === 0 ? (
+        ) : data.items.length === 0 ? (
           <AdminEmptyState
             icon={<ScrollText className="w-12 h-12" />}
             title="No prologues found"
             message={
-              h.search
+              data.search
                 ? "Try a different search term"
                 : "Create your first book prologue"
             }
-            onAction={!h.search ? () => navigate("/admin/add-book-prologue") : undefined}
+            onAction={!data.search ? () => navigate("/admin/add-book-prologue") : undefined}
           />
         ) : (
           <>
             <PrologueGrid
-              items={h.items}
-              loadingMore={h.loadingMore}
-              hasMore={h.hasMore}
-              sentinelRef={h.sentinelRef}
+              items={data.items}
+              loadingMore={data.loadingMore}
+              hasMore={data.hasMore}
+              sentinelRef={data.sentinelRef}
               onEdit={(item) =>
                 navigate(
                   `/admin/edit-book-prologue/${encodeURIComponent(item.bookName)}`,
                 )
               }
-              onDelete={(item) => h.setDeleteItem(item)}
+              onDelete={(item) => actions.setDeleteItem(item)}
               onView={(item) =>
                 navigate(
                   `/admin/book-prologues/${encodeURIComponent(item.bookName)}`,
@@ -76,11 +75,11 @@ export default function AdminBookPrologues() {
       </AdminPageContent>
 
       <PrologueDeleteDialog
-        open={!!h.deleteItem}
-        bookName={h.deleteItem?.bookName || null}
-        deleting={h.deleting === h.deleteItem?.bookName}
-        onOpenChange={(o) => !o && h.setDeleteItem(null)}
-        onConfirm={h.handleDelete}
+        open={!!data.deleteItem}
+        bookName={data.deleteItem?.bookName || null}
+        deleting={data.deleting === data.deleteItem?.bookName}
+        onOpenChange={(o) => !o && actions.setDeleteItem(null)}
+        onConfirm={actions.handleDelete}
       />
     </div>
   );

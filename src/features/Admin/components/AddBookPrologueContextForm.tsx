@@ -6,10 +6,10 @@ import { Textarea } from "@/components/ui/textarea";
 import type { AddBookPrologueModel } from "../types";
 
 interface Props {
-  model: AddBookPrologueModel;
+  state: AddBookPrologueModel;
 }
 
-export function AddBookPrologueContextForm({ model: h }: Props) {
+export function AddBookPrologueContextForm({ state: h }: Props) {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-2 text-sky-600">

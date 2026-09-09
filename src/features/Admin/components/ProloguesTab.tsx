@@ -8,7 +8,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useToast } from "@/hooks/use-toast";
-import { sendPostRequest } from "@/services/api";
 import { BIBLE_BOOKS } from "@/data/staticData";
 import { Combobox } from "@/components/ui/combobox";
 import type { useStudyTools } from "../hooks/useStudyTools";
@@ -32,15 +31,8 @@ export default function ProloguesTab({ state }: ProloguesTabProps) {
     : prologues;
 
   const handleDelete = async (id: number) => {
-    try {
-      const res = await sendPostRequest("book-prologues", "admin/delete", { id });
-      if (res.returnCode === 200) {
-        toast({ title: "Deleted", description: "Prologue deleted" });
-        loadPrologues();
-      }
-    } catch (e) {
-      toast({ title: "Error", description: "Failed to delete", variant: "destructive" });
-    }
+    if (await state.deletePrologue(id)) toast({ title: "Deleted", description: "Prologue deleted" });
+    else toast({ title: "Error", description: "Failed to delete", variant: "destructive" });
   };
 
   return (
@@ -136,9 +128,7 @@ export default function ProloguesTab({ state }: ProloguesTabProps) {
             <PrologueForm
               initial={editPrologue}
               onSave={async (data) => {
-                await sendPostRequest("book-prologues", "admin/upsert", { ...data, id: editPrologue.id });
-                setPrologueSheetOpen(false);
-                loadPrologues();
+                if (await state.savePrologue(data, editPrologue.id)) setPrologueSheetOpen(false);
               }}
               onCancel={() => setPrologueSheetOpen(false)}
             />

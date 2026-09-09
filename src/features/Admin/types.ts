@@ -326,14 +326,63 @@ export interface AddBookPrologueModel {
   goToStep: (step: PrologueStepId) => void;
   goNext: () => void;
   goPrevious: () => void;
-  updateField: <K extends keyof PrologueEditorForm>(key: K, value: PrologueEditorForm[K]) => void;
-  updateArrayItem: (field: keyof PrologueEditorForm, index: number, value: string) => void;
+  updateField: <K extends keyof PrologueEditorForm>(
+    key: K,
+    value: PrologueEditorForm[K],
+  ) => void;
+  updateArrayItem: (
+    field: keyof PrologueEditorForm,
+    index: number,
+    value: string,
+  ) => void;
   addArrayItem: (field: keyof PrologueEditorForm) => void;
   removeArrayItem: (field: keyof PrologueEditorForm, index: number) => void;
   removeKeyScripture: (index: number) => void;
   addKeyScripture: () => void;
-  updateKeyScripture: (index: number, patch: Partial<KeyScriptureEntry>) => void;
+  updateKeyScripture: (
+    index: number,
+    patch: Partial<KeyScriptureEntry>,
+  ) => void;
   pickVerseForKeyScripture: (index: number, verse: number) => void;
   handleSave: () => void;
   goBack: () => void;
+}
+
+export type AddBookProloguePageModel = ReturnType<
+  typeof import("./hooks/useAddBookPrologue").useAddBookPrologue
+>;
+export type AddBookProloguePageData = AddBookProloguePageModel["data"];
+export type AddBookProloguePageActions = AddBookProloguePageModel["actions"];
+
+export interface BookPrologueDetail {
+  bookName: string;
+  title?: string;
+  sortOrder?: number;
+  author?: string;
+  authorDetail?: string;
+  audience?: string;
+  dateWritten?: string;
+  locationWritten?: string;
+  purpose?: string;
+  keyTheme?: string;
+  summary?: string;
+  background?: string;
+  lessons?: string;
+  chapters?: number;
+  structure?: Array<{ range: string; title: string }>;
+  applications?: string[];
+  keyScripture?: Array<{ reference: string; text: string }>;
+  mainThemes?: string[];
+  keyPeople?: string[];
+  keyVerses?: string[];
+  christConnection?: string;
+  isPublished?: boolean;
+  createdBy?: string;
+  createdOn?: string;
+  updatedBy?: string;
+  updatedOn?: string;
+}
+
+export interface BookPrologueDetailData extends BookPrologueDetail {
+  loading: boolean;
 }

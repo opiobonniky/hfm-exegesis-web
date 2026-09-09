@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { sendPostRequest } from "@/services/api";
+import { adminApi } from "../services/adminApi";
 
 interface JournalAdminDetail {
   id: number;
@@ -36,7 +36,7 @@ export function useJournalEntryAdminDetail() {
   useEffect(() => {
     if (!entryId) return;
     setLoading(true);
-    sendPostRequest("journal", "admin/get", { id: Number(entryId) })
+    adminApi.request("journal", "admin/get", { id: Number(entryId) })
       .then((res) => {
         if (res?.returnCode === 200 && res.returnData) {
           setItem(res.returnData);
@@ -56,7 +56,7 @@ export function useJournalEntryAdminDetail() {
     if (!item) return;
     setDeleting(true);
     try {
-      const res = await sendPostRequest("journal", "admin/delete", { id: item.id });
+      const res = await adminApi.request("journal", "admin/delete", { id: item.id });
       if (res.returnCode === 200) {
         toast({ title: "Deleted" });
         navigate("/admin/journal-moderation");
@@ -71,7 +71,7 @@ export function useJournalEntryAdminDetail() {
   const handleTogglePublication = useCallback(async () => {
     if (!item) return;
     try {
-      const res = await sendPostRequest("journal", "admin/set-publication", {
+      const res = await adminApi.request("journal", "admin/set-publication", {
         id: item.id,
         isPublished: !item.isPublished,
       });

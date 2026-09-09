@@ -155,7 +155,7 @@ export function WordsTab({ state }: WordsTabProps) {
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {words.map((w) => (
             <WordCard
-              key={`${w.strongsId}-${w.verseNumber ?? "entry"}`}
+              key={w.strongsId}
               word={w}
               onClick={() => { setDetailWord(w); setDetailSheetOpen(true); }}
             />
@@ -173,7 +173,6 @@ export function WordsTab({ state }: WordsTabProps) {
       </div>
       {/* Detail Sheet */}
       <WordDetailSheet
-        word={detailWord}
         wordEntry={detailWord}
         open={detailSheetOpen}
         onOpenChange={setDetailSheetOpen}

@@ -7,43 +7,48 @@ import { DetailMetadataGrid } from "../components/DetailSection";
 import { PrologueDetailContent } from "../components/PrologueDetailContent";
 import { BookPrologueHero } from "../components/BookPrologueHero";
 import { BookProloguePageShell } from "../components/BookProloguePageShell";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 export default function BookPrologueDetail() {
   const { data, actions } = useBookPrologueDetail();
-  const h = { ...data, ...actions };
 
-  if (h.loading) return <DetailLoading />;
-  if (!h.item) return null;
-
-  const p = h.item;
+  if (data.loading) return <DetailLoading />;
+  if (!data.bookName) return (
+    <EmptyState
+      title="Book Prologue Not Found"
+      message="The requested book prologue could not be found."
+      actionLabel="Go back"
+      onAction={() => actions.navigate(-1)}
+    />
+  );
 
   return (
     <div className="min-h-screen bg-background">
       <BookProloguePageShell>
         <BookPrologueHero
-          item={p}
-          onBack={() => h.navigate("/admin/book-prologues")}
+          item={data}
+          onBack={() => actions.navigate("/admin/book-prologues")}
           onEdit={() =>
-            h.navigate(`/admin/edit-book-prologue/${encodeURIComponent(p.bookName)}`)
+            actions.navigate(`/admin/edit-book-prologue/${encodeURIComponent(data.bookName)}`)
           }
         />
 
         <DetailContent className="max-w-5xl mx-auto px-0 py-0 space-y-4 sm:space-y-5">
-          <PrologueDetailContent item={p} />
+          <PrologueDetailContent item={data} />
 
           <DetailMetadataGrid
             fields={[
-              { label: "Date Written", value: p.dateWritten },
-              { label: "Location", value: p.locationWritten },
-              { label: "Created By", value: p.createdBy },
-              { label: "Created", value: p.createdOn, format: "datetime" },
-              { label: "Updated", value: p.updatedOn, format: "datetime" },
+              { label: "Date Written", value: data.dateWritten },
+              { label: "Location", value: data.locationWritten },
+              { label: "Created By", value: data.createdBy },
+              { label: "Created", value: data.createdOn, format: "datetime" },
+              { label: "Updated", value: data.updatedOn, format: "datetime" },
             ]}
           />
 
           <DetailBackButton
             label="Back to Prologues"
-            onClick={() => h.navigate("/admin/book-prologues")}
+            onClick={() => actions.navigate("/admin/book-prologues")}
           />
         </DetailContent>
       </BookProloguePageShell>

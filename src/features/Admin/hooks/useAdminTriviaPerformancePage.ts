@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { sendPostRequest } from "@/services/api";
+import { adminApi } from "../services/adminApi";
 
 interface OverviewStats { totalUsers: number; totalQuestions: number; avgScore: number; }
 interface UserPerf { id: number; username: string; email: string; score: number; questionsAnswered: number; }
@@ -16,7 +16,7 @@ export function useAdminTriviaPerformancePage() {
   const loadAll = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await sendPostRequest("trivia", "admin-performance", {});
+      const res = await adminApi.request("trivia", "admin-performance", {});
       if (res.data?.returnCode === 200 && res.data.returnData) {
         const d = res.data.returnData;
         setOverview(d.overview || null);

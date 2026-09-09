@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { sendPostRequest } from "@/services/api";
+import { adminApi } from "../services/adminApi";
 
 export interface VerseExplanationListItem {
   id: number;
@@ -41,7 +41,7 @@ export function useVerseExplanationList(pageSize = 20) {
       else setLoading(true);
 
       try {
-        const res = await sendPostRequest("bible", "get-all-verses-explanation", {
+        const res = await adminApi.request("bible", "get-all-verses-explanation", {
           page: pageNum,
           pageSize,
           search: q || undefined,
@@ -93,7 +93,7 @@ export function useVerseExplanationList(pageSize = 20) {
     async (item: VerseExplanationListItem) => {
       setDeleting(item.id);
       try {
-        const res = await sendPostRequest("bible", "delete-verse-explanation", { id: item.id });
+        const res = await adminApi.request("bible", "delete-verse-explanation", { id: item.id });
         if (res?.returnCode === 200 || res?.status === 200) {
           toast({ title: "Deleted", description: `${item.bookName} ${item.chapter}:${item.verseNumber} deleted` });
           refresh();

@@ -4,7 +4,7 @@ import type { AddBookPrologueModel } from "../types";
 import type { PrologueStepId } from "../types";
 
 interface Props {
-  model: AddBookPrologueModel;
+  state: AddBookPrologueModel;
   currentStep: PrologueStepId;
   currentStepIndex: number;
   stepCompletion: Record<PrologueStepId, boolean>;
@@ -20,7 +20,7 @@ const STEP_ICONS: Record<PrologueStepId, typeof BookOpen> = {
 };
 
 export function AddBookPrologueSidebar({
-  model: h,
+  state: h,
   currentStep,
   currentStepIndex,
   stepCompletion,

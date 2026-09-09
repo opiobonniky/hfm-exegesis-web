@@ -11,17 +11,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 type Model = ReturnType<typeof useStudyTools>["data"] & ReturnType<typeof useStudyTools>["actions"];
 
 interface StudyResourceEditorProps {
-  model: Model;
+  state: Model;
   onBack: () => void;
 }
 
-export default function StudyResourceEditor({ model, onBack }: StudyResourceEditorProps) {
+export default function StudyResourceEditor({ state, onBack }: StudyResourceEditorProps) {
   const {
     verseBook, handleBookChange, verseChapter, handleChapterChange, verseNum, setVerseNum,
     verseChapList, verseNumList, verseText, verseTextLoading, currentResource, resourcesLoading, resourceSaving,
     loadResource, saveResource, wordStudies, setWordStudies, commentaries, setCommentaries,
     crossRefs, setCrossRefs, dictTerms, setDictTerms, topics, setTopics,
-  } = model;
+  } = state;
   const [saved, setSaved] = useState(false);
   const [activeTab, setActiveTab] = useState("reference");
   const tabOrder = ["reference", "words", "crossRefs", "commentaries", "dictionary", "topics"];

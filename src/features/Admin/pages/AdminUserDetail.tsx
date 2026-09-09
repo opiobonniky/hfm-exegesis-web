@@ -14,47 +14,45 @@ import { AdminPageContent } from "../components/AdminPageContent";
 
 export default function AdminUserDetail() {
   const { data, actions } = useAdminUserDetail();
-  const h = { ...data, ...actions };
 
-  if (h.loading) return <Skeleton className="h-96" />;
-  if (!h.user) return null;
+  if (data.loading) return <Skeleton className="h-96" />;
+  if (!data.user) return null;
 
-  const u = h.user;
-  const role = USER_ROLE_MAP[u.userRole] || USER_ROLE_MAP[2];
-  const tierColor = SUBSCRIPTION_TIER_COLORS[u.subscriptionTier || "free"] || SUBSCRIPTION_TIER_COLORS.free;
+  const role = USER_ROLE_MAP[data.user.userRole] || USER_ROLE_MAP[2];
+  const tierColor = SUBSCRIPTION_TIER_COLORS[data.user.subscriptionTier || "free"] || SUBSCRIPTION_TIER_COLORS.free;
 
   return (
     <div className="min-h-screen bg-background">
       <UserDetailHeader
-        username={u.username}
-        status={u.status}
-        emailVerified={u.emailVerified}
-        actionLoading={h.actionLoading}
-        onBack={() => h.navigate("/admin/users")}
-        onToggleStatus={h.handleToggleStatus}
-        onToggleVerification={h.handleToggleVerification}
-        onDelete={h.handleDelete}
+        username={data.user.username}
+        status={data.user.status}
+        emailVerified={data.user.emailVerified}
+        actionLoading={data.actionLoading}
+        onBack={() => actions.navigate("/admin/users")}
+        onToggleStatus={actions.handleToggleStatus}
+        onToggleVerification={actions.handleToggleVerification}
+        onDelete={actions.handleDelete}
       />
 
       <AdminPageContent className="max-w-4xl space-y-4 sm:space-y-6">
         <UserProfileCard
-          firstName={u.firstName}
-          lastName={u.lastName}
-          username={u.username}
-          profilePhotoUrl={u.profilePhotoUrl}
-          status={u.status}
-          emailVerified={u.emailVerified}
-          userRole={u.userRole}
-          subscriptionTier={u.subscriptionTier}
+          firstName={data.user.firstName}
+          lastName={data.user.lastName}
+          username={data.user.username}
+          profilePhotoUrl={data.user.profilePhotoUrl}
+          status={data.user.status}
+          emailVerified={data.user.emailVerified}
+          userRole={data.user.userRole}
+          subscriptionTier={data.user.subscriptionTier}
           role={role}
           tierColor={tierColor}
         />
 
-        <UserDetailInfoSection user={u} />
+        <UserDetailInfoSection user={data.user} />
 
-        <UserSessionsCard sessions={h.sessions} loading={h.sessionsLoading} />
+        <UserSessionsCard sessions={data.sessions} loading={data.sessionsLoading} />
 
-        <DetailBackButton label="Back to Users" onClick={() => h.navigate("/admin/users")} />
+        <DetailBackButton label="Back to Users" onClick={() => actions.navigate("/admin/users")} />
       </AdminPageContent>
     </div>
   );

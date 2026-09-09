@@ -4,7 +4,6 @@ import { Search, X, Loader2, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { sendPostRequest } from "@/services/api";
 import type { useStudyTools } from "../hooks/useStudyTools";
 
 type StudyToolsState = ReturnType<typeof useStudyTools>["data"] & ReturnType<typeof useStudyTools>["actions"];
@@ -18,15 +17,8 @@ export default function StudiesTab({ state }: StudiesTabProps) {
   const { toast } = useToast();
 
   const handleDelete = async (id: number) => {
-    try {
-      const res = await sendPostRequest("admin", "delete-daily-exegesis", { id });
-      if (res.returnCode === 200) {
-        toast({ title: "Deleted", description: "Study deleted successfully" });
-        loadStudies(0, studiesSearch);
-      }
-    } catch (e) {
-      toast({ title: "Error", description: "Failed to delete", variant: "destructive" });
-    }
+    if (await state.deleteStudy(id)) toast({ title: "Deleted", description: "Study deleted successfully" });
+    else toast({ title: "Error", description: "Failed to delete", variant: "destructive" });
   };
 
   return (

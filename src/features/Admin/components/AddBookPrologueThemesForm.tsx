@@ -4,10 +4,10 @@ import type { AddBookPrologueModel } from "../types";
 import { AddBookPrologueArrayField } from "./AddBookPrologueArrayField";
 
 interface Props {
-  model: AddBookPrologueModel;
+  state: AddBookPrologueModel;
 }
 
-export function AddBookPrologueThemesForm({ model: h }: Props) {
+export function AddBookPrologueThemesForm({ state: h }: Props) {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-2 text-sky-600">

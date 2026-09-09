@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { sendPostRequest } from "@/services/api";
+import { adminApi } from "../services/adminApi";
 
 import {
   BookOpen,
@@ -110,7 +110,7 @@ export function VerseExplanationDetailContent({ item }: Props) {
     // naive next verse: +1; if not found we stop (could be improved to advance chapter)
     const nextVerse = Number(last.verseNumber) + 1;
     try {
-      const res = await sendPostRequest("bible", "get-verse-explanation", {
+      const res = await adminApi.request("bible", "get-verse-explanation", {
         bookName: last.bookName,
         chapter: last.chapter,
         verseNumber: nextVerse,

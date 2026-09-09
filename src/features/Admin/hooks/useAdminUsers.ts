@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { sendPostRequest } from "@/services/api";
+import { adminApi } from "../services/adminApi";
 import type { AdminUser } from "../types";
 import { USERS_PAGE_SIZE, USER_SEARCH_DEBOUNCE_MS } from "../constants";
 
@@ -26,7 +26,7 @@ export function useAdminUsers() {
       if (append) setLoadingMore(true);
       else setLoading(true);
       try {
-        const res = await sendPostRequest("admin", "get-users-by-admin", {
+        const res = await adminApi.request("admin", "get-users-by-admin", {
           page: pageNum + 1,
           pageSize: USERS_PAGE_SIZE,
           search: q || undefined,
@@ -88,7 +88,7 @@ export function useAdminUsers() {
       setActionLoading(user.id);
       try {
         const newStatus = !user.status;
-        const res = await sendPostRequest("admin", "toggle-user-status", {
+        const res = await adminApi.request("admin", "toggle-user-status", {
           username: user.username,
           status: newStatus,
         });
@@ -112,7 +112,7 @@ export function useAdminUsers() {
       setActionLoading(user.id);
       try {
         const newVerified = !user.emailVerified;
-        const res = await sendPostRequest("admin", "toggle-user-verification", {
+        const res = await adminApi.request("admin", "toggle-user-verification", {
           username: user.username,
           isVerified: newVerified,
         });

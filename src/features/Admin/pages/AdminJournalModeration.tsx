@@ -15,52 +15,51 @@ import { JournalDeleteDialog } from "../components/JournalDeleteDialog";
 
 export default function AdminJournalModeration() {
   const { data, actions } = useAdminJournalModeration();
-  const h = { ...data, ...actions };
 
   return (
     <div className="min-h-screen bg-background">
       <AdminPageHeader
         title="Journal Moderation"
-        subtitle={`${h.totalCount || h.entries.length} entries`}
+        subtitle={`${data.totalCount || data.entries.length} entries`}
         icon={<BookOpen className="w-5 h-5 text-primary" />}
-        onBack={h.goBack}
+        onBack={actions.goBack}
       />
 
       <AdminPageContent>
         <AdminSearchBar
-          value={h.search}
-          onChange={h.setSearch}
-          onSearch={h.handleSearch}
+          value={data.search}
+          onChange={actions.setSearch}
+          onSearch={actions.handleSearch}
           placeholder="Search entries..."
         />
 
-        {h.loading && h.entries.length === 0 ? (
+        {data.loading && data.entries.length === 0 ? (
           <AdminLoadingGrid />
-        ) : h.entries.length === 0 ? (
+        ) : data.entries.length === 0 ? (
           <AdminEmptyState
             icon={<BookOpen className="w-12 h-12" />}
             title="No entries found"
           />
         ) : (
           <JournalTable
-            entries={h.entries}
-            actionLoading={h.actionLoading}
-            loadingMore={h.loadingMore}
-            hasMore={h.hasMore}
-            sentinelRef={h.sentinelRef}
-            onTogglePublication={h.handleTogglePublication}
-            onDelete={h.requestDelete}
-            onView={h.viewEntry}
+            entries={data.entries}
+            actionLoading={data.actionLoading}
+            loadingMore={data.loadingMore}
+            hasMore={data.hasMore}
+            sentinelRef={data.sentinelRef}
+            onTogglePublication={actions.handleTogglePublication}
+            onDelete={actions.requestDelete}
+            onView={actions.viewEntry}
           />
         )}
       </AdminPageContent>
 
       <JournalDeleteDialog
-        open={!!h.deleteTarget}
-        title={h.deleteTarget?.title || null}
-        deleting={h.deleting}
-        onOpenChange={h.handleDeleteDialogChange}
-        onConfirm={h.handleDelete}
+        open={!!data.deleteTarget}
+        title={data.deleteTarget?.title || null}
+        deleting={data.deleting}
+        onOpenChange={actions.handleDeleteDialogChange}
+        onConfirm={actions.handleDelete}
       />
     </div>
   );

@@ -10,50 +10,48 @@ import { AdminDeleteDialog } from "../components/AdminDeleteDialog";
 
 export default function JournalEntryAdminDetail() {
   const { data, actions } = useJournalEntryAdminDetail();
-  const h = { ...data, ...actions };
-
-  if (h.loading) return <DetailLoading />;
-  if (!h.item) return null;
+  if (data.loading) return <DetailLoading />;
+  if (!data.item) return null;
 
   return (
     <div className="min-h-screen bg-background">
       <DetailPageHeader
         icon={<BookOpen className="w-5 h-5 text-primary" />}
         title="Journal Entry"
-        subtitle={`by user ${h.item.userId?.slice(0, 8)}…`}
-        onBack={() => h.navigate("/admin/journal-moderation")}
+        subtitle={`by user ${data.item.userId?.slice(0, 8)}…`}
+        onBack={() => actions.navigate("/admin/journal-moderation")}
         actions={
           <JournalDetailHeader
-            userId={h.item.userId}
-            isPublished={h.item.isPublished}
-            onTogglePublication={h.handleTogglePublication}
-            onDelete={() => h.setConfirmDelete(true)}
+            userId={data.item.userId}
+            isPublished={data.item.isPublished}
+            onTogglePublication={actions.handleTogglePublication}
+            onDelete={() => actions.setConfirmDelete(true)}
           />
         }
       />
 
       <DetailContent>
-        <JournalDetailContent item={h.item} />
+        <JournalDetailContent item={data.item} />
 
         <DetailMetadataGrid
           fields={[
-            { label: "Created", value: h.item.createdOn, format: "datetime" },
-            { label: "Updated", value: h.item.updatedOn, format: "datetime" },
+            { label: "Created", value: data.item.createdOn, format: "datetime" },
+            { label: "Updated", value: data.item.updatedOn, format: "datetime" },
           ]}
         />
 
-        <DetailBackButton label="Back to Journal" onClick={() => h.navigate("/admin/journal-moderation")} />
+        <DetailBackButton label="Back to Journal" onClick={() => actions.navigate("/admin/journal-moderation")} />
       </DetailContent>
 
       <AdminDeleteDialog
-        open={h.confirmDelete}
-        onOpenChange={h.setConfirmDelete}
+        open={data.confirmDelete}
+        onOpenChange={actions.setConfirmDelete}
         title="Delete Journal Entry"
-        description={`Are you sure you want to delete "${h.item.title}"? This action cannot be undone.`}
-        deleting={h.deleting}
+        description={`Are you sure you want to delete "${data.item.title}"? This action cannot be undone.`}
+        deleting={data.deleting}
         onConfirm={() => {
-          h.setConfirmDelete(false);
-          h.handleDelete();
+          actions.setConfirmDelete(false);
+          actions.handleDelete();
         }}
       />
     </div>

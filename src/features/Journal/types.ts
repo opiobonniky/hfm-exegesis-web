@@ -1,4 +1,6 @@
 // ─── Journal Types ─────────────────────────────────────────────────────────────
+import type { ComponentType } from "react";
+import type { Translations } from "@/components/languages/type";
 
 export interface StudiedWord {
   strongsId: string;
@@ -71,6 +73,94 @@ export interface JournalStats {
   entriesThisWeek?: number;
   entriesThisMonth?: number;
 }
+
+export interface JournalDetailEntry {
+  id: number;
+  userId: string;
+  title: string | null;
+  content: string | null;
+  bookName: string | null;
+  chapter: number | null;
+  verseNumber: number | null;
+  category: string;
+  mood: string | null;
+  prayers: string | null;
+  gratitude: string | null;
+  learnings: string | null;
+  application: string | null;
+  isPublished: boolean;
+  isFavorite: boolean;
+  tags: string | null;
+  strongsWords?: string | null;
+  createdOn: string;
+  updatedOn: string;
+}
+
+export interface JournalDetailCategoryMeta {
+  labelKey: string;
+  label: string;
+  color: string;
+}
+
+export interface JournalDetailMoodInfo {
+  label: string;
+  emoji: string;
+}
+
+export interface JournalDetailReflectionSection {
+  key: string;
+  icon: ComponentType<{ className?: string }>;
+  label: string;
+  subtitle: string;
+  content: string;
+  iconColor: string;
+}
+
+export interface JournalDetailSelectedWord {
+  strongsId: string;
+  surfaceText: string;
+}
+
+export interface JournalDetailPageData {
+  t: Translations;
+  isRtl: boolean;
+  entry: JournalDetailEntry | null;
+  loading: boolean;
+  deleting: boolean;
+  showDeleteDialog: boolean;
+  copied: boolean;
+  exporting: boolean;
+  updatingFavorite: boolean;
+  studiedWordSheetOpen: boolean;
+  selectedStudiedWord: JournalDetailSelectedWord | null;
+  isOwner: boolean;
+  catMeta: JournalDetailCategoryMeta;
+  moodInfo: JournalDetailMoodInfo | null;
+  tagsArray: string[];
+  reflectionSections: JournalDetailReflectionSection[];
+}
+
+export interface JournalDetailPageActions {
+  goBack: () => void;
+  handleEdit: () => void;
+  handleShare: () => Promise<void>;
+  handleCopy: () => Promise<void>;
+  handleDelete: () => Promise<void>;
+  handleExportPdf: () => Promise<void>;
+  handleToggleFavorite: () => Promise<void>;
+  openDeleteDialog: () => void;
+  closeDeleteDialog: () => void;
+  handleDeleteDialogChange: (open: boolean) => void;
+  handleStudiedWordSheetChange: (open: boolean) => void;
+  openWordStudy: (strongsId: string, surfaceText: string) => void;
+  formatDate: (date: string) => string;
+  formatDateShort: (date: string) => string;
+}
+
+export type JournalDetailPageModel = {
+  data: JournalDetailPageData;
+  actions: JournalDetailPageActions;
+};
 
 export interface JournalEntryFormData {
   id?: number;

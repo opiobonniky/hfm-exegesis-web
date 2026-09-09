@@ -4,10 +4,10 @@ import { Button } from "@/components/ui/button";
 import type { AddBookPrologueModel } from "../types";
 
 interface Props {
-  model: AddBookPrologueModel;
+  state: AddBookPrologueModel;
 }
 
-export function AddBookPrologueHeaderBar({ model: h }: Props) {
+export function AddBookPrologueHeaderBar({ state: h }: Props) {
   return (
     <div className="sticky top-0 z-20 border-b border-border bg-background/80 backdrop-blur-xl">
       <div className="mx-auto max-w-6xl px-4 py-4 sm:px-6">

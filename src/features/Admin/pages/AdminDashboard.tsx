@@ -11,14 +11,13 @@ import { AdminDashboardQuickActions } from "../components/AdminDashboardQuickAct
 
 const AdminDashboard = () => {
   const { data, actions } = useAdminDashboardPage();
-  const h = { ...data, ...actions };
   const navigate = useNavigate();
   const { isRtl } = useLanguage();
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6" dir={isRtl ? "rtl" : "ltr"}>
       <AdminDashboardHeader />
-      <AdminDashboardStats stats={h.stats} loading={h.loading} />
+      <AdminDashboardStats stats={data.stats} loading={data.loading} />
       <AdminDashboardTools onNavigate={navigate} />
       <AdminDashboardQuickActions onNavigate={navigate} />
     </div>

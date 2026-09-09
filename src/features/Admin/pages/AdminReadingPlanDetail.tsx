@@ -12,47 +12,46 @@ import { Calendar } from "lucide-react";
 
 export default function AdminReadingPlanDetail() {
   const { data, actions } = useAdminReadingPlanDetail();
-  const h = { ...data, ...actions };
 
-  if (h.loading) return <DetailLoading />;
-  if (!h.item) return null;
+  if (data.loading) return <DetailLoading />;
+  if (!data.item) return null;
 
   return (
     <div className="min-h-screen bg-background">
       <DetailPageHeader
         icon={<Calendar className="w-5 h-5 text-primary" />}
-        title={h.item.title}
-        subtitle={h.item.category || undefined}
-        badge={h.item.isPublished !== undefined ? {
-          label: h.item.isPublished ? "Published" : "Draft",
-          variant: h.item.isPublished ? "default" : "secondary",
+        title={data.item.title}
+        subtitle={data.item.category || undefined}
+        badge={data.item.isPublished !== undefined ? {
+          label: data.item.isPublished ? "Published" : "Draft",
+          variant: data.item.isPublished ? "default" : "secondary",
         } : undefined}
-        onBack={() => h.navigate("/admin/reading-plans")}
+        onBack={() => actions.navigate("/admin/reading-plans")}
       />
 
       <DetailContent>
         <ReadingPlanInfoCard
-          title={h.item.title}
-          category={h.item.category}
-          durationDays={h.item.durationDays}
-          description={h.item.description}
+          title={data.item.title}
+          category={data.item.category}
+          durationDays={data.item.durationDays}
+          description={data.item.description}
         />
 
-        {h.item.assignments && h.item.assignments.length > 0 && (
-          <ReadingPlanAssignmentsCard assignments={h.item.assignments} />
+        {data.item.assignments && data.item.assignments.length > 0 && (
+          <ReadingPlanAssignmentsCard assignments={data.item.assignments} />
         )}
 
-        {h.item.questions && h.item.questions.length > 0 && (
-          <ReadingPlanQuizCard questions={h.item.questions} />
+        {data.item.questions && data.item.questions.length > 0 && (
+          <ReadingPlanQuizCard questions={data.item.questions} />
         )}
 
         <DetailMetadataGrid
           fields={[
-            { label: "Created", value: h.item.createdOn, format: "datetime" },
+            { label: "Created", value: data.item.createdOn, format: "datetime" },
           ]}
         />
 
-        <DetailBackButton label="Back to Reading Plans" onClick={() => h.navigate("/admin/reading-plans")} />
+        <DetailBackButton label="Back to Reading Plans" onClick={() => actions.navigate("/admin/reading-plans")} />
       </DetailContent>
     </div>
   );

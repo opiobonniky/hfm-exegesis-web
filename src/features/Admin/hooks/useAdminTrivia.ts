@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/components/languages/languageProvider";
-import { sendPostRequest } from "@/services/api";
+import { adminApi } from "../services/adminApi";
 import type { TriviaQuestion, TriviaOverviewStats, TriviaUserPerformance } from "../types";
 
 export function useAdminTrivia() {
@@ -41,21 +41,21 @@ export function useAdminTrivia() {
   const loadQuestions = useCallback(async (p: number) => {
     setLoading(true);
     try {
-      const res = await sendPostRequest("trivia", "get-all", { page: p, pageSize: 20, search: searchQuery || undefined, difficulty: difficultyFilter !== "all" ? difficultyFilter : undefined, category: categoryFilter !== "all" ? categoryFilter : undefined });
+      const res = await adminApi.request("trivia", "get-all", { page: p, pageSize: 20, search: searchQuery || undefined, difficulty: difficultyFilter !== "all" ? difficultyFilter : undefined, category: categoryFilter !== "all" ? categoryFilter : undefined });
       if (res?.returnCode === 200 && res?.returnData) { setQuestions(res.returnData.data || []); setTotalQuestions(res.returnData.total || 0); }
     } catch { toast({ title: "Failed to load questions", variant: "destructive" }); }
     finally { setLoading(false); }
   }, [searchQuery, difficultyFilter, categoryFilter, toast]);
   const loadOverview = useCallback(async () => {
-    try { const res = await sendPostRequest("trivia", "admin/overview"); if (res?.returnCode === 200 && res?.returnData) setOverviewStats(res.returnData); }
+    try { const res = await adminApi.request("trivia", "admin/overview"); if (res?.returnCode === 200 && res?.returnData) setOverviewStats(res.returnData); }
     catch { toast({ title: "Failed to load overview", variant: "destructive" }); }
   }, [toast]);
   const loadUserPerformance = useCallback(async (p: number) => {
-    try { const res = await sendPostRequest("trivia", "admin/user-performance", { page: p, pageSize: 20, search: perfSearch || undefined, sortBy: perfSortBy, sortOrder: perfSortOrder }); if (res?.returnCode === 200 && res?.returnData) { setUserPerformance(res.returnData.data || []); setPerfTotal(res.returnData.total || 0); } }
+    try { const res = await adminApi.request("trivia", "admin/user-performance", { page: p, pageSize: 20, search: perfSearch || undefined, sortBy: perfSortBy, sortOrder: perfSortOrder }); if (res?.returnCode === 200 && res?.returnData) { setUserPerformance(res.returnData.data || []); setPerfTotal(res.returnData.total || 0); } }
     catch { toast({ title: "Failed to load user performance", variant: "destructive" }); }
   }, [perfSearch, perfSortBy, perfSortOrder, toast]);
   const loadQuestionPerformance = useCallback(async (p: number) => {
-    try { const res = await sendPostRequest("trivia", "admin/question-performance", { page: p, pageSize: 20, search: qpSearch || undefined, difficulty: qpDifficulty !== "all" ? qpDifficulty : undefined, sortBy: qpSortBy, sortOrder: qpSortOrder }); if (res?.returnCode === 200 && res?.returnData) { setQuestionPerf(res.returnData.data || []); setQpTotal(res.returnData.total || 0); } }
+    try { const res = await adminApi.request("trivia", "admin/question-performance", { page: p, pageSize: 20, search: qpSearch || undefined, difficulty: qpDifficulty !== "all" ? qpDifficulty : undefined, sortBy: qpSortBy, sortOrder: qpSortOrder }); if (res?.returnCode === 200 && res?.returnData) { setQuestionPerf(res.returnData.data || []); setQpTotal(res.returnData.total || 0); } }
     catch { toast({ title: "Failed to load question performance", variant: "destructive" }); }
   }, [qpSearch, qpDifficulty, qpSortBy, qpSortOrder, toast]);
   useEffect(() => { loadQuestions(questionPage); }, [loadQuestions, questionPage]);
@@ -78,7 +78,7 @@ export function useAdminTrivia() {
     setSaving(true);
     try {
       const payload = { ...editForm, optionsJson: JSON.stringify(filteredOptions) };
-      const res = await sendPostRequest("trivia", editForm.id ? "update" : "create", payload);
+      const res = await adminApi.request("trivia", editForm.id ? "update" : "create", payload);
       if (res?.returnCode === 200) { toast({ title: editForm.id ? "Updated" : "Created" }); setEditDialog(false); loadQuestions(questionPage); }
       else { toast({ title: "Failed", description: res?.returnMessage, variant: "destructive" }); }
     } catch { toast({ title: "Error", variant: "destructive" }); }
@@ -87,7 +87,7 @@ export function useAdminTrivia() {
   const handleDelete = useCallback(async () => {
     if (!deleteTarget) return; setDeleting(true);
     try {
-      const res = await sendPostRequest("trivia", "delete", { id: deleteTarget.id });
+      const res = await adminApi.request("trivia", "delete", { id: deleteTarget.id });
       if (res?.returnCode === 200) { toast({ title: "Deleted" }); setDeleteTarget(null); loadQuestions(questionPage); }
       else { toast({ title: "Delete failed", variant: "destructive" }); }
     } catch { toast({ title: "Error", variant: "destructive" }); }

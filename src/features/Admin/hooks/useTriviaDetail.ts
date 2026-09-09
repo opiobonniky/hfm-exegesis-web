@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { sendPostRequest } from "@/services/api";
+import { adminApi } from "../services/adminApi";
 
 export interface TriviaQuestionDetail {
   id: number;
@@ -31,7 +31,7 @@ export function useTriviaDetail() {
   useEffect(() => {
     if (!questionId) return;
     setLoading(true);
-    sendPostRequest("trivia", "get", { id: questionId })
+    adminApi.request("trivia", "get", { id: questionId })
       .then((res) => {
         if (res?.returnCode === 200 && res.returnData) {
           setQuestion(res.returnData);

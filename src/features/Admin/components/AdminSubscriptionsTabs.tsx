@@ -1,5 +1,5 @@
 // AdminSubscriptionsTabs — tab list + content routing for admin subscriptions
-import { ShieldCheck, Users } from "lucide-react";
+import { ShieldCheck, Users, Layers } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SUBSCRIPTION_TABS } from "../constants";
 import type { LucideIcon } from "lucide-react";

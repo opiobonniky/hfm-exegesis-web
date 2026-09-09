@@ -14,11 +14,11 @@ import {
 } from "@/components/ui/select";
 import { Combobox } from "@/components/ui/combobox";
 import { Plus, Trash2, Loader2 } from "lucide-react";
-import { bibleApi } from "@/services/bibleApi";
+import { adminApi } from "../services/adminApi";
 import type { AddBookPrologueModel } from "../types";
 
 interface Props {
-  model: AddBookPrologueModel;
+  state: AddBookPrologueModel;
 }
 
 const TRANSLATIONS = [
@@ -29,7 +29,7 @@ const TRANSLATIONS = [
   { id: "NASB", label: "New American Standard Bible (NASB)" },
 ];
 
-export function AddBookPrologueExtraForm({ model: h }: Props) {
+export function AddBookPrologueExtraForm({ state: h }: Props) {
   const { keyScriptures } = h.form;
   const [verseOptions, setVerseOptions] = useState<Record<number, number[]>>({});
   const [loadingVerses, setLoadingVerses] = useState<Record<number, boolean>>({});
@@ -40,7 +40,7 @@ export function AddBookPrologueExtraForm({ model: h }: Props) {
       if (verseOptions[index]) return;
       const translation = entry.translation || "Berean";
       setLoadingVerses((cur) => ({ ...cur, [index]: true }));
-      bibleApi
+      adminApi
         .getVerses(translation, entry.bookName, entry.chapter)
         .then((vd) => {
           const verses = (vd?.verses || []).map((v) => v.verseNumber);

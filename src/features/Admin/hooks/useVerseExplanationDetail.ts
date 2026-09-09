@@ -2,8 +2,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { sendPostRequest } from "@/services/api";
-import { bibleApi } from "@/services/bibleApi";
+import { adminApi } from "../services/adminApi";
 
 export interface VerseExplanationDetail {
   id: number;
@@ -45,7 +44,7 @@ export function useVerseExplanationDetail() {
     if (!bookName || !chapter || !verseNumber) return;
     let active = true;
     setLoading(true);
-    sendPostRequest("bible", "get-verse-explanation", {
+    adminApi.request("bible", "get-verse-explanation", {
       bookName: decodeURIComponent(bookName),
       chapter: Number(chapter),
       verseNumber: Number(verseNumber),
@@ -59,7 +58,7 @@ export function useVerseExplanationDetail() {
           // attempt to fetch the verse text for a richer UI — fall back silently on failure
           try {
             const version = d.bibleVersion || "BSB";
-            const verse = await bibleApi.getVerse(version, d.bookName, d.chapter, d.verseNumber);
+            const verse = await adminApi.getVerse(version, d.bookName, d.chapter, d.verseNumber);
             if (!active) return;
             setItem((prev) => (prev ? { ...prev, verseText: verse?.text || "" } : prev));
           } catch {
@@ -85,7 +84,7 @@ export function useVerseExplanationDetail() {
   const deleteItem = useCallback(async () => {
     if (!item) return false;
     try {
-      const res = await sendPostRequest("bible", "delete-verse-explanation", { id: item.id });
+      const res = await adminApi.request("bible", "delete-verse-explanation", { id: item.id });
       if (res?.returnCode === 200 || res?.status === 200) {
         toast({ title: "Deleted" });
         navigate("/admin/verse-explanations");

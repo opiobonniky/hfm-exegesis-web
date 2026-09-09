@@ -11,7 +11,7 @@ interface Props {
   onView: () => void;
 }
 
-export function ReadingPlanCard({ plan, onEdit, onDelete }: Props) {
+export function ReadingPlanCard({ plan, onEdit, onDelete, onView }: Props) {
   return (
     <div className="rounded-xl border border-border bg-card p-4 hover:shadow-md transition-shadow">
       <div className="flex items-start justify-between mb-2">

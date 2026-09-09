@@ -4,11 +4,9 @@
 
 import { useAddBookPrologue } from "../hooks/useAddBookPrologue";
 import { AddBookProloguePageLayout } from "../components/AddBookProloguePageLayout";
-import type { AddBookPrologueModel } from "../types";
 
 export default function AddBookProloguePage() {
   const { data, actions } = useAddBookPrologue();
-  const h = { ...data, ...actions } as AddBookPrologueModel;
 
-  return <AddBookProloguePageLayout model={h} />;
+  return <AddBookProloguePageLayout data={data} actions={actions} />;
 }

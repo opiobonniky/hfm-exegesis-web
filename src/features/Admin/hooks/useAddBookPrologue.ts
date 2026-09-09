@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { BIBLE_BOOKS } from "@/data/staticData";
-import { bibleApi } from "@/services/bibleApi";
+import { adminApi } from "../services/adminApi";
 import { BIBLE_BOOK_CHAPTERS } from "@/features/Bible/constants";
 import {
   PROLOGUE_STEP_ORDER,
@@ -206,7 +206,7 @@ export function useAddBookPrologue() {
       setForm((prev) => {
         const entry = prev.keyScriptures[index];
         if (!entry?.bookName || entry.chapter == null) return prev;
-        bibleApi
+        adminApi
           .getVerse(entry.translation || "Berean", entry.bookName, entry.chapter, verse)
           .then((vd) => {
             updateKeyScripture(index, { verse, text: vd?.text || "" });

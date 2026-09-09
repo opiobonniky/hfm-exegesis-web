@@ -7,52 +7,51 @@ import JournalDetailWordSheet from "../components/JournalDetailWordSheet";
 
 export default function JournalDetailPage() {
   const { data, actions } = useJournalDetail();
-  const p = { ...data, ...actions };
 
-  if (p.loading) return <JournalDetailLoadingSkeleton />;
-  if (!p.entry) return null;
+  if (data.loading) return <JournalDetailLoadingSkeleton />;
+
 
   return (
-    <div className="min-h-full bg-amber-50/30 dark:bg-stone-950" dir={p.isRtl ? "rtl" : "ltr"}>
+    <div className="min-h-full bg-amber-50/30 dark:bg-stone-950" dir={data.isRtl ? "rtl" : "ltr"}>
       <JournalDetailTopBar
-        isOwner={p.isOwner}
-        isFavorite={p.entry.isFavorite}
-        copied={p.copied}
-        exporting={p.exporting}
-        updatingFavorite={p.updatingFavorite}
-        onBack={p.goBack}
-        onToggleFavorite={p.handleToggleFavorite}
-        onShare={p.handleShare}
-        onExportPdf={p.handleExportPdf}
-        onCopy={p.handleCopy}
-        onEdit={p.handleEdit}
-        onDelete={p.openDeleteDialog}
+        isOwner={data.isOwner}
+        isFavorite={data.entry.isFavorite}
+        copied={data.copied}
+        exporting={data.exporting}
+        updatingFavorite={data.updatingFavorite}
+        onBack={actions.goBack}
+        onToggleFavorite={actions.handleToggleFavorite}
+        onShare={actions.handleShare}
+        onExportPdf={actions.handleExportPdf}
+        onCopy={actions.handleCopy}
+        onEdit={actions.handleEdit}
+        onDelete={actions.openDeleteDialog}
       />
 
       <JournalDetailBody
-        entry={p.entry}
-        t={p.t}
-        category={p.catMeta}
-        mood={p.moodInfo}
-        tags={p.tagsArray}
-        reflectionSections={p.reflectionSections}
-        formatDate={p.formatDate}
-        formatDateShort={p.formatDateShort}
+        entry={data.entry}
+        t={data.t}
+        category={data.catMeta}
+        mood={data.moodInfo}
+        tags={data.tagsArray}
+        reflectionSections={data.reflectionSections}
+        formatDate={actions.formatDate}
+        formatDateShort={actions.formatDateShort}
       />
 
       <JournalDetailDeleteDialog
-        open={p.showDeleteDialog}
-        title={p.entry.title}
-        deleting={p.deleting}
-        onOpenChange={p.handleDeleteDialogChange}
-        onCancel={p.closeDeleteDialog}
-        onDelete={p.handleDelete}
+        open={data.showDeleteDialog}
+        title={data.entry.title}
+        deleting={data.deleting}
+        onOpenChange={actions.handleDeleteDialogChange}
+        onCancel={actions.closeDeleteDialog}
+        onDelete={actions.handleDelete}
       />
 
       <JournalDetailWordSheet
-        open={p.studiedWordSheetOpen}
-        selectedWord={p.selectedStudiedWord}
-        onOpenChange={p.handleStudiedWordSheetChange}
+        open={data.studiedWordSheetOpen}
+        selectedWord={data.selectedStudiedWord}
+        onOpenChange={actions.handleStudiedWordSheetChange}
       />
     </div>
   );

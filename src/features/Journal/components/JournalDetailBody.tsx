@@ -1,5 +1,5 @@
 import type { Translations } from "@/components/languages/type";
-import type { JournalDetailCategoryMeta, JournalDetailEntry, JournalDetailMoodInfo, JournalDetailReflectionSection } from "../hooks/useJournalDetail";
+import type { JournalDetailCategoryMeta, JournalDetailEntry, JournalDetailMoodInfo, JournalDetailReflectionSection } from "../types";
 import JournalDetailContentBlock from "./JournalDetailContentBlock";
 import JournalDetailLeafDivider from "./JournalDetailLeafDivider";
 import JournalDetailMetaRow from "./JournalDetailMetaRow";

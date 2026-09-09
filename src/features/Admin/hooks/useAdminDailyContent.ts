@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/components/languages/languageProvider";
-import { sendPostRequest } from "@/services/api";
+import { adminApi } from "../services/adminApi";
 import type { DailyItem } from "../types";
 import type { ContentType } from "../constants";
 import {
@@ -42,7 +42,7 @@ export function useAdminDailyContent() {
     async (type: ContentType, p: number) => {
       setLoading(true);
       try {
-        const res = await sendPostRequest("admin", getAction(type, "get-all"), {
+        const res = await adminApi.request("admin", getAction(type, "get-all"), {
           page: p,
           size: PAGE_SIZE,
           ...(searchDate
@@ -88,7 +88,7 @@ export function useAdminDailyContent() {
           : type === "devotion"
             ? "devotionId"
             : "exegesisId";
-      const res = await sendPostRequest("admin", action, {
+      const res = await adminApi.request("admin", action, {
         [idKey]: deleteTarget.id,
       });
       if (res?.returnCode === 200) {

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import type { AddBookPrologueModel } from "../types";
 
 interface Props {
-  model: AddBookPrologueModel;
+  state: AddBookPrologueModel;
   currentStepIndex: number;
   stepCount: number;
   onBack: () => void;
@@ -13,7 +13,7 @@ interface Props {
 }
 
 export function AddBookPrologueFooterActions({
-  model: h,
+  state: h,
   currentStepIndex,
   stepCount,
   onBack,

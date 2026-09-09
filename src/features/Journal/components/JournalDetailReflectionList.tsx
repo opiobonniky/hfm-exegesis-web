@@ -1,6 +1,6 @@
 import { ReflectionSection } from "./ReflectionSection";
 import JournalDetailLeafDivider from "./JournalDetailLeafDivider";
-import type { JournalDetailReflectionSection } from "../hooks/useJournalDetail";
+import type { JournalDetailReflectionSection } from "../types";
 
 export interface JournalDetailReflectionListProps {
   sections: JournalDetailReflectionSection[];

@@ -16,18 +16,17 @@ import {
 
 export default function AdminTriviaPerformance() {
   const { data, actions } = useAdminTriviaPerformancePage();
-  const h = { ...data, ...actions };
   const navigate = useNavigate();
 
   return (
     <div className="min-h-full bg-background">
       <TriviaPerformanceHeader
         onBack={() => navigate(-1)}
-        onRefresh={h.loadAll}
+        onRefresh={actions.loadAll}
       />
 
       <AdminPageContent className="py-4">
-        <Tabs value={h.tab} onValueChange={h.setTab}>
+        <Tabs value={data.tab} onValueChange={actions.setTab}>
           <TabsList className="mb-4">
             <TabsTrigger value="overview">
               <BarChart3 className="w-4 h-4 mr-1.5" />Overview
@@ -41,14 +40,14 @@ export default function AdminTriviaPerformance() {
           </TabsList>
 
           <TabsContent value="overview" className="space-y-4">
-            <TriviaOverviewPanel overview={h.overview} />
+            <TriviaOverviewPanel overview={data.overview} />
           </TabsContent>
 
           <TabsContent value="users" className="space-y-3">
             <TriviaUsersPanel
-              users={h.users}
-              search={h.search}
-              onSearchChange={h.setSearch}
+              users={data.users}
+              search={data.search}
+              onSearchChange={actions.setSearch}
               onUserClick={(u) =>
                 navigate(
                   routes.adminTriviaUserDetail.path.replace(":userId", String(u.id)),
@@ -58,7 +57,7 @@ export default function AdminTriviaPerformance() {
           </TabsContent>
 
           <TabsContent value="questions" className="space-y-2">
-            <TriviaQuestionsPanel questions={h.questions} />
+            <TriviaQuestionsPanel questions={data.questions} />
           </TabsContent>
         </Tabs>
       </AdminPageContent>

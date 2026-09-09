@@ -3,6 +3,6 @@ import StudyResourceEditor from "../components/StudyResourceEditor";
 
 export default function AddStudyResource() {
   const { data, actions } = useStudyTools();
-  const model = { ...data, ...actions };
-  return <StudyResourceEditor model={model} onBack={() => model.navigate(-1)} />;
+  const state = { ...data, ...actions };
+  return <StudyResourceEditor state={state} onBack={() => state.navigate(-1)} />;
 }

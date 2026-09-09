@@ -9,10 +9,10 @@ import { PROLOGUE_CONTENT_MAX } from "../constants";
 import { CharCount } from "@/features/DailyContent/components/CharCount";
 
 interface Props {
-  model: AddBookPrologueModel;
+  state: AddBookPrologueModel;
 }
 
-export function AddBookPrologueBasicForm({ model: h }: Props) {
+export function AddBookPrologueBasicForm({ state: h }: Props) {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-2 text-sky-600">

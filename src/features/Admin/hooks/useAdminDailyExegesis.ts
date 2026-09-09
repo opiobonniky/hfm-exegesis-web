@@ -1,7 +1,7 @@
 // useAdminDailyExegesis — all state, effects, and logic for AdminDailyExegesis page
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { sendPostRequest } from "@/services/api";
+import { adminApi } from "../services/adminApi";
 import type { DailyExegesis } from "../types";
 
 interface EditForm {
@@ -40,7 +40,7 @@ export function useAdminDailyExegesis() {
     if (append) setLoadingMore(true);
     else setLoading(true);
     try {
-      const res = await sendPostRequest("admin", "get-all-daily-exegesis", {
+      const res = await adminApi.request("admin", "get-all-daily-exegesis", {
         page: p, size: 20, search: search || undefined,
       });
       const data = res?.returnData || res?.data;
@@ -120,7 +120,7 @@ export function useAdminDailyExegesis() {
         prayer: editForm.prayer, tags: editForm.tags || null,
         displayDate: editForm.displayDate || undefined, isPublished: editForm.isPublished,
       };
-      const res = await sendPostRequest("admin", "add-daily-exegesis", payload);
+      const res = await adminApi.request("admin", "add-daily-exegesis", payload);
       if (res?.returnCode === 200 || res?.status === 200) {
         toast({ title: editItem ? "Updated" : "Created" });
         closeDialog(); load(0); setPage(0);
@@ -133,7 +133,7 @@ export function useAdminDailyExegesis() {
     if (!deleteTarget) return;
     setDeletingId(deleteTarget.id);
     try {
-      const res = await sendPostRequest("admin", "delete-daily-exegesis", { id: deleteTarget.id });
+      const res = await adminApi.request("admin", "delete-daily-exegesis", { id: deleteTarget.id });
       if (res?.returnCode === 200 || res?.status === 200) {
         toast({ title: "Deleted" }); setDeleteTarget(null); load(0); setPage(0);
       }

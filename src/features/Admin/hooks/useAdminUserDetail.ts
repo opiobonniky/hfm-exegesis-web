@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { sendPostRequest } from "@/services/api";
+import { adminApi } from "../services/adminApi";
 import type { AdminUser, UserActivitySession } from "../types";
 
 export function useAdminUserDetail() {
@@ -19,7 +19,7 @@ export function useAdminUserDetail() {
     if (!userId) return;
     setLoading(true);
     try {
-      const res = await sendPostRequest("admin", "get-users-by-admin", {
+      const res = await adminApi.request("admin", "get-users-by-admin", {
         userId,
       });
       const data = res?.returnData;
@@ -42,7 +42,7 @@ export function useAdminUserDetail() {
     if (!userId) return;
     setSessionsLoading(true);
     try {
-      const res = await sendPostRequest("admin", "get-user-activity", { userId });
+      const res = await adminApi.request("admin", "get-user-activity", { userId });
       const data = res?.returnData;
       setSessions(data?.sessions || data?.content || data || []);
     } catch {
@@ -62,7 +62,7 @@ export function useAdminUserDetail() {
     setActionLoading(true);
     try {
       const newStatus = !user.status;
-      const res = await sendPostRequest("admin", "toggle-user-status", {
+      const res = await adminApi.request("admin", "toggle-user-status", {
         username: user.username,
         status: newStatus,
       });
@@ -82,7 +82,7 @@ export function useAdminUserDetail() {
     setActionLoading(true);
     try {
       const newVerified = !user.emailVerified;
-      const res = await sendPostRequest("admin", "toggle-user-verification", {
+      const res = await adminApi.request("admin", "toggle-user-verification", {
         username: user.username,
         isVerified: newVerified,
       });
@@ -101,7 +101,7 @@ export function useAdminUserDetail() {
     if (!user) return;
     setActionLoading(true);
     try {
-      const res = await sendPostRequest("admin", "delete-user", {
+      const res = await adminApi.request("admin", "delete-user", {
         username: user.username,
       });
       if (res.returnCode === 200) {

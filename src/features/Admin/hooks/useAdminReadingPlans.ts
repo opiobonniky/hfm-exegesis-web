@@ -1,7 +1,7 @@
 // useAdminReadingPlans — list + CRUD for reading plans
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { sendPostRequest } from "@/services/api";
+import { adminApi } from "../services/adminApi";
 
 export interface ReadingPlan {
   planId: string;
@@ -53,7 +53,7 @@ export function useAdminReadingPlans() {
       if (append) setLoadingMore(true);
       else setLoading(true);
       try {
-        const res = await sendPostRequest("reading-plans", "get-all", {
+        const res = await adminApi.request("reading-plans", "get-all", {
           page: pageNum + 1,
           pageSize: 20,
           search: q || undefined,
@@ -140,7 +140,7 @@ export function useAdminReadingPlans() {
         durationDays: parseInt(editForm.durationDays) || 7,
         ...(editPlan ? { id: editPlan.id } : {}),
       };
-      const res = await sendPostRequest(
+      const res = await adminApi.request(
         "reading-plans",
         editPlan ? "update" : "create",
         payload,
@@ -161,7 +161,7 @@ export function useAdminReadingPlans() {
     if (!deletePlan) return;
     setDeleting(true);
     try {
-      const res = await sendPostRequest("reading-plans", "delete", {
+      const res = await adminApi.request("reading-plans", "delete", {
         id: deletePlan.id,
       });
       if (res.returnCode === 200) {

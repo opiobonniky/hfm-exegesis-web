@@ -1,7 +1,7 @@
 // useAdminJournalModeration — list + toggle + delete for journal entries
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { sendPostRequest } from "@/services/api";
+import { adminApi } from "../services/adminApi";
 import { useNavigate } from "react-router-dom";
 
 export interface JournalModerationEntry {
@@ -40,7 +40,7 @@ export function useAdminJournalModeration() {
         setLoadingMore(true);
       } else setLoading(true);
       try {
-        const res = await sendPostRequest("journal", "admin/get-all", {
+        const res = await adminApi.request("journal", "admin/get-all", {
           page: pageNum + 1,
           pageSize: 20,
           search: q || undefined,
@@ -97,7 +97,7 @@ export function useAdminJournalModeration() {
     async (entry: JournalModerationEntry) => {
       setActionLoading(entry.id);
       try {
-        const res = await sendPostRequest("journal", "admin/set-publication", {
+        const res = await adminApi.request("journal", "admin/set-publication", {
           id: entry.id,
           isPublished: !entry.isPublished,
         });
@@ -124,7 +124,7 @@ export function useAdminJournalModeration() {
     if (!deleteTarget) return;
     setDeleting(true);
     try {
-      const res = await sendPostRequest("journal", "admin/delete", {
+      const res = await adminApi.request("journal", "admin/delete", {
         id: deleteTarget.id,
       });
       if (res.returnCode === 200) {

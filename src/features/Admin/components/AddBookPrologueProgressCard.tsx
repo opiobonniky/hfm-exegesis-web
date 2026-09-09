@@ -3,11 +3,11 @@ import { CheckCircle2, Sparkles } from "lucide-react";
 import type { AddBookPrologueModel } from "../types";
 
 interface Props {
-  model: AddBookPrologueModel;
+  state: AddBookPrologueModel;
   completionPercent: number;
 }
 
-export function AddBookPrologueProgressCard({ model: h, completionPercent }: Props) {
+export function AddBookPrologueProgressCard({ state: h, completionPercent }: Props) {
   const bookLabel = h.form.bookName ? h.form.bookName : "Choose a book";
   return (
     <div className="mb-6 grid gap-4 md:grid-cols-[1.2fr_0.8fr]">

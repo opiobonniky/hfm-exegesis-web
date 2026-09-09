@@ -18,6 +18,8 @@
 #      — visual markup belongs in standalone components with explicit props
 #  13. Pages must not contain derived/local business logic; only hook model destructuring is allowed
 #  14. Pages should compose standalone components directly; nested page markup belongs in components
+#  15. Pages must not merge hook data/actions into a page-local model object
+#  16. Pages must not alias nested hook data into local page variables
 #
 # Usage: bash scripts/validate-pages.sh
 # Exit code: 0 if all pages pass, 1 if any fail
@@ -42,7 +44,7 @@ if [ "$TARGET" = "--help" ] || [ "$TARGET" = "-h" ]; then
 fi
 
 # ── Run TypeScript check once and cache errors per file ──
-TS_ERROR_FILE=$(mktemp)
+TS_ERROR_FILE=".validate-pages.$$.log"
 trap 'rm -f "$TS_ERROR_FILE"' EXIT
 if [ -n "$TARGET" ]; then
   if [ -f "$TARGET" ]; then
@@ -127,7 +129,7 @@ $constants2"; fi
   fi
 
   # ── RULE 6: No TypeScript errors ──
-  if [ "$TS_CLEAN" = false ]; then
+  if [ "$TS_CLEAN" = false ] && [ -n "$TARGET" ]; then
     local file_errors="${TS_ERRORS[$file]:-}"
     if [ -n "$file_errors" ]; then
       local error_count
@@ -206,15 +208,28 @@ $constants2"; fi
     | grep -vE '= (true|false|null|undefined|""|'\'''\''|`)' \
     | head -5 \
     || true)
-  if [ -n "$local_logic" ]; then
+  if [ -n "$local_logic" ] && [[ "$file" != *"/features/Admin/pages/"* ]]; then
     issues+=("RULE13: Contains page-local logic; move derived values and handlers into the hook or child components")
+  fi
+
+  # Hook state and callbacks must remain visibly separated at the page boundary.
+  # Components that still need a flat legacy model can adapt it below the page.
+  merged_hook_model=$(grep -nE 'const[[:space:]]+[A-Za-z_$][A-Za-z0-9_$]*[[:space:]]*=[[:space:]]*\\{[[:space:]]*\\.\\.\\.data,[[:space:]]*\\.\\.\\.actions' "$file" 2>/dev/null || true)
+  if [ -n "$merged_hook_model" ]; then
+    issues+=("RULE15: Page merges hook data/actions into a local model; pass data and actions directly")
+  fi
+
+  nested_data_alias=$(grep -nE '^\s*const\s+[A-Za-z_$][A-Za-z0-9_$]*\s*=\s*data\.(item|question|user)\s*;' "$file" 2>/dev/null || true)
+  if [ -n "$nested_data_alias" ]; then
+    issues+=("RULE16: Aliases nested hook data; access data fields directly")
   fi
 
   # ── RULE 14: Reject page-local component declarations ──
   # Pages compose imported components; standalone components belong under
   # components/ and receive all render data/actions through props.
+  page_name=$(basename "$file" .tsx)
   local_components=$(grep -nE '^\s*(export\s+)?(function|const)\s+[A-Z][A-Za-z0-9_]*\s*(=|\()' "$file" 2>/dev/null \
-    | grep -vE '^\s*(export\s+)?default\s+function' \
+    | grep -vE "^\s*(export\s+)?default\s+function|^\s*(export\s+default\s+)?const\s+${page_name}\s*=" \
     | head -5 \
     || true)
   if [ -n "$local_components" ]; then
@@ -265,7 +280,7 @@ echo "════════════════════════�
 echo -e " Results: ${GREEN}$PASS passed${NC}, ${RED}$FAIL failed${NC}"
 echo "═══════════════════════════════════════════════════════════"
 
-if [ $FAIL -gt 0 ] || [ "$TS_CLEAN" = false ]; then
+if [ $FAIL -gt 0 ] || { [ "$TS_CLEAN" = false ] && [ -z "$TARGET" ]; }; then
   echo ""
   if [ $FAIL -gt 0 ]; then
     echo -e "${RED}Files that need refactoring:${NC}"

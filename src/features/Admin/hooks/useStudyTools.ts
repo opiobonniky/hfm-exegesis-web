@@ -1,8 +1,7 @@
 // Admin useStudyTools — useStudyTools state and API logic
 import { useState, useCallback, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { sendPostRequest } from "@/services/api";
-import { bibleApi } from "@/services/bibleApi";
+import { adminApi } from "../services/adminApi";
 import { useAdminErrorHandler } from "./useAdminErrorHandler";
 import {
   getChaptersForBook,
@@ -115,7 +114,7 @@ export function useStudyTools() {
 
     let active = true;
     setVerseTextLoading(true);
-    bibleApi.getVerse(getActiveVersionId(), verseBook, verseChapter, verseNum)
+    adminApi.getVerse(getActiveVersionId(), verseBook, verseChapter, verseNum)
       .then((verse) => {
         if (active) setVerseText(verse.text || "");
       })
@@ -162,7 +161,7 @@ export function useStudyTools() {
     setWordsHasMore(false);
     wordsPageRef.current = 0;
     try {
-      const res = await sendPostRequest("strongs", "admin/get-verse-words", {
+      const res = await adminApi.request("strongs", "admin/get-verse-words", {
         bookName: book,
         chapter,
         verse,
@@ -261,7 +260,7 @@ export function useStudyTools() {
   const loadPrologues = useCallback(async () => {
     setProloguesLoading(true);
     try {
-      const res = await sendPostRequest("book-prologues", "admin/get-all", { page: 0, size: 50, search: prologueSearch });
+      const res = await adminApi.request("book-prologues", "admin/get-all", { page: 0, size: 50, search: prologueSearch });
       if (res.returnCode === 200) setPrologues(res.returnData?.content || []);
     } catch (e) { handleError(e, "load prologues"); }
     finally { setProloguesLoading(false); }
@@ -270,11 +269,44 @@ export function useStudyTools() {
   const loadStudies = useCallback(async (page = 0, search = "") => {
     setStudiesLoading(true);
     try {
-      const res = await sendPostRequest("admin", "get-all-daily-exegesis", { page, size: 20, search });
+      const res = await adminApi.request("admin", "get-all-daily-exegesis", { page, size: 20, search });
       if (res.returnCode === 200) setStudies(res.returnData?.content || []);
     } catch (e) { handleError(e, "load studies"); }
     finally { setStudiesLoading(false); }
   }, [handleError]);
+
+  const deletePrologue = useCallback(async (id: number) => {
+    try {
+      const res = await adminApi.request("book-prologues", "admin/delete", { id });
+      if (res.returnCode === 200) {
+        await loadPrologues();
+        return true;
+      }
+    } catch (e) { handleError(e, "delete prologue"); }
+    return false;
+  }, [handleError, loadPrologues]);
+
+  const savePrologue = useCallback(async (data: unknown, id?: number) => {
+    try {
+      const res = await adminApi.request("book-prologues", "admin/upsert", { ...(data as object), ...(id ? { id } : {}) });
+      if (res.returnCode === 200) {
+        await loadPrologues();
+        return true;
+      }
+    } catch (e) { handleError(e, "save prologue"); }
+    return false;
+  }, [handleError, loadPrologues]);
+
+  const deleteStudy = useCallback(async (id: number) => {
+    try {
+      const res = await adminApi.request("admin", "delete-daily-exegesis", { id });
+      if (res.returnCode === 200) {
+        await loadStudies(0, studiesSearch);
+        return true;
+      }
+    } catch (e) { handleError(e, "delete study"); }
+    return false;
+  }, [handleError, loadStudies, studiesSearch]);
 
   const handleBookChange = useCallback((book: string) => {
     setVerseBook(book);
@@ -312,7 +344,7 @@ export function useStudyTools() {
     // Prologues
     prologues, prologuesLoading, prologueSearch, setPrologueSearch,
     prologueViewMode, setPrologueViewMode, selectedPrologueBook, setSelectedPrologueBook,
-    editPrologue, setEditPrologue, prologueSheetOpen, setPrologueSheetOpen, loadPrologues,
+    editPrologue, setEditPrologue, prologueSheetOpen, setPrologueSheetOpen, loadPrologues, deletePrologue, savePrologue,
     // Studies
     studies, studiesLoading, studiesSearch, setStudiesSearch, loadStudies,
     // Sync
@@ -327,7 +359,7 @@ export function useStudyTools() {
     handleChapterChange, setVerseNum, setCurrentResource, loadResource, setResourceSaving,
     saveResource, setWordStudies, setCommentaries, setCrossRefs, setDictTerms, setTopics,
     setPrologueSearch, setPrologueViewMode, setSelectedPrologueBook, setEditPrologue,
-    setPrologueSheetOpen, loadPrologues, setStudiesSearch, loadStudies, setConfirmSyncOpen,
+    setPrologueSheetOpen, loadPrologues, deletePrologue, savePrologue, setStudiesSearch, loadStudies, deleteStudy, setConfirmSyncOpen,
     setConfirmSyncLabel, setConfirmSyncDesc, setSyncingAllRefs, setActiveTab, navigate,
   } };
 }

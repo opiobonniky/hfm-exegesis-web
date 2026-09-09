@@ -18,78 +18,76 @@ import { TierFormDialog } from "../components/TierFormDialog";
 const AdminSubscriptions = () => {
   const { isRtl } = useLanguage();
   const { data, actions } = useAdminSubscriptions();
-  const h = { ...data, ...actions };
-
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6" dir={isRtl ? "rtl" : "ltr"}>
       <AdminSubscriptionsHeader
-        activeTab={h.activeTab}
-        seeding={h.seeding}
-        onSeed={h.handleSeed}
-        onCreateTier={h.openCreateTier}
+        activeTab={data.activeTab}
+        seeding={data.seeding}
+        onSeed={actions.handleSeed}
+        onCreateTier={actions.openCreateTier}
       />
 
-      <AdminSubscriptionsTabs activeTab={h.activeTab} onTabChange={h.setActiveTab}>
+      <AdminSubscriptionsTabs activeTab={data.activeTab} onTabChange={actions.setActiveTab}>
         <TabsContent value="tiers" className="space-y-4">
           <TiersTab
-            tiers={h.tiers}
-            loading={h.tiersLoading}
-            counts={h.summary?.tierCounts}
-            onEdit={h.openEditTier}
-            onDelete={(id) => h.setDeleteTier(id)}
+            tiers={data.tiers}
+            loading={data.tiersLoading}
+            counts={data.summary?.tierCounts}
+            onEdit={actions.openEditTier}
+            onDelete={(id) => actions.setDeleteTier(id)}
           />
         </TabsContent>
 
         <TabsContent value="subscribers" className="space-y-4">
-          <SubscriptionsSummaryCards summary={h.summary} loading={h.subsLoading} />
+          <SubscriptionsSummaryCards summary={data.summary} loading={data.subsLoading} />
           <SubscribersTable
-            subscribers={h.subscribers}
-            loading={h.subsLoading}
-            syncing={h.syncing}
-            onSyncStripe={h.handleSyncStripe}
-            onSuspend={h.setSuspendDialog}
-            onManage={h.setManageDialog}
-            onRefund={h.setRefundDialog}
+            subscribers={data.subscribers}
+            loading={data.subsLoading}
+            syncing={data.syncing}
+            onSyncStripe={actions.handleSyncStripe}
+            onSuspend={actions.setSuspendDialog}
+            onManage={actions.setManageDialog}
+            onRefund={actions.setRefundDialog}
           />
         </TabsContent>
       </AdminSubscriptionsTabs>
 
       {/* Dialogs */}
       <TierFormDialog
-        open={h.tierDialog}
-        onOpenChange={h.setTierDialog}
-        form={h.tierForm}
-        onFormChange={h.setTierForm}
-        saving={h.tierSaving}
-        onSave={h.saveTier}
+        open={data.tierDialog}
+        onOpenChange={actions.setTierDialog}
+        form={data.tierForm}
+        onFormChange={actions.setTierForm}
+        saving={data.tierSaving}
+        onSave={actions.saveTier}
       />
 
       <DeleteTierDialog
-        open={!!h.deleteTier}
-        onOpenChange={(o) => !o && h.setDeleteTier(null)}
-        onConfirm={h.confirmDeleteTier}
+        open={!!data.deleteTier}
+        onOpenChange={(o) => !o && actions.setDeleteTier(null)}
+        onConfirm={actions.confirmDeleteTier}
       />
 
       <SuspendUserDialog
-        user={h.suspendDialog}
-        loading={h.suspendLoading}
-        onOpenChange={(o) => !o && h.setSuspendDialog(null)}
-        onConfirm={h.toggleSuspend}
+        user={data.suspendDialog}
+        loading={data.suspendLoading}
+        onOpenChange={(o) => !o && actions.setSuspendDialog(null)}
+        onConfirm={actions.toggleSuspend}
       />
 
       <ManageUserDialog
-        user={h.manageDialog}
-        tiers={h.tiers}
-        loading={h.manageLoading}
-        onOpenChange={(o) => !o && h.setManageDialog(null)}
-        onSave={h.saveManage}
+        user={data.manageDialog}
+        tiers={data.tiers}
+        loading={data.manageLoading}
+        onOpenChange={(o) => !o && actions.setManageDialog(null)}
+        onSave={actions.saveManage}
       />
 
       <RefundUserDialog
-        user={h.refundDialog}
-        loading={h.refundLoading}
-        onOpenChange={(o) => !o && h.setRefundDialog(null)}
-        onConfirm={h.confirmRefund}
+        user={data.refundDialog}
+        loading={data.refundLoading}
+        onOpenChange={(o) => !o && actions.setRefundDialog(null)}
+        onConfirm={actions.confirmRefund}
       />
     </div>
   );

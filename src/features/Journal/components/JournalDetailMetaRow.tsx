@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import type { JournalDetailCategoryMeta, JournalDetailMoodInfo } from "../hooks/useJournalDetail";
+import type { JournalDetailCategoryMeta, JournalDetailMoodInfo } from "../types";
 
 export interface JournalDetailMetaRowProps {
   category: JournalDetailCategoryMeta;

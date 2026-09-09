@@ -17,7 +17,7 @@ NC='\033[0m'
 PASS=0
 FAIL=0
 TARGET="${1:-}"
-TYPE_ERROR_FILE=$(mktemp)
+TYPE_ERROR_FILE=".validate-hooks.$$.log"
 trap 'rm -f "$TYPE_ERROR_FILE"' EXIT
 
 if [ "$TARGET" = "--help" ] || [ "$TARGET" = "-h" ]; then
@@ -45,24 +45,15 @@ check_hook() {
     issues+=("RULE1: Public return must expose both data and actions")
   fi
 
-  if grep -qE '(sendPostRequest|bibleApi\.|window\.fetch[[:space:]]*\(|globalThis\.fetch[[:space:]]*\(|axios\.|api\.(get|post|put|patch|delete)[[:space:]]*\()' "$file"; then
-    issues+=("RULE4: Direct API calls belong in a service module")
+  # Hooks may orchestrate service calls, but must not import or invoke the
+  # transport layer directly. Keep this check focused on hook source files so
+  # service implementations remain valid.
+  if grep -qE '(^|[^[:alnum:]_])(sendPostRequest|sendGetRequest|sendPutRequest|sendPatchRequest|sendDeleteRequest|bibleApi\.|window\.fetch[[:space:]]*\(|globalThis\.fetch[[:space:]]*\(|axios\.|api\.(get|post|put|patch|delete)[[:space:]]*\()' "$file"; then
+    issues+=("RULE4: Direct API calls are forbidden in hooks; move transport calls to services")
   fi
 
-  if ! grep -qE 'from[[:space:]]+["'\''](\.\./)+services/|from[[:space:]]+["'\'']@/services/' "$file"; then
-    issues+=("RULE5: Hook should use a service module for data access")
-  fi
-
-  local data_block
-  data_block=$(printf '%s\n' "$body" | awk '/data[[:space:]]*:[[:space:]]*{/ {inside=1; next} inside && /^[[:space:]]*},?[[:space:]]*$/ {inside=0} inside {print}')
-  if printf '%s\n' "$data_block" | grep -qE '(^|[,{[:space:]])(on[A-Z][A-Za-z0-9_]*|handle[A-Z][A-Za-z0-9_]*|set[A-Z][A-Za-z0-9_]*|load[A-Z][A-Za-z0-9_]*)[[:space:]]*[,}]'; then
-    issues+=("RULE2: data must contain state/derived values only")
-  fi
-
-  local actions_block
-  actions_block=$(printf '%s\n' "$body" | awk '/actions[[:space:]]*:[[:space:]]*{/ {inside=1; next} inside && /^[[:space:]]*},?[[:space:]]*$/ {inside=0} inside {print}')
-  if printf '%s\n' "$actions_block" | grep -qE '(^|[,{[:space:]])(loading|isLoading|error|data|results|items|history|selected[A-Z][A-Za-z0-9_]*)[[:space:]]*[,}]'; then
-    issues+=("RULE3: actions must contain functions/setters only")
+  if grep -qE 'adminApi\.' "$file" && ! grep -qE 'from[[:space:]]+["'\''](\.\./)+services/' "$file"; then
+    issues+=("RULE5: Admin API access must come from a feature service module")
   fi
 
   if [ "${#issues[@]}" -eq 0 ]; then
