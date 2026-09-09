@@ -52,4 +52,10 @@ export const triviaTheme = {
   },
 } as const;
 
+export const triviaPerformanceTheme = {
+  page: "min-h-full bg-[#e2eaf1] dark:bg-[hsl(222_47%_5%)]",
+  card: "rounded-2xl border border-primary/15 bg-gradient-to-br from-[#d7e3ec] to-primary/[0.12] shadow-sm dark:from-[hsl(217_33%_15%)] dark:to-[hsl(212_63%_20%)]",
+  primaryButton: "bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-lg shadow-primary/20",
+} as const;
+
 export type TriviaTheme = typeof triviaTheme;

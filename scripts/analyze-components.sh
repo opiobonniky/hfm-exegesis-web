@@ -1,5 +1,5 @@
 #!/bin/bash
-# analyze-components.sh — Identifies oversized components and potential refactoring targets
+# analyze-components.sh — Reports presentation-component architecture violations.
 # Usage: bash scripts/analyze-components.sh
 
 RED='\033[0;31m'
@@ -23,7 +23,7 @@ fi
 
 # 2. Find components containing interfaces or types (Violation of types.ts pattern)
 echo -e "\n${YELLOW}Checking for embedded types/interfaces...${NC}"
-TYPE_VIOLATIONS=$(grep -rE "interface |type \w+ =" /home/boniface/project/exegesis/web/src/features -n --include "*.tsx" | grep -v "import")
+TYPE_VIOLATIONS=$(grep -rE "interface |type \w+ =" /home/boniface/project/exegesis/web/src/features -n --include "*.tsx" | grep "/components/" | grep -v "import" || true)
 
 if [ -z "$TYPE_VIOLATIONS" ]; then
   echo -e "${GREEN}✅ No embedded types found in components.${NC}"
@@ -33,9 +33,31 @@ else
   echo "... (truncated)"
 fi
 
+# 3. Find component-local hooks/state (components should receive state through props)
+echo -e "\n${YELLOW}Checking for component-local hooks/state...${NC}"
+HOOK_VIOLATIONS=$(grep -rE '\b(useState|useReducer|useEffect|useMemo|useCallback|useRef|useQuery|useMutation)\b' /home/boniface/project/exegesis/web/src/features -n --include "*.tsx" | grep "/components/" | grep -v "import" || true)
+if [ -z "$HOOK_VIOLATIONS" ]; then
+  echo -e "${GREEN}✅ No component-local hooks found.${NC}"
+else
+  echo -e "${RED}❌ Found hooks/state in components (move them to hooks):${NC}"
+  echo "$HOOK_VIOLATIONS" | head -n 20
+  echo "... (truncated)"
+fi
+
+# 4. Find named helper functions inside component files.
+echo -e "\n${YELLOW}Checking for helper functions in components...${NC}"
+FUNCTION_VIOLATIONS=$(grep -rE '^[[:space:]]*(export[[:space:]]+)?(async[[:space:]]+)?function[[:space:]]+[a-z][A-Za-z0-9_]*|^[[:space:]]*(export[[:space:]]+)?const[[:space:]]+[a-z][A-Za-z0-9_]*[[:space:]]*=[[:space:]]*(async[[:space:]]*)?\(' /home/boniface/project/exegesis/web/src/features -n --include "*.tsx" | grep "/components/" | grep -v "import" || true)
+if [ -z "$FUNCTION_VIOLATIONS" ]; then
+  echo -e "${GREEN}✅ No named helper functions found.${NC}"
+else
+  echo -e "${RED}❌ Found helper functions in components (move them to hooks/utils):${NC}"
+  echo "$FUNCTION_VIOLATIONS" | head -n 20
+  echo "... (truncated)"
+fi
+
 # 3. Find components containing UPPER_CASE constants (Violation of constants.ts pattern)
 echo -e "\n${YELLOW}Checking for embedded constants...${NC}"
-CONST_VIOLATIONS=$(grep -rE "const [A-Z_]{2,}" /home/boniface/project/exegesis/web/src/features -n --include "*.tsx" | grep -v "import")
+CONST_VIOLATIONS=$(grep -rE "const [A-Z_]{2,}" /home/boniface/project/exegesis/web/src/features -n --include "*.tsx" | grep "/components/" | grep -v "import" || true)
 
 if [ -z "$CONST_VIOLATIONS" ]; then
   echo -e "${GREEN}✅ No embedded constants found in components.${NC}"

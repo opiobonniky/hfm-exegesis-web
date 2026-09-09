@@ -28,11 +28,9 @@ export function useTriviaPage() {
   } = useDailyChallenge();
   const [gameMode, setGameMode] = useState<"normal" | "daily">("normal");
   const [resultDismissed, setResultDismissed] = useState(false);
-  const [autoAdvanceProgress, setAutoAdvanceProgress] = useState<number | null>(null);
+  const autoAdvanceProgress = null;
   const [showStarBurst, setShowStarBurst] = useState(false);
   const [showMilestone, setShowMilestone] = useState(false);
-  const autoAdvanceRef = useRef<{ startTime: number; duration: number; rafId: number; timeoutId?: ReturnType<typeof setTimeout> } | null>(null);
-  const cancelledRef = useRef(false);
   const gameModeRef = useRef<"normal" | "daily">("normal");
   const dcSessionRef = useRef<DailyChallengeSession>(dcSession);
   const prevStreakRef = useRef(0);
@@ -67,6 +65,7 @@ export function useTriviaPage() {
         setGameMode("daily");
       } catch {}
     }
+
   }, [restoreState, dcRestoreSession]);
 
   // Re-fetch when difficulty changes during game
@@ -108,50 +107,13 @@ export function useTriviaPage() {
     prevPhaseRef.current = phase;
   }, [phase, score, streak, recordSession]);
 
-  // AUTO-ADVANCE
-  const cleanupAutoAdvance = useCallback(() => {
-    cancelledRef.current = true;
-    if (autoAdvanceRef.current) {
-      cancelAnimationFrame(autoAdvanceRef.current.rafId);
-      clearTimeout(autoAdvanceRef.current.timeoutId);
-      autoAdvanceRef.current = null;
-    }
-    setAutoAdvanceProgress(null);
-  }, []);
-
-  const startAutoAdvance = useCallback(() => {
-    cleanupAutoAdvance();
-    const duration = result?.isCorrect ? 3000 : 4500;
-    cancelledRef.current = false;
-    const startTime = performance.now();
-    const tick = (now: number) => {
-      if (cancelledRef.current) return;
-      const progress = Math.min(((now - startTime) / duration) * 100, 100);
-      setAutoAdvanceProgress(progress);
-      if (progress >= 100) {
-        setResultDismissed(true);
-        setAutoAdvanceProgress(null);
-        if (result?.isCorrect && autoAdvanceRef.current) {
-          autoAdvanceRef.current.timeoutId = setTimeout(() => { if (!cancelledRef.current) nextQuestion(); }, 600);
-        }
-        if (autoAdvanceRef.current) autoAdvanceRef.current.rafId = 0;
-      } else { autoAdvanceRef.current = { startTime, duration, rafId: requestAnimationFrame(tick) }; }
-    };
-    autoAdvanceRef.current = { startTime, duration, rafId: requestAnimationFrame(tick) };
-  }, [result, cleanupAutoAdvance, nextQuestion]);
-
-  useEffect(() => {
-    if (phase === "answered" && result && !resultDismissed) startAutoAdvance();
-    return () => { cleanupAutoAdvance(); };
-  }, [phase, result, resultDismissed, startAutoAdvance, cleanupAutoAdvance]);
-
   // HANDLERS
   const handleSelect = useCallback((index: number) => { if (selectedAnswer !== null) return; answer(index); }, [answer, selectedAnswer]);
   const handleSelectDaily = useCallback((index: number) => { if (dcSession.selectedAnswer !== null) return; dcSubmitAnswer(index); }, [dcSession.selectedAnswer, dcSubmitAnswer]);
   const handleDismissDaily = useCallback(() => { dcNextQuestion(); }, [dcNextQuestion]);
   const startDailyChallenge = useCallback(() => { setGameMode("daily"); startChallenge(); }, [startChallenge]);
   const handleDailyBackToPlan = useCallback(() => { setGameMode("normal"); dcReset(); }, [dcReset]);
-  const handleDismissWithCancel = useCallback(() => { cleanupAutoAdvance(); setResultDismissed(true); }, [cleanupAutoAdvance]);
+  const handleDismissWithCancel = useCallback(() => { setResultDismissed(true); }, []);
 
   const handleReferencePress = useCallback((bookName: string, chapter: number, verseNumber?: number | null) => {
     const gm = gameModeRef.current;
@@ -189,3 +151,6 @@ export function useTriviaPage() {
     setShowStarBurst, setShowMilestone, clearUnlocked, resetLeaderboard,
   } };
 }
+
+export type TriviaPageData = ReturnType<typeof useTriviaPage>["data"];
+export type TriviaPageActions = ReturnType<typeof useTriviaPage>["actions"];

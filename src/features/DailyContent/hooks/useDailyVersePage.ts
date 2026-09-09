@@ -71,6 +71,7 @@ export function useDailyVersePage() {
         setHasNext(res.returnData.hasNext ?? false);
         setHasPrevious(res.returnData.hasPrevious ?? false);
       }
+
     } catch {
       toast({ title: "Failed to load", variant: "destructive" });
     } finally {

@@ -3,7 +3,9 @@ import { DIFFICULTY_OPTIONS } from "../constants";
 import StreakCalendar from "@/components/trivia/StreakCalendar";
 import SessionLeaderboard from "@/components/trivia/SessionLeaderboard";
 import { cn } from "@/lib/utils";
+import { useNavigate } from "react-router-dom";
 import type { DifficultyFilter } from "@/hooks/useTrivia";
+import type { DailyChallengeEntry } from "@/hooks/useDailyChallenge";
 
 interface Props {
   difficulty: DifficultyFilter;
@@ -12,7 +14,7 @@ interface Props {
   isTodayCompleted: boolean;
   consecutiveDays: number;
   todayKey: string;
-  weekHistory: unknown[];
+  weekHistory: Record<string, DailyChallengeEntry>;
   startDailyChallenge: () => void;
   startQuiz: () => void;
   leaderboardState: { bestSession: { total: number } };
@@ -26,6 +28,7 @@ export default function TriviaPlanScreen({
   todayKey, weekHistory, startDailyChallenge, startQuiz,
   leaderboardState, leaderboardComparison, resetLeaderboard,
 }: Props) {
+  const navigate = useNavigate();
   return (
     <div className="flex flex-col gap-5 sm:gap-6">
       <div className="flex items-center gap-3 rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/[0.16] via-primary/[0.08] to-transparent p-4 shadow-sm">
@@ -53,6 +56,15 @@ export default function TriviaPlanScreen({
           </div>
         </div>
       )}
+
+      <button
+        type="button"
+        onClick={() => navigate("/trivia/performance")}
+        className="flex items-center justify-center gap-2 rounded-xl border border-primary/20 bg-primary/[0.08] px-4 py-3 text-sm font-bold text-primary transition-colors hover:bg-primary/[0.14]"
+      >
+        <Trophy className="h-4 w-4" />
+        View performance and answer history
+      </button>
 
       {leaderboardState.bestSession.total > 0 && leaderboardComparison && (
         <SessionLeaderboard comparison={leaderboardComparison} onReset={resetLeaderboard} />

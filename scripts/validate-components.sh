@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Validates feature components expose explicit props instead of page/model bags.
+# Validates feature components are prop-driven presentation components.
 
 set -euo pipefail
 
@@ -30,6 +30,26 @@ check_component() {
 
   if grep -qE '(sendPostRequest|bibleApi\.|window\.fetch[[:space:]]*\(|globalThis\.fetch[[:space:]]*\(|axios\.|api\.(get|post|put|patch|delete)[[:space:]]*\()' "$file"; then
     issues+=("direct API access detected; use an Admin service through a hook")
+  fi
+
+  if grep -qE '\b(useState|useReducer|useEffect|useMemo|useCallback|useRef|useQuery|useMutation)\b' "$file"; then
+    issues+=("component-local hook detected; move state and effects into a page hook")
+  fi
+
+  if grep -qE '^[[:space:]]*(export[[:space:]]+)?(interface|type)[[:space:]]+[A-Za-z_$]' "$file"; then
+    issues+=("local type/interface detected; move the contract to ../types.ts and pass it as props")
+  fi
+
+  # The component declaration itself is allowed. Named helpers and exported
+  # utility functions belong in utils/services, not presentation components.
+  local component_name
+  component_name=$(grep -oE 'export (default )?(function|const) [A-Z][A-Za-z0-9_]*' "$file" | head -1 | sed -E 's/.*(function|const) //')
+  local helper_functions
+  helper_functions=$(grep -nE '^[[:space:]]*(export[[:space:]]+)?(async[[:space:]]+)?function[[:space:]]+[a-z][A-Za-z0-9_]*|^[[:space:]]*(export[[:space:]]+)?const[[:space:]]+[a-z][A-Za-z0-9_]*[[:space:]]*=[[:space:]]*(async[[:space:]]*)?\(' "$file" 2>/dev/null \
+    | grep -vE '^[^:]+:[0-9]+:[[:space:]]*(export[[:space:]]+)?(default[[:space:]]+)?function[[:space:]]+'"${component_name:-__none__}"'|^[^:]+:[0-9]+:[[:space:]]*(export[[:space:]]+)?const[[:space:]]+'"${component_name:-__none__}"'[[:space:]]*=' \
+    | head -5 || true)
+  if [ -n "$helper_functions" ]; then
+    issues+=("named helper function detected; move logic to hooks/utils and keep the component prop-driven")
   fi
 
   if grep -qE '\bmodel[[:space:]]*:' "$file" || grep -qE 'model[[:space:]]*=' "$file"; then

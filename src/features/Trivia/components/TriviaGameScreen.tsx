@@ -1,4 +1,4 @@
-import { Play, RotateCcw, PartyPopper, BookOpen, Target, XCircle, Star, Timer } from "lucide-react";
+import { Play, RotateCcw, PartyPopper, BookOpen, Target, XCircle, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import StainedGlassQuestion from "@/components/trivia/StainedGlassQuestion";
@@ -102,34 +102,26 @@ export default function TriviaGameScreen({
       )}
       {/* Answered */}
       {phase === "answered" && question && result && (
-        <div>
-          <div className="mb-2">
+        <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_20rem]">
+          <div className="min-w-0">
             <StainedGlassQuestion question={question} selectedAnswer={selectedAnswer} disabled={true} isRtl={isRtl} correctAnswerIndex={result?.correctAnswer} onSelect={() => {}} onReferencePress={onReferencePress} />
-          </div>
-          {/* Streak indicator */}
-          {streak >= 2 && (
-            <div className={cn("flex items-center justify-center gap-1.5 mb-3 py-2 px-4 rounded-xl self-center mx-auto w-fit border", isRtl && "flex-row-reverse")} style={{ backgroundColor: streak >= 3 ? "hsl(var(--primary)/0.08)" : "hsl(var(--primary)/0.04)", borderColor: streak >= 3 ? "hsl(var(--primary)/0.3)" : "hsl(var(--primary)/0.15)", boxShadow: streak >= 3 ? "0 0 15px hsl(var(--primary)/0.15)" : "none" }}>
-              <Star className="w-4 h-4" style={{ color: streak >= 3 ? "hsl(var(--primary))" : "hsl(var(--primary)/0.6)" }} fill={streak >= 3 ? "hsl(var(--primary))" : "transparent"} />
-              <p className="text-xs font-extrabold" style={{ color: streak >= 3 ? "hsl(var(--primary))" : "hsl(var(--primary)/0.7)" }}>{streak} in a row{streak >= 3 ? " \u2726" : ""}</p>
-            </div>
-          )}
-          {/* Result */}
-          <div className="min-h-[160px]">
-            {!resultDismissed && <GlassResult result={result} isRtl={isRtl} autoAdvanceProgress={autoAdvanceProgress} onDismiss={onDismiss} />}
-            {resultDismissed && (
-              <div className="space-y-2">
-                {result?.isCorrect && autoAdvanceProgress != null && autoAdvanceProgress >= 100 && (
-                  <div className="flex items-center justify-center gap-1.5 text-xs font-semibold text-muted-foreground/50 animate-pulse">
-                    <Timer className="w-3 h-3" /> Advancing to next question...
-                  </div>
-                )}
-                <button onClick={onNext} className="group w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl text-sm font-extrabold text-card transition-all hover:brightness-110 active:scale-[0.98] overflow-hidden relative uppercase tracking-wider bg-gradient-to-br from-primary to-primary/80" style={{ boxShadow: "0 0 20px hsl(var(--primary)/0.3), 0 4px 15px hsl(var(--primary)/0.2)" }}>
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
-                  <Play className="w-4 h-4 fill-current" /> Next Question
-                </button>
+            {/* Streak indicator */}
+            {streak >= 2 && (
+              <div className={cn("mt-3 flex items-center justify-center gap-1.5 py-2 px-4 rounded-xl self-center mx-auto w-fit border", isRtl && "flex-row-reverse")} style={{ backgroundColor: streak >= 3 ? "hsl(var(--primary)/0.08)" : "hsl(var(--primary)/0.04)", borderColor: streak >= 3 ? "hsl(var(--primary)/0.3)" : "hsl(var(--primary)/0.15)", boxShadow: streak >= 3 ? "0 0 15px hsl(var(--primary)/0.15)" : "none" }}>
+                <Star className="w-4 h-4" style={{ color: streak >= 3 ? "hsl(var(--primary))" : "hsl(var(--primary)/0.6)" }} fill={streak >= 3 ? "hsl(var(--primary))" : "transparent"} />
+                <p className="text-xs font-extrabold" style={{ color: streak >= 3 ? "hsl(var(--primary))" : "hsl(var(--primary)/0.7)" }}>{streak} in a row{streak >= 3 ? " \u2726" : ""}</p>
               </div>
             )}
           </div>
+          <aside className="min-w-0 lg:sticky lg:top-24">
+            {!resultDismissed && <GlassResult result={result} isRtl={isRtl} autoAdvanceProgress={autoAdvanceProgress} onDismiss={onNext} />}
+            {resultDismissed && (
+              <button onClick={onNext} className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-br from-primary to-primary/80 py-3.5 text-sm font-extrabold uppercase tracking-wider text-card shadow-lg shadow-primary/20 transition-all hover:brightness-110 active:scale-[0.98]">
+                <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/15 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
+                <Play className="relative h-4 w-4 fill-current" /> <span className="relative">Next Question</span>
+              </button>
+            )}
+          </aside>
         </div>
       )}
       {/* Finished */}

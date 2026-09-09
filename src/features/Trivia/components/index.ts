@@ -4,3 +4,8 @@ export { default as TriviaPlanScreen } from "./TriviaPlanScreen";
 export { default as TriviaGameScreen } from "./TriviaGameScreen";
 export { default as DailyChallengeGame } from "./DailyChallengeGame";
 export { TriviaPageLayout, TriviaContentWrapper, TriviaDotTexture } from "./TriviaPageLayout";
+export { default as TriviaHomeHero } from "./TriviaHomeHero";
+export { default as TriviaHomeActions } from "./TriviaHomeActions";
+export { default as TriviaQuestionsHeader } from "./TriviaQuestionsHeader";
+export { default as TriviaPerformanceHeader } from "./TriviaPerformanceHeader";
+export { default as TriviaPerformanceState } from "./TriviaPerformanceState";

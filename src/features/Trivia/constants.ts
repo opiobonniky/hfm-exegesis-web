@@ -29,3 +29,5 @@ export const BADGE_CATEGORIES = [
 ] as const;
 
 export const ACCENT = "hsl(var(--primary))";
+export const TRIVIA_HISTORY_PAGE_SIZE = 20;
+export const DIFFICULTY_LABELS: Record<string, string> = { easy: "Easy", medium: "Medium", hard: "Hard" };

@@ -39,7 +39,9 @@ const JournalEntry = lazy(() => import("@/features/Journal/pages/JournalEntry"))
 const JournalDetail = lazy(() => import("@/features/Journal/pages/JournalDetail"));
 const UserDevotions = lazy(() => import("@/features/DailyContent/pages/UserDevotions"));
 const Search = lazy(() => import("@/features/Bible/pages/Search"));
-const Trivia = lazy(() => import("@/features/Trivia/pages/Trivia"));
+const TriviaHome = lazy(() => import("@/features/Trivia/pages/TriviaHome"));
+const TriviaQuestions = lazy(() => import("@/features/Trivia/pages/TriviaQuestions"));
+const TriviaPerformance = lazy(() => import("@/features/Trivia/pages/TriviaPerformance"));
 const StudyBible = lazy(() => import("@/features/Lab/pages/LabDictionary"));
 const BibleStudyFlow = lazy(() => import("@/features/Lab/pages/LabFlow"));
 const LabHome = lazy(() => import("@/features/Lab/pages/LabHome"));
@@ -383,10 +385,24 @@ export const routes = {
   },
   trivia: {
     path: "/trivia",
-    component: Trivia,
+    component: TriviaHome,
     isProtected: true,
     requiresLayout: true,
     title: "Bible Trivia",
+  },
+  triviaQuestions: {
+    path: "/trivia/questions",
+    component: TriviaQuestions,
+    isProtected: true,
+    requiresLayout: true,
+    title: "Trivia Questions",
+  },
+  triviaPerformance: {
+    path: "/trivia/performance",
+    component: TriviaPerformance,
+    isProtected: true,
+    requiresLayout: true,
+    title: "Trivia Performance",
   },
   dictionary: {
     path: "/study-bible",

@@ -1,7 +1,10 @@
 // Trivia triviaApi — API endpoints for triviaApi operations
 import { sendPostRequest } from "@/services/api";
+import type { TriviaPerformanceResponse } from "../types";
 
 export const triviaApi = {
+  getPerformance: (page = 0, pageSize = 20, search = "") =>
+    sendPostRequest<TriviaPerformanceResponse>("trivia", "performance", { page, pageSize, search }),
   getOverview: () =>
     sendPostRequest("trivia", "admin/overview", {}),
   listQuestions: (page = 0, size = 20, filters?: Record<string, any>) =>
