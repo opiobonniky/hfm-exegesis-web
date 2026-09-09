@@ -19,8 +19,8 @@ export function StatCards({ chaptersRead, highlights, notes, journalEntries, fav
   return (
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
       {STATS.map((s, i) => (
-        <div key={s.label} className="flex items-center gap-3 rounded-2xl border border-border/60 bg-card p-3 shadow-sm last:col-span-2 sm:last:col-span-1 sm:flex-col sm:justify-center sm:gap-1.5 sm:p-4">
-          <div className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-xl", s.bg)}>
+        <div key={s.label} className="group flex items-center gap-3 rounded-2xl border border-primary/10 bg-gradient-to-br from-white via-white to-primary/[0.06] p-3 shadow-sm shadow-primary/[0.04] transition-all hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-md dark:from-card dark:via-card dark:to-primary/[0.1] last:col-span-2 sm:last:col-span-1 sm:flex-col sm:justify-center sm:gap-1.5 sm:p-4">
+          <div className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-xl shadow-sm", s.bg)}>
             <s.icon className={cn("w-4 h-4", s.color)} />
           </div>
           <div className="sm:text-center">

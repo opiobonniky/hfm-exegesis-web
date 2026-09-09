@@ -27,7 +27,7 @@ export default function ContentCard({ title, subtitle, cta, children, className,
       <button
         onClick={onClick}
         className={cn(
-          "w-full rounded-2xl border border-border/60 bg-card p-4 text-start shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-md",
+          "w-full rounded-2xl border border-primary/10 bg-gradient-to-br from-white via-white to-primary/[0.05] p-4 text-start shadow-sm shadow-primary/[0.04] transition-all hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-md dark:from-card dark:via-card dark:to-primary/[0.08]",
           !onClick && "cursor-default",
           className,
         )}

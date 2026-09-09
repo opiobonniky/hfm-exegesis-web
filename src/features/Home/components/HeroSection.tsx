@@ -18,7 +18,7 @@ export default function HeroSection({ userName, initial, verse }: HeroSectionPro
   const { t } = useLanguage();
 
   return (
-    <header className="relative overflow-hidden border-b border-border/50 bg-[radial-gradient(circle_at_top_right,hsl(var(--primary)/0.18),transparent_35%),linear-gradient(135deg,hsl(var(--background)),hsl(var(--muted)/0.35))]">
+    <header className="relative overflow-hidden border-b border-primary/15 bg-gradient-to-br from-white via-[#f4f7fa] to-primary/[0.08] dark:from-background dark:via-background dark:to-primary/[0.12]">
       <div className="relative mx-auto max-w-7xl px-4 pb-14 pt-6 sm:px-6 sm:pb-16 sm:pt-8 lg:px-8">
         <div className="mb-8 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -59,7 +59,7 @@ export default function HeroSection({ userName, initial, verse }: HeroSectionPro
           {verse && (
             <button
               onClick={() => navigate(routes.userDailyVerse.path)}
-              className="group relative overflow-hidden rounded-[1.75rem] bg-gradient-to-br from-primary via-primary to-violet-700 p-6 text-start text-primary-foreground shadow-2xl shadow-primary/15 transition-transform hover:-translate-y-0.5 sm:p-8"
+              className="group relative overflow-hidden rounded-[1.75rem] bg-gradient-to-br from-primary via-primary to-[#55758f] p-6 text-start text-primary-foreground shadow-2xl shadow-primary/20 transition-transform hover:-translate-y-0.5 sm:p-8"
             >
               <div className="pointer-events-none absolute -right-14 -top-20 h-52 w-52 rounded-full border-[32px] border-white/5" />
               <div className="relative">

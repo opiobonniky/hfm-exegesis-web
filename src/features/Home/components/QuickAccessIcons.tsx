@@ -32,7 +32,7 @@ export default function QuickAccessIcons({ navigate }: QuickAccessIconsProps)
               <button
                   key={link.label}
                   onClick={() => navigate(link.route)}
-                  className={cn("flex flex-col items-center gap-1.5 p-2.5 rounded-xl transition-all hover:scale-105", link.bg)}
+                  className={cn("flex flex-col items-center gap-1.5 rounded-xl border border-transparent p-2.5 transition-all hover:-translate-y-0.5 hover:scale-105 hover:border-primary/15 hover:shadow-sm", link.bg)}
               >
                 <link.icon className={cn("w-4 h-4", link.color)}/>
                 <span className="text-[10px] font-medium text-muted-foreground/70">{link.label}</span>

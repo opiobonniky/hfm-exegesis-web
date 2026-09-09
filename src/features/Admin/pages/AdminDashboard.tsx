@@ -16,13 +16,16 @@ const AdminDashboard = () => {
 
   return (
     <div
-      className="min-h-full bg-gradient-to-br from-slate-50/80 via-background to-primary/[0.03] p-4 sm:p-6 lg:p-8 space-y-7 dark:from-background dark:via-background dark:to-primary/[0.04]"
+      className="relative min-h-full overflow-hidden bg-[#f6f8fb] p-4 sm:p-6 lg:p-8 dark:bg-background"
       dir={isRtl ? "rtl" : "ltr"}
     >
-      <AdminDashboardHeader />
-      <AdminDashboardStats stats={data.stats} loading={data.loading} />
-      <AdminDashboardTools onNavigate={navigate} />
-      <AdminDashboardQuickActions onNavigate={navigate} />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(58,91,117,0.12),transparent_34%),radial-gradient(circle_at_15%_35%,rgba(58,91,117,0.06),transparent_28%)] dark:bg-none" />
+      <div className="relative mx-auto max-w-[1600px] space-y-8">
+        <AdminDashboardHeader />
+        <AdminDashboardStats stats={data.stats} loading={data.loading} />
+        <AdminDashboardTools onNavigate={navigate} />
+        <AdminDashboardQuickActions onNavigate={navigate} />
+      </div>
     </div>
   );
 };

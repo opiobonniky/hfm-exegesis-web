@@ -24,12 +24,12 @@ export default function RecentActivityList({ activities, maxItems = 5, navigate,
             className="text-xs font-semibold text-primary hover:text-primary/80 transition-colors">All</button>
         )}
       </div>
-      <div className="space-y-1">
+      <div className="space-y-1 rounded-2xl border border-primary/10 bg-white/70 p-2 shadow-sm dark:bg-card/70">
         {activities.slice(0, maxItems).map((act, idx) => (
           <button
             key={idx}
             onClick={() => navigate(`/bible?book=${encodeURIComponent(act.bookName)}&chapter=${act.chapter}`)}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-start hover:bg-muted/40 transition-colors"
+            className="w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-start transition-colors hover:bg-primary/[0.06]"
           >
             <div className="w-8 h-8 rounded-lg bg-primary/5 flex items-center justify-center shrink-0">
               <Flame className="w-3.5 h-3.5 text-primary/60"/>

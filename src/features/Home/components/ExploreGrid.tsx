@@ -25,7 +25,7 @@ export function ExploreGrid() {
           <button
             key={item.label}
             onClick={() => navigate(item.route)}
-            className="group rounded-2xl border border-border/60 bg-card p-4 text-start shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-lg sm:p-5"
+            className="group rounded-2xl border border-primary/10 bg-gradient-to-br from-white via-white to-primary/[0.05] p-4 text-start shadow-sm shadow-primary/[0.04] transition-all hover:-translate-y-1 hover:border-primary/30 hover:shadow-lg dark:from-card dark:via-card dark:to-primary/[0.08] sm:p-5"
           >
             <div className="mb-5 flex items-start justify-between">
               <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${item.tone}`}>

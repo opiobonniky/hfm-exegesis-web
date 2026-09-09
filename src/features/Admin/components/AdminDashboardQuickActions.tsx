@@ -30,7 +30,7 @@ interface Props {
 
 export function AdminDashboardQuickActions({ onNavigate }: Props) {
   return (
-    <Card className="relative overflow-hidden border-border shadow-sm">
+    <Card className="relative overflow-hidden border-primary/10 bg-white/90 shadow-md shadow-primary/[0.06] dark:bg-card">
       <div className="absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-primary/[0.06] to-transparent pointer-events-none" />
       <div className="relative">
         <CardHeader className="pb-3">
