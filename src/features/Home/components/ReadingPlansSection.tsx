@@ -26,7 +26,7 @@ export default function ReadingPlansSection({ plans, onSeeAll, onPressPlan }: Re
             <button
               key={plan.planId || idx}
               onClick={() => onPressPlan?.(plan)}
-              className="w-full rounded-2xl border border-primary/10 bg-gradient-to-br from-white to-primary/[0.06] p-4 text-start shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-md dark:from-card dark:to-primary/[0.1]"
+              className="w-full rounded-2xl border border-primary/15 bg-gradient-to-br from-[#dce6ee] to-primary/[0.13] p-4 text-start shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-md dark:from-[hsl(217_33%_15%)] dark:to-[hsl(212_63%_20%)]"
             >
               <div className="flex items-center justify-between mb-2">
                 <p className="font-semibold text-sm text-foreground truncate">{plan.planName || plan.description || "Reading Plan"}</p>

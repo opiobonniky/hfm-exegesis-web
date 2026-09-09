@@ -2,6 +2,7 @@ import { Play, BookOpen, Trophy, Target, Sun } from "lucide-react";
 import { DIFFICULTY_OPTIONS } from "../constants";
 import StreakCalendar from "@/components/trivia/StreakCalendar";
 import SessionLeaderboard from "@/components/trivia/SessionLeaderboard";
+import { cn } from "@/lib/utils";
 import type { DifficultyFilter } from "@/hooks/useTrivia";
 
 interface Props {
@@ -27,8 +28,10 @@ export default function TriviaPlanScreen({
 }: Props) {
   return (
     <div className="flex flex-col gap-5 sm:gap-6">
-      <div className="flex items-center gap-3 p-3 bg-background rounded-xl border">
-        <BookOpen className="w-10 h-10 text-primary" />
+      <div className="flex items-center gap-3 rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/[0.16] via-primary/[0.08] to-transparent p-4 shadow-sm">
+        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-md shadow-primary/20">
+          <BookOpen className="w-6 h-6" />
+        </div>
         <div>
           <h2 className="text-lg font-bold" style={{ fontFamily: "'Cinzel', serif" }}>Bible Trivia</h2>
           <p className="text-sm text-muted-foreground">Test your knowledge of the Scriptures.</p>
@@ -36,7 +39,7 @@ export default function TriviaPlanScreen({
       </div>
 
       {stats && stats.totalAnswered > 0 && (
-        <div className="rounded-xl border border-primary/10 p-3">
+        <div className="rounded-2xl border border-primary/15 bg-primary/[0.07] p-3">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2.5 min-w-0">
               <Trophy className="w-4 h-4 text-primary" />
@@ -55,7 +58,7 @@ export default function TriviaPlanScreen({
         <SessionLeaderboard comparison={leaderboardComparison} onReset={resetLeaderboard} />
       )}
 
-      <div className="rounded-xl border border-primary/10 p-3">
+      <div className="rounded-2xl border border-primary/15 bg-primary/[0.06] p-3">
         <div className="flex items-center justify-between gap-3 mb-2">
           <div className="flex items-center gap-2.5">
             <Sun className="w-3.5 h-3.5 text-amber-500" />
@@ -84,7 +87,7 @@ export default function TriviaPlanScreen({
             const IconComp = opt.icon;
             const isSelected = difficulty === opt.value;
             return (
-              <button key={opt.value ?? "all"} onClick={() => setDifficulty(opt.value)} className="flex items-center gap-2 px-3 py-2 rounded-xl border transition-all">
+              <button key={opt.value ?? "all"} onClick={() => setDifficulty(opt.value)} className={cn("flex items-center gap-2 rounded-xl border px-3 py-2 transition-all", isSelected ? "border-primary/35 bg-primary/10 shadow-sm" : "border-primary/10 bg-primary/[0.04] hover:border-primary/25 hover:bg-primary/[0.08]")}>
                 <IconComp className="w-3.5 h-3.5" style={{ color: opt.color }} />
                 <span className="text-[10px] font-extrabold">{opt.label}</span>
               </button>

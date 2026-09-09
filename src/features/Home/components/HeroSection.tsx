@@ -18,7 +18,7 @@ export default function HeroSection({ userName, initial, verse }: HeroSectionPro
   const { t } = useLanguage();
 
   return (
-    <header className="relative overflow-hidden border-b border-primary/15 bg-gradient-to-br from-white via-[#f4f7fa] to-primary/[0.08] dark:from-background dark:via-background dark:to-primary/[0.12]">
+    <header className="relative overflow-hidden border-b border-primary/20 bg-gradient-to-br from-[#d5e1ea] via-[#e0e9f0] to-primary/[0.18] dark:from-[hsl(222_35%_9%)] dark:via-[hsl(222_40%_7%)] dark:to-[hsl(212_63%_20%)]">
       <div className="relative mx-auto max-w-7xl px-4 pb-14 pt-6 sm:px-6 sm:pb-16 sm:pt-8 lg:px-8">
         <div className="mb-8 flex items-center justify-between">
           <div className="flex items-center gap-3">

@@ -531,7 +531,7 @@ export function AppSidebar() {
                   src={logoImage}
                   alt={t.brand?.title || "EXEGESIS"}
                   className={cn(
-                    "object-contain",
+                    "object-contain brightness-0 invert drop-shadow-[0_2px_10px_rgba(255,255,255,0.18)]",
                     collapsed ? "w-8 h-8 p-0.5" : "w-full h-full p-3",
                   )}
                 />

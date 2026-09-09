@@ -24,7 +24,7 @@ export default function RecentActivityList({ activities, maxItems = 5, navigate,
             className="text-xs font-semibold text-primary hover:text-primary/80 transition-colors">All</button>
         )}
       </div>
-      <div className="space-y-1 rounded-2xl border border-primary/10 bg-white/70 p-2 shadow-sm dark:bg-card/70">
+      <div className="space-y-1 rounded-2xl border border-primary/20 bg-primary/[0.11] p-2 shadow-sm dark:bg-[hsl(217_33%_13%)]/85">
         {activities.slice(0, maxItems).map((act, idx) => (
           <button
             key={idx}

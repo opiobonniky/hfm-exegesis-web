@@ -15,7 +15,7 @@ export default function DailyVerse() {
   if (p.loading) return <DailyVerseLoadingSkeleton />;
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8 space-y-8" dir={p.isRtl ? "rtl" : "ltr"}>
+    <div className="max-w-5xl mx-auto px-4 py-8 space-y-8" dir={p.isRtl ? "rtl" : "ltr"}>
       <DailyVerseHeader onAdd={p.openAddVerse} />
 
       <VerseFilterBar

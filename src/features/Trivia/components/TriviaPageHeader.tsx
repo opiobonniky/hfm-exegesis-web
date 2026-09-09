@@ -13,7 +13,7 @@ export default function TriviaPageHeader({ onBack, difficulty, score }: Props) {
     <header
       className="flex-shrink-0 sticky top-0 z-30"
       style={{
-        background: "linear-gradient(180deg, hsl(var(--background)/0.95), hsl(var(--background)/0.8))",
+        background: "linear-gradient(180deg, hsl(var(--primary)/0.98), hsl(var(--primary)/0.92))",
         borderBottom: "1px solid hsl(var(--primary)/0.1)",
         backdropFilter: "blur(12px)",
       }}
@@ -28,13 +28,13 @@ export default function TriviaPageHeader({ onBack, difficulty, score }: Props) {
               border: "1px solid hsl(var(--primary)/0.2)",
             }}
           >
-            <ArrowLeft className="w-4 h-4 text-primary" />
+            <ArrowLeft className="w-4 h-4 text-primary-foreground" />
           </button>
           <div>
-            <h1 className="text-base sm:text-lg font-bold tracking-wide leading-none text-foreground" style={{ fontFamily: "'Cinzel', serif" }}>
+            <h1 className="text-base sm:text-lg font-bold tracking-wide leading-none text-primary-foreground" style={{ fontFamily: "'Cinzel', serif" }}>
               Bible Trivia
             </h1>
-            <p className="text-[10px] tracking-widest uppercase leading-none mt-0.5 text-primary/50">
+            <p className="text-[10px] tracking-widest uppercase leading-none mt-0.5 text-primary-foreground/65">
               {difficulty ? `${difficulty.charAt(0).toUpperCase() + difficulty.slice(1)} questions` : "All levels"}
             </p>
           </div>

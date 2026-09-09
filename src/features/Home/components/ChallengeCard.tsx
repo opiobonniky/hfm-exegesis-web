@@ -16,7 +16,7 @@ export default function ChallengeCard({ onPress }: ChallengeCardProps) {
       )}
     >
       <div className="flex items-center gap-2.5 mb-2.5">
-        <div className="w-9 h-9 rounded-xl bg-white/60 dark:bg-rose-950/50 flex items-center justify-center shrink-0">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-rose-100/70 dark:bg-rose-950/50">
           <Trophy className="w-4 h-4 text-rose-500" />
         </div>
         <div>

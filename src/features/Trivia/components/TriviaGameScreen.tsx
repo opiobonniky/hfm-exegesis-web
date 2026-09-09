@@ -41,7 +41,7 @@ export default function TriviaGameScreen({
   return (
     <div className="max-w-2xl mx-auto">
       {/* Difficulty filter chips */}
-      <div className="p-2 rounded-xl mb-4" style={{ background: "hsl(var(--foreground)/0.02)", border: "1px solid hsl(var(--foreground)/0.06)" }}>
+      <div className="mb-4 rounded-2xl border border-primary/15 bg-primary/[0.07] p-2 shadow-sm">
         <p className="px-3 pt-1 pb-2 text-[9px] font-extrabold uppercase tracking-[0.15em] text-primary/50">Difficulty</p>
         <div className={cn("flex items-center gap-1.5", isRtl && "flex-row-reverse")}>
           {(["all", "easy", "medium", "hard"] as const).map((d) => {
@@ -66,7 +66,7 @@ export default function TriviaGameScreen({
             </div>
             <p className="text-[10px] font-extrabold text-primary">{Math.round((score.total / totalCount) * 100)}%</p>
           </div>
-          <div className="w-full h-2 rounded-full overflow-hidden" style={{ backgroundColor: "hsl(var(--foreground)/0.04)", border: "1px solid hsl(var(--primary)/0.1)" }}>
+          <div className="w-full h-2 overflow-hidden rounded-full border border-primary/15 bg-primary/10">
             <div className="h-full rounded-full transition-all duration-500 ease-out bg-gradient-to-r from-primary to-primary/80" style={{ width: `${(score.total / totalCount) * 100}%`, boxShadow: "0 0 8px hsl(var(--primary)/0.3)" }} />
           </div>
         </div>
