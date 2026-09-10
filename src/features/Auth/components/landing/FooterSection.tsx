@@ -3,8 +3,8 @@ import { Facebook } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { animSlideLeft, animFadeUp, animSlideRight } from "./animations";
-import logoImage from "@/assets/logos/exegesis_bg_rm.png";
-import lordsBookImage from "@/assets/logos/lordsbook.png";
+import logoImage from "@/assets/logos/exegesis_bg_rm.webp";
+import lordsBookImage from "@/assets/logos/lordsbook.webp";
 
 function TikTokIcon({ className }: { className?: string }) {
   return (

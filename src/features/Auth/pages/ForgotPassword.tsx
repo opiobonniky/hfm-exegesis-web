@@ -9,7 +9,7 @@ import {
 } from "../components";
 import { AnimatePresence } from "framer-motion";
 import { Mail, KeyRound, Lock } from "lucide-react";
-import logoImage from "@/assets/logos/exegesis_bg_rm.png";
+import logoImage from "@/assets/logos/exegesis_bg_rm.webp";
 
 export default function ForgotPassword() {
   const { data, actions } = useForgotPasswordPage();

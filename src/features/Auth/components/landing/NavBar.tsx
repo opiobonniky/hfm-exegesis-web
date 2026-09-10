@@ -3,7 +3,7 @@ import { BookOpen, Sparkles, CalendarDays, Globe, Menu, X, ArrowRight, Mail as M
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { LANGUAGE_NAMES, type Language } from "@/components/languages/type";
-import logoImage from "@/assets/logos/exegesis_bg_rm.png";
+import logoImage from "@/assets/logos/exegesis_bg_rm.webp";
 import type { RefObject } from "react";
 import { MenuItem } from "../../types";
 import { LanguageSelector } from "../LanguageSelector";

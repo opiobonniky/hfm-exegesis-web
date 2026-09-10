@@ -36,8 +36,8 @@ import { useLanguage } from "@/components/languages/languageProvider";
 import { LANGUAGE_NAMES, type Language } from "@/components/languages/type";
 import { getLanguageName } from "@/components/languages/localeUtils";
 import { useAuth } from "@/contexts/AuthContext";
-import logoImage from "@/assets/logos/exegesis_bg_rm.png";
-import lordsbookImage from "@/assets/logos/lordsbook.png";
+import logoImage from "@/assets/logos/exegesis_bg_rm.webp";
+import lordsbookImage from "@/assets/logos/lordsbook.webp";
 
 function TikTokIcon({ className }: { className?: string }) {
   return (

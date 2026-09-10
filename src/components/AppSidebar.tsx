@@ -36,7 +36,7 @@ import {
 } from "@/components/ui/sidebar";
 
 import { routes } from "./Routes/routes";
-import logoImage from "@/assets/logos/exegesis_bg_rm.png";
+import logoImage from "@/assets/logos/exegesis_bg_rm.webp";
 
 /* ───────────────────────────────────────────────────────────────────────────────
    Types

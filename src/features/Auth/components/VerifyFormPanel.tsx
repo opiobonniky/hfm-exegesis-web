@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { ArrowLeft } from "lucide-react";
-import logoImage from "@/assets/logos/exegesis_bg_rm.png";
+import logoImage from "@/assets/logos/exegesis_bg_rm.webp";
 import { AuthHighlightText } from "./AuthHighlightText";
 
 interface VerifyFormPanelProps {

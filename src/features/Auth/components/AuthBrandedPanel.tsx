@@ -5,7 +5,7 @@
 import { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import logoImage from "@/assets/logos/exegesis_bg_rm.png";
+import logoImage from "@/assets/logos/exegesis_bg_rm.webp";
 
 interface Props {
   /** Quote text */

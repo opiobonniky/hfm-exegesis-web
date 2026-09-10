@@ -1,5 +1,5 @@
 // Login — thin compositor using a page hook and focused render components
-import logoImage from "@/assets/logos/exegesis_bg_rm.png";
+import logoImage from "@/assets/logos/exegesis_bg_rm.webp";
 import { useLoginPage } from "../hooks/useLoginPage";
 import { LoginBrandedPanel, LoginFormContent } from "../components";
 

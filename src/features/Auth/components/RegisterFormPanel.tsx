@@ -1,5 +1,5 @@
 import { AuthStepIndicator, AuthAccountLink } from "../components";
-import logoImage from "@/assets/logos/exegesis_bg_rm.png";
+import logoImage from "@/assets/logos/exegesis_bg_rm.webp";
 
 interface RegisterFormPanelProps {
   createAccountLabel: string;

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/components/languages/languageProvider";
 import heroBgJpeg from "@/assets/logos/hero-bg.jpeg";
 import heroBgWebp from "@/assets/logos/hero-bg.webp";
-import logoImage from "@/assets/logos/exegesis_bg_rm.png";
+import logoImage from "@/assets/logos/exegesis_bg_rm.webp";
 
 export function HeroSection() {
   const { t } = useLanguage();
