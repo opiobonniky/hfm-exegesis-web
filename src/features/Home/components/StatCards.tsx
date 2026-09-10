@@ -1,15 +1,14 @@
 // StatCards — stats row for dashboard
-import { BookOpen, Star, BookMarked, PenLine, Heart } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { BookOpen, Star, BookMarked, PenLine, Heart, type LucideIcon } from "lucide-react";
 
-interface Stat { value: number; label: string; icon: any; color: string; bg: string; }
+interface Stat { label: string; icon: LucideIcon; }
 
 const STATS: Stat[] = [
-  { value: 0, label: "Chapters", icon: BookOpen, color: "text-blue-500", bg: "bg-blue-50 dark:bg-blue-950/30" },
-  { value: 0, label: "Highlights", icon: Star, color: "text-amber-500", bg: "bg-amber-50 dark:bg-amber-950/30" },
-  { value: 0, label: "Notes", icon: BookMarked, color: "text-violet-500", bg: "bg-violet-50 dark:bg-violet-950/30" },
-  { value: 0, label: "Journal", icon: PenLine, color: "text-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-950/30" },
-  { value: 0, label: "Favorites", icon: Heart, color: "text-rose-500", bg: "bg-rose-50 dark:bg-rose-950/30" },
+  { label: "Chapters", icon: BookOpen },
+  { label: "Highlights", icon: Star },
+  { label: "Notes", icon: BookMarked },
+  { label: "Journal", icon: PenLine },
+  { label: "Favorites", icon: Heart },
 ];
 
 interface Props { chaptersRead: number; highlights: number; notes: number; journalEntries: number; favorites: number; }
@@ -17,18 +16,20 @@ interface Props { chaptersRead: number; highlights: number; notes: number; journ
 export function StatCards({ chaptersRead, highlights, notes, journalEntries, favorites }: Props) {
   const values = [chaptersRead, highlights, notes, journalEntries, favorites];
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+    <section aria-label="Your study statistics" className="overflow-hidden rounded-2xl border border-[#d8d2c4] bg-[#faf8f2] dark:border-white/10 dark:bg-[#111b24]">
+      <div className="grid grid-cols-2 sm:grid-cols-5">
       {STATS.map((s, i) => (
-        <div key={s.label} className="group flex items-center gap-3 rounded-2xl border border-primary/15 bg-gradient-to-br from-[#d7e3ec] via-[#e1eaf1] to-primary/[0.14] p-3 shadow-sm shadow-primary/[0.08] transition-all hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md dark:from-[hsl(217_33%_15%)] dark:via-[hsl(222_35%_10%)] dark:to-[hsl(212_63%_20%)] last:col-span-2 sm:last:col-span-1 sm:flex-col sm:justify-center sm:gap-1.5 sm:p-4">
-          <div className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-xl shadow-sm", s.bg)}>
-            <s.icon className={cn("w-4 h-4", s.color)} />
+        <div key={s.label} className="flex min-h-24 items-center gap-3 border-b border-e border-[#e2ddd2] p-4 last:col-span-2 last:border-b-0 sm:last:col-span-1 sm:border-b-0 sm:p-5 dark:border-white/10">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#ebe6da] text-[#785724] dark:bg-white/10 dark:text-[#d7aa62]">
+            <s.icon className="h-4 w-4" strokeWidth={1.8} />
           </div>
-          <div className="sm:text-center">
-            <span className="block text-base font-bold text-foreground">{values[i]}</span>
-            <span className="text-[10px] font-medium text-muted-foreground">{s.label}</span>
+          <div>
+            <span className="block font-serif text-2xl font-semibold leading-none text-[#173346] dark:text-[#f5f0e5]">{values[i]}</span>
+            <span className="mt-1 block text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">{s.label}</span>
           </div>
         </div>
       ))}
-    </div>
+      </div>
+    </section>
   );
 }

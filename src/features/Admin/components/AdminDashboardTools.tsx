@@ -19,12 +19,12 @@ const ICON_MAP: Record<string, LucideIcon> = {
 };
 
 const TOOL_GRADIENTS = [
-  "from-amber-50 via-white to-orange-50 border-amber-200/80 dark:from-amber-950/20 dark:via-card dark:to-orange-950/20",
-  "from-emerald-50 via-white to-teal-50 border-emerald-200/80 dark:from-emerald-950/20 dark:via-card dark:to-teal-950/20",
-  "from-rose-50 via-white to-pink-50 border-rose-200/80 dark:from-rose-950/20 dark:via-card dark:to-pink-950/20",
-  "from-sky-50 via-white to-cyan-50 border-sky-200/80 dark:from-sky-950/20 dark:via-card dark:to-cyan-950/20",
-  "from-violet-50 via-white to-fuchsia-50 border-violet-200/80 dark:from-violet-950/20 dark:via-card dark:to-fuchsia-950/20",
-  "from-indigo-50 via-white to-blue-50 border-indigo-200/80 dark:from-indigo-950/20 dark:via-card dark:to-blue-950/20",
+  "bg-amber-100 via-white to-amber-100 border-amber-200/80 dark:bg-amber-950/20 dark:via-card dark:to-orange-950/20",
+  "bg-emerald-100 via-white to-emerald-100 border-emerald-200/80 dark:bg-emerald-950/20 dark:via-card dark:to-teal-950/20",
+  "bg-rose-100 via-white to-rose-100 border-rose-200/80 dark:bg-rose-950/20 dark:via-card dark:to-pink-950/20",
+  "bg-sky-100 via-white to-sky-100 border-sky-200/80 dark:bg-sky-950/20 dark:via-card dark:to-cyan-950/20",
+  "bg-violet-100 via-white to-violet-100 border-violet-200/80 dark:bg-violet-950/20 dark:via-card dark:to-fuchsia-950/20",
+  "bg-indigo-10O via-white to-indigo-10OTH border-indigo-200/8₀ dark:bg-indigo-95₀/2₀ dark:via-card dark:to-blue-95₀/2₀",
 ];
 
 interface Props {

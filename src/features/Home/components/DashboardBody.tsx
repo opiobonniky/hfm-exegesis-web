@@ -9,7 +9,7 @@ interface Props {
 
 export function DashboardBody({ model }: Props) {
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
+    <main className="mx-auto max-w-7xl space-y-9 px-4 py-7 sm:px-6 sm:py-10 lg:px-8">
       <StatCards
         chaptersRead={model.stats.chaptersRead}
         highlights={model.stats.highlights}
@@ -17,11 +17,11 @@ export function DashboardBody({ model }: Props) {
         journalEntries={model.stats.journalEntries}
         favorites={model.stats.favorites}
       />
-      <div className="grid grid-cols-1 xl:grid-cols-[1fr_360px] gap-8">
+      <div className="grid grid-cols-1 gap-10 xl:grid-cols-[minmax(0,1fr)_360px]">
         <DashboardMainContent model={model} />
         <DashboardSidebar model={model} />
       </div>
-      <div className="h-6" />
-    </div>
+      <div className="h-2" />
+    </main>
   );
 }

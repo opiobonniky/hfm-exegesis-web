@@ -72,16 +72,18 @@ export interface UserDashboardActivity {
 }
 
 export interface UserDashboardSession {
-  planId: string;
-  planName: string;
+  id: string;
+  passageRef: string;
+  currentStage: string;
   completed: boolean;
-  lastActivity: string;
+  updatedOn: string;
 }
 
 export interface UserDashboardExegesis {
   id: number;
-  passageRef: string;
-  introduction: string;
+  title: string;
+  passageReference: string;
+  introduction?: string;
   displayDate: string;
 }
 
@@ -94,8 +96,11 @@ export interface UserDashboardDevotion {
 
 export interface UserDashboardJournalEntry {
   id: number;
-  title: string;
-  reflection: string;
+  title?: string;
+  content: string;
+  bookName?: string;
+  chapter?: number;
+  verseNumber?: number;
   createdOn: string;
-  isPublic: boolean;
+  isPublished: boolean;
 }

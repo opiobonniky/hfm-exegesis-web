@@ -12,7 +12,7 @@ export default function ChallengeCard({ onPress }: ChallengeCardProps) {
       className={cn(
         "rounded-2xl p-5 cursor-pointer transition-all duration-200",
         "hover:shadow-md active:scale-[0.99]",
-        "bg-gradient-to-br from-rose-50 to-pink-50 dark:from-rose-950/30 dark:to-pink-950/30",
+        "bg-rose-50 dark:bg-rose-950/30",
       )}
     >
       <div className="flex items-center gap-2.5 mb-2.5">
@@ -28,7 +28,7 @@ export default function ChallengeCard({ onPress }: ChallengeCardProps) {
       <p className="text-xs text-rose-600/70 dark:text-rose-400/70 leading-relaxed mb-3">
         Test your knowledge of the Scriptures with fun trivia questions across all difficulty levels!
       </p>
-      <button className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-rose-600 to-rose-700 dark:from-rose-500 dark:to-rose-600 active:scale-[0.98]">
+      <button className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-rose-700 py-2.5 text-xs font-bold text-white active:scale-[0.98] dark:bg-rose-600">
         Play Trivia <Sparkles className="w-3.5 h-3.5" />
       </button>
     </div>

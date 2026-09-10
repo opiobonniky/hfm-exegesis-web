@@ -8,6 +8,8 @@ export const homeApi = {
     sendPostRequest("admin", "get-users-by-admin", { page, pageSize: size }),
   getUserDashboard: () =>
     sendPostRequest("bible", "get-home-stats", {}),
+  getRecentActivity: (limit = 5) =>
+    sendPostRequest("bible", "get-recent-activity", { limit }),
   getTodaysVerse: () =>
     sendPostRequest("bible", "get-todays-verse", {}),
   getUserPlans: () =>

@@ -12,9 +12,11 @@ export function LatestJournalCard({ model }: Props) {
       <div className="font-semibold text-sm text-foreground line-clamp-1">
         {model.latestEntry.title || "Journal Entry"}
       </div>
-      {(model.latestEntry.passageRef || model.latestEntry.reflection) && (
+      {(model.latestEntry.bookName || model.latestEntry.content) && (
         <div className="text-xs text-muted-foreground/60 mt-1 line-clamp-1">
-          {model.latestEntry.passageRef || model.latestEntry.reflection}
+          {model.latestEntry.bookName
+            ? `${model.latestEntry.bookName}${model.latestEntry.chapter ? ` ${model.latestEntry.chapter}` : ""}`
+            : model.latestEntry.content}
         </div>
       )}
     </ContentCard>

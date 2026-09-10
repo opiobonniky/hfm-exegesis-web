@@ -1,7 +1,9 @@
 // ─── Home Feature Helpers ──────────────────────────────────────────────────────
 
+import type { Translations } from "@/components/languages/type";
+
 /** Time-of-day greeting */
-export function getGreeting(t: any): string {
+export function getGreeting(t: Translations): string {
   const h = new Date().getHours();
   if (h < 5) return t?.userDashboard?.goodNight || "Good Night";
   if (h < 12) return t?.userDashboard?.goodMorning || "Good Morning";

@@ -13,9 +13,9 @@ export function DailyExegesisCard({ model }: Props) {
       <div className="font-semibold text-sm text-foreground line-clamp-1">
         {model.dailyExegesis.title || "Daily Exegesis"}
       </div>
-      {model.dailyExegesis.passageRef && (
+      {model.dailyExegesis.passageReference && (
         <div className="text-xs text-muted-foreground/60 mt-1 font-mono">
-          {model.dailyExegesis.passageRef}
+          {model.dailyExegesis.passageReference}
         </div>
       )}
     </ContentCard>

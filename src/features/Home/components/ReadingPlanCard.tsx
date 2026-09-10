@@ -21,7 +21,7 @@ export default function ReadingPlanCard({ planName, description, totalDays, comp
         <span className={cn("shrink-0 text-xs font-bold", pct >= 70 ? "text-emerald-500" : "text-muted-foreground")}>{pct}%</span>
       </div>
       <div className="space-y-1.5">
-        <div className="h-1.5 overflow-hidden rounded-full bg-muted-foreground/10"><div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: pct >= 70 ? "linear-gradient(90deg, #10B981, #34D399)" : "linear-gradient(90deg, hsl(var(--primary)), hsl(var(--primary)/0.7))" }} /></div>
+        <div className="h-1.5 overflow-hidden rounded-full bg-muted-foreground/10"><div className="h-full rounded-full bg-primary transition-all" style={{ width: `${pct}%` }} /></div>
         <div className="flex justify-between text-xs text-muted-foreground/60"><span>{completedDays} of {totalDays} days</span><span>{totalDays - completedDays} left</span></div>
       </div>
     </div>

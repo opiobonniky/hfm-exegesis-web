@@ -2,16 +2,33 @@
 import { useState, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { useRTL } from "@/providers/RTLProvider";
-import { sendPostRequest } from "@/services/api";
-import { getCurrentSession } from "@/services/exegesisApi";
+import { useLanguage } from "@/components/languages/languageProvider";
+import { getCurrentSession, type ExegesisSession } from "@/services/exegesisApi";
+import { homeApi } from "../services/homeApi";
 
-import type { UserDashboardVerse, UserDashboardPlan, UserDashboardStats, UserDashboardActivity } from "../types";
+import type {
+  UserDashboardActivity,
+  UserDashboardDevotion,
+  UserDashboardExegesis,
+  UserDashboardJournalEntry,
+  UserDashboardPlan,
+  UserDashboardStats,
+  UserDashboardVerse,
+} from "../types";
+
+interface RecentActivityResponse {
+  id: string | number;
+  type: string;
+  book?: string;
+  chapter?: number;
+  verse?: number;
+  time?: string;
+}
 
 export function useUserDashboard() {
   const navigate = useNavigate();
   const { userInfo } = useAuth();
-  const { isRtl } = useRTL();
+  const { isRtl } = useLanguage();
   const [dailyVerse, setDailyVerse] = useState<UserDashboardVerse | null>(null);
   const [verseText, setVerseText] = useState<string | null>(null);
   const [readingPlans, setReadingPlans] = useState<UserDashboardPlan[]>([]);
@@ -20,22 +37,23 @@ export function useUserDashboard() {
   });
   const [recentActivity, setRecentActivity] = useState<UserDashboardActivity[]>([]);
   const [lastRead, setLastRead] = useState<UserDashboardActivity | null>(null);
-  const [currentSession, setCurrentSession] = useState<any>(null);
-  const [dailyExegesis, setDailyExegesis] = useState<any>(null);
-  const [dailyDevotion, setDailyDevotion] = useState<any>(null);
-  const [latestEntry, setLatestEntry] = useState<any>(null);
+  const [currentSession, setCurrentSession] = useState<ExegesisSession | null>(null);
+  const [dailyExegesis, setDailyExegesis] = useState<UserDashboardExegesis | null>(null);
+  const [dailyDevotion, setDailyDevotion] = useState<UserDashboardDevotion | null>(null);
+  const [latestEntry, setLatestEntry] = useState<UserDashboardJournalEntry | null>(null);
   const [loading, setLoading] = useState(true);
 
   const fetchAll = useCallback(async () => {
     setLoading(true);
     try {
-      const [verseRes, statsRes, plansRes, journalRes, readHistoryRes, journalListRes] = await Promise.all([
-        sendPostRequest("bible", "get-todays-verse", {}),
-        sendPostRequest("bible", "get-home-stats", {}),
-        sendPostRequest("reading-plans", "get-user-plans", {}),
-        sendPostRequest("journal", "stats", {}),
-        sendPostRequest("bible", "get-read-history", { page: 0, pageSize: 1 }),
-        sendPostRequest("journal", "get-all", { page: 0, pageSize: 1 }),
+      const [verseRes, statsRes, plansRes, journalRes, readHistoryRes, journalListRes, activityRes] = await Promise.all([
+        homeApi.getTodaysVerse(),
+        homeApi.getUserDashboard(),
+        homeApi.getUserPlans(),
+        homeApi.getJournalStats(),
+        homeApi.getReadHistory(),
+        homeApi.getLatestJournal(),
+        homeApi.getRecentActivity(),
       ]);
       if (statsRes.returnCode === 200 && statsRes.returnData) {
         const d = statsRes.returnData;
@@ -46,7 +64,18 @@ export function useUserDashboard() {
           favorites: d.favorites ?? 0,
           journalEntries: journalRes.returnData?.totalEntries ?? 0,
         });
-        setRecentActivity(d.recentActivity ?? []);
+      }
+      if (activityRes.returnCode === 200 && Array.isArray(activityRes.returnData)) {
+        setRecentActivity(activityRes.returnData.map((activity: RecentActivityResponse) => ({
+          id: String(activity.id),
+          type: activity.type,
+          title: activity.book || "Activity",
+          description: activity.type,
+          updatedOn: activity.time || "",
+          bookName: activity.type === "plan" ? undefined : activity.book,
+          chapter: activity.type === "plan" ? undefined : activity.chapter,
+          verseNumber: activity.type === "plan" ? undefined : activity.verse,
+        })));
       }
       if (plansRes.returnCode === 200) setReadingPlans(plansRes.returnData?.slice(0, 3) ?? []);
       if (readHistoryRes.returnCode === 200 && readHistoryRes.returnData?.readHistories?.length > 0) {
@@ -80,8 +109,8 @@ export function useUserDashboard() {
       // Parallel background fetches
       const [sessionRes, exegesisRes, devotionRes] = await Promise.allSettled([
         getCurrentSession(),
-        sendPostRequest("bible", "get-todays-exegesis", {}),
-        sendPostRequest("bible", "get-todays-devotion", {}),
+        homeApi.getTodaysExegesis(),
+        homeApi.getTodaysDevotion(),
       ]);
       if (sessionRes.status === "fulfilled" && sessionRes.value && !sessionRes.value.completed) {
         setCurrentSession(sessionRes.value);

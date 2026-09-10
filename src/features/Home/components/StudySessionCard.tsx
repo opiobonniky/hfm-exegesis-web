@@ -1,7 +1,6 @@
 "use client";
 
 import { Microscope, ArrowRight } from "lucide-react";
-import { cn } from "@/lib/utils";
 import type { UserDashboardSession } from "../types";
 interface StudySessionCardProps {
   session: UserDashboardSession;
@@ -9,20 +8,20 @@ interface StudySessionCardProps {
 }
 export default function StudySessionCard({ session, onPress }: StudySessionCardProps) {
   return (
-    <div>
-      <h2 className="text-xs font-bold text-muted-foreground/50 uppercase tracking-[0.12em] mb-4">Resume Study</h2>
+    <section>
+      <h2 className="mb-4 text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">In progress</h2>
       <button
         onClick={onPress}
-        className="w-full flex items-center gap-4 rounded-2xl border border-primary/20 bg-gradient-to-r from-primary/[0.16] via-[#dce6ee] to-[#e5edf3] p-4 text-start shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md dark:from-[hsl(212_63%_24%)] dark:via-[hsl(217_33%_15%)] dark:to-[hsl(222_35%_10%)]"
+        className="flex w-full items-center gap-4 rounded-2xl border border-[#173346] bg-[#173346] p-5 text-start text-white shadow-[0_12px_30px_rgba(23,51,70,0.12)] transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#b88a44] focus-visible:ring-offset-2 dark:border-[#294b61] dark:bg-[#1a3547]"
       >
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-[#55758f]">
-          <Microscope className="w-5 h-5 text-white" />
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-white/20 bg-white/5">
+          <Microscope className="h-5 w-5 text-[#d7aa62]" />
         </div>
-        <div className="flex-1 min-w-0">
-          <p className="font-semibold text-sm text-foreground">Continue your study</p>
-          <p className="text-xs text-muted-foreground/60 mt-0.5">Pick up where you left off</p>
+        <div className="min-w-0 flex-1">
+          <p className="truncate font-serif text-lg font-semibold text-[#fffaf0]">{session.passageRef || "Continue your study"}</p>
+          <p className="mt-1 text-xs capitalize text-white/60">{session.currentStage ? `${session.currentStage} stage` : "Pick up where you left off"}</p>
         </div>
-        <ArrowRight className="w-4 h-4 text-muted-foreground/40" />
+        <ArrowRight className="h-4 w-4 text-white/60 rtl:rotate-180" />
       </button>
-    </div>
+    </section>
   )}
