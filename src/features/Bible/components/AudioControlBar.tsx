@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Headphones, Settings2, Square } from "lucide-react";
+import { Headphones, Loader2, Settings2, Square } from "lucide-react";
 
 import { useLanguage } from "@/components/languages/languageProvider";
 import type {
@@ -90,8 +90,22 @@ export default function AudioControlBar({
 
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
-              <span className="inline-flex items-center rounded-full border border-primary/20 bg-primary/5 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.14em] text-primary">
-                {audio.isPaused ? "Paused" : "Now playing"}
+              <span
+                className={cn(
+                  "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.14em]",
+                  audio.isBuffering
+                    ? "border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                    : "border-primary/20 bg-primary/5 text-primary",
+                )}
+              >
+                {audio.isBuffering && (
+                  <Loader2 className="h-2.5 w-2.5 animate-spin" />
+                )}
+                {audio.isBuffering
+                  ? "Buffering"
+                  : audio.isPaused
+                    ? "Paused"
+                    : "Now playing"}
               </span>
               <span className="text-[10px] font-medium tabular-nums text-muted-foreground">
                 {currentPosition} / {audio.totalVerses}
