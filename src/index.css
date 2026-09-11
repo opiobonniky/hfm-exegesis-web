@@ -387,6 +387,73 @@
   .stagger-3 { animation-delay: 0.3s; }
   .stagger-4 { animation-delay: 0.4s; }
   .stagger-5 { animation-delay: 0.5s; }
+
+  /* ── Audio "now reading" verse effects ─────────────────────────────── */
+  /* Warm sweep that travels across the verse while it is being read. */
+  @keyframes verse-reading-sweep {
+    0% { background-position: -220% 0; }
+    100% { background-position: 220% 0; }
+  }
+  /* Gentle glow pulse synced to the sweep, signalling "this verse". */
+  @keyframes verse-reading-glow {
+    0%, 100% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0.0); }
+    50% { box-shadow: 0 0 14px 2px hsl(var(--primary) / 0.16); }
+  }
+  /* Equalizer bars shown next to the verse number while its audio plays. */
+  @keyframes verse-eq-bar {
+    0%, 100% { transform: scaleY(0.35); }
+    50% { transform: scaleY(1); }
+  }
+
+  .verse-reading {
+    background-image: linear-gradient(
+      100deg,
+      transparent 20%,
+      hsl(var(--primary) / 0.09) 42%,
+      hsl(var(--accent) / 0.13) 50%,
+      hsl(var(--primary) / 0.09) 58%,
+      transparent 80%
+    );
+    background-size: 220% 100%;
+    background-repeat: no-repeat;
+    animation:
+      verse-reading-sweep 2.6s ease-in-out infinite,
+      verse-reading-glow 2.6s ease-in-out infinite;
+    border-radius: 0.375rem;
+  }
+
+  .verse-eq {
+    display: inline-flex;
+    align-items: flex-end;
+    gap: 1.5px;
+    height: 0.65em;
+    margin-inline-start: 0.25em;
+    vertical-align: baseline;
+  }
+  .verse-eq span {
+    display: inline-block;
+    width: 2px;
+    height: 100%;
+    border-radius: 1px;
+    background: hsl(var(--primary));
+    transform-origin: bottom;
+    animation: verse-eq-bar 0.9s ease-in-out infinite;
+  }
+  .verse-eq span:nth-child(2) { animation-delay: 0.18s; opacity: 0.85; }
+  .verse-eq span:nth-child(3) { animation-delay: 0.36s; opacity: 0.7; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .verse-reading {
+      /* Static tint keeps the verse identifiable without motion. */
+      background-image: linear-gradient(
+        0deg,
+        hsl(var(--primary) / 0.08),
+        hsl(var(--primary) / 0.08)
+      );
+      animation: none;
+    }
+    .verse-eq span { animation: none; transform: scaleY(0.7); }
+  }
 }
 
 /* Landing hero nav styles */

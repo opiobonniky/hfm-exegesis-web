@@ -1,7 +1,12 @@
 // AdminDashboardTools — tools grid for admin dashboard
 import {
-  Sparkles, CalendarDays, CreditCard, ScrollText,
-  Lightbulb, BookOpen, ArrowRight,
+  Sparkles,
+  CalendarDays,
+  CreditCard,
+  ScrollText,
+  Lightbulb,
+  BookOpen,
+  ArrowRight,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -19,12 +24,12 @@ const ICON_MAP: Record<string, LucideIcon> = {
 };
 
 const TOOL_GRADIENTS = [
-  "bg-amber-100 via-white to-amber-100 border-amber-200/80 dark:bg-amber-950/20 dark:via-card dark:to-orange-950/20",
-  "bg-emerald-100 via-white to-emerald-100 border-emerald-200/80 dark:bg-emerald-950/20 dark:via-card dark:to-teal-950/20",
-  "bg-rose-100 via-white to-rose-100 border-rose-200/80 dark:bg-rose-950/20 dark:via-card dark:to-pink-950/20",
-  "bg-sky-100 via-white to-sky-100 border-sky-200/80 dark:bg-sky-950/20 dark:via-card dark:to-cyan-950/20",
-  "bg-violet-100 via-white to-violet-100 border-violet-200/80 dark:bg-violet-950/20 dark:via-card dark:to-fuchsia-950/20",
-  "bg-indigo-10O via-white to-indigo-10OTH border-indigo-200/8₀ dark:bg-indigo-95₀/2₀ dark:via-card dark:to-blue-95₀/2₀",
+  "bg-gray-300 via-white to-amber-100 border-amber-200/80 dark:bg-amber-950/20 dark:via-card dark:to-orange-950/20",
+  "bg-gray-300 via-white to-emerald-100 border-emerald-200/80 dark:bg-emerald-950/20 dark:via-card dark:to-teal-950/20",
+  "bg-gray-300 via-white to-rose-100 border-rose-200/80 dark:bg-rose-950/20 dark:via-card dark:to-pink-950/20",
+  "bg-gray-300 via-white to-sky-100 border-sky-200/80 dark:bg-sky-950/20 dark:via-card dark:to-cyan-950/20",
+  "bg-gray-300 via-white to-violet-100 border-violet-200/80 dark:bg-violet-950/20 dark:via-card dark:to-fuchsia-950/20",
+  "bg-gray-300 via-white to-indigo-100 border-indigo-200/80 dark:bg-indigo-950/20 dark:via-card dark:to-blue-950/20",
 ];
 
 interface Props {
@@ -38,7 +43,7 @@ export function AdminDashboardTools({ onNavigate }: Props) {
         title="Management Tools"
         subtitle="Jump into any admin area"
       />
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-8 bg-gray-200 rounded-md">
         {ADMIN_TOOLS.map((tool, index) => {
           const Icon = ICON_MAP[tool.icon] || Sparkles;
           return (
@@ -47,14 +52,19 @@ export function AdminDashboardTools({ onNavigate }: Props) {
               onClick={() => onNavigate(tool.path)}
               className="group text-left w-full"
             >
-              <Card className={cn(
-                "relative h-full bg-gradient-to-br hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 cursor-pointer overflow-hidden",
-                TOOL_GRADIENTS[index % TOOL_GRADIENTS.length],
-              )}>
+              <Card
+                className={cn(
+                  "relative h-full bg-gradient-to-br hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 cursor-pointer overflow-hidden",
+                  TOOL_GRADIENTS[index % TOOL_GRADIENTS.length],
+                )}
+              >
                 <div
                   className={cn(
                     "absolute -right-10 -top-10 h-32 w-32 rounded-full blur-2xl opacity-25 transition-opacity duration-200 group-hover:opacity-40",
-                    tool.color.replace(/dark:bg-[^\s]+/, "").replace("text-", "bg-").split(/\s+/)[0],
+                    tool.color
+                      .replace(/dark:bg-[^\s]+/, "")
+                      .replace("text-", "bg-")
+                      .split(/\s+/)[0],
                   )}
                 />
                 <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-primary/[0.05] to-transparent pointer-events-none" />
@@ -73,7 +83,7 @@ export function AdminDashboardTools({ onNavigate }: Props) {
                         <h3 className="font-semibold text-sm sm:text-base mb-1">
                           {tool.title}
                         </h3>
-                        <span className="text-[10px] font-bold text-muted-foreground/40">
+                        <span className={`text-[10px] font-bold text-[${tool.color}]-foreground/40`}>
                           {String(index + 1).padStart(2, "0")}
                         </span>
                       </div>
@@ -81,7 +91,7 @@ export function AdminDashboardTools({ onNavigate }: Props) {
                         {tool.description}
                       </p>
                     </div>
-                    <ArrowRight className="w-4 h-4 text-muted-foreground/40 group-hover:text-primary group-hover:translate-x-0.5 transition-all duration-200 shrink-0 mt-1" />
+                    <ArrowRight className="w-7 h-7 text-muted-foreground/80 group-hover:text-[--color] group-hover:translate-x-0.5 transition-all duration-200 shrink-0 mt-1" />
                   </div>
                 </CardContent>
               </Card>

@@ -5,6 +5,7 @@ import { useLanguage } from "@/components/languages/languageProvider";
 import { useSearch, CROSS_TRANSLATION_OPTIONS } from "@/hooks/useSearch";
 import { routes } from "@/components/Routes/routes";
 import { useSubscription } from "@/hooks/useSubscription";
+import { useSearchSectionHeadings } from "./useSearchSectionHeadings";
 import type {
   PopularSearchItem,
   SearchResult,
@@ -45,6 +46,15 @@ export function useSearchPage() {
     filteredBooks,
     BOOK_NAMES,
   } = search;
+  const bibleResults = useMemo(
+    () => results.filter((r): r is SearchResult => !!(r as SearchResult)?.book_name),
+    [results],
+  );
+  const sectionHeadings = useSearchSectionHeadings(
+    bibleResults,
+    translation,
+    t?.lang,
+  );
   const scopeLocked = isFree && (scope === "topics" || scope === "lemma");
   const hasQuery = query.trim().length >= 3;
   const showSkeleton = loading && hasQuery && results.length === 0;
@@ -134,6 +144,7 @@ export function useSearchPage() {
     bookName,
     covenant,
     translation,
+    sectionHeadings,
     setTranslation,
     searchHistory,
     popularSearches,

@@ -51,6 +51,9 @@ export function AdminDashboardStats({ stats, loading }: Props) {
           color="bg-violet-500/10 text-violet-600"
           gradient="from-violet-300 via-white to-violet-300 border-violet-200/80"
         />
+
+        
+      
       </div>
     </section>
   );
@@ -67,10 +70,10 @@ export function StatsSectionHeading({
     <div className="flex items-center gap-3">
       <span className="h-6 w-1 rounded-full bg-gradient-to-b from-primary to-primary/40" />
       <div>
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+        <h2 className="text-md font-bold uppercase tracking-wider text-primary">
           {title}
         </h2>
-        {subtitle && <p className="text-xs text-muted-foreground/70">{subtitle}</p>}
+        {subtitle && <p className="text-xs text-black-foreground/70">{subtitle}</p>}
       </div>
     </div>
   );

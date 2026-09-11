@@ -8,6 +8,8 @@ interface SearchResultCardProps {
   headline?: string;
   verseText: string;
   translationAbbr?: string;
+  /** Section heading the result's verse falls under (e.g. "The Seventh Day"). */
+  sectionHeading?: string;
   onOpen: () => void;
   onStudy: () => void;
   onSave: () => void;
@@ -29,7 +31,7 @@ function parseHighlight(html: string): { text: string; highlight: boolean }[] {
 }
 
 export default function SearchResultCard({
-  ref_, headline, verseText, translationAbbr, onOpen, onStudy, onSave,
+  ref_, headline, verseText, translationAbbr, sectionHeading, onOpen, onStudy, onSave,
 }: SearchResultCardProps) {
   const parts = headline ? parseHighlight(headline) : null;
 
@@ -45,6 +47,12 @@ export default function SearchResultCard({
           </Badge>
         )}
       </div>
+      {/* Section context from the reader's heading dataset */}
+      {sectionHeading && (
+        <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/70">
+          {sectionHeading}
+        </p>
+      )}
       {/* Text */}
       {parts ? (
         <p className="text-sm leading-relaxed text-foreground/80 font-serif">

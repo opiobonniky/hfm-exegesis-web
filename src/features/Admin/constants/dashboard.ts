@@ -54,10 +54,10 @@ export const ADMIN_TOOLS: AdminTool[] = [
 ];
 
 export const ADMIN_QUICK_ACTIONS = [
-  { label: "Add Daily Verse", description: "Schedule a new verse", icon: "Sun", path: "/add-daily-verse", color: "text-amber-500" },
-  { label: "Add Devotion", description: "Create a new devotion", icon: "BookOpen", path: "/add-daily-devotion", color: "text-emerald-500" },
-  { label: "Create Reading Plan", description: "Build a new plan", icon: "BookText", path: "/add-reading-plan", color: "text-sky-500" },
-  { label: "Add Explanation", description: "Write verse explanation", icon: "BookMarked", path: "/add-explanation", color: "text-violet-500" },
-  { label: "User Management", description: "Manage user accounts", icon: "Users", path: "/admin/users", color: "text-blue-500" },
-  { label: "Journal Moderation", description: "Review journal entries", icon: "BookOpen", path: "/admin/journal-moderation", color: "text-rose-500" },
+  { label: "Add Daily Verse", description: "Schedule a new verse", icon: "Sun", path: "/add-daily-verse", color: "text-amber-700" },
+  { label: "Add Devotion", description: "Create a new devotion", icon: "BookOpen", path: "/add-daily-devotion", color: "text-emerald-700" },
+  { label: "Create Reading Plan", description: "Build a new plan", icon: "BookText", path: "/add-reading-plan", color: "text-sky-700" },
+  { label: "Add Explanation", description: "Write verse explanation", icon: "BookMarked", path: "/add-explanation", color: "text-violet-700" },
+  { label: "User Management", description: "Manage user accounts", icon: "Users", path: "/admin/users", color: "text-blue-700" },
+  { label: "Journal Moderation", description: "Review journal entries", icon: "BookOpen", path: "/admin/journal-moderation", color: "text-rose-700" },
 ] as const;

@@ -12,6 +12,7 @@ import { VolumeControl } from "./AudioControls/VolumeControl";
 import { VoiceControl } from "./AudioControls/VoiceControl";
 import { RepeatControl } from "./AudioControls/RepeatControl";
 import { PlaybackControls } from "./AudioControls/PlaybackControls";
+import { VerseTickBar } from "./AudioControls/VerseTickBar";
 
 interface AudioControlBarProps {
   audio: AudioPlayerState & AudioPlayerActions;
@@ -30,8 +31,6 @@ export default function AudioControlBar({
     audio.currentVerseIdx + 1,
     audio.totalVerses,
   );
-  const progressPct =
-    audio.totalVerses > 0 ? (currentPosition / audio.totalVerses) * 100 : 0;
   const repeatLabel =
     audio.repeatMode === "none"
       ? "Off"
@@ -42,16 +41,11 @@ export default function AudioControlBar({
   return (
     <div className="relative z-40 shrink-0 bg-transparent sm:px-4 sm:pb-3">
       <div className="mx-auto w-full max-w-3xl overflow-hidden border-t border-border/70 bg-card/95 shadow-[0_-12px_36px_-24px_hsl(var(--foreground))] backdrop-blur-xl sm:rounded-2xl sm:border">
-        <div
-          className="h-1 bg-muted/50"
-          role="progressbar"
-          aria-valuemin={0}
-          aria-valuemax={audio.totalVerses}
-          aria-valuenow={currentPosition}
-        >
-          <div
-            className="h-full rounded-e-full bg-primary transition-[width] duration-300"
-            style={{ width: `${progressPct}%` }}
+        <div className="px-3 pt-2.5 sm:px-4">
+          <VerseTickBar
+            currentVerseIdx={audio.currentVerseIdx}
+            totalVerses={audio.totalVerses}
+            onSeek={audio.seekToVerse}
           />
         </div>
 

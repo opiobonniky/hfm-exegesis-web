@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { sendPostRequest, API_BASE_URL } from "@/services/api";
 import { bibleApi } from "@/services/bibleApi";
+import { getChapterHeadingsCached } from "@/services/chapterHeadings";
 import type { ChapterHeading } from "@/services/bibleApi";
 import {
   BIBLE_BOOK_CHAPTERS,
@@ -135,28 +136,25 @@ export function useBibleReader() {
       setChapters((current) => (append ? [...current, ...loaded] : loaded));
       setHasMore(numbers.at(-1)! < max);
 
-      // Fetch section headings for the freshly loaded chapters. The backend
-      // dataset is BSB-derived public-domain and covers all 66 books; it is
-      // translated server-side when `lang` is provided. Failures are silent —
-      // headings are decorative and must never block reading.
+      // Fetch section headings for the freshly loaded chapters via the
+      // shared cache — back-navigation to a previously read chapter renders
+      // them instantly from cache, and language changes fetch fresh data.
       const lang = language || "en";
       await Promise.all(
         numbers.map((chapter) =>
-          bibleApi
-            .getChapterHeadings(translation, book, chapter, lang)
-            .then((headings) => ({ chapter, headings }))
-            .catch(() => ({ chapter, headings: [] as ChapterHeading[] })),
+          getChapterHeadingsCached(translation, book, chapter, lang).then(
+            (headings) => ({ chapter, headings }),
+          ),
         ),
-      )
-        .then((results) => {
-          setHeadingsByChapter((current) => {
-            const next = { ...current };
-            for (const { chapter, headings } of results) {
-              next[`${book}-${chapter}`] = headings;
-            }
-            return next;
-          });
+      ).then((results) => {
+        setHeadingsByChapter((current) => {
+          const next = { ...current };
+          for (const { chapter, headings } of results) {
+            next[`${book}-${chapter}`] = headings;
+          }
+          return next;
         });
+      });
     },
     [language],
   );

@@ -17,12 +17,12 @@ export function StatCard({ label, value, icon: Icon, color, gradient }: Props) {
   return (
     <Card
       className={cn(
-        "relative overflow-hidden border shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md",
-        "bg-gradient-to-br dark:border-border dark:bg-card dark:from-card dark:via-card dark:to-card",
+        "relative overflow-hidden shadow-md  duration-200 hover:-translate-y-0.5 hover:shadow-md",
+        "bg-background dark:bg-card dark:from-card dark:via-card dark:to-card",
         gradient,
       )}
     >
-      <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary/70 to-primary/10 dark:from-primary dark:to-primary/20" />
+      <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary/40 to-primary/10 dark:from-primary dark:to-primary/20" />
       <div
         className={cn(
           "absolute -right-8 -top-8 h-28 w-28 rounded-full blur-2xl opacity-20",

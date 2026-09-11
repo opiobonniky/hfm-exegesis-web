@@ -25,6 +25,7 @@ export default function VerseResources() {
     <BiblePageLayout className="flex flex-col">
       <VerseResourcesHero
         verseRef={h.verseRef}
+        sectionHeading={h.sectionHeading}
         goToReader={h.goToReader}
         statsRow={h.data ? <ResourceStatsRow data={h.data} /> : undefined}
         tabBar={h.visibleTabs.length > 0 ? (

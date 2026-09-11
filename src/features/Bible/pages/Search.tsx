@@ -40,6 +40,7 @@ export default function SearchPage() {
                   hasMore={h.results.length > 0 && h.total > h.results.length} loadMore={h.loadMore}
                   handleSelect={h.handleSelect} handleStudy={h.handleStudy} handleSave={h.handleSave}
                   handleHistoryTap={h.handleHistoryTap}
+                  sectionHeadings={h.sectionHeadings}
                 />
               ) : (
                 <SearchInitialState scope={h.scope} searchHistory={h.searchHistory} popularSearches={h.popularSearches}

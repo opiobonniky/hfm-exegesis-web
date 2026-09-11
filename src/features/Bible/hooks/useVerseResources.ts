@@ -6,6 +6,7 @@ import {
   getTranslationComparison,
 } from "@/services/verseResourcesApi";
 import { getBookPrologue } from "@/services/bookProloguesApi";
+import { getHeadingForVerse } from "@/services/chapterHeadings";
 import type {
   VerseResourceData,
   TranslationComparisonEntry,
@@ -43,6 +44,21 @@ export function useVerseResources() {
   const [prologue, setPrologue] = useState<BookPrologue | null>(null);
   const [prologueLoading, setPrologueLoading] = useState(false);
   const verseRef = `${bookName} ${chapter}:${verseNumber}`;
+  // Section heading covering this verse (e.g. "The Seventh Day" for
+  // Genesis 2:1) — same dataset the reader and search use.
+  const [sectionHeading, setSectionHeading] = useState<string | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    if (!bookName || !chapter) return;
+    getHeadingForVerse("Berean", bookName, chapter, verseNumber).then(
+      (heading) => {
+        if (!cancelled) setSectionHeading(heading);
+      },
+    );
+    return () => {
+      cancelled = true;
+    };
+  }, [bookName, chapter, verseNumber]);
   const fetchAll = useCallback(async () => {
     if (!bookName || !chapter) return;
     setLoading(true);
@@ -106,6 +122,7 @@ export function useVerseResources() {
     chapter,
     verseNumber,
     verseRef,
+    sectionHeading,
     activeTab,
     setActiveTab,
     handleTabChange,

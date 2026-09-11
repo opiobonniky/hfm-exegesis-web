@@ -88,6 +88,15 @@ export function useBibleReaderPage() {
     useState<VerseActionTarget | null>(null);
   const [fontSize, setFontSize] = useState(getInitialFontSize);
 
+  // ── Audio “now reading” tracking ─────────────────────────────────────────
+  // The audio player reports an index into the playlist it was given; map it
+  // back to the verse currently being read so the text can highlight it and
+  // auto-scroll can keep it in view.
+  const [audioVerseKey, setAudioVerseKey] = useState<string | null>(null);
+  const playlistRef = useRef<
+    Array<{ text: string; key: string; book: string; chapter: number; verse: number }> | null
+  >(null);
+
   const updateFontSize = useCallback((size: number) => {
     const validSize = Number.isFinite(size)
       ? Math.min(Math.max(Math.trunc(size), MIN_FONT_SIZE), MAX_FONT_SIZE)
@@ -280,16 +289,69 @@ export function useBibleReaderPage() {
       audio.stopPlayback();
       return;
     }
-    const verses = reader.chapters
-      .filter(
-        (chapter) =>
-          chapter.book === reader.selectedBook &&
-          chapter.chapter === reader.selectedChapter,
-      )
-      .flatMap((chapter) => chapter.verses)
-      .filter((verse) => verse.text);
-    if (verses.length > 0) audio.startPlayback(verses);
+    const chapterChapters = reader.chapters.filter(
+      (chapter) =>
+        chapter.book === reader.selectedBook &&
+        chapter.chapter === reader.selectedChapter,
+    );
+    // Each playlist item carries BOTH the spoken text (consumed by the audio
+    // player) and the verse identity (consumed by the highlight/scroll maps).
+    const playlist = chapterChapters.flatMap((chapter) =>
+      chapter.verses
+        .filter((verse) => verse.text)
+        .map((verse) => ({
+          text: verse.text,
+          key: `${chapter.book}-${chapter.chapter}-${verse.verse}`,
+          book: chapter.book,
+          chapter: chapter.chapter,
+          verse: verse.verse,
+        })),
+    );
+    if (playlist.length === 0) return;
+    playlistRef.current = playlist;
+    audio.startPlayback(playlist, 0);
+    // Immediately reflect the first verse so the highlight appears in sync.
+    setAudioVerseKey(playlist[0].key);
   }, [audio, reader.chapters, reader.selectedBook, reader.selectedChapter]);
+
+  // Multi-verse selection playback (“Listen” on selected verses) is defined
+  // after selectedVerseData below (TDZ — it closes over it).
+
+  // Map the player's playlist index to the verse key being read.
+  useEffect(() => {
+    if (!audio.isPlaying && !audio.isPaused) {
+      setAudioVerseKey(null);
+      return;
+    }
+    const playlist = playlistRef.current;
+    if (!playlist) return;
+    const item = playlist[audio.currentVerseIdx];
+    if (item) setAudioVerseKey(item.key);
+  }, [audio.currentVerseIdx, audio.isPlaying, audio.isPaused]);
+
+  // Keep the verse being read in view: scroll only when it is out of the
+  // viewport, so the user's manual scrolling is respected while following
+  // along. Checks run on every verse change and while playing.
+  useEffect(() => {
+    if (!audioVerseKey || (!audio.isPlaying && !audio.isPaused)) return;
+    const scrollRoot = scrollRef.current;
+    const element = reader.verseRefs.current[audioVerseKey];
+    if (!scrollRoot || !element) return;
+
+    const ensureVisible = () => {
+      const rootRect = scrollRoot.getBoundingClientRect();
+      const rect = element.getBoundingClientRect();
+      const margin = 80;
+      const fullyVisible =
+        rect.top >= rootRect.top + margin &&
+        rect.bottom <= rootRect.bottom - margin;
+      if (fullyVisible) return;
+      requestAnimationFrame(() => {
+        element.scrollIntoView({ behavior: "smooth", block: "center" });
+      });
+    };
+    ensureVisible();
+  }, [audioVerseKey, audio.isPlaying, audio.isPaused, reader.verseRefs]);
 
   const handleExplainVerse = useCallback(
     (book: string, chapter: number, verse: number) => {
@@ -509,9 +571,20 @@ export function useBibleReaderPage() {
     }
   }, [selectedVerseData]);
 
-  const handleListenSelected = useCallback(() => {
+  // Multi-verse selection playback with the same now-reading tracking as
+  // full-chapter reading (defined here because it closes over selectedVerseData).
+  const handleListenSelectedAudio = useCallback(() => {
     if (selectedVerseData.length === 0) return;
-    audio.startPlayback(selectedVerseData);
+    const playlist = selectedVerseData.map((verse) => ({
+      text: verse.text,
+      key: `${verse.book}-${verse.chapter}-${verse.verse}`,
+      book: verse.book,
+      chapter: verse.chapter,
+      verse: verse.verse,
+    }));
+    playlistRef.current = playlist;
+    audio.startPlayback(playlist, 0);
+    setAudioVerseKey(playlist[0].key);
     clearSelection();
   }, [audio, clearSelection, selectedVerseData]);
 
@@ -746,6 +819,7 @@ export function useBibleReaderPage() {
       chapter: {
         chapters: reader.chapters,
         headingsByChapter: reader.headingsByChapter,
+        audioVerseKey,
         selectedVerses: reader.selectedVerses,
         highlights: reader.highlights,
         favorites: reader.favorites,
@@ -779,7 +853,7 @@ export function useBibleReaderPage() {
         onMultiFavorite: handleMultiFavorite,
         onMultiCopy: handleCopySelected,
         onMultiShare: handleShareSelected,
-        onMultiListen: handleListenSelected,
+        onMultiListen: handleListenSelectedAudio,
         onMultiClear: clearSelection,
         onPrev: handlePrevChapter,
         onNext: handleNextChapter,

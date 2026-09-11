@@ -11,6 +11,8 @@ type SearchResultItem = SearchResult | JournalSearchResult | TopicResult | Lemma
 
 interface SearchResultsListProps {
   results: SearchResultItem[];
+  /** Section headings keyed "Book|Chapter|Verse" for bible-scope results. */
+  sectionHeadings?: Record<string, string>;
   scope: string;
   total: number;
   loading: boolean;
@@ -52,7 +54,7 @@ function LemmaItem({ item, idx }: { item: LemmaResult; idx: number }) {
   );
 }
 
-export function SearchResultsList({ results, scope, total, loading, hasMore, loadMore, handleSelect, handleStudy, handleSave, handleHistoryTap }: SearchResultsListProps) {
+export function SearchResultsList({ results, scope, total, loading, hasMore, loadMore, handleSelect, handleStudy, handleSave, handleHistoryTap, sectionHeadings = {} }: SearchResultsListProps) {
   return (
     <div className="px-4 sm:px-6 pb-6 space-y-3">
       {results.map((item, idx) => {
@@ -60,12 +62,14 @@ export function SearchResultsList({ results, scope, total, loading, hasMore, loa
         if (scope === "topics") return <TopicItem key={`topic-${idx}`} item={item as TopicResult} idx={idx} onTap={() => handleHistoryTap((item as TopicResult).topicName)} />;
         if (scope === "lemma") return <LemmaItem key={`lemma-${idx}`} item={item as LemmaResult} idx={idx} />;
         const bi = item as SearchResult | CrossTranslationResult;
+        const verseNo = (bi as SearchResult).verse ?? (bi as CrossTranslationResult).verse;
         return (
           <SearchResultCard key={`bible-${idx}`}
-            ref_={`${bi.book_name} ${bi.chapter}:${(bi as SearchResult).verse ?? (bi as CrossTranslationResult).verse}`}
+            ref_={`${bi.book_name} ${bi.chapter}:${verseNo}`}
             headline={(bi as any).headline}
             verseText={bi.verse_text || (bi as CrossTranslationResult).verse_text}
             translationAbbr={(bi as CrossTranslationResult).translationAbbr}
+            sectionHeading={sectionHeadings[`${bi.book_name}|${bi.chapter}|${verseNo}`]}
             onOpen={() => handleSelect(bi as SearchResult)}
             onStudy={() => handleStudy(bi as SearchResult)}
             onSave={() => handleSave(bi as SearchResult)}

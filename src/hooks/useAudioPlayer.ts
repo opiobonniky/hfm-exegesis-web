@@ -28,12 +28,46 @@ export interface AudioPlayerActions {
   setVoice: (voice: TTSVoice) => void;
   skipForward: () => void;
   skipBackward: () => void;
+  /** Jump playback to a playlist index (0-based) — used by the tick-bar scrubber. */
+  seekToVerse: (verseIdx: number) => void;
   setVolume: (vol: number) => void;
   setRepeatMode: (mode: "none" | "one" | "all") => void;
   cycleRepeatMode: () => void;
 }
 
 const SPEED_OPTIONS = [0.75, 1.0, 1.25, 1.5, 1.75, 2.0];
+
+/**
+ * Natural pause between verses (ms) so scripture reads like a professional
+ * narration instead of back-to-back robotic speech. Scales with the speech
+ * rate — faster reading, proportionally shorter breaths.
+ */
+const VERSE_PAUSE_BASE_MS = 420;
+/** Extra pause at the end of a chapter/passage before completion. */
+const PASSAGE_END_PAUSE_MS = 900;
+/** Longest pause applied at reduced speeds. */
+const VERSE_PAUSE_MAX_MS = 900;
+
+const versePauseMs = (rate: number, isLastVerse: boolean) => {
+  const base = isLastVerse ? PASSAGE_END_PAUSE_MS : VERSE_PAUSE_BASE_MS;
+  return Math.min(Math.round(base / Math.max(rate, 0.5)), VERSE_PAUSE_MAX_MS + 600);
+};
+
+/**
+ * Expand common scripture abbreviations and symbols so TTS pronounces them
+ * naturally (e.g. "LORD" → "Lord", "§" → "verse"). Purely for narration —
+ * the on-screen text is never modified.
+ */
+const normalizeForSpeech = (text: string): string =>
+  text
+    .replace(/\bLORD\b/g, "Lord")
+    .replace(/\bLord\s+GOD\b/g, "Lord God")
+    .replace(/\bGOD\b/g, "God")
+    .replace(/\bv\.(?=\s*\d)/gi, "verse ")
+    .replace(/\bvs\.(?=\s*\d)/gi, "verse ")
+    .replace(/§/g, "verse ")
+    .replace(/\s{2,}/g, " ")
+    .trim();
 
 /** How many upcoming verses to keep synthesized and ready in the cache */
 const PREFETCH_AHEAD = 2;
@@ -156,6 +190,8 @@ export function useAudioPlayer(): AudioPlayerState & AudioPlayerActions {
    * resolve (paused audio fires no onended).
    */
   const settleCurrentRef = useRef<(() => void) | null>(null);
+  /** Timeout handle for the inter-verse narration pause. */
+  const pauseTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   /**
    * Monotonic epoch guarding all async work. Any fetch that was started
@@ -236,6 +272,10 @@ export function useAudioPlayer(): AudioPlayerState & AudioPlayerActions {
   const cancelAllAudio = useCallback(() => {
     isReadingRef.current = false;
     isPausedRef.current = false;
+    if (pauseTimeoutRef.current) {
+      clearTimeout(pauseTimeoutRef.current);
+      pauseTimeoutRef.current = null;
+    }
     if (utteranceRef.current) {
       if (window.speechSynthesis?.paused) window.speechSynthesis.resume();
       window.speechSynthesis?.cancel();
@@ -476,11 +516,14 @@ export function useAudioPlayer(): AudioPlayerState & AudioPlayerActions {
       }
 
       setCurrentVerseIdx(idx);
+      // Narrate from a normalized copy so abbreviations/symbols are spoken
+      // naturally; the on-screen verse text is untouched.
+      const spokenText = normalizeForSpeech(versesRef.current[idx].text);
       // Start the CURRENT verse's synthesis first so it reaches the backend
       // TTS pool before any prefetches, then warm the cache for the verses
       // that follow. By the time the current verse ends, the next audio is
       // usually already synthesized and playback continues without a gap.
-      const playPromise = playVerse(versesRef.current[idx].text, idx);
+      const playPromise = playVerse(spokenText, idx);
       prefetchUpcoming(idx + 1);
       await playPromise;
 
@@ -491,6 +534,29 @@ export function useAudioPlayer(): AudioPlayerState & AudioPlayerActions {
       // currentIdxRef — the equality check defers to it.
       if (currentIdxRef.current === idx && repeatModeRef.current !== "one") {
         currentIdxRef.current = idx + 1;
+      }
+
+      // Breathe between verses — a short beat before the next verse starts
+      // gives narration a natural, professional cadence. Repeat-one replays
+      // immediately without a pause. Interruptible: stop/skip during the
+      // pause must abort it immediately.
+      const isLastVerse = idx + 1 >= versesRef.current.length;
+      if (isReadingRef.current && !isPausedRef.current && repeatModeRef.current !== "one") {
+        const pauseMs = versePauseMs(speechRateRef.current, isLastVerse);
+        const startEpoch = epochRef.current;
+        await new Promise<void>((resolve) => {
+          pauseTimeoutRef.current = setTimeout(resolve, pauseMs);
+          // Abort the sleep if playback is redirected/stopped mid-pause.
+          settleCurrentRef.current = () => {
+            if (pauseTimeoutRef.current) {
+              clearTimeout(pauseTimeoutRef.current);
+              pauseTimeoutRef.current = null;
+            }
+            resolve();
+          };
+        });
+        if (settleCurrentRef.current) settleCurrentRef.current = null;
+        if (epochRef.current !== startEpoch || !isReadingRef.current) break;
       }
     }
 
@@ -597,6 +663,10 @@ export function useAudioPlayer(): AudioPlayerState & AudioPlayerActions {
    * time — a later const would be in the temporal dead zone).
    */
   const redirectPlayback = useCallback(() => {
+    if (pauseTimeoutRef.current) {
+      clearTimeout(pauseTimeoutRef.current);
+      pauseTimeoutRef.current = null;
+    }
     if (utteranceRef.current) {
       if (window.speechSynthesis?.paused) window.speechSynthesis.resume();
       window.speechSynthesis?.cancel();
@@ -657,6 +727,27 @@ export function useAudioPlayer(): AudioPlayerState & AudioPlayerActions {
     redirectPlayback();
   }, [resumePlayback, redirectPlayback]);
 
+  /**
+   * Scrub straight to a playlist index (tick-bar click / keyboard seek).
+   * Same contract as skipBackward/skipForward: advance the index, then
+   * redirectPlayback() so the loop drops the stale verse and picks up the
+   * new one — while paused it resumes so the seek is heard immediately.
+   */
+  const seekToVerse = useCallback(
+    (verseIdx: number) => {
+      if (!isReadingRef.current) return;
+      const clamped = Math.min(
+        Math.max(Math.trunc(verseIdx), 0),
+        Math.max(versesRef.current.length - 1, 0),
+      );
+      if (clamped === currentIdxRef.current) return;
+      if (isPausedRef.current) resumePlayback();
+      currentIdxRef.current = clamped;
+      redirectPlayback();
+    },
+    [redirectPlayback, resumePlayback],
+  );
+
   const handleSetVolume = useCallback((vol: number) => {
     const nextVolume = Math.max(0, Math.min(1, vol));
     volumeRef.current = nextVolume;
@@ -704,6 +795,7 @@ export function useAudioPlayer(): AudioPlayerState & AudioPlayerActions {
     setVoice,
     skipForward,
     skipBackward,
+    seekToVerse,
     setVolume: handleSetVolume,
     setRepeatMode,
     cycleRepeatMode,

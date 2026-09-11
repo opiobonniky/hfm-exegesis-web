@@ -31,6 +31,8 @@ interface SidebarProps {
 interface ChapterProps {
   chapters: ChapterData[];
   headingsByChapter?: HeadingsByChapter;
+  /** Verse currently being read aloud (audio tracking), if any. */
+  audioVerseKey?: string | null;
   selectedVerses: string[];
   highlights: Record<string, Highlight>;
   favorites: Set<string>;
@@ -138,6 +140,7 @@ export default function BibleReaderBody({
               <ChapterContent
                 chapters={chapter.chapters}
                 headingsByChapter={chapter.headingsByChapter}
+                audioVerseKey={chapter.audioVerseKey}
                 selectedVerses={chapter.selectedVerses}
                 highlights={chapter.highlights}
                 favorites={chapter.favorites}

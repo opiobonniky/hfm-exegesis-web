@@ -1,8 +1,19 @@
 // AdminDashboardQuickActions — quick action links for admin dashboard
 import {
-  Sun, BookOpen, BookText, BookMarked, Users, ArrowUpRight,
+  Sun,
+  BookOpen,
+  BookText,
+  BookMarked,
+  Users,
+  ArrowUpRight,
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { ADMIN_QUICK_ACTIONS } from "../constants";
 import type { LucideIcon } from "lucide-react";
@@ -16,12 +27,12 @@ const ICON_MAP: Record<string, LucideIcon> = {
 };
 
 const ACTION_GRADIENTS = [
-  "from-amber-50/80 to-orange-50/80 hover:border-amber-300 dark:from-amber-950/20 dark:to-orange-950/20",
-  "from-emerald-50/80 to-teal-50/80 hover:border-emerald-300 dark:from-emerald-950/20 dark:to-teal-950/20",
-  "from-sky-50/80 to-cyan-50/80 hover:border-sky-300 dark:from-sky-950/20 dark:to-cyan-950/20",
-  "from-violet-50/80 to-fuchsia-50/80 hover:border-violet-300 dark:from-violet-950/20 dark:to-fuchsia-950/20",
-  "from-blue-50/80 to-indigo-50/80 hover:border-blue-300 dark:from-blue-950/20 dark:to-indigo-950/20",
-  "from-rose-50/80 to-pink-50/80 hover:border-rose-300 dark:from-rose-950/20 dark:to-pink-950/20",
+  "bg-primary/50 to-primary-50/80 hover:border-amber-300 dark:from-amber-950/20 dark:to-orange-950/20",
+  "bg-primary/50 to-teal-50/80 hover:border-emerald-300 dark:from-emerald-950/20 dark:to-teal-950/20",
+  "bg-primary/50 to-cyan-50/80 hover:border-sky-300 dark:from-sky-950/20 dark:to-cyan-950/20",
+  "bg-primary/50 to-fuchsia-50/80 hover:border-violet-300 dark:from-violet-950/20 dark:to-fuchsia-950/20",
+  "bg-primary/50 to-blue-50/80 hover:border-blue-300 dark:from-blue-950/20 dark:to-indigo-950/20",
+  "bg-primary/50 to-rose-50/80 hover:border-rose-300 dark:from-rose-950/20 dark:to-pink-950/20",
 ];
 
 interface Props {
@@ -30,7 +41,7 @@ interface Props {
 
 export function AdminDashboardQuickActions({ onNavigate }: Props) {
   return (
-    <Card className="relative overflow-hidden border-primary/10 bg-white/90 shadow-md shadow-primary/[0.06] dark:bg-card">
+    <Card className="relative overflow-hidden border-primary/10 bg-inherit -shadow-md shadow-primary/[0.26] dark:bg-card">
       <div className="absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-primary/[0.06] to-transparent pointer-events-none" />
       <div className="relative">
         <CardHeader className="pb-3">
@@ -51,7 +62,7 @@ export function AdminDashboardQuickActions({ onNavigate }: Props) {
                   key={action.path}
                   onClick={() => onNavigate(action.path)}
                   className={cn(
-                    "group relative flex items-center gap-3 rounded-xl border bg-gradient-to-br p-3 text-left overflow-hidden transition-all hover:-translate-y-0.5 hover:shadow-sm",
+                    "group relative flex items-center gap-3 rounded-xl shadow-lg bg-gradient-to-br p-3 text-left overflow-hidden transition-all hover:-translate-y-0.5 hover:shadow-sm",
                     ACTION_GRADIENTS[index % ACTION_GRADIENTS.length],
                   )}
                 >
@@ -70,11 +81,15 @@ export function AdminDashboardQuickActions({ onNavigate }: Props) {
                   </span>
                   <div className="relative min-w-0 flex-1">
                     <p className="text-sm font-semibold">{action.label}</p>
-                    <p className="truncate text-xs text-muted-foreground">
+                    <p
+                      className={`"truncate text-xs ${action.color} -foreground/70 group-hover:text-[--color] transition-colors duration-200"`}
+                    >
                       {action.description}
                     </p>
                   </div>
-                  <ArrowUpRight className="relative w-4 h-4 text-muted-foreground/40 group-hover:text-primary group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all shrink-0" />
+                  <ArrowUpRight
+                    className={`relative w-4 h-4 text-muted-foreground/40 group-hover:text-primary group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all shrink-0`}
+                  />
                 </button>
               );
             })}
