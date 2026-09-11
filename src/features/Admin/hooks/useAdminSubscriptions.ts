@@ -26,6 +26,7 @@ export function useAdminSubscriptions() {
   const [manageLoading, setManageLoading] = useState(false);
   const [refundDialog, setRefundDialog] = useState<SubscribedUser | null>(null);
   const [refundLoading, setRefundLoading] = useState(false);
+  const [historyUser, setHistoryDialog] = useState<SubscribedUser | null>(null);
 
   const loadTiers = useCallback(async () => {
     setTiersLoading(true);
@@ -140,13 +141,13 @@ export function useAdminSubscriptions() {
     data: {
       activeTab, tiers, tiersLoading, tierDialog, tierForm, tierSaving, deleteTier, seeding,
       subscribers, subsLoading, syncing, summary, suspendDialog, suspendLoading,
-      manageDialog, manageLoading, refundDialog, refundLoading,
+      manageDialog, manageLoading, refundDialog, refundLoading, historyUser,
     },
     actions: {
       setActiveTab, setTierDialog, setTierForm, setDeleteTier, setSuspendDialog,
       setManageDialog, saveManage, setRefundDialog, confirmRefund, openCreateTier,
       openEditTier, saveTier, confirmDeleteTier, handleSeed, handleSyncStripe, toggleSuspend,
-      loadTiers, loadSubscribers,
+      loadTiers, loadSubscribers, setHistoryDialog,
     },
   };
 }

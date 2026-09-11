@@ -43,6 +43,7 @@ export { AdminSubscriptionsTabs } from "./AdminSubscriptionsTabs";
 export { SubscriptionsSummaryCards } from "./SubscriptionsSummaryCards";
 export { TiersTab } from "./TiersTab";
 export { SubscribersTable } from "./SubscribersTable";
+export { SubscriptionHistorySheet } from "./SubscriptionHistorySheet";
 export { SuspendUserDialog } from "./SuspendUserDialog";
 export { DeleteTierDialog } from "./DeleteTierDialog";
 export { ManageUserDialog } from "./ManageUserDialog";

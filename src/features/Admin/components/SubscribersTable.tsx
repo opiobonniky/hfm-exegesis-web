@@ -1,5 +1,5 @@
 // SubscribersTable — subscribers list tab content for admin subscriptions
-import { Users, RefreshCw, Ban, RotateCcw, Loader2, Settings2, Undo2 } from "lucide-react";
+import { Users, RefreshCw, Ban, RotateCcw, Loader2, Settings2, Undo2, History } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -17,6 +17,7 @@ interface Props {
   onSuspend: (sub: SubscribedUser) => void;
   onManage: (sub: SubscribedUser) => void;
   onRefund: (sub: SubscribedUser) => void;
+  onHistory: (sub: SubscribedUser) => void;
 }
 
 export function SubscribersTable({
@@ -27,6 +28,7 @@ export function SubscribersTable({
   onSuspend,
   onManage,
   onRefund,
+  onHistory,
 }: Props) {
   return (
     <Card className="border-border/50">
@@ -142,6 +144,15 @@ export function SubscribersTable({
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-muted-foreground hover:text-primary"
+                          onClick={() => onHistory(sub)}
+                          title="View subscription history"
+                        >
+                          <History className="w-4 h-4" />
+                        </Button>
                         <Button
                           variant="ghost"
                           size="sm"

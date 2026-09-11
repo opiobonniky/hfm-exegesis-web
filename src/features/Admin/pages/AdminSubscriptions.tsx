@@ -13,6 +13,7 @@ import { SuspendUserDialog } from "../components/SuspendUserDialog";
 import { DeleteTierDialog } from "../components/DeleteTierDialog";
 import { ManageUserDialog } from "../components/ManageUserDialog";
 import { RefundUserDialog } from "../components/RefundUserDialog";
+import { SubscriptionHistorySheet } from "../components/SubscriptionHistorySheet";
 import { TierFormDialog } from "../components/TierFormDialog";
 
 const AdminSubscriptions = () => {
@@ -48,6 +49,7 @@ const AdminSubscriptions = () => {
             onSuspend={actions.setSuspendDialog}
             onManage={actions.setManageDialog}
             onRefund={actions.setRefundDialog}
+            onHistory={actions.setHistoryDialog}
           />
         </TabsContent>
       </AdminSubscriptionsTabs>
@@ -88,6 +90,11 @@ const AdminSubscriptions = () => {
         loading={data.refundLoading}
         onOpenChange={(o) => !o && actions.setRefundDialog(null)}
         onConfirm={actions.confirmRefund}
+      />
+
+      <SubscriptionHistorySheet
+        user={data.historyUser}
+        onOpenChange={(o) => !o && actions.setHistoryDialog(null)}
       />
     </div>
   );
