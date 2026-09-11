@@ -19,7 +19,9 @@
     "validate:hooks": "bash scripts/validate-hooks.sh",
     "validate:components": "bash scripts/validate-components.sh",
     "lint:colors": "node scripts/check-hardcoded-colors.js",
-    "lint:colors:verbose": "node scripts/check-hardcoded-colors.js --verbose"
+    "lint:colors:verbose": "node scripts/check-hardcoded-colors.js --verbose",
+    "lint:dark": "node scripts/check-dark-mode.js",
+    "lint:dark:update": "node scripts/check-dark-mode.js --update-baseline"
   },
   "dependencies": {
     "@eslint/js": "^9.32.0",

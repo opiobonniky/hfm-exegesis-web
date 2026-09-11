@@ -1,0 +1,279 @@
+{
+  "src/features/Admin/components/BookPrologueHero.tsx": [
+    "light-surface:bg-emerald-300",
+    "light-surface:bg-amber-300"
+  ],
+  "src/features/AdminTriviaUserDetail/components/AnswerHistoryTable.tsx": [
+    "light-surface:bg-emerald-100",
+    "light-surface:border-emerald-200",
+    "accent-tint:text-emerald-700"
+  ],
+  "src/features/Auth/components/AuthSlideButton.tsx": [
+    "dark-text:text-gray-900"
+  ],
+  "src/features/Auth/pages/ForceChangePassword.tsx": [
+    "light-surface:bg-amber-100",
+    "accent-tint:text-amber-600"
+  ],
+  "src/features/DailyContent/components/AddExplanationExegesisForm.tsx": [
+    "accent-tint:text-sky-600"
+  ],
+  "src/features/DailyContent/components/AddExplanationExtrasForm.tsx": [
+    "accent-tint:text-sky-600"
+  ],
+  "src/features/DailyContent/components/AddExplanationHeader.tsx": [
+    "light-surface:border-amber-300",
+    "accent-tint:text-amber-700"
+  ],
+  "src/features/DailyContent/components/AddExplanationHeaderBar.tsx": [
+    "accent-tint:text-sky-600"
+  ],
+  "src/features/DailyContent/components/AddExplanationReferenceForm.tsx": [
+    "accent-tint:text-sky-600"
+  ],
+  "src/features/DailyContent/components/AddExplanationSidebar.tsx": [
+    "accent-tint:text-emerald-600",
+    "accent-tint:text-sky-600"
+  ],
+  "src/features/DailyContent/components/AddExplanationStudyForm.tsx": [
+    "accent-tint:text-sky-600"
+  ],
+  "src/features/DailyContent/components/ExplanationAutoFillBanner.tsx": [
+    "light-surface:border-sky-200",
+    "accent-tint:text-sky-700",
+    "accent-tint:text-sky-600",
+    "light-surface:border-sky-300",
+    "light-surface:bg-white",
+    "light-surface:bg-sky-100"
+  ],
+  "src/features/DailyContent/components/GuidedTabs.tsx": [
+    "light-surface:border-emerald-200",
+    "accent-tint:text-emerald-700"
+  ],
+  "src/features/DailyContent/components/InlineWarning.tsx": [
+    "accent-tint:text-amber-600"
+  ],
+  "src/features/DailyContent/components/LivePreview.tsx": [
+    "accent-tint:text-amber-600",
+    "accent-tint:text-amber-700"
+  ],
+  "src/features/DailyContent/components/PromptSelector.tsx": [
+    "light-surface:border-amber-300"
+  ],
+  "src/features/Lab/components/LabAbideStage.tsx": [
+    "accent-tint:text-emerald-600",
+    "accent-tint:text-blue-600",
+    "accent-tint:text-amber-600",
+    "accent-tint:text-rose-600"
+  ],
+  "src/features/Lab/components/LabApplyStage.tsx": [
+    "accent-tint:text-emerald-600"
+  ],
+  "src/features/Lab/components/LabCompletedStage.tsx": [
+    "accent-tint:text-emerald-600"
+  ],
+  "src/features/Lab/components/LabLearnStage.tsx": [
+    "accent-tint:text-amber-600"
+  ],
+  "src/features/Lab/components/LabLookStage.tsx": [
+    "accent-tint:text-blue-600",
+    "accent-tint:text-amber-600"
+  ],
+  "src/features/Lab/constants.ts": [
+    "light-surface:bg-amber-100",
+    "accent-tint:text-amber-600",
+    "light-surface:bg-emerald-100",
+    "accent-tint:text-emerald-600"
+  ],
+  "src/features/NotificationSettings/components/NotificationSettingsLayout.tsx": [
+    "light-surface:bg-white"
+  ],
+  "src/features/ReadingPlan/components/ActivePlanCard.tsx": [
+    "light-surface:bg-emerald-100",
+    "accent-tint:text-emerald-700"
+  ],
+  "src/features/ReadingPlan/components/BrowsePlanCard.tsx": [
+    "accent-tint:text-teal-600",
+    "light-surface:bg-emerald-100",
+    "accent-tint:text-emerald-700",
+    "light-surface:bg-teal-100",
+    "accent-tint:text-teal-700",
+    "light-surface:bg-violet-100",
+    "accent-tint:text-violet-700",
+    "light-surface:bg-stone-200"
+  ],
+  "src/features/ReadingPlan/components/DailyReadingHeader.tsx": [
+    "light-surface:bg-amber-300"
+  ],
+  "src/features/ReadingPlan/components/DayCard.tsx": [
+    "light-surface:border-emerald-200",
+    "light-surface:border-violet-200",
+    "light-surface:bg-emerald-100",
+    "accent-tint:text-emerald-700",
+    "light-surface:bg-violet-100",
+    "accent-tint:text-violet-700",
+    "light-surface:border-sky-200",
+    "accent-tint:text-sky-700",
+    "light-surface:border-amber-200",
+    "accent-tint:text-amber-700",
+    "light-surface:border-indigo-200",
+    "accent-tint:text-indigo-700"
+  ],
+  "src/features/ReadingPlan/components/DayCardEdit.tsx": [
+    "light-surface:border-teal-300",
+    "light-surface:border-emerald-200",
+    "light-surface:border-amber-200",
+    "light-surface:bg-emerald-100",
+    "accent-tint:text-emerald-700",
+    "light-surface:bg-amber-100",
+    "accent-tint:text-amber-700",
+    "accent-tint:text-emerald-600",
+    "accent-tint:text-amber-600",
+    "accent-tint:text-teal-600",
+    "accent-tint:text-teal-700",
+    "accent-tint:text-violet-600",
+    "accent-tint:text-violet-700"
+  ],
+  "src/features/ReadingPlan/components/EditPlanDaysSection.tsx": [
+    "accent-tint:text-teal-700"
+  ],
+  "src/features/ReadingPlan/components/PlanAdminTab.tsx": [
+    "accent-tint:text-violet-600",
+    "accent-tint:text-sky-600",
+    "accent-tint:text-amber-600",
+    "accent-tint:text-indigo-600",
+    "accent-tint:text-orange-700",
+    "accent-tint:text-emerald-600",
+    "accent-tint:text-rose-600",
+    "light-surface:border-emerald-100",
+    "accent-tint:text-emerald-700",
+    "light-surface:border-sky-100",
+    "accent-tint:text-sky-700",
+    "light-surface:bg-emerald-100",
+    "light-surface:bg-rose-100",
+    "accent-tint:text-rose-700",
+    "light-surface:bg-amber-100",
+    "accent-tint:text-amber-700",
+    "light-surface:border-indigo-100",
+    "accent-tint:text-indigo-700"
+  ],
+  "src/features/ReadingPlan/components/PlanDetailHeader.tsx": [
+    "light-surface:bg-violet-200",
+    "light-surface:bg-indigo-200",
+    "light-surface:border-violet-200",
+    "light-surface:bg-violet-100",
+    "accent-tint:text-violet-700",
+    "accent-tint:text-sky-600",
+    "accent-tint:text-emerald-600",
+    "accent-tint:text-violet-600",
+    "accent-tint:text-orange-600",
+    "accent-tint:text-amber-600",
+    "accent-tint:text-indigo-600",
+    "accent-tint:text-emerald-700",
+    "accent-tint:text-rose-700"
+  ],
+  "src/features/ReadingPlan/components/PlanDetailUI.tsx": [
+    "light-surface:border-emerald-200",
+    "accent-tint:text-emerald-700",
+    "light-surface:border-sky-200",
+    "accent-tint:text-sky-700"
+  ],
+  "src/features/ReadingPlan/components/PlanOverviewTab.tsx": [
+    "accent-tint:text-emerald-700",
+    "accent-tint:text-rose-700"
+  ],
+  "src/features/ReadingPlan/components/PlanQuizTab.tsx": [
+    "light-surface:bg-violet-100",
+    "light-surface:border-violet-200",
+    "accent-tint:text-violet-700",
+    "light-surface:border-amber-200",
+    "accent-tint:text-amber-700",
+    "light-surface:border-emerald-200",
+    "accent-tint:text-emerald-700",
+    "light-surface:border-indigo-200"
+  ],
+  "src/features/ReadingPlan/components/PlanStepDays.tsx": [
+    "accent-tint:text-teal-600",
+    "light-surface:border-emerald-200",
+    "accent-tint:text-emerald-700"
+  ],
+  "src/features/ReadingPlan/components/PlanStepIndicator.tsx": [
+    "accent-tint:text-emerald-600",
+    "light-surface:bg-emerald-100",
+    "light-surface:bg-emerald-200",
+    "light-surface:bg-stone-200"
+  ],
+  "src/features/ReadingPlan/components/PlanStepMeta.tsx": [
+    "accent-tint:text-teal-600"
+  ],
+  "src/features/ReadingPlan/components/PlanStepReview.tsx": [
+    "accent-tint:text-teal-600",
+    "light-surface:border-violet-200",
+    "accent-tint:text-violet-700",
+    "light-surface:bg-teal-100",
+    "accent-tint:text-teal-700"
+  ],
+  "src/features/ReadingPlan/components/ReadingPlanCard.tsx": [
+    "light-surface:border-emerald-200",
+    "light-surface:bg-emerald-100",
+    "accent-tint:text-emerald-700"
+  ],
+  "src/features/ReadingPlan/constants.ts": [
+    "accent-tint:text-emerald-700",
+    "light-surface:border-emerald-200",
+    "accent-tint:text-amber-700",
+    "light-surface:border-amber-200",
+    "accent-tint:text-rose-700",
+    "light-surface:border-rose-200"
+  ],
+  "src/features/ReadingPlan/pages/AddReadingPlan.tsx": [
+    "accent-tint:text-teal-700",
+    "light-surface:bg-teal-100"
+  ],
+  "src/features/ReadingPlan/pages/BibleReadingPlan.tsx": [
+    "accent-tint:text-teal-700",
+    "light-surface:bg-teal-100"
+  ],
+  "src/features/ReadingPlan/pages/UserPlans.tsx": [
+    "accent-tint:text-teal-700",
+    "light-surface:bg-teal-100"
+  ],
+  "src/features/Settings/components/NotificationsTab.tsx": [
+    "accent-tint:text-violet-600"
+  ],
+  "src/features/Settings/components/PreferencesTab.tsx": [
+    "accent-tint:text-sky-600",
+    "accent-tint:text-emerald-600"
+  ],
+  "src/features/Settings/components/ProfileTab.tsx": [
+    "accent-tint:text-amber-600",
+    "accent-tint:text-violet-600"
+  ],
+  "src/features/Subscription/components/SowerHero.tsx": [
+    "light-surface:bg-violet-300"
+  ],
+  "src/features/Subscription/components/SowerTierCards.tsx": [
+    "light-surface:to-slate-100"
+  ],
+  "src/features/Trivia/components/TriviaPerformanceContent.tsx": [
+    "accent-tint:text-emerald-600",
+    "accent-tint:text-rose-600"
+  ],
+  "src/features/VoiceSettings/components/VoiceSettingsLayout.tsx": [
+    "light-surface:bg-white"
+  ],
+  "src/components/PageLayout.tsx": [
+    "light-surface:from-blue-400"
+  ],
+  "src/components/TabBar.tsx": [
+    "accent-tint:text-teal-700",
+    "light-surface:bg-teal-100",
+    "accent-tint:text-blue-700",
+    "light-surface:bg-blue-100",
+    "accent-tint:text-emerald-700",
+    "light-surface:bg-emerald-100"
+  ],
+  "src/components/WordDetailSheet.tsx": [
+    "accent-tint:text-sky-600"
+  ]
+}
