@@ -1,6 +1,7 @@
 // AdminDashboardStats — stats row for admin dashboard
 import { Users, ShieldCheck, BarChart3, UserCheck } from "lucide-react";
 import { StatCard } from "./StatCard";
+import { AdminSignupRateCard } from "./AdminSignupRateCard";
 
 interface Props {
   stats: {
@@ -8,6 +9,8 @@ interface Props {
     activeUsers?: number;
     verifiedUsers?: number;
     adminCount?: number;
+    newUsersThisMonth?: number;
+    newUsersToday?: number;
   } | null;
   loading: boolean;
 }
@@ -51,10 +54,8 @@ export function AdminDashboardStats({ stats, loading }: Props) {
           color="bg-violet-500/10 text-violet-600"
           gradient="from-violet-300 via-white to-violet-300 border-violet-200/80"
         />
-
-        
-      
       </div>
+      <AdminSignupRateCard stats={stats} loading={loading} />
     </section>
   );
 }
