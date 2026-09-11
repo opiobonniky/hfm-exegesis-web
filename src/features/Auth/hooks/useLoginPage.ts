@@ -80,6 +80,11 @@ export function useLoginPage() {
       if (res?.returnCode === 200 && res.returnData) {
         setUserInfo(res.returnData);
         toast({ title: "Welcome back!" });
+        // Users on the admin-issued temporary password must change it first
+        if (res.returnData.mustChangePassword) {
+          navigate(routes.forceChangePassword.path, { replace: true });
+          return;
+        }
         navigate(res.returnData.userRole === 1 ? routes.dashboard.path : routes.userDashboard.path);
       } else {
         toast({ title: res?.returnMessage || "Login failed", variant: "destructive" });

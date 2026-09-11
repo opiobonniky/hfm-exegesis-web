@@ -41,6 +41,13 @@ export function ProtectedRoute() {
     return <Navigate to="/login" replace />;
   }
 
+  // Interlock: users on a temporary (admin-issued) password must change it
+  // before they can reach any other protected page.
+  const isForceChangePage = location.pathname === routes.forceChangePassword.path;
+  if (userInfo?.mustChangePassword && !isForceChangePage) {
+    return <Navigate to={routes.forceChangePassword.path} replace />;
+  }
+
   const isAdmin = userInfo?.userRole === 1;
   const currentPath = location.pathname;
 

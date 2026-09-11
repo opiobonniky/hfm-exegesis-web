@@ -77,6 +77,7 @@ export { ReadingPlanQuizCard } from "./ReadingPlanQuizCard";
 export { TriviaPerformanceHeader } from "./TriviaPerformanceHeader";
 export { TriviaOverviewPanel, TriviaUsersPanel, TriviaQuestionsPanel } from "./TriviaPerformanceTabs";
 export { UsersTable } from "./UsersTable";
+export { RoleSelector } from "./RoleSelector";
 export { DailyContentGrid } from "./DailyContentGrid";
 // Detail page components
 export { DetailLoading, DetailPageHeader, DetailContent, DetailBackButton, DetailEditButton } from "./DetailPageLayout";

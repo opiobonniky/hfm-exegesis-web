@@ -15,6 +15,8 @@ export interface UserInfo {
   token: string;
   userRole?: number;
   roleName?: string;
+  /** True while the user still signs in with the admin-issued temporary password */
+  mustChangePassword?: boolean;
 }
 
 type AuthContextType = {

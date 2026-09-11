@@ -7,6 +7,7 @@ const GoogleRegister = lazy(() => import("@/features/Auth/pages/GoogleRegister")
 const Register = lazy(() => import("@/features/Auth/pages/Register"));
 const VerifyAccount = lazy(() => import("@/features/Auth/pages/VerifyAccount"));
 const ForgotPassword = lazy(() => import("@/features/Auth/pages/ForgotPassword"));
+const ForceChangePassword = lazy(() => import("@/features/Auth/pages/ForceChangePassword"));
 const Dashboard = lazy(() => import("@/features/Admin/pages/AdminDashboard"));
 const HomeDashboard = lazy(() => import("@/features/Home/pages/Index"));
 const DailyVerse = lazy(() => import("@/features/DailyContent/pages/DailyVerse"));
@@ -154,6 +155,15 @@ export const routes = {
     isProtected: false,
     requiresLayout: false,
     title: "Forgot Password",
+  },
+
+  // ==================== PROTECTED ROUTES (WITHOUT LAYOUT) ====================
+  forceChangePassword: {
+    path: "/force-change-password",
+    component: ForceChangePassword,
+    isProtected: true,
+    requiresLayout: false,
+    title: "Change Password",
   },
 
   // ==================== PROTECTED ROUTES (WITH LAYOUT) ====================

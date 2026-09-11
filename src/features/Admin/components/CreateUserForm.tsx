@@ -1,6 +1,8 @@
-// CreateUserForm — full create-user form with account, personal, role sections
+// CreateUserForm — full create-user form with account, personal, role sections.
+// No password field: the backend auto-generates a temporary password and emails
+// it to the user (queued via the Message table).
 import {
-  User, Mail, Lock, Phone, Calendar, Shield, Save, Loader2,
+  User, Mail, KeyRound, Info, Phone, Calendar, Shield, Save, Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -56,7 +58,7 @@ function RoleOption({
 
 interface CreateUserFormProps {
   form: {
-    username: string; email: string; password: string;
+    username: string; email: string;
     firstName: string; lastName: string;
     phoneNumber: string; gender: string; dateOfBirth: string;
     userRole: number;
@@ -87,9 +89,12 @@ export function CreateUserForm({
           <FormField icon={<Mail className="w-4 h-4" />} label="Email" error={errors.email} required>
             <Input type="email" placeholder="user@example.com" value={form.email} onChange={(e) => updateField("email", e.target.value)} className="h-9 text-sm" />
           </FormField>
-          <FormField icon={<Lock className="w-4 h-4" />} label="Password" error={errors.password} required>
-            <Input type="password" placeholder="Min. 6 characters" value={form.password} onChange={(e) => updateField("password", e.target.value)} className="h-9 text-sm" />
-          </FormField>
+          <div className="flex items-start gap-2.5 p-3 rounded-lg bg-primary/5 border border-primary/20">
+            <KeyRound className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              A secure temporary password is <span className="font-medium text-foreground">auto-generated and emailed</span> to this address. The user will be prompted to change it after signing in.
+            </p>
+          </div>
         </CardContent>
       </Card>
 
@@ -138,11 +143,17 @@ export function CreateUserForm({
             Role Assignment
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
           <RadioGroup value={String(form.userRole)} onValueChange={(v) => updateField("userRole", Number(v))} className="space-y-3">
             <RoleOption value="2" icon={<User className="w-5 h-5" />} title="Regular User" description="Can read the Bible, journal, take trivia, and access standard features" selected={form.userRole === 2} />
             <RoleOption value="1" icon={<Shield className="w-5 h-5" />} title="Administrator" description="Full access to admin dashboard, content management, and user administration" selected={form.userRole === 1} />
           </RadioGroup>
+          <div className="flex items-start gap-2.5 p-3 rounded-lg bg-muted/50 border">
+            <Info className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              The assigned role is included in the welcome email so the user knows their access level.
+            </p>
+          </div>
         </CardContent>
       </Card>
 

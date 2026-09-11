@@ -1,9 +1,10 @@
 // UsersTable — responsive table (desktop) / card list (mobile) with infinite scroll
 import { RefObject } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader2, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { UserRowCard } from "./UserRowCard";
+import { RoleSelector } from "./RoleSelector";
 import type { AdminUser } from "../types";
 
 interface UsersTableProps {
@@ -14,7 +15,9 @@ interface UsersTableProps {
   sentinelRef: RefObject<HTMLDivElement>;
   onToggleStatus: (user: AdminUser) => void;
   onToggleVerification: (user: AdminUser) => void;
+  onRoleChange: (user: AdminUser, role: number) => void;
   onView: (user: AdminUser) => void;
+  onDelete: (user: AdminUser) => void;
 }
 
 export function UsersTable({
@@ -25,21 +28,23 @@ export function UsersTable({
   sentinelRef,
   onToggleStatus,
   onToggleVerification,
+  onRoleChange,
   onView,
+  onDelete,
 }: UsersTableProps) {
   return (
     <>
       {/* Desktop table */}
-      <div className="hidden md:block border rounded-lg overflow-hidden">
+      <div className="hidden md:block border rounded-xl overflow-hidden shadow-sm">
         <table className="w-full">
           <thead>
             <tr className="border-b bg-muted/50">
-              <th className="text-left p-3 text-sm font-medium">User</th>
-              <th className="text-left p-3 text-sm font-medium">Email</th>
-              <th className="text-left p-3 text-sm font-medium">Role</th>
-              <th className="text-left p-3 text-sm font-medium">Status</th>
-              <th className="text-left p-3 text-sm font-medium hidden lg:table-cell">Last Login</th>
-              <th className="text-right p-3 text-sm font-medium">Actions</th>
+              <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">User</th>
+              <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Email</th>
+              <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Role</th>
+              <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Status</th>
+              <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground hidden lg:table-cell">Last Login</th>
+              <th className="text-right p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -50,7 +55,9 @@ export function UsersTable({
                 actionLoading={actionLoading}
                 onToggleStatus={() => onToggleStatus(user)}
                 onToggleVerification={() => onToggleVerification(user)}
+                onRoleChange={(role) => onRoleChange(user, role)}
                 onView={() => onView(user)}
+                onDelete={() => onDelete(user)}
               />
             ))}
           </tbody>
@@ -62,7 +69,7 @@ export function UsersTable({
         {users.map((user) => (
           <div
             key={user.id}
-            className="border rounded-xl p-3 bg-card hover:shadow-sm transition-shadow"
+            className="border rounded-xl p-3 bg-card hover:shadow-sm transition-shadow cursor-pointer"
             onClick={() => onView(user)}
           >
             <div className="flex items-center gap-3">
@@ -80,9 +87,11 @@ export function UsersTable({
                       ? `${user.firstName || ""} ${user.lastName || ""}`.trim()
                       : user.username}
                   </p>
-                  <Badge variant={user.userRole === 1 ? "default" : "secondary"} className="text-[10px] shrink-0">
-                    {user.userRole === 1 ? "Admin" : "User"}
-                  </Badge>
+                  <RoleSelector
+                    userRole={user.userRole}
+                    busy={actionLoading === user.id}
+                    onRoleChange={(role) => onRoleChange(user, role)}
+                  />
                 </div>
                 <p className="text-xs text-muted-foreground truncate">{user.email}</p>
               </div>
@@ -117,6 +126,14 @@ export function UsersTable({
                   disabled={actionLoading === user.id}
                 >
                   {user.emailVerified ? "\u2713" : "\u25CB"}
+                </Button>
+                <Button
+                  variant="ghost" size="icon" className="h-7 w-7 text-destructive"
+                  onClick={() => onDelete(user)}
+                  disabled={actionLoading === user.id}
+                  title="Delete user permanently"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
                 </Button>
               </div>
             </div>

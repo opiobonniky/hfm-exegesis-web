@@ -470,7 +470,6 @@ export interface ReadingPlanAdminDetail {
 export interface CreateUserForm {
   username: string;
   email: string;
-  password: string;
   firstName: string;
   lastName: string;
   phoneNumber: string;
