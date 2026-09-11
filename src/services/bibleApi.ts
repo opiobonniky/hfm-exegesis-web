@@ -76,6 +76,12 @@ export interface ChapterVerseData {
   verses: Verse[];
 }
 
+/** Section heading within a chapter (e.g. "The Garden of Eden" at Genesis 2:4). */
+export interface ChapterHeading {
+  verse: number;
+  heading: string;
+}
+
 const BASE_URL = "/translations";
 
 export const bibleApi = {
@@ -161,6 +167,23 @@ export const bibleApi = {
       return response.data.data;
     }
     throw new Error(response.data.message || "Failed to fetch verses");
+  },
+
+  /** Section headings for one chapter, optionally translated to `lang`. */
+  getChapterHeadings: async (
+    translationId: string,
+    bookName: string,
+    chapter: number,
+    lang?: string
+  ): Promise<ChapterHeading[]> => {
+    const response = await api.post(
+      `${BASE_URL}/${translationId}/chapter-headings`,
+      { bookName, chapter, lang },
+    );
+    if (response.data.success) {
+      return response.data.data?.headings || [];
+    }
+    throw new Error(response.data.message || "Failed to fetch chapter headings");
   },
 
   getVerse: async (

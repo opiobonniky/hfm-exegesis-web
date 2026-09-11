@@ -745,6 +745,7 @@ export function useBibleReaderPage() {
       },
       chapter: {
         chapters: reader.chapters,
+        headingsByChapter: reader.headingsByChapter,
         selectedVerses: reader.selectedVerses,
         highlights: reader.highlights,
         favorites: reader.favorites,

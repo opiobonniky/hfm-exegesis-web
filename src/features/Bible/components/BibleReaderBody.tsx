@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { LoadingSkeleton } from "@/components/verseResources";
 import type { AudioPlayerState, AudioPlayerActions } from "@/hooks/useAudioPlayer";
-import type { ChapterData, Highlight } from "../hooks/useBibleReader";
+import type { ChapterData, HeadingsByChapter, Highlight } from "../hooks/useBibleReader";
 import BibleSidebar from "./BibleSidebar";
 import ChapterContent from "./ChapterContent";
 import AudioControlBar from "./AudioControlBar";
@@ -30,6 +30,7 @@ interface SidebarProps {
 /* ─── Chapter Props ──────────────────────────────────────────────────────── */
 interface ChapterProps {
   chapters: ChapterData[];
+  headingsByChapter?: HeadingsByChapter;
   selectedVerses: string[];
   highlights: Record<string, Highlight>;
   favorites: Set<string>;
@@ -136,6 +137,7 @@ export default function BibleReaderBody({
             <div style={{ fontSize: `${fontSize}px` }}>
               <ChapterContent
                 chapters={chapter.chapters}
+                headingsByChapter={chapter.headingsByChapter}
                 selectedVerses={chapter.selectedVerses}
                 highlights={chapter.highlights}
                 favorites={chapter.favorites}

@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { sendPostRequest, API_BASE_URL } from "@/services/api";
 import { bibleApi } from "@/services/bibleApi";
+import type { ChapterHeading } from "@/services/bibleApi";
 import {
   BIBLE_BOOK_CHAPTERS,
   BIBLE_BOOKS,
@@ -25,6 +26,8 @@ export interface ChapterData {
   verses: { verse: number; text: string }[];
   testament: string;
 }
+/** Section headings keyed by "Book-Chapter" (e.g. "Genesis-2" → headings). */
+export type HeadingsByChapter = Record<string, ChapterHeading[]>;
 export interface Highlight {
   colorId: number;
   note?: string;
@@ -70,6 +73,8 @@ export function useBibleReader() {
   const [highlights, setHighlights] = useState<Record<string, Highlight>>({});
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [verseNotes, setVerseNotes] = useState<Record<string, string>>({});
+  // Section headings per "Book-Chapter", matching the mobile app's reader.
+  const [headingsByChapter, setHeadingsByChapter] = useState<HeadingsByChapter>({});
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const chapterRefs = useRef<Record<string, HTMLDivElement>>({});
   const verseRefs = useRef<Record<string, HTMLSpanElement | null>>({});
@@ -129,8 +134,31 @@ export function useBibleReader() {
       });
       setChapters((current) => (append ? [...current, ...loaded] : loaded));
       setHasMore(numbers.at(-1)! < max);
+
+      // Fetch section headings for the freshly loaded chapters. The backend
+      // dataset is BSB-derived public-domain and covers all 66 books; it is
+      // translated server-side when `lang` is provided. Failures are silent —
+      // headings are decorative and must never block reading.
+      const lang = language || "en";
+      await Promise.all(
+        numbers.map((chapter) =>
+          bibleApi
+            .getChapterHeadings(translation, book, chapter, lang)
+            .then((headings) => ({ chapter, headings }))
+            .catch(() => ({ chapter, headings: [] as ChapterHeading[] })),
+        ),
+      )
+        .then((results) => {
+          setHeadingsByChapter((current) => {
+            const next = { ...current };
+            for (const { chapter, headings } of results) {
+              next[`${book}-${chapter}`] = headings;
+            }
+            return next;
+          });
+        });
     },
-    [],
+    [language],
   );
   useEffect(() => {
     setLoading(true);
@@ -284,6 +312,7 @@ export function useBibleReader() {
     selectedVerse,
     versionId,
     chapters,
+    headingsByChapter,
     loading,
     loadingMore,
     loadError,

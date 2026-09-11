@@ -24,6 +24,7 @@ const ReadingPlans = lazy(() => import("@/features/ReadingPlan/pages/ReadingPlan
 const EditReadingPlan = lazy(() => import("@/features/ReadingPlan/pages/EditReadingPlan"));
 
 const BibleReader = lazy(() => import("@/features/Bible/pages/BibleReader"));
+const TestSessionSetup = lazy(() => import("@/features/Bible/pages/TestSessionSetup"));
 const BookOverview = lazy(() => import("@/features/Bible/pages/BookOverview"));
 const UserDashboard = lazy(() => import("@/features/Home/pages/UserDashboard"));
 const UserDailyVerse = lazy(() => import("@/features/DailyContent/pages/UserDailyVerse"));
@@ -280,6 +281,11 @@ export const routes = {
     isProtected: true,
     requiresLayout: true,
     title: "Bible Reader",
+  },
+  testSession: {
+    path: "/test-session",
+    component: TestSessionSetup,
+    isProtected: false,
   },
   bookOverview: {
     path: "/book-overview",
