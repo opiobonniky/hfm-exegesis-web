@@ -22,7 +22,7 @@ export function AddBookPrologueHeaderBar({ state: h }: Props) {
               <ArrowLeft className="h-4 w-4" />
             </Button>
             <div className="min-w-0">
-              <p className="text-[11px] uppercase tracking-[0.22em] text-sky-600">
+              <p className="text-[11px] uppercase tracking-[0.22em] text-sky-600 dark:text-sky-400">
                 Book prologues
               </p>
               <h1 className="truncate text-lg font-bold text-foreground sm:text-xl">

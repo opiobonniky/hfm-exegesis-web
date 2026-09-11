@@ -95,7 +95,7 @@ export function UserRowCard({
             {user.status ? "Active" : "Inactive"}
           </Badge>
           {user.emailVerified && (
-            <Badge variant="outline" className="text-[10px] text-emerald-600 border-emerald-200">
+            <Badge variant="outline" className="text-[10px] text-emerald-600 dark:text-emerald-400 border-emerald-200">
               <CheckCircle className="w-2.5 h-2.5 mr-0.5" /> Verified
             </Badge>
           )}

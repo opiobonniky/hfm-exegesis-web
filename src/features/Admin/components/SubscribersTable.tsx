@@ -133,7 +133,7 @@ export function SubscribersTable({
                         className={cn(
                           "text-[10px]",
                           sub.source === "stripe_only"
-                            ? "bg-amber-50 text-amber-700 border-amber-200"
+                            ? "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/15 dark:text-amber-400 dark:border-amber-500/30"
                             : "bg-muted",
                         )}
                       >

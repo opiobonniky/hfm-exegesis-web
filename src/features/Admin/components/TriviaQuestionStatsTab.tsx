@@ -74,7 +74,7 @@ export function TriviaQuestionStatsTab({ h }: Props) {
                   <TableCell className="max-w-[300px]"><p className="text-sm truncate">{q.question}</p></TableCell>
                   <TableCell><Badge variant="outline" className={cn("text-[10px]", difficultyColor(q.difficulty))}>{q.difficulty}</Badge></TableCell>
                   <TableCell className="font-medium">{q.timesAnswered}</TableCell>
-                  <TableCell className="text-emerald-600 font-medium">{q.timesCorrect}</TableCell>
+                  <TableCell className="text-emerald-600 dark:text-emerald-400 font-medium">{q.timesCorrect}</TableCell>
                   <TableCell className="text-red-500 font-medium">{q.timesIncorrect}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">

@@ -51,7 +51,7 @@ export function AddBookPrologueExtraForm({ state: h }: Props) {
   if (keyScriptures.length === 0) {
     return (
       <div className="space-y-6">
-        <div className="flex items-center gap-2 text-sky-600">
+        <div className="flex items-center gap-2 text-sky-600 dark:text-sky-400">
           <Sparkles className="h-4 w-4" />
           <span className="text-sm font-medium">Key scripture references</span>
         </div>
@@ -70,7 +70,7 @@ export function AddBookPrologueExtraForm({ state: h }: Props) {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-2 text-sky-600">
+      <div className="flex items-center gap-2 text-sky-600 dark:text-sky-400">
         <Sparkles className="h-4 w-4" />
         <span className="text-sm font-medium">Key scripture references</span>
       </div>
@@ -204,7 +204,7 @@ export function AddBookPrologueExtraForm({ state: h }: Props) {
             </div>
 
             {entry.reference && (
-              <p className="text-sm font-semibold text-sky-600">
+              <p className="text-sm font-semibold text-sky-600 dark:text-sky-400">
                 {entry.reference}
               </p>
             )}

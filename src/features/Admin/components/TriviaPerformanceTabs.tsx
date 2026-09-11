@@ -19,8 +19,8 @@ export function TriviaOverviewPanel({ overview }: { overview: OverviewData | nul
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
       <StatCard label="Total Users" value={overview.totalUsers ?? "\u2014"} icon={Users} color="bg-primary/10 text-primary" />
-      <StatCard label="Total Questions" value={overview.totalQuestions ?? "\u2014"} icon={BarChart3} color="bg-violet-500/10 text-violet-600" />
-      <StatCard label="Avg Score" value={overview.avgScore ? `${overview.avgScore}%` : "\u2014"} icon={TrendingUp} color="bg-emerald-500/10 text-emerald-600" />
+      <StatCard label="Total Questions" value={overview.totalQuestions ?? "\u2014"} icon={BarChart3} color="bg-violet-500/10 text-violet-600 dark:text-violet-400" />
+      <StatCard label="Avg Score" value={overview.avgScore ? `${overview.avgScore}%` : "\u2014"} icon={TrendingUp} color="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" />
     </div>
   );
 }

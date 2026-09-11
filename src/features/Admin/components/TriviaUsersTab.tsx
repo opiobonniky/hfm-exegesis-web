@@ -64,7 +64,7 @@ export function TriviaUsersTab({ h }: Props) {
                     <div className="text-xs text-muted-foreground">{u.email}</div>
                   </TableCell>
                   <TableCell className="font-medium">{u.totalAnswered}</TableCell>
-                  <TableCell className="text-emerald-600 font-medium">{u.correct}</TableCell>
+                  <TableCell className="text-emerald-600 dark:text-emerald-400 font-medium">{u.correct}</TableCell>
                   <TableCell className="text-red-500 font-medium">{u.incorrect}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">

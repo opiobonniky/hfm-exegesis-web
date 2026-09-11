@@ -10,7 +10,7 @@ interface Props {
 export function AddBookPrologueThemesForm({ state: h }: Props) {
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-2 text-sky-600">
+      <div className="flex items-center gap-2 text-sky-600 dark:text-sky-400">
         <Layers className="h-4 w-4" />
         <span className="text-sm font-medium">Themes & people</span>
       </div>

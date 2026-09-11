@@ -102,7 +102,7 @@ export function UsersTable({
                   {user.status ? "Active" : "Inactive"}
                 </Badge>
                 {user.emailVerified && (
-                  <Badge variant="outline" className="text-[10px] text-emerald-600">Verified</Badge>
+                  <Badge variant="outline" className="text-[10px] text-emerald-600 dark:text-emerald-400">Verified</Badge>
                 )}
               </div>
               <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>

@@ -55,9 +55,9 @@ export function AddBookPrologueSidebar({
               <div
                 className={`mt-0.5 flex h-8 w-8 items-center justify-center rounded-lg border ${
                   isDone
-                    ? "border-emerald-400/40 bg-emerald-500/10 text-emerald-600"
+                    ? "border-emerald-400/40 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
                     : isActive
-                      ? "border-sky-400/40 bg-sky-500/10 text-sky-600"
+                      ? "border-sky-400/40 bg-sky-500/10 text-sky-600 dark:text-sky-400"
                       : "border-border bg-background text-muted-foreground"
                 }`}
               >
@@ -80,7 +80,7 @@ export function AddBookPrologueSidebar({
         <ul className="mt-3 space-y-2 text-sm text-foreground">
           <li className="flex items-center justify-between gap-2">
             <span>Book & title</span>
-            <span className={basicComplete ? "text-emerald-600" : "text-muted-foreground"}>
+            <span className={basicComplete ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground"}>
               {basicComplete ? "Ready" : "Missing"}
             </span>
           </li>

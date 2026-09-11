@@ -54,7 +54,7 @@ export function JournalDetailContent({ item }: { item: JournalEntry }) {
               </Badge>
             )}
             {item.mood && (
-              <Badge variant="outline" className="text-amber-600">
+              <Badge variant="outline" className="text-amber-600 dark:text-amber-400">
                 {item.mood}
               </Badge>
             )}

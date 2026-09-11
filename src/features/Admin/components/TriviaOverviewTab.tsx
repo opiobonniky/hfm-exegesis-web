@@ -11,10 +11,10 @@ export function TriviaOverviewTab({ h }: { h: ReturnType<typeof useAdminTrivia>[
     <div className="space-y-4">
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
         <TriviaStatCard label="Total Participants" value={h.overviewStats?.totalParticipants ?? "—"} icon={Users} color="bg-primary/10 text-primary" />
-        <TriviaStatCard label="Total Answers" value={h.overviewStats?.totalAnswers ?? "—"} icon={BarChart3} color="bg-violet-500/10 text-violet-600" />
-        <TriviaStatCard label="Avg Score" value={h.overviewStats ? `${h.overviewStats.averageScore}%` : "—"} icon={TrendingUp} color="bg-emerald-500/10 text-emerald-600" />
-        <TriviaStatCard label="Today's Answers" value={h.overviewStats?.todayAnswers ?? "—"} icon={Sparkles} color="bg-amber-500/10 text-amber-600" />
-        <TriviaStatCard label="Daily Active" value={h.overviewStats?.dailyActiveParticipants ?? "—"} icon={Users} color="bg-sky-500/10 text-sky-600" />
+        <TriviaStatCard label="Total Answers" value={h.overviewStats?.totalAnswers ?? "—"} icon={BarChart3} color="bg-violet-500/10 text-violet-600 dark:text-violet-400" />
+        <TriviaStatCard label="Avg Score" value={h.overviewStats ? `${h.overviewStats.averageScore}%` : "—"} icon={TrendingUp} color="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" />
+        <TriviaStatCard label="Today's Answers" value={h.overviewStats?.todayAnswers ?? "—"} icon={Sparkles} color="bg-amber-500/10 text-amber-600 dark:text-amber-400" />
+        <TriviaStatCard label="Daily Active" value={h.overviewStats?.dailyActiveParticipants ?? "—"} icon={Users} color="bg-sky-500/10 text-sky-600 dark:text-sky-400" />
       </div>
       {h.overviewStats?.difficultyBreakdown && (
         <Card className="border-border/50">
@@ -27,7 +27,7 @@ export function TriviaOverviewTab({ h }: { h: ReturnType<typeof useAdminTrivia>[
                   {["Answered", "Correct", "Rate"].map(label => (
                     <div key={label} className="flex justify-between text-sm">
                       <span className="text-muted-foreground">{label}</span>
-                      <span className={cn("font-medium", label === "Correct" && "text-emerald-600")}>
+                      <span className={cn("font-medium", label === "Correct" && "text-emerald-600 dark:text-emerald-400")}>
                         {label === "Answered" ? stats.total : label === "Correct" ? stats.correct : `${stats.total > 0 ? Math.round((stats.correct / stats.total) * 100) : 0}%`}
                       </span>
                     </div>
