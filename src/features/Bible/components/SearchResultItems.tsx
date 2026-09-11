@@ -26,7 +26,7 @@ interface SearchResultsListProps {
 
 function JournalItem({ item, idx, onSelect }: { item: JournalSearchResult; idx: number; onSelect: () => void }) {
   return (
-    <div key={`journal-${idx}`} className="rounded-xl border border-border/40 bg-card p-4 hover:border-emerald-200/50 hover:shadow-sm transition-all cursor-pointer" onClick={onSelect}>
+    <div key={`journal-${idx}`} className="rounded-xl border border-border/40 bg-card p-4 hover:border-emerald-200/50 dark:hover:border-emerald-500/40 hover:shadow-sm transition-all cursor-pointer" onClick={onSelect}>
       <p className="text-sm font-bold text-foreground">{item.title || "Untitled"}</p>
       <p className="text-sm text-foreground/70 mt-1 line-clamp-2">{item.content}</p>
       {item.bookName && <p className="text-xs text-muted-foreground mt-1">{item.bookName} {item.chapter}:{item.verseNumber}</p>}
@@ -36,7 +36,7 @@ function JournalItem({ item, idx, onSelect }: { item: JournalSearchResult; idx: 
 
 function TopicItem({ item, idx, onTap }: { item: TopicResult; idx: number; onTap: () => void }) {
   return (
-    <div key={`topic-${idx}`} className="rounded-xl border border-border/40 bg-card p-4 hover:border-amber-200/50 hover:shadow-sm transition-all cursor-pointer" onClick={onTap}>
+    <div key={`topic-${idx}`} className="rounded-xl border border-border/40 bg-card p-4 hover:border-amber-200/50 dark:hover:border-amber-500/40 hover:shadow-sm transition-all cursor-pointer" onClick={onTap}>
       <p className="text-sm font-bold text-primary capitalize">{item.topicName}</p>
       {item.description && <p className="text-sm text-foreground/70 mt-1 line-clamp-2">{item.description}</p>}
       <p className="text-xs text-muted-foreground mt-1">{item.verseRefs?.split(",").length || 0} related verses</p>
@@ -46,7 +46,7 @@ function TopicItem({ item, idx, onTap }: { item: TopicResult; idx: number; onTap
 
 function LemmaItem({ item, idx }: { item: LemmaResult; idx: number }) {
   return (
-    <div key={`lemma-${idx}`} className="rounded-xl border border-border/40 bg-card p-4 hover:border-blue-200/50 hover:shadow-sm transition-all">
+    <div key={`lemma-${idx}`} className="rounded-xl border border-border/40 bg-card p-4 hover:border-blue-200/50 dark:hover:border-blue-500/40 hover:shadow-sm transition-all">
       <p className="text-sm font-bold text-foreground">{item.originalWord || item.strongsId}</p>
       <p className="text-xs font-semibold text-primary mt-0.5">{item.strongsId} · {item.transliteration}</p>
       <p className="text-sm text-foreground/70 mt-1">{item.shortDefinition}</p>

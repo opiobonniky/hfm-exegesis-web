@@ -32,7 +32,7 @@ export default function BibleLibrary() {
         <div className="mx-auto max-w-4xl px-4 sm:px-6 pt-3">
           <div
             role="alert"
-            className="rounded-xl border border-amber-300/60 bg-amber-50 px-4 py-3 text-sm text-amber-900"
+            className="rounded-xl border border-amber-300/60 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-800/50 dark:bg-amber-950/30 dark:text-amber-300"
           >
             {h.loadError} Showing the standard list until the server is reachable.
           </div>

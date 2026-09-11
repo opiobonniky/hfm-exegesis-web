@@ -78,7 +78,7 @@ export default function ExplanationList({
                     <div className="flex flex-wrap items-center gap-2 mb-1">
                       <h3 className="font-bold text-base">{item.bookName} {item.chapter}:{item.verseNumber}</h3>
                       {item.bibleVersion && <Badge variant="outline" className="text-xs font-mono">{item.bibleVersion}</Badge>}
-                      {item.learnMore && <Badge variant="outline" className="text-xs gap-1 border-amber-200 bg-amber-50 text-amber-700"><Sparkles className="w-3 h-3" /> Learn More</Badge>}
+                      {item.learnMore && <Badge variant="outline" className="text-xs gap-1 border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-500/30 dark:bg-amber-500/15 dark:text-amber-400"><Sparkles className="w-3 h-3" /> Learn More</Badge>}
                     </div>
                     {item.updatedOn && <p className="text-xs text-muted-foreground/60 mb-2">Updated {new Date(item.updatedOn).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</p>}
                   </div>
@@ -95,7 +95,7 @@ export default function ExplanationList({
                     <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">{item.explanation}</p>
                     {item.learnMore && (
                       <div className="mt-3 pt-3 border-t border-border/20">
-                        <p className="text-xs font-semibold text-amber-600 mb-1">Learn More</p>
+                        <p className="text-xs font-semibold text-amber-600 dark:text-amber-400 mb-1">Learn More</p>
                         <p className="text-sm text-foreground/70 leading-relaxed whitespace-pre-wrap">{item.learnMore}</p>
                       </div>
                     )}

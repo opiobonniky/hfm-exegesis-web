@@ -75,7 +75,7 @@ export default function SearchResultCard({
         <Button variant="ghost" size="sm" className="h-7 text-[11px] px-2.5 gap-1 hover:bg-primary/10 hover:text-primary" onClick={(e) => { e.stopPropagation(); onStudy(); }}>
           <BookMarked className="w-3 h-3" /> Study
         </Button>
-        <Button variant="ghost" size="sm" className="h-7 text-[11px] px-2.5 gap-1 hover:bg-emerald-500/10 hover:text-emerald-600" onClick={(e) => { e.stopPropagation(); onSave(); }}>
+        <Button variant="ghost" size="sm" className="h-7 text-[11px] px-2.5 gap-1 hover:bg-emerald-500/10 hover:text-emerald-600 dark:hover:text-emerald-400" onClick={(e) => { e.stopPropagation(); onSave(); }}>
           <BookmarkCheck className="w-3 h-3" /> Save
         </Button>
       </div>
