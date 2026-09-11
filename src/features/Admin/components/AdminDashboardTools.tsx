@@ -24,12 +24,12 @@ const ICON_MAP: Record<string, LucideIcon> = {
 };
 
 const TOOL_GRADIENTS = [
-  "bg-gray-200 via-white to-amber-100 border-amber-200/80 dark:bg-gray-950/20 dark:via-card dark:to-orange-950/20",
-  "bg-gray-200 via-white to-emerald-100 border-emerald-200/80 dark:bg-emerald-950/20 dark:via-card dark:to-teal-950/20",
-  "bg-gray-200 via-white to-rose-100 border-rose-200/80 dark:bg-rose-950/20 dark:via-card dark:to-pink-950/20",
-  "bg-gray-200 via-white to-sky-100 border-sky-200/80 dark:bg-sky-950/20 dark:via-card dark:to-cyan-950/20",
-  "bg-gray-200 via-white to-violet-100 border-violet-200/80 dark:bg-violet-950/20 dark:via-card dark:to-fuchsia-950/20",
-  "bg-gray-200 via-white to-indigo-100 border-indigo-200/80 dark:bg-indigo-950/20 dark:via-card dark:to-blue-950/20",
+  "bg-gray-200 via-white to-amber-100 border-amber-200/80 dark:border-amber-500/20 dark:bg-gray-950/20 dark:via-card dark:to-orange-950/20",
+  "bg-gray-200 via-white to-emerald-100 border-emerald-200/80 dark:border-emerald-500/20 dark:bg-emerald-950/20 dark:via-card dark:to-teal-950/20",
+  "bg-gray-200 via-white to-rose-100 border-rose-200/80 dark:border-rose-500/20 dark:bg-rose-950/20 dark:via-card dark:to-pink-950/20",
+  "bg-gray-200 via-white to-sky-100 border-sky-200/80 dark:border-sky-500/20 dark:bg-sky-950/20 dark:via-card dark:to-cyan-950/20",
+  "bg-gray-200 via-white to-violet-100 border-violet-200/80 dark:border-violet-500/20 dark:bg-violet-950/20 dark:via-card dark:to-fuchsia-950/20",
+  "bg-gray-200 via-white to-indigo-100 border-indigo-200/80 dark:border-indigo-500/20 dark:bg-indigo-950/20 dark:via-card dark:to-blue-950/20",
 ];
 
 interface Props {
@@ -43,7 +43,7 @@ export function AdminDashboardTools({ onNavigate }: Props) {
         title="Management Tools"
         subtitle="Jump into any admin area"
       />
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-8 bg-gray-100 rounded-md shadow-md">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-8 bg-gray-100 rounded-md shadow-md dark:bg-white/[0.03] dark:shadow-none">
         {ADMIN_TOOLS.map((tool, index) => {
           const Icon = ICON_MAP[tool.icon] || Sparkles;
           return (
