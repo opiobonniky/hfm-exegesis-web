@@ -32,7 +32,7 @@ export default function AudioControlBar({
 
   return (
     <div className="relative z-20 shrink-0 bg-transparent sm:px-4 sm:pb-3 h-10 -mt-28">
-      <div className="mx-auto w-full max-w-3xl overflow-hidden border-t border-border/70  shadow-[0_-12px_36px_-24px_hsl(var(--foreground))] backdrop-blur-xl sm:rounded-2xl sm:border">
+      <div className="mx-auto w-full max-w-3xl overflow-hidden border-t border-border bg-background/95 shadow-[0_-12px_36px_-24px_hsl(var(--foreground))] backdrop-blur-xl sm:rounded-2xl sm:border">
         <div className="px-3 pt-3.5 sm:px-4">
           <VerseTickBar
             currentVerseIdx={audioState.currentVerseIdx}
@@ -143,7 +143,7 @@ export default function AudioControlBar({
           </button>
         </div>
       </div>
-      <div className="h-[env(safe-area-inset-bottom)] bg-card/95 sm:hidden" />
+      <div className="h-[env(safe-area-inset-bottom)] bg-background/95 sm:hidden" />
     </div>
   );
 }
