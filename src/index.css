@@ -397,7 +397,7 @@
   /* Gentle glow pulse synced to the sweep, signalling "this verse". */
   @keyframes verse-reading-glow {
     0%, 100% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0.0); }
-    50% { box-shadow: 0 0 14px 2px hsl(var(--primary) / 0.16); }
+    50% { box-shadow: 0 0 18px 4px hsl(var(--primary) / 0.35); }
   }
   /* Equalizer bars shown next to the verse number while its audio plays. */
   @keyframes verse-eq-bar {
@@ -438,13 +438,17 @@
   }
 
   .verse-reading {
+    /* Persistent tint marks the verse even between sweeps; the moving
+       band rides on top. An inline highlight background-color (user's own
+       highlight) intentionally wins over this base tint. */
+    background-color: hsl(var(--primary) / 0.14);
     background-image: linear-gradient(
       100deg,
-      transparent 20%,
-      hsl(var(--primary) / 0.09) 42%,
-      hsl(var(--accent) / 0.13) 50%,
-      hsl(var(--primary) / 0.09) 58%,
-      transparent 80%
+      transparent 15%,
+      hsl(var(--primary) / 0.22) 40%,
+      hsl(var(--accent) / 0.34) 50%,
+      hsl(var(--primary) / 0.22) 60%,
+      transparent 85%
     );
     background-size: 220% 100%;
     background-repeat: no-repeat;
@@ -479,8 +483,8 @@
       /* Static tint keeps the verse identifiable without motion. */
       background-image: linear-gradient(
         0deg,
-        hsl(var(--primary) / 0.08),
-        hsl(var(--primary) / 0.08)
+        hsl(var(--primary) / 0.14),
+        hsl(var(--primary) / 0.14)
       );
       animation: none;
     }
