@@ -92,7 +92,7 @@ export default function BibleReaderBody({
         <main
           ref={scrollRef}
           aria-busy={loading}
-          className="relative min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-7 [overflow-anchor:none] sm:px-8 sm:py-10 lg:px-12"
+          className="relative min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain px-4 py-7 [overflow-anchor:none] sm:px-8 sm:py-10 lg:px-12"
         >
           <FontSizeControls
             fontSize={fontSize}

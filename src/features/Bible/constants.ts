@@ -79,3 +79,14 @@ export const AUDIO_SPEED_OPTIONS = [0.75, 1, 1.25, 1.5, 1.75, 2];
 export const BIBLE_READER_MIN_FONT_SIZE = 12;
 export const BIBLE_READER_MAX_FONT_SIZE = 40;
 export const BIBLE_READER_DEFAULT_FONT_SIZE = 20;
+
+/** Verse toolbar highlight swatches — id maps to ReaderHighlight.colorId. */
+export const VERSE_HIGHLIGHT_COLORS = [
+  { id: 0, color: "bg-yellow-300", ring: "ring-yellow-400", label: "Yellow" },
+  { id: 1, color: "bg-green-300", ring: "ring-green-400", label: "Green" },
+  { id: 2, color: "bg-blue-300", ring: "ring-blue-400", label: "Blue" },
+  { id: 3, color: "bg-pink-300", ring: "ring-pink-400", label: "Pink" },
+  { id: 4, color: "bg-orange-300", ring: "ring-orange-400", label: "Orange" },
+] as const;
+
+export type VerseHighlightColor = (typeof VERSE_HIGHLIGHT_COLORS)[number];

@@ -44,6 +44,10 @@ export const bibleTheme = {
   components: {
     statCard: "bg-card rounded-xl p-4 sm:p-6 shadow-sm border border-border",
     tableRow: "border-b border-border hover:bg-muted/50 transition-colors",
+    verseToolbarButton:
+      "flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors duration-150 hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60",
+    verseToolbarButtonActive:
+      "flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-primary transition-colors duration-150 hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60",
   },
   transition: {
     fast: "duration-150",

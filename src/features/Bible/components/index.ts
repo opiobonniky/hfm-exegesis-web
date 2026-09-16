@@ -1,6 +1,7 @@
 export { default as BookPicker } from "./BookPicker";
 export { default as ChapterContent } from "./ChapterContent";
 export { default as VerseToolbar } from "./VerseToolbar";
+export { default as VerseToolbarColorPicker } from "./VerseToolbarColorPicker";
 export { default as AudioControlBar } from "./AudioControlBar";
 export { default as FontSizeControls } from "./FontSizeControls";
 export { default as TranslationPicker } from "./TranslationPicker";
