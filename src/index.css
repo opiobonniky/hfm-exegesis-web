@@ -441,7 +441,7 @@
     /* Persistent tint marks the verse even between sweeps; the moving
        band rides on top. An inline highlight background-color (user's own
        highlight) intentionally wins over this base tint. */
-    background-color: hsl(var(--primary) / 0.14);
+    background-color: hsl(var(--primary) / 0.2);
     background-image: linear-gradient(
       100deg,
       transparent 15%,
@@ -483,8 +483,8 @@
       /* Static tint keeps the verse identifiable without motion. */
       background-image: linear-gradient(
         0deg,
-        hsl(var(--primary) / 0.14),
-        hsl(var(--primary) / 0.14)
+        hsl(var(--primary) / 0.2),
+        hsl(var(--primary) / 0.2)
       );
       animation: none;
     }
