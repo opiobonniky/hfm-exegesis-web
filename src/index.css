@@ -485,6 +485,13 @@
       animation: none;
     }
     .verse-eq span { animation: none; transform: scaleY(0.7); }
+    /* Highlight and note fades become instant state changes. */
+    .verse-highlight-fade[data-highlight="true"] {
+      animation: none;
+    }
+    .verse-note-in {
+      animation: none;
+    }
   }
 }
 
