@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/components/languages/languageProvider";
+import ReaderDock from "./ReaderDock";
 
 interface VerseMultiSelectBarProps {
   count: number;
@@ -85,13 +86,12 @@ export default function VerseMultiSelectBar({
   ] as const;
   if (count === 0) return null;
   return (
-    <div className="relative z-20 shrink-0 bg-transparent sm:px-4 sm:pb-3 h-10 -mt-14">
-      <div
-        className={cn(
-          "flex items-center justify-center gap-0.5 overflow-x-auto border-t border-border bg-background/95 px-2 backdrop-blur-xl",
-          "sm:mx-auto sm:w-fit sm:max-w-full sm:rounded-2xl sm:border sm:px-3 sm:shadow-lg",
-        )}
-      >
+    <ReaderDock
+      barClassName={cn(
+        "flex items-center justify-center gap-0.5 overflow-x-auto px-2",
+        "sm:mx-auto sm:w-fit sm:max-w-full sm:px-3",
+      )}
+    >
         {/* Count badge */}
         <div className="me-1 flex shrink-0 items-center gap-1.5 px-2 py-1">
           <span className="text-xs font-bold text-primary">{count}</span>
@@ -127,7 +127,6 @@ export default function VerseMultiSelectBar({
         >
           <X className="w-4 h-4" />
         </button>
-      </div>
-    </div>
+    </ReaderDock>
   );
 }

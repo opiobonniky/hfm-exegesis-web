@@ -17,6 +17,7 @@ export { default as ExplanationList } from "./ExplanationList";
 export { default as VerseMultiSelectBar } from "./VerseMultiSelectBar";
 export { default as MultiSelectHighlightDialog } from "./MultiSelectHighlightDialog";
 export { default as BottomActionBar } from "./BottomActionBar";
+export { default as ReaderDock } from "./ReaderDock";
 export { BiblePageLayout, BiblePageInner, BiblePageStickyHeader } from "./BiblePageLayout";
 export { DeletePreview } from "./DeletePreview";
 export { VerseResourcesErrorState } from "./VerseResourcesErrorState";

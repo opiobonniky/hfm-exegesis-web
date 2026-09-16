@@ -10,6 +10,7 @@ import { VoiceControl } from "./AudioControls/VoiceControl";
 import { RepeatControl } from "./AudioControls/RepeatControl";
 import { PlaybackControls } from "./AudioControls/PlaybackControls";
 import { VerseTickBar } from "./AudioControls/VerseTickBar";
+import ReaderDock from "./ReaderDock";
 
 export default function AudioControlBar({
   audioState,
@@ -31,9 +32,12 @@ export default function AudioControlBar({
         : "All";
 
   return (
-    <div className="relative z-20 shrink-0 bg-transparent sm:px-4 sm:pb-3 h-10 -mt-28">
-      <div className="mx-auto w-full max-w-3xl overflow-hidden border-t border-border bg-background/95 shadow-[0_-12px_36px_-24px_hsl(var(--foreground))] backdrop-blur-xl sm:rounded-2xl sm:border">
-        <div className="px-3 pt-3.5 sm:px-4">
+    <ReaderDock
+      lift="-mt-28"
+      safeArea
+      barClassName="mx-auto w-full max-w-3xl overflow-hidden shadow-[0_-12px_36px_-24px_hsl(var(--foreground))] sm:rounded-2xl"
+    >
+      <div className="px-3 pt-3.5 sm:px-4">
           <VerseTickBar
             currentVerseIdx={audioState.currentVerseIdx}
             totalVerses={audioState.totalVerses}
@@ -142,8 +146,6 @@ export default function AudioControlBar({
             <Square className="h-3.5 w-3.5" fill="currentColor" />
           </button>
         </div>
-      </div>
-      <div className="h-[env(safe-area-inset-bottom)] bg-background/95 sm:hidden" />
-    </div>
+    </ReaderDock>
   );
 }

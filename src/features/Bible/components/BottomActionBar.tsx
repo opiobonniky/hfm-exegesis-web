@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/components/languages/languageProvider";
+import ReaderDock from "./ReaderDock";
 
 interface BottomActionBarProps {
   onPrev: () => void;
@@ -35,13 +36,12 @@ export default function BottomActionBar({
 }: BottomActionBarProps) {
   const { t } = useLanguage();
   return (
-    <div className="relative z-20 shrink-0 bg-transparent sm:px-4 sm:pb-3 h-10 -mt-14">
-      <div
-        className={cn(
-          "flex items-center justify-around border-t border-border bg-background/95 px-2 backdrop-blur-xl",
-          "sm:mx-auto sm:w-full sm:max-w-xl sm:rounded-2xl sm:border sm:px-3 sm:shadow-lg",
-        )}
-      >
+    <ReaderDock
+      barClassName={cn(
+        "flex items-center justify-around px-2",
+        "sm:mx-auto sm:w-full sm:max-w-xl sm:px-3",
+      )}
+    >
         {/* Prev chapter */}
         <button
           type="button"
@@ -113,7 +113,6 @@ export default function BottomActionBar({
         >
           <SkipForward className="w-4 h-4" />
         </button>
-      </div>
-    </div>
+    </ReaderDock>
   );
 }
