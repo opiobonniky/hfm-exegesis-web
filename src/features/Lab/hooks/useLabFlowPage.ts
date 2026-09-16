@@ -15,6 +15,7 @@ import type { VerseResourceData, TranslationComparisonEntry } from "@/services/v
 import { bibleApi } from "@/services/bibleApi";
 import type { Verse } from "@/services/bibleApi";
 import { useAudioPlayer } from "@/hooks/useAudioPlayer";
+import { routes } from "@/components/Routes/routes";
 
 export function useLabFlowPage() {
   const navigate = useNavigate();
@@ -187,10 +188,10 @@ export function useLabFlowPage() {
 
   const goBack = useCallback(() => {
     if (lab.data.stage === "passage" || lab.data.completed) {
-      navigate("/lab");
+      navigate(routes.labFlow.path);
     } else {
       lab.actions.saveCurrentProgress();
-      navigate("/lab");
+      navigate(-1);
     }
   }, [lab.data.stage, lab.data.completed, lab.actions.saveCurrentProgress, navigate]);
 

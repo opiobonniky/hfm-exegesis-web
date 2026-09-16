@@ -332,7 +332,7 @@ export function useBibleReader() {
   const toggleFavorite = useCallback(
     async (book: string, chapter: number, verse: number) => {
       const key = `${book}-${chapter}-${verse}`;
-      await sendPostRequest("bible", "toggle-favorite", {
+      await sendPostRequest("bible", "add-favorite", {
         bookName: book,
         chapter,
         verseNumber: verse,
