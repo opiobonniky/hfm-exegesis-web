@@ -160,7 +160,7 @@ export default function BibleReaderBody({
         </main>
 
         {/* Bottom bar: fixed height, never scrolls */}
-        <div className="shrink-0">
+        <div className="shrink-0 ">
           {audioActive ? (
             <AudioControlBar
               audioState={audioState}

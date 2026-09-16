@@ -85,10 +85,10 @@ export default function VerseMultiSelectBar({
   ] as const;
   if (count === 0) return null;
   return (
-    <div className="z-30 shrink-0 bg-transparent sm:px-4 sm:pb-3 -mt-10">
+    <div className="z-30 shrink-0 bg-transparent sm:px-4 sm:pb-3 h-10 -mt-15">
       <div
         className={cn(
-          "flex items-center justify-center gap-0.5 overflow-x-auto border-t border-border bg-background/95 px-2 py-2 backdrop-blur-xl",
+          "flex items-center justify-center gap-0.5 overflow-x-auto border-t border-border bg-transparent px-2 py-2 backdrop-blur-xl",
           "sm:mx-auto sm:w-fit sm:max-w-full sm:rounded-2xl sm:border sm:px-3 sm:shadow-lg",
         )}
       >
