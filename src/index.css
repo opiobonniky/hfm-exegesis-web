@@ -492,6 +492,34 @@
     .verse-note-in {
       animation: none;
     }
+    /* Skeleton shimmer becomes a static tint; entrances become instant. */
+    .shimmer {
+      animation: none;
+    }
+    .fade-up {
+      animation: none;
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+/* ── Global reduced-motion guard for Tailwind animation utilities ─────────
+   Uses of animate-spin / animate-pulse / animate-in / animate-out / etc.
+   across features cannot be individually audited; this top-level block
+   (outside any @layer so it wins) makes them render their base state:
+   spinners become static icons, skeletons static, and enter/exit
+   animations show/hide instantly. */
+@media (prefers-reduced-motion: reduce) {
+  .animate-spin,
+  .animate-pulse,
+  .animate-bounce,
+  .animate-in,
+  .animate-out,
+  .animate-accordion-down,
+  .animate-accordion-up,
+  .animate-caret-blink {
+    animation: none !important;
   }
 }
 
