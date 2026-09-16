@@ -166,11 +166,13 @@ export default function ChapterContent({
                               aria-pressed={isSelected}
                               aria-label={`${ch.book} ${ch.chapter}:${verse.verse}. ${verse.text}`}
                               style={hc ?? undefined}
+                              data-highlight={highlight ? "true" : undefined}
                               className={cn(
                                 "-mx-0.5 inline cursor-pointer scroll-mt-20 whitespace-normal rounded-sm px-0.5 align-baseline transition-colors duration-200",
                                 "hover:bg-primary/8 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
                                 isSelected &&
                                   "bg-primary/10 ring-1 ring-primary/20",
+                                hc && "verse-highlight-fade",
                               )}
                             >
                               <sup

@@ -38,7 +38,7 @@ export default function MultiSelectHighlightDialog({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center sm:items-center"
+      className="fixed inset-0 z-[80] flex items-end justify-center pb-[calc(4.5rem+env(safe-area-inset-bottom))] sm:items-center sm:pb-0"
       onClick={() => !saving && onOpenChange(false)}
     >
       <div

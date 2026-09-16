@@ -405,6 +405,21 @@
     50% { transform: scaleY(1); }
   }
 
+  /* Smooth wash-in for highlight color changes on verses. The tint arrives
+     via inline style, so the animation only animates opacity: it starts
+     transparent and settles at the verse's own background color. Gated on
+     data-highlight so it runs when a highlight is applied (or restored on
+     load) — color-to-color changes fall back to the span's 200ms transition
+     and hover remains unaffected. */
+  @keyframes verse-highlight-fade {
+    from { background-color: transparent; }
+    to { background-color: var(--highlight-color, transparent); }
+  }
+
+  .verse-highlight-fade[data-highlight="true"] {
+    animation: verse-highlight-fade 450ms ease-out;
+  }
+
   .verse-reading {
     background-image: linear-gradient(
       100deg,
