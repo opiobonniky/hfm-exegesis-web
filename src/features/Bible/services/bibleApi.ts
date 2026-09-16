@@ -35,8 +35,6 @@ export const bibleApi = {
     sendPostRequest("bible", "get-todays-exegesis", {}),
   getVerseExplanation: (book: string, chapter: number, verse: number) =>
     sendPostRequest("bible", "get-verse-explanation", { bookName: book, chapter, verseNumber: verse }),
-  toggleHighlight: (book: string, chapter: number, verse: number, colorId: string) =>
-    sendPostRequest("bible", "toggle-highlight", { bookName: book, chapter, verseNumber: verse, colorId }),
   toggleFavorite: (book: string, chapter: number, verse: number) =>
     sendPostRequest("bible", "toggle-favorite", { bookName: book, chapter, verseNumber: verse }),
   saveNote: (book: string, chapter: number, verse: number, note: string) =>

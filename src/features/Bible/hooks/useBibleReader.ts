@@ -163,6 +163,49 @@ export function useBibleReader() {
       })
       .finally(() => setLoading(false));
   }, [fetchChapters, loadStartChapter, reloadToken, selectedBook, versionId]);
+
+  /**
+   * Hydrate the user's saved highlights, favorites, and notes once on mount
+   * so the reader shows the same marks the mobile app created (same backend
+   * rows, same colorId palette).
+   */
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const [hlRes, favRes, noteRes] = await Promise.all([
+          sendPostRequest("bible", "get-highlights", { pageSize: 50 }),
+          sendPostRequest("bible", "get-favorites", { pageSize: 50 }),
+          sendPostRequest("bible", "get-verse-note", {}),
+        ]);
+        if (cancelled) return;
+        const hlMap: Record<string, ReaderHighlight> = {};
+        for (const h of hlRes.returnData?.highlights || []) {
+          hlMap[`${h.bookName}-${h.chapter}-${h.verseNumber}`] = {
+            colorId: Number(h.colorId) || 0,
+          };
+        }
+        setHighlights(hlMap);
+        const favSet = new Set<string>();
+        for (const f of favRes.returnData?.favorites || []) {
+          favSet.add(`${f.bookName}-${f.chapter}-${f.verseNumber}`);
+        }
+        setFavorites(favSet);
+        const noteMap: Record<string, string> = {};
+        for (const n of noteRes.returnData || []) {
+          if (n?.note) {
+            noteMap[`${n.bookName}-${n.chapter}-${n.verseNumber}`] = n.note;
+          }
+        }
+        setVerseNotes(noteMap);
+      } catch (error) {
+        console.error("Failed to load reader highlights/favorites/notes:", error);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
   const navigateTo = useCallback(
     (book: string, chapter: number, verse?: number) => {
       if (!isBibleBook(book)) return;
@@ -242,21 +285,47 @@ export function useBibleReader() {
     [],
   );
   const clearSelectedVerses = useCallback(() => setSelectedVerses([]), []);
+  /**
+   * Apply a highlight color to a verse (colorId 0 removes it). Uses the same
+   * backend endpoints as the mobile app: add-highlight upserts the row and
+   * delete-highlight removes it, so colors stay in sync across platforms.
+   */
   const toggleHighlight = useCallback(
     async (book: string, chapter: number, verse: number, colorId: number) => {
       const key = `${book}-${chapter}-${verse}`;
-      await sendPostRequest("bible", "toggle-highlight", {
+      if (colorId === 0) {
+        // Remove: fetch the row id(s) then delete (same flow as the app).
+        const res = await sendPostRequest("bible", "get-highlights", {
+          bookName: book,
+          chapter,
+          verseNumber: verse,
+        });
+        const rows: Array<{ id: number }> =
+          res.returnCode === 200 ? res.returnData?.highlights || [] : [];
+        await Promise.all(
+          rows.map((row) =>
+            sendPostRequest("bible", "delete-highlight", {
+              highlightId: row.id,
+            }),
+          ),
+        );
+        setHighlights((current) => {
+          const next = { ...current };
+          delete next[key];
+          return next;
+        });
+        return;
+      }
+      await sendPostRequest("bible", "add-highlight", {
         bookName: book,
         chapter,
-        verseNumber: verse,
+        verseNumbers: [verse],
         colorId,
       });
-      setHighlights((current) => {
-        const next = { ...current };
-        if (next[key]?.colorId === colorId) delete next[key];
-        else next[key] = { colorId };
-        return next;
-      });
+      setHighlights((current) => ({
+        ...current,
+        [key]: { colorId },
+      }));
     },
     [],
   );

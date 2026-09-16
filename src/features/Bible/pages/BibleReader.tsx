@@ -6,6 +6,7 @@ import BibleReaderBody from "../components/BibleReaderBody";
 import VerseExplanationDrawer from "../components/VerseExplanationDrawer";
 import VerseActionSheet from "../components/VerseActionSheet";
 import { EditNoteDialog } from "../components/EditNoteDialog";
+import { MultiSelectHighlightDialog } from "../components";
 import ApiBaseUrlIndicator from "../components/ApiBaseUrlIndicator";
 
 export default function BibleReader() {
@@ -82,7 +83,7 @@ export default function BibleReader() {
         onOpenVerseActions={actions.handleOpenVerseActions}
         onRetryLoad={actions.retryLoad}
         onLoadMore={actions.loadMore}
-        onMultiHighlight={actions.handleMultiHighlight}
+        onMultiHighlight={actions.openMultiHighlightDialog}
         onMultiNote={actions.handleOpenNote}
         onMultiFavorite={actions.handleMultiFavorite}
         onMultiCopy={actions.handleCopySelected}
@@ -143,6 +144,16 @@ export default function BibleReader() {
         onSave={actions.handleSaveNote}
         onClose={actions.closeNoteDialog}
         onDelete={actions.handleDeleteNote}
+      />
+      <MultiSelectHighlightDialog
+        open={data.multiHighlightDialogOpen}
+        onOpenChange={(open) =>
+          open ? actions.openMultiHighlightDialog() : actions.closeMultiHighlightDialog()
+        }
+        count={data.selectedVerseCount}
+        saving={data.multiHighlightSaving}
+        onPick={actions.confirmMultiHighlight}
+        onClear={actions.clearMultiHighlights}
       />
       <ApiBaseUrlIndicator
         apiBaseUrl={data.apiBaseUrl}

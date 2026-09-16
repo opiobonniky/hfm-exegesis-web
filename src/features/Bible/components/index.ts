@@ -15,6 +15,7 @@ export { default as SearchInitialState } from "./SearchInitialState";
 export { default as BookCard } from "./BookCard";
 export { default as ExplanationList } from "./ExplanationList";
 export { default as VerseMultiSelectBar } from "./VerseMultiSelectBar";
+export { default as MultiSelectHighlightDialog } from "./MultiSelectHighlightDialog";
 export { default as BottomActionBar } from "./BottomActionBar";
 export { BiblePageLayout, BiblePageInner, BiblePageStickyHeader } from "./BiblePageLayout";
 export { DeletePreview } from "./DeletePreview";

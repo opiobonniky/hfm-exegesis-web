@@ -15,6 +15,7 @@ import {
   BIBLE_READER_DEFAULT_FONT_SIZE,
   BIBLE_READER_MAX_FONT_SIZE,
   BIBLE_READER_MIN_FONT_SIZE,
+  VERSE_HIGHLIGHT_COLORS,
 } from "../constants";
 import { useBibleReader } from "./useBibleReader";
 import { hasSeenBookOverview } from "../services/bookOverviewSeen";
@@ -29,6 +30,11 @@ const parseRequestedChapter = (value: string | null) => {
   const chapter = Number.parseInt(value || "", 10);
   return Number.isFinite(chapter) && chapter > 0 ? chapter : null;
 };
+
+/** Default swatch for one-tap highlight actions (app's Yellow, id 3). */
+const DEFAULT_HIGHLIGHT_COLOR_ID = VERSE_HIGHLIGHT_COLORS.find(
+  (c) => c.name === "Yellow",
+)?.id ?? 3;
 function getInitialFontSize(): number {
   try {
     const stored = Number.parseInt(
@@ -88,6 +94,8 @@ export function useBibleReaderPage() {
   const [explanation, setExplanation] =
     useState<VerseExplanationData | null>(null);
   const [noteDialogOpen, setNoteDialogOpen] = useState(false);
+  const [multiHighlightDialogOpen, setMultiHighlightDialogOpen] = useState(false);
+  const [multiHighlightSaving, setMultiHighlightSaving] = useState(false);
   const [noteText, setNoteText] = useState("");
   const [noteDialogMode, setNoteDialogMode] = useState<"create" | "edit">("create");
   const [noteDialogVerseRef, setNoteDialogVerseRef] = useState("");
@@ -471,7 +479,7 @@ export function useBibleReaderPage() {
         verseActionTarget.book,
         verseActionTarget.chapter,
         verseActionTarget.verse,
-        0,
+        DEFAULT_HIGHLIGHT_COLOR_ID,
       );
     } catch {
       toast.error("Unable to update the highlight");
@@ -626,18 +634,65 @@ export function useBibleReaderPage() {
     clearSelection();
   }, [audio, clearSelection, selectedVerseData]);
 
-  const handleMultiHighlight = useCallback(async () => {
+  /** Open the multi-select highlight color picker instead of applying a default. */
+  const openMultiHighlightDialog = useCallback(() => {
+    if (selectedVerseData.length === 0) return;
+    setMultiHighlightDialogOpen(true);
+  }, [selectedVerseData.length]);
+
+  const closeMultiHighlightDialog = useCallback(
+    () => setMultiHighlightDialogOpen(false),
+    [],
+  );
+
+  /** Apply the chosen color to every selected verse. */
+  const confirmMultiHighlight = useCallback(
+    async (colorId: number) => {
+      if (selectedVerseData.length === 0) return;
+      setMultiHighlightSaving(true);
+      try {
+        await Promise.all(
+          selectedVerseData.map((verse) =>
+            reader.toggleHighlight(
+              verse.book,
+              verse.chapter,
+              verse.verse,
+              colorId,
+            ),
+          ),
+        );
+        toast.success(
+          `Highlighted ${selectedVerseData.length} verse${selectedVerseData.length === 1 ? "" : "s"}`,
+        );
+      } catch {
+        toast.error("Unable to highlight the selected verses");
+      } finally {
+        setMultiHighlightSaving(false);
+        clearSelection();
+        setMultiHighlightDialogOpen(false);
+      }
+    },
+    [clearSelection, reader, selectedVerseData],
+  );
+
+  /** Remove highlights from every selected verse (colorId 0 = remove). */
+  const clearMultiHighlights = useCallback(async () => {
+    if (selectedVerseData.length === 0) return;
+    setMultiHighlightSaving(true);
     try {
       await Promise.all(
         selectedVerseData.map((verse) =>
           reader.toggleHighlight(verse.book, verse.chapter, verse.verse, 0),
         ),
       );
-      toast.success("Selected verses highlighted");
+      toast.success("Highlights removed");
     } catch {
-      toast.error("Unable to highlight the selected verses");
+      toast.error("Unable to remove the highlights");
+    } finally {
+      setMultiHighlightSaving(false);
+      clearSelection();
+      setMultiHighlightDialogOpen(false);
     }
-    clearSelection();
   }, [clearSelection, reader, selectedVerseData]);
 
   const handleMultiFavorite = useCallback(async () => {
@@ -868,6 +923,8 @@ export function useBibleReaderPage() {
       noteText,
       noteSaving,
       noteDeleting,
+      multiHighlightDialogOpen,
+      multiHighlightSaving,
     },
     actions: {
       goBack: () => navigate(-1),
@@ -891,7 +948,10 @@ export function useBibleReaderPage() {
       handleOpenVerseActions,
       retryLoad: reader.retryLoad,
       loadMore: reader.loadMore,
-      handleMultiHighlight,
+      openMultiHighlightDialog,
+      closeMultiHighlightDialog,
+      confirmMultiHighlight,
+      clearMultiHighlights,
       handleOpenNote,
       handleMultiFavorite,
       handleCopySelected,

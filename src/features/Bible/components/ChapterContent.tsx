@@ -6,6 +6,7 @@ import { StickyNote } from "lucide-react";
 import VerseToolbar from "./VerseToolbar";
 import type { ChapterData, ReaderHighlight } from "../types";
 import type { ChapterHeading } from "@/services/bibleApi";
+import { getVerseHighlightStyle } from "../constants";
 
 interface ChapterContentProps {
   chapters: ChapterData[];
@@ -30,14 +31,6 @@ interface ChapterContentProps {
   chapterRefs: React.MutableRefObject<Record<string, HTMLDivElement>>;
   verseRefs: React.MutableRefObject<Record<string, HTMLSpanElement | null>>;
 }
-
-const HC: Record<number, { light: string; dark: string }> = {
-  0: { light: "bg-yellow-100", dark: "dark:bg-yellow-950/30" },
-  1: { light: "bg-green-100", dark: "dark:bg-green-950/30" },
-  2: { light: "bg-blue-100", dark: "dark:bg-blue-950/30" },
-  3: { light: "bg-pink-100", dark: "dark:bg-pink-950/30" },
-  4: { light: "bg-orange-100", dark: "dark:bg-orange-950/30" },
-};
 
 export default function ChapterContent({
   chapters,
@@ -137,7 +130,7 @@ export default function ChapterContent({
                         const highlight = highlights[key];
                         const isFavorited = favorites.has(key);
                         const note = verseNotes[key];
-                        const hc = highlight ? HC[highlight.colorId] : null;
+                        const hc = getVerseHighlightStyle(highlight?.colorId);
                         const isNowReading = audioVerseKey === key;
                         return (
                           <span
@@ -172,12 +165,12 @@ export default function ChapterContent({
                               tabIndex={0}
                               aria-pressed={isSelected}
                               aria-label={`${ch.book} ${ch.chapter}:${verse.verse}. ${verse.text}`}
+                              style={hc ?? undefined}
                               className={cn(
                                 "-mx-0.5 inline cursor-pointer scroll-mt-20 whitespace-normal rounded-sm px-0.5 align-baseline transition-colors duration-200",
                                 "hover:bg-primary/8 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
                                 isSelected &&
                                   "bg-primary/10 ring-1 ring-primary/20",
-                                hc && cn(hc.light, hc.dark),
                               )}
                             >
                               <sup
@@ -201,7 +194,8 @@ export default function ChapterContent({
                             </span>
                             <span
                               className={cn(
-                                "absolute -top-11 start-0 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-all duration-200 z-20 pointer-events-none translate-y-1 group-hover:translate-y-0 group-focus-within:translate-y-0",
+                                "absolute -top-11 start-0 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-all duration-200 pointer-events-none translate-y-1 group-hover:translate-y-0 group-focus-within:translate-y-0",
+                                "z-[70]",
                                 isSelected &&
                                   "max-sm:opacity-100 max-sm:translate-y-0",
                               )}

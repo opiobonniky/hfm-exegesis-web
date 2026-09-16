@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   Highlighter,
   Star,
@@ -46,6 +46,26 @@ export default function VerseToolbar({
   onMore,
 }: VerseToolbarProps) {
   const [showColors, setShowColors] = useState(false);
+  const [anchorRect, setAnchorRect] = useState<{
+    top: number;
+    bottom: number;
+    left: number;
+    right: number;
+  } | null>(null);
+  const highlightBtnRef = useRef<HTMLButtonElement>(null);
+
+  const openPicker = () => {
+    const rect = highlightBtnRef.current?.getBoundingClientRect();
+    if (rect) {
+      setAnchorRect({
+        top: rect.top,
+        bottom: rect.bottom,
+        left: rect.left,
+        right: rect.right,
+      });
+    }
+    setShowColors(true);
+  };
 
   return (
     <div
@@ -53,36 +73,36 @@ export default function VerseToolbar({
       onClick={(e) => e.stopPropagation()}
     >
       {/* Highlight with color picker */}
-      <div className="relative">
-        <button
-          type="button"
-          onClick={() => setShowColors((open) => !open)}
-          className={cn(
-            currentHighlight !== undefined || showColors
-              ? toolbarButtonActive
-              : toolbarButton,
-          )}
-          title="Highlight verse"
-          aria-label="Highlight verse"
-          aria-expanded={showColors}
-        >
-          <Highlighter className="h-3.5 w-3.5" />
-        </button>
-        {showColors && (
-          <VerseToolbarColorPicker
-            currentHighlight={currentHighlight}
-            onPick={(colorId) => {
-              onHighlight(book, chapter, verse, colorId);
-              setShowColors(false);
-            }}
-            onClear={() => {
-              onHighlight(book, chapter, verse, currentHighlight ?? 0);
-              setShowColors(false);
-            }}
-            onClose={() => setShowColors(false)}
-          />
+      <button
+        ref={highlightBtnRef}
+        type="button"
+        onClick={() => (showColors ? setShowColors(false) : openPicker())}
+        className={cn(
+          currentHighlight !== undefined || showColors
+            ? toolbarButtonActive
+            : toolbarButton,
         )}
-      </div>
+        title="Highlight verse"
+        aria-label="Highlight verse"
+        aria-expanded={showColors}
+      >
+        <Highlighter className="h-3.5 w-3.5" />
+      </button>
+      {showColors && (
+        <VerseToolbarColorPicker
+          anchorRect={anchorRect}
+          currentHighlight={currentHighlight}
+          onPick={(colorId) => {
+            onHighlight(book, chapter, verse, colorId);
+            setShowColors(false);
+          }}
+          onClear={() => {
+            onHighlight(book, chapter, verse, 0);
+            setShowColors(false);
+          }}
+          onClose={() => setShowColors(false)}
+        />
+      )}
 
       {/* Favorite */}
       <button

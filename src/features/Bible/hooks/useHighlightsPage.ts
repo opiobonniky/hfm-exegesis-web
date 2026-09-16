@@ -5,6 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { sendPostRequest } from "@/services/api";
 import { ensureDataLoaded, getVerseText } from "@/utilities/bibleUtils";
+import { VERSE_HIGHLIGHT_COLORS } from "../constants";
 
 export interface HighlightItem {
   id: number;
@@ -16,14 +17,11 @@ export interface HighlightItem {
   createdOn: string;
 }
 
-const HIGHLIGHT_COLORS: Record<number, { color: string; label: string }> = {
-  1: { color: "#FDE68A", label: "Yellow" },
-  2: { color: "#BBF7D0", label: "Green" },
-  3: { color: "#BFDBFE", label: "Blue" },
-  4: { color: "#FBCFE8", label: "Pink" },
-  5: { color: "#DDD6FE", label: "Purple" },
-  6: { color: "#FED7AA", label: "Orange" },
-};
+// Shared palette — mirrors the mobile app's HIGHLIGHT_COLORS (see constants.ts)
+const HIGHLIGHT_COLORS: Record<number, { color: string; label: string }> =
+  Object.fromEntries(
+    VERSE_HIGHLIGHT_COLORS.map((c) => [c.id, { color: c.color, label: c.name }]),
+  );
 
 export function useHighlightsPage() {
   const { t, isRtl } = useLanguage();

@@ -77,16 +77,58 @@ export const LAB_STAGE_CONFIG = [
 export const AUDIO_SPEED_OPTIONS = [0.75, 1, 1.25, 1.5, 1.75, 2];
 
 export const BIBLE_READER_MIN_FONT_SIZE = 12;
-export const BIBLE_READER_MAX_FONT_SIZE = 40;
+export const BIBLE_READER_MAX_FONT_SIZE = 48;
 export const BIBLE_READER_DEFAULT_FONT_SIZE = 20;
 
-/** Verse toolbar highlight swatches — id maps to ReaderHighlight.colorId. */
+/**
+ * Verse highlight palette — mirrors the mobile app's
+ * `app/src/utilits/HIGHLIGHT_COLORS.ts` exactly (same ids, same hex values)
+ * so highlights created on one platform render identically on the other.
+ * colorId 0 means "no highlight / removed".
+ */
 export const VERSE_HIGHLIGHT_COLORS = [
-  { id: 0, color: "bg-yellow-300", ring: "ring-yellow-400", label: "Yellow" },
-  { id: 1, color: "bg-green-300", ring: "ring-green-400", label: "Green" },
-  { id: 2, color: "bg-blue-300", ring: "ring-blue-400", label: "Blue" },
-  { id: 3, color: "bg-pink-300", ring: "ring-pink-400", label: "Pink" },
-  { id: 4, color: "bg-orange-300", ring: "ring-orange-400", label: "Orange" },
+  // Warm
+  { id: 1, name: "Red", color: "#F87171" },
+  { id: 3, name: "Yellow", color: "#FACC15" },
+  { id: 4, name: "Orange", color: "#F97316" },
+  { id: 13, name: "Pink", color: "#EC4899" },
+  { id: 14, name: "Rose", color: "#FB7185" },
+  { id: 15, name: "Amber", color: "#F59E0B" },
+  // Cool
+  { id: 2, name: "Blue", color: "#3B82F6" },
+  { id: 7, name: "Cyan", color: "#06B6D4" },
+  { id: 8, name: "Teal", color: "#0D9488" },
+  { id: 9, name: "Sky", color: "#38BDF8" },
+  { id: 10, name: "Indigo", color: "#6366F1" },
+  // Nature
+  { id: 5, name: "Green", color: "#22C55E" },
+  { id: 6, name: "Purple", color: "#A855F7" },
+  { id: 11, name: "Lime", color: "#84CC16" },
+  { id: 12, name: "Mint", color: "#2DD4BF" },
 ] as const;
 
 export type VerseHighlightColor = (typeof VERSE_HIGHLIGHT_COLORS)[number];
+
+/** Swatch groups shown in the picker — same grouping as the app. */
+export const VERSE_HIGHLIGHT_COLOR_GROUPS = [
+  { label: "Warm", ids: [1, 3, 4, 13, 14, 15] },
+  { label: "Cool", ids: [2, 7, 8, 9, 10] },
+  { label: "Nature", ids: [5, 6, 11, 12] },
+] as const;
+
+/** Look up a palette entry by colorId (returns undefined for id 0). */
+export function getVerseHighlightColor(
+  colorId: number | undefined | null,
+): VerseHighlightColor | undefined {
+  if (colorId == null || colorId === 0) return undefined;
+  return VERSE_HIGHLIGHT_COLORS.find((c) => c.id === colorId);
+}
+
+
+export function getVerseHighlightStyle(colorId: number | undefined | null): {
+  backgroundColor: string;
+} | null {
+  const c = getVerseHighlightColor(colorId);
+  if (!c) return null;
+  return { backgroundColor: `${c.color}33` };
+}
