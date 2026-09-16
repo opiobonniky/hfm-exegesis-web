@@ -648,6 +648,7 @@ export interface Translations {
     chapterLabel: string;
     // ── Selection toolbar ──
     listen: string;
+    more: string;
     stop: string;
     fav: string;
     journal: string;

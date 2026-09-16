@@ -63,7 +63,7 @@ export function VerseTickBar({
     <div
       ref={barRef}
       dir="auto"
-      className="group/bar relative h-5 select-none"
+      className="group/bar relative h-3 select-none"
     >
       <div
         ref={trackRef}
@@ -77,7 +77,7 @@ export function VerseTickBar({
         onClick={onSeek ? handleTrackClick : undefined}
         onKeyDown={onSeek ? handleTrackKeyDown : undefined}
         className={cn(
-          "relative flex h-1.5 items-center gap-px overflow-hidden rounded-full bg-muted transition-all",
+          "relative flex h-2.5 items-center gap-px overflow-hidden rounded-full bg-muted transition-all",
           "group-hover/bar:h-2.5 group-focus-visible/bar:h-2.5",
           onSeek && "cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1",
         )}

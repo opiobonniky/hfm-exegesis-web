@@ -12,19 +12,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-
-interface EditNoteDialogProps {
-  open: boolean;
-  mode?: "create" | "edit";
-  verseRef?: string;
-  text: string;
-  saving: boolean;
-  deleting?: boolean;
-  onTextChange: (v: string) => void;
-  onSave: () => void;
-  onClose: () => void;
-  onDelete?: () => void;
-}
+import type { EditNoteDialogProps } from "../types";
 
 export function EditNoteDialog({
   open,

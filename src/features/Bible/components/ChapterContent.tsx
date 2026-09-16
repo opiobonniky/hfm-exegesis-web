@@ -4,7 +4,7 @@ import { Fragment } from "react";
 import { cn } from "@/lib/utils";
 import { StickyNote } from "lucide-react";
 import VerseToolbar from "./VerseToolbar";
-import type { ChapterData, Highlight } from "../hooks/useBibleReader";
+import type { ChapterData, ReaderHighlight } from "../types";
 import type { ChapterHeading } from "@/services/bibleApi";
 
 interface ChapterContentProps {
@@ -14,7 +14,7 @@ interface ChapterContentProps {
   /** Verse currently being read aloud, or null when audio is off. */
   audioVerseKey?: string | null;
   selectedVerses: string[];
-  highlights: Record<string, Highlight>;
+  highlights: Record<string, ReaderHighlight>;
   favorites: Set<string>;
   verseNotes: Record<string, string>;
   onToggleVerse: (key: string) => void;
@@ -122,29 +122,31 @@ export default function ChapterContent({
                 const headings = headingsByChapter[chapterKey] || [];
                 const sections = splitByHeadings(ch.verses, headings);
 
-
                 return sections.map((section, sectionIndex) => (
                   <Fragment key={`${chapterKey}-section-${sectionIndex}`}>
                     {section.heading && (
                       <h3 className="my-6 text-center font-[family-name:var(--font-heading)] text-lg font-bold tracking-tight text-foreground sm:my-8 sm:text-xl">
                         {section.heading}
                       </h3>
-                    )}                      <div className="!block">              {section.verses.map((verse) => {
-                const key = `${chapterKey}-${verse.verse}`;
-                const isSelected = selectedVerseSet.has(key);
-                const highlight = highlights[key];
-                const isFavorited = favorites.has(key);
-                const note = verseNotes[key];
-                const hc = highlight ? HC[highlight.colorId] : null;
-                const isNowReading = audioVerseKey === key;
-                return (
-                  <span
-                    key={verse.verse}
-                    className={cn(
-                      "group relative !inline whitespace-normal",
-                      isNowReading && "verse-reading",
-                    )}
-                  >
+                    )}{" "}
+                    <div className="!block">
+                      {" "}
+                      {section.verses.map((verse) => {
+                        const key = `${chapterKey}-${verse.verse}`;
+                        const isSelected = selectedVerseSet.has(key);
+                        const highlight = highlights[key];
+                        const isFavorited = favorites.has(key);
+                        const note = verseNotes[key];
+                        const hc = highlight ? HC[highlight.colorId] : null;
+                        const isNowReading = audioVerseKey === key;
+                        return (
+                          <span
+                            key={verse.verse}
+                            className={cn(
+                              "group relative !inline whitespace-normal",
+                              isNowReading && "verse-reading",
+                            )}
+                          >
                             <span
                               ref={(el) => {
                                 verseRefs.current[key] = el;
@@ -178,20 +180,22 @@ export default function ChapterContent({
                                 hc && cn(hc.light, hc.dark),
                               )}
                             >
-                      <sup
-                        className={cn(
-                          "select-none pe-0.5 font-sans text-[0.58em] font-bold leading-none text-primary/55 transition-colors hover:text-primary",
-                          isSelected && "text-primary",
-                          isNowReading && "text-primary",
-                        )}
-                      >
-                        {verse.verse}
-                        {isNowReading && (
-                          <span className="verse-eq" aria-hidden="true">
-                            <span /><span /><span />
-                          </span>
-                        )}
-                      </sup>
+                              <sup
+                                className={cn(
+                                  "select-none pe-0.5 font-sans text-[0.58em] font-bold leading-none text-primary/55 transition-colors hover:text-primary",
+                                  isSelected && "text-primary",
+                                  isNowReading && "text-primary",
+                                )}
+                              >
+                                {verse.verse}
+                                {isNowReading && (
+                                  <span className="verse-eq" aria-hidden="true">
+                                    <span />
+                                    <span />
+                                    <span />
+                                  </span>
+                                )}
+                              </sup>
                               {"\u00a0"}
                               {verse.text}
                             </span>

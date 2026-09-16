@@ -2,11 +2,8 @@ import { useState } from "react";
 import { Headphones, Loader2, Settings2, Square } from "lucide-react";
 
 import { useLanguage } from "@/components/languages/languageProvider";
-import type {
-  AudioPlayerActions,
-  AudioPlayerState,
-} from "@/hooks/useAudioPlayer";
 import { cn } from "@/lib/utils";
+import type { AudioControlBarProps } from "../types";
 import { SpeedControl } from "./AudioControls/SpeedControl";
 import { VolumeControl } from "./AudioControls/VolumeControl";
 import { VoiceControl } from "./AudioControls/VoiceControl";
@@ -14,38 +11,33 @@ import { RepeatControl } from "./AudioControls/RepeatControl";
 import { PlaybackControls } from "./AudioControls/PlaybackControls";
 import { VerseTickBar } from "./AudioControls/VerseTickBar";
 
-interface AudioControlBarProps {
-  audio: AudioPlayerState & AudioPlayerActions;
-  bookName: string;
-  chapter: number;
-}
-
 export default function AudioControlBar({
-  audio,
+  audioState,
+  audioActions,
   bookName,
   chapter,
 }: AudioControlBarProps) {
   const { t, isRtl } = useLanguage();
   const [expanded, setExpanded] = useState(false);
   const currentPosition = Math.min(
-    audio.currentVerseIdx + 1,
-    audio.totalVerses,
+    audioState.currentVerseIdx + 1,
+    audioState.totalVerses,
   );
   const repeatLabel =
-    audio.repeatMode === "none"
+    audioState.repeatMode === "none"
       ? "Off"
-      : audio.repeatMode === "one"
+      : audioState.repeatMode === "one"
         ? "One"
         : "All";
 
   return (
-    <div className="relative z-40 shrink-0 bg-transparent sm:px-4 sm:pb-3">
-      <div className="mx-auto w-full max-w-3xl overflow-hidden border-t border-border/70 bg-card/95 shadow-[0_-12px_36px_-24px_hsl(var(--foreground))] backdrop-blur-xl sm:rounded-2xl sm:border">
-        <div className="px-3 pt-2.5 sm:px-4">
+    <div className="relative z-20 shrink-0 bg-transparent sm:px-4 sm:pb-3 h-10 -mt-28">
+      <div className="mx-auto w-full max-w-3xl overflow-hidden border-t border-border/70  shadow-[0_-12px_36px_-24px_hsl(var(--foreground))] backdrop-blur-xl sm:rounded-2xl sm:border">
+        <div className="px-3 pt-3.5 sm:px-4">
           <VerseTickBar
-            currentVerseIdx={audio.currentVerseIdx}
-            totalVerses={audio.totalVerses}
-            onSeek={audio.seekToVerse}
+            currentVerseIdx={audioState.currentVerseIdx}
+            totalVerses={audioState.totalVerses}
+            onSeek={audioActions.seekToVerse}
           />
         </div>
 
@@ -53,21 +45,21 @@ export default function AudioControlBar({
           <div className="border-b border-border/60 bg-muted/15 px-3 py-3 sm:px-5">
             <div className="grid gap-3 sm:grid-cols-2">
               <SpeedControl
-                speechRate={audio.speechRate}
-                onSpeechRateChange={audio.setSpeechRate}
+                speechRate={audioState.speechRate}
+                onSpeechRateChange={audioActions.setSpeechRate}
               />
               <VolumeControl
-                volume={audio.volume}
-                onVolumeChange={audio.setVolume}
+                volume={audioState.volume}
+                onVolumeChange={audioActions.setVolume}
               />
               <VoiceControl
-                voices={audio.voices}
-                selectedVoice={audio.selectedVoice}
-                onVoiceChange={audio.setVoice}
+                voices={audioState.voices}
+                selectedVoice={audioState.selectedVoice}
+                onVoiceChange={audioActions.setVoice}
               />
               <RepeatControl
-                repeatMode={audio.repeatMode}
-                onCycle={audio.cycleRepeatMode}
+                repeatMode={audioState.repeatMode}
+                onCycle={audioActions.cycleRepeatMode}
                 label={t.bibleReader.repeatModeLabel.replace(
                   "{mode}",
                   repeatLabel,
@@ -87,22 +79,22 @@ export default function AudioControlBar({
               <span
                 className={cn(
                   "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.14em]",
-                  audio.isBuffering
+                  audioState.isBuffering
                     ? "border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400"
                     : "border-primary/20 bg-primary/5 text-primary",
                 )}
               >
-                {audio.isBuffering && (
+                {audioState.isBuffering && (
                   <Loader2 className="h-2.5 w-2.5 animate-spin" />
                 )}
-                {audio.isBuffering
+                {audioState.isBuffering
                   ? "Buffering"
-                  : audio.isPaused
+                  : audioState.isPaused
                     ? "Paused"
                     : "Now playing"}
               </span>
               <span className="text-[10px] font-medium tabular-nums text-muted-foreground">
-                {currentPosition} / {audio.totalVerses}
+                {currentPosition} / {audioState.totalVerses}
               </span>
             </div>
             <p className="mt-1 truncate font-[family-name:var(--font-heading)] text-sm font-bold text-foreground">
@@ -111,16 +103,16 @@ export default function AudioControlBar({
           </div>
 
           <PlaybackControls
-            isPaused={audio.isPaused}
-            currentVerseIdx={audio.currentVerseIdx}
-            totalVerses={audio.totalVerses}
+            isPaused={audioState.isPaused}
+            currentVerseIdx={audioState.currentVerseIdx}
+            totalVerses={audioState.totalVerses}
             previousLabel={t.bibleReader.previousVerse}
             resumeLabel={t.bibleReader.resumeAudio}
             pauseLabel={t.bibleReader.pauseAudio}
             nextLabel={t.bibleReader.nextVerse}
-            onPrevious={audio.skipBackward}
-            onTogglePause={audio.togglePause}
-            onNext={audio.skipForward}
+            onPrevious={audioActions.skipBackward}
+            onTogglePause={audioActions.togglePause}
+            onNext={audioActions.skipForward}
           />
 
           <div className="hidden h-7 w-px bg-border/60 sm:block" />
@@ -143,7 +135,7 @@ export default function AudioControlBar({
           </button>
           <button
             type="button"
-            onClick={audio.stopPlayback}
+            onClick={audioActions.stopPlayback}
             aria-label={t.bibleReader.stopAudio}
             className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-destructive/10 text-destructive transition-colors hover:bg-destructive/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >

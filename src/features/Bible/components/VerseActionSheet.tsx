@@ -1,49 +1,29 @@
 import {
-  BookHeart, BookOpen, Brain, CheckCircle2, ChevronRight, Copy, Ear, Eye,
-  GitFork, GraduationCap, Headphones, Heart, Highlighter, Languages,
+  BookHeart, BookOpen, Brain, ChevronRight, Copy,
+  GitFork, Headphones, Highlighter, Languages,
   Library, Lightbulb, NotebookPen, Search, Share2, Sparkles, Star,
   StickyNote, Wrench,
 } from "lucide-react";
 
-import { useLanguage } from "@/components/languages/languageProvider";
 import {
   Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle,
 } from "@/components/ui/sheet";
-import { VerseActionTarget, LabStage } from "../types";
+import type { LabStage, VerseActionSheetProps } from "../types";
 import { LAB_STAGE_CONFIG } from "../constants";
 import { ActionButton } from "./ActionButton";
 import { LabStageItem } from "./LabStageItem";
 import { ActionSection } from "./ActionSection";
-
-interface VerseActionSheetProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  target: VerseActionTarget | null;
-  isRtl: boolean;
-  onExplain: () => void;
-  onStartLab: (stage: LabStage) => void;
-  onOpenResources: (
-    tab: "commentaries" | "crossReferences" | "translations",
-  ) => void;
-  onDevotional: () => void;
-  onStudyTools: () => void;
-  onStrongs: () => void;
-  onTrivia: () => void;
-  onListen: () => void;
-  onHighlight: () => void;
-  onNote: () => void;
-  onJournal: () => void;
-  onFavorite: () => void;
-  onSearch: () => void;
-  onShare: () => void;
-  onCopy: () => void;
-}
+import {
+  getLabStageIcon,
+  getReaderLabel,
+} from "../utils/readerPresentation";
 
 export default function VerseActionSheet({
   open,
   onOpenChange,
   target,
   isRtl,
+  labels,
   onExplain,
   onStartLab,
   onOpenResources,
@@ -60,24 +40,9 @@ export default function VerseActionSheet({
   onShare,
   onCopy,
 }: VerseActionSheetProps) {
-  const { t } = useLanguage();
-  const bibleReader = t.bibleReader as unknown as Record<string, string>;
-  const label = (key: string, fallback: string) => bibleReader[key] || fallback;
-  const run = (callback: () => void) => () => {
-    onOpenChange(false);
-    callback();
-  };
-
   const reference = target
     ? `${target.book} ${target.chapter}:${target.verse}`
     : "";
-
-  const getIcon = (iconName: string): any => {
-    const icons: any = {
-      Eye, Ear, GraduationCap, Heart, CheckCircle2,
-    };
-    return icons[iconName];
-  };
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -89,16 +54,17 @@ export default function VerseActionSheet({
         <SheetHeader className="shrink-0 border-b border-border bg-muted/20 px-5 py-5 pe-12 text-start">
           <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-primary">
             <BookOpen className="size-4" aria-hidden="true" />
-            {label("verseActions", "Verse actions")}
+            {getReaderLabel(labels, "verseActions", "Verse actions")}
           </div>
           <SheetTitle className="text-xl font-bold leading-tight">
-            {reference || label("selectVerse", "Select Verse")}
+            {reference || getReaderLabel(labels, "selectVerse", "Select Verse")}
           </SheetTitle>
           <SheetDescription className="line-clamp-3 font-serif text-sm italic leading-relaxed text-foreground/75">
             {target?.text ? (
               <>&ldquo;{target.text}&rdquo;</>
             ) : (
-              label(
+              getReaderLabel(
+                labels,
                 "verseActionsDescription",
                 "Study, save, and share this verse.",
               )
@@ -119,10 +85,11 @@ export default function VerseActionSheet({
                       id="exegesis-lab-title"
                       className="font-bold text-foreground"
                     >
-                      {label("exegesisLab", "Exegesis Lab")}
+                      {getReaderLabel(labels, "exegesisLab", "Exegesis Lab")}
                     </h2>
                     <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                      {label(
+                      {getReaderLabel(
+                        labels,
                         "exegesisLabDescription",
                         "Take this verse through a guided journey from observation to practice.",
                       )}
@@ -136,10 +103,13 @@ export default function VerseActionSheet({
                         key={stage}
                         index={index}
                         stage={stage}
-                        icon={getIcon(icon)}
-                        title={label(titleKey, titleFallback)}
-                        description={label(descKey, descFallback)}
-                        onClick={run(() => onStartLab(stage as any))}
+                        icon={getLabStageIcon(icon)}
+                        title={getReaderLabel(labels, titleKey, titleFallback)}
+                        description={getReaderLabel(labels, descKey, descFallback)}
+                        onClick={() => {
+                          onOpenChange(false);
+                          onStartLab(stage as LabStage);
+                        }}
                       />
                     ),
                   )}
@@ -147,92 +117,92 @@ export default function VerseActionSheet({
               </div>
             </section>
 
-            <ActionSection title={label("resources", "Resources")}>
+            <ActionSection title={getReaderLabel(labels, "resources", "Resources")}>
               <ActionButton
                 icon={Lightbulb}
-                title={label("explanation", "Explanation")}
-                onClick={run(onExplain)}
+                title={getReaderLabel(labels, "explanation", "Explanation")}
+                onClick={() => { onOpenChange(false); onExplain(); }}
               />
               <ActionButton
                 icon={Library}
-                title={label("commentaries", "Commentaries")}
-                onClick={run(() => onOpenResources("commentaries"))}
+                title={getReaderLabel(labels, "commentaries", "Commentaries")}
+                onClick={() => { onOpenChange(false); onOpenResources("commentaries"); }}
               />
               <ActionButton
                 icon={GitFork}
-                title={label("crossReferences", "Cross References")}
-                onClick={run(() => onOpenResources("crossReferences"))}
+                title={getReaderLabel(labels, "crossReferences", "Cross References")}
+                onClick={() => { onOpenChange(false); onOpenResources("crossReferences"); }}
               />
               <ActionButton
                 icon={Languages}
-                title={label("translations", "Translations")}
-                onClick={run(() => onOpenResources("translations"))}
+                title={getReaderLabel(labels, "translations", "Translations")}
+                onClick={() => { onOpenChange(false); onOpenResources("translations"); }}
               />
               <ActionButton
                 icon={BookHeart}
-                title={label("devotional", "Devotional")}
-                onClick={run(onDevotional)}
+                title={getReaderLabel(labels, "devotional", "Devotional")}
+                onClick={() => { onOpenChange(false); onDevotional(); }}
               />
               <ActionButton
                 icon={Wrench}
-                title={label("studyTools", "Study Tools")}
-                onClick={run(onStudyTools)}
+                title={getReaderLabel(labels, "studyTools", "Study Tools")}
+                onClick={() => { onOpenChange(false); onStudyTools(); }}
               />
               <ActionButton
                 icon={BookOpen}
-                title={label("strongs", "Strong's Word Study")}
-                onClick={run(onStrongs)}
+                title={getReaderLabel(labels, "strongs", "Strong's Word Study")}
+                onClick={() => { onOpenChange(false); onStrongs(); }}
               />
               <ActionButton
                 icon={Brain}
-                title={label("trivia", "Verse Trivia")}
-                onClick={run(onTrivia)}
+                title={getReaderLabel(labels, "trivia", "Verse Trivia")}
+                onClick={() => { onOpenChange(false); onTrivia(); }}
               />
             </ActionSection>
 
-            <ActionSection title={label("listenHighlightSave", "Listen, highlight & save")} gridCols="grid-cols-2 gap-2">
+            <ActionSection title={getReaderLabel(labels, "listenHighlightSave", "Listen, highlight & save")} gridCols="grid-cols-2 gap-2">
               <ActionButton
                 icon={Headphones}
-                title={label("listen", "Listen")}
-                onClick={run(onListen)}
+                title={getReaderLabel(labels, "listen", "Listen")}
+                onClick={() => { onOpenChange(false); onListen(); }}
               />
               <ActionButton
                 icon={Highlighter}
-                title={label("highlight", "Highlight")}
-                onClick={run(onHighlight)}
+                title={getReaderLabel(labels, "highlight", "Highlight")}
+                onClick={() => { onOpenChange(false); onHighlight(); }}
               />
               <ActionButton
                 icon={StickyNote}
-                title={label("addNote", "Add Note")}
-                onClick={run(onNote)}
+                title={getReaderLabel(labels, "addNote", "Add Note")}
+                onClick={() => { onOpenChange(false); onNote(); }}
               />
               <ActionButton
                 icon={NotebookPen}
-                title={label("journal", "Journal")}
-                onClick={run(onJournal)}
+                title={getReaderLabel(labels, "journal", "Journal")}
+                onClick={() => { onOpenChange(false); onJournal(); }}
               />
               <ActionButton
                 icon={Star}
-                title={label("favorite", "Favorite")}
-                onClick={run(onFavorite)}
+                title={getReaderLabel(labels, "favorite", "Favorite")}
+                onClick={() => { onOpenChange(false); onFavorite(); }}
               />
               <ActionButton
                 icon={Search}
-                title={label("searchBible", "Search Bible")}
-                onClick={run(onSearch)}
+                title={getReaderLabel(labels, "searchBible", "Search Bible")}
+                onClick={() => { onOpenChange(false); onSearch(); }}
               />
             </ActionSection>
 
-            <ActionSection title={label("shareExport", "Share & export")} gridCols="grid-cols-2 gap-2">
+            <ActionSection title={getReaderLabel(labels, "shareExport", "Share & export")} gridCols="grid-cols-2 gap-2">
               <ActionButton
                 icon={Share2}
-                title={label("shareVerse", "Share Verse")}
-                onClick={run(onShare)}
+                title={getReaderLabel(labels, "shareVerse", "Share Verse")}
+                onClick={() => { onOpenChange(false); onShare(); }}
               />
               <ActionButton
                 icon={Copy}
-                title={label("copyVerse", "Copy Verse")}
-                onClick={run(onCopy)}
+                title={getReaderLabel(labels, "copyVerse", "Copy Verse")}
+                onClick={() => { onOpenChange(false); onCopy(); }}
               />
             </ActionSection>
           </div>

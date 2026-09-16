@@ -7,6 +7,7 @@ import {
   Share2,
   Volume2,
   X,
+  MoreHorizontal,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/components/languages/languageProvider";
@@ -20,6 +21,7 @@ interface VerseMultiSelectBarProps {
   onShare: () => void;
   onListen: () => void;
   onClear: () => void;
+  onMore: () => void;
 }
 export default function VerseMultiSelectBar({
   count,
@@ -30,6 +32,7 @@ export default function VerseMultiSelectBar({
   onShare,
   onListen,
   onClear,
+  onMore,
 }: VerseMultiSelectBarProps) {
   const { t } = useLanguage();
   const handlers: Record<string, () => void> = {
@@ -39,6 +42,7 @@ export default function VerseMultiSelectBar({
     copy: onCopy,
     share: onShare,
     listen: onListen,
+    more: onMore,
   };
   const actions = [
     {
@@ -72,10 +76,16 @@ export default function VerseMultiSelectBar({
       label: t.bibleReader.listen,
       color: "text-purple-500",
     },
+    {
+      key: "more",
+      icon: MoreHorizontal,
+      label: t.bibleReader.more,
+      color: "text-purple-500",
+    },
   ] as const;
   if (count === 0) return null;
   return (
-    <div className="z-30 shrink-0 bg-transparent sm:px-4 sm:pb-3">
+    <div className="z-30 shrink-0 bg-transparent sm:px-4 sm:pb-3 -mt-10">
       <div
         className={cn(
           "flex items-center justify-center gap-0.5 overflow-x-auto border-t border-border bg-background/95 px-2 py-2 backdrop-blur-xl",

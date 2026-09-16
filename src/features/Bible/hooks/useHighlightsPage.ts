@@ -39,8 +39,11 @@ export function useHighlightsPage() {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await sendPostRequest("bible", "get-highlights", { pageSize: 200 });
-      const items: HighlightItem[] = res.returnCode === 200 ? (res.returnData?.highlights || []) : [];
+      const res = await sendPostRequest("bible", "get-highlights", {
+        pageSize: 200,
+      });
+      const items: HighlightItem[] =
+        res.returnCode === 200 ? res.returnData?.highlights || [] : [];
       setHighlights(items.filter(Boolean));
 
       try {
@@ -50,45 +53,76 @@ export function useHighlightsPage() {
           if (item.bookName && item.chapter && item.verseNumber) {
             const key = `${item.bookName} ${item.chapter}:${item.verseNumber}`;
             if (!(key in map)) {
-              const text = getVerseText(item.bookName, Number(item.chapter), Number(item.verseNumber));
+              const text = getVerseText(
+                item.bookName,
+                Number(item.chapter),
+                Number(item.verseNumber),
+              );
               if (text) map[key] = text;
             }
           }
         }
         setVerseTextMap(map);
-      } catch { /* Bible data not available */ }
-    } catch (e) { console.error(e); } finally { setLoading(false); }
+      } catch {
+        /* Bible data not available */
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  useEffect(() => { loadData(); }, [loadData]);
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
-  const deleteHighlight = useCallback(async (id: number) => {
-    setDeleting(id);
-    try {
-      const res = await sendPostRequest("bible", "delete-highlight", { highlightId: id });
-      if (res.returnCode === 200) {
-        setHighlights((p) => p.filter((h) => h.id !== id));
-        toast({ title: "Highlight removed" });
+  const deleteHighlight = useCallback(
+    async (id: number) => {
+      setDeleting(id);
+      try {
+        const res = await sendPostRequest("bible", "delete-highlight", {
+          highlightId: id,
+        });
+        if (res.returnCode === 200) {
+          setHighlights((p) => p.filter((h) => h.id !== id));
+          toast({ title: "Highlight removed" });
+        }
+      } catch {
+        toast({ title: "Failed to delete", variant: "destructive" });
+      } finally {
+        setDeleting(null);
       }
-    } catch { toast({ title: "Failed to delete", variant: "destructive" }); }
-    finally { setDeleting(null); }
-  }, [toast]);
+    },
+    [toast],
+  );
 
-  const goToReader = useCallback((book: string, ch: number) => {
-    navigate(`/bible-reader?book=${book}&chapter=${ch}`);
-  }, [navigate]);
+  const goToReader = useCallback(
+    (book: string, ch: number) => {
+      navigate(`/bible-reader?book=${book}&chapter=${ch}`);
+    },
+    [navigate],
+  );
 
   const filtered = useMemo(() => {
     const q = searchQuery.toLowerCase();
-    return highlights.filter((h) => {
-      if (filterBook !== "all" && h.bookName !== filterBook) return false;
-      if (q) {
-        const ref = `${h.bookName} ${h.chapter}:${h.verseNumber}`.toLowerCase();
-        const noteMatch = h.note?.toLowerCase().includes(q) || false;
-        if (!ref.includes(q) && !noteMatch) return false;
-      }
-      return true;
-    }).sort((a, b) => a.bookName.localeCompare(b.bookName) || a.chapter - b.chapter || a.verseNumber - b.verseNumber);
+    return highlights
+      .filter((h) => {
+        if (filterBook !== "all" && h.bookName !== filterBook) return false;
+        if (q) {
+          const ref =
+            `${h.bookName} ${h.chapter}:${h.verseNumber}`.toLowerCase();
+          const noteMatch = h.note?.toLowerCase().includes(q) || false;
+          if (!ref.includes(q) && !noteMatch) return false;
+        }
+        return true;
+      })
+      .sort(
+        (a, b) =>
+          a.bookName.localeCompare(b.bookName) ||
+          a.chapter - b.chapter ||
+          a.verseNumber - b.verseNumber,
+      );
   }, [highlights, searchQuery, filterBook]);
 
   const grouped = useMemo(() => {
@@ -101,10 +135,31 @@ export function useHighlightsPage() {
     return groups;
   }, [filtered]);
 
-  const getColor = useCallback((colorId: number) => HIGHLIGHT_COLORS[colorId] || HIGHLIGHT_COLORS[1], []);
+  const getColor = useCallback(
+    (colorId: number) => HIGHLIGHT_COLORS[colorId] || HIGHLIGHT_COLORS[1],
+    [],
+  );
 
   return {
-    data: { t, isRtl, loading, highlights, filtered, grouped, searchQuery, filterBook, deleting, verseTextMap },
-    actions: { setSearchQuery, setFilterBook, getColor, deleteHighlight, goToReader, refresh: loadData },
+    data: {
+      t,
+      isRtl,
+      loading,
+      highlights,
+      filtered,
+      grouped,
+      searchQuery,
+      filterBook,
+      deleting,
+      verseTextMap,
+    },
+    actions: {
+      setSearchQuery,
+      setFilterBook,
+      getColor,
+      deleteHighlight,
+      goToReader,
+      refresh: loadData,
+    },
   };
 }

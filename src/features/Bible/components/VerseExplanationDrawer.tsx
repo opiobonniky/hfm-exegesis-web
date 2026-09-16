@@ -1,52 +1,17 @@
 // Verse explanation drawer — right-side panel matching app's section layout
-import { useEffect, useState } from "react";
 import {
   BookOpen, Loader2, Lightbulb, GraduationCap, BookMarked,
   Layers, Sparkles, ScrollText, ListChecks, RefreshCcw, ChevronRight,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { sendPostRequest } from "@/services/api";
 import {
   Sheet, SheetClose, SheetContent, SheetDescription, SheetHeader, SheetTitle,
 } from "@/components/ui/sheet";
-import { useLanguage } from "@/components/languages/languageProvider";
 import type { LucideIcon } from "lucide-react";
-
-interface VerseExplanationDrawerProps {
-  open: boolean;
-  onClose: () => void;
-  bookName: string;
-  chapter: number;
-  verse: number;
-}
-
-/** Parse JSON-stringified list field */
-function parseList<T = string>(raw: string | undefined | null): T[] {
-  if (!raw) return [];
-  try { const p = JSON.parse(raw); return Array.isArray(p) ? p : []; } catch { return []; }
-}
-
-interface WordStudy {
-  word?: string;
-  strongs?: string;
-  definition?: string;
-}
-
-interface ExplanationData {
-  verseIntroduction?: string;
-  explanation?: string;
-  application?: string;
-  backgroundAuthor?: string;
-  backgroundBook?: string;
-  backgroundContext?: string;
-  wordStudies?: string;
-  practicalApplications?: string;
-  keyThemes?: string;
-  crossReferences?: string;
-  learnMore?: string;
-  finalThoughts?: string;
-  takeaways?: string;
-}
+import type {
+  ExplanationWordStudy,
+  VerseExplanationDrawerProps,
+} from "../types";
+import { parseJsonList } from "../utils/readerPresentation";
 
 /** Section header with icon + label */
 function Section({ icon: Icon, label, children }: { icon: LucideIcon; label: string; children: React.ReactNode }) {
@@ -94,34 +59,25 @@ function BulletList({ items }: { items: string[] }) {
   );
 }
 
-export default function VerseExplanationDrawer({ open, onClose, bookName, chapter, verse }: VerseExplanationDrawerProps) {
-  const { isRtl, t } = useLanguage();
-  const [loading, setLoading] = useState(false);
-  const [data, setData] = useState<ExplanationData | null>(null);
-
-  // Fetch explanation on open
-  useEffect(() => {
-    if (!open || !bookName) return;
-    let cancelled = false;
-    setLoading(true);
-    setData(null);
-    sendPostRequest("bible", "get-verse-explanation", { bookName, chapter, verseNumber: verse })
-      .then((res) => {
-        if (!cancelled && res.returnCode === 200 && res.returnData) {
-          setData(res.returnData);
-        }
-      })
-      .catch(() => {})
-      .finally(() => { if (!cancelled) setLoading(false); });
-    return () => { cancelled = true; };
-  }, [open, bookName, chapter, verse]);
-
+export default function VerseExplanationDrawer({
+  open,
+  onClose,
+  bookName,
+  chapter,
+  verse,
+  isRtl,
+  title,
+  loadingLabel,
+  closeLabel,
+  loading,
+  explanation,
+}: VerseExplanationDrawerProps) {
   // Parse structured fields
-  const wordStudies = parseList<WordStudy>(data?.wordStudies);
-  const practicalApps = parseList(data?.practicalApplications);
-  const keyThemes = parseList(data?.keyThemes);
-  const crossRefs = parseList(data?.crossReferences);
-  const takeaways = parseList(data?.takeaways);
+  const wordStudies = parseJsonList<ExplanationWordStudy>(explanation?.wordStudies);
+  const practicalApps = parseJsonList(explanation?.practicalApplications);
+  const keyThemes = parseJsonList(explanation?.keyThemes);
+  const crossRefs = parseJsonList(explanation?.crossReferences);
+  const takeaways = parseJsonList(explanation?.takeaways);
 
   return (
     <Sheet open={open} onOpenChange={(nextOpen) => { if (!nextOpen) onClose(); }}>
@@ -133,7 +89,7 @@ export default function VerseExplanationDrawer({ open, onClose, bookName, chapte
               <BookOpen className="w-4 h-4 text-primary" />
             </div>
             <div>
-              <SheetTitle className="text-sm font-bold text-foreground">{t.bibleReader.explanation}</SheetTitle>
+              <SheetTitle className="text-sm font-bold text-foreground">{title}</SheetTitle>
               <SheetDescription className="text-[11px] text-muted-foreground">{bookName} {chapter}:{verse}</SheetDescription>
             </div>
           </div>
@@ -143,9 +99,9 @@ export default function VerseExplanationDrawer({ open, onClose, bookName, chapte
           {loading ? (
             <div className="flex flex-col items-center justify-center py-16 gap-3">
               <Loader2 className="w-6 h-6 animate-spin text-primary" />
-              <p className="text-xs text-muted-foreground">{t.bibleReader.loadingExplanation}</p>
+              <p className="text-xs text-muted-foreground">{loadingLabel}</p>
             </div>
-          ) : !data ? (
+          ) : !explanation ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
               <BookOpen className="w-8 h-8 text-muted-foreground/30 mb-3" />
               <p className="text-sm text-muted-foreground">No explanation available for this verse.</p>
@@ -153,29 +109,29 @@ export default function VerseExplanationDrawer({ open, onClose, bookName, chapte
           ) : (
             <>
               {/* Verse Introduction */}
-              {data.verseIntroduction && (
+              {explanation.verseIntroduction && (
                 <Section icon={ScrollText} label="Verse Introduction">
-                  <p className="text-sm text-foreground/80 leading-relaxed">{data.verseIntroduction}</p>
+                  <p className="text-sm text-foreground/80 leading-relaxed">{explanation.verseIntroduction}</p>
                 </Section>
               )}
               {/* Explanation */}
-              {data.explanation && (
-                <Section icon={Lightbulb} label={t.bibleReader.explanation}>
-                  <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">{data.explanation}</p>
+              {explanation.explanation && (
+                <Section icon={Lightbulb} label={title}>
+                  <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">{explanation.explanation}</p>
                 </Section>
               )}
               {/* Application */}
-              {data.application && (
+              {explanation.application && (
                 <Section icon={RefreshCcw} label="Application">
-                  <p className="text-sm text-foreground/80 leading-relaxed">{data.application}</p>
+                  <p className="text-sm text-foreground/80 leading-relaxed">{explanation.application}</p>
                 </Section>
               )}
               {/* Background */}
-              {(data.backgroundAuthor || data.backgroundBook || data.backgroundContext) && (
+              {(explanation.backgroundAuthor || explanation.backgroundBook || explanation.backgroundContext) && (
                 <Section icon={Layers} label="Background">
-                  {data.backgroundAuthor && <><SubLabel label="Author" /><p className="text-sm text-foreground/80">{data.backgroundAuthor}</p></>}
-                  {data.backgroundBook && <><SubLabel label="Book" /><p className="text-sm text-foreground/80">{data.backgroundBook}</p></>}
-                  {data.backgroundContext && <><SubLabel label="Context" /><p className="text-sm text-foreground/80">{data.backgroundContext}</p></>}
+                  {explanation.backgroundAuthor && <><SubLabel label="Author" /><p className="text-sm text-foreground/80">{explanation.backgroundAuthor}</p></>}
+                  {explanation.backgroundBook && <><SubLabel label="Book" /><p className="text-sm text-foreground/80">{explanation.backgroundBook}</p></>}
+                  {explanation.backgroundContext && <><SubLabel label="Context" /><p className="text-sm text-foreground/80">{explanation.backgroundContext}</p></>}
                 </Section>
               )}
               {/* Strong's Word Study */}
@@ -208,7 +164,7 @@ export default function VerseExplanationDrawer({ open, onClose, bookName, chapte
                 </Section>
               )}
               {/* Learn More */}
-              {data.learnMore && (
+              {explanation.learnMore && (
                 <Section icon={BookMarked} label="Learn More">
                   <details className="group">
                     <summary className="flex items-center gap-1.5 text-xs font-semibold text-primary cursor-pointer hover:text-primary/80 transition-colors list-none">
@@ -216,15 +172,15 @@ export default function VerseExplanationDrawer({ open, onClose, bookName, chapte
                       Expand additional context
                     </summary>
                     <div className="mt-3 text-sm text-foreground/75 leading-relaxed whitespace-pre-wrap pl-5">
-                      {data.learnMore}
+                      {explanation.learnMore}
                     </div>
                   </details>
                 </Section>
               )}
               {/* Final Thoughts */}
-              {data.finalThoughts && (
+              {explanation.finalThoughts && (
                 <Section icon={BookMarked} label="Final Thoughts">
-                  <p className="text-sm text-foreground/80 leading-relaxed">{data.finalThoughts}</p>
+                  <p className="text-sm text-foreground/80 leading-relaxed">{explanation.finalThoughts}</p>
                 </Section>
               )}
               {/* Takeaways */}
@@ -239,7 +195,7 @@ export default function VerseExplanationDrawer({ open, onClose, bookName, chapte
         {/* Footer */}
         <div className="shrink-0 px-5 py-3 border-t border-border bg-muted/20">
           <SheetClose asChild>
-            <button type="button" className="w-full py-2.5 rounded-xl bg-muted text-xs font-semibold text-muted-foreground hover:bg-muted/80 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{t.bibleReader.closeExplanation}</button>
+            <button type="button" className="w-full py-2.5 rounded-xl bg-muted text-xs font-semibold text-muted-foreground hover:bg-muted/80 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{closeLabel}</button>
           </SheetClose>
         </div>
       </SheetContent>

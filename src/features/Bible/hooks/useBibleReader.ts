@@ -4,7 +4,12 @@ import { useLanguage } from "@/components/languages/languageProvider";
 import { sendPostRequest, API_BASE_URL } from "@/services/api";
 import { bibleApi } from "@/services/bibleApi";
 import { getChapterHeadingsCached } from "@/services/chapterHeadings";
-import type { ChapterHeading } from "@/services/bibleApi";
+import type {
+  ChapterData,
+  HeadingsByChapter,
+  ReaderHighlight,
+  TranslationOption,
+} from "../types";
 import {
   BIBLE_BOOK_CHAPTERS,
   BIBLE_BOOKS,
@@ -14,25 +19,6 @@ import {
 } from "../constants";
 
 
-export interface TranslationOption {
-  id: string;
-  name: string;
-  language?: string;
-  copyright?: string;
-  isFree?: boolean;
-}
-export interface ChapterData {
-  book: string;
-  chapter: number;
-  verses: { verse: number; text: string }[];
-  testament: string;
-}
-/** Section headings keyed by "Book-Chapter" (e.g. "Genesis-2" → headings). */
-export type HeadingsByChapter = Record<string, ChapterHeading[]>;
-export interface Highlight {
-  colorId: number;
-  note?: string;
-}
 const INITIAL_CHAPTER_COUNT = 3;
 const INITIAL_PREVIOUS_CHAPTERS = 2;
 const parsePositiveInteger = (value: string | null) => {
@@ -71,7 +57,7 @@ export function useBibleReader() {
     TranslationOption[]
   >([]);
   const [selectedVerses, setSelectedVerses] = useState<string[]>([]);
-  const [highlights, setHighlights] = useState<Record<string, Highlight>>({});
+  const [highlights, setHighlights] = useState<Record<string, ReaderHighlight>>({});
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [verseNotes, setVerseNotes] = useState<Record<string, string>>({});
   // Section headings per "Book-Chapter", matching the mobile app's reader.

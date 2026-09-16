@@ -35,10 +35,10 @@ export default function BottomActionBar({
 }: BottomActionBarProps) {
   const { t } = useLanguage();
   return (
-    <div className="relative z-20 shrink-0 bg-transparent sm:px-4 sm:pb-3">
+    <div className="relative z-20 shrink-0 bg-transparent sm:px-4 sm:pb-3 h-10 -mt-14">
       <div
         className={cn(
-          "flex items-center justify-around border-t border-border bg-background/95 px-2 py-2 backdrop-blur-xl",
+          "flex items-center justify-around border-t border-border bg-background/95 px-2 backdrop-blur-xl",
           "sm:mx-auto sm:w-full sm:max-w-xl sm:rounded-2xl sm:border sm:px-3 sm:shadow-lg",
         )}
       >

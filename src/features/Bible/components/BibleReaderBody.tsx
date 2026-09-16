@@ -1,12 +1,10 @@
 // BibleReaderBody — sidebar + scrollable chapter content + bottom action bar
 "use client";
 
-import React, {RefObject} from "react";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { LoadingSkeleton } from "@/components/verseResources";
-import type { AudioPlayerState, AudioPlayerActions } from "@/hooks/useAudioPlayer";
-import type { ChapterData, HeadingsByChapter, Highlight } from "../hooks/useBibleReader";
+import type { BibleReaderBodyProps } from "../types";
 import BibleSidebar from "./BibleSidebar";
 import ChapterContent from "./ChapterContent";
 import AudioControlBar from "./AudioControlBar";
@@ -14,98 +12,77 @@ import FontSizeControls from "./FontSizeControls";
 import VerseMultiSelectBar from "./VerseMultiSelectBar";
 import BottomActionBar from "./BottomActionBar";
 
-/* ─── Sidebar Props ──────────────────────────────────────────────────────── */
-interface SidebarProps {
-  open: boolean;
-  onClose: () => void;
-  isRtl: boolean;
-  books: { bookNumber: number; bookName: string; maxChapter: number }[];
-  selectedBook: string;
-  selectedChapter: number;
-  onSelect: (book: string, chapter: number) => void;
-  onBookOverview: () => void;
-  loading: boolean;
-}
-
-/* ─── Chapter Props ──────────────────────────────────────────────────────── */
-interface ChapterProps {
-  chapters: ChapterData[];
-  headingsByChapter?: HeadingsByChapter;
-  /** Verse currently being read aloud (audio tracking), if any. */
-  audioVerseKey?: string | null;
-  selectedVerses: string[];
-  highlights: Record<string, Highlight>;
-  favorites: Set<string>;
-  verseNotes: Record<string, string>;
-  onToggleVerse: (key: string) => void;
-  onToggleHighlight: (book: string, chapter: number, verse: number, colorId: number) => void;
-  onToggleFavorite: (book: string, chapter: number, verse: number) => void;
-  onExplainVerse: (book: string, chapter: number, verse: number) => void;
-  onOpenVerseActions: (book: string, chapter: number, verse: number) => void;
-  chapterRefs: React.MutableRefObject<Record<string, HTMLDivElement>>;
-  verseRefs: React.MutableRefObject<Record<string, HTMLSpanElement | null>>;
-}
-
-/* ─── Loading/Error Props ────────────────────────────────────────────────── */
-interface LoadingProps {
-  loading: boolean;
-  loadError: string | null;
-  loadingMore: boolean;
-  hasMore: boolean;
-  onRetryLoad: () => void;
-  onLoadMore: () => void;
-  loadMoreRef: RefObject<HTMLDivElement>;
-}
-
-/* ─── Bottom Bar Props ───────────────────────────────────────────────────── */
-interface BottomBarProps {
-  audioActive: boolean;
-  audio: AudioPlayerState & AudioPlayerActions;
-  selectedBook: string;
-  selectedChapter: number;
-  hasSelection: boolean;
-  selectedVerseCount: number;
-  onMultiHighlight: () => void;
-  onMultiNote: () => void;
-  onMultiFavorite: () => void;
-  onMultiCopy: () => void;
-  onMultiShare: () => void;
-  onMultiListen: () => void;
-  onMultiClear: () => void;
-  onPrev: () => void;
-  onNext: () => void;
-  onScrollTop: () => void;
-  onScrollBottom: () => void;
-  onBookmark: () => void;
-  onAudioToggle: () => void;
-  canGoPrev: boolean;
-  canGoNext: boolean;
-}
-
-/* ─── Main Props ─────────────────────────────────────────────────────────── */
-interface BibleReaderBodyProps {
-  sidebar: SidebarProps;
-  chapter: ChapterProps;
-  loading: LoadingProps;
-  bottomBar: BottomBarProps;
-  fontSize: number;
-  onFontSizeChange: (size: number) => void;
-  scrollRef: RefObject<HTMLDivElement>;
-}
-
 export default function BibleReaderBody({
-  sidebar,
-  chapter,
-  loading,
-  bottomBar,
-  fontSize,
-  onFontSizeChange,
   scrollRef,
+  fontSize,
+  sidebarOpen,
+  isRtl,
+  books,
+  selectedBook,
+  selectedChapter,
+  booksLoading,
+  chapters,
+  headingsByChapter,
+  audioVerseKey,
+  selectedVerses,
+  highlights,
+  favorites,
+  verseNotes,
+  chapterRefs,
+  verseRefs,
+  loading,
+  loadError,
+  loadingMore,
+  hasMore,
+  loadMoreRef,
+  audioActive,
+  audioState,
+  audioActions,
+  hasSelection,
+  selectedVerseCount,
+  canGoPrev,
+  canGoNext,
+  onFontSizeChange,
+  onCloseSidebar,
+  onSelectChapter,
+  onBookOverview,
+  onToggleVerse,
+  onToggleHighlight,
+  onToggleFavorite,
+  onExplainVerse,
+  onOpenVerseActions,
+  onRetryLoad,
+  onLoadMore,
+  onMultiHighlight,
+  onMultiNote,
+  onMultiFavorite,
+  onMultiCopy,
+  onMultiShare,
+  onMultiListen,
+  onMultiClear,
+  onPrev,
+  onNext,
+  onScrollTop,
+  onScrollBottom,
+  onBookmark,
+  onAudioToggle,
+  onMore,
+
 }: BibleReaderBodyProps) {
   return (
     <div className="relative flex min-h-0 flex-1 overflow-hidden">
       {/* Sidebar: absolute overlay */}
-      <BibleSidebar {...sidebar} onSelect={(book, ch) => sidebar.onSelect(book, ch)} />
+      <BibleSidebar
+        open={sidebarOpen}
+        onClose={onCloseSidebar}
+        isRtl={isRtl}
+        books={books}
+        selectedBook={selectedBook}
+        selectedChapter={selectedChapter}
+        onSelect={onSelectChapter}
+        onBookOverview={onBookOverview}
+        loading={booksLoading}
+      />
 
       {/* Content column: flex-col so main scrolls independently */}
       <div className="relative flex min-h-0 min-w-0 flex-1 flex-col">
@@ -114,7 +91,7 @@ export default function BibleReaderBody({
         {/* ONLY this element scrolls — verses */}
         <main
           ref={scrollRef}
-          aria-busy={loading.loading}
+          aria-busy={loading}
           className="relative min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-7 [overflow-anchor:none] sm:px-8 sm:py-10 lg:px-12"
         >
           <FontSizeControls
@@ -123,42 +100,44 @@ export default function BibleReaderBody({
             className="sm:hidden mb-4"
           />
 
-          {loading.loading && chapter.chapters.length === 0 ? (
+          {loading && chapters.length === 0 ? (
             <LoadingSkeleton />
-          ) : loading.loadError && chapter.chapters.length === 0 ? (
+          ) : loadError && chapters.length === 0 ? (
             <div
               role="alert"
               className="min-h-64 flex flex-col items-center justify-center gap-3 text-center"
             >
-              <p className="text-sm text-muted-foreground">{loading.loadError}</p>
-              <Button variant="outline" size="sm" onClick={loading.onRetryLoad}>
+              <p className="text-sm text-muted-foreground">
+                {loadError}
+              </p>
+              <Button variant="outline" size="sm" onClick={onRetryLoad}>
                 Try again
               </Button>
             </div>
           ) : (
             <div style={{ fontSize: `${fontSize}px` }}>
               <ChapterContent
-                chapters={chapter.chapters}
-                headingsByChapter={chapter.headingsByChapter}
-                audioVerseKey={chapter.audioVerseKey}
-                selectedVerses={chapter.selectedVerses}
-                highlights={chapter.highlights}
-                favorites={chapter.favorites}
-                verseNotes={chapter.verseNotes}
-                onToggleVerse={chapter.onToggleVerse}
-                onToggleHighlight={chapter.onToggleHighlight}
-                onToggleFavorite={chapter.onToggleFavorite}
-                onExplainVerse={chapter.onExplainVerse}
-                onOpenVerseActions={chapter.onOpenVerseActions}
-                chapterRefs={chapter.chapterRefs}
-                verseRefs={chapter.verseRefs}
+                chapters={chapters}
+                headingsByChapter={headingsByChapter}
+                audioVerseKey={audioVerseKey}
+                selectedVerses={selectedVerses}
+                highlights={highlights}
+                favorites={favorites}
+                verseNotes={verseNotes}
+                onToggleVerse={onToggleVerse}
+                onToggleHighlight={onToggleHighlight}
+                onToggleFavorite={onToggleFavorite}
+                onExplainVerse={onExplainVerse}
+                onOpenVerseActions={onOpenVerseActions}
+                chapterRefs={chapterRefs}
+                verseRefs={verseRefs}
               />
             </div>
           )}
 
-          <div ref={loading.loadMoreRef} className="h-4" />
+          <div ref={loadMoreRef} className="h-4" />
 
-          {loading.loadingMore && (
+          {loadingMore && (
             <div
               role="status"
               className="flex items-center justify-center gap-2 py-4 text-xs text-muted-foreground"
@@ -167,13 +146,13 @@ export default function BibleReaderBody({
             </div>
           )}
 
-          {loading.loadError && chapter.chapters.length > 0 && (
+          {loadError && chapters.length > 0 && (
             <div
               role="alert"
               className="flex items-center justify-center gap-3 py-4 text-sm text-muted-foreground"
             >
-              <span>{loading.loadError}</span>
-              <Button variant="outline" size="sm" onClick={loading.onLoadMore}>
+              <span>{loadError}</span>
+              <Button variant="outline" size="sm" onClick={onLoadMore}>
                 Try again
               </Button>
             </div>
@@ -182,34 +161,36 @@ export default function BibleReaderBody({
 
         {/* Bottom bar: fixed height, never scrolls */}
         <div className="shrink-0">
-          {bottomBar.audioActive ? (
+          {audioActive ? (
             <AudioControlBar
-              audio={bottomBar.audio}
-              bookName={bottomBar.selectedBook}
-              chapter={bottomBar.selectedChapter}
+              audioState={audioState}
+              audioActions={audioActions}
+              bookName={selectedBook}
+              chapter={selectedChapter}
             />
-          ) : bottomBar.hasSelection ? (
+          ) : hasSelection ? (
             <VerseMultiSelectBar
-              count={bottomBar.selectedVerseCount}
-              onHighlight={bottomBar.onMultiHighlight}
-              onNote={bottomBar.onMultiNote}
-              onFavorite={bottomBar.onMultiFavorite}
-              onCopy={bottomBar.onMultiCopy}
-              onShare={bottomBar.onMultiShare}
-              onListen={bottomBar.onMultiListen}
-              onClear={bottomBar.onMultiClear}
+              count={selectedVerseCount}
+              onHighlight={onMultiHighlight}
+              onNote={onMultiNote}
+              onFavorite={onMultiFavorite}
+              onCopy={onMultiCopy}
+              onShare={onMultiShare}
+              onListen={onMultiListen}
+              onClear={onMultiClear}
+              onMore={onMore}
             />
           ) : (
             <BottomActionBar
-              onPrev={bottomBar.onPrev}
-              onNext={bottomBar.onNext}
-              onScrollTop={bottomBar.onScrollTop}
-              onScrollBottom={bottomBar.onScrollBottom}
-              onBookmark={bottomBar.onBookmark}
-              onAudioToggle={bottomBar.onAudioToggle}
-              isAudioPlaying={bottomBar.audioActive}
-              canGoPrev={bottomBar.canGoPrev}
-              canGoNext={bottomBar.canGoNext}
+              onPrev={onPrev}
+              onNext={onNext}
+              onScrollTop={onScrollTop}
+              onScrollBottom={onScrollBottom}
+              onBookmark={onBookmark}
+              onAudioToggle={onAudioToggle}
+              isAudioPlaying={audioActive}
+              canGoPrev={canGoPrev}
+              canGoNext={canGoNext}
             />
           )}
         </div>

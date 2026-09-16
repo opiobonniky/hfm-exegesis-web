@@ -10,17 +10,21 @@ import { useLanguage } from "@/components/languages/languageProvider";
 import { toast } from "@/components/ui/sonner";
 import { API_BASE_URL } from "@/services/api";
 import { useAudioPlayer } from "@/hooks/useAudioPlayer";
-import { BIBLE_BOOKS } from "../constants";
+import {
+  BIBLE_BOOKS,
+  BIBLE_READER_DEFAULT_FONT_SIZE,
+  BIBLE_READER_MAX_FONT_SIZE,
+  BIBLE_READER_MIN_FONT_SIZE,
+} from "../constants";
 import { useBibleReader } from "./useBibleReader";
-import { hasSeenBookOverview, markBookOverviewSeen } from "../services/bookOverviewSeen";
+import { hasSeenBookOverview } from "../services/bookOverviewSeen";
+import { getVerseExplanation } from "../services/verseExplanation";
 import type {
   LabStage,
+  VerseExplanationData,
   VerseActionTarget,
 } from "../types";
 
-const MIN_FONT_SIZE = 12;
-const MAX_FONT_SIZE = 40;
-const DEFAULT_FONT_SIZE = 20;
 const parseRequestedChapter = (value: string | null) => {
   const chapter = Number.parseInt(value || "", 10);
   return Number.isFinite(chapter) && chapter > 0 ? chapter : null;
@@ -28,21 +32,25 @@ const parseRequestedChapter = (value: string | null) => {
 function getInitialFontSize(): number {
   try {
     const stored = Number.parseInt(
-      localStorage.getItem("bible-font-size") || String(DEFAULT_FONT_SIZE),
+      localStorage.getItem("bible-font-size") ||
+        String(BIBLE_READER_DEFAULT_FONT_SIZE),
       10,
     );
     return Number.isFinite(stored)
-      ? Math.min(Math.max(stored, MIN_FONT_SIZE), MAX_FONT_SIZE)
-      : DEFAULT_FONT_SIZE;
+      ? Math.min(
+          Math.max(stored, BIBLE_READER_MIN_FONT_SIZE),
+          BIBLE_READER_MAX_FONT_SIZE,
+        )
+      : BIBLE_READER_DEFAULT_FONT_SIZE;
   } catch {
-    return DEFAULT_FONT_SIZE;
+    return BIBLE_READER_DEFAULT_FONT_SIZE;
   }
 }
 
 export function useBibleReaderPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { isRtl } = useLanguage();
+  const { isRtl, t } = useLanguage();
   const { data: readerData, actions: readerActions } = useBibleReader();
   const reader = { ...readerData, ...readerActions };
   const audio = useAudioPlayer();
@@ -76,6 +84,9 @@ export function useBibleReaderPage() {
     chapter: 0,
     verse: 0,
   });
+  const [explanationLoading, setExplanationLoading] = useState(false);
+  const [explanation, setExplanation] =
+    useState<VerseExplanationData | null>(null);
   const [noteDialogOpen, setNoteDialogOpen] = useState(false);
   const [noteText, setNoteText] = useState("");
   const [noteDialogMode, setNoteDialogMode] = useState<"create" | "edit">("create");
@@ -99,7 +110,10 @@ export function useBibleReaderPage() {
 
   const updateFontSize = useCallback((size: number) => {
     const validSize = Number.isFinite(size)
-      ? Math.min(Math.max(Math.trunc(size), MIN_FONT_SIZE), MAX_FONT_SIZE)
+      ? Math.min(
+          Math.max(Math.trunc(size), BIBLE_READER_MIN_FONT_SIZE),
+          BIBLE_READER_MAX_FONT_SIZE,
+        )
       : getInitialFontSize();
     setFontSize(validSize);
     try {
@@ -108,6 +122,30 @@ export function useBibleReaderPage() {
       /* unavailable */
     }
   }, []);
+
+  useEffect(() => {
+    if (!drawerOpen || !drawerVerse.book) return;
+    let cancelled = false;
+    setExplanationLoading(true);
+    setExplanation(null);
+    getVerseExplanation(
+      drawerVerse.book,
+      drawerVerse.chapter,
+      drawerVerse.verse,
+    )
+      .then((result) => {
+        if (!cancelled) setExplanation(result);
+      })
+      .catch(() => {
+        if (!cancelled) setExplanation(null);
+      })
+      .finally(() => {
+        if (!cancelled) setExplanationLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [drawerOpen, drawerVerse]);
 
   useLayoutEffect(() => {
     if (chapters.length === 0) {
@@ -760,157 +798,151 @@ export function useBibleReaderPage() {
 
   return {
     data: {
-    apiBaseUrl: API_BASE_URL,
-
-    // ── Layout ──────────────────────────────────────────────────────────
-    layout: {
+      apiBaseUrl: API_BASE_URL,
       dir: isRtl ? ("rtl" as const) : ("ltr" as const),
       isRtl,
-      navigate,
-    },
-
-    // ── Header props (spread into BibleReaderHeader) ─────────────────────
-    header: {
-      navigation: {
-        bookName: reader.selectedBook,
-        chapter: reader.selectedChapter,
-        onBack: () => navigate(-1),
-        onToggleSidebar: () => setSidebarOpen(!sidebarOpen),
-        onBookOverview: () =>
-          navigate(`/book-overview?book=${encodeURIComponent(reader.selectedBook)}`),
-      },
-      audio: {
-        active: audioActive,
-        onToggle: handleReadChapter,
-      },
-      translation: {
-        translations: reader.availableTranslations,
-        selectedId: reader.versionId,
-        onSelect: reader.selectTranslation,
-        open: translationOpen,
-        onOpenChange: setTranslationOpen,
-        search: translationSearch,
-        onSearchChange: setTranslationSearch,
-      },
-      toolbar: {
-        fontSize,
-        onFontSizeChange: updateFontSize,
-        onToggleSearch: () => navigate("/search"),
-      },
-    },
-
-    // ── Body props (spread into BibleReaderBody) ─────────────────────────
-    body: {
-      scrollRef,
+      backLabel: t.common.back,
+      searchLabel: t.common.search,
+      selectBookChapterLabel: t.bibleReader.selectBookChapter,
+      listenLabel: t.bibleReader.listen,
+      stopLabel: t.bibleReader.stop,
+      selectedBook: reader.selectedBook,
+      selectedChapter: reader.selectedChapter,
+      audioActive,
+      availableTranslations: reader.availableTranslations,
+      versionId: reader.versionId,
+      translationOpen,
+      translationSearch,
       fontSize,
-      onFontSizeChange: updateFontSize,
-      sidebar: {
-        open: sidebarOpen,
-        onClose: () => setSidebarOpen(false),
-        isRtl,
-        books: reader.backendBooks,
-        selectedBook: reader.selectedBook,
-        selectedChapter: reader.selectedChapter,
-        onSelect: (book: string, ch: number) => reader.navigateTo(book, ch),
-        onBookOverview: () =>
-          navigate(`/book-overview?book=${encodeURIComponent(reader.selectedBook)}`),
-        loading: reader.booksLoading,
+      scrollRef,
+      sidebarOpen,
+      backendBooks: reader.backendBooks,
+      booksLoading: reader.booksLoading,
+      chapters: reader.chapters,
+      headingsByChapter: reader.headingsByChapter,
+      audioVerseKey,
+      selectedVerses: reader.selectedVerses,
+      highlights: reader.highlights,
+      favorites: reader.favorites,
+      verseNotes: reader.verseNotes,
+      chapterRefs: reader.chapterRefs,
+      verseRefs: reader.verseRefs,
+      loading: reader.loading,
+      loadError: reader.loadError,
+      loadingMore: reader.loadingMore,
+      hasMore: reader.hasMore,
+      loadMoreRef: reader.loadMoreRef,
+      hasSelection,
+      selectedVerseCount: reader.selectedVerses.length,
+      canGoPrev,
+      canGoNext,
+      audioState: {
+        isPlaying: audio.isPlaying,
+        isPaused: audio.isPaused,
+        isBuffering: audio.isBuffering,
+        speechRate: audio.speechRate,
+        voices: audio.voices,
+        selectedVoice: audio.selectedVoice,
+        currentVerseIdx: audio.currentVerseIdx,
+        totalVerses: audio.totalVerses,
+        passageComplete: audio.passageComplete,
+        volume: audio.volume,
+        ttsEnabled: audio.ttsEnabled,
+        repeatMode: audio.repeatMode,
       },
-      chapter: {
-        chapters: reader.chapters,
-        headingsByChapter: reader.headingsByChapter,
-        audioVerseKey,
-        selectedVerses: reader.selectedVerses,
-        highlights: reader.highlights,
-        favorites: reader.favorites,
-        verseNotes: reader.verseNotes,
-        onToggleVerse: reader.toggleVerse,
-        onToggleHighlight: handleToggleHighlight,
-        onToggleFavorite: handleToggleFavorite,
-        onExplainVerse: handleExplainVerse,
-        onOpenVerseActions: handleOpenVerseActions,
-        chapterRefs: reader.chapterRefs,
-        verseRefs: reader.verseRefs,
+      drawerOpen,
+      drawerBookName: drawerVerse.book,
+      drawerChapter: drawerVerse.chapter,
+      drawerVerse: drawerVerse.verse,
+      explanationLoading,
+      explanation,
+      explanationTitle: t.bibleReader.explanation,
+      explanationLoadingLabel: t.bibleReader.loadingExplanation,
+      explanationCloseLabel: t.bibleReader.closeExplanation,
+      verseActionLabels: t.bibleReader as unknown as Record<string, string>,
+      verseActionsOpen,
+      verseActionTarget,
+      noteDialogOpen,
+      noteDialogMode,
+      noteDialogVerseRef,
+      noteText,
+      noteSaving,
+      noteDeleting,
+    },
+    actions: {
+      goBack: () => navigate(-1),
+      toggleSidebar: () => setSidebarOpen((open) => !open),
+      closeSidebar: () => setSidebarOpen(false),
+      openBookOverview: () =>
+        navigate(
+          `/book-overview?book=${encodeURIComponent(reader.selectedBook)}`,
+        ),
+      handleReadChapter,
+      selectTranslation: reader.selectTranslation,
+      setTranslationOpen,
+      setTranslationSearch,
+      updateFontSize,
+      openSearch: () => navigate("/search"),
+      navigateToChapter: reader.navigateTo,
+      toggleVerse: reader.toggleVerse,
+      handleToggleHighlight,
+      handleToggleFavorite,
+      handleExplainVerse,
+      handleOpenVerseActions,
+      retryLoad: reader.retryLoad,
+      loadMore: reader.loadMore,
+      handleMultiHighlight,
+      handleOpenNote,
+      handleMultiFavorite,
+      handleCopySelected,
+      handleShareSelected,
+      handleListenSelectedAudio,
+      clearSelection,
+      handlePrevChapter,
+      handleNextChapter,
+      scrollToTop,
+      scrollToBottom,
+      handleBookmark,
+      audioActions: {
+        startPlayback: audio.startPlayback,
+        stopPlayback: audio.stopPlayback,
+        pausePlayback: audio.pausePlayback,
+        resumePlayback: audio.resumePlayback,
+        togglePause: audio.togglePause,
+        setSpeechRate: audio.setSpeechRate,
+        cycleSpeed: audio.cycleSpeed,
+        setVoice: audio.setVoice,
+        skipForward: audio.skipForward,
+        skipBackward: audio.skipBackward,
+        seekToVerse: audio.seekToVerse,
+        setVolume: audio.setVolume,
+        setRepeatMode: audio.setRepeatMode,
+        cycleRepeatMode: audio.cycleRepeatMode,
       },
-      loading: {
-        loading: reader.loading,
-        loadError: reader.loadError,
-        loadingMore: reader.loadingMore,
-        hasMore: reader.hasMore,
-        onRetryLoad: reader.retryLoad,
-        onLoadMore: reader.loadMore,
-        loadMoreRef: reader.loadMoreRef,
-      },
-      bottomBar: {
-        audioActive,
-        audio,
-        selectedBook: reader.selectedBook,
-        selectedChapter: reader.selectedChapter,
-        hasSelection,
-        selectedVerseCount: reader.selectedVerses.length,
-        onMultiHighlight: handleMultiHighlight,
-        onMultiNote: handleOpenNote,
-        onMultiFavorite: handleMultiFavorite,
-        onMultiCopy: handleCopySelected,
-        onMultiShare: handleShareSelected,
-        onMultiListen: handleListenSelectedAudio,
-        onMultiClear: clearSelection,
-        onPrev: handlePrevChapter,
-        onNext: handleNextChapter,
-        onScrollTop: scrollToTop,
-        onScrollBottom: scrollToBottom,
-        onBookmark: handleBookmark,
-        onAudioToggle: handleReadChapter,
-        canGoPrev,
-        canGoNext,
-      },
+      closeDrawer: () => setDrawerOpen(false),
+      setVerseActionsOpen,
+      handleActionExplain,
+      handleActionLab,
+      handleActionResources,
+      openDevotional: () => navigate(actionUrl("/daily-devotions")),
+      openStudyTools: () => navigate(actionUrl("/verse-resources")),
+      openStrongs: () => navigate(actionUrl("/strongs-dictionary")),
+      openTrivia: () => navigate(actionUrl("/trivia")),
+      handleActionListen,
+      handleActionHighlight,
+      handleActionNote,
+      openJournal: () => navigate(actionUrl("/journal/new")),
+      handleActionFavorite,
+      searchVerse: () =>
+        navigate(
+          `/search?query=${encodeURIComponent(verseActionTarget?.text.slice(0, 100) ?? "")}`,
+        ),
+      handleActionShare,
+      handleActionCopy,
+      closeNoteDialog: () => setNoteDialogOpen(false),
+      setNoteText,
+      handleSaveNote,
+      handleDeleteNote,
     },
-
-    // ── Overlay props ────────────────────────────────────────────────────
-    drawer: {
-      open: drawerOpen,
-      onClose: () => setDrawerOpen(false),
-      bookName: drawerVerse.book,
-      chapter: drawerVerse.chapter,
-      verse: drawerVerse.verse,
-    },
-
-    verseActions: {
-      open: verseActionsOpen,
-      onOpenChange: setVerseActionsOpen,
-      target: verseActionTarget,
-      isRtl,
-      onExplain: handleActionExplain,
-      onStartLab: handleActionLab,
-      onOpenResources: handleActionResources,
-      onDevotional: () => navigate(actionUrl("/daily-devotions")),
-      onStudyTools: () => navigate(actionUrl("/verse-resources")),
-      onStrongs: () => navigate(actionUrl("/strongs-dictionary")),
-      onTrivia: () => navigate(actionUrl("/trivia")),
-      onListen: handleActionListen,
-      onHighlight: handleActionHighlight,
-      onNote: handleActionNote,
-      onJournal: () => navigate(actionUrl("/journal/new")),
-      onFavorite: handleActionFavorite,
-      onSearch: () =>
-        navigate(`/search?query=${encodeURIComponent(verseActionTarget?.text.slice(0, 100) ?? "")}`),
-      onShare: handleActionShare,
-      onCopy: handleActionCopy,
-    },
-
-    note: {
-      open: noteDialogOpen,
-      onClose: () => setNoteDialogOpen(false),
-      mode: noteDialogMode,
-      verseRef: noteDialogVerseRef,
-      text: noteText,
-      onTextChange: setNoteText,
-      saving: noteSaving,
-      deleting: noteDeleting,
-      onSave: handleSaveNote,
-      onDelete: handleDeleteNote,
-    },
-    },
-    actions: {},
   };
 }

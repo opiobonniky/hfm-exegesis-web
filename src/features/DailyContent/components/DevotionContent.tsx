@@ -25,7 +25,7 @@ export function DevotionContent({ devotion, accent = "hsl(var(--primary))", like
   const takeaways = parseList(devotion.takeaways);
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
+    <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
       <div className="space-y-2">
         <h2 className="text-2xl font-bold">{devotion.title}</h2>
         <div className="flex items-center gap-2 text-sm text-muted-foreground">

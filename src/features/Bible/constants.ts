@@ -75,3 +75,7 @@ export const LAB_STAGE_CONFIG = [
 ];
 
 export const AUDIO_SPEED_OPTIONS = [0.75, 1, 1.25, 1.5, 1.75, 2];
+
+export const BIBLE_READER_MIN_FONT_SIZE = 12;
+export const BIBLE_READER_MAX_FONT_SIZE = 40;
+export const BIBLE_READER_DEFAULT_FONT_SIZE = 20;

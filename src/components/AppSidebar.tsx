@@ -186,13 +186,11 @@ function PillNavItem({
               "relative flex items-center w-full overflow-hidden transition-all duration-200 rounded-xl border border-transparent",
               collapsed ? "justify-center p-1" : "gap-3 p-2",
               active
-                ? "border-primary-foreground/20 bg-gradient-to-r from-primary-foreground/20 via-primary-foreground/10 to-transparent shadow-sm"
+                ? "border-primary-foreground/40 bg-gradient-to-r from-primary-foreground/10 via-primary-foreground/40 to-transparent shadow-sm"
                 : "hover:border-primary-foreground/15 hover:bg-gradient-to-r hover:from-primary-foreground/10 hover:to-transparent",
             )}
           >
-            {active && (
-              <span className="absolute inset-y-2 left-0 w-0.5 rounded-full bg-gradient-to-b from-primary via-primary/60 to-primary shadow-[0_0_10px_hsl(var(--primary)/0.55)] rtl:left-auto rtl:right-0" />
-            )}
+            
             {/* Icon container */}
             <div
               className={cn(
@@ -232,7 +230,7 @@ function PillNavItem({
 
             {/* Active dot */}
             {active && !collapsed && (
-              <span className="ml-auto w-1 h-1 rounded-full bg-primary-foreground shrink-0 shadow-[0_0_4px_hsl(var(--primary-foreground)/0.4)]" />
+              <span className="ml-auto w-3 h-3 rounded-full bg-primary/85 shrink-0 shadow-[0_0_4px_hsl(var(--primary-foreground)/0.4)]" />
             )}
           </div>
         );
@@ -327,13 +325,11 @@ function BibleNavItem({
           "relative flex items-center w-full overflow-hidden transition-all duration-200 rounded-xl border border-transparent",
           collapsed ? "justify-center p-1" : "gap-3 p-2",
           active
-            ? "border-primary-foreground/20 bg-gradient-to-r from-primary-foreground/20 via-primary-foreground/10 to-transparent shadow-sm"
+            ? "border-primary-foreground/40 bg-gradient-to-r from-primary-foreground/20 via-primary-foreground/40 to-transparent shadow-sm"
             : "hover:border-primary-foreground/15 hover:bg-gradient-to-r hover:from-primary-foreground/10 hover:to-transparent",
         )}
       >
-        {active && (
-          <span className="absolute inset-y-2 left-0 w-0.5 rounded-full bg-gradient-to-b from-primary via-primary/60 to-primary shadow-[0_0_10px_hsl(var(--primary)/0.55)] rtl:left-auto rtl:right-0" />
-        )}
+       
         <div
           className={cn(
             "flex items-center justify-center shrink-0 transition-all duration-300",
@@ -370,7 +366,7 @@ function BibleNavItem({
         )}
 
         {active && !collapsed && (
-          <span className="ml-auto w-1 h-1 rounded-full bg-primary-foreground shrink-0 shadow-[0_0_4px_hsl(var(--primary-foreground)/0.4)]" />
+          <span className="ml-auto w-3 h-3 rounded-sm bg-primary-foreground shrink-0 shadow-[0_0_4px_hsl(var(--primary-foreground)/0.4)]" />
         )}
       </div>
     </button>
