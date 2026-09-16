@@ -420,6 +420,23 @@
     animation: verse-highlight-fade 450ms ease-out;
   }
 
+  /* Gentle rise-and-fade when a note chip appears under a verse (created
+     inline or restored on load). Animates opacity + a small translate. */
+  @keyframes verse-note-in {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .verse-note-in {
+    animation: verse-note-in 350ms ease-out;
+  }
+
   .verse-reading {
     background-image: linear-gradient(
       100deg,

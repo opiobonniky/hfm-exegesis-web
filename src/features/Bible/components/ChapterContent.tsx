@@ -230,7 +230,7 @@ export default function ChapterContent({
                               </span>
                             </span>
                             {note && (
-                              <span className="ms-6 mt-2 flex items-start gap-2 rounded-lg border border-border/50 bg-muted/40 px-3 py-2 font-sans text-xs not-italic leading-relaxed text-muted-foreground">
+                              <span className="verse-note-in ms-6 mt-2 flex items-start gap-2 rounded-lg border border-border/50 bg-muted/40 px-3 py-2 font-sans text-xs not-italic leading-relaxed text-muted-foreground">
                                 <StickyNote
                                   className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary/70"
                                   aria-hidden="true"
