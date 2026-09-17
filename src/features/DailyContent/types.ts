@@ -511,6 +511,8 @@ export interface AddExplanationStudyFormProps {
   addWordStudy: () => void;
   removeWordStudy: (index: number) => void;
   updateWordStudy: (index: number, field: keyof WordStudyItem, value: string | number) => void;
+  /** Replaces a top-level form field — used to reorder the word-study list. */
+  updateField: (key: "wordStudies", value: WordStudyItem[]) => void;
 }
 
 export interface AddExplanationExtrasFormProps {

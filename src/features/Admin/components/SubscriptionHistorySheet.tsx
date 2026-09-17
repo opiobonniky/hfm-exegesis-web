@@ -141,7 +141,7 @@ export function SubscriptionHistorySheet({ user, onOpenChange }: Props) {
     if (user) {
       setEvents([]);
       setProfile(null);
-      load(user.id);
+      load(String(user.id));
     }
   }, [user, load]);
 

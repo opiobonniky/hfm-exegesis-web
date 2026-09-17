@@ -7,18 +7,16 @@ import {
   StrongsFavoritesTab,
   StrongsSearchTab,
 } from "./StrongsDictionaryComponents";
-import type { useStrongsDictionaryPage } from "../hooks/useStrongsDictionaryPage";
-
-type PageModel = ReturnType<typeof useStrongsDictionaryPage>;
+import type { StrongsDictionaryPageData } from "../hooks/useStrongsDictionaryPage";
 
 interface StrongsStudyWorkspaceProps {
-  mode: PageModel["mode"];
-  searchCount: PageModel["searchCount"];
-  langFilter: PageModel["langFilter"];
-  onSetLangFilter: PageModel["setLangFilter"];
-  onSetMode: PageModel["setMode"];
+  mode: StrongsDictionaryPageData["mode"];
+  searchCount: StrongsDictionaryPageData["searchCount"];
+  langFilter: StrongsDictionaryPageData["langFilter"];
+  onSetLangFilter: StrongsDictionaryPageData["setLangFilter"];
+  onSetMode: StrongsDictionaryPageData["setMode"];
   searchTab: Pick<
-    PageModel,
+    StrongsDictionaryPageData,
     | "searchQuery"
     | "searchResults"
     | "searchLoading"
@@ -31,7 +29,7 @@ interface StrongsStudyWorkspaceProps {
     | "loadMoreSearch"
   >;
   browseTab: Pick<
-    PageModel,
+    StrongsDictionaryPageData,
     | "selectedBook"
     | "loadSelectedBook"
     | "browseWords"
@@ -45,7 +43,7 @@ interface StrongsStudyWorkspaceProps {
     | "loadMoreBrowse"
   >;
   favoritesTab: Pick<
-    PageModel,
+    StrongsDictionaryPageData,
     | "favorites"
     | "favLoading"
     | "selectedWord"
@@ -85,7 +83,10 @@ export function StrongsStudyWorkspace({
           <LanguageFilter value={langFilter} onChange={onSetLangFilter} />
         </div>
 
-        <Tabs value={mode} onValueChange={(value) => onSetMode(value as PageModel["mode"])}>
+        <Tabs
+          value={mode}
+          onValueChange={(value) => onSetMode(value as StrongsDictionaryPageData["mode"])}
+        >
           <TabsList className="grid h-auto w-full grid-cols-3 bg-muted/70 p-1 sm:w-fit sm:min-w-[360px]">
             <TabsTrigger value="search" className="gap-2 py-2.5">
               <Search className="h-4 w-4" /> Search

@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/Badge";
+import { Badge } from "@/components/ui/badge";
 import { Calendar, BookOpen, ChevronRight } from "lucide-react";
 
 interface DevotionCardProps {
@@ -18,7 +18,7 @@ export function DevotionCard({ title, content, reference, date, status, onClick 
       <CardContent className="p-4">
         <div className="flex items-start justify-between mb-2">
           <h3 className="font-semibold text-foreground line-clamp-1">{title}</h3>
-          <Badge variant={status === "published" ? "success" : "warning"} className="shrink-0 ml-2">{status}</Badge>
+           <Badge variant={status === "published" ? "default" : "outline"} className="shrink-0 ml-2">{status}</Badge>
         </div>
         <p className="text-sm text-muted-foreground line-clamp-2 mb-3">{content}</p>
         <div className="flex items-center justify-between text-xs text-muted-foreground">

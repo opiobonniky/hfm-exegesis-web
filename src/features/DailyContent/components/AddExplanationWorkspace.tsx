@@ -72,6 +72,7 @@ export function AddExplanationWorkspace({
               addWordStudy={actions.addWordStudy}
               removeWordStudy={actions.removeWordStudy}
               updateWordStudy={actions.updateWordStudy}
+              updateField={actions.updateField}
             />
           </TabsContent>
           <TabsContent value="extras">

@@ -1,14 +1,15 @@
 import {
-  BookHeart, BookOpen, Brain, ChevronRight, Copy,
+  BookHeart, BookMarked, BookOpen, BookText, Brain, Copy,
   GitFork, Headphones, Highlighter, Languages,
-  Library, Lightbulb, NotebookPen, Search, Share2, Sparkles, Star,
-  StickyNote, Wrench,
+  Library, Lightbulb, ListOrdered, NotebookPen, ScrollText, Search, Share2, Sparkles, Star,
+  StickyNote, Tags, Wrench,
 } from "lucide-react";
 
 import {
   Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle,
 } from "@/components/ui/sheet";
 import type { LabStage, VerseActionSheetProps } from "../types";
+import type { LucideIcon } from "lucide-react";
 import { LAB_STAGE_CONFIG } from "../constants";
 import { ActionButton } from "./ActionButton";
 import { LabStageItem } from "./LabStageItem";
@@ -17,6 +18,8 @@ import {
   getLabStageIcon,
   getReaderLabel,
 } from "../utils/readerPresentation";
+import { useResourceSectionCounts } from "../hooks/useResourceSectionCounts";
+import { sectionHasContent } from "@/components/verseResources";
 
 export default function VerseActionSheet({
   open,
@@ -43,6 +46,105 @@ export default function VerseActionSheet({
   const reference = target
     ? `${target.book} ${target.chapter}:${target.verse}`
     : "";
+
+  // "3 commentaries", "2 cross references", … shown beside each resource
+  // action, and actions whose count comes back 0 are removed entirely — the
+  // reader only sees the studies this verse actually has. `null` counts
+  // (still loading, or not counted) keep the action visible so buttons never
+  // pop out from under the reader's finger.
+  const { countOf } = useResourceSectionCounts({
+    enabled: open,
+    bookName: target?.book,
+    chapter: target?.chapter,
+    verse: target?.verse,
+  });
+
+  /** Resource action config: rendered only when the section has content. */
+  const resourceActions: Array<{
+    section: string;
+    icon: LucideIcon;
+    title: string;
+    count: number | null;
+    onClick: () => void;
+  }> = [
+    {
+      section: "explanation",
+      icon: Lightbulb,
+      title: getReaderLabel(labels, "explanation", "Explanation"),
+      count: countOf("explanation"),
+      onClick: () => { onOpenChange(false); onExplain(); },
+    },
+    {
+      section: "commentaries",
+      icon: Library,
+      title: getReaderLabel(labels, "commentaries", "Commentaries"),
+      count: countOf("commentaries"),
+      onClick: () => { onOpenChange(false); onOpenResources("commentaries"); },
+    },
+    {
+      section: "crossReferences",
+      icon: GitFork,
+      title: getReaderLabel(labels, "crossReferences", "Cross References"),
+      count: countOf("crossReferences"),
+      onClick: () => { onOpenChange(false); onOpenResources("crossReferences"); },
+    },
+    {
+      section: "wordStudies",
+      icon: BookMarked,
+      title: getReaderLabel(labels, "wordStudies", "Word Studies"),
+      count: countOf("wordStudies"),
+      onClick: () => { onOpenChange(false); onOpenResources("wordStudies"); },
+    },
+    {
+      section: "dictionary",
+      icon: BookText,
+      title: getReaderLabel(labels, "dictionary", "Bible Dictionary"),
+      count: countOf("dictionary"),
+      onClick: () => { onOpenChange(false); onOpenResources("dictionary"); },
+    },
+    {
+      section: "interlinear",
+      icon: ListOrdered,
+      title: getReaderLabel(labels, "interlinear", "Interlinear"),
+      count: countOf("interlinear"),
+      onClick: () => { onOpenChange(false); onOpenResources("interlinear"); },
+    },
+    {
+      section: "topics",
+      icon: Tags,
+      title: getReaderLabel(labels, "themes", "Themes & Topics"),
+      count: countOf("topics"),
+      onClick: () => { onOpenChange(false); onOpenResources("topics"); },
+    },
+    {
+      section: "verseReferences",
+      icon: ScrollText,
+      title: getReaderLabel(labels, "verseReferences", "Where Else It Appears"),
+      count: countOf("verseReferences"),
+      onClick: () => { onOpenChange(false); onOpenResources("verseReferences"); },
+    },
+    {
+      section: "translations",
+      icon: Languages,
+      title: getReaderLabel(labels, "translations", "Translations"),
+      count: countOf("translations"),
+      onClick: () => { onOpenChange(false); onOpenResources("translations"); },
+    },
+    {
+      section: "prologue",
+      icon: BookOpen,
+      title: getReaderLabel(labels, "bookContext", "Book Context"),
+      count: countOf("prologue"),
+      onClick: () => { onOpenChange(false); onOpenResources("prologue"); },
+    },
+    {
+      section: "studyTools",
+      icon: Wrench,
+      title: getReaderLabel(labels, "studyTools", "Study Tools"),
+      count: countOf("studyTools"),
+      onClick: () => { onOpenChange(false); onStudyTools(); },
+    },
+  ];
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -117,36 +219,28 @@ export default function VerseActionSheet({
               </div>
             </section>
 
+            {/* Every visible entry here opens the Verse Resources page on
+                that exact section, so the reader lands on the study they
+                tapped. Sections with no content for this verse are hidden. */}
             <ActionSection title={getReaderLabel(labels, "resources", "Resources")}>
-              <ActionButton
-                icon={Lightbulb}
-                title={getReaderLabel(labels, "explanation", "Explanation")}
-                onClick={() => { onOpenChange(false); onExplain(); }}
-              />
-              <ActionButton
-                icon={Library}
-                title={getReaderLabel(labels, "commentaries", "Commentaries")}
-                onClick={() => { onOpenChange(false); onOpenResources("commentaries"); }}
-              />
-              <ActionButton
-                icon={GitFork}
-                title={getReaderLabel(labels, "crossReferences", "Cross References")}
-                onClick={() => { onOpenChange(false); onOpenResources("crossReferences"); }}
-              />
-              <ActionButton
-                icon={Languages}
-                title={getReaderLabel(labels, "translations", "Translations")}
-                onClick={() => { onOpenChange(false); onOpenResources("translations"); }}
-              />
+              {resourceActions
+                .filter((action) => sectionHasContent(action.count))
+                .map((action) => (
+                  <ActionButton
+                    key={action.section}
+                    icon={action.icon}
+                    title={action.title}
+                    count={action.count}
+                    onClick={action.onClick}
+                  />
+                ))}
+            </ActionSection>
+
+            <ActionSection title={getReaderLabel(labels, "moreStudy", "More study")}>
               <ActionButton
                 icon={BookHeart}
                 title={getReaderLabel(labels, "devotional", "Devotional")}
                 onClick={() => { onOpenChange(false); onDevotional(); }}
-              />
-              <ActionButton
-                icon={Wrench}
-                title={getReaderLabel(labels, "studyTools", "Study Tools")}
-                onClick={() => { onOpenChange(false); onStudyTools(); }}
               />
               <ActionButton
                 icon={BookOpen}

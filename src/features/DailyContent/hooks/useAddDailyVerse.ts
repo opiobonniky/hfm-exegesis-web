@@ -327,7 +327,7 @@ export function useAddDailyVerse() {
         })
         .filter(Boolean)
         .join("\n");
-      const takeaways = parseStructuredField(d?.takeaways ?? study.takeaways);
+      const takeaways = parseStructuredField(d?.studyMetadata?.takeaways ?? study.takeaways);
 
       return {
         explanation: exegesis.explanationText || "",
@@ -741,3 +741,5 @@ export function useAddDailyVerse() {
 
 export type AddDailyVersePageModel = ReturnType<typeof useAddDailyVerse>;
 export type AddDailyVersePageViewModel = AddDailyVersePageModel["data"] & AddDailyVersePageModel["actions"];
+
+export default useAddDailyVerse;

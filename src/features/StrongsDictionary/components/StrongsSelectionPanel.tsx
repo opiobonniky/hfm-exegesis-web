@@ -2,14 +2,12 @@ import { BookOpen } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { WordDetail } from "./WordDetail";
-import type { useStrongsDictionaryPage } from "../hooks/useStrongsDictionaryPage";
-
-type PageModel = ReturnType<typeof useStrongsDictionaryPage>;
+import type { StrongsDictionaryPageData } from "../hooks/useStrongsDictionaryPage";
 
 interface StrongsSelectionPanelProps {
-  selectedWord: PageModel["selectedWord"];
-  isFavorited: PageModel["isFavorited"];
-  onToggleFavorite: PageModel["toggleFavorite"];
+  selectedWord: StrongsDictionaryPageData["selectedWord"];
+  isFavorited: StrongsDictionaryPageData["isFavorited"];
+  onToggleFavorite: StrongsDictionaryPageData["toggleFavorite"];
   onClose: () => void;
 }
 

@@ -12,6 +12,16 @@ import ApiBaseUrlIndicator from "../components/ApiBaseUrlIndicator";
 export default function BibleReader() {
   const { data, actions } = useBibleReaderPage();
 
+  // The toolbar is positioned at z-[70], above every overlay, so it would float
+  // in front of any panel that covers the verse it belongs to. Hide it whenever
+  // a panel is open — the verse menus, and the sidebar overlay.
+  const verseToolbarHidden =
+    data.verseActionsOpen ||
+    data.drawerOpen ||
+    data.noteDialogOpen ||
+    data.multiHighlightDialogOpen ||
+    data.sidebarOpen;
+
   return (
     <div
       dir={data.dir}
@@ -58,6 +68,7 @@ export default function BibleReader() {
         highlights={data.highlights}
         favorites={data.favorites}
         verseNotes={data.verseNotes}
+        verseToolbarHidden={verseToolbarHidden}
         chapterRefs={data.chapterRefs}
         verseRefs={data.verseRefs}
         loading={data.loading}

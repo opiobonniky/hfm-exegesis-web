@@ -249,3 +249,11 @@ export function useStrongsDictionaryPage() {
     setSelectedBook, loadSelectedBook, loadMoreBrowse, setSelectedWord, toggleFavorite,
   } };
 }
+
+export type StrongsDictionaryPageModel = ReturnType<typeof useStrongsDictionaryPage>;
+
+/**
+ * Flattened view model consumed by the presentation components: the page spreads
+ * `data` and `actions` into a single object before passing it down.
+ */
+export type StrongsDictionaryPageData = StrongsDictionaryPageModel["data"];

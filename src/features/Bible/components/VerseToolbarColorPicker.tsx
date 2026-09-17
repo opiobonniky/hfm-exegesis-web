@@ -76,7 +76,7 @@ export default function VerseToolbarColorPicker({
         {VERSE_HIGHLIGHT_COLOR_GROUPS.map((group) => {
           const colors = group.ids
             .map((id) => VERSE_HIGHLIGHT_COLORS.find((c) => c.id === id))
-            .filter(Boolean) as typeof VERSE_HIGHLIGHT_COLORS;
+            .filter(Boolean) as any[];
           return (
             <div key={group.label} className="flex flex-col gap-1">
               <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">

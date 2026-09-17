@@ -77,7 +77,7 @@ export default function DailyChallengeGame({
           <PartyPopper className="w-12 h-12 text-amber-500" />
           <h2 className="text-xl sm:text-2xl font-black text-center">Daily Challenge Complete!</h2>
           <p className="text-2xl font-black text-amber-500">{session.score.correct}/{session.score.total}</p>
-          <StreakCalendar weekHistory={[]} todayKey={todayKey} isTodayCompleted={true} consecutiveDays={consecutiveDays} />
+           <StreakCalendar weekHistory={{}} todayKey={todayKey} isTodayCompleted={true} consecutiveDays={consecutiveDays} />
           <button onClick={onBack} className="inline-flex items-center gap-2.5 px-8 py-3 rounded-2xl text-sm font-bold text-card bg-gradient-to-br from-primary to-primary/80">
             <RotateCcw className="w-4 h-4" /> Back to Menu
           </button>

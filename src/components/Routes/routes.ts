@@ -9,7 +9,7 @@ const VerifyAccount = lazy(() => import("@/features/Auth/pages/VerifyAccount"));
 const ForgotPassword = lazy(() => import("@/features/Auth/pages/ForgotPassword"));
 const ForceChangePassword = lazy(() => import("@/features/Auth/pages/ForceChangePassword"));
 const Dashboard = lazy(() => import("@/features/Admin/pages/AdminDashboard"));
-const HomeDashboard = lazy(() => import("@/features/Home/pages/Index"));
+const HomeDashboard = lazy(() => import("@/features/Home/pages/HomeDashboard"));
 const DailyVerse = lazy(() => import("@/features/DailyContent/pages/DailyVerse"));
 const VerseExplanations = lazy(() => import("@/features/Bible/pages/VerseExplanations"));
 const AddDailyVerse = lazy(() => import("@/features/DailyContent/pages/AddDailyVerse"));
@@ -104,7 +104,7 @@ export interface RouteConfig {
 }
 
 // Define all routes in a centralized configuration
-export const routes = {
+const routeConfigs = {
   // ==================== PUBLIC ROUTES ====================
   onboarding: {
     path: "/onboarding",
@@ -286,6 +286,8 @@ export const routes = {
     path: "/test-session",
     component: TestSessionSetup,
     isProtected: false,
+    requiresLayout: false,
+    title: "Test Session",
   },
   bookOverview: {
     path: "/book-overview",
@@ -791,7 +793,16 @@ export const routes = {
     requiresLayout: false,
     title: "Not Found",
   },
-};
+} satisfies Record<string, RouteConfig>;
+
+/**
+ * Every route is normalized to the full `RouteConfig` shape. Without this, the
+ * inferred type is a union of 95 distinct object literals, so reading an
+ * optional field such as `title` or `requiresLayout` off `Object.values(routes)`
+ * fails unless every single entry happens to declare it. The literal keys are
+ * preserved so `keyof typeof routes` still narrows to the route names.
+ */
+export const routes: { [K in keyof typeof routeConfigs]: RouteConfig } = routeConfigs;
 
 // Helper function to get route by key
 export const getRoute = (key: keyof typeof routes) => routes[key];

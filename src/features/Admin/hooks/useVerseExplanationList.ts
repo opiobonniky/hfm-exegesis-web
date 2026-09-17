@@ -7,6 +7,8 @@ import type {
   VerseExplanationListItem,
   VerseExplanationPageData as PageData,
 } from "../types";
+export type { VerseExplanationListItem };
+
 
 export function useVerseExplanationList(pageSize = 20) {
   const navigate = useNavigate();

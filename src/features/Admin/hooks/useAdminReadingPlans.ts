@@ -3,6 +3,8 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { adminApi } from "../services/adminApi";
 import type { ReadingPlan, ReadingPlanForm } from "../types";
+export type { ReadingPlan, ReadingPlanForm };
+
 
 const EMPTY_FORM: ReadingPlanForm = {
   title: "",

@@ -66,9 +66,9 @@ export default function TriviaPlanScreen({
         View performance and answer history
       </button>
 
-      {leaderboardState.bestSession.total > 0 && leaderboardComparison && (
-        <SessionLeaderboard comparison={leaderboardComparison} onReset={resetLeaderboard} />
-      )}
+       {leaderboardState.bestSession.total > 0 && leaderboardComparison && (
+         <SessionLeaderboard comparison={leaderboardComparison as any} onReset={resetLeaderboard} />
+       )}
 
       <div className="rounded-2xl border border-primary/15 bg-primary/[0.06] p-3">
         <div className="flex items-center justify-between gap-3 mb-2">

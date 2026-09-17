@@ -22,7 +22,6 @@ export { BiblePageLayout, BiblePageInner, BiblePageStickyHeader } from "./BibleP
 export { DeletePreview } from "./DeletePreview";
 export { VerseResourcesErrorState } from "./VerseResourcesErrorState";
 export { VerseResourcesHero } from "./VerseResourcesHero";
-export { VerseResourcesContent } from "./VerseResourcesContent";
 export { BibleLibraryHeader } from "./BibleLibraryHeader";
 export { BibleLibraryEmpty } from "./BibleLibraryEmpty";
 export { BibleLibraryLoading } from "./BibleLibraryLoading";

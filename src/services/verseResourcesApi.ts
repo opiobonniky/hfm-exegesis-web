@@ -6,9 +6,28 @@ export interface CommentaryEntry {
   text: string;
 }
 
-export interface Crossref {
-  ref: string;
+/** One verse of the resolved passage shown around a cross reference. */
+export interface ContextVerse {
+  verse: number;
   text: string;
+  /** True for the verse the cross reference actually points at. */
+  isFocus: boolean;
+}
+
+export interface Crossref {
+  /** Legacy display reference, e.g. "Romans 5:8". */
+  ref: string;
+  /** The authored note explaining the connection. */
+  text: string;
+  bookName?: string;
+  chapter?: number;
+  verse?: number;
+  /** The actual verse text, resolved from the Bible translation. */
+  verseText?: string;
+  /** The referenced verse plus its surrounding verses, resolved server-side. */
+  contextVerses?: ContextVerse[];
+  /** Optional commentary attached to the cross reference. */
+  commentary?: string;
 }
 
 export interface DictionaryEntry {
@@ -23,6 +42,13 @@ export interface WordStudyEntry {
   transliteration: string;
   meaning: string;
   strongs?: string;
+  surfaceText?: string;
+  originalWord?: string;
+  pronunciation?: string;
+  partOfSpeech?: string;
+  language?: string;
+  definition?: string;
+  fullDefinition?: string;
 }
 
 export interface TopicEntry {
@@ -36,6 +62,33 @@ export interface InterlinearWord {
   translation?: string;
   word?: string;
   grammar?: string;
+  lemma?: string;
+}
+
+/** A verse in which one of this verse's Strong's words also appears. */
+export interface VerseReferenceEntry {
+  strongs: string;
+  originalWord?: string;
+  transliteration?: string;
+  definition?: string;
+  surfaceText?: string;
+  bookName: string;
+  chapter: number;
+  verse: number;
+  translation?: string;
+  ref: string;
+}
+
+export interface ExplanationSection {
+  explanation: string;
+  application: string;
+  introduction: string;
+  backgroundAuthor: string;
+  backgroundBook: string;
+  backgroundContext: string;
+  finalThoughts: string;
+  takeaways: string[];
+  practicalApplications: string[];
 }
 
 export interface StudyToolWord {
@@ -67,26 +120,67 @@ export interface StudyToolResource {
   studyToolWords?: StudyToolWord[];
 }
 
+/** Entry count per section, keyed by section id. */
+export type ResourceSectionCounts = Record<string, number>;
+
 export interface VerseResourceData {
   id: number;
   bookName: string;
   chapter: number;
   verseStart: number;
   verseEnd: number | null;
+  /** Section this payload carries. `null` means every section was returned. */
+  section?: string | null;
+  /** Counts for every section so the reader can build its section rail. */
+  sections?: ResourceSectionCounts;
+  /** Verses shown on each side of a cross reference (0-3). */
+  contextRadius?: number;
+  explanation?: ExplanationSection | null;
   commentaries: CommentaryEntry[];
   crossReferences: Crossref[];
   dictionaryTerms: DictionaryEntry[];
   wordStudies: WordStudyEntry[];
-  interlinearWords: any[];
+  interlinearWords: InterlinearWord[];
   relatedTopics: TopicEntry[];
+  themes?: string[];
+  verseReferences?: VerseReferenceEntry[];
   studyTools?: StudyToolResource[];
+  // Newer, more descriptive aliases returned alongside the legacy keys.
+  dictionary?: DictionaryEntry[];
+  interlinear?: InterlinearWord[];
+  topics?: string[];
 }
 
 export interface TranslationComparisonEntry {
   version: string;
   abbreviation: string;
+  id?: string;
   text: string;
 }
+
+/**
+ * Entry counts per section for a verse — lets the reader's verse menu show
+ * what study content exists before the reader opens anything.
+ */
+export const getResourceSectionCounts = async (
+  bookName: string,
+  chapter: number,
+  verseNumber: number,
+): Promise<ResourceSectionCounts | null> => {
+  try {
+    const res = await sendPostRequest<{ sections?: ResourceSectionCounts }>(
+      "verse-resources",
+      "section-counts",
+      { bookName, chapter, verseNumber },
+    );
+    if (res.returnCode === 200 && res.returnData) {
+      return res.returnData.sections ?? null;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+};
 
 export const getTranslationComparison = async (
   bookName: string,
@@ -108,16 +202,21 @@ export const getTranslationComparison = async (
   }
 };
 
+/**
+ * Fetch verse resources. Pass `section` to receive only that one section's
+ * content; omit it to receive everything (used by the admin tooling).
+ */
 export const getVerseResources = async (
   bookName: string,
   chapter: number,
   verseNumber: number,
+  section?: string,
 ): Promise<VerseResourceData | null> => {
   try {
     const res = await sendPostRequest<VerseResourceData>(
       "verse-resources",
       "get",
-      { bookName, chapter, verseNumber },
+      { bookName, chapter, verseNumber, ...(section ? { section } : {}) },
     );
     if (res.returnCode === 200 && res.returnData) {
       return res.returnData;

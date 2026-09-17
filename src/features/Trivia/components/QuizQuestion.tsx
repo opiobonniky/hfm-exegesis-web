@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/Badge";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import type { TriviaQuestion } from "../types";
 
@@ -15,7 +15,7 @@ export function QuizQuestion({ question, selectedAnswer, onSelectAnswer, showCor
     <Card className="bg-card border-border">
       <CardHeader>
         <div className="flex items-center gap-2 mb-2">
-          <Badge variant={question.difficulty === "easy" ? "success" : question.difficulty === "medium" ? "warning" : "destructive"}>
+           <Badge variant={question.difficulty === "easy" ? "default" : question.difficulty === "medium" ? "outline" : "destructive"}>
             {question.difficulty}
           </Badge>
           <span className="text-xs text-muted-foreground">{question.category}</span>
@@ -23,7 +23,7 @@ export function QuizQuestion({ question, selectedAnswer, onSelectAnswer, showCor
         <CardTitle className="text-lg">{question.question}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
-        {question.options.map((option, i) => (
+         {[question.optionA, question.optionB, question.optionC, question.optionD].map((option, i) => (
           <button
             key={i}
             onClick={() => onSelectAnswer(option)}

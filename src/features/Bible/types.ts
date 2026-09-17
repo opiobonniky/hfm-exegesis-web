@@ -1,4 +1,5 @@
 import type { MutableRefObject, RefObject } from "react";
+import type { LucideIcon } from "lucide-react";
 import type { ChapterHeading } from "@/services/bibleApi";
 import type {
   AudioPlayerActions,
@@ -96,7 +97,21 @@ export interface Translation {
 
 export type CovenantFilter = "all" | "ot" | "nt";
 export type ActivityType = "all" | "highlights" | "notes" | "favorites" | "history";
-export type TabKey = "commentaries" | "crossReferences" | "wordStudies" | "dictionary" | "translations" | "interlinear" | "topics";
+/** Every study section the Verse Resources page can be routed to. */
+export type ResourceSectionKey =
+  | "explanation"
+  | "commentaries"
+  | "crossReferences"
+  | "wordStudies"
+  | "dictionary"
+  | "translations"
+  | "interlinear"
+  | "topics"
+  | "verseReferences"
+  | "studyTools"
+  | "prologue";
+
+export type TabKey = ResourceSectionKey;
 
 export type VerseActionTarget = {
   book: string;
@@ -176,6 +191,19 @@ export interface EditNoteDialogProps {
   onDelete?: () => void;
 }
 
+export interface ActionButtonProps {
+  icon: LucideIcon;
+  title: string;
+  description?: string;
+  onClick: () => void;
+  /**
+   * How many entries this action leads to, when known. Rendered as a badge.
+   * Actions whose section is empty are filtered out by the caller before
+   * render, so there is no disabled state here.
+   */
+  count?: number | null;
+}
+
 export interface VerseActionSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -184,9 +212,7 @@ export interface VerseActionSheetProps {
   labels: Record<string, string>;
   onExplain: () => void;
   onStartLab: (stage: LabStage) => void;
-  onOpenResources: (
-    tab: "commentaries" | "crossReferences" | "translations",
-  ) => void;
+  onOpenResources: (tab: ResourceSectionKey) => void;
   onDevotional: () => void;
   onStudyTools: () => void;
   onStrongs: () => void;
@@ -245,6 +271,12 @@ export interface BibleReaderBodyProps {
   highlights: Record<string, ReaderHighlight>;
   favorites: Set<string>;
   verseNotes: Record<string, string>;
+  /**
+   * True while a verse overlay (action sheet, explanation drawer, note or
+   * highlight dialog) is open. The floating verse toolbar is hidden then, so it
+   * never floats on top of — or behind — the panel covering the same verse.
+   */
+  verseToolbarHidden: boolean;
   chapterRefs: MutableRefObject<Record<string, HTMLDivElement>>;
   verseRefs: MutableRefObject<Record<string, HTMLSpanElement | null>>;
   loading: boolean;

@@ -84,10 +84,10 @@ export function useJournalPrompts() {
 
   const filteredPrompts = useMemo(
     () => prompts.filter((item) => {
-      if (search && !item.prompt.toLowerCase().includes(search.toLowerCase())) return false;
+      if (search && !item.text.toLowerCase().includes(search.toLowerCase())) return false;
       if (category && item.category !== category) return false;
       if (filterBook && item.bookName !== filterBook) return false;
-      if (filterChapter && item.chapter !== Number(filterChapter)) return false;
+      if (filterChapter && Number(item.chapter) !== Number(filterChapter)) return false;
       return true;
     }),
     [prompts, search, category, filterBook, filterChapter],
@@ -101,7 +101,7 @@ export function useJournalPrompts() {
 
   const handleChapterChange = useCallback((v: string) => {
     setFormData((prev) => ({ ...prev, chapter: v, verseNumber: "" }));
-    if (v && formData.bookName) { setVerses(getVersesCountForChapter(formData.bookName, Number(v))); } else { setVerses([]); }
+    if (v && formData.bookName) { setVerses(getVersesCountForChapter(formData.bookName, Number(v)) as any); } else { setVerses([]); }
   }, [formData.bookName]);
 
   return {

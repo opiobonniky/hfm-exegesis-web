@@ -29,9 +29,9 @@ export function VerifyFormPanel({ backToLoginLabel, verifyEmailLabel, enterCodeL
 
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <AuthHighlightText to="/login">
-              <ArrowLeft className="w-4 h-4" />
-            </AuthHighlightText>
+             <AuthHighlightText text="Go back to login">
+               <ArrowLeft className="w-4 h-4" />
+             </AuthHighlightText>
             <h1 className="text-3xl font-bold font-[family-name:var(--font-heading)] tracking-tight">
               {verifyEmailLabel}
             </h1>

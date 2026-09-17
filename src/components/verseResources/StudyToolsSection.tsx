@@ -1,7 +1,7 @@
 import React from "react";
 import { FileText } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { ResourceCard, SectionLabel } from "./shared";
+import { ResourceCard } from "./shared";
 import { STUDY_TOOL_LABELS, STUDY_TOOL_COLORS } from "./constants";
 import type { StudyToolResource } from "@/services/verseResourcesApi";
 
@@ -13,13 +13,7 @@ export function StudyToolsSection({
   if (!tools || tools.length === 0) return null;
 
   return (
-    <div className="mb-6">
-      <SectionLabel
-        icon={<FileText className="w-3.5 h-3.5" />}
-        label="Study Tools"
-        color="#8B5CF6"
-        count={tools.length}
-      />
+    <div>
       <div className="space-y-2.5">
         {tools.map((tool) => {
           const toolColor = STUDY_TOOL_COLORS[tool.toolType] || "#8B5CF6";

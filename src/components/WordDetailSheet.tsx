@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -106,8 +107,8 @@ export function WordDetailSheet({
 
   // ── Derive entry & display values (MUST be before any useCallback that references them) ──
   const entry: (StrongsEntry & { adminExplanation?: string | null; verseCount?: number; verseReferences?: VerseRef[] | null }) | null =
-    wordEntry || fetchedEntry
-      ? { ...(wordEntry || {}), ...(fetchedEntry || {}) }
+    (wordEntry || fetchedEntry)
+      ? { ...(wordEntry || {}), ...(fetchedEntry || {}) } as any
       : null;
 
   // Derive display values

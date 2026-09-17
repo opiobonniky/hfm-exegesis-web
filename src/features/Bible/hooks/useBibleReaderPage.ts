@@ -22,6 +22,7 @@ import { hasSeenBookOverview } from "../services/bookOverviewSeen";
 import { getVerseExplanation } from "../services/verseExplanation";
 import type {
   LabStage,
+  ResourceSectionKey,
   VerseExplanationData,
   VerseActionTarget,
 } from "../types";
@@ -457,7 +458,7 @@ export function useBibleReaderPage() {
   );
 
   const handleActionResources = useCallback(
-    (tab: "commentaries" | "crossReferences" | "translations") => {
+    (tab: ResourceSectionKey) => {
       navigate(actionUrl("/verse-resources", { tab }));
     },
     [actionUrl, navigate],
@@ -985,7 +986,7 @@ export function useBibleReaderPage() {
       handleActionLab,
       handleActionResources,
       openDevotional: () => navigate(actionUrl("/daily-devotions")),
-      openStudyTools: () => navigate(actionUrl("/verse-resources")),
+      openStudyTools: () => navigate(actionUrl("/verse-resources", { tab: "studyTools" })),
       openStrongs: () => navigate(actionUrl("/strongs-dictionary")),
       openTrivia: () => navigate(actionUrl("/trivia")),
       handleActionListen,

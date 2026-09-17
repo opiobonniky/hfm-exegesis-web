@@ -50,11 +50,11 @@ export function useSearchPage() {
     () => results.filter((r): r is SearchResult => !!(r as SearchResult)?.book_name),
     [results],
   );
-  const sectionHeadings = useSearchSectionHeadings(
-    bibleResults,
-    translation,
-    t?.lang,
-  );
+   const sectionHeadings = useSearchSectionHeadings(
+      bibleResults,
+      translation,
+      (t as any)?.lang || "en",
+    );
   const scopeLocked = isFree && (scope === "topics" || scope === "lemma");
   const hasQuery = query.trim().length >= 3;
   const showSkeleton = loading && hasQuery && results.length === 0;

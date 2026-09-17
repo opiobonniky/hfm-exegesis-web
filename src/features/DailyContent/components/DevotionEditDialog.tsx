@@ -74,7 +74,7 @@ export function DevotionEditDialog({ open, onOpenChange, editState, onChange, on
           <div className="grid grid-cols-3 gap-4">
             <div className="space-y-1.5">
               <Label>{t.dailyVerse?.book || "Book"}</Label>
-              <Input value={local.book} onChange={(e) => set("book", e.target.value)} placeholder={t.dailyVerse?.selectBook || "e.g. Psalms"} />
+              <Input value={local.bookName} onChange={(e) => set("bookName", e.target.value)} placeholder={t.dailyVerse?.selectBook || "e.g. Psalms"} />
             </div>
             <div className="space-y-1.5">
               <Label>{t.dailyVerse?.chapter || "Chapter"}</Label>

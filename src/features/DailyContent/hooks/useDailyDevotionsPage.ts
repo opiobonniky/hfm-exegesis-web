@@ -146,8 +146,8 @@ export function useDailyDevotionsPage() {
   const emptyMessage = t.devotions?.noDevotions || "No devotions found";
   const addLabel = t.devotions?.addDevotion || "Add Devotion";
   const paginationLabels = {
-    page: t.common?.page || "Page",
-    of: t.common?.of || "of",
+    page: (t as any).common?.page || "Page",
+    of: (t as any).common?.of || "of",
     results: "results",
   };
 

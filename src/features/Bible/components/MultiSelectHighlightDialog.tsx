@@ -68,11 +68,11 @@ export default function MultiSelectHighlightDialog({
         </div>
 
         <div className="flex flex-col gap-2.5">
-          {VERSE_HIGHLIGHT_COLOR_GROUPS.map((group) => {
-            const colors = group.ids
-              .map((id) => VERSE_HIGHLIGHT_COLORS.find((c) => c.id === id))
-              .filter(Boolean) as typeof VERSE_HIGHLIGHT_COLORS;
-            return (
+            {VERSE_HIGHLIGHT_COLOR_GROUPS.map((group) => {
+              const colors = group.ids
+                .map((id) => VERSE_HIGHLIGHT_COLORS.find((c) => c.id === id))
+                .filter(Boolean) as any[];
+              return (
               <div key={group.label} className="flex flex-col gap-1">
                 <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                   {group.label}

@@ -6,6 +6,7 @@ import { adminApi } from "../services/adminApi";
 import { BookPrologueDetailData } from "../types";
 
 
+export type BookPrologueDetail = BookPrologueDetailData;
 export function useBookPrologueDetail() {
   const { bookName } = useParams<{ bookName: string }>();
   const navigate = useNavigate();

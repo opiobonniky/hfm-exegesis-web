@@ -23,7 +23,7 @@ export function RegisterStepButtons({ backLabel, submitLabel, isLoading, onBack 
         disabled={isLoading}
         className="flex-1 h-12 rounded-2xl bg-primary text-primary-foreground font-bold text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-all disabled:opacity-50"
       >
-        {isLoading ? <AuthLoadingSpinner size="sm" /> : submitLabel}
+        {isLoading ? <AuthLoadingSpinner /> : submitLabel}
       </button>
     </div>
   );

@@ -9,7 +9,6 @@ import { hexToRgba } from "../utils"; // Assuming this helper is moved to utils
 
 interface MobileNavMenuProps {
   mobileMenuOpen: boolean;
-  mobileMenuOpen: boolean;
   setMobileMenuOpen: (v: boolean) => void;
   menuPanelRef: React.RefObject<HTMLDivElement | null>;
   expandedMobileSection: string | null;

@@ -55,7 +55,7 @@ export function ReadingPlanCard({ plan, isRtl, t, onPress, onDelete }: Props) {
         </div>
       </div>
       <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
-        <span className="flex items-center gap-1"><Calendar className="w-3 h-3" />{plan.totalDays || plan.total_days || 0} days</span>
+         <span className="flex items-center gap-1"><Calendar className="w-3 h-3" />{plan.totalDays || 0} days</span>
         {started && <span>{progress}% complete</span>}
       </div>
     </div>

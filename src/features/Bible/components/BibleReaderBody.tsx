@@ -28,6 +28,7 @@ export default function BibleReaderBody({
   highlights,
   favorites,
   verseNotes,
+  verseToolbarHidden,
   chapterRefs,
   verseRefs,
   loading,
@@ -124,6 +125,7 @@ export default function BibleReaderBody({
                 highlights={highlights}
                 favorites={favorites}
                 verseNotes={verseNotes}
+                toolbarHidden={verseToolbarHidden}
                 onToggleVerse={onToggleVerse}
                 onToggleHighlight={onToggleHighlight}
                 onToggleFavorite={onToggleFavorite}

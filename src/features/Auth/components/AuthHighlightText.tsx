@@ -4,8 +4,14 @@
  */
 interface AuthHighlightTextProps {
   text: string;
+  children?: React.ReactNode;
 }
 
-export function AuthHighlightText({ text }: AuthHighlightTextProps) {
-  return <span className="text-primary">{text}</span>;
+export function AuthHighlightText({ text, children }: AuthHighlightTextProps) {
+  return (
+    <span className="text-primary flex items-center gap-1">
+      {children}
+      {text}
+    </span>
+  );
 }

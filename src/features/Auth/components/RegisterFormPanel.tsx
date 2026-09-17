@@ -24,7 +24,7 @@ export function RegisterFormPanel({ createAccountLabel, haveAccountLabel, loginL
           <AuthAccountLink to="/login" label={loginLabel} />
         </p>
 
-        <AuthStepIndicator step={step} totalSteps={2} />
+         <AuthStepIndicator steps={2} current={step} />
 
         {children}
       </div>

@@ -7,7 +7,7 @@ interface TierInfo {
 }
 
 interface SowerTiersGridProps {
-  billingInterval: string;
+  billingInterval: "month" | "year";
   isPaying: boolean;
   isLegacySower: boolean;
   isCovenantSower: boolean;

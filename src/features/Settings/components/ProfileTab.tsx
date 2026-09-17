@@ -69,7 +69,7 @@ export function ProfileTab({ profile, isPayingUser, tierLabel, expiresLabel, sav
         </div>
         <Button onClick={onSaveProfile} disabled={saving} className="bg-primary hover:bg-primary/90">
           {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-          {saving ? "Saving..." : t.settings?.saveProfile || "Save Profile"}
+           {saving ? "Saving..." : (t as any).settings?.saveProfile || "Save Profile"}
         </Button>
       </div>
       <div className="rounded-2xl bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-950/40 dark:to-purple-950/40 border border-violet-200 dark:border-violet-800/40 p-4 sm:p-6">

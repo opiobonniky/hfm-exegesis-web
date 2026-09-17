@@ -18,6 +18,12 @@ interface ChapterContentProps {
   highlights: Record<string, ReaderHighlight>;
   favorites: Set<string>;
   verseNotes: Record<string, string>;
+  /**
+   * Hides the floating verse toolbar. Set while a verse overlay (action sheet,
+   * explanation drawer, note/highlight dialog) is open, so the toolbar never
+   * renders on top of the panel that is already acting on the same verse.
+   */
+  toolbarHidden?: boolean;
   onToggleVerse: (key: string) => void;
   onToggleHighlight: (
     book: string,
@@ -40,6 +46,7 @@ export default function ChapterContent({
   highlights,
   favorites,
   verseNotes,
+  toolbarHidden = false,
   onToggleVerse,
   onToggleHighlight,
   onToggleFavorite,
@@ -194,41 +201,43 @@ export default function ChapterContent({
                               {"\u00a0"}
                               {verse.text}
                             </span>
-                            <span
-                              className={cn(
-                                "absolute -top-11 start-0 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-all duration-200 pointer-events-none translate-y-1 group-hover:translate-y-0 group-focus-within:translate-y-0",
-                                "z-[70]",
-                                isSelected &&
-                                  "max-sm:opacity-100 max-sm:translate-y-0",
-                              )}
-                            >
-                              <span className="pointer-events-auto block">
-                                <VerseToolbar
-                                  verseKey={key}
-                                  book={ch.book}
-                                  chapter={ch.chapter}
-                                  verse={verse.verse}
-                                  isFavorited={isFavorited}
-                                  currentHighlight={highlight?.colorId}
-                                  onHighlight={onToggleHighlight}
-                                  onFavorite={onToggleFavorite}
-                                  onExplain={() =>
-                                    onExplainVerse(
-                                      ch.book,
-                                      ch.chapter,
-                                      verse.verse,
-                                    )
-                                  }
-                                  onMore={() =>
-                                    (onOpenVerseActions ?? onExplainVerse)(
-                                      ch.book,
-                                      ch.chapter,
-                                      verse.verse,
-                                    )
-                                  }
-                                />
+                            {!toolbarHidden && (
+                              <span
+                                className={cn(
+                                  "absolute -top-11 start-0 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-all duration-200 pointer-events-none translate-y-1 group-hover:translate-y-0 group-focus-within:translate-y-0",
+                                  "z-[70]",
+                                  isSelected &&
+                                    "max-sm:opacity-100 max-sm:translate-y-0",
+                                )}
+                              >
+                                <span className="pointer-events-auto block">
+                                  <VerseToolbar
+                                    verseKey={key}
+                                    book={ch.book}
+                                    chapter={ch.chapter}
+                                    verse={verse.verse}
+                                    isFavorited={isFavorited}
+                                    currentHighlight={highlight?.colorId}
+                                    onHighlight={onToggleHighlight}
+                                    onFavorite={onToggleFavorite}
+                                    onExplain={() =>
+                                      onExplainVerse(
+                                        ch.book,
+                                        ch.chapter,
+                                        verse.verse,
+                                      )
+                                    }
+                                    onMore={() =>
+                                      (onOpenVerseActions ?? onExplainVerse)(
+                                        ch.book,
+                                        ch.chapter,
+                                        verse.verse,
+                                      )
+                                    }
+                                  />
+                                </span>
                               </span>
-                            </span>
+                            )}
                             {note && (
                               <span className="verse-note-in ms-6 mt-2 flex items-start gap-2 rounded-lg border border-border/50 bg-muted/40 px-3 py-2 font-sans text-xs not-italic leading-relaxed text-muted-foreground">
                                 <StickyNote

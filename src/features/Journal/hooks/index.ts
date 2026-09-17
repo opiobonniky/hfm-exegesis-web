@@ -3,4 +3,5 @@ export { useJournalPrompts } from "./useJournalPrompts";
 export { useJournalEntry } from "./useJournalEntry";
 export { useJournalDetail } from "./useJournalDetail";
 export { useJournalTemplatesPage } from "./useJournalTemplatesPage";
-export type { JournalTemplate } from "./useJournalTemplatesPage";
+// Removed duplicate export of JournalTemplate
+

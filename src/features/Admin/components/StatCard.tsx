@@ -8,7 +8,7 @@ interface Props {
   value: string | number;
   icon: LucideIcon;
   color: string;
-  gradient: string;
+  gradient?: string;
 }
 
 // color value is a Tailwind utility token like "bg-primary/10 text-primary".

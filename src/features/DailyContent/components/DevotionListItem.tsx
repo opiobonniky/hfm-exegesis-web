@@ -54,11 +54,11 @@ export function DevotionListItem({ item, isSelected, onSelect, onEdit, onDelete,
           </div>
         )}
       </div>
-      {item.isPublished && (
-        <span className="inline-block mt-2 text-[10px] px-2 py-0.5 rounded-full bg-green-100 text-green-700 font-medium">
-          {t.common?.published || "Published"}
-        </span>
-      )}
+          {item.isPublished && (
+            <span className="inline-block mt-2 text-[10px] px-2 py-0.5 rounded-full bg-green-100 text-green-700 font-medium">
+              {(t as any).common?.published || "Published"}
+            </span>
+          )}
     </div>
   );
 }

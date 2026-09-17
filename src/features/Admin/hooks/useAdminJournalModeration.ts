@@ -4,6 +4,8 @@ import { useToast } from "@/hooks/use-toast";
 import { adminApi } from "../services/adminApi";
 import { useNavigate } from "react-router-dom";
 import type { JournalModerationEntry } from "../types";
+export type { JournalModerationEntry };
+
 
 export function useAdminJournalModeration() {
   const { toast } = useToast();

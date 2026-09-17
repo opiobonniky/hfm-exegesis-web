@@ -9,7 +9,7 @@ import { CharCount } from "./CharCount";
 const BACKGROUND_MAX = 10000;
 
 export function AddExplanationStudyForm(props: AddExplanationStudyFormProps) {
-  const { introduction, backgroundAuthor, backgroundBook, backgroundContext, wordStudies, updateNested, addWordStudy, removeWordStudy, updateWordStudy } = props;
+  const { introduction, backgroundAuthor, backgroundBook, backgroundContext, wordStudies, updateNested, addWordStudy, removeWordStudy, updateWordStudy, updateField } = props;
   const h = {
     form: {
       studyMetadata: { introduction, backgroundAuthor, backgroundBook, backgroundContext },
@@ -19,7 +19,7 @@ export function AddExplanationStudyForm(props: AddExplanationStudyFormProps) {
     addWordStudy,
     removeWordStudy,
     updateWordStudy,
-    updateField: () => undefined,
+    updateField,
   };
   return (
     <div className="space-y-8">
