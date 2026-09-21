@@ -4,6 +4,7 @@ import React, { createContext, useContext, useEffect, useState, useCallback, use
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
 import { sendPostRequest } from "@/services/api";
+import { enableWebPush, disableWebPush, syncPushTokenIfPermitted } from "@/services/pushService";
 
 export interface UserInfo {
   id?: string;
@@ -126,6 +127,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       setUserInfoState(user);
       // Fetch subscription status on login
       fetchSubscriptionStatus();
+      // Re-point any existing push token at the just-logged-in user.
+      // Only if permission was already granted — never prompts from here.
+      void syncPushTokenIfPermitted();
     } else {
       localStorage.removeItem(TOKEN_KEY);
       localStorage.removeItem(USER_KEY);
@@ -133,6 +137,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       setUserInfoState(null);
       setSubscriptionTier("free");
       setAccessExpiresAt(null);
+      // Best-effort: remove this device's push token from the backend so the
+      // previous user stops receiving pushes on shared computers.
+      void disableWebPush();
     }
   }, [fetchSubscriptionStatus]);
 

@@ -7,3 +7,4 @@ export {
   NotificationCardContent,
 } from "./NotificationSettingsLayout";
 export { NotificationSettingsLoading } from "./NotificationSettingsLoading";
+export { PushNotificationCard } from "./PushNotificationCard";

@@ -8,6 +8,7 @@ import {
   NotificationTimePicker,
   NotificationCardContent,
   NotificationSettingsLoading,
+  PushNotificationCard,
 } from "../components";
 
 export default function NotificationSettings() {
@@ -37,7 +38,16 @@ export default function NotificationSettings() {
         <NotificationToggle label="Devotion Reminder" desc="Get reminded to read your daily devotion" checked={h.settings.devotionReminder} onToggle={() => h.handleToggle("devotionReminder")} />
         <NotificationToggle label="Streak Reminder" desc="Don't break your reading streak" checked={h.settings.streakReminder} onToggle={() => h.handleToggle("streakReminder")} />
         <NotificationToggle label="Email Notifications" desc="Receive notifications via email" checked={h.settings.emailNotifications} onToggle={() => h.handleToggle("emailNotifications")} />
-        <NotificationToggle label="Push Notifications" desc="Receive push notifications on your device" checked={h.settings.pushNotifications} onToggle={() => h.handleToggle("pushNotifications")} />
+        <PushNotificationCard
+          supported={h.push.supported}
+          permission={h.push.permission}
+          enabled={h.push.enabled}
+          busy={h.pushBusy}
+          checked={h.settings.pushNotifications}
+          onEnable={h.handleEnablePush}
+          onDisable={h.handleDisablePush}
+          onTest={h.handleTestPush}
+        />
         <NotificationTimePicker label="Reminder Time" value={h.settings.reminderTime} onChange={(v) => h.updateSettings({ reminderTime: v })} />
       </NotificationCardContent>
     </NotificationSettingsLayout>
