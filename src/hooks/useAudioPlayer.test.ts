@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { renderHook, act, waitFor } from "@testing-library/react";
+import { renderHook, act, waitFor, cleanup } from "@testing-library/react";
 import { useAudioPlayer } from "./useAudioPlayer";
 
 // ── Mock Data ──
@@ -40,7 +40,10 @@ function createMockAudio() {
   const el = {
     play: vi.fn().mockResolvedValue(undefined),
     pause: vi.fn(),
+    load: vi.fn(),
     src: "",
+    currentTime: 0,
+    preload: "",
     playbackRate: 1,
     volume: 1,
     get onended() { return onendedCb; },
@@ -82,9 +85,9 @@ function fireOnerror() {
 }
 
 /** Flush pending microtasks and React state updates */
-async function flush() {
+async function flush(delay = 0) {
   await act(async () => {
-    await new Promise((r) => setTimeout(r, 0));
+    await new Promise((r) => setTimeout(r, delay));
   });
 }
 
@@ -97,9 +100,11 @@ describe("useAudioPlayer", () => {
     setupAudioMock();
     vi.mocked(ttsService.getVoices).mockResolvedValue(MOCK_VOICES);
     vi.mocked(ttsService.speak).mockResolvedValue(new ArrayBuffer(0));
+    vi.mocked(ttsService.isEnabled).mockResolvedValue(true);
   });
 
   afterEach(() => {
+    cleanup();
     vi.unstubAllGlobals();
   });
 
@@ -165,15 +170,15 @@ describe("useAudioPlayer", () => {
       await flush(); // Let verse 0's play() resolve, audioRef set
 
       fireOnended();  // verse 0 → 1
-      await flush();
+      await flush(440);
       expect(result.current.currentVerseIdx).toBe(1);
 
       fireOnended();  // verse 1 → 2
-      await flush();
+      await flush(440);
       expect(result.current.currentVerseIdx).toBe(2);
 
       fireOnended();  // verse 2 → passage complete
-      await flush();
+      await flush(920);
       expect(result.current.passageComplete).toBe(true);
       expect(result.current.isPlaying).toBe(false);
     });
@@ -185,6 +190,20 @@ describe("useAudioPlayer", () => {
       act(() => result.current.startPlayback(MOCK_VERSES, 1));
 
       expect(result.current.currentVerseIdx).toBe(1);
+    });
+
+    it("decodes the current verse and the upcoming prefetch window", async () => {
+      const verses = Array.from({ length: 6 }, (_, index) => ({
+        text: `Prefetch verse ${index + 1}.`,
+      }));
+      const { result } = renderHook(() => useAudioPlayer());
+      await waitFor(() => expect(result.current.ttsEnabled).toBe(true));
+
+      act(() => result.current.startPlayback(verses));
+
+      await waitFor(() => expect(ttsService.speak).toHaveBeenCalledTimes(6));
+      expect(mockAudioEl.load).toHaveBeenCalledTimes(6);
+      act(() => result.current.stopPlayback());
     });
 
     it("stops existing playback before starting new one", async () => {
@@ -349,7 +368,7 @@ describe("useAudioPlayer", () => {
       await flush(); // Let verse 0's play() resolve
 
       fireOnended(); // verse 0 → 1
-      await flush();
+      await flush(440);
 
       act(() => result.current.skipForward()); // forward from 1 → 2
       await flush(); // Let runPlayback process the skip and start verse 2
@@ -365,10 +384,10 @@ describe("useAudioPlayer", () => {
       await flush(); // Let verse 0's play() resolve
 
       fireOnended(); // verse 0 → 1
-      await flush();
+      await flush(440);
 
       fireOnended(); // verse 1 → 2
-      await flush();
+      await flush(440);
 
       act(() => result.current.skipBackward()); // backward from 2 → 1
       await flush(); // Let runPlayback re-enter loop at verse 1
@@ -407,9 +426,9 @@ describe("useAudioPlayer", () => {
       act(() => result.current.startPlayback(MOCK_VERSES));
       await flush();
 
-      fireOnended(); await flush(); // verse 0 → 1
-      fireOnended(); await flush(); // verse 1 → 2
-      fireOnended(); await flush(); // verse 2 → complete
+      fireOnended(); await flush(440); // verse 0 → 1
+      fireOnended(); await flush(440); // verse 1 → 2
+      fireOnended(); await flush(920); // verse 2 → complete
 
       expect(result.current.passageComplete).toBe(true);
       expect(result.current.isPlaying).toBe(false);
@@ -421,9 +440,9 @@ describe("useAudioPlayer", () => {
 
       act(() => result.current.startPlayback(MOCK_VERSES));
       await flush();
-      fireOnended(); await flush();
-      fireOnended(); await flush();
-      fireOnended(); await flush();
+      fireOnended(); await flush(440);
+      fireOnended(); await flush(440);
+      fireOnended(); await flush(920);
       expect(result.current.passageComplete).toBe(true);
 
       act(() => result.current.startPlayback(MOCK_VERSES));
@@ -442,7 +461,7 @@ describe("useAudioPlayer", () => {
       await waitFor(() => expect(result.current.voices.length).toBeGreaterThan(0));
 
       act(() => result.current.startPlayback(SINGLE_VERSE));
-      await flush();
+      await flush(920);
 
       expect(result.current.isPlaying).toBe(false);
       expect(result.current.passageComplete).toBe(true);
@@ -454,7 +473,7 @@ describe("useAudioPlayer", () => {
       await waitFor(() => expect(result.current.voices.length).toBeGreaterThan(0));
 
       act(() => result.current.startPlayback(SINGLE_VERSE));
-      await flush();
+      await flush(920);
 
       expect(result.current.isPlaying).toBe(false);
       expect(result.current.passageComplete).toBe(true);
@@ -469,7 +488,7 @@ describe("useAudioPlayer", () => {
 
       // Fire onerror explicitly instead of onended to test the error path
       fireOnerror();
-      await flush();
+      await flush(920);
 
       expect(result.current.isPlaying).toBe(false);
       expect(result.current.passageComplete).toBe(true);
@@ -583,7 +602,7 @@ describe("useAudioPlayer", () => {
       await flush();
 
       fireOnended();
-      await flush();
+      await flush(440);
 
       expect(result.current.currentVerseIdx).toBe(1);
     });
@@ -652,10 +671,6 @@ describe("useAudioPlayer", () => {
       })));
     });
 
-    afterEach(() => {
-      vi.unstubAllGlobals();
-    });
-
     it("ttsEnabled starts as false when API is offline", () => {
       const { result } = renderHook(() => useAudioPlayer());
       expect(result.current.ttsEnabled).toBe(false);
@@ -713,6 +728,7 @@ describe("useAudioPlayer", () => {
     });
 
     it("cancels Web Speech when component unmounts while playing", async () => {
+      vi.mocked(ttsService.isEnabled).mockResolvedValue(false);
       vi.stubGlobal("speechSynthesis", {
         speak: vi.fn(), // Don't fire onend — keep utterance active
         cancel: vi.fn(),
@@ -721,6 +737,10 @@ describe("useAudioPlayer", () => {
         paused: false,
         getVoices: vi.fn().mockReturnValue([]),
       });
+      vi.stubGlobal("SpeechSynthesisUtterance", vi.fn(() => ({
+        onend: null,
+        onerror: null,
+      })));
       const { result, unmount } = renderHook(() => useAudioPlayer());
       await waitFor(() => expect(result.current.voices.length).toBeGreaterThan(0));
 

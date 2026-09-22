@@ -70,9 +70,38 @@ const normalizeForSpeech = (text: string): string =>
     .trim();
 
 /** How many upcoming verses to keep synthesized and ready in the cache */
-const PREFETCH_AHEAD = 2;
+const PREFETCH_AHEAD = 8;
 /** Maximum number of object URLs kept in the cache before evicting the oldest */
-const CACHE_MAX_ENTRIES = 8;
+const CACHE_MAX_ENTRIES = 12;
+
+/**
+ * Cap on simultaneous synthesis requests. Kokoro-based TTS (Lordsbook) upstream
+ * saturates — and returns 502s — when flooded, so the prefetch window fills
+ * steadily with a bounded number of in-flight verses instead of hammering it.
+ */
+const TTS_MAX_CONCURRENCY = 3;
+
+const ttsQueue: Array<() => void> = [];
+let ttsInFlight = 0;
+
+const runWithTtsConcurrency = (job: () => Promise<void>): Promise<void> =>
+  new Promise((resolve, reject) => {
+    const run = () => {
+      ttsInFlight += 1;
+      job()
+        .then(resolve, reject)
+        .finally(() => {
+          ttsInFlight -= 1;
+          const next = ttsQueue.shift();
+          if (next) next();
+        });
+    };
+    if (ttsInFlight < TTS_MAX_CONCURRENCY) {
+      run();
+    } else {
+      ttsQueue.push(run);
+    }
+  });
 
 const STORAGE_KEYS = {
   speechRate: "exegesis-speech-rate",
@@ -315,16 +344,30 @@ export function useAudioPlayer(): AudioPlayerState & AudioPlayerActions {
 
       const fetchPromise = (async (): Promise<HTMLAudioElement | null> => {
         try {
-          const arrayBuffer = await ttsService.speak(
-            text,
-            selectedVoiceIdRef.current,
-            speechRateRef.current,
-          );
+          const arrayBuffer = await new Promise<ArrayBuffer | null>((resolve) => {
+            void runWithTtsConcurrency(async () => {
+              try {
+                resolve(
+                  await ttsService.speak(
+                    text,
+                    selectedVoiceIdRef.current,
+                    speechRateRef.current,
+                  ),
+                );
+              } catch {
+                resolve(null);
+              }
+            });
+          });
+          if (!arrayBuffer) return null;
           const blob = new Blob([arrayBuffer], { type: "audio/mpeg" });
           const url = URL.createObjectURL(blob);
           const audio = new Audio(url);
           audio.preload = "auto";
           audio.volume = volumeRef.current;
+          // The bytes are already local in a Blob URL. Trigger decoding now so
+          // a prefetched verse can start immediately at the playback boundary.
+          audio.load?.();
 
           const cache = audioCacheRef.current;
           cache.set(keyStr, { audio, url });
@@ -531,8 +574,9 @@ export function useAudioPlayer(): AudioPlayerState & AudioPlayerActions {
       if (epochRef.current !== myEpoch) break;
 
       // Advance to next verse (unless repeat-one mode). A skip already moved
-      // currentIdxRef — the equality check defers to it.
-      if (currentIdxRef.current === idx && repeatModeRef.current !== "one") {
+      // currentIdxRef, so honor it without adding the normal inter-verse pause.
+      const wasRedirected = currentIdxRef.current !== idx;
+      if (!wasRedirected && repeatModeRef.current !== "one") {
         currentIdxRef.current = idx + 1;
       }
 
@@ -541,7 +585,12 @@ export function useAudioPlayer(): AudioPlayerState & AudioPlayerActions {
       // immediately without a pause. Interruptible: stop/skip during the
       // pause must abort it immediately.
       const isLastVerse = idx + 1 >= versesRef.current.length;
-      if (isReadingRef.current && !isPausedRef.current && repeatModeRef.current !== "one") {
+      if (
+        !wasRedirected &&
+        isReadingRef.current &&
+        !isPausedRef.current &&
+        repeatModeRef.current !== "one"
+      ) {
         const pauseMs = versePauseMs(speechRateRef.current, isLastVerse);
         const startEpoch = epochRef.current;
         await new Promise<void>((resolve) => {

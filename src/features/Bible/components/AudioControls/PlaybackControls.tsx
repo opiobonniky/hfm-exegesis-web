@@ -26,26 +26,26 @@ export function PlaybackControls({
   onNext,
 }: PlaybackControlsProps) {
   return (
-    <div className="flex shrink-0 items-center gap-1 sm:gap-1.5">
+    <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
       <button
         type="button"
         onClick={onPrevious}
         disabled={currentVerseIdx === 0}
         aria-label={previousLabel}
-        className="flex h-9 w-9 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
-        <SkipBack className="h-4 w-4" />
+        <SkipBack className="h-3.5 w-3.5" />
       </button>
       <button
         type="button"
         onClick={onTogglePause}
         aria-label={isPaused ? resumeLabel : pauseLabel}
-        className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/20 transition-transform hover:scale-[1.03] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md shadow-primary/20 transition-transform hover:scale-[1.03] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
       >
         {isPaused ? (
-          <Play className="ms-0.5 h-5 w-5" fill="currentColor" />
+          <Play className="ms-0.5 h-4 w-4" fill="currentColor" />
         ) : (
-          <Pause className="h-5 w-5" fill="currentColor" />
+          <Pause className="h-4 w-4" fill="currentColor" />
         )}
       </button>
       <button
@@ -53,9 +53,9 @@ export function PlaybackControls({
         onClick={onNext}
         disabled={currentVerseIdx >= totalVerses - 1}
         aria-label={nextLabel}
-        className="flex h-9 w-9 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
-        <SkipForward className="h-4 w-4" />
+        <SkipForward className="h-3.5 w-3.5" />
       </button>
     </div>
   );

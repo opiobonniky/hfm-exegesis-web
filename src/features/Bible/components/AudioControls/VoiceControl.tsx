@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { ChevronDown, Mic } from "lucide-react";
 import {
   Popover, PopoverContent, PopoverTrigger,
@@ -12,6 +13,8 @@ interface VoiceControlProps {
 }
 
 export function VoiceControl({ voices, selectedVoice, onVoiceChange }: VoiceControlProps) {
+  const [open, setOpen] = useState(false);
+
   return (
     <section className="flex items-center gap-3 rounded-xl border border-border/60 bg-background/70 p-3">
       <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
@@ -21,7 +24,7 @@ export function VoiceControl({ voices, selectedVoice, onVoiceChange }: VoiceCont
         <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
           Reading voice
         </p>
-        <Popover>
+        <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
             <button
               type="button"
@@ -43,6 +46,7 @@ export function VoiceControl({ voices, selectedVoice, onVoiceChange }: VoiceCont
                   key={voice.voiceId}
                   onClick={() => {
                     onVoiceChange(voice);
+                    setOpen(false);
                   }}
                   aria-pressed={selectedVoice?.voiceId === voice.voiceId}
                   className={cn(
