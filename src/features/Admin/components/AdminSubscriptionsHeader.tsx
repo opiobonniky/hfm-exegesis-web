@@ -1,6 +1,7 @@
 // AdminSubscriptionsHeader — header section for admin subscriptions page
 import { CreditCard, RefreshCw, Plus, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   activeTab: string;
@@ -22,12 +23,8 @@ export function AdminSubscriptionsHeader({
           <CreditCard className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
         </div>
         <div className="min-w-0">
-          <h1 className="text-2xl sm:text-3xl font-bold font-[family-name:var(--font-heading)]">
-            Subscription Manager
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Manage subscription tiers and subscribers
-          </p>
+          <h1 className="text-2xl sm:text-3xl font-bold font-[family-name:var(--font-heading)]">{tt("Subscription Manager")}</h1>
+          <p className="text-sm text-muted-foreground">{tt("Manage subscription tiers and subscribers")}</p>
         </div>
       </div>
       {activeTab === "tiers" && (
@@ -43,13 +40,13 @@ export function AdminSubscriptionsHeader({
             ) : (
               <RefreshCw className="w-4 h-4 mr-1" />
             )}
-            <span className="hidden sm:inline">Seed Defaults</span>
-            <span className="sm:hidden">Seed</span>
+            <span className="hidden sm:inline">{tt("Seed Defaults")}</span>
+            <span className="sm:hidden">{tt("Seed")}</span>
           </Button>
           <Button size="sm" onClick={onCreateTier}>
             <Plus className="w-4 h-4 mr-1.5" />
-            <span className="hidden sm:inline">New Tier</span>
-            <span className="sm:hidden">New</span>
+            <span className="hidden sm:inline">{tt("New Tier")}</span>
+            <span className="sm:hidden">{tt("New")}</span>
           </Button>
         </div>
       )}

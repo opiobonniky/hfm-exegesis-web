@@ -10,6 +10,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import type { SubscribedUser } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   user: SubscribedUser | null;
@@ -38,12 +39,12 @@ export function SuspendUserDialog({
             ) : (
               <Ban className="w-5 h-5" />
             )}
-            {isSuspended ? "Unsuspend User" : "Suspend User"}
+            {isSuspended ? tt("Unsuspend User") : tt("Suspend User")}
           </DialogTitle>
           <DialogDescription>
             {isSuspended
-              ? "Restore access for this user."
-              : "This will revoke access for the user immediately."}
+              ? tt("Restore access for this user.")
+              : tt("This will revoke access for the user immediately.")}
           </DialogDescription>
         </DialogHeader>
         <div className="py-2">
@@ -60,9 +61,7 @@ export function SuspendUserDialog({
             onClick={() => onOpenChange(false)}
             disabled={loading}
             className="w-full sm:w-auto"
-          >
-            Cancel
-          </Button>
+          >{tt("Cancel")}</Button>
           <Button
             variant={isSuspended ? "default" : "destructive"}
             onClick={onConfirm}
@@ -71,8 +70,7 @@ export function SuspendUserDialog({
           >
             {loading ? (
               <>
-                <Loader2 className="w-4 h-4 animate-spin" /> Processing...
-              </>
+                <Loader2 className="w-4 h-4 animate-spin" />{tt("Processing...")}</>
             ) : (
               <>
                 {isSuspended ? (
@@ -80,7 +78,7 @@ export function SuspendUserDialog({
                 ) : (
                   <Ban className="w-4 h-4" />
                 )}{" "}
-                {isSuspended ? "Unsuspend" : "Suspend"}
+                {isSuspended ? tt("Unsuspend") : tt("Suspend")}
               </>
             )}
           </Button>

@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/components/languages/languageProvider";
+import { tt } from '@/components/languages/hardcodedTranslate';
 interface BookPickerProps {
   books: { bookNumber: number; bookName: string; maxChapter: number }[];
   selectedBook: string;
@@ -58,7 +59,7 @@ export default function BookPicker({
                 aria-expanded={isExpanded}
               >
                 <BookOpen className="w-3.5 h-3.5 shrink-0" />
-                <span className="truncate">{book.bookName}</span>
+                <span className="truncate">{tt(book.bookName)}</span>
               </button>
               {isExpanded && (
                 <div className="flex flex-wrap gap-1 px-2 py-1 ms-5">
@@ -100,7 +101,7 @@ export default function BookPicker({
             className="ps-8 pe-8 h-9 text-xs"
           />
           {search && (
-            <button type="button" aria-label="Clear book search" onClick={() => setSearch("")} className="absolute end-2 top-1/2 -translate-y-1/2 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+            <button type="button" aria-label={tt("Clear book search")} onClick={() => setSearch("")} className="absolute end-2 top-1/2 -translate-y-1/2 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
               <X className="w-3 h-3 text-muted-foreground" />
             </button>
           )}

@@ -2,6 +2,7 @@
  * AuthFooter — terms and legal text at bottom of Auth pages.
  */
 import { Link } from "react-router-dom";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   termsLabel: string;
@@ -24,8 +25,7 @@ export function AuthFooter({
         {termsLabel}{" "}
         <Link to="/terms" className="text-primary font-bold underline">
           {termsLinkLabel}
-        </Link>{" "}
-        and{" "}
+        </Link>{" "}{tt("and")}{" "}
         <Link to="/privacy" className="text-primary font-bold underline">
           {privacyLinkLabel}
         </Link>

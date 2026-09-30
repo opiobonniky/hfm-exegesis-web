@@ -3,6 +3,7 @@ import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { sendPostRequest } from "@/services/api";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export function useGoogleRegister() {
   const navigate = useNavigate();
@@ -17,7 +18,7 @@ export function useGoogleRegister() {
     setError(""); setLoading(true);
     try {
       const res = await sendPostRequest("auth", "google-register", { firstName, lastName });
-      if (res?.returnCode === 200) { toast({ title: "Welcome!" }); navigate("/"); }
+      if (res?.returnCode === 200) { toast({ title: tt("Welcome!") }); navigate("/"); }
       else { setError(res?.returnMessage || "Registration failed"); }
     } catch { setError("Network error. Please try again."); }
     finally { setLoading(false); }

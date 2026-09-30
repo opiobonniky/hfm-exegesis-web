@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { routes } from "./Routes/routes";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { useSubscription } from "@/hooks/useSubscription";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 const LAST_BIBLE_KEY = "exegesis_last_bible";
 
@@ -35,13 +36,13 @@ interface NavTab {
 
 const NAV_TABS: NavTab[] = [
   {
-    label: "Home",
+    label: tt("Home"),
     icon: Home,
     path: routes.home.path,
     activePaths: [routes.home.path, routes.userDashboard.path],
   },
   {
-    label: "Bible",
+    label: tt("Bible"),
     icon: BookOpen,
     path: routes.bibleLibrary.path,
     activePaths: [
@@ -51,14 +52,14 @@ const NAV_TABS: NavTab[] = [
     ],
   },
   {
-    label: "Lab",
+    label: tt("Lab"),
     icon: Microscope,
     path: routes.dictionary.path,
     activePaths: [routes.dictionary.path, routes.labFlow.path],
     minTier: "legacy_sower",
   },
   {
-    label: "Journal",
+    label: tt("Journal"),
     icon: PenLine,
     path: routes.journal.path,
     activePaths: [

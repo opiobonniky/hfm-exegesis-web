@@ -1,6 +1,7 @@
 import { BookText, FileText, Globe, Plus, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getCategoryLabel } from "../constants";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   hasSearch: boolean;
@@ -38,8 +39,7 @@ export function JournalEmptyState({ hasSearch, currentCategory, isDiscover, onCr
       <p className="text-sm text-muted-foreground dark:text-muted-foreground/70 text-center max-w-sm mb-5">{subtitle}</p>
       {!hasSearch && !isDiscover && (
         <Button onClick={onCreateNew} className="rounded-xl bg-foreground/10 hover:bg-foreground/20 text-foreground gap-2">
-          <Plus className="w-4 h-4" />Create First Entry
-        </Button>
+          <Plus className="w-4 h-4" />{tt("Create First Entry")}</Button>
       )}
     </div>
   );

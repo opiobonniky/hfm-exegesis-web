@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import { TRIVIA_PAGE_SIZE } from "../constants";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   h: {
@@ -28,15 +29,15 @@ export function TriviaUsersTab({ h }: Props) {
         <div className="flex flex-col sm:flex-row gap-2">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input placeholder="Search users..." value={h.perfSearch} onChange={e => { h.setPerfSearch(e.target.value); h.setPerfPage(0); }} className="pl-9 h-9 text-sm" />
+            <Input placeholder={tt("Search users...")} value={h.perfSearch} onChange={e => { h.setPerfSearch(e.target.value); h.setPerfPage(0); }} className="pl-9 h-9 text-sm" />
           </div>
           <Select value={h.perfSortBy} onValueChange={v => { h.setPerfSortBy(v); h.setPerfPage(0); }}>
             <SelectTrigger className="h-9 w-36 text-sm"><SelectValue /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="percentage">Best Score</SelectItem>
-              <SelectItem value="totalAnswered">Most Answers</SelectItem>
-              <SelectItem value="correct">Most Correct</SelectItem>
-              <SelectItem value="lastAnsweredDate">Recent</SelectItem>
+              <SelectItem value="percentage">{tt("Best Score")}</SelectItem>
+              <SelectItem value="totalAnswered">{tt("Most Answers")}</SelectItem>
+              <SelectItem value="correct">{tt("Most Correct")}</SelectItem>
+              <SelectItem value="lastAnsweredDate">{tt("Recent")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -46,17 +47,17 @@ export function TriviaUsersTab({ h }: Props) {
           <Table>
             <TableHeader>
               <TableRow className="bg-muted/30">
-                <TableHead>User</TableHead>
-                <TableHead className="text-center">Answered</TableHead>
-                <TableHead className="text-center">Correct</TableHead>
-                <TableHead className="text-center">Incorrect</TableHead>
-                <TableHead>Score</TableHead>
-                <TableHead>Last Active</TableHead>
+                <TableHead>{tt("User")}</TableHead>
+                <TableHead className="text-center">{tt("Answered")}</TableHead>
+                <TableHead className="text-center">{tt("Correct")}</TableHead>
+                <TableHead className="text-center">{tt("Incorrect")}</TableHead>
+                <TableHead>{tt("Score")}</TableHead>
+                <TableHead>{tt("Last Active")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {h.userPerformance.length === 0 ? (
-                <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">No data yet</TableCell></TableRow>
+                <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">{tt("No data yet")}</TableCell></TableRow>
               ) : h.userPerformance.map(u => (
                 <TableRow key={u.userId} className="border-border/40">
                   <TableCell>
@@ -82,7 +83,7 @@ export function TriviaUsersTab({ h }: Props) {
         </div>
         {h.perfTotal > TRIVIA_PAGE_SIZE && (
           <div className="flex items-center justify-between px-4 py-3 border-t border-border/40">
-            <p className="text-xs text-muted-foreground">Page {h.perfPage + 1} of {Math.ceil(h.perfTotal / TRIVIA_PAGE_SIZE)}</p>
+            <p className="text-xs text-muted-foreground">{tt("Page")}{h.perfPage + 1} of {Math.ceil(h.perfTotal / TRIVIA_PAGE_SIZE)}</p>
             <div className="flex gap-1">
               <Button variant="outline" size="icon" className="h-7 w-7" disabled={h.perfPage === 0} onClick={() => h.setPerfPage(p => p - 1)}><ChevronLeft className="w-3 h-3" /></Button>
               <Button variant="outline" size="icon" className="h-7 w-7" disabled={(h.perfPage + 1) * TRIVIA_PAGE_SIZE >= h.perfTotal} onClick={() => h.setPerfPage(p => p + 1)}><ChevronRight className="w-3 h-3" /></Button>

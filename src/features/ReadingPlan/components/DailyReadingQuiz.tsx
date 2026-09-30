@@ -1,6 +1,7 @@
 import { Brain, CheckCircle, XCircle, RotateCcw, PenLine, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface QuizQuestion { id: number; question: string; options: string[]; correctAnswer: number; }
 
@@ -36,14 +37,14 @@ export default function DailyReadingQuiz({
           <Star className="w-8 h-8 text-primary" />
         </div>
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">Understanding check</p>
-          <h2 className="mt-1 text-xl font-bold">Quiz complete</h2>
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">{tt("Understanding check")}</p>
+          <h2 className="mt-1 text-xl font-bold">{tt("Quiz complete")}</h2>
         </div>
         <p className="text-4xl font-black tracking-tight text-primary">{correctCount}<span className="text-xl text-muted-foreground">/{questions.length}</span></p>
-        <p className="text-sm text-muted-foreground">You answered {pct}% correctly.</p>
+        <p className="text-sm text-muted-foreground">{tt("You answered")}{pct}{tt("% correctly.")}</p>
         <div className="flex items-center justify-center gap-2">
-          <Button variant="outline" size="sm" onClick={onReview} className="gap-1.5"><PenLine className="w-3.5 h-3.5" /> Review</Button>
-          <Button variant="outline" size="sm" onClick={onRetry} className="gap-1.5"><RotateCcw className="w-3.5 h-3.5" /> Retry</Button>
+          <Button variant="outline" size="sm" onClick={onReview} className="gap-1.5"><PenLine className="w-3.5 h-3.5" />{tt("Review")}</Button>
+          <Button variant="outline" size="sm" onClick={onRetry} className="gap-1.5"><RotateCcw className="w-3.5 h-3.5" />{tt("Retry")}</Button>
         </div>
       </section>
     );
@@ -56,8 +57,8 @@ export default function DailyReadingQuiz({
           <Brain className="h-5 w-5" />
         </div>
         <div className="min-w-0 flex-1">
-          <h2 className="text-sm font-bold">Check your understanding</h2>
-          <p className="text-xs text-muted-foreground">Question {currentQ + 1} of {questions.length}</p>
+          <h2 className="text-sm font-bold">{tt("Check your understanding")}</h2>
+          <p className="text-xs text-muted-foreground">{tt("Question")}{currentQ + 1} of {questions.length}</p>
         </div>
         <span className="rounded-full bg-muted px-2.5 py-1 text-xs font-bold text-muted-foreground">{Math.round(((currentQ + 1) / questions.length) * 100)}%</span>
       </div>
@@ -90,7 +91,7 @@ export default function DailyReadingQuiz({
       </div>
       {showResult && (
         <Button onClick={onNext} className="w-full" size="sm">
-          {currentQ < questions.length - 1 ? "Next Question" : "Finish Quiz"}
+          {currentQ < questions.length - 1 ? tt("Next Question") : tt("Finish Quiz")}
         </Button>
       )}
     </section>

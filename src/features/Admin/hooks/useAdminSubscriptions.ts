@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { adminApi } from "../services/adminApi";
 import type { SubscriptionTier, SubscribedUser, SubscriptionsSummary } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export function useAdminSubscriptions() {
   const { toast } = useToast();
@@ -33,7 +34,7 @@ export function useAdminSubscriptions() {
     try {
       const res = await adminApi.request("admin", "subscription-tiers/list", {});
       if (res?.returnCode === 200 && res?.returnData?.tiers) setTiers(res.returnData.tiers);
-    } catch { toast({ title: "Failed to load tiers", variant: "destructive" }); }
+    } catch { toast({ title: tt("Failed to load tiers"), variant: "destructive" }); }
     finally { setTiersLoading(false); }
   }, [toast]);
 
@@ -45,7 +46,7 @@ export function useAdminSubscriptions() {
         if (res?.returnData?.subscribedUsers) setSubscribers(res.returnData.subscribedUsers);
         if (res?.returnData?.summary) setSummary(res.returnData.summary);
       }
-    } catch { toast({ title: "Failed to load subscribers", variant: "destructive" }); }
+    } catch { toast({ title: tt("Failed to load subscribers"), variant: "destructive" }); }
     finally { setSubsLoading(false); }
   }, [toast]);
 
@@ -63,7 +64,7 @@ export function useAdminSubscriptions() {
   }, []);
 
   const saveTier = useCallback(async () => {
-    if (!tierForm.name?.trim()) { toast({ title: "Name is required", variant: "destructive" }); return; }
+    if (!tierForm.name?.trim()) { toast({ title: tt("Name is required"), variant: "destructive" }); return; }
     setTierSaving(true);
     try {
       const payload = { ...tierForm, features: tierForm.features ? tierForm.features.split("\n").map((f: string) => f.trim()).filter(Boolean) : [] };
@@ -71,8 +72,8 @@ export function useAdminSubscriptions() {
         ? await adminApi.request("admin", "subscription-tiers/update", payload)
         : await adminApi.request("admin", "subscription-tiers/create", payload);
       if (res?.returnCode === 200) { toast({ title: tierForm.id ? "Tier updated" : "Tier created" }); setTierDialog(false); loadTiers(); }
-      else { toast({ title: "Failed", description: res?.returnMessage, variant: "destructive" }); }
-    } catch { toast({ title: "Error saving tier", variant: "destructive" }); }
+      else { toast({ title: tt("Failed"), description: res?.returnMessage, variant: "destructive" }); }
+    } catch { toast({ title: tt("Error saving tier"), variant: "destructive" }); }
     finally { setTierSaving(false); }
   }, [tierForm, toast, loadTiers]);
 
@@ -80,16 +81,16 @@ export function useAdminSubscriptions() {
     if (!deleteTier) return;
     try {
       const res = await adminApi.request("admin", "subscription-tiers/delete", { id: deleteTier });
-      if (res?.returnCode === 200) { toast({ title: "Tier deleted" }); setDeleteTier(null); loadTiers(); }
-    } catch { toast({ title: "Delete failed", variant: "destructive" }); }
+      if (res?.returnCode === 200) { toast({ title: tt("Tier deleted") }); setDeleteTier(null); loadTiers(); }
+    } catch { toast({ title: tt("Delete failed"), variant: "destructive" }); }
   }, [deleteTier, toast, loadTiers]);
 
   const handleSeed = useCallback(async () => {
     setSeeding(true);
     try {
       const res = await adminApi.request("admin", "subscription-tiers/seed", {});
-      if (res?.returnCode === 200) { toast({ title: "Default tiers seeded" }); loadTiers(); }
-    } catch { toast({ title: "Seed failed", variant: "destructive" }); }
+      if (res?.returnCode === 200) { toast({ title: tt("Default tiers seeded") }); loadTiers(); }
+    } catch { toast({ title: tt("Seed failed"), variant: "destructive" }); }
     finally { setSeeding(false); }
   }, [toast, loadTiers]);
 
@@ -97,8 +98,8 @@ export function useAdminSubscriptions() {
     setSyncing(true);
     try {
       const res = await adminApi.request("admin", "sync-stripe-users", {});
-      if (res?.returnCode === 200) { toast({ title: "Stripe sync completed", description: res.returnMessage }); loadSubscribers(); }
-    } catch { toast({ title: "Sync failed", variant: "destructive" }); }
+      if (res?.returnCode === 200) { toast({ title: tt("Stripe sync completed"), description: res.returnMessage }); loadSubscribers(); }
+    } catch { toast({ title: tt("Sync failed"), variant: "destructive" }); }
     finally { setSyncing(false); }
   }, [toast, loadSubscribers]);
 
@@ -108,7 +109,7 @@ export function useAdminSubscriptions() {
     try {
       const res = await adminApi.request("admin", "subscriptions/suspend", { userId: suspendDialog.id, suspend: !suspendDialog.isSuspended });
       if (res?.returnCode === 200) { toast({ title: suspendDialog.isSuspended ? "User unsuspended" : "User suspended" }); setSuspendDialog(null); loadSubscribers(); }
-    } catch { toast({ title: "Failed to update", variant: "destructive" }); }
+    } catch { toast({ title: tt("Failed to update"), variant: "destructive" }); }
     finally { setSuspendLoading(false); }
   }, [suspendDialog, toast, loadSubscribers]);
 
@@ -120,9 +121,9 @@ export function useAdminSubscriptions() {
         userId: manageDialog.id,
         ...data,
       });
-      if (res?.returnCode === 200) { toast({ title: "Subscription updated" }); setManageDialog(null); loadSubscribers(); }
-      else { toast({ title: "Update failed", description: res?.returnMessage, variant: "destructive" }); }
-    } catch { toast({ title: "Error updating subscription", variant: "destructive" }); }
+      if (res?.returnCode === 200) { toast({ title: tt("Subscription updated") }); setManageDialog(null); loadSubscribers(); }
+      else { toast({ title: tt("Update failed"), description: res?.returnMessage, variant: "destructive" }); }
+    } catch { toast({ title: tt("Error updating subscription"), variant: "destructive" }); }
     finally { setManageLoading(false); }
   }, [manageDialog, toast, loadSubscribers]);
 
@@ -131,9 +132,9 @@ export function useAdminSubscriptions() {
     setRefundLoading(true);
     try {
       const res = await adminApi.request("admin", "subscriptions/refund", { userId: refundDialog.id, reason });
-      if (res?.returnCode === 200) { toast({ title: "Refund processed", description: "Subscription cancelled" }); setRefundDialog(null); loadSubscribers(); }
-      else { toast({ title: "Refund failed", description: res?.returnMessage, variant: "destructive" }); }
-    } catch { toast({ title: "Error processing refund", variant: "destructive" }); }
+      if (res?.returnCode === 200) { toast({ title: tt("Refund processed"), description: tt("Subscription cancelled") }); setRefundDialog(null); loadSubscribers(); }
+      else { toast({ title: tt("Refund failed"), description: res?.returnMessage, variant: "destructive" }); }
+    } catch { toast({ title: tt("Error processing refund"), variant: "destructive" }); }
     finally { setRefundLoading(false); }
   }, [refundDialog, toast, loadSubscribers]);
 

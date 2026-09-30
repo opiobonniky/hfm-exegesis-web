@@ -1,6 +1,7 @@
 import React from "react";
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 // ── ResourceCard ──────────────────────────────────────────────────────────
 
@@ -115,9 +116,7 @@ export function ShowMoreButton({
     <button
       onClick={onPress}
       className="flex items-center justify-center gap-1 py-2.5 mt-1 w-full text-xs font-bold text-primary hover:text-primary/80 transition-colors"
-    >
-      Show {Math.min(batch, remaining)} more
-      <ChevronDown className="w-3 h-3" strokeWidth={2.5} />
+    >{tt("Show")}{Math.min(batch, remaining)}{tt("more")}<ChevronDown className="w-3 h-3" strokeWidth={2.5} />
     </button>
   );
 }

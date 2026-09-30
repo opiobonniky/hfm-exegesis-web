@@ -13,6 +13,7 @@ import {
   TriviaUsersPanel,
   TriviaQuestionsPanel,
 } from "../components/TriviaPerformanceTabs";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export default function AdminTriviaPerformance() {
   const { data, actions } = useAdminTriviaPerformancePage();
@@ -29,14 +30,11 @@ export default function AdminTriviaPerformance() {
         <Tabs value={data.tab} onValueChange={actions.setTab}>
           <TabsList className="mb-4">
             <TabsTrigger value="overview">
-              <BarChart3 className="w-4 h-4 mr-1.5" />Overview
-            </TabsTrigger>
+              <BarChart3 className="w-4 h-4 mr-1.5" />{tt("Overview")}</TabsTrigger>
             <TabsTrigger value="users">
-              <Users className="w-4 h-4 mr-1.5" />Users
-            </TabsTrigger>
+              <Users className="w-4 h-4 mr-1.5" />{tt("Users")}</TabsTrigger>
             <TabsTrigger value="questions">
-              <TrendingUp className="w-4 h-4 mr-1.5" />Questions
-            </TabsTrigger>
+              <TrendingUp className="w-4 h-4 mr-1.5" />{tt("Questions")}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-4">

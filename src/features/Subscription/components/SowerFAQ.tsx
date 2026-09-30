@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { FAQ_ITEMS } from "./SowerTierCards";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export function SowerFAQ() {
   const [open, setOpen] = useState<number | null>(null);
@@ -10,8 +11,8 @@ export function SowerFAQ() {
     <section className="py-14 bg-background">
       <div className="max-w-3xl mx-auto px-5 sm:px-6">
         <div className="text-center mb-10">
-          <h2 className="text-2xl sm:text-3xl font-black text-foreground mb-2">Frequently Asked Questions</h2>
-          <p className="text-sm text-muted-foreground">Everything you need to know about sowing.</p>
+          <h2 className="text-2xl sm:text-3xl font-black text-foreground mb-2">{tt("Frequently Asked Questions")}</h2>
+          <p className="text-sm text-muted-foreground">{tt("Everything you need to know about sowing.")}</p>
         </div>
         <div className="space-y-2">
           {FAQ_ITEMS.map((faq, i) => {

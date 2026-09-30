@@ -12,6 +12,7 @@ import {
   loadPushPreference,
   type PushSettingsState,
 } from "../services/pushService";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export interface NotificationSettingsData {
   dailyVerseReminder: boolean; devotionReminder: boolean; streakReminder: boolean;
@@ -46,10 +47,10 @@ export function useNotificationSettingsPage() {
     try {
       const result = await enablePush();
       if (result.enabled) {
-        toast({ title: "Push enabled", description: "You'll now receive notifications on this device." });
+        toast({ title: tt("Push enabled"), description: tt("You'll now receive notifications on this device.") });
         await savePushPreference(true);
       } else if (result.reason) {
-        toast({ title: "Push not enabled", description: result.reason, variant: "destructive" });
+        toast({ title: tt("Push not enabled"), description: result.reason, variant: "destructive" });
       }
       await refreshPushState();
       return result.enabled;
@@ -63,7 +64,7 @@ export function useNotificationSettingsPage() {
     try {
       await disablePush();
       await savePushPreference(false);
-      toast({ title: "Push disabled", description: "Notifications are off for this device." });
+      toast({ title: tt("Push disabled"), description: tt("Notifications are off for this device.") });
       await refreshPushState();
     } finally {
       setPushBusy(false);
@@ -112,13 +113,13 @@ export function useNotificationSettingsPage() {
     try {
       const res = await sendPostRequest("user", "update-notification-settings", settings);
       if (res.returnCode === 200) {
-        toast({ title: "Saved", description: "Notification settings updated" });
+        toast({ title: tt("Saved"), description: tt("Notification settings updated") });
         navigate(routes.settings.path);
       } else {
-        toast({ title: "Error", description: res.returnMessage, variant: "destructive" });
+        toast({ title: tt("Error"), description: res.returnMessage, variant: "destructive" });
       }
     } catch {
-      toast({ title: "Error", variant: "destructive" });
+      toast({ title: tt("Error"), variant: "destructive" });
     } finally { setSaving(false); }
   }, [settings, navigate, toast]);
   return {

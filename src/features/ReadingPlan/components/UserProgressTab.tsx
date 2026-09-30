@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import UserPlanCard from "./UserPlanCard";
 import CompletedPlanCard from "./CompletedPlanCard";
 import type { UserPlan } from "../hooks/useUserPlansPage";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   userPlans: UserPlan[];
@@ -22,12 +23,9 @@ export default function UserProgressTab({ userPlans, t, onContinue, onRemove, on
         <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
           <BookOpen className="w-8 h-8 text-primary" />
         </div>
-        <h3 className="text-xl font-semibold mb-2">No active plan yet</h3>
-        <p className="text-muted-foreground text-center mb-6 max-w-xs">
-          Head over to Browse Plans and start your first reading plan.
-        </p>
-        <Button onClick={onBrowse}>
-          Browse Plans <ChevronRight className="w-4 h-4 ml-2" />
+        <h3 className="text-xl font-semibold mb-2">{tt("No active plan yet")}</h3>
+        <p className="text-muted-foreground text-center mb-6 max-w-xs">{tt("Head over to Browse Plans and start your first reading plan.")}</p>
+        <Button onClick={onBrowse}>{tt("Browse Plans")}<ChevronRight className="w-4 h-4 ml-2" />
         </Button>
       </div>
     );
@@ -46,7 +44,7 @@ export default function UserProgressTab({ userPlans, t, onContinue, onRemove, on
         <div>
           <div className="flex items-center gap-2 mb-4">
             <Trophy className="w-5 h-5 text-emerald-500" />
-            <h3 className="text-lg font-semibold text-muted-foreground">Completed Plans</h3>
+            <h3 className="text-lg font-semibold text-muted-foreground">{tt("Completed Plans")}</h3>
           </div>
           <div className="space-y-4">
             {completed.map((plan) => (

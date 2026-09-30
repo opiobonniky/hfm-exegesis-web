@@ -1,8 +1,9 @@
 import type { DailyExegesisFull } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export const DAILY_EXEGESIS_FALLBACK: DailyExegesisFull = {
   id: 0,
-  title: "The Word That Leads Us Home",
+  title: tt("The Word That Leads Us Home"),
   passageReference: "John 15:4-5",
   introduction: "Daily Exegesis will appear here once it is published.",
   contextSummary:
@@ -19,9 +20,9 @@ export const DAILY_EXEGESIS_FALLBACK: DailyExegesisFull = {
 };
 
 export const DAILY_EXEGESIS_SECTIONS = [
-  { key: "introduction", title: "Introduction" },
-  { key: "contextSummary", title: "Context Summary" },
-  { key: "teachingBody", title: "Teaching" },
-  { key: "application", title: "Application" },
-  { key: "prayer", title: "Prayer" },
+  { key: "introduction", title: tt("Introduction") },
+  { key: "contextSummary", title: tt("Context Summary") },
+  { key: "teachingBody", title: tt("Teaching") },
+  { key: "application", title: tt("Application") },
+  { key: "prayer", title: tt("Prayer") },
 ] as const;

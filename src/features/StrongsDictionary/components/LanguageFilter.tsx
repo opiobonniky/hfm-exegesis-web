@@ -1,9 +1,10 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 const LANG_FILTERS = [
-  { label: "All", value: "all" },
-  { label: "Hebrew", value: "hebrew" },
-  { label: "Greek", value: "greek" },
+  { label: tt("All"), value: "all" },
+  { label: tt("Hebrew"), value: "hebrew" },
+  { label: tt("Greek"), value: "greek" },
 ];
 
 interface LanguageFilterProps {

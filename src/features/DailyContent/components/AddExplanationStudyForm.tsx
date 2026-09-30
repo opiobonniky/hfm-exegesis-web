@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import type { AddExplanationStudyFormProps } from "../types";
 import { CharCount } from "./CharCount";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 const BACKGROUND_MAX = 10000;
 
@@ -25,17 +26,17 @@ export function AddExplanationStudyForm(props: AddExplanationStudyFormProps) {
     <div className="space-y-8">
       <div className="flex items-center gap-2 text-sky-600">
         <Target className="h-4 w-4" />
-        <span className="text-sm font-medium">Study context</span>
+        <span className="text-sm font-medium">{tt("Study context")}</span>
       </div>
 
       <div className="space-y-4 rounded-2xl border border-border bg-muted/30 p-4">
         <div className="space-y-2">
           <div className="flex items-center justify-between gap-2">
-            <Label className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Verse introduction</Label>
+            <Label className="text-xs uppercase tracking-[0.2em] text-muted-foreground">{tt("Verse introduction")}</Label>
             <CharCount value={h.form.studyMetadata.introduction} max={BACKGROUND_MAX} />
           </div>
           <Textarea
-            placeholder="Brief introduction to the verse..."
+            placeholder={tt("Brief introduction to the verse...")}
             value={h.form.studyMetadata.introduction}
             onChange={(e) => h.updateNested("studyMetadata", "introduction", e.target.value)}
             rows={5}
@@ -47,13 +48,13 @@ export function AddExplanationStudyForm(props: AddExplanationStudyFormProps) {
         <div className="space-y-4 border-t border-border pt-4">
           <div className="space-y-2">
             <div className="flex items-center justify-between gap-2">
-              <Label className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Background — Author</Label>
+              <Label className="text-xs uppercase tracking-[0.2em] text-muted-foreground">{tt("Background — Author")}</Label>
               <CharCount value={h.form.studyMetadata.backgroundAuthor} max={BACKGROUND_MAX} />
             </div>
             <Textarea
               value={h.form.studyMetadata.backgroundAuthor}
               onChange={(e) => h.updateNested("studyMetadata", "backgroundAuthor", e.target.value)}
-              placeholder="Author background and attribution..."
+              placeholder={tt("Author background and attribution...")}
               rows={5}
               maxLength={BACKGROUND_MAX}
               className="border-border bg-background text-foreground placeholder:text-muted-foreground"
@@ -61,13 +62,13 @@ export function AddExplanationStudyForm(props: AddExplanationStudyFormProps) {
           </div>
           <div className="space-y-2">
             <div className="flex items-center justify-between gap-2">
-              <Label className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Background — Book</Label>
+              <Label className="text-xs uppercase tracking-[0.2em] text-muted-foreground">{tt("Background — Book")}</Label>
               <CharCount value={h.form.studyMetadata.backgroundBook} max={BACKGROUND_MAX} />
             </div>
             <Textarea
               value={h.form.studyMetadata.backgroundBook}
               onChange={(e) => h.updateNested("studyMetadata", "backgroundBook", e.target.value)}
-              placeholder="The book and its place in Scripture..."
+              placeholder={tt("The book and its place in Scripture...")}
               rows={5}
               maxLength={BACKGROUND_MAX}
               className="border-border bg-background text-foreground placeholder:text-muted-foreground"
@@ -75,13 +76,13 @@ export function AddExplanationStudyForm(props: AddExplanationStudyFormProps) {
           </div>
           <div className="space-y-2">
             <div className="flex items-center justify-between gap-2">
-              <Label className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Background — Context</Label>
+              <Label className="text-xs uppercase tracking-[0.2em] text-muted-foreground">{tt("Background — Context")}</Label>
               <CharCount value={h.form.studyMetadata.backgroundContext} max={BACKGROUND_MAX} />
             </div>
             <Textarea
               value={h.form.studyMetadata.backgroundContext}
               onChange={(e) => h.updateNested("studyMetadata", "backgroundContext", e.target.value)}
-              placeholder="Context of the verse within the passage..."
+              placeholder={tt("Context of the verse within the passage...")}
               rows={5}
               maxLength={BACKGROUND_MAX}
               className="border-border bg-background text-foreground placeholder:text-muted-foreground"
@@ -94,15 +95,14 @@ export function AddExplanationStudyForm(props: AddExplanationStudyFormProps) {
         <div className="mb-4 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 text-foreground">
             <Tag className="h-4 w-4 text-sky-600" />
-            <span className="font-semibold">Strong's word study</span>
+            <span className="font-semibold">{tt("Strong's word study")}</span>
           </div>
           <Button variant="outline" size="sm" className="gap-2" onClick={h.addWordStudy}>
-            <Plus className="h-3 w-3" /> Add word
-          </Button>
+            <Plus className="h-3 w-3" />{tt("Add word")}</Button>
         </div>
 
         {h.form.wordStudies.length === 0 ? (
-          <p className="text-sm text-muted-foreground italic">No word studies added yet.</p>
+          <p className="text-sm text-muted-foreground italic">{tt("No word studies added yet.")}</p>
         ) : (
           <div className="space-y-3">
             {h.form.wordStudies.map((ws, i) => (
@@ -139,9 +139,9 @@ export function AddExplanationStudyForm(props: AddExplanationStudyFormProps) {
                      }}
                      className="border-border bg-background text-foreground placeholder:text-muted-foreground"
                   />
-                  <Input placeholder="Surface text" value={ws.surfaceText} onChange={(e) => h.updateWordStudy(i, "surfaceText", e.target.value)} className="border-border bg-background text-foreground placeholder:text-muted-foreground" />
+                  <Input placeholder={tt("Surface text")} value={ws.surfaceText} onChange={(e) => h.updateWordStudy(i, "surfaceText", e.target.value)} className="border-border bg-background text-foreground placeholder:text-muted-foreground" />
                   <div className="space-y-1 xl:col-span-3">
-                    <Textarea placeholder="Definition and word study..." value={ws.customDefinition} onChange={(e) => h.updateWordStudy(i, "customDefinition", e.target.value)} rows={3} maxLength={BACKGROUND_MAX} className="w-full border-border bg-background text-foreground placeholder:text-muted-foreground" />
+                    <Textarea placeholder={tt("Definition and word study...")} value={ws.customDefinition} onChange={(e) => h.updateWordStudy(i, "customDefinition", e.target.value)} rows={3} maxLength={BACKGROUND_MAX} className="w-full border-border bg-background text-foreground placeholder:text-muted-foreground" />
                     <div className="flex justify-end"><CharCount value={ws.customDefinition} max={BACKGROUND_MAX} /></div>
                   </div>
                 </div>

@@ -7,6 +7,7 @@ import { Lock, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { routes } from "@/components/Routes/routes";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export interface LockedFeatureBadgeProps {
   featureName?: string;
@@ -48,9 +49,7 @@ export default function LockedFeatureBadge({
           onClick={() => navigate(routes.sower.path)}
           className="shrink-0 gap-1.5 h-8 px-3 text-xs bg-violet-600 hover:bg-violet-700 text-white font-bold"
         >
-          <Sparkles className="w-3 h-3" />
-          Unlock
-        </Button>
+          <Sparkles className="w-3 h-3" />{tt("Unlock")}</Button>
       </div>
     );
   }
@@ -73,13 +72,8 @@ export default function LockedFeatureBadge({
         onClick={() => navigate(routes.sower.path)}
         className="gap-2 bg-violet-600 hover:bg-violet-700 text-white font-bold shadow-lg shadow-violet-500/30"
       >
-        <Sparkles className="w-4 h-4" />
-        Become a Sower
-      </Button>
-      <p className="text-[11px] text-muted-foreground mt-3 max-w-xs">
-        Bible reading across all translations is always free — subscription only
-        gates advanced study tools.
-      </p>
+        <Sparkles className="w-4 h-4" />{tt("Become a Sower")}</Button>
+      <p className="text-[11px] text-muted-foreground mt-3 max-w-xs">{tt("Bible reading across all translations is always free — subscription only gates advanced study tools.")}</p>
     </div>
   );
 }

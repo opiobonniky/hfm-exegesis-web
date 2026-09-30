@@ -8,6 +8,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface JournalDeleteDialogProps {
   open: boolean;
@@ -28,12 +29,9 @@ export function JournalDeleteDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Delete Journal Entry</DialogTitle>
+          <DialogTitle>{tt("Delete Journal Entry")}</DialogTitle>
         </DialogHeader>
-        <p className="text-sm text-muted-foreground">
-          Are you sure you want to delete this entry? This action cannot be
-          undone.
-        </p>
+        <p className="text-sm text-muted-foreground">{tt("Are you sure you want to delete this entry? This action cannot be undone.")}</p>
         {title && (
           <p className="text-sm font-medium">&ldquo;{title}&rdquo;</p>
         )}
@@ -42,9 +40,7 @@ export function JournalDeleteDialog({
             variant="outline"
             onClick={() => onOpenChange(false)}
             disabled={deleting}
-          >
-            Cancel
-          </Button>
+          >{tt("Cancel")}</Button>
           <Button
             variant="destructive"
             onClick={onConfirm}
@@ -55,9 +51,7 @@ export function JournalDeleteDialog({
               <Loader2 className="w-4 h-4 animate-spin" />
             ) : (
               <Trash2 className="w-4 h-4" />
-            )}{" "}
-            Delete
-          </Button>
+            )}{" "}{tt("Delete")}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -2,6 +2,7 @@
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/components/languages/languageProvider";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface BookOverviewHeaderProps {
   bookName: string;
@@ -22,12 +23,12 @@ export default function BookOverviewHeader({
           size="icon"
           className="h-8 w-8"
           onClick={onBack}
-          aria-label="Go back"
+          aria-label={tt("Go back")}
         >
           <ArrowLeft className={`h-4 w-4 ${isRtl ? "rotate-180" : ""}`} />
         </Button>
         <div className="min-w-0 flex-1">
-          <h1 className="text-sm font-semibold truncate">{bookName} Overview</h1>
+          <h1 className="text-sm font-semibold truncate">{bookName}{tt("Overview")}</h1>
         </div>
       </div>
     </header>

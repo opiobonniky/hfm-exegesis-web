@@ -17,6 +17,7 @@ import {
 import { cn } from "@/lib/utils";
 import { ADMIN_QUICK_ACTIONS } from "../constants";
 import type { LucideIcon } from "lucide-react";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 const ICON_MAP: Record<string, LucideIcon> = {
   Sun,
@@ -48,10 +49,8 @@ export function AdminDashboardQuickActions({ onNavigate }: Props) {
           <CardTitle className="flex items-center gap-2 text-base">
             <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10">
               <BookOpen className="w-4 h-4 text-primary" />
-            </span>
-            Quick Actions
-          </CardTitle>
-          <CardDescription>Common admin tasks and shortcuts</CardDescription>
+            </span>{tt("Quick Actions")}</CardTitle>
+          <CardDescription>{tt("Common admin tasks and shortcuts")}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">

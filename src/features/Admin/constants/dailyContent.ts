@@ -1,3 +1,4 @@
+import { tt } from '@/components/languages/hardcodedTranslate';
 // ─── Admin Daily Content Constants ────────────────────────────────────────────
 
 export type ContentType = "verse" | "devotion" | "exegesis";
@@ -6,14 +7,14 @@ export const CONTENT_TYPE_LABELS: Record<
   ContentType,
   { label: string; plural: string; icon: string }
 > = {
-  verse: { label: "Daily Verse", plural: "Daily Verses", icon: "Sun" },
+  verse: { label: tt("Daily Verse"), plural: "Daily Verses", icon: "Sun" },
   devotion: {
-    label: "Daily Devotion",
+    label: tt("Daily Devotion"),
     plural: "Daily Devotions",
     icon: "Sprout",
   },
   exegesis: {
-    label: "Daily Exegesis",
+    label: tt("Daily Exegesis"),
     plural: "Daily Exegesis",
     icon: "BookOpen",
   },
@@ -26,9 +27,9 @@ export const TAB_VALUE_MAP: Record<string, ContentType> = {
 };
 
 export const CONTENT_TABS = [
-  { value: "verses", label: "Daily Verses", icon: "Sun" },
-  { value: "devotions", label: "Devotions", icon: "Sprout" },
-  { value: "exegesis", label: "Exegesis", icon: "BookOpen" },
+  { value: "verses", label: tt("Daily Verses"), icon: "Sun" },
+  { value: "devotions", label: tt("Devotions"), icon: "Sprout" },
+  { value: "exegesis", label: tt("Exegesis"), icon: "BookOpen" },
 ] as const;
 
 export const API_ACTIONS = {

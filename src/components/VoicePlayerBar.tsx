@@ -19,6 +19,7 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/components/languages/languageProvider";
 import type { TTSVoice } from "@/services/ttsService";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface SpeechItem {
   verseKey: string;
@@ -221,14 +222,14 @@ export default function VoicePlayerBar({
               }}
             >
               <PopoverTrigger asChild>
-                <ControlBtn title={selectedVoice?.name || "Voice"}>
+                <ControlBtn title={selectedVoice?.name || tt("Voice")}>
                   <Volume2 className="w-4 h-4" />
                 </ControlBtn>
               </PopoverTrigger>
               <PopoverContent align="center" side="top" className="w-64 p-1">
                 <div className="p-1.5 border-b border-border/40 mb-1">
                   <Input
-                    placeholder="Search voices…"
+                    placeholder={tt("Search voices…")}
                     value={voiceSearch}
                     onChange={(e) => setVoiceSearch(e.target.value)}
                     className="h-7 text-xs"
@@ -247,9 +248,7 @@ export default function VoicePlayerBar({
                           .includes(voiceSearch.toLowerCase()),
                     );
                     return filtered.length === 0 ? (
-                      <p className="text-xs text-muted-foreground p-2 text-center">
-                        No voices found
-                      </p>
+                      <p className="text-xs text-muted-foreground p-2 text-center">{tt("No voices found")}</p>
                     ) : (
                       filtered.map((v) => (
                         <button
@@ -268,12 +267,12 @@ export default function VoicePlayerBar({
                         >
                           <span className="block leading-tight">{v.name}</span>
                           <span className="block text-[10px] text-muted-foreground">
-                            {v.category || "Neural"}{" "}
+                            {v.category || tt("Neural")}{" "}
                             {v.source === "edge"
-                              ? "(free)"
+                              ? tt("(free)")
                               : v.source === "builtin"
-                                ? "(built-in)"
-                                : "(cloud)"}
+                                ? tt("(built-in)")
+                                : tt("(cloud)")}
                           </span>
                         </button>
                       ))
@@ -321,7 +320,7 @@ export default function VoicePlayerBar({
             {/* Mute */}
             <ControlBtn
               onClick={onToggleMute}
-              title={voice === 0 ? "Unmute" : "Mute"}
+              title={voice === 0 ? tt("Unmute") : tt("Mute")}
             >
               {voice === 0 ? (
                 <VolumeX className="w-4 h-4 text-muted-foreground/40" />

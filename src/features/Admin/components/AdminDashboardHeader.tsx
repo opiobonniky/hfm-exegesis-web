@@ -1,6 +1,7 @@
 // AdminDashboardHeader — welcome banner header for admin dashboard
 import { LayoutDashboard, Sparkles } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   subtitle?: string;
@@ -19,15 +20,11 @@ export function AdminDashboardHeader({ subtitle }: Props) {
               <LayoutDashboard className="w-7 h-7" />
             </div>
             <div>
-              <span className="mb-2 inline-flex items-center rounded-full border border-white/25 bg-white/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/80">
-                Control center
-              </span>
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-primary-foreground font-[family-name:var(--font-heading)]">
-                Admin Console
-              </h1>
+              <span className="mb-2 inline-flex items-center rounded-full border border-white/25 bg-white/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/80">{tt("Control center")}</span>
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-primary-foreground font-[family-name:var(--font-heading)]">{tt("Admin Console")}</h1>
               <p className="mt-1 flex items-center gap-1.5 text-sm text-primary-foreground/85">
                 <Sparkles className="w-3.5 h-3.5" />
-                {subtitle || "Manage your platform from one place"}
+                {subtitle || tt("Manage your platform from one place")}
               </p>
             </div>
           </div>

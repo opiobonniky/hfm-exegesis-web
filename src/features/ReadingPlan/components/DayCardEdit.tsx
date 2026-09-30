@@ -4,6 +4,7 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/components/languages/languageProvider";
+import { tt } from "@/components/languages/hardcodedTranslate";
 import { BIBLE_BOOKS, INPUT_CLS, TEXTAREA_CLS } from "../constants";
 import { emptyQuiz, isDayComplete, isDayPartial } from "../hooks/useAddReadingPlanPage";
 import type { DayAssignment, Chapter, QuizQuestion } from "../types";
@@ -129,7 +130,7 @@ export function DayCardEdit({
                   </SelectTrigger>
                   <SelectContent className="max-h-60">
                     {BIBLE_BOOKS.map((b) => (
-                      <SelectItem key={b} value={b}>{b}</SelectItem>
+                      <SelectItem key={b} value={b}>{tt(b)}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>

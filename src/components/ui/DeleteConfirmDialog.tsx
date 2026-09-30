@@ -6,6 +6,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface DeleteConfirmDialogProps {
   open: boolean;
@@ -45,11 +46,9 @@ export function DeleteConfirmDialog({
           </div>
         )}
         <DialogFooter className="gap-2 sm:gap-0">
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>Cancel</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>{tt("Cancel")}</Button>
           <Button variant="destructive" onClick={onConfirm} disabled={loading} className="gap-2">
-            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
-            Delete
-          </Button>
+            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}{tt("Delete")}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

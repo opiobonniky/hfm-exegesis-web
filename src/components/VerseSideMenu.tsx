@@ -27,6 +27,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { routes } from "@/components/Routes/routes";
 import { useToast } from "@/hooks/use-toast";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export interface VerseInfo {
   verseKey: string;
@@ -67,8 +68,8 @@ interface ActionItem {
 const ACTIONS: ActionItem[] = [
   {
     icon: BookOpen,
-    label: "Study This Verse",
-    description: "Open Exegesis Lab with this verse",
+    label: tt("Study This Verse"),
+    description: tt("Open Exegesis Lab with this verse"),
     color: "text-indigo-600 dark:text-indigo-400",
     bgColor: "bg-indigo-50 dark:bg-indigo-950/30",
     borderColor: "border-indigo-200/50 dark:border-indigo-800/30",
@@ -77,8 +78,8 @@ const ACTIONS: ActionItem[] = [
   },
   {
     icon: BookText,
-    label: "Open Strong's",
-    description: "View Greek & Hebrew word studies",
+    label: tt("Open Strong's"),
+    description: tt("View Greek & Hebrew word studies"),
     color: "text-violet-600 dark:text-violet-400",
     bgColor: "bg-violet-50 dark:bg-violet-950/30",
     borderColor: "border-violet-200/50 dark:border-violet-800/30",
@@ -86,8 +87,8 @@ const ACTIONS: ActionItem[] = [
   },
   {
     icon: PenLine,
-    label: "Add Note",
-    description: "Quick note linked to this verse",
+    label: tt("Add Note"),
+    description: tt("Quick note linked to this verse"),
     color: "text-emerald-600 dark:text-emerald-400",
     bgColor: "bg-emerald-50 dark:bg-emerald-950/30",
     borderColor: "border-emerald-200/50 dark:border-emerald-800/30",
@@ -95,8 +96,8 @@ const ACTIONS: ActionItem[] = [
   },
   {
     icon: Highlighter,
-    label: "Highlight",
-    description: "Mark this verse in color",
+    label: tt("Highlight"),
+    description: tt("Mark this verse in color"),
     color: "text-amber-600 dark:text-amber-400",
     bgColor: "bg-amber-50 dark:bg-amber-950/30",
     borderColor: "border-amber-200/50 dark:border-amber-800/30",
@@ -104,8 +105,8 @@ const ACTIONS: ActionItem[] = [
   },
   {
     icon: BookMarked,
-    label: "Save to Journal",
-    description: "Create journal entry with verse",
+    label: tt("Save to Journal"),
+    description: tt("Create journal entry with verse"),
     color: "text-rose-600 dark:text-rose-400",
     bgColor: "bg-rose-50 dark:bg-rose-950/30",
     borderColor: "border-rose-200/50 dark:border-rose-800/30",
@@ -114,8 +115,8 @@ const ACTIONS: ActionItem[] = [
   },
   {
     icon: Crosshair,
-    label: "Cross References",
-    description: "See related passages",
+    label: tt("Cross References"),
+    description: tt("See related passages"),
     color: "text-cyan-600 dark:text-cyan-400",
     bgColor: "bg-cyan-50 dark:bg-cyan-950/30",
     borderColor: "border-cyan-200/50 dark:border-cyan-800/30",
@@ -123,8 +124,8 @@ const ACTIONS: ActionItem[] = [
   },
   {
     icon: Languages,
-    label: "Compare Translations",
-    description: "Read in other versions",
+    label: tt("Compare Translations"),
+    description: tt("Read in other versions"),
     color: "text-blue-600 dark:text-blue-400",
     bgColor: "bg-blue-50 dark:bg-blue-950/30",
     borderColor: "border-blue-200/50 dark:border-blue-800/30",
@@ -132,8 +133,8 @@ const ACTIONS: ActionItem[] = [
   },
   {
     icon: Heart,
-    label: "Devotional on This Verse",
-    description: "Read related devotional",
+    label: tt("Devotional on This Verse"),
+    description: tt("Read related devotional"),
     color: "text-pink-600 dark:text-pink-400",
     bgColor: "bg-pink-50 dark:bg-pink-950/30",
     borderColor: "border-pink-200/50 dark:border-pink-800/30",
@@ -142,8 +143,8 @@ const ACTIONS: ActionItem[] = [
   },
   {
     icon: Brain,
-    label: "Trivia from This Verse",
-    description: "Answer a question from this passage",
+    label: tt("Trivia from This Verse"),
+    description: tt("Answer a question from this passage"),
     color: "text-orange-600 dark:text-orange-400",
     bgColor: "bg-orange-50 dark:bg-orange-950/30",
     borderColor: "border-orange-200/50 dark:border-orange-800/30",
@@ -152,8 +153,8 @@ const ACTIONS: ActionItem[] = [
   },
   {
     icon: Search,
-    label: "Search This Word",
-    description: "Find other occurrences",
+    label: tt("Search This Word"),
+    description: tt("Find other occurrences"),
     color: "text-purple-600 dark:text-purple-400",
     bgColor: "bg-purple-50 dark:bg-purple-950/30",
     borderColor: "border-purple-200/50 dark:border-purple-800/30",
@@ -162,8 +163,8 @@ const ACTIONS: ActionItem[] = [
   },
   {
     icon: Share2,
-    label: "Share Verse",
-    description: "Share with others",
+    label: tt("Share Verse"),
+    description: tt("Share with others"),
     color: "text-muted-foreground dark:text-muted-foreground/70",
     bgColor: "bg-muted dark:bg-background/50",
     borderColor: "border-border/50 dark:border-border/50",
@@ -224,15 +225,15 @@ export default function VerseSideMenu({
         break;
       case "crossrefs":
         toast({
-          title: "Coming Soon",
-          description: "Cross references will be available in the next update.",
+          title: tt("Coming Soon"),
+          description: tt("Cross references will be available in the next update."),
         });
         onClose();
         break;
       case "compare":
         toast({
-          title: "Coming Soon",
-          description: "Translation comparison will be available in the next update.",
+          title: tt("Coming Soon"),
+          description: tt("Translation comparison will be available in the next update."),
         });
         onClose();
         break;
@@ -277,9 +278,7 @@ export default function VerseSideMenu({
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-border/50">
           <div className="min-w-0 flex-1">
-            <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-              Verse Actions
-            </p>
+            <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">{tt("Verse Actions")}</p>
             <p className="text-sm font-semibold text-foreground truncate mt-0.5">
               {verse.bookName} {verse.chapter}:{verse.verseNumber}
             </p>
@@ -349,9 +348,7 @@ export default function VerseSideMenu({
 
         {/* Footer */}
         <div className="px-5 py-3 border-t border-border/50">
-          <p className="text-[10px] text-muted-foreground/40 text-center">
-            Tap a verse number to open this menu while reading
-          </p>
+          <p className="text-[10px] text-muted-foreground/40 text-center">{tt("Tap a verse number to open this menu while reading")}</p>
         </div>
       </div>
     </div>

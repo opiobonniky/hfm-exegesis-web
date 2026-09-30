@@ -12,6 +12,7 @@ import {
 } from "../components";
 import { JournalTable } from "../components/JournalTable";
 import { JournalDeleteDialog } from "../components/JournalDeleteDialog";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export default function AdminJournalModeration() {
   const { data, actions } = useAdminJournalModeration();
@@ -19,7 +20,7 @@ export default function AdminJournalModeration() {
   return (
     <div className="min-h-screen bg-background">
       <AdminPageHeader
-        title="Journal Moderation"
+        title={tt("Journal Moderation")}
         subtitle={`${data.totalCount || data.entries.length} entries`}
         icon={<BookOpen className="w-5 h-5 text-primary" />}
         onBack={actions.goBack}
@@ -30,7 +31,7 @@ export default function AdminJournalModeration() {
           value={data.search}
           onChange={actions.setSearch}
           onSearch={actions.handleSearch}
-          placeholder="Search entries..."
+          placeholder={tt("Search entries...")}
         />
 
         {data.loading && data.entries.length === 0 ? (
@@ -38,7 +39,7 @@ export default function AdminJournalModeration() {
         ) : data.entries.length === 0 ? (
           <AdminEmptyState
             icon={<BookOpen className="w-12 h-12" />}
-            title="No entries found"
+            title={tt("No entries found")}
           />
         ) : (
           <JournalTable

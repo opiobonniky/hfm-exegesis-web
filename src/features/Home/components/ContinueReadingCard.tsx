@@ -2,6 +2,7 @@ import ContentCard from "./ContentCard";
 import { BookOpen } from "lucide-react";
 import { routes } from "@/components/Routes/routes";
 import type { UserDashboardPageModel } from "../hooks/useUserDashboard";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   model: UserDashboardPageModel;
@@ -11,7 +12,7 @@ export function ContinueReadingCard({ model }: Props) {
   if (!model.lastRead) return null;
   return (
     <ContentCard
-      title="Continue Reading"
+      title={tt("Continue Reading")}
       onClick={() => model.navigate(`${routes.bibleReader.path}?book=${encodeURIComponent(model.lastRead!.bookName)}&chapter=${model.lastRead!.chapter}`)}
     >
       <div className="flex items-center gap-3">
@@ -20,7 +21,7 @@ export function ContinueReadingCard({ model }: Props) {
         </div>
         <div className="flex-1 min-w-0">
           <div className="font-serif text-lg font-semibold text-[#173346] dark:text-[#f5f0e5]">{model.lastRead.bookName}</div>
-          <div className="text-xs text-muted-foreground">Chapter {model.lastRead.chapter}</div>
+          <div className="text-xs text-muted-foreground">{tt("Chapter")}{model.lastRead.chapter}</div>
         </div>
       </div>
     </ContentCard>

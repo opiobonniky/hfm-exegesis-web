@@ -23,6 +23,7 @@ import { adminApi } from "../services/adminApi";
 import { formatReadableDate } from "../utils";
 import { cn } from "@/lib/utils";
 import type { SubscribedUser } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface SubscriptionEvent {
   id: string;
@@ -55,32 +56,32 @@ const EVENT_STYLE: Record<
   created: {
     icon: Sparkles,
     chip: "bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-400",
-    label: "Subscribed",
+    label: tt("Subscribed"),
   },
   renewed: {
     icon: RefreshCw,
     chip: "bg-sky-500/10 text-sky-600 dark:bg-sky-500/15 dark:text-sky-400",
-    label: "Renewed",
+    label: tt("Renewed"),
   },
   upgraded: {
     icon: ArrowUpRight,
     chip: "bg-violet-500/10 text-violet-600 dark:bg-violet-500/15 dark:text-violet-400",
-    label: "Upgraded",
+    label: tt("Upgraded"),
   },
   downgraded: {
     icon: ArrowDownRight,
     chip: "bg-amber-500/10 text-amber-600 dark:bg-amber-500/15 dark:text-amber-400",
-    label: "Downgraded",
+    label: tt("Downgraded"),
   },
   cancelled: {
     icon: CalendarClock,
     chip: "bg-red-500/10 text-red-600 dark:bg-red-500/15 dark:text-red-400",
-    label: "Cancelled",
+    label: tt("Cancelled"),
   },
   expired: {
     icon: History,
     chip: "bg-orange-500/10 text-orange-600 dark:bg-orange-500/15 dark:text-orange-400",
-    label: "Expired",
+    label: tt("Expired"),
   },
 };
 
@@ -154,11 +155,9 @@ export function SubscriptionHistorySheet({ user, onOpenChange }: Props) {
       <SheetContent className="w-full overflow-y-auto sm:max-w-md p-0 flex flex-col">
         <SheetHeader className="border-b p-5 pb-4">
           <SheetTitle className="flex items-center gap-2 text-base">
-            <History className="w-4 h-4 text-primary" />
-            Subscription history
-          </SheetTitle>
+            <History className="w-4 h-4 text-primary" />{tt("Subscription history")}</SheetTitle>
           <SheetDescription className="text-xs">
-            {name ? `${name} · ${user?.email}` : "Loading…"}
+            {name ? `${name} · ${user?.email}` : tt("Loading…")}
           </SheetDescription>
           {profile && (
             <div className="flex flex-wrap gap-2 pt-1">
@@ -166,8 +165,7 @@ export function SubscriptionHistorySheet({ user, onOpenChange }: Props) {
                 {profile.subscriptionTier}
               </Badge>
               {profile.accessExpiresAt && (
-                <Badge variant="outline" className="text-[10px]">
-                  renews {formatReadableDate(profile.accessExpiresAt)}
+                <Badge variant="outline" className="text-[10px]">{tt("renews")}{formatReadableDate(profile.accessExpiresAt)}
                 </Badge>
               )}
             </div>
@@ -190,11 +188,8 @@ export function SubscriptionHistorySheet({ user, onOpenChange }: Props) {
           ) : events.length === 0 ? (
             <div className="flex flex-col items-center py-16 text-center">
               <CalendarPlus className="w-10 h-10 mb-3 text-muted-foreground/40" />
-              <p className="text-sm font-medium">No events recorded</p>
-              <p className="text-xs text-muted-foreground mt-1">
-                Subscription changes (renewals, upgrades, cancellations) will
-                appear here as they happen.
-              </p>
+              <p className="text-sm font-medium">{tt("No events recorded")}</p>
+              <p className="text-xs text-muted-foreground mt-1">{tt("Subscription changes (renewals, upgrades, cancellations) will appear here as they happen.")}</p>
             </div>
           ) : (
             <ol className="relative space-y-5 before:absolute before:inset-y-1 before:left-[15px] before:w-px before:bg-border">

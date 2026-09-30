@@ -7,6 +7,7 @@ import { useUserPlansPage } from "@/features/ReadingPlan";
 import UserProgressTab from "../components/UserProgressTab";
 import UserBrowseTab from "../components/UserBrowseTab";
 import RemovePlanModal from "../components/RemovePlanModal";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export default function UserPlans() {
   const { data, actions } = useUserPlansPage();
@@ -16,8 +17,8 @@ export default function UserPlans() {
       <PageHeader
         icon={<BookOpen className="h-5 w-5 text-teal-700" />}
         iconBg="bg-teal-100"
-        title={data.t.readingPlan?.readingPlans || "My Reading Plans"}
-        subtitle={data.t.readingPlan?.bibleReadingPlan || "Build a daily Bible habit"}
+        title={data.t.readingPlan?.readingPlans || tt("My Reading Plans")}
+        subtitle={data.t.readingPlan?.bibleReadingPlan || tt("Build a daily Bible habit")}
       />
 
       <TabBar

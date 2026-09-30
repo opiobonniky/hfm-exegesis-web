@@ -1,5 +1,6 @@
 import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   visible: boolean;
@@ -15,8 +16,6 @@ export function HistoryClearAction({ visible, onClear }: Props) {
       className="gap-1.5 text-xs text-destructive hover:text-destructive"
       onClick={onClear}
     >
-      <Trash2 className="w-3.5 h-3.5" />
-      Clear All
-    </Button>
+      <Trash2 className="w-3.5 h-3.5" />{tt("Clear All")}</Button>
   );
 }

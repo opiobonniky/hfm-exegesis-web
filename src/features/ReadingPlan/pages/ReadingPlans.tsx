@@ -8,6 +8,7 @@ import { useReadingPlansPage } from "../hooks/useReadingPlansPage";
 import { ReadingPlanFilters } from "../components/ReadingPlanFilters";
 import { ReadingPlanPagination } from "../components/ReadingPlanPagination";
 import { CreatePlanButton, DeletePlanModal, PlansGrid } from "../components";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export default function ReadingPlans() {
   const { data, actions } = useReadingPlansPage();
@@ -39,7 +40,7 @@ export default function ReadingPlans() {
           <EmptyState
             title={data.noPlansTitle}
             message={data.noPlansDesc}
-            actionLabel="Create Plan"
+            actionLabel={tt("Create Plan")}
             onAction={() => data.navigate("/admin/plans/new")}
           />
         ) : (

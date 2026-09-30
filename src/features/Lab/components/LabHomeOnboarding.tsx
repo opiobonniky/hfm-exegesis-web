@@ -1,6 +1,7 @@
 import { X, ChevronLeft, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ONBOARDING_STEPS } from "../constants";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   onDismiss: () => void;
@@ -29,14 +30,14 @@ export function LabHomeOnboarding({ onDismiss, step, onStepChange }: Props) {
             <p className="text-sm text-muted-foreground/80 leading-relaxed max-w-sm">{ONBOARDING_STEPS[step].desc}</p>
           </div>
           <div className="flex items-center justify-between mt-8 gap-3">
-            {step > 0 ? <button onClick={() => onStepChange((s) => s - 1)} className="inline-flex items-center gap-1 px-3 py-2 rounded-xl text-xs font-semibold text-muted-foreground hover:bg-muted/50 transition-colors"><ChevronLeft className="w-3.5 h-3.5" />Back</button> : <div />}
+            {step > 0 ? <button onClick={() => onStepChange((s) => s - 1)} className="inline-flex items-center gap-1 px-3 py-2 rounded-xl text-xs font-semibold text-muted-foreground hover:bg-muted/50 transition-colors"><ChevronLeft className="w-3.5 h-3.5" />{tt("Back")}</button> : <div />}
             <button onClick={step < ONBOARDING_STEPS.length - 1 ? () => onStepChange((s) => s + 1) : onDismiss}
               className="px-5 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-bold shadow-sm hover:opacity-90 transition-all">
-              {step < ONBOARDING_STEPS.length - 1 ? "Next" : "Start Studying"}
+              {step < ONBOARDING_STEPS.length - 1 ? "Next" : tt("Start Studying")}
             </button>
           </div>
           {step < ONBOARDING_STEPS.length - 1 && (
-            <button onClick={onDismiss} className="w-full py-2.5 text-[10px] font-semibold text-muted-foreground/40 hover:text-muted-foreground/70 transition-colors border-t border-border/30">Skip tutorial</button>
+            <button onClick={onDismiss} className="w-full py-2.5 text-[10px] font-semibold text-muted-foreground/40 hover:text-muted-foreground/70 transition-colors border-t border-border/30">{tt("Skip tutorial")}</button>
           )}
         </div>
       </div>

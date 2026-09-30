@@ -1,5 +1,6 @@
 import { Target, CheckCircle2, Clock, TrendingUp } from "lucide-react";
 import type { TriviaUserDetail } from "./hooks/useAdminTriviaUserDetailPage";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export const getStats = (detail: TriviaUserDetail) => {
   const accuracy =
@@ -9,25 +10,25 @@ export const getStats = (detail: TriviaUserDetail) => {
 
   return [
     {
-      label: "Total Answered",
+      label: tt("Total Answered"),
       value: detail.questionsAnswered,
       icon: Target,
       color: "text-blue-500",
     },
     {
-      label: "Correct Answers",
+      label: tt("Correct Answers"),
       value: detail.correctAnswers,
       icon: CheckCircle2,
       color: "text-emerald-500",
     },
     {
-      label: "Accuracy",
+      label: tt("Accuracy"),
       value: `${accuracy}%`,
       icon: TrendingUp,
       color: accuracy >= 70 ? "text-emerald-500" : "text-amber-500",
     },
     {
-      label: "Score",
+      label: tt("Score"),
       value: detail.score,
       icon: Clock,
       color: "text-purple-500",

@@ -2,6 +2,7 @@ import { Ear, Play, Pause, Square, RotateCcw, SkipForward, Volume2, CheckCircle2
 import { cn } from "@/lib/utils";
 import { LISTEN_OPTIONS } from "../constants";
 import type { AudioPlayerState, AudioPlayerActions } from "@/hooks/useAudioPlayer";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Verse { verseNumber: number; text: string; }
 
@@ -40,11 +41,11 @@ export default function LabListenStage({
         </div>
         <div>
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Step 2 of 5</span>
-            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-purple-500/10 text-purple-600 font-semibold">~5 min</span>
+            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{tt("Step 2 of 5")}</span>
+            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-purple-500/10 text-purple-600 font-semibold">{tt("~5 min")}</span>
           </div>
-          <h2 className="text-base font-bold text-foreground">Listen — Hear the Word</h2>
-          <p className="text-xs text-muted-foreground">Be still and dwell in the Word. Let Scripture sink into your heart.</p>
+          <h2 className="text-base font-bold text-foreground">{tt("Listen — Hear the Word")}</h2>
+          <p className="text-xs text-muted-foreground">{tt("Be still and dwell in the Word. Let Scripture sink into your heart.")}</p>
         </div>
       </div>
 
@@ -88,14 +89,13 @@ export default function LabListenStage({
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
                     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-purple-500/10 text-[10px] font-bold text-purple-600 uppercase tracking-wider">
-                      {isPaused ? "Paused" : "Reading"}
+                      {isPaused ? tt("Paused") : tt("Reading")}
                     </span>
                     <span className="text-[10px] font-medium text-muted-foreground tabular-nums">
                       {audio.currentVerseIdx + 1} / {audio.totalVerses}
                     </span>
                   </div>
-                  <span className="text-[10px] text-muted-foreground">
-                    Repeat {repeatCount + (isPlaying ? 1 : 0)} of {selectedRepeats}
+                  <span className="text-[10px] text-muted-foreground">{tt("Repeat")}{repeatCount + (isPlaying ? 1 : 0)} of {selectedRepeats}
                   </span>
                 </div>
 
@@ -103,17 +103,17 @@ export default function LabListenStage({
                 <div className="flex items-center justify-center gap-3">
                   <button onClick={audio.stopPlayback}
                     className="w-10 h-10 rounded-full bg-destructive/10 text-destructive flex items-center justify-center hover:bg-destructive/20 transition-colors"
-                    title="Stop">
+                    title={tt("Stop")}>
                     <Square className="w-4 h-4" fill="currentColor" />
                   </button>
                   <button onClick={audio.togglePause}
                     className="w-14 h-14 rounded-full bg-purple-600 text-white flex items-center justify-center shadow-lg shadow-purple-600/25 hover:shadow-xl hover:scale-[1.03] active:scale-95 transition-all"
-                    title={isPaused ? "Resume" : "Pause"}>
+                    title={isPaused ? tt("Resume") : tt("Pause")}>
                     {isPaused ? <Play className="w-6 h-6 ml-0.5" fill="currentColor" /> : <Pause className="w-6 h-6" fill="currentColor" />}
                   </button>
                   <button onClick={() => { audio.stopPlayback(); onSkip(); }}
                     className="w-10 h-10 rounded-full bg-purple-500/10 text-purple-600 flex items-center justify-center hover:bg-purple-500/20 transition-colors"
-                    title="Skip to Learn">
+                    title={tt("Skip to Learn")}>
                     <SkipForward className="w-4 h-4" />
                   </button>
                 </div>
@@ -122,7 +122,7 @@ export default function LabListenStage({
                 <div className="flex items-center justify-center gap-4 mt-3 text-[10px] text-muted-foreground">
                   <span className="flex items-center gap-1">
                     <Mic className="w-3 h-3" />
-                    {audio.selectedVoice?.name || "Default"}
+                    {audio.selectedVoice?.name || tt("Default")}
                   </span>
                   <span className="flex items-center gap-1">
                     <Gauge className="w-3 h-3" />
@@ -137,7 +137,7 @@ export default function LabListenStage({
           {!isPlaying && !isPaused && (
             <>
               <div className="rounded-xl border border-border/40 bg-card p-4">
-                <p className="text-sm font-semibold text-foreground mb-3">How many times should we read?</p>
+                <p className="text-sm font-semibold text-foreground mb-3">{tt("How many times should we read?")}</p>
                 <div className="grid grid-cols-5 gap-2">
                   {LISTEN_OPTIONS.map((opt) => (
                     <button key={opt.value} onClick={() => setSelectedRepeats(opt.value)}
@@ -156,9 +156,7 @@ export default function LabListenStage({
               {/* Progress */}
               {repeatCount > 0 && (
                 <div className="rounded-xl border border-border/40 bg-card p-4 text-center">
-                  <p className="text-sm text-muted-foreground">
-                    Completed <span className="font-bold text-foreground">{repeatCount}</span> of <span className="font-bold text-foreground">{selectedRepeats}</span> reads
-                  </p>
+                  <p className="text-sm text-muted-foreground">{tt("Completed")}<span className="font-bold text-foreground">{repeatCount}</span> of <span className="font-bold text-foreground">{selectedRepeats}</span>{tt("reads")}</p>
                   <div className="w-full h-2 bg-muted/30 rounded-full mt-3 overflow-hidden">
                     <div className="h-full bg-primary rounded-full transition-all duration-500"
                       style={{ width: `${(repeatCount / selectedRepeats) * 100}%` }} />
@@ -181,8 +179,7 @@ export default function LabListenStage({
           <div className="flex items-center justify-between pt-2">
             <button onClick={onSkip}
               className="flex items-center gap-1 px-3 py-2 rounded-lg text-xs font-medium text-muted-foreground hover:bg-muted/50 transition-colors">
-              <SkipForward className="w-3.5 h-3.5" /> Skip to Learn
-            </button>
+              <SkipForward className="w-3.5 h-3.5" />{tt("Skip to Learn")}</button>
           </div>
         </>
       ) : (
@@ -191,21 +188,16 @@ export default function LabListenStage({
           <div className="w-16 h-16 rounded-2xl bg-purple-500/10 flex items-center justify-center mx-auto">
             <CheckCircle2 className="w-8 h-8 text-purple-600" />
           </div>
-          <h3 className="text-lg font-bold text-foreground">Amen! 🙏</h3>
-          <p className="text-sm text-muted-foreground">You've dwelled in the Word {repeatCount} time{repeatCount !== 1 ? "s" : ""}.</p>
+          <h3 className="text-lg font-bold text-foreground">{tt("Amen! 🙏")}</h3>
+          <p className="text-sm text-muted-foreground">{tt("You've dwelled in the Word")}{repeatCount}{tt("time")}{repeatCount !== 1 ? "s" : ""}.</p>
           <div className="flex flex-col gap-3 max-w-xs mx-auto">
             <button onClick={onAdvance} disabled={saving}
               className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground text-sm font-bold shadow-lg hover:shadow-xl hover:opacity-90 transition-all disabled:opacity-50">
-              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Brain className="w-4 h-4" />}
-              Continue to Learn
-            </button>
+              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Brain className="w-4 h-4" />}{tt("Continue to Learn")}</button>
             <button onClick={() => { audio.stopPlayback(); onStartListening(); }}
               className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl border border-purple-300 text-purple-600 text-sm font-bold hover:bg-purple-50 transition-colors">
-              <Play className="w-4 h-4" fill="currentColor" /> Replay Passage
-            </button>
-            <button onClick={() => { audio.stopPlayback(); onReset(); }} className="text-xs text-muted-foreground hover:text-foreground">
-              Change reading times
-            </button>
+              <Play className="w-4 h-4" fill="currentColor" />{tt("Replay Passage")}</button>
+            <button onClick={() => { audio.stopPlayback(); onReset(); }} className="text-xs text-muted-foreground hover:text-foreground">{tt("Change reading times")}</button>
           </div>
         </div>
       )}

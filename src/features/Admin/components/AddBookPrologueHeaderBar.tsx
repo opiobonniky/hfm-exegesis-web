@@ -2,6 +2,7 @@
 import { ArrowLeft, Loader2, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { AddBookPrologueModel } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   state: AddBookPrologueModel;
@@ -22,19 +23,15 @@ export function AddBookPrologueHeaderBar({ state: h }: Props) {
               <ArrowLeft className="h-4 w-4" />
             </Button>
             <div className="min-w-0">
-              <p className="text-[11px] uppercase tracking-[0.22em] text-sky-600 dark:text-sky-400">
-                Book prologues
-              </p>
+              <p className="text-[11px] uppercase tracking-[0.22em] text-sky-600 dark:text-sky-400">{tt("Book prologues")}</p>
               <h1 className="truncate text-lg font-bold text-foreground sm:text-xl">
-                {h.isEditMode ? `Edit ${h.form.bookName || "Prologue"}` : "Create Book Prologue"}
+                {h.isEditMode ? `Edit ${h.form.bookName || "Prologue"}` : tt("Create Book Prologue")}
               </h1>
             </div>
           </div>
 
           <div className="flex items-center gap-2 self-start lg:self-auto">
-            <Button variant="outline" onClick={h.goBack}>
-              Cancel
-            </Button>
+            <Button variant="outline" onClick={h.goBack}>{tt("Cancel")}</Button>
             <Button
               onClick={h.handleSave}
               disabled={!h.isValid || h.saving}
@@ -45,7 +42,7 @@ export function AddBookPrologueHeaderBar({ state: h }: Props) {
               ) : (
                 <Save className="h-4 w-4" />
               )}
-              {h.isEditMode ? "Update" : "Create"}
+              {h.isEditMode ? tt("Update") : tt("Create")}
             </Button>
           </div>
         </div>

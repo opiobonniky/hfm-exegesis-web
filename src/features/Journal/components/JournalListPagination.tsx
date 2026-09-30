@@ -1,6 +1,7 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface JournalListPaginationProps {
   page: number;
@@ -18,9 +19,8 @@ export function JournalListPagination({ page, totalPages, hasPrevious, hasNext, 
   return (
     <div className="flex items-center justify-between mt-6 pt-4 border-t border-border dark:border-stone-800">
       <Button variant="outline" disabled={!hasPrevious} onClick={onPrevious} className="rounded-xl border-border dark:border-stone-800">
-        <ChevronLeft className={cn("w-4 h-4", isRtl ? "ml-2 order-1" : "mr-2")} />Previous
-      </Button>
-      <div className="text-sm text-muted-foreground dark:text-muted-foreground/70">Page {page} of {totalPages}</div>
+        <ChevronLeft className={cn("w-4 h-4", isRtl ? "ml-2 order-1" : "mr-2")} />{tt("Previous")}</Button>
+      <div className="text-sm text-muted-foreground dark:text-muted-foreground/70">{tt("Page")}{page} of {totalPages}</div>
       <Button variant="outline" disabled={!hasNext} onClick={onNext} className="rounded-xl border-border dark:border-stone-800">
         Next<ChevronRight className={cn("w-4 h-4", isRtl ? "mr-2" : "ml-2")} />
       </Button>

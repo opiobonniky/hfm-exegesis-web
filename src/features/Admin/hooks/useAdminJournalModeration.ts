@@ -4,6 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import { adminApi } from "../services/adminApi";
 import { useNavigate } from "react-router-dom";
 import type { JournalModerationEntry } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 export type { JournalModerationEntry };
 
 
@@ -46,7 +47,7 @@ export function useAdminJournalModeration() {
         setHasMore(data?.hasNext ?? apiPage < Math.ceil(total / 20));
         setPage(pageNum);
       } catch {
-        toast({ title: "Failed to load entries", variant: "destructive" });
+        toast({ title: tt("Failed to load entries"), variant: "destructive" });
       } finally {
         setLoading(false);
         if (append) {
@@ -103,7 +104,7 @@ export function useAdminJournalModeration() {
           });
         }
       } catch {
-        toast({ title: "Failed to update", variant: "destructive" });
+        toast({ title: tt("Failed to update"), variant: "destructive" });
       } finally {
         setActionLoading(null);
       }
@@ -120,11 +121,11 @@ export function useAdminJournalModeration() {
       });
       if (res.returnCode === 200) {
         setEntries((prev) => prev.filter((e) => e.id !== deleteTarget.id));
-        toast({ title: "Deleted" });
+        toast({ title: tt("Deleted") });
         setDeleteTarget(null);
       }
     } catch {
-      toast({ title: "Failed to delete", variant: "destructive" });
+      toast({ title: tt("Failed to delete"), variant: "destructive" });
     } finally {
       setDeleting(false);
     }

@@ -2,6 +2,7 @@ import { Select, SelectContent, SelectItem, SelectGroup, SelectLabel, SelectTrig
 import { LANGUAGE_NAMES, type Language } from "@/components/languages/type";
 import { getLanguageName } from "@/components/languages/localeUtils";
 import { Check } from "lucide-react";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface LanguageSelectorProps {
   value: string;
@@ -18,10 +19,10 @@ export function LanguageSelector({ value, onChange, disabled, className }: Langu
       </SelectTrigger>
       <SelectContent className="min-w-[140px]">
         {[
-          { label: "Primary", languages: ["en"] as Language[] },
-          { label: "European", languages: ["de", "fr", "es", "pt", "it", "el", "ru"] as Language[] },
-          { label: "Indian", languages: ["hi", "bn", "ta", "te", "mr", "gu", "kn", "ml", "pa", "ur"] as Language[] },
-          { label: "Other", languages: ["ar", "sw", "ne", "fil"] as Language[] },
+          { label: tt("Primary"), languages: ["en"] as Language[] },
+          { label: tt("European"), languages: ["de", "fr", "es", "pt", "it", "el", "ru"] as Language[] },
+          { label: tt("Indian"), languages: ["hi", "bn", "ta", "te", "mr", "gu", "kn", "ml", "pa", "ur"] as Language[] },
+          { label: tt("Other"), languages: ["ar", "sw", "ne", "fil"] as Language[] },
         ].map((group) => (
           <SelectGroup key={group.label}>
             <SelectLabel className="text-[9px] font-bold tracking-widest uppercase text-muted-foreground/50">{group.label}</SelectLabel>

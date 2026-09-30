@@ -5,6 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { sendPostRequest } from "@/services/api";
 import { ensureDataLoaded, getVerseText } from "@/utilities/bibleUtils";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export interface FavoriteItem {
   id: number;
@@ -57,9 +58,9 @@ export function useFavoritesPage() {
       const res = await sendPostRequest("bible", "delete-favorite", { favoriteId: id });
       if (res.returnCode === 200) {
         setFavorites((p) => p.filter((f) => f.id !== id));
-        toast({ title: "Favorite removed" });
+        toast({ title: tt("Favorite removed") });
       }
-    } catch { toast({ title: "Failed to remove", variant: "destructive" }); }
+    } catch { toast({ title: tt("Failed to remove"), variant: "destructive" }); }
     finally { setDeleting(null); }
   }, [toast]);
 

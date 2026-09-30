@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Mic2, Heart, BookOpen, Sparkles } from "lucide-react";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { animFadeUp, animStagger, animCardUp } from "./animations";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 const ITEMS = [
   { titleKey: "exegesisVVTeachingTitle", descKey: "exegesisVVTeachingDesc", icon: Mic2, defaultTitle: "Verse by Verse Teaching", defaultDesc: "Explanation and application with a learn more tab." },
@@ -19,11 +20,11 @@ export function ExegesisSection() {
         <motion.div variants={animFadeUp} initial="hidden" whileInView="visible" viewport={{ once: false, margin: "-80px" }}>
           <div className="text-center mb-10 sm:mb-16">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-foreground font-[family-name:var(--font-heading)] tracking-tighter leading-none">
-              {t.landing?.exegesisProjectTitle || "EXEGESIS"}{" "}
-              <span className="text-brand-primary">{t.landing?.exegesisProjectTitleHighlight || "PROJECT"}</span>
+              {t.landing?.exegesisProjectTitle || tt("EXEGESIS")}{" "}
+              <span className="text-brand-primary">{t.landing?.exegesisProjectTitleHighlight || tt("PROJECT")}</span>
             </h2>
             <p className="text-base sm:text-lg text-muted-foreground mt-4 max-w-2xl mx-auto leading-relaxed font-medium">
-              {t.landing?.exegesisProjectDesc || "We're going to want to make each section follow the features of the app"}
+              {t.landing?.exegesisProjectDesc || tt("We're going to want to make each section follow the features of the app")}
             </p>
           </div>
 

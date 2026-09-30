@@ -4,6 +4,7 @@
 import { useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "sonner";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 const SOWER_PATH = "/sower";
 const NAV_DELAY_MS = 6000; // time (ms) before auto-navigating
@@ -21,12 +22,12 @@ export function SubscriptionExpiredHandler() {
   useEffect(() => {
     const onExpired = (e: Event) => {
       const detail = (e as CustomEvent<ExpiredDetail>).detail || {};
-      toast("Your subscription has expired", {
+      toast(tt("Your subscription has expired"), {
         description:
           detail.returnMessage ||
           "Renew your subscription to keep accessing premium study tools.",
         action: {
-          label: "Subscribe Now",
+          label: tt("Subscribe Now"),
           onClick: () => {
             if (timerRef.current) clearTimeout(timerRef.current);
             navigate(SOWER_PATH);

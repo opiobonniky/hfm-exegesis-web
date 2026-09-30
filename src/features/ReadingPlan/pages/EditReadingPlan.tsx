@@ -8,6 +8,7 @@ import { EditPlanMetaSection } from "../components/EditPlanMetaSection";
 import { EditPlanDaysSection } from "../components/EditPlanDaysSection";
 import { PageLoadingState } from "../components";
 import { SaveButton } from "../components/SaveButton";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export default function EditReadingPlan() {
   const p = useEditReadingPlanPage();
@@ -22,10 +23,10 @@ export default function EditReadingPlan() {
         <PageHeader
           back="Back"
           onBack={() => data.navigate(-1)}
-          title="Edit Plan"
+          title={tt("Edit Plan")}
           action={
             <SaveButton
-              label={data.savingMeta ? "Saving..." : "Save"}
+              label={data.savingMeta ? tt("Saving...") : tt("Save")}
               loading={data.savingMeta}
               onClick={actions.handleSaveMeta}
             />

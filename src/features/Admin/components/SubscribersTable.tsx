@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { cn } from "@/lib/utils";
 import { formatReadableDate } from "../utils";
 import type { SubscribedUser } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   subscribers: SubscribedUser[];
@@ -34,8 +35,7 @@ export function SubscribersTable({
     <Card className="border-border/50">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-base">
-            Subscribers ({subscribers.length})
+          <CardTitle className="text-base">{tt("Subscribers (")}{subscribers.length})
           </CardTitle>
           <Button
             variant="outline"
@@ -47,9 +47,7 @@ export function SubscribersTable({
               <Loader2 className="w-4 h-4 animate-spin mr-1" />
             ) : (
               <RefreshCw className="w-4 h-4 mr-1" />
-            )}
-            Sync Stripe
-          </Button>
+            )}{tt("Sync Stripe")}</Button>
         </div>
       </CardHeader>
       <CardContent className="p-0">
@@ -62,19 +60,19 @@ export function SubscribersTable({
         ) : subscribers.length === 0 ? (
           <div className="flex flex-col items-center py-16 text-center px-4">
             <Users className="w-10 h-10 mb-3 text-muted-foreground/40" />
-            <p className="font-medium">No subscribers yet</p>
+            <p className="font-medium">{tt("No subscribers yet")}</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow className="bg-muted/30">
-                  <TableHead>User</TableHead>
-                  <TableHead>Tier</TableHead>
-                  <TableHead>Expires</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Source</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>{tt("User")}</TableHead>
+                  <TableHead>{tt("Tier")}</TableHead>
+                  <TableHead>{tt("Expires")}</TableHead>
+                  <TableHead>{tt("Status")}</TableHead>
+                  <TableHead>{tt("Source")}</TableHead>
+                  <TableHead className="text-right">{tt("Actions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -93,8 +91,7 @@ export function SubscribersTable({
                       <div className="text-xs text-muted-foreground">
                         {sub.email}
                       </div>
-                      <div className="text-[10px] text-muted-foreground/70 mt-0.5">
-                        Joined {formatReadableDate(sub.createdOn)}
+                      <div className="text-[10px] text-muted-foreground/70 mt-0.5">{tt("Joined")}{formatReadableDate(sub.createdOn)}
                       </div>
                     </TableCell>
                     <TableCell>
@@ -110,23 +107,17 @@ export function SubscribersTable({
                         <Badge
                           variant="outline"
                           className="text-[10px] bg-red-50 text-red-700 border-red-200 dark:bg-red-950/30 dark:text-red-400 dark:border-red-800/40"
-                        >
-                          Suspended
-                        </Badge>
+                        >{tt("Suspended")}</Badge>
                       ) : sub.isExpired ? (
                         <Badge
                           variant="outline"
                           className="text-[10px] bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-950/30 dark:text-orange-400 dark:border-orange-800/40"
-                        >
-                          Expired
-                        </Badge>
+                        >{tt("Expired")}</Badge>
                       ) : (
                         <Badge
                           variant="outline"
                           className="text-[10px] bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-800/40"
-                        >
-                          Active
-                        </Badge>
+                        >{tt("Active")}</Badge>
                       )}
                     </TableCell>
                     <TableCell>
@@ -149,7 +140,7 @@ export function SubscribersTable({
                           size="icon"
                           className="h-8 w-8 text-muted-foreground hover:text-primary"
                           onClick={() => onHistory(sub)}
-                          title="View subscription history"
+                          title={tt("View subscription history")}
                         >
                           <History className="w-4 h-4" />
                         </Button>
@@ -158,17 +149,17 @@ export function SubscribersTable({
                           size="sm"
                           className="h-8 px-2 text-xs gap-1 text-muted-foreground hover:text-primary"
                           onClick={() => onManage(sub)}
-                          title="Manage tier & expiry"
+                          title={tt("Manage tier & expiry")}
                         >
                           <Settings2 className="w-4 h-4" />
-                          <span className="hidden lg:inline">Manage</span>
+                          <span className="hidden lg:inline">{tt("Manage")}</span>
                         </Button>
                         <Button
                           variant="ghost"
                           size="icon"
                           className="h-8 w-8 text-muted-foreground hover:text-destructive"
                           onClick={() => onSuspend(sub)}
-                          title={sub.isSuspended ? "Unsuspend" : "Suspend"}
+                          title={sub.isSuspended ? tt("Unsuspend") : tt("Suspend")}
                         >
                           {sub.isSuspended ? (
                             <RotateCcw className="w-4 h-4" />
@@ -181,7 +172,7 @@ export function SubscribersTable({
                           size="icon"
                           className="h-8 w-8 text-muted-foreground hover:text-destructive"
                           onClick={() => onRefund(sub)}
-                          title="Refund & cancel"
+                          title={tt("Refund & cancel")}
                         >
                           <Undo2 className="w-4 h-4" />
                         </Button>

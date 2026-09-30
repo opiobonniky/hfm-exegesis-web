@@ -1,5 +1,6 @@
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { ExportModal } from "./ExportModal";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface JournalListExportDialogProps {
   open: boolean;
@@ -14,7 +15,7 @@ export function JournalListExportDialog({ open, selectedIds, onOpenChange, onClo
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="rounded-2xl border-border dark:border-stone-800 max-w-lg">
-        <DialogTitle className="sr-only">Export Journal Entries</DialogTitle>
+        <DialogTitle className="sr-only">{tt("Export Journal Entries")}</DialogTitle>
         <ExportModal onClose={onClose} selectedIds={exportIds} />
       </DialogContent>
     </Dialog>

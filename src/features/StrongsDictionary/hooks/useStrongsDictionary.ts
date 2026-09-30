@@ -4,6 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import { sendPostRequest } from "@/services/api";
 
 import type { StrongWord } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 export function useStrongsDictionary() {
   const { toast } = useToast();
   const [query, setQuery] = useState("");
@@ -50,11 +51,11 @@ export function useStrongsDictionary() {
         localStorage.setItem("strongs-recent", JSON.stringify(updated));
       } else if (requestId === requestIdRef.current) {
         setResults([]);
-        toast({ title: "No results found" });
+        toast({ title: tt("No results found") });
       }
     } catch {
       if (requestId === requestIdRef.current) {
-        toast({ title: "Search failed", variant: "destructive" });
+        toast({ title: tt("Search failed"), variant: "destructive" });
       }
     } finally {
       if (requestId === requestIdRef.current) {

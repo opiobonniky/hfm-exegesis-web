@@ -1,3 +1,4 @@
+import { tt } from '@/components/languages/hardcodedTranslate';
 export const BIBLE_BOOK_CHAPTERS = {
   Genesis: 50, Exodus: 40, Leviticus: 27, Numbers: 36, Deuteronomy: 34,
   Joshua: 24, Judges: 21, Ruth: 4, "1 Samuel": 31, "2 Samuel": 24,
@@ -88,32 +89,32 @@ export const BIBLE_READER_DEFAULT_FONT_SIZE = 20;
  */
 export const VERSE_HIGHLIGHT_COLORS = [
   // Warm
-  { id: 1, name: "Red", color: "#F87171" },
-  { id: 3, name: "Yellow", color: "#FACC15" },
-  { id: 4, name: "Orange", color: "#F97316" },
-  { id: 13, name: "Pink", color: "#EC4899" },
-  { id: 14, name: "Rose", color: "#FB7185" },
-  { id: 15, name: "Amber", color: "#F59E0B" },
+  { id: 1, name: tt("Red"), color: "#F87171" },
+  { id: 3, name: tt("Yellow"), color: "#FACC15" },
+  { id: 4, name: tt("Orange"), color: "#F97316" },
+  { id: 13, name: tt("Pink"), color: "#EC4899" },
+  { id: 14, name: tt("Rose"), color: "#FB7185" },
+  { id: 15, name: tt("Amber"), color: "#F59E0B" },
   // Cool
-  { id: 2, name: "Blue", color: "#3B82F6" },
-  { id: 7, name: "Cyan", color: "#06B6D4" },
-  { id: 8, name: "Teal", color: "#0D9488" },
-  { id: 9, name: "Sky", color: "#38BDF8" },
-  { id: 10, name: "Indigo", color: "#6366F1" },
+  { id: 2, name: tt("Blue"), color: "#3B82F6" },
+  { id: 7, name: tt("Cyan"), color: "#06B6D4" },
+  { id: 8, name: tt("Teal"), color: "#0D9488" },
+  { id: 9, name: tt("Sky"), color: "#38BDF8" },
+  { id: 10, name: tt("Indigo"), color: "#6366F1" },
   // Nature
-  { id: 5, name: "Green", color: "#22C55E" },
-  { id: 6, name: "Purple", color: "#A855F7" },
-  { id: 11, name: "Lime", color: "#84CC16" },
-  { id: 12, name: "Mint", color: "#2DD4BF" },
+  { id: 5, name: tt("Green"), color: "#22C55E" },
+  { id: 6, name: tt("Purple"), color: "#A855F7" },
+  { id: 11, name: tt("Lime"), color: "#84CC16" },
+  { id: 12, name: tt("Mint"), color: "#2DD4BF" },
 ] as const;
 
 export type VerseHighlightColor = (typeof VERSE_HIGHLIGHT_COLORS)[number];
 
 /** Swatch groups shown in the picker — same grouping as the app. */
 export const VERSE_HIGHLIGHT_COLOR_GROUPS = [
-  { label: "Warm", ids: [1, 3, 4, 13, 14, 15] },
-  { label: "Cool", ids: [2, 7, 8, 9, 10] },
-  { label: "Nature", ids: [5, 6, 11, 12] },
+  { label: tt("Warm"), ids: [1, 3, 4, 13, 14, 15] },
+  { label: tt("Cool"), ids: [2, 7, 8, 9, 10] },
+  { label: tt("Nature"), ids: [5, 6, 11, 12] },
 ] as const;
 
 /** Look up a palette entry by colorId (returns undefined for id 0). */

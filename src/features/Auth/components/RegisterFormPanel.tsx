@@ -1,5 +1,6 @@
 import { AuthStepIndicator, AuthAccountLink } from "../components";
 import logoImage from "@/assets/logos/exegesis_bg_rm.webp";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface RegisterFormPanelProps {
   createAccountLabel: string;
@@ -15,7 +16,7 @@ export function RegisterFormPanel({ createAccountLabel, haveAccountLabel, loginL
       <div className="max-w-md mx-auto w-full">
         <div className="lg:hidden flex items-center gap-3 mb-8">
           <img src={logoImage} alt="Exegesis" className="w-8 h-8 rounded-lg" />
-          <span className="text-lg font-bold" style={{ fontFamily: "'Cinzel', serif" }}>EXEGESIS</span>
+          <span className="text-lg font-bold" style={{ fontFamily: "'Cinzel', serif" }}>{tt("EXEGESIS")}</span>
         </div>
 
         <h2 className="text-2xl font-bold text-foreground mb-1">{createAccountLabel}</h2>

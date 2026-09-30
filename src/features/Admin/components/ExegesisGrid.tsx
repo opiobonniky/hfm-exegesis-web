@@ -3,6 +3,7 @@ import { RefObject } from "react";
 import { Loader2 } from "lucide-react";
 import { ExegesisCard } from "./ExegesisCard";
 import type { DailyExegesis } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface ExegesisGridProps {
   items: DailyExegesis[];
@@ -47,9 +48,7 @@ export function ExegesisGrid({
         </div>
       )}
       {!hasMore && items.length > 0 && (
-        <p className="text-center text-xs text-muted-foreground/50 py-4">
-          All exegeses loaded
-        </p>
+        <p className="text-center text-xs text-muted-foreground/50 py-4">{tt("All exegeses loaded")}</p>
       )}
     </>
   );

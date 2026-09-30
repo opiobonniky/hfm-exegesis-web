@@ -2,6 +2,7 @@
 import { Edit2, Trash2, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   id: string;
@@ -24,16 +25,16 @@ export function SubscriptionTierCard({ name, price, interval, description, featu
           <div className="flex items-center gap-2 flex-wrap mb-1">
             <p className="font-semibold text-sm">{name}</p>
             {isActive ? (
-              <Badge className="text-[10px] bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-800/40">Active</Badge>
+              <Badge className="text-[10px] bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-800/40">{tt("Active")}</Badge>
             ) : (
-              <Badge variant="outline" className="text-[10px] text-muted-foreground">Inactive</Badge>
+              <Badge variant="outline" className="text-[10px] text-muted-foreground">{tt("Inactive")}</Badge>
             )}
           </div>
-          <p className="text-sm font-bold text-primary">${price}/{interval === "none" ? "free" : interval}</p>
+          <p className="text-sm font-bold text-primary">${price}/{interval === "none" ? tt("free") : interval}</p>
           {typeof memberCount === "number" && (
             <div className="flex items-center gap-1 mt-0.5 text-xs text-muted-foreground">
               <Users className="w-3.5 h-3.5" />
-              {memberCount} member{memberCount === 1 ? "" : "s"}
+              {memberCount}{tt("member")}{memberCount === 1 ? "" : "s"}
             </div>
           )}
           {description && <p className="text-xs text-muted-foreground mt-0.5">{description}</p>}

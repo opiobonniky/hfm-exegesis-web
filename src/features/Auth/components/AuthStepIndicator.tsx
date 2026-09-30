@@ -2,6 +2,7 @@
  * AuthStepIndicator — step indicator dots for multi-step Auth flows.
  */
 import { motion } from "framer-motion";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface AuthStepIndicatorProps {
   steps: number;
@@ -11,9 +12,9 @@ interface AuthStepIndicatorProps {
 export function AuthStepIndicator({ steps, current }: AuthStepIndicatorProps) {
   return (
     <div className="flex items-center justify-center gap-1.5 mt-6">
-      <span className="text-[10px] font-medium text-white/30 tracking-wider uppercase">Exegesis Project</span>
+      <span className="text-[10px] font-medium text-white/30 tracking-wider uppercase">{tt("Exegesis Project")}</span>
       <span className="text-[10px] text-white/20">&middot;</span>
-      <span className="text-[10px] text-white/30 italic">The Living Text</span>
+      <span className="text-[10px] text-white/30 italic">{tt("The Living Text")}</span>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 // BookOverviewContent — displays all prologue sections for a book
 import { BookOpen, Info } from "lucide-react";
 import type { BookPrologue } from "@/services/bookProloguesApi";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface BookOverviewContentProps {
   bookName: string;
@@ -114,13 +115,11 @@ export default function BookOverviewContent({
             </span>
             {prologue.chapters && (
               <span className="inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full bg-muted text-muted-foreground border border-border">
-                {prologue.chapters} Chapters
-              </span>
+                {prologue.chapters}{tt("Chapters")}</span>
             )}
           </div>
           {(prologue.author || prologue.authorDetail) && (
-            <p className="text-xs text-muted-foreground">
-              Written by <span className="font-medium text-foreground">{prologue.authorDetail || prologue.author}</span>
+            <p className="text-xs text-muted-foreground">{tt("Written by")}<span className="font-medium text-foreground">{prologue.authorDetail || prologue.author}</span>
               {prologue.dateWritten && (
                 <> · {prologue.dateWritten}</>
               )}
@@ -134,23 +133,23 @@ export default function BookOverviewContent({
       </div>
       {/* Content sections */}
       <div className="px-4 sm:px-6 pt-6 space-y-6">
-        <DetailBlock label="Overview" value={prologue.summary} />
-        <DetailBlock label="Background and History" value={prologue.background} />
-        <DetailBlock label="Author" value={prologue.authorDetail || prologue.author} />
-        <DetailBlock label="Written To" value={prologue.audience} />
-        <DetailBlock label="Purpose" value={prologue.purpose} />
+        <DetailBlock label={tt("Overview")} value={prologue.summary} />
+        <DetailBlock label={tt("Background and History")} value={prologue.background} />
+        <DetailBlock label={tt("Author")} value={prologue.authorDetail || prologue.author} />
+        <DetailBlock label={tt("Written To")} value={prologue.audience} />
+        <DetailBlock label={tt("Purpose")} value={prologue.purpose} />
         <DetailBlock
           label={`What Do We Learn From ${bookName}?`}
           value={prologue.lessons}
         />
-        <BulletList label="Key Applications" items={prologue.applications} />
-        <ScriptureList label="Key Scripture" items={prologue.keyScripture} />
-        <StructureList label="Structure" items={prologue.structure} />
-        <DetailBlock label="Key Theme" value={prologue.keyTheme} />
-        <BulletList label="Main Themes" items={prologue.mainThemes} />
-        <BulletList label="Key People" items={prologue.keyPeople} />
-        <BulletList label="Key Verses" items={prologue.keyVerses} />
-        <DetailBlock label="Connection to Christ" value={prologue.christConnection} />
+        <BulletList label={tt("Key Applications")} items={prologue.applications} />
+        <ScriptureList label={tt("Key Scripture")} items={prologue.keyScripture} />
+        <StructureList label={tt("Structure")} items={prologue.structure} />
+        <DetailBlock label={tt("Key Theme")} value={prologue.keyTheme} />
+        <BulletList label={tt("Main Themes")} items={prologue.mainThemes} />
+        <BulletList label={tt("Key People")} items={prologue.keyPeople} />
+        <BulletList label={tt("Key Verses")} items={prologue.keyVerses} />
+        <DetailBlock label={tt("Connection to Christ")} value={prologue.christConnection} />
       </div>
     </div>
   );

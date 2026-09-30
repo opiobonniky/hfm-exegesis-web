@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { sendPostRequest } from "@/services/api";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export interface TriviaFormData {
   question: string; options: string[]; correctOptionIndex: number;
@@ -39,8 +40,8 @@ export function useAdminAddTriviaQuestionPage() {
       if (res.returnCode === 200) {
         toast({ title: isEditing ? "Updated" : "Created" });
         navigate("/admin/trivia");
-      } else { toast({ title: "Error", description: res.returnMessage, variant: "destructive" }); }
-    } catch { toast({ title: "Error", variant: "destructive" }); }
+      } else { toast({ title: tt("Error"), description: res.returnMessage, variant: "destructive" }); }
+    } catch { toast({ title: tt("Error"), variant: "destructive" }); }
     finally { setSaving(false); }
   }, [form, isEditing, navigate, toast]);
   const goBack = useCallback(() => navigate(-1), [navigate]);

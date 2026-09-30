@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { adminApi } from "../services/adminApi";
 import type { UseAdminCrudOptions } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export function useAdminCrud<T extends { id: number }>(opts: UseAdminCrudOptions<T>) {
   const { toast } = useToast();
@@ -47,8 +48,8 @@ export function useAdminCrud<T extends { id: number }>(opts: UseAdminCrudOptions
         setHasMore(hasNext);
       } catch {
         toast({
-          title: "Error",
-          description: "Failed to load data",
+          title: tt("Error"),
+          description: tt("Failed to load data"),
           variant: "destructive",
         });
       } finally {
@@ -101,7 +102,7 @@ export function useAdminCrud<T extends { id: number }>(opts: UseAdminCrudOptions
         const res = await adminApi.request(opts.route, opts.saveAction, payload);
         if (res?.returnCode === 200 || res?.status === 200) {
           toast({
-            title: "Success",
+            title: tt("Success"),
             description: itemId ? "Updated successfully" : "Created successfully",
           });
           refresh();
@@ -112,7 +113,7 @@ export function useAdminCrud<T extends { id: number }>(opts: UseAdminCrudOptions
         );
       } catch (e: any) {
         toast({
-          title: "Error",
+          title: tt("Error"),
           description: e.message || "Failed to save",
           variant: "destructive",
         });
@@ -132,14 +133,14 @@ export function useAdminCrud<T extends { id: number }>(opts: UseAdminCrudOptions
           id: itemId,
         });
         if (res?.returnCode === 200 || res?.status === 200) {
-          toast({ title: "Success", description: "Deleted successfully" });
+          toast({ title: tt("Success"), description: tt("Deleted successfully") });
           refresh();
           return true;
         }
         throw new Error(res?.returnMessage || "Failed to delete");
       } catch (e: any) {
         toast({
-          title: "Error",
+          title: tt("Error"),
           description: e.message || "Failed to delete",
           variant: "destructive",
         });

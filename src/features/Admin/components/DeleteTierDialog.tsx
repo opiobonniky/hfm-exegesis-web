@@ -9,6 +9,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   open: boolean;
@@ -22,27 +23,21 @@ export function DeleteTierDialog({ open, onOpenChange, onConfirm }: Props) {
       <DialogContent className="sm:max-w-md rounded-xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-destructive">
-            <AlertTriangle className="w-5 h-5" /> Delete Tier
-          </DialogTitle>
-          <DialogDescription>
-            This cannot be undone. Users on this tier may be affected.
-          </DialogDescription>
+            <AlertTriangle className="w-5 h-5" />{tt("Delete Tier")}</DialogTitle>
+          <DialogDescription>{tt("This cannot be undone. Users on this tier may be affected.")}</DialogDescription>
         </DialogHeader>
         <DialogFooter className="flex-col-reverse sm:flex-row gap-2">
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
             className="w-full sm:w-auto"
-          >
-            Cancel
-          </Button>
+          >{tt("Cancel")}</Button>
           <Button
             variant="destructive"
             onClick={onConfirm}
             className="gap-2 w-full sm:w-auto"
           >
-            <Trash2 className="w-4 h-4" /> Delete
-          </Button>
+            <Trash2 className="w-4 h-4" />{tt("Delete")}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

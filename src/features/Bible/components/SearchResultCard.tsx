@@ -2,6 +2,7 @@
 import { BookOpen, BookmarkCheck, BookMarked } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface SearchResultCardProps {
   ref_: string;
@@ -70,14 +71,11 @@ export default function SearchResultCard({
       {/* Actions */}
       <div className="flex items-center gap-1 mt-3 pt-3 border-t border-border/20 opacity-75 group-hover:opacity-100 transition-opacity">
         <Button variant="ghost" size="sm" className="h-7 text-[11px] px-2.5 gap-1 hover:bg-accent/10 hover:text-accent" onClick={(e) => { e.stopPropagation(); onOpen(); }}>
-          <BookOpen className="w-3 h-3" /> Open
-        </Button>
+          <BookOpen className="w-3 h-3" />{tt("Open")}</Button>
         <Button variant="ghost" size="sm" className="h-7 text-[11px] px-2.5 gap-1 hover:bg-primary/10 hover:text-primary" onClick={(e) => { e.stopPropagation(); onStudy(); }}>
-          <BookMarked className="w-3 h-3" /> Study
-        </Button>
+          <BookMarked className="w-3 h-3" />{tt("Study")}</Button>
         <Button variant="ghost" size="sm" className="h-7 text-[11px] px-2.5 gap-1 hover:bg-emerald-500/10 hover:text-emerald-600 dark:hover:text-emerald-400" onClick={(e) => { e.stopPropagation(); onSave(); }}>
-          <BookmarkCheck className="w-3 h-3" /> Save
-        </Button>
+          <BookmarkCheck className="w-3 h-3" />{tt("Save")}</Button>
       </div>
     </div>
   );

@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/select";
 import type { AddExplanationExtrasFormProps } from "../types";
 import { CharCount } from "./CharCount";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 const APP_MAX = 5000;
 const COMMENTARY_MAX = 8000;
@@ -53,19 +54,17 @@ export function AddExplanationExtrasForm(props: AddExplanationExtrasFormProps) {
     <div className="space-y-8">
       <div className="flex items-center gap-2 text-sky-600">
         <Tag className="h-4 w-4" />
-        <span className="text-sm font-medium">Additional value</span>
+        <span className="text-sm font-medium">{tt("Additional value")}</span>
       </div>
 
       <div className="rounded-2xl border border-border bg-muted/30 p-4">
         <div className="mb-4 flex items-center gap-2 text-foreground">
           <Target className="h-4 w-4 text-sky-600" />
-          <span className="font-semibold">Practical applications</span>
+          <span className="font-semibold">{tt("Practical applications")}</span>
         </div>
 
         {h.form.practicalApps.length === 0 ? (
-          <p className="text-sm text-muted-foreground italic">
-            No applications added yet.
-          </p>
+          <p className="text-sm text-muted-foreground italic">{tt("No applications added yet.")}</p>
         ) : (
           <div className="space-y-3">
             {h.form.practicalApps.map((pa, i) => (
@@ -107,22 +106,19 @@ export function AddExplanationExtrasForm(props: AddExplanationExtrasFormProps) {
           className="gap-2 mt-4"
           onClick={h.addPracticalApp}
         >
-          <Plus className="h-3 w-3" /> Add point
-        </Button>
+          <Plus className="h-3 w-3" />{tt("Add point")}</Button>
       </div>
 
       <div className="rounded-2xl border border-border bg-muted/30 p-4">
         <div className="mb-4 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 text-foreground">
             <LinkIcon className="h-4 w-4 text-sky-600" />
-            <span className="font-semibold">Cross references</span>
+            <span className="font-semibold">{tt("Cross references")}</span>
           </div>
         </div>
 
         {h.form.crossReferences.length === 0 ? (
-          <p className="text-sm text-muted-foreground italic">
-            No cross references added yet.
-          </p>
+          <p className="text-sm text-muted-foreground italic">{tt("No cross references added yet.")}</p>
         ) : (
           <div className="space-y-3">
             {h.form.crossReferences.map((cr, i) => {
@@ -138,9 +134,7 @@ export function AddExplanationExtrasForm(props: AddExplanationExtrasFormProps) {
                   <div className="grid grid-cols-1 gap-3 md:grid-cols-12 md:items-center">
                     <div className="space-y-2 md:col-span-5">
                       {i === 0 && (
-                        <Label className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-                          Book
-                        </Label>
+                        <Label className="text-xs uppercase tracking-[0.2em] text-muted-foreground">{tt("Book")}</Label>
                       )}
                       <Combobox
                         options={crossReferenceBookOptions}
@@ -152,15 +146,13 @@ export function AddExplanationExtrasForm(props: AddExplanationExtrasFormProps) {
                           if (cr.referenceText)
                             h.updateCrossRef(i, "referenceText", "");
                         }}
-                        placeholder="Select book..."
+                        placeholder={tt("Select book...")}
                         width="w-full"
                       />
                     </div>
                     <div className="space-y-2 md:col-span-3">
                       {i === 0 && (
-                        <Label className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-                          Chapter
-                        </Label>
+                        <Label className="text-xs uppercase tracking-[0.2em] text-muted-foreground">{tt("Chapter")}</Label>
                       )}
                       <Select
                         value={cr.chapter ? String(cr.chapter) : ""}
@@ -174,7 +166,7 @@ export function AddExplanationExtrasForm(props: AddExplanationExtrasFormProps) {
                       >
                         <SelectTrigger className="border-border bg-background text-foreground">
                           <SelectValue
-                            placeholder={cr.bookName ? "Select" : "Pick book"}
+                            placeholder={cr.bookName ? tt("Select") : tt("Pick book")}
                           />
                         </SelectTrigger>
                         <SelectContent>
@@ -188,9 +180,7 @@ export function AddExplanationExtrasForm(props: AddExplanationExtrasFormProps) {
                     </div>
                     <div className="space-y-2 md:col-span-3">
                       {i === 0 && (
-                        <Label className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-                          Verse
-                        </Label>
+                        <Label className="text-xs uppercase tracking-[0.2em] text-muted-foreground">{tt("Verse")}</Label>
                       )}
                       <Select
                         value={cr.verseNumber ? String(cr.verseNumber) : ""}
@@ -204,10 +194,10 @@ export function AddExplanationExtrasForm(props: AddExplanationExtrasFormProps) {
                             <SelectValue
                               placeholder={
                                 !cr.bookName
-                                  ? "Pick book"
+                                  ? tt("Pick book")
                                   : !cr.chapter
-                                    ? "Pick chapter"
-                                    : "Select"
+                                    ? tt("Pick chapter")
+                                    : tt("Select")
                               }
                             />
                           )}
@@ -234,14 +224,12 @@ export function AddExplanationExtrasForm(props: AddExplanationExtrasFormProps) {
                   </div>
 
                   <div className="mt-3 space-y-1">
-                    <Label className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-                      Reference text (auto-filled)
-                    </Label>
+                    <Label className="text-xs uppercase tracking-[0.2em] text-muted-foreground">{tt("Reference text (auto-filled)")}</Label>
                     <Textarea
                       placeholder={
                         cr.verseNumber
-                          ? "Loading verse text..."
-                          : "Select a verse to auto-fill its text, or type it manually."
+                          ? tt("Loading verse text...")
+                          : tt("Select a verse to auto-fill its text, or type it manually.")
                       }
                       value={cr.referenceText}
                       onChange={(e) =>
@@ -254,13 +242,11 @@ export function AddExplanationExtrasForm(props: AddExplanationExtrasFormProps) {
 
                   <div className="mt-3 space-y-1">
                     <div className="flex items-center justify-between">
-                      <Label className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-                        Commentary
-                      </Label>
+                      <Label className="text-xs uppercase tracking-[0.2em] text-muted-foreground">{tt("Commentary")}</Label>
                       <CharCount value={cr.commentary} max={COMMENTARY_MAX} />
                     </div>
                     <Textarea
-                      placeholder="Commentary"
+                      placeholder={tt("Commentary")}
                       value={cr.commentary}
                       onChange={(e) =>
                         h.updateCrossRef(i, "commentary", e.target.value)
@@ -282,20 +268,17 @@ export function AddExplanationExtrasForm(props: AddExplanationExtrasFormProps) {
           className="gap-2 mt-4"
           onClick={h.addCrossRef}
         >
-          <Plus className="h-3 w-3" /> Add ref
-        </Button>
+          <Plus className="h-3 w-3" />{tt("Add ref")}</Button>
       </div>
 
       <div className="rounded-2xl border border-border bg-muted/30 p-4">
         <div className="mb-4 flex items-center gap-2 text-foreground">
           <Tag className="h-4 w-4 text-sky-600" />
-          <span className="font-semibold">Key themes</span>
+          <span className="font-semibold">{tt("Key themes")}</span>
         </div>
 
         {h.form.themes.length === 0 ? (
-          <p className="text-sm text-muted-foreground italic">
-            No themes added yet.
-          </p>
+          <p className="text-sm text-muted-foreground italic">{tt("No themes added yet.")}</p>
         ) : (
           <div className="space-y-2">
             {h.form.themes.map((t, i) => (
@@ -305,7 +288,7 @@ export function AddExplanationExtrasForm(props: AddExplanationExtrasFormProps) {
               >
                 <Input
                   className="flex-1 border-border bg-background text-foreground placeholder:text-muted-foreground"
-                  placeholder="e.g., Covenant Faithfulness"
+                  placeholder={tt("e.g., Covenant Faithfulness")}
                   value={t.themeName}
                   onChange={(e) => h.updateTheme(i, e.target.value)}
                 />
@@ -328,25 +311,19 @@ export function AddExplanationExtrasForm(props: AddExplanationExtrasFormProps) {
           className="gap-2 mt-4"
           onClick={h.addTheme}
         >
-          <Plus className="h-3 w-3" /> Add theme
-        </Button>
+          <Plus className="h-3 w-3" />{tt("Add theme")}</Button>
       </div>
 
       <div className="rounded-2xl border border-border bg-muted/30 p-4">
         <div className="mb-4 flex items-center justify-between gap-2">
-          <Label className="text-base font-semibold text-foreground">
-            Takeaways
-          </Label>
+          <Label className="text-base font-semibold text-foreground">{tt("Takeaways")}</Label>
           <span className="text-xs text-muted-foreground">
-            {h.form.studyMetadata.takeaways.length} item
-            {h.form.studyMetadata.takeaways.length === 1 ? "" : "s"}
+            {h.form.studyMetadata.takeaways.length}{tt("item")}{h.form.studyMetadata.takeaways.length === 1 ? "" : "s"}
           </span>
         </div>
 
         {h.form.studyMetadata.takeaways.length === 0 ? (
-          <p className="text-sm text-muted-foreground italic">
-            No takeaways added yet.
-          </p>
+          <p className="text-sm text-muted-foreground italic">{tt("No takeaways added yet.")}</p>
         ) : (
           <div className="space-y-3">
             {h.form.studyMetadata.takeaways.map((takeaway, i) => (
@@ -366,7 +343,7 @@ export function AddExplanationExtrasForm(props: AddExplanationExtrasFormProps) {
                   }}
                   rows={2}
                   className="w-full resize-y border-border bg-background text-foreground placeholder:text-muted-foreground"
-                  placeholder="Write a concise takeaway..."
+                  placeholder={tt("Write a concise takeaway...")}
                 />
                 <Button
                   variant="ghost"
@@ -397,22 +374,19 @@ export function AddExplanationExtrasForm(props: AddExplanationExtrasFormProps) {
             ])
           }
         >
-          <Plus className="h-3 w-3" /> Add takeaway
-        </Button>
+          <Plus className="h-3 w-3" />{tt("Add takeaway")}</Button>
       </div>
 
       <div className="rounded-2xl border border-border bg-muted/30 p-4">
         <div className="flex items-center justify-between gap-2">
-          <Label className="text-base font-semibold text-foreground">
-            Final thoughts
-          </Label>
+          <Label className="text-base font-semibold text-foreground">{tt("Final thoughts")}</Label>
           <CharCount
             value={h.form.studyMetadata.finalThoughts}
             max={FINAL_THOUGHTS_MAX}
           />
         </div>
         <Textarea
-          placeholder="Closing encouragement or application..."
+          placeholder={tt("Closing encouragement or application...")}
           value={h.form.studyMetadata.finalThoughts}
           onChange={(e) =>
             h.updateNested("studyMetadata", "finalThoughts", e.target.value)

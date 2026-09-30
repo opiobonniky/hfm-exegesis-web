@@ -15,6 +15,7 @@ import type {
   AddBookProloguePageActions,
   AddBookProloguePageData,
 } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   data: AddBookProloguePageData;
@@ -29,7 +30,7 @@ export function AddBookProloguePageLayout({ data, actions }: Props) {
       <div className="min-h-screen flex items-center justify-center bg-background text-foreground">
         <div className="flex items-center gap-3 rounded-full border border-border bg-card px-4 py-2 shadow-sm">
           <Loader2 className="h-5 w-5 animate-spin text-primary" />
-          <span className="text-sm text-muted-foreground">Loading book prologue...</span>
+          <span className="text-sm text-muted-foreground">{tt("Loading book prologue...")}</span>
         </div>
       </div>
     );

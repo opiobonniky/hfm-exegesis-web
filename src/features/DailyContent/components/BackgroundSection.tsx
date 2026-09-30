@@ -2,6 +2,7 @@
 import { User, BookOpen, MapPin } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   backgroundAuthor: string;
@@ -16,25 +17,25 @@ interface Props {
 export function BackgroundSection(p: Props) {
   const fields = [
     {
-      label: "Background — Author",
+      label: tt("Background — Author"),
       icon: <User className="h-4 w-4 text-purple-500" />,
       value: p.backgroundAuthor,
       onChange: p.setBackgroundAuthor,
-      placeholder: "Who wrote the book and why does that matter?",
+      placeholder: tt("Who wrote the book and why does that matter?"),
     },
     {
-      label: "Background — Book",
+      label: tt("Background — Book"),
       icon: <BookOpen className="h-4 w-4 text-indigo-500" />,
       value: p.backgroundBook,
       onChange: p.setBackgroundBook,
-      placeholder: "Summarize the book and its major purpose...",
+      placeholder: tt("Summarize the book and its major purpose..."),
     },
     {
-      label: "Background — Context",
+      label: tt("Background — Context"),
       icon: <MapPin className="h-4 w-4 text-orange-500" />,
       value: p.backgroundContext,
       onChange: p.setBackgroundContext,
-      placeholder: "Describe the immediate historical and literary context...",
+      placeholder: tt("Describe the immediate historical and literary context..."),
     },
   ];
 

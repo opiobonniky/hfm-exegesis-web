@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { sendPostRequest } from "@/services/api";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export interface HistoryItem {
   id: number;
@@ -58,10 +59,10 @@ export function useHistoryPage() {
       const res = await sendPostRequest("bible", "delete-read-history", { readHistoryIds: [id] });
       if (res.returnCode === 200) {
         setHistory((p) => p.filter((h) => h.id !== id));
-        toast({ title: "History item removed" });
+        toast({ title: tt("History item removed") });
       }
     } catch {
-      toast({ title: "Failed to delete", variant: "destructive" });
+      toast({ title: tt("Failed to delete"), variant: "destructive" });
     } finally {
       setDeleting(null);
     }
@@ -74,10 +75,10 @@ export function useHistoryPage() {
       const res = await sendPostRequest("bible", "delete-read-history", { readHistoryIds: ids });
       if (res.returnCode === 200) {
         setHistory([]);
-        toast({ title: "History cleared" });
+        toast({ title: tt("History cleared") });
       }
     } catch {
-      toast({ title: "Failed to clear history", variant: "destructive" });
+      toast({ title: tt("Failed to clear history"), variant: "destructive" });
     } finally {
       setClearingAll(false);
       setDeleteModal({ visible: false, type: null });

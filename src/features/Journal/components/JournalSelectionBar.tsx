@@ -1,4 +1,5 @@
 import { CheckSquare, Download, Square } from "lucide-react";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface JournalSelectionBarProps {
   selectedCount: number;
@@ -17,15 +18,15 @@ export function JournalSelectionBar({ selectedCount, entryCount, onToggleAll, on
         <div className="flex items-center gap-3">
           <button onClick={onToggleAll} className="flex items-center gap-1.5 text-xs font-bold text-amber-300 hover:text-amber-200 transition-colors">
             {allSelected ? <CheckSquare className="w-4 h-4" /> : <Square className="w-4 h-4" />}
-            {allSelected ? "Deselect All" : "Select All"}
+            {allSelected ? tt("Deselect All") : tt("Select All")}
           </button>
-          <div className="text-xs text-muted-foreground/70">{selectedCount} of {entryCount} selected</div>
+          <div className="text-xs text-muted-foreground/70">{selectedCount} of {entryCount}{tt("selected")}</div>
         </div>
         {selectedCount > 0 && (
           <div className="flex items-center gap-2">
-            <button onClick={onClear} className="text-xs text-muted-foreground/70 hover:text-foreground transition-colors px-3 py-1.5 rounded-xl border border-border hover:border-foreground/30">Clear</button>
+            <button onClick={onClear} className="text-xs text-muted-foreground/70 hover:text-foreground transition-colors px-3 py-1.5 rounded-xl border border-border hover:border-foreground/30">{tt("Clear")}</button>
             <button onClick={onExport} className="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-xl bg-amber-500 text-foreground hover:bg-amber-400 transition-all">
-              <Download className="w-3.5 h-3.5" />Export Selected ({selectedCount})
+              <Download className="w-3.5 h-3.5" />{tt("Export Selected (")}{selectedCount})
             </button>
           </div>
         )}

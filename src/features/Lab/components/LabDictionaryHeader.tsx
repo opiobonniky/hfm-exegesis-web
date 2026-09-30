@@ -1,5 +1,6 @@
 import { ArrowLeft } from "lucide-react";
 import TierBadge from "@/components/TierBadge";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   onGoBack: () => void;
@@ -14,8 +15,8 @@ export function LabDictionaryHeader({ onGoBack }: Props) {
             <ArrowLeft className="w-4 h-4 text-foreground" />
           </button>
           <div>
-            <h1 className="text-base sm:text-lg font-semibold tracking-wide text-foreground leading-none" style={{ fontFamily: "'Cinzel', serif" }}>Dictionary</h1>
-            <p className="text-[10px] text-muted-foreground tracking-widest uppercase leading-none mt-0.5">Original Language Word Study</p>
+            <h1 className="text-base sm:text-lg font-semibold tracking-wide text-foreground leading-none" style={{ fontFamily: "'Cinzel', serif" }}>{tt("Dictionary")}</h1>
+            <p className="text-[10px] text-muted-foreground tracking-widest uppercase leading-none mt-0.5">{tt("Original Language Word Study")}</p>
           </div>
         </div>
         <TierBadge />

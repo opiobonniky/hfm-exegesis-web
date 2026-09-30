@@ -1,6 +1,7 @@
 import { ChevronLeft, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 /** Loading skeleton for verse pages */
 export function VerseLoadingSkeleton() {
@@ -21,10 +22,9 @@ export function VerseEmptyState({ onBack }: { onBack: () => void }) {
     <div className="min-h-screen bg-background flex items-center justify-center">
       <div className="text-center space-y-4">
         <Sparkles className="w-12 h-12 text-muted-foreground/30 mx-auto" />
-        <p className="text-muted-foreground">No verse available today</p>
+        <p className="text-muted-foreground">{tt("No verse available today")}</p>
         <Button onClick={onBack} variant="outline">
-          <ChevronLeft className="w-4 h-4 mr-1" /> Go back
-        </Button>
+          <ChevronLeft className="w-4 h-4 mr-1" />{tt("Go back")}</Button>
       </div>
     </div>
   );
@@ -48,10 +48,9 @@ export function DevotionEmptyState({ onBack }: { onBack: () => void }) {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center">
       <div className="text-center space-y-4">
-        <p className="text-muted-foreground">No devotion available today</p>
+        <p className="text-muted-foreground">{tt("No devotion available today")}</p>
         <Button onClick={onBack} variant="outline">
-          <ChevronLeft className="w-4 h-4 mr-1" /> Go back
-        </Button>
+          <ChevronLeft className="w-4 h-4 mr-1" />{tt("Go back")}</Button>
       </div>
     </div>
   );

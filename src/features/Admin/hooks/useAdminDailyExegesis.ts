@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { adminApi } from "../services/adminApi";
 import type { DailyExegesis, DailyExegesisEditForm as EditForm } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 const EMPTY_FORM: EditForm = {
   title: "", bookName: "", chapter: "", verseStart: "", verseEnd: "",
@@ -41,7 +42,7 @@ export function useAdminDailyExegesis() {
       const next = data?.hasNext ?? list.length === 20;
       setItems(prev => append ? [...prev, ...list] : list);
       setHasMore(next);
-    } catch { toast({ title: "Failed to load", variant: "destructive" }); }
+    } catch { toast({ title: tt("Failed to load"), variant: "destructive" }); }
     finally { setLoading(false); setLoadingMore(false); }
   }, [search, toast]);
 
@@ -92,7 +93,7 @@ export function useAdminDailyExegesis() {
 
   const handleSave = useCallback(async () => {
     if (!editForm.title || !editForm.passageReference || !editForm.teachingBody) {
-      toast({ title: "Validation Error", description: "Title, passage reference, and teaching body are required", variant: "destructive" });
+      toast({ title: tt("Validation Error"), description: tt("Title, passage reference, and teaching body are required"), variant: "destructive" });
       return;
     }
     setSaving(true);
@@ -118,7 +119,7 @@ export function useAdminDailyExegesis() {
         toast({ title: editItem ? "Updated" : "Created" });
         closeDialog(); load(0); setPage(0);
       } else { throw new Error(res?.returnMessage || res?.message || "Failed"); }
-    } catch (e) { toast({ title: "Error", description: (e as Error).message, variant: "destructive" }); }
+    } catch (e) { toast({ title: tt("Error"), description: (e as Error).message, variant: "destructive" }); }
     finally { setSaving(false); }
   }, [editForm, editItem, toast, closeDialog, load]);
 
@@ -128,9 +129,9 @@ export function useAdminDailyExegesis() {
     try {
       const res = await adminApi.request("admin", "delete-daily-exegesis", { id: deleteTarget.id });
       if (res?.returnCode === 200 || res?.status === 200) {
-        toast({ title: "Deleted" }); setDeleteTarget(null); load(0); setPage(0);
+        toast({ title: tt("Deleted") }); setDeleteTarget(null); load(0); setPage(0);
       }
-    } catch { toast({ title: "Delete failed", variant: "destructive" }); }
+    } catch { toast({ title: tt("Delete failed"), variant: "destructive" }); }
     finally { setDeletingId(null); }
   }, [deleteTarget, toast, load]);
 

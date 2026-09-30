@@ -1,3 +1,4 @@
+import { tt } from '@/components/languages/hardcodedTranslate';
 interface Props {
   passageRef: string;
   onGoBack: () => void;
@@ -18,9 +19,7 @@ export function LabReviewHeader({ passageRef, onGoBack }: Props) {
             <h1 className="text-sm sm:text-base font-semibold text-foreground truncate leading-tight">
               {passageRef}
             </h1>
-            <p className="text-[10px] text-muted-foreground tracking-widest uppercase leading-none mt-0.5">
-              Study Review
-            </p>
+            <p className="text-[10px] text-muted-foreground tracking-widest uppercase leading-none mt-0.5">{tt("Study Review")}</p>
           </div>
         </div>
       </div>

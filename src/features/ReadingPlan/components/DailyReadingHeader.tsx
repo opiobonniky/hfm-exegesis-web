@@ -1,5 +1,6 @@
 import { ArrowLeft, CheckCircle2, Flame, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   planTitle: string;
@@ -15,16 +16,16 @@ export default function DailyReadingHeader({ planTitle, dayNumber, totalDays, is
   return (
     <header className="relative border-b border-border/60 bg-background/80 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-6xl items-center gap-3 px-4 sm:px-6 lg:px-8">
-        <Button variant="ghost" size="icon" onClick={onBack} aria-label="Back to reading plan">
+        <Button variant="ghost" size="icon" onClick={onBack} aria-label={tt("Back to reading plan")}>
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-semibold">{planTitle}</p>
-          <p className="text-xs text-muted-foreground">Your guided Scripture practice</p>
+          <p className="text-xs text-muted-foreground">{tt("Your guided Scripture practice")}</p>
         </div>
         <div className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold ${isCompleted ? "bg-green-500/10 text-green-700 dark:text-green-400" : "bg-primary/10 text-primary"}`}>
           {isCompleted ? <CheckCircle2 className="h-3.5 w-3.5" /> : <Flame className="h-3.5 w-3.5" />}
-          {isCompleted ? "Complete" : `Day ${dayNumber}`}
+          {isCompleted ? tt("Complete") : `Day ${dayNumber}`}
         </div>
       </div>
 
@@ -34,18 +35,14 @@ export default function DailyReadingHeader({ planTitle, dayNumber, totalDays, is
           <div className="pointer-events-none absolute -bottom-24 right-24 h-48 w-48 rounded-full bg-white/5 blur-2xl" />
           <div className="relative max-w-2xl">
             <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-semibold backdrop-blur-sm">
-              <Sparkles className="h-3.5 w-3.5 text-amber-300" />
-              Today's practice
-            </div>
-            <p className="text-sm font-medium text-white/70">Day {dayNumber}{totalDays > 0 ? ` of ${totalDays}` : ""}</p>
-            <h1 className="mt-1 text-3xl font-bold tracking-tight sm:text-4xl">Read. Reflect. Respond.</h1>
-            <p className="mt-3 max-w-xl text-sm leading-6 text-white/75 sm:text-base">
-              Make room for the passage, write what stands out, and carry one truth into your day.
-            </p>
+              <Sparkles className="h-3.5 w-3.5 text-amber-300" />{tt("Today's practice")}</div>
+            <p className="text-sm font-medium text-white/70">{tt("Day")}{dayNumber}{totalDays > 0 ? ` of ${totalDays}` : ""}</p>
+            <h1 className="mt-1 text-3xl font-bold tracking-tight sm:text-4xl">{tt("Read. Reflect. Respond.")}</h1>
+            <p className="mt-3 max-w-xl text-sm leading-6 text-white/75 sm:text-base">{tt("Make room for the passage, write what stands out, and carry one truth into your day.")}</p>
             {totalDays > 0 && (
               <div className="mt-6 max-w-md">
                 <div className="mb-2 flex items-center justify-between text-xs font-medium text-white/70">
-                  <span>Plan progress</span>
+                  <span>{tt("Plan progress")}</span>
                   <span>{progress}%</span>
                 </div>
                 <div className="h-1.5 overflow-hidden rounded-full bg-black/20">

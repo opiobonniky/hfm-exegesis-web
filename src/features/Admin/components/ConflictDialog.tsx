@@ -5,6 +5,7 @@ import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogDescription,
 } from "@/components/ui/dialog";
 import type { ContentType } from "../constants";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   open: boolean;
@@ -22,8 +23,7 @@ export function ConflictDialog({ open, onOpenChange, contentType, data, saving, 
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
             <AlertTriangle className="w-5 h-5" />
-            {typeLabel} Already Exists
-          </DialogTitle>
+            {typeLabel}{tt("Already Exists")}</DialogTitle>
           <DialogDescription>
             {(() => {
               const conflict = data?.conflicts?.[0] || data;
@@ -45,14 +45,12 @@ export function ConflictDialog({ open, onOpenChange, contentType, data, saving, 
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className="flex-col-reverse sm:flex-row gap-2">
-          <Button variant="ghost" onClick={() => onOpenChange(false)} className="w-full sm:w-auto">
-            Cancel
-          </Button>
+          <Button variant="ghost" onClick={() => onOpenChange(false)} className="w-full sm:w-auto">{tt("Cancel")}</Button>
           <Button onClick={onResolve} disabled={saving} className="gap-2 w-full sm:w-auto">
             {saving ? (
-              <><Loader2 className="w-4 h-4 animate-spin" /> Updating...</>
+              <><Loader2 className="w-4 h-4 animate-spin" />{tt("Updating...")}</>
             ) : (
-              <><Save className="w-4 h-4" /> Update Existing</>
+              <><Save className="w-4 h-4" />{tt("Update Existing")}</>
             )}
           </Button>
         </DialogFooter>

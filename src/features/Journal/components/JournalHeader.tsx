@@ -2,6 +2,7 @@ import { BookText, Download, Plus, CheckSquare, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { JournalPageStats, JournalViewMode } from "../hooks/useJournalPageFull";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   stats: JournalPageStats | null;
@@ -23,9 +24,9 @@ export function JournalHeader({ stats, viewMode, selectionMode, selectedCount, o
               <BookText className="w-5 h-5 text-foreground/80 dark:text-muted-foreground/50" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-foreground dark:text-stone-100 tracking-tight">Legacy Ledger</h1>
+              <h1 className="text-xl font-bold text-foreground dark:text-stone-100 tracking-tight">{tt("Legacy Ledger")}</h1>
               <p className="text-sm text-muted-foreground dark:text-muted-foreground/70">
-                {stats ? `${stats.totalEntries} entries · ${stats.entriesThisWeek} this week` : "Your study archive"}
+                {stats ? `${stats.totalEntries} entries · ${stats.entriesThisWeek} this week` : tt("Your study archive")}
               </p>
             </div>
           </div>
@@ -33,14 +34,13 @@ export function JournalHeader({ stats, viewMode, selectionMode, selectedCount, o
             <div className="flex items-center gap-2">
               <Button variant="outline" size="sm" onClick={onToggleSelectionMode}
                 className={cn("rounded-xl border-border dark:border-stone-800 text-xs", selectionMode && "bg-foreground/10 text-foreground border-border")}>
-                {selectionMode ? <X className="w-4 h-4" /> : <CheckSquare className="w-4 h-4" />}{selectionMode ? "Cancel" : "Select"}
+                {selectionMode ? <X className="w-4 h-4" /> : <CheckSquare className="w-4 h-4" />}{selectionMode ? tt("Cancel") : tt("Select")}
               </Button>
               <Button variant="outline" size="sm" onClick={onExport} className="rounded-xl border-border dark:border-stone-800 text-xs gap-1.5">
-                <Download className="w-4 h-4" />{selectedCount > 0 ? `Export (${selectedCount})` : "Export"}
+                <Download className="w-4 h-4" />{selectedCount > 0 ? `Export (${selectedCount})` : tt("Export")}
               </Button>
               <Button size="sm" onClick={onCreate} className="rounded-xl bg-foreground/10 hover:bg-foreground/20 text-foreground gap-2 text-xs">
-                <Plus className="w-4 h-4" />New Entry
-              </Button>
+                <Plus className="w-4 h-4" />{tt("New Entry")}</Button>
             </div>
           )}
         </div>

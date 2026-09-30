@@ -1,5 +1,6 @@
 import { BookOpen, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   billingInterval: "month" | "year";
@@ -15,31 +16,24 @@ export function SowerHero({ billingInterval, setBillingInterval }: Props) {
       <div className="relative max-w-6xl mx-auto px-5 sm:px-6 text-center">
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-card/10 backdrop-blur-sm border border-card/20 mb-6">
           <BookOpen className="w-4 h-4 text-violet-200" />
-          <span className="text-xs font-bold text-violet-100 uppercase tracking-wider">Support the Mission</span>
+          <span className="text-xs font-bold text-violet-100 uppercase tracking-wider">{tt("Support the Mission")}</span>
         </div>
-        <h1 className="text-3xl sm:text-5xl font-black text-white mb-4 leading-tight px-4">
-          Sow into the Word
-        </h1>
-        <p className="text-base sm:text-xl text-violet-200 max-w-2xl mb-2 font-medium px-4">
-          The Word remains free. Your support makes the mission possible.
-        </p>
-        <p className="text-xs sm:text-sm text-violet-300/70 max-w-xl italic mb-8 px-4">
-          "Whoever sows sparingly will also reap sparingly, and whoever sows bountifully will also reap bountifully."
-          <br />
-          <span className="text-xs text-violet-300/50">— 2 Corinthians 9:6</span>
+        <h1 className="text-3xl sm:text-5xl font-black text-white mb-4 leading-tight px-4">{tt("Sow into the Word")}</h1>
+        <p className="text-base sm:text-xl text-violet-200 max-w-2xl mb-2 font-medium px-4">{tt("The Word remains free. Your support makes the mission possible.")}</p>
+        <p className="text-xs sm:text-sm text-violet-300/70 max-w-xl italic mb-8 px-4">{tt("\"Whoever sows sparingly will also reap sparingly, and whoever sows bountifully will also reap bountifully.\"")}<br />
+          <span className="text-xs text-violet-300/50">{tt("— 2 Corinthians 9:6")}</span>
         </p>
         <div className="flex items-center justify-center gap-3 mb-8">
           <button
             onClick={() => setBillingInterval("month")}
             className={cn("px-5 py-2 rounded-full text-sm font-bold transition-all",
               billingInterval === "month" ? "bg-card text-violet-900 shadow-lg" : "bg-card/10 text-violet-200 hover:bg-card/20")}
-          >Monthly</button>
+          >{tt("Monthly")}</button>
           <button
             onClick={() => setBillingInterval("year")}
             className={cn("px-5 py-2 rounded-full text-sm font-bold transition-all",
               billingInterval === "year" ? "bg-card text-violet-900 shadow-lg" : "bg-card/10 text-violet-200 hover:bg-card/20")}
-          >
-            Yearly<span className="ml-1.5 text-[10px] font-semibold opacity-70">~20% off</span>
+          >{tt("Yearly")}<span className="ml-1.5 text-[10px] font-semibold opacity-70">{tt("~20% off")}</span>
           </button>
         </div>
       </div>

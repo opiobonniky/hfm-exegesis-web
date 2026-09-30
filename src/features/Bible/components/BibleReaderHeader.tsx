@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import FontSizeControls from "./FontSizeControls";
 import TranslationPicker from "./TranslationPicker";
 import type { BibleReaderHeaderProps } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export default function BibleReaderHeader({
   bookName,
@@ -65,8 +66,7 @@ export default function BibleReaderHeader({
             <span className="max-w-[8rem] truncate font-[family-name:var(--font-heading)] text-sm font-bold leading-tight tracking-tight text-foreground sm:max-w-[14rem] sm:text-base">
               {bookName}
             </span>
-            <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-              Chapter {chapter}
+            <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">{tt("Chapter")}{chapter}
             </span>
           </span>
           <ChevronDown className="h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform group-hover:translate-y-0.5" />
@@ -82,7 +82,7 @@ export default function BibleReaderHeader({
           className="hidden h-9 gap-1.5 px-3 text-xs sm:flex"
         >
           <BookOpen className="w-3.5 h-3.5" />
-          <span>Overview</span>
+          <span>{tt("Overview")}</span>
         </Button>
 
         {/* Font size (desktop) */}

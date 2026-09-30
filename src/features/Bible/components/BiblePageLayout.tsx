@@ -5,6 +5,7 @@ import { ReactNode } from "react";
 import { Loader2, RefreshCw, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BIBLE_BOOKS } from "../constants";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface BiblePageLayoutProps {
   children: ReactNode;
@@ -43,12 +44,12 @@ export function BiblePageLayout({
             <div className="mx-auto flex max-w-4xl items-center justify-between gap-3 px-4 py-4 sm:px-6">
               <div>
                 <h1 className="font-[family-name:var(--font-heading)] text-xl font-bold text-foreground">{title}</h1>
-                <p className="text-xs text-muted-foreground">{count} items</p>
+                <p className="text-xs text-muted-foreground">{count}{tt("items")}</p>
               </div>
               <div className="flex items-center gap-2">
                 {actions}
                 {onRefresh && (
-                  <Button variant="ghost" size="icon" onClick={onRefresh} disabled={loading} title="Refresh">
+                  <Button variant="ghost" size="icon" onClick={onRefresh} disabled={loading} title={tt("Refresh")}>
                     <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
                   </Button>
                 )}
@@ -73,9 +74,9 @@ export function BiblePageLayout({
                     onChange={(event) => onFilterBookChange(event.target.value)}
                     className="h-10 max-w-40 rounded-xl border border-border/60 bg-background px-3 text-xs text-foreground"
                   >
-                    <option value="all">All Books</option>
+                    <option value="all">{tt("All Books")}</option>
                     {BIBLE_BOOKS.map((book) => (
-                      <option key={book.bookName} value={book.bookName}>{book.bookName}</option>
+                      <option key={book.bookName} value={book.bookName}>{tt(book.bookName)}</option>
                     ))}
                   </select>
                 )}

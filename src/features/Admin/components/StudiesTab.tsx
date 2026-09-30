@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import type { useStudyTools } from "../hooks/useStudyTools";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 type StudyToolsState = ReturnType<typeof useStudyTools>["data"] & ReturnType<typeof useStudyTools>["actions"];
 
@@ -17,8 +18,8 @@ export default function StudiesTab({ state }: StudiesTabProps) {
   const { toast } = useToast();
 
   const handleDelete = async (id: number) => {
-    if (await state.deleteStudy(id)) toast({ title: "Deleted", description: "Study deleted successfully" });
-    else toast({ title: "Error", description: "Failed to delete", variant: "destructive" });
+    if (await state.deleteStudy(id)) toast({ title: tt("Deleted"), description: tt("Study deleted successfully") });
+    else toast({ title: tt("Error"), description: tt("Failed to delete"), variant: "destructive" });
   };
 
   return (
@@ -28,7 +29,7 @@ export default function StudiesTab({ state }: StudiesTabProps) {
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="Search by Strong's ID, book, or note content..."
+            placeholder={tt("Search by Strong's ID, book, or note content...")}
             value={studiesSearch}
             onChange={(e) => setStudiesSearch(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && loadStudies(0, studiesSearch)}
@@ -37,8 +38,7 @@ export default function StudiesTab({ state }: StudiesTabProps) {
         </div>
         {studiesSearch && (
           <Button variant="ghost" size="sm" onClick={() => { setStudiesSearch(""); loadStudies(0, ""); }} className="h-9 text-xs">
-            <X className="w-3.5 h-3.5 mr-1" /> Clear
-          </Button>
+            <X className="w-3.5 h-3.5 mr-1" />{tt("Clear")}</Button>
         )}
       </div>
       {/* List */}
@@ -50,7 +50,7 @@ export default function StudiesTab({ state }: StudiesTabProps) {
         </div>
       ) : studies.length === 0 ? (
         <div className="text-center py-12 text-muted-foreground">
-          <p className="text-sm">No studies found.</p>
+          <p className="text-sm">{tt("No studies found.")}</p>
         </div>
       ) : (
         <div className="space-y-2">

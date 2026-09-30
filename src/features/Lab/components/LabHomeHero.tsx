@@ -2,6 +2,7 @@ import { BookOpen, Play, ChevronRight, Clock, Timer, Sparkles, Cross } from "luc
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { LabSession } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   activeSession: LabSession | null;
@@ -38,15 +39,15 @@ export function LabHomeHero({ activeSession, onStartStudy, handleResumeStudy }: 
             </div>
           </div>
         </div>
-        <h2 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight mb-2">Study the Word</h2>
-        <p className="text-sm text-muted-foreground/70 max-w-md mx-auto mb-3">A 4-step guided journey through Scripture — from observation to application.</p>
+        <h2 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight mb-2">{tt("Study the Word")}</h2>
+        <p className="text-sm text-muted-foreground/70 max-w-md mx-auto mb-3">{tt("A 4-step guided journey through Scripture — from observation to application.")}</p>
         {activeSession && !activeSession.completed && (
           <button onClick={() => handleResumeStudy(activeSession.id)}
             className="w-full rounded-xl bg-gradient-to-r from-primary to-primary/90 p-4 text-left mb-4 shadow-lg shadow-primary/25 group transition-all hover:shadow-xl active:scale-[0.99]">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
                 <div className="w-7 h-7 rounded-lg bg-white/15 flex items-center justify-center"><Play className="w-3.5 h-3.5 text-white fill-white" /></div>
-                <p className="text-sm font-bold text-white">Continue Study</p>
+                <p className="text-sm font-bold text-white">{tt("Continue Study")}</p>
               </div>
               <ChevronRight className="w-4 h-4 text-white/60 group-hover:text-white/90 transition-colors" />
             </div>
@@ -61,9 +62,8 @@ export function LabHomeHero({ activeSession, onStartStudy, handleResumeStudy }: 
         )}
         <div className="flex flex-col items-center gap-3">
           <Button onClick={onStartStudy} className="gap-2 h-12 px-7 rounded-xl shadow-lg shadow-primary/25 text-sm font-bold" size="lg">
-            <Play className="w-4 h-4 fill-current" />Start New Study
-          </Button>
-          {!activeSession && <p className="text-[10px] text-muted-foreground/50">Choose a passage and begin your journey</p>}
+            <Play className="w-4 h-4 fill-current" />{tt("Start New Study")}</Button>
+          {!activeSession && <p className="text-[10px] text-muted-foreground/50">{tt("Choose a passage and begin your journey")}</p>}
         </div>
       </div>
     </section>

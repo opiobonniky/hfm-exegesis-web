@@ -4,6 +4,7 @@ import { useLanguage } from "@/components/languages/languageProvider";
 import { useLabDictionary as useLabDictService } from "../services/use-lab-dictionary";
 
 import type { WordResult } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export function useLabDictionary() {
   const { t, isRtl } = useLanguage();
@@ -29,7 +30,7 @@ export function useLabDictionary() {
       localStorage.setItem("lab-dict-recent", JSON.stringify(updated));
     } catch { 
       setResults([]); 
-      toast({ title: "Search failed", variant: "destructive" }); 
+      toast({ title: tt("Search failed"), variant: "destructive" });
     } finally { 
       setLoading(false); 
     }

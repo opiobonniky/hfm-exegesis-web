@@ -2,6 +2,7 @@ import { Lightbulb, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/components/languages/languageProvider";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export function DailyDevotionsHeader({ onAdd }: { onAdd: () => void }) {
   const { userInfo } = useAuth();
@@ -16,16 +17,16 @@ export function DailyDevotionsHeader({ onAdd }: { onAdd: () => void }) {
         </div>
         <div>
           <h1 className="text-3xl font-bold font-[family-name:var(--font-heading)]">
-            {t.devotions?.dailyDevotions || "Daily Devotion"}
+            {t.devotions?.dailyDevotions || tt("Daily Devotion")}
           </h1>
           <p className="text-muted-foreground">
-            {t.devotions?.pageSubtitle || "Spiritual reflections for each day"}
+            {t.devotions?.pageSubtitle || tt("Spiritual reflections for each day")}
           </p>
         </div>
       </div>
       {isAdmin && (
         <Button onClick={onAdd} className="gap-2 bg-gradient-to-r from-primary to-primary/80 shadow-md w-fit">
-          <Plus className="w-4 h-4" />{t.devotions?.addDevotion || "Add Devotion"}
+          <Plus className="w-4 h-4" />{t.devotions?.addDevotion || tt("Add Devotion")}
         </Button>
       )}
     </div>

@@ -3,6 +3,7 @@ import { Sun, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/components/languages/languageProvider";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export default function DailyVerseHeader({ onAdd }: { onAdd: () => void }) {
   const { userInfo } = useAuth();
@@ -15,14 +16,14 @@ export default function DailyVerseHeader({ onAdd }: { onAdd: () => void }) {
           <Sun className="w-5 h-5 text-muted-foreground" />
         </div>
         <div>
-          <h1 className="text-xl font-bold">{t.dailyVerse?.dailyVerse || "Daily Verse"}</h1>
-          <p className="text-sm text-muted-foreground">{t.dailyVerse?.pageSubtitle || "Start each day with God's Word"}</p>
+          <h1 className="text-xl font-bold">{t.dailyVerse?.dailyVerse || tt("Daily Verse")}</h1>
+          <p className="text-sm text-muted-foreground">{t.dailyVerse?.pageSubtitle || tt("Start each day with God's Word")}</p>
         </div>
       </div>
       {isAdmin && (
         <Button onClick={onAdd} size="sm" className="gap-2 w-fit">
           <Plus className="w-4 h-4" />
-          {t.dailyVerse?.addVerse || "Add Daily Verse"}
+          {t.dailyVerse?.addVerse || tt("Add Daily Verse")}
         </Button>
       )}
     </div>

@@ -5,6 +5,7 @@ import { useLanguage } from "@/components/languages/languageProvider";
 import { getVerseText } from "@/utilities/bibleUtils";
 import { formatDisplayDate, isToday, isFuture } from "../constants";
 import type { DailyVerseItem } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   verse: DailyVerseItem;
@@ -21,9 +22,9 @@ export default function DailyVerseFeaturedVerse({ verse, onOpenBible, onWriteJou
           <Calendar className="w-3 h-3 mr-1" />
           {formatDisplayDate(verse.displayDate)}
         </Badge>
-        {isToday(verse.displayDate) && <Badge className="text-xs">Today</Badge>}
+        {isToday(verse.displayDate) && <Badge className="text-xs">{tt("Today")}</Badge>}
         {isFuture(verse.displayDate) && (
-          <Badge variant="outline" className="text-xs border-primary/30 text-primary">Upcoming</Badge>
+          <Badge variant="outline" className="text-xs border-primary/30 text-primary">{tt("Upcoming")}</Badge>
         )}
       </div>
       <h2 className="text-xl font-semibold mb-2">
@@ -37,16 +38,16 @@ export default function DailyVerseFeaturedVerse({ verse, onOpenBible, onWriteJou
       </blockquote>
       <div className="bg-muted/50 rounded-xl p-5 mb-4">
         <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-          {t.dailyVerse?.explanation || "Explanation"}
+          {t.dailyVerse?.explanation || tt("Explanation")}
         </h3>
         <p className="text-base leading-relaxed text-foreground/85 whitespace-pre-line">
-          {verse.explanation || verse.reflection || "No explanation available."}
+          {verse.explanation || verse.reflection || tt("No explanation available.")}
         </p>
         {verse.learnMore && (
           <div className="mt-4 pt-4 border-t border-border">
             <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
               <Lightbulb className="w-3.5 h-3.5" />
-              {t.dailyVerse?.learnMore || "Learn More"}
+              {t.dailyVerse?.learnMore || tt("Learn More")}
             </h4>
             <p className="text-sm leading-relaxed text-muted-foreground whitespace-pre-line">
               {verse.learnMore}
@@ -56,11 +57,9 @@ export default function DailyVerseFeaturedVerse({ verse, onOpenBible, onWriteJou
       </div>
       <div className="flex flex-col sm:flex-row gap-3">
         <Button className="flex-1 gap-2 h-11" onClick={() => onOpenBible(verse)}>
-          <BookOpen className="w-4 h-4" />Open in Bible
-        </Button>
+          <BookOpen className="w-4 h-4" />{tt("Open in Bible")}</Button>
         <Button variant="outline" className="flex-1 gap-2 h-11" onClick={() => onWriteJournal(verse)}>
-          <PenLine className="w-4 h-4" />Write in Journal
-        </Button>
+          <PenLine className="w-4 h-4" />{tt("Write in Journal")}</Button>
       </div>
     </section>
   );

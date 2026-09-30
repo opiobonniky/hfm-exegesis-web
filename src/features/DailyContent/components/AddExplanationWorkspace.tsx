@@ -8,6 +8,7 @@ import { AddExplanationStudyForm } from "./AddExplanationStudyForm";
 import { AddExplanationExtrasForm } from "./AddExplanationExtrasForm";
 import { AddExplanationFooterActions } from "./AddExplanationFooterActions";
 import type { AddExplanationWorkspaceProps } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export function AddExplanationWorkspace({
   data,
@@ -29,10 +30,10 @@ export function AddExplanationWorkspace({
       <div className="rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-5">
         <Tabs value={data.activeTab} onValueChange={(value) => actions.setActiveTab(value as typeof data.activeTab)}>
           <TabsList className="hidden" aria-hidden="true">
-            <TabsTrigger value="reference">Reference</TabsTrigger>
-            <TabsTrigger value="exegesis">Exegesis</TabsTrigger>
-            <TabsTrigger value="study">Study</TabsTrigger>
-            <TabsTrigger value="extras">Extras</TabsTrigger>
+            <TabsTrigger value="reference">{tt("Reference")}</TabsTrigger>
+            <TabsTrigger value="exegesis">{tt("Exegesis")}</TabsTrigger>
+            <TabsTrigger value="study">{tt("Study")}</TabsTrigger>
+            <TabsTrigger value="extras">{tt("Extras")}</TabsTrigger>
           </TabsList>
           <TabsContent value="reference">
             <AddExplanationReferenceForm

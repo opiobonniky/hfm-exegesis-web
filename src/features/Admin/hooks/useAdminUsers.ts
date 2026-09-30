@@ -5,6 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { adminApi } from "../services/adminApi";
 import type { AdminUser } from "../types";
 import { USERS_PAGE_SIZE, USER_SEARCH_DEBOUNCE_MS, USER_ROLE_MAP } from "../constants";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export function useAdminUsers() {
   const navigate = useNavigate();
@@ -39,7 +40,7 @@ export function useAdminUsers() {
         setTotalCount(total);
         setHasMore(pageNum + 1 < totalPages);
       } catch {
-        toast({ title: "Failed to load users", variant: "destructive" });
+        toast({ title: tt("Failed to load users"), variant: "destructive" });
       } finally {
         setLoading(false);
         setLoadingMore(false);
@@ -99,7 +100,7 @@ export function useAdminUsers() {
           toast({ title: newStatus ? "User activated" : "User deactivated" });
         }
       } catch {
-        toast({ title: "Failed to update status", variant: "destructive" });
+        toast({ title: tt("Failed to update status"), variant: "destructive" });
       } finally {
         setActionLoading(null);
       }
@@ -125,7 +126,7 @@ export function useAdminUsers() {
           toast({ title: newVerified ? "User verified" : "Verification removed" });
         }
       } catch {
-        toast({ title: "Failed to update verification", variant: "destructive" });
+        toast({ title: tt("Failed to update verification"), variant: "destructive" });
       } finally {
         setActionLoading(null);
       }
@@ -158,7 +159,7 @@ export function useAdminUsers() {
         setUsers((prev) =>
           prev.map((u) => (u.id === user.id ? { ...u, userRole: user.userRole } : u)),
         );
-        toast({ title: "Failed to update role", variant: "destructive" });
+        toast({ title: tt("Failed to update role"), variant: "destructive" });
       } finally {
         setActionLoading(null);
       }
@@ -181,7 +182,7 @@ export function useAdminUsers() {
           setUsers((prev) => prev.filter((u) => u.id !== user.id));
           setTotalCount((prev) => Math.max(0, prev - 1));
           toast({
-            title: "User deleted",
+            title: tt("User deleted"),
             description: `${user.firstName || user.username} and all associated data were permanently removed.`,
           });
         } else {
@@ -191,7 +192,7 @@ export function useAdminUsers() {
           });
         }
       } catch {
-        toast({ title: "Failed to delete user", variant: "destructive" });
+        toast({ title: tt("Failed to delete user"), variant: "destructive" });
       } finally {
         setActionLoading(null);
       }

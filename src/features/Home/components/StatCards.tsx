@@ -1,14 +1,15 @@
 // StatCards — stats row for dashboard
 import { BookOpen, Star, BookMarked, PenLine, Heart, type LucideIcon } from "lucide-react";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Stat { label: string; icon: LucideIcon; }
 
 const STATS: Stat[] = [
-  { label: "Chapters", icon: BookOpen },
-  { label: "Highlights", icon: Star },
-  { label: "Notes", icon: BookMarked },
-  { label: "Journal", icon: PenLine },
-  { label: "Favorites", icon: Heart },
+  { label: tt("Chapters"), icon: BookOpen },
+  { label: tt("Highlights"), icon: Star },
+  { label: tt("Notes"), icon: BookMarked },
+  { label: tt("Journal"), icon: PenLine },
+  { label: tt("Favorites"), icon: Heart },
 ];
 
 interface Props { chaptersRead: number; highlights: number; notes: number; journalEntries: number; favorites: number; }
@@ -16,7 +17,7 @@ interface Props { chaptersRead: number; highlights: number; notes: number; journ
 export function StatCards({ chaptersRead, highlights, notes, journalEntries, favorites }: Props) {
   const values = [chaptersRead, highlights, notes, journalEntries, favorites];
   return (
-    <section aria-label="Your study statistics" className="overflow-hidden rounded-2xl border border-[#d8d2c4] bg-[#faf8f2] dark:border-white/10 dark:bg-[#111b24]">
+    <section aria-label={tt("Your study statistics")} className="overflow-hidden rounded-2xl border border-[#d8d2c4] bg-[#faf8f2] dark:border-white/10 dark:bg-[#111b24]">
       <div className="grid grid-cols-2 sm:grid-cols-5">
       {STATS.map((s, i) => (
         <div key={s.label} className="flex min-h-24 items-center gap-3 border-b border-e border-[#e2ddd2] p-4 last:col-span-2 last:border-b-0 sm:last:col-span-1 sm:border-b-0 sm:p-5 dark:border-white/10">

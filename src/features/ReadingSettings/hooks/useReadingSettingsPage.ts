@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useTheme } from "@/hooks/useTheme";
 import { routes } from "@/components/Routes/routes";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export type FontSize = "small" | "medium" | "large";
 export const FONT_SIZES: { value: FontSize; label: string; px: string }[] = [
@@ -25,10 +26,10 @@ export function useReadingSettingsPage() {
       localStorage.setItem("reading_font_size", fontSizePx);
       localStorage.setItem("reading_show_verse_numbers", String(showVerseNumbers));
       localStorage.setItem("reading_auto_play", String(autoPlayVerse));
-      toast({ title: "Saved", description: "Reading settings updated" });
+      toast({ title: tt("Saved"), description: tt("Reading settings updated") });
       navigate(routes.settings.path);
     } catch {
-      toast({ title: "Error", variant: "destructive" });
+      toast({ title: tt("Error"), variant: "destructive" });
     } finally { setSaving(false); }
   }, [fontSizePx, showVerseNumbers, autoPlayVerse, navigate, toast]);
   const goBack = useCallback(() => navigate(-1), [navigate]);

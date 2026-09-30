@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 import type { VerseExplanation } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 const BIBLE_BOOKS = [
   "All Books","Genesis","Exodus","Leviticus","Numbers","Deuteronomy","Joshua","Judges","Ruth",
@@ -43,11 +44,11 @@ export default function ExplanationList({
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
         <div className="relative flex-1 w-full sm:max-w-xs">
           <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/40" />
-          <Input placeholder="Search by book, chapter, verse..." className="pl-9" value={search} onChange={(e) => onSearchChange(e.target.value)} />
+          <Input placeholder={tt("Search by book, chapter, verse...")} className="pl-9" value={search} onChange={(e) => onSearchChange(e.target.value)} />
         </div>
         <Select value={bookFilter} onValueChange={onBookFilterChange}>
           <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
-          <SelectContent className="max-h-64">{BIBLE_BOOKS.map((b) => <SelectItem key={b} value={b}>{b}</SelectItem>)}</SelectContent>
+          <SelectContent className="max-h-64">{BIBLE_BOOKS.map((b) => <SelectItem key={b} value={b}>{tt(b)}</SelectItem>)}</SelectContent>
         </Select>
       </div>
       {/* List */}
@@ -58,9 +59,9 @@ export default function ExplanationList({
           <Card className="border-border/40">
             <CardContent className="flex flex-col items-center justify-center py-16 gap-3">
               <BookOpen className="w-12 h-12 text-muted-foreground/40" />
-              <p className="text-muted-foreground font-medium">{explanations.length === 0 ? "No verse explanations yet" : "No results match your search"}</p>
+              <p className="text-muted-foreground font-medium">{explanations.length === 0 ? tt("No verse explanations yet") : tt("No results match your search")}</p>
               {explanations.length === 0 && (
-                <Button variant="outline" size="sm" onClick={onAddFirst} className="gap-2 mt-1"><Plus className="w-4 h-4" /> Add your first explanation</Button>
+                <Button variant="outline" size="sm" onClick={onAddFirst} className="gap-2 mt-1"><Plus className="w-4 h-4" />{tt("Add your first explanation")}</Button>
               )}
             </CardContent>
           </Card>
@@ -78,9 +79,9 @@ export default function ExplanationList({
                     <div className="flex flex-wrap items-center gap-2 mb-1">
                       <h3 className="font-bold text-base">{item.bookName} {item.chapter}:{item.verseNumber}</h3>
                       {item.bibleVersion && <Badge variant="outline" className="text-xs font-mono">{item.bibleVersion}</Badge>}
-                      {item.learnMore && <Badge variant="outline" className="text-xs gap-1 border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-500/30 dark:bg-amber-500/15 dark:text-amber-400"><Sparkles className="w-3 h-3" /> Learn More</Badge>}
+                      {item.learnMore && <Badge variant="outline" className="text-xs gap-1 border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-500/30 dark:bg-amber-500/15 dark:text-amber-400"><Sparkles className="w-3 h-3" />{tt("Learn More")}</Badge>}
                     </div>
-                    {item.updatedOn && <p className="text-xs text-muted-foreground/60 mb-2">Updated {new Date(item.updatedOn).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</p>}
+                    {item.updatedOn && <p className="text-xs text-muted-foreground/60 mb-2">{tt("Updated")}{new Date(item.updatedOn).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</p>}
                   </div>
                   {isAdmin && (
                     <div className="flex items-center gap-1 shrink-0">
@@ -95,7 +96,7 @@ export default function ExplanationList({
                     <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">{item.explanation}</p>
                     {item.learnMore && (
                       <div className="mt-3 pt-3 border-t border-border/20">
-                        <p className="text-xs font-semibold text-amber-600 dark:text-amber-400 mb-1">Learn More</p>
+                        <p className="text-xs font-semibold text-amber-600 dark:text-amber-400 mb-1">{tt("Learn More")}</p>
                         <p className="text-sm text-foreground/70 leading-relaxed whitespace-pre-wrap">{item.learnMore}</p>
                       </div>
                     )}
@@ -108,7 +109,7 @@ export default function ExplanationList({
       </div>
       {/* Count */}
       {!loading && filtered.length > 0 && (
-        <p className="text-xs text-muted-foreground text-center pb-4">Showing {filtered.length} of {explanations.length} explanations</p>
+        <p className="text-xs text-muted-foreground text-center pb-4">{tt("Showing")}{filtered.length} of {explanations.length}{tt("explanations")}</p>
       )}
     </div>
   );

@@ -2,6 +2,7 @@
 import { BookOpen, FileText, BookmarkCheck, Search, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { SearchScope } from "@/services/searchApi";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 const SCOPES: SearchScope[] = ["bible", "strongs", "journal", "topics", "lemma"];
 const SCOPE_LABELS: Record<SearchScope, string> = {
@@ -70,7 +71,7 @@ export default function SearchFilters({
                   covenant === c ? "bg-card text-foreground shadow-sm" : "text-muted-foreground",
                 )}
               >
-                {c === "all" ? "All" : c === "ot" ? "OT" : "NT"}
+                {c === "all" ? tt("All") : c === "ot" ? "OT" : "NT"}
               </button>
             ))}
           </div>
@@ -80,9 +81,9 @@ export default function SearchFilters({
             onChange={(e) => onBookFilterChange(e.target.value)}
             className="flex-1 h-8 px-2 rounded-lg border border-border bg-background text-xs text-foreground focus:ring-2 focus:ring-primary"
           >
-            <option value="">All Books</option>
+            <option value="">{tt("All Books")}</option>
             {filteredBooks.map((b) => (
-              <option key={b} value={b}>{b}</option>
+              <option key={b} value={b}>{tt(b)}</option>
             ))}
           </select>
         </div>

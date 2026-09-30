@@ -1,5 +1,6 @@
 // VoiceSettings layout wrapper
 import { ReactNode } from "react";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface VoiceSettingsLayoutProps {
   children: ReactNode;
@@ -32,9 +33,7 @@ export function VoiceSettingsHeader({ title, subtitle, saving, onBack, onSave }:
       <button onClick={onSave} disabled={saving} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-all disabled:opacity-50">
         {saving ? (
           <svg className="mr-2 h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
-        ) : null}
-        Save
-      </button>
+        ) : null}{tt("Save")}</button>
     </div>
   );
 }
@@ -50,8 +49,8 @@ export function VoicePreviewCard({ isPlaying, onPlay, onStop }: VoicePreviewCard
     <div className="rounded-lg border bg-card p-6">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm font-medium">Preview Voice</p>
-          <p className="text-xs text-muted-foreground mt-1 max-w-md">For God so loved the world that he gave his one and only Son...</p>
+          <p className="text-sm font-medium">{tt("Preview Voice")}</p>
+          <p className="text-xs text-muted-foreground mt-1 max-w-md">{tt("For God so loved the world that he gave his one and only Son...")}</p>
         </div>
         <button
           onClick={isPlaying ? onStop : onPlay}
@@ -62,7 +61,7 @@ export function VoicePreviewCard({ isPlaying, onPlay, onStop }: VoicePreviewCard
           ) : (
             <svg className="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /></svg>
           )}
-          {isPlaying ? "Stop" : "Play"}
+          {isPlaying ? tt("Stop") : tt("Play")}
         </button>
       </div>
     </div>
@@ -80,16 +79,14 @@ export function VoiceProviderCard({ edgeEnabled, onToggleEdge, children }: Voice
     <div className="rounded-lg border bg-card">
       <div className="px-6 py-4 border-b">
         <p className="font-semibold flex items-center gap-2">
-          <svg className="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072M12 6l-4 4h3v4h2v-4h3l-4-4z" /></svg>
-          Voice Provider
-        </p>
-        <p className="text-sm text-muted-foreground">Choose between device voices or cloud-based Microsoft Edge voices</p>
+          <svg className="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072M12 6l-4 4h3v4h2v-4h3l-4-4z" /></svg>{tt("Voice Provider")}</p>
+        <p className="text-sm text-muted-foreground">{tt("Choose between device voices or cloud-based Microsoft Edge voices")}</p>
       </div>
       <div className="p-6 space-y-4">
         <div className="flex items-center justify-between border rounded-lg p-4">
           <div>
-            <p className="font-medium">Microsoft Edge TTS</p>
-            <p className="text-sm text-muted-foreground">High-quality neural voices powered by Microsoft Azure</p>
+            <p className="font-medium">{tt("Microsoft Edge TTS")}</p>
+            <p className="text-sm text-muted-foreground">{tt("High-quality neural voices powered by Microsoft Azure")}</p>
           </div>
           <button
             onClick={() => onToggleEdge(!edgeEnabled)}
@@ -157,7 +154,7 @@ interface VoiceGridCardProps {
 export function VoiceGridCard({ voices, selectedId, onSelect }: VoiceGridCardProps) {
   return (
     <div className="space-y-2">
-      <p className="text-sm font-medium">Select Voice</p>
+      <p className="text-sm font-medium">{tt("Select Voice")}</p>
       <div className="grid grid-cols-2 gap-2 mt-2">
         {voices.map((voice) => (
           <button key={voice.id} onClick={() => onSelect(voice.id)}

@@ -4,6 +4,7 @@ import { useLanguage } from "@/components/languages/languageProvider";
 import { ActivePlanCard } from "./ActivePlanCard";
 import type { ReadingPlan } from "../types";
 import type { Tab } from "../hooks/useBibleReadingPlanPage";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   myPlans: ReadingPlan[];
@@ -29,12 +30,12 @@ export function ReadingPlanProgressTab({
         <div className="w-16 h-16 rounded-2xl bg-teal-50 flex items-center justify-center mb-4">
           <BookOpen className="w-8 h-8 text-teal-500" />
         </div>
-        <h3 className="text-xl font-bold text-foreground mb-2">{t.readingPlan?.noActivePlan || "No active plan yet"}</h3>
+        <h3 className="text-xl font-bold text-foreground mb-2">{t.readingPlan?.noActivePlan || tt("No active plan yet")}</h3>
         <p className="text-sm text-muted-foreground text-center mb-6 max-w-xs">
-          {t.readingPlan?.startPlanDesc || "Head over to Browse Plans and start your first reading plan."}
+          {t.readingPlan?.startPlanDesc || tt("Head over to Browse Plans and start your first reading plan.")}
         </p>
         <button onClick={() => setActiveTab("browse")} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-sm font-semibold transition-all">
-          {t.readingPlan?.browsePlans || "Browse Plans"}<ChevronRight className={cn("w-4 h-4", isRtl && "rotate-180")} />
+          {t.readingPlan?.browsePlans || tt("Browse Plans")}<ChevronRight className={cn("w-4 h-4", isRtl && "rotate-180")} />
         </button>
       </div>
     );
@@ -68,7 +69,7 @@ export function ReadingPlanProgressTab({
         <>
           <div className="flex items-center gap-2 pt-4">
             <Trophy className="w-4 h-4 text-emerald-500" />
-            <span className="text-sm font-semibold text-muted-foreground">{t.readingPlan?.completedPlans || "Completed Plans"}</span>
+            <span className="text-sm font-semibold text-muted-foreground">{t.readingPlan?.completedPlans || tt("Completed Plans")}</span>
           </div>
           {completed.map((plan) => (
             <ActivePlanCard key={plan.planId} plan={plan} {...makeHandlers(plan)} />

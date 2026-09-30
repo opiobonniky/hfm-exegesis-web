@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TriviaQuestionCard } from "./index";
 import { CATEGORY_OPTIONS, TRIVIA_DIFFICULTIES, TRIVIA_PAGE_SIZE } from "../constants";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   h: {
@@ -33,26 +34,26 @@ export function TriviaQuestionsTab({ h }: Props) {
     <Card className="border-border/50">
       <CardHeader className="pb-3">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <CardTitle className="text-base">All Questions <span className="text-muted-foreground font-normal">({h.totalQuestions})</span></CardTitle>
-          <Button size="sm" onClick={h.openCreateDialog}><Plus className="w-4 h-4 mr-1.5" />New Question</Button>
+          <CardTitle className="text-base">{tt("All Questions")}<span className="text-muted-foreground font-normal">({h.totalQuestions})</span></CardTitle>
+          <Button size="sm" onClick={h.openCreateDialog}><Plus className="w-4 h-4 mr-1.5" />{tt("New Question")}</Button>
         </div>
         <div className="flex flex-col sm:flex-row gap-2 mt-2">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input placeholder="Search questions..." value={h.searchQuery} onChange={e => h.setSearchQuery(e.target.value)} className="pl-9 h-9 text-sm" />
+            <Input placeholder={tt("Search questions...")} value={h.searchQuery} onChange={e => h.setSearchQuery(e.target.value)} className="pl-9 h-9 text-sm" />
             {h.searchQuery && <button onClick={() => h.setSearchQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"><span className="text-xs">✕</span></button>}
           </div>
           <Select value={h.difficultyFilter} onValueChange={h.setDifficultyFilter}>
-            <SelectTrigger className="h-9 w-32 text-sm"><SelectValue placeholder="Difficulty" /></SelectTrigger>
+            <SelectTrigger className="h-9 w-32 text-sm"><SelectValue placeholder={tt("Difficulty")} /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Difficulties</SelectItem>
+              <SelectItem value="all">{tt("All Difficulties")}</SelectItem>
               {TRIVIA_DIFFICULTIES.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}
             </SelectContent>
           </Select>
           <Select value={h.categoryFilter} onValueChange={h.setCategoryFilter}>
-            <SelectTrigger className="h-9 w-36 text-sm"><SelectValue placeholder="Category" /></SelectTrigger>
+            <SelectTrigger className="h-9 w-36 text-sm"><SelectValue placeholder={tt("Category")} /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Categories</SelectItem>
+              <SelectItem value="all">{tt("All Categories")}</SelectItem>
               {CATEGORY_OPTIONS.filter(c => c !== "all").map(c => <SelectItem key={c} value={c}>{c.replace("-", " ")}</SelectItem>)}
             </SelectContent>
           </Select>
@@ -64,8 +65,8 @@ export function TriviaQuestionsTab({ h }: Props) {
         ) : h.questions.length === 0 ? (
           <div className="flex flex-col items-center py-16 text-center px-4">
             <HelpCircle className="w-10 h-10 mb-3 text-muted-foreground/40" />
-            <p className="font-medium">No questions found</p>
-            <Button variant="ghost" size="sm" className="mt-3 text-primary" onClick={h.openCreateDialog}>Create your first question</Button>
+            <p className="font-medium">{tt("No questions found")}</p>
+            <Button variant="ghost" size="sm" className="mt-3 text-primary" onClick={h.openCreateDialog}>{tt("Create your first question")}</Button>
           </div>
         ) : (
           <div className="divide-y divide-border/40">

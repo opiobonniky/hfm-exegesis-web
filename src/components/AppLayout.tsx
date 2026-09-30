@@ -9,6 +9,7 @@ import { Menu, Sun, Moon } from 'lucide-react';
 import { Button } from './ui/button';
 import { useTheme } from '@/hooks/useTheme';
 import { routes } from './Routes/routes';
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 /**
  * Try to match the current pathname to a route config and return its title.
@@ -38,7 +39,7 @@ function matchRouteTitle(pathname: string): string | null {
 
 export function AppLayout() {
   const { isAuthenticated, userInfo } = useAuth();
-  const { t, isRtl } = useLanguage();
+  const { isRtl } = useLanguage();
   const { themeMode, setThemeMode } = useTheme();
   const location = useLocation();
 
@@ -50,9 +51,9 @@ export function AppLayout() {
     // Fallback to dashboard titles
     const isAdmin = userInfo?.userRole === 1;
     return isAdmin
-      ? (t.common?.dashboard || t.sidebar?.dashboard || 'Dashboard')
-      : (t.sidebar?.myDashboard || t.dashboard?.myDashboard || 'My Dashboard');
-  }, [location.pathname, userInfo?.userRole, t]);
+      ? tt('Dashboard')
+      : tt('My Dashboard');
+  }, [location.pathname, userInfo?.userRole]);
 
   // ── Sync browser tab title ──
   useEffect(() => {
@@ -80,7 +81,7 @@ export function AppLayout() {
             <button
               onClick={() => setThemeMode(themeMode === "dark" ? "light" : "dark")}
               className="ms-auto flex items-center justify-center w-8 h-8 rounded-lg hover:bg-muted transition-all active:scale-95"
-              title={themeMode === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+              title={themeMode === "dark" ? tt("Switch to light mode") : tt("Switch to dark mode")}
             >
               {themeMode === "dark" ? (
                 <Sun className="w-4 h-4 text-muted-foreground" />

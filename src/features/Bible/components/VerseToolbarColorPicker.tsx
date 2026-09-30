@@ -8,6 +8,7 @@ import {
   VERSE_HIGHLIGHT_COLORS,
   VERSE_HIGHLIGHT_COLOR_GROUPS,
 } from "../constants";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface VerseToolbarColorPickerProps {
   /** Currently applied highlight color id, if any (0 = none). */
@@ -68,7 +69,7 @@ export default function VerseToolbarColorPicker({
       />
       <span
         role="menu"
-        aria-label="Choose highlight color"
+        aria-label={tt("Choose highlight color")}
         style={{ top: pos.top, left: pos.left, width: PICKER_WIDTH }}
         className="fixed z-[100] flex flex-col gap-2 rounded-2xl border border-border/80 bg-popover/95 p-3 shadow-xl backdrop-blur-md animate-in fade-in slide-in-from-bottom-1"
         onClick={(e) => e.stopPropagation()}
@@ -116,12 +117,10 @@ export default function VerseToolbarColorPicker({
               onClear();
             }}
             className="flex items-center justify-center gap-1.5 rounded-lg border border-dashed border-muted-foreground/40 py-1 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            title="Remove highlight"
-            aria-label="Remove highlight"
+            title={tt("Remove highlight")}
+            aria-label={tt("Remove highlight")}
           >
-            <Eraser className="h-3 w-3" />
-            Remove highlight
-          </button>
+            <Eraser className="h-3 w-3" />{tt("Remove highlight")}</button>
         )}
       </span>
     </>,

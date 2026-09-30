@@ -3,6 +3,7 @@ import type { ChangeEventHandler } from "react";
 import type { Translations } from "@/components/languages/type";
 import { Textarea } from "@/components/ui/textarea";
 import { FormCard } from "./FormCard";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 const TEXTAREA_CLASS_NAME = "rounded-xl border-border dark:border-stone-800 bg-card dark:bg-stone-900 text-sm text-foreground dark:text-stone-200 min-h-[100px]";
 const SERIF_STYLE = { fontFamily: "'Georgia', 'Times New Roman', serif" };
@@ -65,35 +66,35 @@ export function JournalEntryReflectionFields({
   return (
     <>
       <JournalFormReflectionField
-        title={t.journal.whatILearned || "What I Learned"}
-        subtitle={t.journal.learnSubtitle || "Insights & revelations from this reading"}
-        placeholder={t.journal.learnPlaceholder || "Key insights or revelations from your reading..."}
+        title={t.journal.whatILearned || tt("What I Learned")}
+        subtitle={t.journal.learnSubtitle || tt("Insights & revelations from this reading")}
+        placeholder={t.journal.learnPlaceholder || tt("Key insights or revelations from your reading...")}
         value={learnings}
         icon={Lightbulb}
         onChange={onLearningsChange}
       />
       <JournalFormReflectionField
-        title={t.journal.howIllApply || "How I'll Apply"}
-        subtitle={t.journal.applySubtitle || "Practical steps to live out this truth"}
-        placeholder={t.journal.applyPlaceholder || "How will this change your life or actions?"}
+        title={t.journal.howIllApply || tt("How I'll Apply")}
+        subtitle={t.journal.applySubtitle || tt("Practical steps to live out this truth")}
+        placeholder={t.journal.applyPlaceholder || tt("How will this change your life or actions?")}
         value={application}
         icon={Pencil}
         onChange={onApplicationChange}
       />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <JournalFormReflectionField
-          title={t.journal.gratitude || "Gratitude"}
-          subtitle={t.journal.gratitudeSubtitle || "Counting blessings and gifts"}
-          placeholder={t.journal.gratPlaceholder || "List your gratitude..."}
+          title={t.journal.gratitude || tt("Gratitude")}
+          subtitle={t.journal.gratitudeSubtitle || tt("Counting blessings and gifts")}
+          placeholder={t.journal.gratPlaceholder || tt("List your gratitude...")}
           value={gratitude}
           icon={Heart}
           compact
           onChange={onGratitudeChange}
         />
         <JournalFormReflectionField
-          title={t.journal.prayers || "Prayers"}
-          subtitle={t.journal.prayerSubtitle || "Conversations with the Father"}
-          placeholder={t.journal.prayerPlaceholder || "Prayers and requests..."}
+          title={t.journal.prayers || tt("Prayers")}
+          subtitle={t.journal.prayerSubtitle || tt("Conversations with the Father")}
+          placeholder={t.journal.prayerPlaceholder || tt("Prayers and requests...")}
           value={prayers}
           icon={Star}
           compact

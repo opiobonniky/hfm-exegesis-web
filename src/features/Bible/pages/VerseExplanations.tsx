@@ -6,6 +6,7 @@ import ExplanationList from "../components/ExplanationList";
 import { PageHeader } from "@/components/PageHeader";
 import { DeleteConfirmDialog } from "../components/DeleteConfirmDialog";
 import { BiblePageLayout, BiblePageInner, DeletePreview, VerseExplanationsAddAction } from "../components";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 const VerseExplanations = () => {
   const { data, actions } = useVerseExplanationsPage();
@@ -15,7 +16,7 @@ const VerseExplanations = () => {
     <BiblePageLayout isRtl={h.isRtl}>
       <BiblePageInner>
         <PageHeader
-          title={h.t.verseExplanations?.title || "Verse Explanations"}
+          title={h.t.verseExplanations?.title || tt("Verse Explanations")}
           subtitle={`${h.explanations.length} explanations`}
           onBack={h.goToAdd}
           action={<VerseExplanationsAddAction onAdd={h.goToAdd} />}
@@ -35,7 +36,7 @@ const VerseExplanations = () => {
 
       <DeleteConfirmDialog
         open={!!h.deleteTarget}
-        title={h.t.verseExplanations?.deleteDialogTitle || "Delete Explanation"}
+        title={h.t.verseExplanations?.deleteDialogTitle || tt("Delete Explanation")}
         description={h.deleteDescription}
         loading={h.deleting}
         onConfirm={h.confirmDelete}

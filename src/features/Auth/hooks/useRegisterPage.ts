@@ -8,6 +8,7 @@ import { routes } from "@/components/Routes/routes";
 import { getDeviceInfo, getClientIP } from "@/lib/utils";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth, googleProvider } from "@/firebaseConfiguration/config";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export function useRegisterPage() {
   const navigate = useNavigate();
@@ -72,7 +73,7 @@ export function useRegisterPage() {
         deviceInfo: { ...deviceInfo, ip: clientIP },
       });
       if (res?.returnCode === 200) {
-        toast({ title: "Registration successful!" });
+        toast({ title: tt("Registration successful!") });
         navigate("/verify-account", { state: { email: formData.email } });
       } else if (res?.returnCode === 405 && res.returnData?.needsRegistration) {
         navigate(routes.googleRegister.path, { state: res.returnData });
@@ -104,7 +105,7 @@ export function useRegisterPage() {
       }
     } catch (error: any) {
       if (error.code !== "auth/popup-closed-by-user") {
-        toast({ title: "Google login failed", description: error.message, variant: "destructive" });
+        toast({ title: tt("Google login failed"), description: error.message, variant: "destructive" });
       }
     } finally { setIsGoogleLoading(false); }
   }, [setUserInfo, navigate, toast]);

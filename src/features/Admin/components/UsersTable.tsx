@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { UserRowCard } from "./UserRowCard";
 import { RoleSelector } from "./RoleSelector";
 import type { AdminUser } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface UsersTableProps {
   users: AdminUser[];
@@ -39,12 +40,12 @@ export function UsersTable({
         <table className="w-full">
           <thead>
             <tr className="border-b bg-muted/50">
-              <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">User</th>
-              <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Email</th>
-              <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Role</th>
-              <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Status</th>
-              <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground hidden lg:table-cell">Last Login</th>
-              <th className="text-right p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Actions</th>
+              <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{tt("User")}</th>
+              <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{tt("Email")}</th>
+              <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{tt("Role")}</th>
+              <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{tt("Status")}</th>
+              <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground hidden lg:table-cell">{tt("Last Login")}</th>
+              <th className="text-right p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{tt("Actions")}</th>
             </tr>
           </thead>
           <tbody>
@@ -99,10 +100,10 @@ export function UsersTable({
             <div className="flex items-center justify-between mt-2 pt-2 border-t border-border/50">
               <div className="flex items-center gap-1.5">
                 <Badge variant={user.status ? "default" : "destructive"} className="text-[10px]">
-                  {user.status ? "Active" : "Inactive"}
+                  {user.status ? tt("Active") : tt("Inactive")}
                 </Badge>
                 {user.emailVerified && (
-                  <Badge variant="outline" className="text-[10px] text-emerald-600 dark:text-emerald-400">Verified</Badge>
+                  <Badge variant="outline" className="text-[10px] text-emerald-600 dark:text-emerald-400">{tt("Verified")}</Badge>
                 )}
               </div>
               <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
@@ -110,7 +111,7 @@ export function UsersTable({
                   variant="ghost" size="icon" className="h-7 w-7"
                   onClick={() => onToggleStatus(user)}
                   disabled={actionLoading === user.id}
-                  title={user.status ? "Deactivate" : "Activate"}
+                  title={user.status ? tt("Deactivate") : tt("Activate")}
                 >
                   {actionLoading === user.id ? (
                     <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -131,7 +132,7 @@ export function UsersTable({
                   variant="ghost" size="icon" className="h-7 w-7 text-destructive"
                   onClick={() => onDelete(user)}
                   disabled={actionLoading === user.id}
-                  title="Delete user permanently"
+                  title={tt("Delete user permanently")}
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                 </Button>
@@ -149,9 +150,7 @@ export function UsersTable({
         </div>
       )}
       {!hasMore && users.length > 0 && (
-        <p className="text-center text-xs text-muted-foreground/50 py-4">
-          All users loaded
-        </p>
+        <p className="text-center text-xs text-muted-foreground/50 py-4">{tt("All users loaded")}</p>
       )}
     </>
   );

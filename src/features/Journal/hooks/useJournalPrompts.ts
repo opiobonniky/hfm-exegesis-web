@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { sendPostRequest } from "@/services/api";
 import { getBooksByTestament, getChaptersForBook, getVersesCountForChapter } from "@/utilities/bibleUtils";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Prompt { id: string; text: string; category: string; difficulty: string; isActive: boolean; description?: string; order?: number; bookName?: string; chapter?: string; verseNumber?: string; }
 
@@ -46,14 +47,14 @@ export function useJournalPrompts() {
   }, [category, search]);
   useEffect(() => { if (isAdmin) fetchPrompts(); }, [isAdmin, fetchPrompts]);
   const handleSave = useCallback(async () => {
-    if (!formData.prompt.trim()) { toast({ title: "Prompt text is required", variant: "destructive" }); return; }
+    if (!formData.prompt.trim()) { toast({ title: tt("Prompt text is required"), variant: "destructive" }); return; }
     setSaving(true);
     try {
       const payload = { ...formData, id: editingPrompt?.id };
       const res = await sendPostRequest("journal", editingPrompt ? "prompts/update" : "prompts/create", payload);
       if (res?.returnCode === 200) { toast({ title: editingPrompt ? "Updated" : "Created" }); setDialogOpen(false); fetchPrompts(); }
-      else { toast({ title: "Failed", variant: "destructive" }); }
-    } catch { toast({ title: "Error", variant: "destructive" }); }
+      else { toast({ title: tt("Failed"), variant: "destructive" }); }
+    } catch { toast({ title: tt("Error"), variant: "destructive" }); }
     finally { setSaving(false); }
   }, [formData, editingPrompt, toast, fetchPrompts]);
   const handleDelete = useCallback(async () => {
@@ -61,9 +62,9 @@ export function useJournalPrompts() {
     setDeleting(true);
     try {
       const res = await sendPostRequest("journal", "prompts/delete", { id: deleteDialog.id });
-      if (res?.returnCode === 200) { toast({ title: "Deleted" }); setDeleteDialog(null); fetchPrompts(); }
-      else { toast({ title: "Delete failed", variant: "destructive" }); }
-    } catch { toast({ title: "Error", variant: "destructive" }); }
+      if (res?.returnCode === 200) { toast({ title: tt("Deleted") }); setDeleteDialog(null); fetchPrompts(); }
+      else { toast({ title: tt("Delete failed"), variant: "destructive" }); }
+    } catch { toast({ title: tt("Error"), variant: "destructive" }); }
     finally { setDeleting(false); }
   }, [deleteDialog, toast, fetchPrompts]);
   const openEdit = useCallback((prompt?: Prompt) => {

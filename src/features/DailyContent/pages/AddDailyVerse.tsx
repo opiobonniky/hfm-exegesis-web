@@ -25,6 +25,7 @@ import {
   AddDailyVerseWorkspace,
 } from "../components";
 import { routes } from "@/components/Routes/routes";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 const AddDailyVerse = () => {
   const { data, actions } = useAddDailyVerse();
@@ -43,8 +44,8 @@ const AddDailyVerse = () => {
         >
           <GuidedTabs validateStep={h.validateStep}>
             <GuidedTab
-              title="Verse Reference"
-              description="Choose the passage, text, and schedule"
+              title={tt("Verse Reference")}
+              description={tt("Choose the passage, text, and schedule")}
             >
               <VerseReferenceSection
                 testament={h.testament}
@@ -83,8 +84,8 @@ const AddDailyVerse = () => {
             </GuidedTab>
 
             <GuidedTab
-              title="Verse Content"
-              description="Write the required explanation"
+              title={tt("Verse Content")}
+              description={tt("Write the required explanation")}
             >
               <ExplanationAutoFillBanner model={h} />
               <RequiredContentFields
@@ -102,8 +103,8 @@ const AddDailyVerse = () => {
             </GuidedTab>
 
             <GuidedTab
-              title="Background"
-              description="Add optional study context"
+              title={tt("Background")}
+              description={tt("Add optional study context")}
             >
               <BackgroundSection
                 backgroundAuthor={h.backgroundAuthor}
@@ -117,8 +118,8 @@ const AddDailyVerse = () => {
             </GuidedTab>
 
             <GuidedTab
-              title="Rich Content"
-              description="Add takeaways and study tools"
+              title={tt("Rich Content")}
+              description={tt("Add takeaways and study tools")}
             >
               <StructuredContentSection
                 wordStudies={h.wordStudies}
@@ -139,8 +140,8 @@ const AddDailyVerse = () => {
             </GuidedTab>
 
             <GuidedTab
-              title="Publish & Save"
-              description="Review status and submit"
+              title={tt("Publish & Save")}
+              description={tt("Review status and submit")}
             >
               <PublishToggle
                 published={h.published}

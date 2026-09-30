@@ -7,6 +7,7 @@ import {
   VerifyFooterLinks,
 } from "../components";
 import { Mail, ArrowRight, KeyRound } from "lucide-react";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 const VerifyAccount = () => {
   const { data, actions } = useVerifyAccountPage();
@@ -31,24 +32,24 @@ const VerifyAccount = () => {
         <form onSubmit={handleVerify} className="space-y-4">
           <VerifyInputField
             id="email"
-            label={t.common?.email || "Email Address"}
+            label={t.common?.email || tt("Email Address")}
             icon={Mail}
-            placeholder="you@example.com"
+            placeholder={tt("you@example.com")}
             value={email}
             onChange={setEmail}
             readOnly
           />
           <VerifyInputField
             id="code"
-            label={t.auth?.verification || "Verification Code"}
+            label={t.auth?.verification || tt("Verification Code")}
             icon={KeyRound}
-            placeholder="Enter 6-digit code"
+            placeholder={tt("Enter 6-digit code")}
             value={code}
             onChange={(v) => setCode(v.replace(/\D/g, "").slice(0, 6))}
             isCode
           />
           <AuthLoadingButton loading={isLoading} disabled={code.length < 6}>
-            {t.auth?.verifyAccount || "Verify Account"}
+            {t.auth?.verifyAccount || tt("Verify Account")}
             <ArrowRight className="w-4 h-4" />
           </AuthLoadingButton>
         </form>

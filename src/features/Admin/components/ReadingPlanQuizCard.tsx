@@ -1,6 +1,7 @@
 // ReadingPlanQuizCard — list of quiz questions with highlighted correct answers
 import { CheckCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface QuizQuestion {
   id: number;
@@ -17,8 +18,7 @@ export function ReadingPlanQuizCard({ questions }: ReadingPlanQuizCardProps) {
   return (
     <Card>
       <CardHeader className="pb-3">
-        <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-          Quiz Questions ({questions.length})
+        <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">{tt("Quiz Questions (")}{questions.length})
         </CardTitle>
       </CardHeader>
       <CardContent>

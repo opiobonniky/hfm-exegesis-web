@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { type TranslationOption } from "@/lib/bibleHelpers";
 import MobileNavDrawer from "@/components/MobileNavDrawer";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 // ── Props ──────────────────────────────────────────────────────────────────────
 
@@ -116,7 +117,7 @@ export default function BibleReaderHeader({
             className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors active:scale-95"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span className="hidden lg:inline">Back to Quiz</span>
+            <span className="hidden lg:inline">{tt("Back to Quiz")}</span>
           </button>
         ) : (
           <div className="flex items-center gap-3">
@@ -162,16 +163,16 @@ export default function BibleReaderHeader({
             size="sm"
             onClick={onOpenStudyTools}
             className="h-8 px-2.5 text-xs gap-1.5 border-border/50 bg-muted/30"
-            title="Study Tools"
+            title={tt("Study Tools")}
           >
             <Lightbulb className="w-3.5 h-3.5 text-amber-500" />
-            <span className="hidden lg:inline">Tools</span>
+            <span className="hidden lg:inline">{tt("Tools")}</span>
           </Button>
 
           <button
             onClick={onOpenSearch}
             className="relative w-8 h-8 before:absolute before:content-[''] before:-inset-2 before:rounded-xl rounded-xl bg-muted/50 flex items-center justify-center border border-border/40 active:scale-95 transition-all [touch-action:manipulation]"
-            title="Search"
+            title={tt("Search")}
           >
             <Search className="w-3.5 h-3.5 text-muted-foreground" />
           </button>
@@ -242,7 +243,7 @@ export default function BibleReaderHeader({
           onValueChange={onBookChange}
           disabled={booksLoading || backendBooks.length === 0}
         >
-          <SelectTrigger aria-label="Select book" className="w-[175px] h-8 text-xs border-border/50 bg-muted/30">
+          <SelectTrigger aria-label={tt("Select book")} className="w-[175px] h-8 text-xs border-border/50 bg-muted/30">
             <SelectValue
               placeholder={booksLoading ? t.bibleReader.loadingBooks : t.bibleReader.selectBook}
             />
@@ -263,7 +264,7 @@ export default function BibleReaderHeader({
           onValueChange={(val) => onChapterChange(parseInt(val, 10))}
           disabled={booksLoading || backendBooks.length === 0}
         >
-          <SelectTrigger aria-label="Select chapter" className="w-[130px] h-8 text-xs border-border/50 bg-muted/30">
+          <SelectTrigger aria-label={tt("Select chapter")} className="w-[130px] h-8 text-xs border-border/50 bg-muted/30">
             <SelectValue
               placeholder={booksLoading ? t.bibleReader.loadingBooks : t.bibleReader.selectChapter}
             />
@@ -298,7 +299,7 @@ export default function BibleReaderHeader({
           onValueChange={onVerseChange}
           disabled={currentChapterVerseCount === 0}
         >
-          <SelectTrigger aria-label="Select verse" className="w-[130px] h-8 text-xs border-border/50 bg-muted/30">
+          <SelectTrigger aria-label={tt("Select verse")} className="w-[130px] h-8 text-xs border-border/50 bg-muted/30">
             <SelectValue placeholder={t.bibleReader.selectVerse} />
           </SelectTrigger>
           <SelectContent>

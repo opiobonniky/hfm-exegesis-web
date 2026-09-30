@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { useLanguage } from "@/components/languages/languageProvider";
 import type { DailyVerseItem } from "../types";
 import { formatDisplayDate, isToday, isFuture } from "../constants";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface VerseCardProps {
   verse: DailyVerseItem; isSelected: boolean; onSelect: () => void;
@@ -22,8 +23,8 @@ export default function VerseCard({ verse, isSelected, onSelect, onShare, onFavo
           <div><p className="text-sm font-semibold">{verse.bookName} {verse.chapter}:{verse.verseNumber}</p><p className="text-xs text-muted-foreground">{formatDisplayDate(verse.displayDate)}</p></div>
         </div>
         <div className="flex items-center gap-1">
-          {verse.isPublished && <Badge variant="secondary" className="text-[10px]">{t.dailyVerse?.publishedLabel || "Published"}</Badge>}
-          {today && <Badge className="text-[10px]">{t.dailyVerse?.today || "Today"}</Badge>}
+          {verse.isPublished && <Badge variant="secondary" className="text-[10px]">{t.dailyVerse?.publishedLabel || tt("Published")}</Badge>}
+          {today && <Badge className="text-[10px]">{t.dailyVerse?.today || tt("Today")}</Badge>}
         </div>
       </div>
       {verse.verseText && <p className="text-sm text-muted-foreground italic line-clamp-2 mb-2">"{verse.verseText}"</p>}

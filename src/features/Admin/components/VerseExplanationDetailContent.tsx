@@ -17,6 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   item: any;
@@ -142,7 +143,7 @@ export function VerseExplanationDetailContent({ item }: Props) {
               <CardHeader>
                 <div className="flex items-center gap-2">
                   <BookOpen className="w-5 h-5 text-primary" />
-                  <CardTitle className="text-sm">Reference</CardTitle>
+                  <CardTitle className="text-sm">{tt("Reference")}</CardTitle>
                 </div>
               </CardHeader>
               <CardContent>
@@ -151,14 +152,13 @@ export function VerseExplanationDetailContent({ item }: Props) {
                     {bookName} {chapter}:{verseNumber}
                   </div>
                   <div className="text-sm text-muted-foreground">
-                    {bibleVersion || "BSB"}
+                    {bibleVersion || tt("BSB")}
                   </div>
                   <div className="mt-2 flex items-center gap-2">
                     <Badge variant={isPublished ? "default" : "secondary"}>
-                      {isPublished ? "Published" : "Draft"}
+                      {isPublished ? tt("Published") : tt("Draft")}
                     </Badge>
-                    <Badge variant="outline" className="text-xs font-mono">
-                      ID: {item.id}
+                    <Badge variant="outline" className="text-xs font-mono">{tt("ID:")}{item.id}
                     </Badge>
                   </div>
 
@@ -171,8 +171,7 @@ export function VerseExplanationDetailContent({ item }: Props) {
                         (window.location.href = `/admin/edit-verse-explanation/${encodeURIComponent(bookName)}/${chapter}/${verseNumber}`)
                       }
                     >
-                      <Edit2 className="w-4 h-4 mr-2" /> Edit
-                    </Button>
+                      <Edit2 className="w-4 h-4 mr-2" />{tt("Edit")}</Button>
                     <Button
                       variant="ghost"
                       onClick={() =>
@@ -180,9 +179,7 @@ export function VerseExplanationDetailContent({ item }: Props) {
                           `${bookName} ${chapter}:${verseNumber} — ${bibleVersion || "BSB"}`,
                         )
                       }
-                    >
-                      Copy reference
-                    </Button>
+                    >{tt("Copy reference")}</Button>
                   </div>
                 </div>
               </CardContent>
@@ -192,13 +189,13 @@ export function VerseExplanationDetailContent({ item }: Props) {
               <CardHeader>
                 <div className="flex items-center gap-2">
                   <Globe className="w-4 h-4 text-primary" />
-                  <CardTitle className="text-sm">Study Info</CardTitle>
+                  <CardTitle className="text-sm">{tt("Study Info")}</CardTitle>
                 </div>
               </CardHeader>
               <CardContent>
                 <div className="text-sm text-foreground/90 leading-relaxed">
                   <p>
-                    <strong>Introduction:</strong>
+                    <strong>{tt("Introduction:")}</strong>
                   </p>
                   <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
                     {studyMetadata?.introduction || "—"}
@@ -211,7 +208,7 @@ export function VerseExplanationDetailContent({ item }: Props) {
               <CardHeader>
                 <div className="flex items-center gap-2">
                   <Tag className="w-4 h-4 text-primary" />
-                  <CardTitle className="text-sm">Themes</CardTitle>
+                  <CardTitle className="text-sm">{tt("Themes")}</CardTitle>
                 </div>
               </CardHeader>
               <CardContent>
@@ -227,9 +224,7 @@ export function VerseExplanationDetailContent({ item }: Props) {
                       </Badge>
                     ))
                   ) : (
-                    <div className="text-sm text-muted-foreground">
-                      No themes
-                    </div>
+                    <div className="text-sm text-muted-foreground">{tt("No themes")}</div>
                   )}
                 </div>
               </CardContent>
@@ -247,7 +242,7 @@ export function VerseExplanationDetailContent({ item }: Props) {
                   {bookName} {chapter}:{verseNumber}
                 </h1>
                 <div className="text-sm text-muted-foreground">
-                  {bibleVersion || "BSB"}
+                  {bibleVersion || tt("BSB")}
                 </div>
                 {item.verseText && (
                   <blockquote className="mt-3 italic text-foreground/80 border-l-2 border-primary/30 pl-4 text-base leading-7 md:max-w-2xl">
@@ -269,8 +264,7 @@ export function VerseExplanationDetailContent({ item }: Props) {
                     (window.location.href = `/admin/edit-verse-explanation/${encodeURIComponent(bookName)}/${chapter}/${verseNumber}`)
                   }
                 >
-                  <Edit2 className="w-4 h-4 mr-2" /> Edit
-                </Button>
+                  <Edit2 className="w-4 h-4 mr-2" />{tt("Edit")}</Button>
               </div>
             </div>
           </div>
@@ -280,9 +274,7 @@ export function VerseExplanationDetailContent({ item }: Props) {
             <div className="p-6">
               <div className="flex items-center gap-3 mb-3">
                 <Lightbulb className="w-5 h-5 text-primary" />
-                <h2 className="text-lg font-semibold">
-                  Theological Explanation
-                </h2>
+                <h2 className="text-lg font-semibold">{tt("Theological Explanation")}</h2>
               </div>
 
               <div className="prose prose-stone dark:prose-invert max-w-none text-base text-foreground/90 leading-7 space-y-4 prose-p:my-0 prose-headings:scroll-mt-4">
@@ -294,11 +286,9 @@ export function VerseExplanationDetailContent({ item }: Props) {
               </div>
 
               <div className="mt-8">
-                <h3 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wide">
-                  Application
-                </h3>
+                <h3 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wide">{tt("Application")}</h3>
                 <div className="p-5 rounded-lg bg-primary/5 border border-primary/10 text-base italic text-foreground/80 leading-7">
-                  {exegesis?.applicationText || "No application provided."}
+                  {exegesis?.applicationText || tt("No application provided.")}
                 </div>
               </div>
             </div>
@@ -307,9 +297,7 @@ export function VerseExplanationDetailContent({ item }: Props) {
           {/* Word Studies */}
           <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="bg-card rounded-xl border p-4">
-              <h3 className="text-sm font-semibold mb-3 uppercase tracking-wide">
-                Strong's Word Studies
-              </h3>
+              <h3 className="text-sm font-semibold mb-3 uppercase tracking-wide">{tt("Strong's Word Studies")}</h3>
               <div className="space-y-3">
                 {wordStudies && wordStudies.length > 0 ? (
                   wordStudies.map((ws: any, i: number) => (
@@ -332,15 +320,13 @@ export function VerseExplanationDetailContent({ item }: Props) {
                     </div>
                   ))
                 ) : (
-                  <div className="text-sm text-muted-foreground italic">
-                    No word studies.
-                  </div>
+                  <div className="text-sm text-muted-foreground italic">{tt("No word studies.")}</div>
                 )}
               </div>
             </div>
 
             <div className="bg-card rounded-xl border p-4">
-              <h3 className="text-sm font-semibold mb-3 uppercase tracking-wide">Cross References</h3>
+              <h3 className="text-sm font-semibold mb-3 uppercase tracking-wide">{tt("Cross References")}</h3>
               <div className="space-y-3">
                 {crossReferences && crossReferences.length > 0 ? (
                   crossReferences.map((cr: any, i: number) => (
@@ -357,9 +343,7 @@ export function VerseExplanationDetailContent({ item }: Props) {
                     </div>
                   ))
                 ) : (
-                  <div className="text-sm text-muted-foreground italic">
-                    No cross references.
-                  </div>
+                  <div className="text-sm text-muted-foreground italic">{tt("No cross references.")}</div>
                 )}
               </div>
             </div>
@@ -368,26 +352,20 @@ export function VerseExplanationDetailContent({ item }: Props) {
           {/* Practical Apps & Takeaways */}
           <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="bg-card rounded-xl border p-4">
-              <h3 className="text-sm font-semibold mb-3 uppercase tracking-wide">
-                Practical Applications
-              </h3>
+              <h3 className="text-sm font-semibold mb-3 uppercase tracking-wide">{tt("Practical Applications")}</h3>
               <ol className="list-decimal list-inside space-y-2.5 text-sm text-foreground/90 leading-relaxed">
                 {practicalApps && practicalApps.length > 0 ? (
                   practicalApps.map((pa: any, i: number) => (
                     <li key={i}>{pa.applicationText}</li>
                   ))
                 ) : (
-                  <li className="italic text-muted-foreground">
-                    No applications listed.
-                  </li>
+                  <li className="italic text-muted-foreground">{tt("No applications listed.")}</li>
                 )}
               </ol>
             </div>
 
             <div className="bg-primary/5 rounded-xl border p-4">
-              <h3 className="text-sm font-semibold mb-3 uppercase tracking-wide">
-                Final Thoughts & Takeaways
-              </h3>
+              <h3 className="text-sm font-semibold mb-3 uppercase tracking-wide">{tt("Final Thoughts & Takeaways")}</h3>
               <div className="text-sm text-foreground/80 italic leading-relaxed mb-4">
                 {studyMetadata?.finalThoughts || "—"}
               </div>
@@ -396,9 +374,9 @@ export function VerseExplanationDetailContent({ item }: Props) {
                   takeaways.map((t: string, i: number) => <li key={i}>{t}</li>)
                 ) : (
                   <>
-                    <li>Remember God’s faithfulness and give thanks.</li>
-                    <li>Call upon the LORD with dependence and prayer.</li>
-                    <li>Make God’s deeds known through faithful witness.</li>
+                    <li>{tt("Remember God’s faithfulness and give thanks.")}</li>
+                    <li>{tt("Call upon the LORD with dependence and prayer.")}</li>
+                    <li>{tt("Make God’s deeds known through faithful witness.")}</li>
                   </>
                 )}
               </ol>

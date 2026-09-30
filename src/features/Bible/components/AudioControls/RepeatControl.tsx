@@ -1,5 +1,6 @@
 import { Repeat, Repeat1 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface RepeatControlProps {
   repeatMode: "none" | "one" | "all";
@@ -31,11 +32,9 @@ export function RepeatControl({ repeatMode, onCycle, label }: RepeatControlProps
         )}
       </span>
       <span>
-        <span className="block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-          Repeat
-        </span>
+        <span className="block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{tt("Repeat")}</span>
         <span className="block text-xs font-bold text-foreground">
-          {repeatMode === "none" ? "Off" : repeatMode === "one" ? "One" : "All"}
+          {repeatMode === "none" ? tt("Off") : repeatMode === "one" ? tt("One") : tt("All")}
         </span>
       </span>
     </button>

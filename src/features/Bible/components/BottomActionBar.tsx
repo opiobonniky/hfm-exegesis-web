@@ -11,6 +11,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/components/languages/languageProvider";
 import ReaderDock from "./ReaderDock";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface BottomActionBarProps {
   onPrev: () => void;
@@ -56,7 +57,7 @@ export default function BottomActionBar({
         <button
           type="button"
           onClick={onScrollTop}
-          aria-label="Scroll up"
+          aria-label={tt("Scroll up")}
           className="w-10 h-10 rounded-xl flex items-center justify-center text-muted-foreground hover:bg-muted transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <ArrowUp className="w-4 h-4" />
@@ -98,7 +99,7 @@ export default function BottomActionBar({
         <button
           type="button"
           onClick={onScrollBottom}
-          aria-label="Scroll down"
+          aria-label={tt("Scroll down")}
           className="w-10 h-10 rounded-xl flex items-center justify-center text-muted-foreground hover:bg-muted transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <ArrowDown className="w-4 h-4" />

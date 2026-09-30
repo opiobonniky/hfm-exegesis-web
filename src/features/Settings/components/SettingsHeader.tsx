@@ -2,6 +2,7 @@
 
 import { Shield } from "lucide-react";
 import { useLanguage } from "@/components/languages/languageProvider";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export default function SettingsHeader() {
   const { t } = useLanguage();
@@ -15,8 +16,8 @@ export default function SettingsHeader() {
             <Shield className="w-5 h-5 text-primary" />
           </div>
           <div>
-            <p className="text-[10px] font-bold tracking-widest uppercase text-primary/40">{t.settings?.pageTitle || "Settings"}</p>
-            <h1 className="text-xl sm:text-2xl font-bold text-primary">{t.settings?.yourProfile || "Your Profile"}</h1>
+            <p className="text-[10px] font-bold tracking-widest uppercase text-primary/40">{t.settings?.pageTitle || tt("Settings")}</p>
+            <h1 className="text-xl sm:text-2xl font-bold text-primary">{t.settings?.yourProfile || tt("Your Profile")}</h1>
           </div>
         </div>
       </div>

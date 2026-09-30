@@ -1,5 +1,6 @@
 import ContentCard from "./ContentCard";
 import type { UserDashboardPageModel } from "../hooks/useUserDashboard";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   model: UserDashboardPageModel;
@@ -8,9 +9,9 @@ interface Props {
 export function LatestJournalCard({ model }: Props) {
   if (!model.latestEntry) return null;
   return (
-    <ContentCard title="Latest Journal" cta="Open" onClick={() => model.navigate(`/journal/view/${model.latestEntry.id}`)} onCta={() => model.navigate(`/journal/view/${model.latestEntry.id}`)}>
+    <ContentCard title={tt("Latest Journal")} cta="Open" onClick={() => model.navigate(`/journal/view/${model.latestEntry.id}`)} onCta={() => model.navigate(`/journal/view/${model.latestEntry.id}`)}>
       <div className="font-semibold text-sm text-foreground line-clamp-1">
-        {model.latestEntry.title || "Journal Entry"}
+        {model.latestEntry.title || tt("Journal Entry")}
       </div>
       {(model.latestEntry.bookName || model.latestEntry.content) && (
         <div className="text-xs text-muted-foreground/60 mt-1 line-clamp-1">

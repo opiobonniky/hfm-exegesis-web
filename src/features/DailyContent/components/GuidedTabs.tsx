@@ -3,6 +3,7 @@ import { ArrowLeft, ArrowRight, Check, Circle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { GuidedTabProps, GuidedTabsProps } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export function GuidedTab({ children }: GuidedTabProps) {
   return <>{children}</>;
@@ -38,7 +39,7 @@ export function GuidedTabs({
 
   return (
     <div className="space-y-6">
-      <nav aria-label="Daily verse form steps" className="overflow-x-auto pb-1">
+      <nav aria-label={tt("Daily verse form steps")} className="overflow-x-auto pb-1">
         <ol
           className={cn(
             "grid min-w-[680px] gap-2",

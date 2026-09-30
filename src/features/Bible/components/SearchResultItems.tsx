@@ -6,6 +6,7 @@ import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SearchResultCard from "./SearchResultCard";
 import type { SearchResult, JournalSearchResult, TopicResult, LemmaResult, CrossTranslationResult } from "@/services/searchApi";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 type SearchResultItem = SearchResult | JournalSearchResult | TopicResult | LemmaResult | CrossTranslationResult;
 
@@ -27,7 +28,7 @@ interface SearchResultsListProps {
 function JournalItem({ item, idx, onSelect }: { item: JournalSearchResult; idx: number; onSelect: () => void }) {
   return (
     <div key={`journal-${idx}`} className="rounded-xl border border-border/40 bg-card p-4 hover:border-emerald-200/50 dark:hover:border-emerald-500/40 hover:shadow-sm transition-all cursor-pointer" onClick={onSelect}>
-      <p className="text-sm font-bold text-foreground">{item.title || "Untitled"}</p>
+      <p className="text-sm font-bold text-foreground">{item.title || tt("Untitled")}</p>
       <p className="text-sm text-foreground/70 mt-1 line-clamp-2">{item.content}</p>
       {item.bookName && <p className="text-xs text-muted-foreground mt-1">{item.bookName} {item.chapter}:{item.verseNumber}</p>}
     </div>
@@ -39,7 +40,7 @@ function TopicItem({ item, idx, onTap }: { item: TopicResult; idx: number; onTap
     <div key={`topic-${idx}`} className="rounded-xl border border-border/40 bg-card p-4 hover:border-amber-200/50 dark:hover:border-amber-500/40 hover:shadow-sm transition-all cursor-pointer" onClick={onTap}>
       <p className="text-sm font-bold text-primary capitalize">{item.topicName}</p>
       {item.description && <p className="text-sm text-foreground/70 mt-1 line-clamp-2">{item.description}</p>}
-      <p className="text-xs text-muted-foreground mt-1">{item.verseRefs?.split(",").length || 0} related verses</p>
+      <p className="text-xs text-muted-foreground mt-1">{item.verseRefs?.split(",").length || 0}{tt("related verses")}</p>
     </div>
   );
 }
@@ -79,12 +80,12 @@ export function SearchResultsList({ results, scope, total, loading, hasMore, loa
       {hasMore && (
         <div className="flex justify-center pt-2">
           <Button variant="outline" size="sm" onClick={loadMore} disabled={loading} className="gap-2 rounded-xl">
-            {loading && <Loader2 className="w-3 h-3 animate-spin" />}{loading ? "Loading..." : "Load More"}
+            {loading && <Loader2 className="w-3 h-3 animate-spin" />}{loading ? tt("Loading...") : tt("Load More")}
           </Button>
         </div>
       )}
       {loading && results.length > 0 && (
-        <div className="flex items-center justify-center gap-2 py-4"><Loader2 className="w-4 h-4 animate-spin text-primary" /><span className="text-xs text-muted-foreground">Searching...</span></div>
+        <div className="flex items-center justify-center gap-2 py-4"><Loader2 className="w-4 h-4 animate-spin text-primary" /><span className="text-xs text-muted-foreground">{tt("Searching...")}</span></div>
       )}
     </div>
   );
@@ -94,7 +95,7 @@ export function SearchNoQuery({ minChars }: { minChars?: boolean }) {
   if (!minChars) return null;
   return (
     <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
-      <p className="text-sm text-muted-foreground">Type at least 3 characters to search</p>
+      <p className="text-sm text-muted-foreground">{tt("Type at least 3 characters to search")}</p>
     </div>
   );
 }
@@ -102,8 +103,8 @@ export function SearchNoQuery({ minChars }: { minChars?: boolean }) {
 export function SearchNoResults({ query }: { query: string }) {
   return (
     <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
-      <p className="text-sm font-semibold text-foreground/70 mb-1">No results found</p>
-      <p className="text-xs text-muted-foreground/60 max-w-xs">No verses match "{query}". Try a different word.</p>
+      <p className="text-sm font-semibold text-foreground/70 mb-1">{tt("No results found")}</p>
+      <p className="text-xs text-muted-foreground/60 max-w-xs">{tt("No verses match \"")}{query}{tt("\". Try a different word.")}</p>
     </div>
   );
 }

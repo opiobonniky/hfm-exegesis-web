@@ -7,6 +7,7 @@ import type {
   VerseExplanationListItem,
   VerseExplanationPageData as PageData,
 } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 export type { VerseExplanationListItem };
 
 
@@ -46,7 +47,7 @@ export function useVerseExplanationList(pageSize = 20) {
         }));
       } catch (err) {
         console.error(err);
-        toast({ title: "Error", description: "Failed to load verse explanations", variant: "destructive" });
+        toast({ title: tt("Error"), description: tt("Failed to load verse explanations"), variant: "destructive" });
       } finally {
         if (append) setLoadingMore(false);
         else setLoading(false);
@@ -81,13 +82,13 @@ export function useVerseExplanationList(pageSize = 20) {
       try {
         const res = await adminApi.request("bible", "delete-verse-explanation", { id: item.id });
         if (res?.returnCode === 200 || res?.status === 200) {
-          toast({ title: "Deleted", description: `${item.bookName} ${item.chapter}:${item.verseNumber} deleted` });
+          toast({ title: tt("Deleted"), description: `${item.bookName} ${item.chapter}:${item.verseNumber} deleted` });
           refresh();
           return true;
         }
         throw new Error(res?.returnMessage || "Failed to delete");
       } catch (e: any) {
-        toast({ title: "Error", description: e.message || "Failed to delete", variant: "destructive" });
+        toast({ title: tt("Error"), description: e.message || "Failed to delete", variant: "destructive" });
         return false;
       } finally {
         setDeleting(null);

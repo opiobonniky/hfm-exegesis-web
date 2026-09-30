@@ -3,6 +3,7 @@
 import { Save, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface SaveButtonProps {
   saving: boolean;
@@ -41,7 +42,7 @@ export function DeleteButton({
   return (
     <Button variant="destructive" onClick={onClick} disabled={deleting || disabled} className={cn("gap-2", className)}>
       {deleting ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-      {deleting ? "Deleting..." : label}
+      {deleting ? tt("Deleting...") : label}
     </Button>
   );
 }

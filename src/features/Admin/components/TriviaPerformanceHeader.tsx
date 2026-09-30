@@ -1,6 +1,7 @@
 // TriviaPerformanceHeader — sticky header for trivia performance page
 import { ArrowLeft, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface TriviaPerformanceHeaderProps {
   onBack: () => void;
@@ -18,12 +19,11 @@ export function TriviaPerformanceHeader({
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <div className="flex-1 min-w-0">
-          <h1 className="text-lg font-bold">Trivia Performance</h1>
-          <p className="text-xs text-muted-foreground">Analytics and statistics</p>
+          <h1 className="text-lg font-bold">{tt("Trivia Performance")}</h1>
+          <p className="text-xs text-muted-foreground">{tt("Analytics and statistics")}</p>
         </div>
         <Button variant="outline" size="sm" onClick={onRefresh} className="gap-1.5">
-          <RefreshCw className="w-3.5 h-3.5" /> Refresh
-        </Button>
+          <RefreshCw className="w-3.5 h-3.5" />{tt("Refresh")}</Button>
       </div>
     </header>
   );

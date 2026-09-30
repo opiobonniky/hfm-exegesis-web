@@ -8,6 +8,7 @@ import { useSubscription } from "@/hooks/useSubscription";
 import { useTheme } from "@/hooks/useTheme";
 import { routes } from "@/components/Routes/routes";
 import { INITIAL_PROFILE, NOTIFICATION_KEYS } from "../constants";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export function useSettingsPage() {
   const navigate = useNavigate();
@@ -54,7 +55,7 @@ export function useSettingsPage() {
       const res = await sendPostRequest("auth", "update-current-user", profile);
       if (res.returnCode === 200) toast({ title: t.settings?.profileUpdated || "Profile updated" });
       else toast({ title: res.returnMessage || "Failed", variant: "destructive" });
-    } catch { toast({ title: "Error", variant: "destructive" }); }
+    } catch { toast({ title: tt("Error"), variant: "destructive" }); }
     finally { setSavingProfile(false); }
   }, [profile, toast, t]);
   const handlePasswordChange = useCallback(async (currentPassword: string, newPassword: string) => {
@@ -69,7 +70,7 @@ export function useSettingsPage() {
     setNotifications(prev => ({ ...prev, [key]: value }));
     const storageKey = key.replace("Reminder", "").replace("Notifications", "").toLowerCase();
     localStorage.setItem(`notify_${storageKey}`, String(value));
-    toast({ title: "Notification", description: value ? "Enabled" : "Disabled" });
+    toast({ title: tt("Notification"), description: value ? "Enabled" : "Disabled" });
   }, [toast]);
   const handleSowerAction = useCallback(async () => {
     if (isPayingUser) {
@@ -77,8 +78,8 @@ export function useSettingsPage() {
       try {
         const res = await sendPostRequest("subscriptions", "create-portal-session", {});
         if (res.returnCode === 200 && res.returnData?.url) window.open(res.returnData.url, "_blank");
-        else toast({ title: "Portal error", description: res.returnMessage, variant: "destructive" });
-      } catch (err: any) { toast({ title: "Error", description: err?.message, variant: "destructive" }); }
+        else toast({ title: tt("Portal error"), description: res.returnMessage, variant: "destructive" });
+      } catch (err: any) { toast({ title: tt("Error"), description: err?.message, variant: "destructive" }); }
       finally { setSowerPortalLoading(false); }
     } else { navigate(routes.sower.path); }
   }, [isPayingUser, toast, navigate]);

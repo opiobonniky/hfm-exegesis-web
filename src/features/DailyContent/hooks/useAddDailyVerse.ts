@@ -14,6 +14,7 @@ import {
 import { BIBLE_VERSIONS } from "@/assets/bibleVersion/json/bibleVersions";
 import type { DailyVersePayload } from "../types";
 import { parseStructuredField } from "../helpers/contentDetailHelpers";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 /** All form fields in one object */
 export interface VerseFormFields {
@@ -482,7 +483,7 @@ export function useAddDailyVerse() {
 
       if (missing.length > 0) {
         toast({
-          title: "Complete this step",
+          title: tt("Complete this step"),
           description: `Please provide: ${missing.join(", ")}.`,
           variant: "destructive",
         });
@@ -506,8 +507,8 @@ export function useAddDailyVerse() {
   const handleSave = useCallback(async () => {
     if (!book || !chapter || !verseNumber) {
       toast({
-        title: "Missing fields",
-        description: "Please fill all required fields",
+        title: tt("Missing fields"),
+        description: tt("Please fill all required fields"),
         variant: "destructive",
       });
       return;

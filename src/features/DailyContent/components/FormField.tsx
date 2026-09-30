@@ -4,6 +4,7 @@
 import { ReactNode } from "react";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface FormFieldProps {
   label: string;
@@ -33,7 +34,7 @@ export function FormField({
           {label}
           {required && " *"}
           {optional && (
-            <span className="text-xs text-muted-foreground font-normal ml-1">(optional)</span>
+            <span className="text-xs text-muted-foreground font-normal ml-1">{tt("(optional)")}</span>
           )}
         </Label>
         {hint && <span className="text-xs text-muted-foreground">{hint}</span>}

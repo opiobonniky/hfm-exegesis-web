@@ -15,6 +15,7 @@ import type {
   UserDashboardStats,
   UserDashboardVerse,
 } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface RecentActivityResponse {
   id: string | number;
@@ -84,7 +85,7 @@ export function useUserDashboard() {
           id: String(hist.id ?? ""),
           type: "read",
           title: hist.bookName,
-          description: "Continue reading",
+          description: tt("Continue reading"),
           updatedOn: hist.updatedOn || hist.createdOn,
           bookName: hist.bookName,
           chapter: hist.chapter,

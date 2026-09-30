@@ -1,6 +1,7 @@
 import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import { useLanguage } from "@/components/languages/languageProvider";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 const NotFound = () => {
   const location = useLocation();
@@ -23,7 +24,7 @@ const NotFound = () => {
           {t.error?.notFound || "404"}
         </h1>
         <p className="mb-4 text-xl text-muted-foreground">
-          {t.error?.pageNotFound || "Oops! Page not found"}
+          {t.error?.pageNotFound || tt("Oops! Page not found")}
         </p>
         <button
           onClick={() => {
@@ -32,7 +33,7 @@ const NotFound = () => {
           }}
           className="mb-4 text-primary underline hover:text-primary/90"
         >
-          {t.common?.goHome || "Return to Home"}
+          {t.common?.goHome || tt("Return to Home")}
         </button>
       </div>
     </div>

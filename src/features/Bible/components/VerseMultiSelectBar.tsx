@@ -12,6 +12,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/components/languages/languageProvider";
 import ReaderDock from "./ReaderDock";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface VerseMultiSelectBarProps {
   count: number;
@@ -96,7 +97,7 @@ export default function VerseMultiSelectBar({
         <div className="me-1 flex shrink-0 items-center gap-1.5 px-2 py-1">
           <span className="text-xs font-bold text-primary">{count}</span>
           <span className="text-[10px] text-muted-foreground">
-            {count === 1 ? "verse" : "verses"}
+            {count === 1 ? tt("verse") : tt("verses")}
           </span>
         </div>
         {/* Action buttons */}

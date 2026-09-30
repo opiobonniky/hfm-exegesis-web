@@ -3,6 +3,7 @@ import { RefObject } from "react";
 import { Loader2 } from "lucide-react";
 import { ReadingPlanCard } from "./ReadingPlanCard";
 import type { ReadingPlan } from "../hooks/useAdminReadingPlans";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface ReadingPlanGridProps {
   plans: ReadingPlan[];
@@ -45,9 +46,7 @@ export function ReadingPlanGrid({
         </div>
       )}
       {!hasMore && plans.length > 0 && (
-        <p className="text-center text-xs text-muted-foreground/50 py-4">
-          All items loaded
-        </p>
+        <p className="text-center text-xs text-muted-foreground/50 py-4">{tt("All items loaded")}</p>
       )}
     </>
   );

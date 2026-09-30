@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { sendPostRequest } from "@/services/api";
 import { cn } from "@/lib/utils";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   onClose: () => void;
@@ -33,25 +34,25 @@ export function ExportModal({ onClose, selectedIds }: Props) {
         const a = document.createElement("a"); a.href = url; a.download = filename || `legacy-ledger-export.${format}`;
         document.body.appendChild(a); a.click();
         setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 500);
-        toast({ title: "Exported", description: `Exported ${entryCount} entries as .${format}` });
+        toast({ title: tt("Exported"), description: `Exported ${entryCount} entries as .${format}` });
         onClose();
       }
     } catch (e: any) {
-      toast({ title: "Export Failed", description: e?.message || "Failed to export entries", variant: "destructive" });
+      toast({ title: tt("Export Failed"), description: e?.message || "Failed to export entries", variant: "destructive" });
     } finally { setExporting(false); }
   };
   const formats = [
-    { value: "pdf" as const, label: ".pdf", desc: "Formatted PDF" },
-    { value: "txt" as const, label: ".txt", desc: "Plain Text" },
-    { value: "json" as const, label: ".json", desc: "Structured Data" },
+    { value: "pdf" as const, label: tt(".pdf"), desc: tt("Formatted PDF") },
+    { value: "txt" as const, label: tt(".txt"), desc: tt("Plain Text") },
+    { value: "json" as const, label: ".json", desc: tt("Structured Data") },
   ];
   return (
     <div className="p-6">
       <h3 className="text-lg font-bold text-foreground dark:text-stone-200 text-center mb-1">
-        {selectedIds && selectedIds.length > 0 ? `Export ${selectedIds.length} Selected Entries` : "Export Legacy Ledger"}
+        {selectedIds && selectedIds.length > 0 ? `Export ${selectedIds.length} Selected Entries` : tt("Export Legacy Ledger")}
       </h3>
       <p className="text-sm text-muted-foreground dark:text-muted-foreground/70 text-center mb-5">
-        {selectedIds && selectedIds.length > 0 ? `Choose a format to export ${selectedIds.length} selected journal entries.` : "Choose a format to export all your entries."}
+        {selectedIds && selectedIds.length > 0 ? `Choose a format to export ${selectedIds.length} selected journal entries.` : tt("Choose a format to export all your entries.")}
       </p>
       <div className="flex gap-3 mb-5">
         {formats.map((f) => (
@@ -65,10 +66,10 @@ export function ExportModal({ onClose, selectedIds }: Props) {
         ))}
       </div>
       <div className="flex gap-3">
-        <Button variant="outline" onClick={onClose} className="flex-1 rounded-xl border-border dark:border-stone-800">Cancel</Button>
+        <Button variant="outline" onClick={onClose} className="flex-1 rounded-xl border-border dark:border-stone-800">{tt("Cancel")}</Button>
         <Button onClick={handleExport} disabled={exporting} className="flex-1 gap-2 rounded-xl bg-foreground/10 hover:bg-foreground/20 text-foreground">
           {exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
-          {exporting ? "Exporting..." : "Export"}
+          {exporting ? tt("Exporting...") : tt("Export")}
         </Button>
       </div>
     </div>

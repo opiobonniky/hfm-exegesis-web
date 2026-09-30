@@ -1,5 +1,6 @@
 import { CheckCircle2, Layers, Timer } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   completedCount: number;
@@ -8,9 +9,9 @@ interface Props {
 }
 
 const STATS = [
-  { key: "completed", label: "Completed", icon: CheckCircle2, color: "text-green-500", bg: "bg-green-500/10" },
-  { key: "total", label: "Total Studies", icon: Layers, color: "text-primary", bg: "bg-primary/10" },
-  { key: "inProgress", label: "In Progress", icon: Timer, color: "text-amber-500", bg: "bg-amber-500/10" },
+  { key: "completed", label: tt("Completed"), icon: CheckCircle2, color: "text-green-500", bg: "bg-green-500/10" },
+  { key: "total", label: tt("Total Studies"), icon: Layers, color: "text-primary", bg: "bg-primary/10" },
+  { key: "inProgress", label: tt("In Progress"), icon: Timer, color: "text-amber-500", bg: "bg-amber-500/10" },
 ];
 
 export function LabHomeStats({ completedCount, totalCount, inProgressCount }: Props) {

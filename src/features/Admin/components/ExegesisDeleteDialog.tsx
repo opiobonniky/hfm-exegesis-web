@@ -9,6 +9,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   open: boolean;
@@ -30,16 +31,11 @@ export function ExegesisDeleteDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <AlertTriangle className="w-5 h-5 text-destructive" /> Delete Exegesis
-          </DialogTitle>
-          <DialogDescription>
-            Are you sure you want to delete <strong>{title}</strong>? This action cannot be undone.
-          </DialogDescription>
+            <AlertTriangle className="w-5 h-5 text-destructive" />{tt("Delete Exegesis")}</DialogTitle>
+          <DialogDescription>{tt("Are you sure you want to delete")}<strong>{title}</strong>{tt("? This action cannot be undone.")}</DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>{tt("Cancel")}</Button>
           <Button
             variant="destructive"
             onClick={onConfirm}
@@ -50,9 +46,7 @@ export function ExegesisDeleteDialog({
               <Loader2 className="w-4 h-4 animate-spin" />
             ) : (
               <Trash2 className="w-4 h-4" />
-            )}{" "}
-            Delete
-          </Button>
+            )}{" "}{tt("Delete")}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

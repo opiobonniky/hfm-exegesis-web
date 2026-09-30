@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { FormCard } from "./FormCard";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface JournalEntryAdditionalSectionProps {
   t: Translations;
@@ -26,14 +27,14 @@ export function JournalEntryAdditionalSection({
   onPublishedChange,
 }: JournalEntryAdditionalSectionProps) {
   return (
-    <FormCard title={t.journal.additional || "Additional"} icon={Tag}>
+    <FormCard title={t.journal.additional || tt("Additional")} icon={Tag}>
       <div className="space-y-4">
         <div className="space-y-1.5">
           <Label className="text-xs font-medium text-foreground/80 dark:text-muted-foreground/50">
-            {t.journal.tags || "Tags"}
+            {t.journal.tags || tt("Tags")}
           </Label>
           <Input
-            placeholder={t.journal.tagsPlaceholder || "comma, separated, tags"}
+            placeholder={t.journal.tagsPlaceholder || tt("comma, separated, tags")}
             value={tags}
             onChange={onTagsChange}
             className="rounded-xl border-border dark:border-stone-800 bg-card dark:bg-stone-900 text-sm text-foreground dark:text-stone-200"
@@ -41,7 +42,7 @@ export function JournalEntryAdditionalSection({
         </div>
         <div className="flex items-center justify-between pt-1">
           <Label className="text-xs font-medium text-foreground/80 dark:text-muted-foreground/50">
-            {t.journal.addToFavorites || "Add to favorites"}
+            {t.journal.addToFavorites || tt("Add to favorites")}
           </Label>
           <Switch
             checked={isFavorite}
@@ -52,12 +53,12 @@ export function JournalEntryAdditionalSection({
         <div className="flex items-center justify-between pt-1">
           <div>
             <Label className="text-xs font-medium text-foreground/80 dark:text-muted-foreground/50">
-              {t.journal.privacy || "Privacy"}
+              {t.journal.privacy || tt("Privacy")}
             </Label>
             <p className="text-[10px] text-muted-foreground/60 dark:text-muted-foreground/50 mt-0.5">
               {isPublished
-                ? t.journal.publicDesc || "Visible in Community"
-                : t.journal.privateDesc || "Only you can see this"}
+                ? t.journal.publicDesc || tt("Visible in Community")
+                : t.journal.privateDesc || tt("Only you can see this")}
             </p>
           </div>
           <Switch

@@ -3,6 +3,7 @@ import { BookOpen, ChevronRight, Search, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MAX_CHAPTERS, SUGGESTED_PASSAGES } from "@/features/Lab/constants";
 import { BOOK_NAMES } from "../constants";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   bookName: string;
@@ -49,18 +50,14 @@ export default function LabPassageSelector({
           <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mx-auto mb-4 ring-1 ring-primary/10">
             <BookOpen className="w-8 h-8 text-primary" />
           </div>
-          <h2 className="text-xl font-bold text-foreground" style={{ fontFamily: "'Cinzel', serif" }}>
-            Choose Your Passage
-          </h2>
-          <p className="text-sm text-muted-foreground mt-1.5">
-            Select a Bible passage to begin your 5-stage study journey
-          </p>
+          <h2 className="text-xl font-bold text-foreground" style={{ fontFamily: "'Cinzel', serif" }}>{tt("Choose Your Passage")}</h2>
+          <p className="text-sm text-muted-foreground mt-1.5">{tt("Select a Bible passage to begin your 5-stage study journey")}</p>
         </div>
 
         {/* Suggested passages */}
         {!bookName && (
           <div className="mb-8">
-            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-3">Suggested Passages</p>
+            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-3">{tt("Suggested Passages")}</p>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
               {SUGGESTED_PASSAGES.map((sp) => {
                 const [book, ch, vs] = sp.ref.replace(/:/g, " ").split(" ");
@@ -80,11 +77,11 @@ export default function LabPassageSelector({
 
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 mb-4 text-xs text-muted-foreground">
-          <span className={cn("font-semibold", step === "book" && "text-primary")}>Book</span>
+          <span className={cn("font-semibold", step === "book" && "text-primary")}>{tt("Book")}</span>
           <ChevronRight className="w-3 h-3" />
-          <span className={cn("font-semibold", step === "chapter" && "text-primary")}>Chapter</span>
+          <span className={cn("font-semibold", step === "chapter" && "text-primary")}>{tt("Chapter")}</span>
           <ChevronRight className="w-3 h-3" />
-          <span className={cn("font-semibold", step === "verse" && "text-primary")}>Verse</span>
+          <span className={cn("font-semibold", step === "verse" && "text-primary")}>{tt("Verse")}</span>
         </div>
 
         {/* Book picker */}
@@ -93,7 +90,7 @@ export default function LabPassageSelector({
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/40" />
               <input value={search} onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search books..." autoFocus
+                placeholder={tt("Search books...")} autoFocus
                 className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-border/60 bg-card text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40" />
             </div>
             <div className="max-h-[50vh] overflow-y-auto rounded-xl border border-border/40 bg-card divide-y divide-border/20">
@@ -111,8 +108,7 @@ export default function LabPassageSelector({
         {step === "chapter" && (
           <div className="space-y-3">
             <p className="text-sm text-muted-foreground">
-              <span className="font-semibold text-foreground">{bookName}</span> — Select a chapter
-            </p>
+              <span className="font-semibold text-foreground">{bookName}</span>{tt("— Select a chapter")}</p>
             <div className="grid grid-cols-6 sm:grid-cols-8 gap-1.5 max-h-[50vh] overflow-y-auto">
               {Array.from({ length: maxCh }, (_, i) => i + 1).map((ch) => (
                 <button key={ch} onClick={() => handleChapterSelect(String(ch))}
@@ -124,9 +120,7 @@ export default function LabPassageSelector({
                 </button>
               ))}
             </div>
-            <button onClick={() => setStep("book")} className="text-xs text-muted-foreground hover:text-foreground">
-              ← Change book
-            </button>
+            <button onClick={() => setStep("book")} className="text-xs text-muted-foreground hover:text-foreground">{tt("← Change book")}</button>
           </div>
         )}
 
@@ -134,24 +128,23 @@ export default function LabPassageSelector({
         {step === "verse" && (
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              <span className="font-semibold text-foreground">{bookName} {chapter}</span> — Select verse range
-            </p>
+              <span className="font-semibold text-foreground">{bookName} {chapter}</span>{tt("— Select verse range")}</p>
             <div className="flex gap-3">
               <div className="flex-1">
-                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">From Verse</label>
+                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{tt("From Verse")}</label>
                 <select value={verseStart} onChange={(e) => onSelectVerseStart(e.target.value)}
                   className="w-full mt-1 px-3 py-2.5 rounded-xl border border-border/60 bg-card text-sm focus:outline-none focus:ring-2 focus:ring-primary/30">
-                  <option value="">Select...</option>
+                  <option value="">{tt("Select...")}</option>
                   {Array.from({ length: maxVerse }, (_, i) => i + 1).map((v) => (
                     <option key={v} value={v}>{v}</option>
                   ))}
                 </select>
               </div>
               <div className="flex-1">
-                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">To Verse (optional)</label>
+                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{tt("To Verse (optional)")}</label>
                 <select value={verseEnd} onChange={(e) => onSelectVerseEnd(e.target.value)}
                   className="w-full mt-1 px-3 py-2.5 rounded-xl border border-border/60 bg-card text-sm focus:outline-none focus:ring-2 focus:ring-primary/30">
-                  <option value="">Same verse</option>
+                  <option value="">{tt("Same verse")}</option>
                   {Array.from({ length: maxVerse }, (_, i) => i + 1).map((v) => (
                     <option key={v} value={v}>{v}</option>
                   ))}
@@ -162,21 +155,19 @@ export default function LabPassageSelector({
             {/* Preview */}
             {verseStart && (
               <div className="rounded-xl border border-border/40 bg-muted/20 p-4">
-                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2">Passage Preview</p>
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2">{tt("Passage Preview")}</p>
                 {previewLoading ? (
                   <div className="space-y-2">{[1, 2, 3].map((i) => <div key={i} className="h-4 bg-[hsl(var(--skeleton))] rounded animate-pulse" />)}</div>
                 ) : previewText ? (
                   <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">{previewText}</p>
                 ) : (
-                  <p className="text-xs text-muted-foreground">Select a verse to preview</p>
+                  <p className="text-xs text-muted-foreground">{tt("Select a verse to preview")}</p>
                 )}
               </div>
             )}
 
             <div className="flex gap-2">
-              <button onClick={() => setStep("chapter")} className="text-xs text-muted-foreground hover:text-foreground">
-                ← Change chapter
-              </button>
+              <button onClick={() => setStep("chapter")} className="text-xs text-muted-foreground hover:text-foreground">{tt("← Change chapter")}</button>
             </div>
           </div>
         )}
@@ -187,7 +178,7 @@ export default function LabPassageSelector({
             <button onClick={onBeginStudy} disabled={loading}
               className="flex items-center gap-2 px-8 py-3 rounded-xl bg-primary text-primary-foreground text-sm font-bold shadow-lg hover:shadow-xl hover:opacity-90 transition-all disabled:opacity-50">
               <Sparkles className="w-4 h-4" />
-              {loading ? "Starting study..." : "Begin Study"}
+              {loading ? tt("Starting study...") : tt("Begin Study")}
             </button>
           </div>
         )}

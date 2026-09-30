@@ -5,6 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { adminApi } from "../services/adminApi";
 import type { TriviaQuestion, TriviaOverviewStats, TriviaUserPerformance } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export function useAdminTrivia() {
   const { t, isRtl } = useLanguage();
@@ -43,20 +44,20 @@ export function useAdminTrivia() {
     try {
       const res = await adminApi.request("trivia", "get-all", { page: p, pageSize: 20, search: searchQuery || undefined, difficulty: difficultyFilter !== "all" ? difficultyFilter : undefined, category: categoryFilter !== "all" ? categoryFilter : undefined });
       if (res?.returnCode === 200 && res?.returnData) { setQuestions(res.returnData.data || []); setTotalQuestions(res.returnData.total || 0); }
-    } catch { toast({ title: "Failed to load questions", variant: "destructive" }); }
+    } catch { toast({ title: tt("Failed to load questions"), variant: "destructive" }); }
     finally { setLoading(false); }
   }, [searchQuery, difficultyFilter, categoryFilter, toast]);
   const loadOverview = useCallback(async () => {
     try { const res = await adminApi.request("trivia", "admin/overview"); if (res?.returnCode === 200 && res?.returnData) setOverviewStats(res.returnData); }
-    catch { toast({ title: "Failed to load overview", variant: "destructive" }); }
+    catch { toast({ title: tt("Failed to load overview"), variant: "destructive" }); }
   }, [toast]);
   const loadUserPerformance = useCallback(async (p: number) => {
     try { const res = await adminApi.request("trivia", "admin/user-performance", { page: p, pageSize: 20, search: perfSearch || undefined, sortBy: perfSortBy, sortOrder: perfSortOrder }); if (res?.returnCode === 200 && res?.returnData) { setUserPerformance(res.returnData.data || []); setPerfTotal(res.returnData.total || 0); } }
-    catch { toast({ title: "Failed to load user performance", variant: "destructive" }); }
+    catch { toast({ title: tt("Failed to load user performance"), variant: "destructive" }); }
   }, [perfSearch, perfSortBy, perfSortOrder, toast]);
   const loadQuestionPerformance = useCallback(async (p: number) => {
     try { const res = await adminApi.request("trivia", "admin/question-performance", { page: p, pageSize: 20, search: qpSearch || undefined, difficulty: qpDifficulty !== "all" ? qpDifficulty : undefined, sortBy: qpSortBy, sortOrder: qpSortOrder }); if (res?.returnCode === 200 && res?.returnData) { setQuestionPerf(res.returnData.data || []); setQpTotal(res.returnData.total || 0); } }
-    catch { toast({ title: "Failed to load question performance", variant: "destructive" }); }
+    catch { toast({ title: tt("Failed to load question performance"), variant: "destructive" }); }
   }, [qpSearch, qpDifficulty, qpSortBy, qpSortOrder, toast]);
   useEffect(() => { loadQuestions(questionPage); }, [loadQuestions, questionPage]);
   useEffect(() => { loadOverview(); }, [loadOverview]);
@@ -72,25 +73,25 @@ export function useAdminTrivia() {
     setEditDialog(true);
   }, []);
   const handleSave = useCallback(async () => {
-    if (!editForm.question?.trim()) { toast({ title: "Question is required", variant: "destructive" }); return; }
+    if (!editForm.question?.trim()) { toast({ title: tt("Question is required"), variant: "destructive" }); return; }
     const filteredOptions = optionsArray.filter(o => o.trim());
-    if (filteredOptions.length < 2) { toast({ title: "At least 2 options required", variant: "destructive" }); return; }
+    if (filteredOptions.length < 2) { toast({ title: tt("At least 2 options required"), variant: "destructive" }); return; }
     setSaving(true);
     try {
       const payload = { ...editForm, optionsJson: JSON.stringify(filteredOptions) };
       const res = await adminApi.request("trivia", editForm.id ? "update" : "create", payload);
       if (res?.returnCode === 200) { toast({ title: editForm.id ? "Updated" : "Created" }); setEditDialog(false); loadQuestions(questionPage); }
-      else { toast({ title: "Failed", description: res?.returnMessage, variant: "destructive" }); }
-    } catch { toast({ title: "Error", variant: "destructive" }); }
+      else { toast({ title: tt("Failed"), description: res?.returnMessage, variant: "destructive" }); }
+    } catch { toast({ title: tt("Error"), variant: "destructive" }); }
     finally { setSaving(false); }
   }, [editForm, optionsArray, toast, loadQuestions, questionPage]);
   const handleDelete = useCallback(async () => {
     if (!deleteTarget) return; setDeleting(true);
     try {
       const res = await adminApi.request("trivia", "delete", { id: deleteTarget.id });
-      if (res?.returnCode === 200) { toast({ title: "Deleted" }); setDeleteTarget(null); loadQuestions(questionPage); }
-      else { toast({ title: "Delete failed", variant: "destructive" }); }
-    } catch { toast({ title: "Error", variant: "destructive" }); }
+      if (res?.returnCode === 200) { toast({ title: tt("Deleted") }); setDeleteTarget(null); loadQuestions(questionPage); }
+      else { toast({ title: tt("Delete failed"), variant: "destructive" }); }
+    } catch { toast({ title: tt("Error"), variant: "destructive" }); }
     finally { setDeleting(false); }
   }, [deleteTarget, toast, loadQuestions, questionPage]);
   const onViewQuestion = useCallback((q: TriviaQuestion) => {

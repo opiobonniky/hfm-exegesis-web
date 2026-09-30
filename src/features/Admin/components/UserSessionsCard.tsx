@@ -2,6 +2,7 @@
 import { Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Session {
   id: string;
@@ -29,9 +30,7 @@ export function UserSessionsCard({ sessions, loading }: UserSessionsCardProps) {
   return (
     <Card>
       <CardHeader className="pb-3">
-        <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-          Login Sessions
-        </CardTitle>
+        <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">{tt("Login Sessions")}</CardTitle>
       </CardHeader>
       <CardContent>
         {loading ? (
@@ -39,9 +38,7 @@ export function UserSessionsCard({ sessions, loading }: UserSessionsCardProps) {
             <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
           </div>
         ) : sessions.length === 0 ? (
-          <p className="text-sm text-muted-foreground text-center py-6">
-            No sessions recorded
-          </p>
+          <p className="text-sm text-muted-foreground text-center py-6">{tt("No sessions recorded")}</p>
         ) : (
           <div className="space-y-2 max-h-80 overflow-y-auto">
             {sessions.slice(0, 20).map((s) => (
@@ -57,7 +54,7 @@ export function UserSessionsCard({ sessions, loading }: UserSessionsCardProps) {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <span className="font-medium text-xs">
-                      {s.deviceType || "Unknown"}
+                      {s.deviceType || tt("Unknown")}
                     </span>
                     {s.browser && (
                       <span className="text-xs text-muted-foreground">

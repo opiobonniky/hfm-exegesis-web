@@ -1,5 +1,6 @@
 import { CheckCircle2, Lightbulb } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Reflection { id: number; question: string; reflectionText: string; }
 
@@ -13,8 +14,8 @@ export default function DailyReadingReflections({ reflections, onAnswerChange }:
   return (
     <div className="space-y-3">
       <div>
-        <h2 className="flex items-center gap-2 text-sm font-bold"><Lightbulb className="h-4 w-4 text-amber-500" /> Reflect and respond</h2>
-        <p className="mt-1 text-xs text-muted-foreground">Write a response to each prompt. Drafts are saved on this device.</p>
+        <h2 className="flex items-center gap-2 text-sm font-bold"><Lightbulb className="h-4 w-4 text-amber-500" />{tt("Reflect and respond")}</h2>
+        <p className="mt-1 text-xs text-muted-foreground">{tt("Write a response to each prompt. Drafts are saved on this device.")}</p>
       </div>
       {reflections.map((r) => {
         const answered = r.reflectionText.trim().length > 0;
@@ -28,12 +29,12 @@ export default function DailyReadingReflections({ reflections, onAnswerChange }:
             <Textarea
               value={r.reflectionText}
               onChange={(event) => onAnswerChange(r.id, event.target.value)}
-              placeholder="Write what stood out to you, what it means, or how you will apply it..."
+              placeholder={tt("Write what stood out to you, what it means, or how you will apply it...")}
               rows={4}
               className="min-h-28 resize-y"
               aria-label={`Response to reflection ${r.id + 1}`}
             />
-            <p className="mt-2 text-right text-[11px] text-muted-foreground">{r.reflectionText.trim().length} characters</p>
+            <p className="mt-2 text-right text-[11px] text-muted-foreground">{r.reflectionText.trim().length}{tt("characters")}</p>
           </div>
         );
       })}

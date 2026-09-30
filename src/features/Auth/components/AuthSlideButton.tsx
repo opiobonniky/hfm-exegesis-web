@@ -5,6 +5,7 @@
 import { Sparkles, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface AuthSlideButtonProps {
   onClick: () => void;
@@ -18,9 +19,9 @@ export function AuthSlideButton({ onClick, isLast }: AuthSlideButtonProps) {
       "bg-card text-gray-900 hover:bg-card/90 hover:shadow-xl", "shadow-lg shadow-black/20",
     )}>
       {isLast ? (
-        <><Sparkles className="w-5 h-5" />Create Account</>
+        <><Sparkles className="w-5 h-5" />{tt("Create Account")}</>
       ) : (
-        <>Continue<ChevronRight className="w-5 h-5" /></>
+        <>{tt("Continue")}<ChevronRight className="w-5 h-5" /></>
       )}
     </Button>
   );

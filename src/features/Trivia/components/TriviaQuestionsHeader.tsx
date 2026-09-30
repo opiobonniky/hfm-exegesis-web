@@ -1,5 +1,6 @@
 import { ArrowLeft } from "lucide-react";
 import type { TriviaQuestionsHeaderProps } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export default function TriviaQuestionsHeader({
   questionNumber,
@@ -14,13 +15,11 @@ export default function TriviaQuestionsHeader({
           onClick={onExit}
           className="flex items-center gap-2 rounded-xl px-2 py-2 text-sm font-bold transition hover:bg-white/10"
         >
-          <ArrowLeft className="h-4 w-4" />
-          Exit quiz
-        </button>
+          <ArrowLeft className="h-4 w-4" />{tt("Exit quiz")}</button>
         <div className="text-right">
-          <p className="text-sm font-black">Question {questionNumber}</p>
+          <p className="text-sm font-black">{tt("Question")}{questionNumber}</p>
           <p className="text-[10px] uppercase tracking-wider text-primary-foreground/60">
-            {difficulty || "All levels"}
+            {difficulty || tt("All levels")}
           </p>
         </div>
       </div>

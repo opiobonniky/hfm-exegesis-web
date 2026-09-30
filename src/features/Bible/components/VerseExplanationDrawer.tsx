@@ -12,6 +12,7 @@ import type {
   VerseExplanationDrawerProps,
 } from "../types";
 import { parseJsonList } from "../utils/readerPresentation";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 /** Section header with icon + label */
 function Section({ icon: Icon, label, children }: { icon: LucideIcon; label: string; children: React.ReactNode }) {
@@ -104,13 +105,13 @@ export default function VerseExplanationDrawer({
           ) : !explanation ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
               <BookOpen className="w-8 h-8 text-muted-foreground/30 mb-3" />
-              <p className="text-sm text-muted-foreground">No explanation available for this verse.</p>
+              <p className="text-sm text-muted-foreground">{tt("No explanation available for this verse.")}</p>
             </div>
           ) : (
             <>
               {/* Verse Introduction */}
               {explanation.verseIntroduction && (
-                <Section icon={ScrollText} label="Verse Introduction">
+                <Section icon={ScrollText} label={tt("Verse Introduction")}>
                   <p className="text-sm text-foreground/80 leading-relaxed">{explanation.verseIntroduction}</p>
                 </Section>
               )}
@@ -122,21 +123,21 @@ export default function VerseExplanationDrawer({
               )}
               {/* Application */}
               {explanation.application && (
-                <Section icon={RefreshCcw} label="Application">
+                <Section icon={RefreshCcw} label={tt("Application")}>
                   <p className="text-sm text-foreground/80 leading-relaxed">{explanation.application}</p>
                 </Section>
               )}
               {/* Background */}
               {(explanation.backgroundAuthor || explanation.backgroundBook || explanation.backgroundContext) && (
-                <Section icon={Layers} label="Background">
-                  {explanation.backgroundAuthor && <><SubLabel label="Author" /><p className="text-sm text-foreground/80">{explanation.backgroundAuthor}</p></>}
-                  {explanation.backgroundBook && <><SubLabel label="Book" /><p className="text-sm text-foreground/80">{explanation.backgroundBook}</p></>}
-                  {explanation.backgroundContext && <><SubLabel label="Context" /><p className="text-sm text-foreground/80">{explanation.backgroundContext}</p></>}
+                <Section icon={Layers} label={tt("Background")}>
+                  {explanation.backgroundAuthor && <><SubLabel label={tt("Author")} /><p className="text-sm text-foreground/80">{explanation.backgroundAuthor}</p></>}
+                  {explanation.backgroundBook && <><SubLabel label={tt("Book")} /><p className="text-sm text-foreground/80">{explanation.backgroundBook}</p></>}
+                  {explanation.backgroundContext && <><SubLabel label={tt("Context")} /><p className="text-sm text-foreground/80">{explanation.backgroundContext}</p></>}
                 </Section>
               )}
               {/* Strong's Word Study */}
               {wordStudies.length > 0 && (
-                <Section icon={GraduationCap} label="Word Study">
+                <Section icon={GraduationCap} label={tt("Word Study")}>
                   <div className="space-y-3">
                     {wordStudies.map((ws, i) => (
                       <div key={i} className="p-3 rounded-lg bg-muted/30 border border-border/50">
@@ -158,19 +159,17 @@ export default function VerseExplanationDrawer({
               )}
               {/* Insights and Cross References */}
               {(keyThemes.length > 0 || crossRefs.length > 0) && (
-                <Section icon={Sparkles} label="Insights & Cross References">
-                  {keyThemes.length > 0 && <><SubLabel label="Key Themes" /><BulletList items={keyThemes} /></>}
-                  {crossRefs.length > 0 && <><SubLabel label="Cross References" /><BulletList items={crossRefs} /></>}
+                <Section icon={Sparkles} label={tt("Insights & Cross References")}>
+                  {keyThemes.length > 0 && <><SubLabel label={tt("Key Themes")} /><BulletList items={keyThemes} /></>}
+                  {crossRefs.length > 0 && <><SubLabel label={tt("Cross References")} /><BulletList items={crossRefs} /></>}
                 </Section>
               )}
               {/* Learn More */}
               {explanation.learnMore && (
-                <Section icon={BookMarked} label="Learn More">
+                <Section icon={BookMarked} label={tt("Learn More")}>
                   <details className="group">
                     <summary className="flex items-center gap-1.5 text-xs font-semibold text-primary cursor-pointer hover:text-primary/80 transition-colors list-none">
-                      <ChevronRight className="w-3.5 h-3.5 transition-transform group-open:rotate-90" />
-                      Expand additional context
-                    </summary>
+                      <ChevronRight className="w-3.5 h-3.5 transition-transform group-open:rotate-90" />{tt("Expand additional context")}</summary>
                     <div className="mt-3 text-sm text-foreground/75 leading-relaxed whitespace-pre-wrap pl-5">
                       {explanation.learnMore}
                     </div>
@@ -179,7 +178,7 @@ export default function VerseExplanationDrawer({
               )}
               {/* Final Thoughts */}
               {explanation.finalThoughts && (
-                <Section icon={BookMarked} label="Final Thoughts">
+                <Section icon={BookMarked} label={tt("Final Thoughts")}>
                   <p className="text-sm text-foreground/80 leading-relaxed">{explanation.finalThoughts}</p>
                 </Section>
               )}

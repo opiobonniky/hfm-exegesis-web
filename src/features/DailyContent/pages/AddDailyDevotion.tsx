@@ -14,6 +14,7 @@ import {
   DailyContentPageHeader,
   PageContentWrapper,
 } from "../components";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export default function AddDailyDevotion() {
   const { data, actions } = useAddDailyDevotion();
@@ -75,7 +76,7 @@ export default function AddDailyDevotion() {
           setBackgroundBook={actions.setBackgroundBook}
           setBackgroundContext={actions.setBackgroundContext}
         />
-        <Section title="Rich Content" defaultOpen={false}>
+        <Section title={tt("Rich Content")} defaultOpen={false}>
           <StructuredContentSection
             wordStudies={data.wordStudies}
             setWordStudies={actions.setWordStudies}
@@ -93,7 +94,7 @@ export default function AddDailyDevotion() {
             isRtl={data.isRtl}
           />
         </Section>
-        <Section title="Schedule & Publish">
+        <Section title={tt("Schedule & Publish")}>
           <PublishToggle
             published={data.published}
             onCheckedChange={actions.setPublished}

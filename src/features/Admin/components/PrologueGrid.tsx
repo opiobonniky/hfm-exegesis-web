@@ -2,6 +2,7 @@
 import { RefObject } from "react";
 import { Loader2 } from "lucide-react";
 import { PrologueCard } from "./PrologueCard";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface PrologueItem {
   bookName: string;
@@ -52,9 +53,7 @@ export function PrologueGrid({
         </div>
       )}
       {!hasMore && items.length > 0 && (
-        <p className="text-center text-xs text-muted-foreground/50 py-4">
-          All items loaded
-        </p>
+        <p className="text-center text-xs text-muted-foreground/50 py-4">{tt("All items loaded")}</p>
       )}
     </>
   );

@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { adminApi } from "../services/adminApi";
 import type { CreateUserForm } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 const INITIAL_FORM: CreateUserForm = {
   username: "",
@@ -61,12 +62,12 @@ export function useAdminCreateUser() {
       });
       if (res.returnCode === 201 || res.returnCode === 200) {
         toast({
-          title: "User created successfully",
-          description: "A temporary password has been emailed to the user.",
+          title: tt("User created successfully"),
+          description: tt("A temporary password has been emailed to the user."),
         });
         navigate("/admin/users");
       } else {
-        toast({ title: "Failed to create user", description: res.returnMessage, variant: "destructive" });
+        toast({ title: tt("Failed to create user"), description: res.returnMessage, variant: "destructive" });
       }
     } catch (err: any) {
       const msg = err?.response?.data?.returnMessage || "Failed to create user";

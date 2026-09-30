@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { routes } from "@/components/Routes/routes";
 import type { UserPlanItem } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   plan: UserPlanItem;
@@ -18,9 +19,9 @@ export default function CompletedPlanCard({ plan, t, onView }: Props) {
           <div className="flex-1">
             <div className="flex items-center gap-2">
               <CardTitle className="text-lg">{plan.planName}</CardTitle>
-              <span className="text-xs px-2 py-1 bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 rounded-full font-medium">Done</span>
+              <span className="text-xs px-2 py-1 bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 rounded-full font-medium">{tt("Done")}</span>
             </div>
-            <p className="text-sm text-muted-foreground mt-1">{plan.totalDays} days completed</p>
+            <p className="text-sm text-muted-foreground mt-1">{plan.totalDays}{tt("days completed")}</p>
           </div>
           <div className="w-14 h-14 relative">
             <svg className="w-14 h-14 -rotate-90">
@@ -33,11 +34,9 @@ export default function CompletedPlanCard({ plan, t, onView }: Props) {
       </CardHeader>
       <CardContent className="flex gap-2">
         <Button variant="outline" className="flex-1" onClick={() => onView(plan.planId)}>
-          <Eye className="w-4 h-4 mr-2" />Summary
-        </Button>
+          <Eye className="w-4 h-4 mr-2" />{tt("Summary")}</Button>
         <Button variant="outline" className="flex-1">
-          <Trophy className="w-4 h-4 mr-2" />Revisit
-        </Button>
+          <Trophy className="w-4 h-4 mr-2" />{tt("Revisit")}</Button>
       </CardContent>
     </Card>
   );

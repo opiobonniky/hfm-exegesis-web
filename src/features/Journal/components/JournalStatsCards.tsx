@@ -1,15 +1,16 @@
 import { PenLine, Star, TrendingUp, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { JournalPageStats } from "../hooks/useJournalPageFull";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props { stats: JournalPageStats }
 
 export function JournalStatsCards({ stats }: Props) {
   const cards = [
-    { label: "Total Entries", value: stats.totalEntries, icon: PenLine, bg: "bg-blue-50 dark:bg-blue-950/40", color: "text-blue-600 dark:text-blue-400" },
-    { label: "Favorites", value: stats.favoriteCount, icon: Star, bg: "bg-amber-50 dark:bg-amber-950/40", color: "text-amber-600 dark:text-amber-400" },
-    { label: "This Week", value: stats.entriesThisWeek, icon: TrendingUp, bg: "bg-emerald-50 dark:bg-emerald-950/40", color: "text-emerald-600 dark:text-emerald-400" },
-    { label: "This Month", value: stats.entriesThisMonth, icon: Sparkles, bg: "bg-violet-50 dark:bg-violet-950/40", color: "text-violet-600 dark:text-violet-400" },
+    { label: tt("Total Entries"), value: stats.totalEntries, icon: PenLine, bg: "bg-blue-50 dark:bg-blue-950/40", color: "text-blue-600 dark:text-blue-400" },
+    { label: tt("Favorites"), value: stats.favoriteCount, icon: Star, bg: "bg-amber-50 dark:bg-amber-950/40", color: "text-amber-600 dark:text-amber-400" },
+    { label: tt("This Week"), value: stats.entriesThisWeek, icon: TrendingUp, bg: "bg-emerald-50 dark:bg-emerald-950/40", color: "text-emerald-600 dark:text-emerald-400" },
+    { label: tt("This Month"), value: stats.entriesThisMonth, icon: Sparkles, bg: "bg-violet-50 dark:bg-violet-950/40", color: "text-violet-600 dark:text-violet-400" },
   ];
 
   return (

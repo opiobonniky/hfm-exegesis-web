@@ -2,6 +2,7 @@
 import { Clock, Trash2, TrendingUp, Search, X } from "lucide-react";
 import { SUGGESTIONS } from "@/hooks/useSearch";
 import type { SearchScope } from "@/services/searchApi";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface SearchInitialStateProps {
   scope: SearchScope;
@@ -26,11 +27,10 @@ export default function SearchInitialState({
           <div className="flex items-center justify-between px-4 sm:px-6 py-2">
             <div className="flex items-center gap-2">
               <Clock className="w-3.5 h-3.5 text-muted-foreground" />
-              <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Recent Searches</p>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">{tt("Recent Searches")}</p>
             </div>
             <button onClick={onClearHistory} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors">
-              <Trash2 className="w-3 h-3" /> Clear
-            </button>
+              <Trash2 className="w-3 h-3" />{tt("Clear")}</button>
           </div>
           {searchHistory.map((item) => (
             <div key={item} className="flex items-center gap-3 px-4 sm:px-6 py-2.5 hover:bg-muted/30 cursor-pointer transition-colors rounded-lg mx-2"
@@ -51,7 +51,7 @@ export default function SearchInitialState({
         <div className="mb-6 px-4 sm:px-6">
           <div className="flex items-center gap-2 py-2">
             <TrendingUp className="w-3.5 h-3.5 text-muted-foreground" />
-            <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Popular</p>
+            <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">{tt("Popular")}</p>
           </div>
           <div className="flex flex-wrap gap-2">
             {popularSearches.filter((p) => p.scope === scope).slice(0, 8).map((p) => (
@@ -69,10 +69,10 @@ export default function SearchInitialState({
           <Search className="w-7 h-7 text-primary/60" />
         </div>
         <p className="text-base font-bold text-foreground mb-1">
-          {scope === "bible" ? "Search the Bible" : scope === "journal" ? "Search Your Journal" : scope === "topics" ? "Explore Bible topics" : "Search Greek/Hebrew lemmas"}
+          {scope === "bible" ? tt("Search the Bible") : scope === "journal" ? tt("Search Your Journal") : scope === "topics" ? tt("Explore Bible topics") : tt("Search Greek/Hebrew lemmas")}
         </p>
         <p className="text-sm text-muted-foreground mb-5 max-w-xs">
-          {scope === "bible" ? "Find verses across all books and chapters" : scope === "journal" ? "Find reflections, prayers, and notes" : "Explore topics and themes"}
+          {scope === "bible" ? tt("Find verses across all books and chapters") : scope === "journal" ? tt("Find reflections, prayers, and notes") : tt("Explore topics and themes")}
         </p>
         <div className="flex flex-wrap gap-2 justify-center max-w-md">
           {SUGGESTIONS[scope].map((s) => (

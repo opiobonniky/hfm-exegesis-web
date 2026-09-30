@@ -1,6 +1,7 @@
 // LabFlow constants — chapter counts, stage config, passage suggestions
 import { Eye, Ear, Heart, BookText, Search, LibraryBig } from "lucide-react";
 import type { LabStage, LearnTab } from "./types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export const STAGE_ORDER: LabStage[] = ["look", "listen", "learn", "abide", "apply"];
 
@@ -22,10 +23,10 @@ export const LOOK_PROMPTS = [
 ];
 
 export const LEARN_TABS: { key: LearnTab; label: string }[] = [
-  { key: "exegesis", label: "Study Notes" },
-  { key: "language", label: "Original Language" },
-  { key: "history", label: "Historical Context" },
-  { key: "prologue", label: "Book Prologue" },
+  { key: "exegesis", label: tt("Study Notes") },
+  { key: "language", label: tt("Original Language") },
+  { key: "history", label: tt("Historical Context") },
+  { key: "prologue", label: tt("Book Prologue") },
 ];
 
 export const BOOK_NAMES = [
@@ -65,12 +66,12 @@ export const STAGE_TIME: Record<string, string> = {
 };
 
 export const SUGGESTED_PASSAGES = [
-  { ref: "John 1:1", label: "The Word", desc: "In the beginning was the Word" },
-  { ref: "Psalm 23:1", label: "The Shepherd", desc: "The LORD is my shepherd" },
-  { ref: "Genesis 1:1", label: "Creation", desc: "In the beginning God created" },
-  { ref: "Romans 8:28", label: "All Things", desc: "All things work together" },
-  { ref: "Philippians 4:13", label: "Strength", desc: "I can do all things" },
-  { ref: "Isaiah 40:31", label: "Renewal", desc: "They that wait upon the LORD" },
+  { ref: "John 1:1", label: tt("The Word"), desc: "In the beginning was the Word" },
+  { ref: "Psalm 23:1", label: tt("The Shepherd"), desc: "The LORD is my shepherd" },
+  { ref: "Genesis 1:1", label: tt("Creation"), desc: "In the beginning God created" },
+  { ref: "Romans 8:28", label: tt("All Things"), desc: "All things work together" },
+  { ref: "Philippians 4:13", label: tt("Strength"), desc: "I can do all things" },
+  { ref: "Isaiah 40:31", label: tt("Renewal"), desc: "They that wait upon the LORD" },
 ];
 
 export const MAX_CHAPTERS: Record<string, number> = {
@@ -97,23 +98,23 @@ export const LAB_ERRORS = {
 
 export type LabMode = "search" | "browse" | "verse";
 export const LAB_MODE_TABS: Array<{ id: LabMode; icon: any; label: string }> = [
-  { id: "search", icon: Search, label: "Search" },
-  { id: "browse", icon: LibraryBig, label: "Browse by Book" },
-  { id: "verse", icon: BookText, label: "By Verse" },
+  { id: "search", icon: Search, label: tt("Search") },
+  { id: "browse", icon: LibraryBig, label: tt("Browse by Book") },
+  { id: "verse", icon: BookText, label: tt("By Verse") },
 ];
 export const SEARCH_HINTS = ["love", "faith", "grace", "word", "light", "logos", "agape"];
 export const LAB_BROWSE_PAGE_SIZE = 100;
 
 // LabHome constants
 export const STAGE_META = [
-  { key: "look", label: "Look", desc: "Read and observe", time: "5 min" },
-  { key: "listen", label: "Listen", desc: "Meditate and reflect", time: "5 min" },
-  { key: "learn", label: "Learn", desc: "Study and understand", time: "5 min" },
-  { key: "abide", label: "Abide", desc: "Apply and pray", time: "5 min" },
+  { key: "look", label: tt("Look"), desc: tt("Read and observe"), time: "5 min" },
+  { key: "listen", label: tt("Listen"), desc: tt("Meditate and reflect"), time: "5 min" },
+  { key: "learn", label: tt("Learn"), desc: tt("Study and understand"), time: "5 min" },
+  { key: "abide", label: tt("Abide"), desc: tt("Apply and pray"), time: "5 min" },
 ];
 
 export const ONBOARDING_STEPS = [
-  { title: "Welcome to Exegesis Lab", desc: "A 4-step guided journey through Scripture.", bg: "bg-primary/10", color: "text-primary" },
-  { title: "Look, Listen, Learn, Abide", desc: "Each stage guides you deeper into the Word.", bg: "bg-amber-100", color: "text-amber-600" },
-  { title: "Start Your Journey", desc: "Choose a passage and begin studying.", bg: "bg-emerald-100", color: "text-emerald-600" },
+  { title: tt("Welcome to Exegesis Lab"), desc: tt("A 4-step guided journey through Scripture."), bg: "bg-primary/10", color: "text-primary" },
+  { title: tt("Look, Listen, Learn, Abide"), desc: tt("Each stage guides you deeper into the Word."), bg: "bg-amber-100", color: "text-amber-600" },
+  { title: tt("Start Your Journey"), desc: tt("Choose a passage and begin studying."), bg: "bg-emerald-100", color: "text-emerald-600" },
 ];

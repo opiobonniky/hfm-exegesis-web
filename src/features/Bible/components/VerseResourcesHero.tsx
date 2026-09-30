@@ -8,6 +8,7 @@
 import { ReactNode } from "react";
 import { BookOpen, Library } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface VerseResourcesHeroProps {
   verseRef: string;
@@ -33,9 +34,7 @@ export function VerseResourcesHero({
               <Library className="size-4 text-primary" strokeWidth={2.2} />
             </span>
             <div className="min-w-0">
-              <h1 className="font-[family-name:var(--font-heading)] text-base font-bold leading-tight text-foreground">
-                Verse Resources
-              </h1>
+              <h1 className="font-[family-name:var(--font-heading)] text-base font-bold leading-tight text-foreground">{tt("Verse Resources")}</h1>
               <p className="truncate text-[11px] text-muted-foreground">
                 {verseRef}
                 {sectionHeading && (
@@ -51,7 +50,7 @@ export function VerseResourcesHero({
             onClick={goToReader}
           >
             <BookOpen className="size-3" />
-            <span className="hidden sm:inline">Reader</span>
+            <span className="hidden sm:inline">{tt("Reader")}</span>
           </Button>
         </div>
 

@@ -11,6 +11,7 @@ import AudioControlBar from "./AudioControlBar";
 import FontSizeControls from "./FontSizeControls";
 import VerseMultiSelectBar from "./VerseMultiSelectBar";
 import BottomActionBar from "./BottomActionBar";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export default function BibleReaderBody({
   scrollRef,
@@ -111,9 +112,7 @@ export default function BibleReaderBody({
               <p className="text-sm text-muted-foreground">
                 {loadError}
               </p>
-              <Button variant="outline" size="sm" onClick={onRetryLoad}>
-                Try again
-              </Button>
+              <Button variant="outline" size="sm" onClick={onRetryLoad}>{tt("Try again")}</Button>
             </div>
           ) : (
             <div style={{ fontSize: `${fontSize}px` }}>
@@ -144,8 +143,7 @@ export default function BibleReaderBody({
               role="status"
               className="flex items-center justify-center gap-2 py-4 text-xs text-muted-foreground"
             >
-              <Loader2 className="h-4 w-4 animate-spin" /> Loading more chapters
-            </div>
+              <Loader2 className="h-4 w-4 animate-spin" />{tt("Loading more chapters")}</div>
           )}
 
           {loadError && chapters.length > 0 && (
@@ -154,9 +152,7 @@ export default function BibleReaderBody({
               className="flex items-center justify-center gap-3 py-4 text-sm text-muted-foreground"
             >
               <span>{loadError}</span>
-              <Button variant="outline" size="sm" onClick={onLoadMore}>
-                Try again
-              </Button>
+              <Button variant="outline" size="sm" onClick={onLoadMore}>{tt("Try again")}</Button>
             </div>
           )}
         </main>

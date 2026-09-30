@@ -5,6 +5,7 @@
 import { BookOpenCheck, Loader2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { AddDailyVersePageViewModel } from "../hooks/useAddDailyVerse";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   model: AddDailyVersePageViewModel;
@@ -14,9 +15,7 @@ export function ExplanationAutoFillBanner({ model: h }: Props) {
   if (h.explanationLoading) {
     return (
       <div className="flex items-center gap-2 rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-700">
-        <Loader2 className="h-4 w-4 animate-spin" />
-        Checking for an existing verse explanation...
-      </div>
+        <Loader2 className="h-4 w-4 animate-spin" />{tt("Checking for an existing verse explanation...")}</div>
     );
   }
 
@@ -29,13 +28,9 @@ export function ExplanationAutoFillBanner({ model: h }: Props) {
       <div className="flex items-start gap-3">
         <BookOpenCheck className="mt-0.5 h-5 w-5 shrink-0 text-sky-600" />
         <div className="text-sm text-sky-800">
-          <p className="font-medium">
-            Found an existing explanation for {reference}
+          <p className="font-medium">{tt("Found an existing explanation for")}{reference}
           </p>
-          <p className="mt-0.5 text-sky-700/80">
-            Its content was pasted into the matching fields. Review and edit as
-            needed, or overwrite them all with the explanation content.
-          </p>
+          <p className="mt-0.5 text-sky-700/80">{tt("Its content was pasted into the matching fields. Review and edit as needed, or overwrite them all with the explanation content.")}</p>
         </div>
       </div>
       <Button
@@ -45,8 +40,7 @@ export function ExplanationAutoFillBanner({ model: h }: Props) {
         className="shrink-0 gap-2 border-sky-300 bg-white text-sky-700 hover:bg-sky-100"
         onClick={() => h.applyExplanation(h.explanationSource)}
       >
-        <Sparkles className="h-3.5 w-3.5" /> Overwrite with explanation
-      </Button>
+        <Sparkles className="h-3.5 w-3.5" />{tt("Overwrite with explanation")}</Button>
     </div>
   );
 }

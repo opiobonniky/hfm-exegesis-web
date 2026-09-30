@@ -11,6 +11,7 @@ import { Loader2 } from "lucide-react";
 import { useSubscription } from "@/hooks/useSubscription";
 import { routes } from "@/components/Routes/routes";
 import { cn } from "@/lib/utils";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export interface TierBadgeProps {
   /** Custom click handler. Defaults to navigating to /sower for all users. */
@@ -77,9 +78,7 @@ export function TierBadge({
         )}
         {/* Upgrade CTA */}
         {!isPayingUser && (
-          <span className="text-[10px] font-semibold text-violet-400/70 group-hover:text-violet-300 shrink-0">
-            Upgrade
-          </span>
+          <span className="text-[10px] font-semibold text-violet-400/70 group-hover:text-violet-300 shrink-0">{tt("Upgrade")}</span>
         )}
       </button>
     );
@@ -114,9 +113,7 @@ export function TierBadge({
       )}
       {/* Upgrade CTA */}
       {!isPayingUser && (
-        <span className="text-[10px] font-bold text-violet-500/70 group-hover:text-violet-500 underline underline-offset-2 shrink-0">
-          Upgrade
-        </span>
+        <span className="text-[10px] font-bold text-violet-500/70 group-hover:text-violet-500 underline underline-offset-2 shrink-0">{tt("Upgrade")}</span>
       )}
     </button>
   );

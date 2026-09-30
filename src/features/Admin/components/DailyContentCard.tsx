@@ -3,6 +3,7 @@ import { Check, Edit2, Trash2, Eye, BookOpen, Lightbulb, Heart } from "lucide-re
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import type { DailyItem } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   item: DailyItem;
@@ -41,10 +42,9 @@ export function DailyContentCard({ item, onView, onEdit, onDelete }: Props) {
             </Badge>
             {item.isPublished ? (
               <Badge variant="outline" className="text-[10px] bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-800/40">
-                <Check className="w-2.5 h-2.5 mr-0.5" /> Published
-              </Badge>
+                <Check className="w-2.5 h-2.5 mr-0.5" />{tt("Published")}</Badge>
             ) : (
-              <Badge variant="outline" className="text-[10px] bg-muted text-muted-foreground">Draft</Badge>
+              <Badge variant="outline" className="text-[10px] bg-muted text-muted-foreground">{tt("Draft")}</Badge>
             )}
           </div>
           {item.title && <p className="font-medium text-sm truncate">{item.title}</p>}

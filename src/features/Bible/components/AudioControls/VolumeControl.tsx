@@ -1,5 +1,6 @@
 import { Volume2 } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface VolumeControlProps {
   volume: number;
@@ -11,7 +12,7 @@ export function VolumeControl({ volume, onVolumeChange }: VolumeControlProps) {
     <section className="rounded-xl border border-border/60 bg-background/70 p-3">
       <div className="mb-3 flex items-center gap-2">
         <Volume2 className="h-4 w-4 text-primary" />
-        <span className="text-xs font-semibold text-foreground">Volume</span>
+        <span className="text-xs font-semibold text-foreground">{tt("Volume")}</span>
         <span className="ms-auto text-[10px] font-semibold tabular-nums text-muted-foreground">
           {Math.round(volume * 100)}%
         </span>
@@ -21,7 +22,7 @@ export function VolumeControl({ volume, onVolumeChange }: VolumeControlProps) {
         min={0}
         max={100}
         step={5}
-        aria-label="Reading volume"
+        aria-label={tt("Reading volume")}
         onValueChange={([value]) => onVolumeChange(value / 100)}
       />
     </section>

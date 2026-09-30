@@ -3,6 +3,7 @@ import { RefObject } from "react";
 import { Trash2, Edit2, Eye, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface VerseExplanationItem {
   id: number;
@@ -56,27 +57,25 @@ export function VerseExplanationTable({
                     {item.bookName} {item.chapter}:{item.verseNumber}
                   </div>
                   <div className="text-xs text-muted-foreground mt-1">
-                    {item.bibleVersion || "BSB"}
+                    {item.bibleVersion || tt("BSB")}
                   </div>
                 </div>
                 <Badge
                   variant={item.isPublished ? "default" : "secondary"}
                   className="text-[10px]"
                 >
-                  {item.isPublished ? "Published" : "Draft"}
+                  {item.isPublished ? tt("Published") : tt("Draft")}
                 </Badge>
               </div>
 
               <div className="mt-3">
                 <p className="text-sm text-muted-foreground line-clamp-3">
-                  {item.explanation || "No explanation provided."}
+                  {item.explanation || tt("No explanation provided.")}
                 </p>
               </div>
 
               <div className="mt-3">
-                <h4 className="text-xs uppercase text-muted-foreground font-medium">
-                  Learn More
-                </h4>
+                <h4 className="text-xs uppercase text-muted-foreground font-medium">{tt("Learn More")}</h4>
                 <p className="text-xs text-muted-foreground line-clamp-2 mt-1">
                   {summarizeText(item.learnMore)}
                 </p>
@@ -88,7 +87,7 @@ export function VerseExplanationTable({
                 variant="ghost"
                 size="icon"
                 onClick={() => onView(item)}
-                title="View"
+                title={tt("View")}
               >
                 <Eye className="w-4 h-4" />
               </Button>
@@ -121,7 +120,7 @@ export function VerseExplanationTable({
                   {item.explanation}
                 </p>
                 <p className="text-xs text-muted-foreground mt-2">
-                  {item.bibleVersion || "BSB"} •{" "}
+                  {item.bibleVersion || tt("BSB")} •{" "}
                   {item.createdOn
                     ? new Date(item.createdOn).toLocaleDateString()
                     : ""}
@@ -131,7 +130,7 @@ export function VerseExplanationTable({
                 variant={item.isPublished ? "default" : "secondary"}
                 className="text-[10px] shrink-0"
               >
-                {item.isPublished ? "Pub" : "Draft"}
+                {item.isPublished ? tt("Pub") : tt("Draft")}
               </Badge>
             </div>
             <div
@@ -175,9 +174,7 @@ export function VerseExplanationTable({
         </div>
       )}
       {!hasMore && items.length > 0 && (
-        <p className="text-center text-xs text-muted-foreground/50 py-4">
-          All explanations loaded
-        </p>
+        <p className="text-center text-xs text-muted-foreground/50 py-4">{tt("All explanations loaded")}</p>
       )}
     </>
   );

@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogD
 import { formatReadableDate } from "../utils";
 import type { SubscriptionTier, SubscribedUser } from "../types";
 import { SUBSCRIPTION_TIER_OPTIONS } from "../constants";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   user: SubscribedUser | null;
@@ -38,10 +39,8 @@ export function ManageUserDialog({ user, tiers, loading, onOpenChange, onSave }:
       <DialogContent className="sm:max-w-md rounded-xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <CalendarClock className="w-5 h-5" /> Manage Subscription
-          </DialogTitle>
-          <DialogDescription>
-            Change the tier or access expiry for{" "}
+            <CalendarClock className="w-5 h-5" />{tt("Manage Subscription")}</DialogTitle>
+          <DialogDescription>{tt("Change the tier or access expiry for")}{" "}
             <span className="font-medium text-foreground">
               {user.firstName} {user.lastName}
             </span>
@@ -49,7 +48,7 @@ export function ManageUserDialog({ user, tiers, loading, onOpenChange, onSave }:
         </DialogHeader>
         <div className="space-y-4 py-2">
           <div className="space-y-1.5">
-            <Label>Subscription Tier</Label>
+            <Label>{tt("Subscription Tier")}</Label>
             <Select value={tier} onValueChange={setTier}>
               <SelectTrigger className="h-9 text-sm"><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -62,7 +61,7 @@ export function ManageUserDialog({ user, tiers, loading, onOpenChange, onSave }:
             </Select>
           </div>
           <div className="space-y-1.5">
-            <Label>Access Expires On</Label>
+            <Label>{tt("Access Expires On")}</Label>
             <Input
               type="date"
               value={expiry}
@@ -71,21 +70,19 @@ export function ManageUserDialog({ user, tiers, loading, onOpenChange, onSave }:
             <p className="text-xs text-muted-foreground">
               {user.accessExpiresAt
                 ? `Current: ${formatReadableDate(user.accessExpiresAt)}`
-                : "No expiry set."}
+                : tt("No expiry set.")}
             </p>
-            <p className="text-xs text-muted-foreground">
-              Leave empty for no expiry / free access.
-            </p>
+            <p className="text-xs text-muted-foreground">{tt("Leave empty for no expiry / free access.")}</p>
           </div>
         </div>
         <DialogFooter className="flex-col-reverse sm:flex-row gap-2">
-          <Button variant="outline" onClick={() => onOpenChange(false)} className="w-full sm:w-auto">Cancel</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)} className="w-full sm:w-auto">{tt("Cancel")}</Button>
           <Button
             onClick={() => onSave({ subscriptionTier: tier, accessExpiresAt: expiry ? new Date(expiry + "T00:00:00").toISOString() : null })}
             disabled={loading}
             className="gap-2 w-full sm:w-auto"
           >
-            {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Saving...</> : <><Save className="w-4 h-4" /> Save</>}
+            {loading ? <><Loader2 className="w-4 h-4 animate-spin" />{tt("Saving...")}</> : <><Save className="w-4 h-4" />{tt("Save")}</>}
           </Button>
         </DialogFooter>
       </DialogContent>

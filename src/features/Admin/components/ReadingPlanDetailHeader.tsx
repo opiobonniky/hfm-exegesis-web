@@ -2,6 +2,7 @@
 import { ArrowLeft, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface ReadingPlanDetailHeaderProps {
   planId: string;
@@ -24,13 +25,12 @@ export function ReadingPlanDetailHeader({
             </Button>
             <div>
               <h1 className="text-lg font-semibold flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-primary" /> Reading Plan
-              </h1>
+                <Calendar className="w-5 h-5 text-primary" />{tt("Reading Plan")}</h1>
               <p className="text-xs text-muted-foreground">{planId}</p>
             </div>
           </div>
           <Badge variant={isPublished !== false ? "default" : "secondary"}>
-            {isPublished !== false ? "Published" : "Draft"}
+            {isPublished !== false ? tt("Published") : tt("Draft")}
           </Badge>
         </div>
       </div>

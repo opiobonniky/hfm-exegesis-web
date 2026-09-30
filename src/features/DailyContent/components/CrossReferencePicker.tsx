@@ -16,6 +16,7 @@ import {
   BIBLE_BOOK_CHAPTERS,
   type BibleBookName,
 } from "@/features/Bible/constants";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface CrossReferenceItem {
   bookName: string;
@@ -189,17 +190,11 @@ export function CrossReferencePicker({
   return (
     <div className="space-y-4" dir={isRtl ? "rtl" : "ltr"}>
       <div className="flex items-center gap-2 text-sm font-medium text-foreground">
-        <LinkIcon className="h-4 w-4 text-sky-500" />
-        Cross references
-        <span className="text-xs font-normal text-muted-foreground">
-          Select a book, chapter, and verse to quote it automatically.
-        </span>
+        <LinkIcon className="h-4 w-4 text-sky-500" />{tt("Cross references")}<span className="text-xs font-normal text-muted-foreground">{tt("Select a book, chapter, and verse to quote it automatically.")}</span>
       </div>
 
       {items.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-border px-4 py-5 text-sm italic text-muted-foreground">
-          No cross references added yet.
-        </p>
+        <p className="rounded-xl border border-dashed border-border px-4 py-5 text-sm italic text-muted-foreground">{tt("No cross references added yet.")}</p>
       ) : (
         <div className="space-y-3">
           {items.map((item, index) => {
@@ -219,9 +214,7 @@ export function CrossReferencePicker({
               >
                 <div className="grid gap-3 md:grid-cols-12 md:items-end">
                   <div className="space-y-2 md:col-span-5">
-                    <Label className="text-xs uppercase tracking-[0.16em] text-muted-foreground">
-                      Book
-                    </Label>
+                    <Label className="text-xs uppercase tracking-[0.16em] text-muted-foreground">{tt("Book")}</Label>
                     <Combobox
                       options={bookOptions}
                       value={item.bookName || undefined}
@@ -237,14 +230,12 @@ export function CrossReferencePicker({
                           [index]: [],
                         }));
                       }}
-                      placeholder="Select book..."
+                      placeholder={tt("Select book...")}
                       width="w-full"
                     />
                   </div>
                   <div className="space-y-2 md:col-span-3">
-                    <Label className="text-xs uppercase tracking-[0.16em] text-muted-foreground">
-                      Chapter
-                    </Label>
+                    <Label className="text-xs uppercase tracking-[0.16em] text-muted-foreground">{tt("Chapter")}</Label>
                     <Select
                       value={item.chapter ? String(item.chapter) : ""}
                       onValueChange={(chapter) => {
@@ -260,7 +251,7 @@ export function CrossReferencePicker({
                     >
                       <SelectTrigger>
                         <SelectValue
-                          placeholder={item.bookName ? "Select" : "Pick book"}
+                          placeholder={item.bookName ? tt("Select") : tt("Pick book")}
                         />
                       </SelectTrigger>
                       <SelectContent>
@@ -273,9 +264,7 @@ export function CrossReferencePicker({
                     </Select>
                   </div>
                   <div className="space-y-2 md:col-span-3">
-                    <Label className="text-xs uppercase tracking-[0.16em] text-muted-foreground">
-                      Verse
-                    </Label>
+                    <Label className="text-xs uppercase tracking-[0.16em] text-muted-foreground">{tt("Verse")}</Label>
                     <Select
                       value={item.verseNumber ? String(item.verseNumber) : ""}
                       onValueChange={(verse) =>
@@ -287,7 +276,7 @@ export function CrossReferencePicker({
                         {verseLoading ? (
                           <Loader2 className="h-4 w-4 animate-spin" />
                         ) : (
-                          <SelectValue placeholder="Select" />
+                          <SelectValue placeholder={tt("Select")} />
                         )}
                       </SelectTrigger>
                       <SelectContent>
@@ -309,7 +298,7 @@ export function CrossReferencePicker({
                         items.filter((_, itemIndex) => itemIndex !== index),
                       )
                     }
-                    aria-label="Remove cross reference"
+                    aria-label={tt("Remove cross reference")}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -324,8 +313,8 @@ export function CrossReferencePicker({
                   className="mt-3 resize-y"
                   placeholder={
                     item.verseNumber
-                      ? "Verse text will be filled automatically..."
-                      : "Select a verse to fill its text."
+                      ? tt("Verse text will be filled automatically...")
+                      : tt("Select a verse to fill its text.")
                   }
                 />
               </div>
@@ -346,8 +335,7 @@ export function CrossReferencePicker({
           ])
         }
       >
-        <Plus className="h-3 w-3" /> Add reference
-      </Button>
+        <Plus className="h-3 w-3" />{tt("Add reference")}</Button>
     </div>
   );
 }

@@ -4,6 +4,7 @@ import {
   HimFirstMediaPageLayout, HimFirstHero, HimFirstContentSection, HimFirstAnimated,
   HimFirstCTAButton, HimFirstFeatureList,
 } from "../components";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 const OurGoals = () => {
   const { data } = useHimFirstMediaPage();
@@ -14,7 +15,7 @@ const OurGoals = () => {
       <HimFirstHero
         titleText={t.himFirstMedia?.ourGoalsTitle || "Our"}
         titleHighlight={t.himFirstMedia?.ourGoalsTitleHighlight || "Goals"}
-        subtitle={t.himFirstMedia?.ourGoalsTagline || "Clear targets we're pursuing to fulfill our calling."}
+        subtitle={t.himFirstMedia?.ourGoalsTagline || tt("Clear targets we're pursuing to fulfill our calling.")}
       />
 
       <HimFirstContentSection>
@@ -22,7 +23,7 @@ const OurGoals = () => {
 
         <HimFirstAnimated className="mt-12 text-center">
           <HimFirstCTAButton to="/register">
-            {t.himFirstMedia?.ourGoalsCta || "Join Us in Reaching These Goals"}
+            {t.himFirstMedia?.ourGoalsCta || tt("Join Us in Reaching These Goals")}
           </HimFirstCTAButton>
         </HimFirstAnimated>
       </HimFirstContentSection>

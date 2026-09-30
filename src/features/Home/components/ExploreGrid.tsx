@@ -1,14 +1,15 @@
 import { ArrowUpRight, BookOpen, CalendarDays, Microscope, PenLine, Sun, Trophy } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { routes } from "@/components/Routes/routes";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 const ITEMS = [
-  { label: "Bible Reader", sub: "Read and study", icon: BookOpen, route: routes.bibleReader.path },
-  { label: "Daily Verse", sub: "Today's word", icon: Sun, route: routes.userDailyVerse.path },
-  { label: "Reading Plans", sub: "Guided journeys", icon: CalendarDays, route: routes.userPlans.path },
-  { label: "Word Study", sub: "Explore meaning", icon: Microscope, route: routes.dictionary.path },
-  { label: "Bible Trivia", sub: "Test knowledge", icon: Trophy, route: routes.trivia.path },
-  { label: "My Journal", sub: "Reflect and write", icon: PenLine, route: routes.journal.path },
+  { label: tt("Bible Reader"), sub: "Read and study", icon: BookOpen, route: routes.bibleReader.path },
+  { label: tt("Daily Verse"), sub: "Today's word", icon: Sun, route: routes.userDailyVerse.path },
+  { label: tt("Reading Plans"), sub: "Guided journeys", icon: CalendarDays, route: routes.userPlans.path },
+  { label: tt("Word Study"), sub: "Explore meaning", icon: Microscope, route: routes.dictionary.path },
+  { label: tt("Bible Trivia"), sub: "Test knowledge", icon: Trophy, route: routes.trivia.path },
+  { label: tt("My Journal"), sub: "Reflect and write", icon: PenLine, route: routes.journal.path },
 ];
 
 export function ExploreGrid() {
@@ -18,10 +19,10 @@ export function ExploreGrid() {
     <section>
       <div className="mb-5 flex items-end justify-between gap-4">
         <div>
-          <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#946b30] dark:text-[#d9b879]">Study library</p>
-          <h2 className="mt-1 font-serif text-2xl font-semibold text-[#173346] dark:text-[#f5f0e5]">Choose a place to begin</h2>
+          <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#946b30] dark:text-[#d9b879]">{tt("Study library")}</p>
+          <h2 className="mt-1 font-serif text-2xl font-semibold text-[#173346] dark:text-[#f5f0e5]">{tt("Choose a place to begin")}</h2>
         </div>
-        <span className="hidden text-xs text-muted-foreground sm:block">Six ways to go deeper</span>
+        <span className="hidden text-xs text-muted-foreground sm:block">{tt("Six ways to go deeper")}</span>
       </div>
       <div className="grid grid-cols-2 overflow-hidden rounded-2xl border border-[#d8d2c4] bg-[#faf8f2] sm:grid-cols-3 dark:border-white/10 dark:bg-[#111b24]">
         {ITEMS.map((item) => (

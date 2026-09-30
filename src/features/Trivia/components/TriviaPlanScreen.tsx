@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
 import type { DifficultyFilter } from "@/hooks/useTrivia";
 import type { DailyChallengeEntry } from "@/hooks/useDailyChallenge";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   difficulty: DifficultyFilter;
@@ -36,8 +37,8 @@ export default function TriviaPlanScreen({
           <BookOpen className="w-6 h-6" />
         </div>
         <div>
-          <h2 className="text-lg font-bold" style={{ fontFamily: "'Cinzel', serif" }}>Bible Trivia</h2>
-          <p className="text-sm text-muted-foreground">Test your knowledge of the Scriptures.</p>
+          <h2 className="text-lg font-bold" style={{ fontFamily: "'Cinzel', serif" }}>{tt("Bible Trivia")}</h2>
+          <p className="text-sm text-muted-foreground">{tt("Test your knowledge of the Scriptures.")}</p>
         </div>
       </div>
 
@@ -47,8 +48,7 @@ export default function TriviaPlanScreen({
             <div className="flex items-center gap-2.5 min-w-0">
               <Trophy className="w-4 h-4 text-primary" />
               <p className="text-xs font-semibold text-muted-foreground/80">
-                {stats.correct}/{stats.totalAnswered} correct
-              </p>
+                {stats.correct}/{stats.totalAnswered}{tt("correct")}</p>
             </div>
             <p className="text-lg font-black text-primary">
               {Math.round((stats.correct / stats.totalAnswered) * 100)}%
@@ -62,9 +62,7 @@ export default function TriviaPlanScreen({
         onClick={() => navigate("/trivia/performance")}
         className="flex items-center justify-center gap-2 rounded-xl border border-primary/20 bg-primary/[0.08] px-4 py-3 text-sm font-bold text-primary transition-colors hover:bg-primary/[0.14]"
       >
-        <Trophy className="h-4 w-4" />
-        View performance and answer history
-      </button>
+        <Trophy className="h-4 w-4" />{tt("View performance and answer history")}</button>
 
        {leaderboardState.bestSession.total > 0 && leaderboardComparison && (
          <SessionLeaderboard comparison={leaderboardComparison as any} onReset={resetLeaderboard} />
@@ -74,16 +72,13 @@ export default function TriviaPlanScreen({
         <div className="flex items-center justify-between gap-3 mb-2">
           <div className="flex items-center gap-2.5">
             <Sun className="w-3.5 h-3.5 text-amber-500" />
-            <p className="text-[9px] font-extrabold uppercase tracking-[0.15em] text-primary/60">Daily Challenge</p>
+            <p className="text-[9px] font-extrabold uppercase tracking-[0.15em] text-primary/60">{tt("Daily Challenge")}</p>
           </div>
           {isTodayCompleted ? (
-            <span className="px-2.5 py-1 rounded-full text-[9px] font-extrabold uppercase tracking-wider text-green-600 bg-green-500/10">
-              Done
-            </span>
+            <span className="px-2.5 py-1 rounded-full text-[9px] font-extrabold uppercase tracking-wider text-green-600 bg-green-500/10">{tt("Done")}</span>
           ) : (
             <button onClick={startDailyChallenge} className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-[10px] font-extrabold uppercase tracking-wider bg-amber-500 text-white">
-              <Sun className="w-3 h-3" /> Start
-            </button>
+              <Sun className="w-3 h-3" />{tt("Start")}</button>
           )}
         </div>
         <StreakCalendar weekHistory={weekHistory} todayKey={todayKey} isTodayCompleted={isTodayCompleted} consecutiveDays={consecutiveDays} />
@@ -92,7 +87,7 @@ export default function TriviaPlanScreen({
       <div>
         <div className="flex items-center gap-2 mb-2">
           <Target className="w-3 h-3 text-primary/50" />
-          <p className="text-[10px] font-black uppercase tracking-[0.15em] text-foreground/70">Choose your path</p>
+          <p className="text-[10px] font-black uppercase tracking-[0.15em] text-foreground/70">{tt("Choose your path")}</p>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           {DIFFICULTY_OPTIONS.map((opt) => {
@@ -109,12 +104,8 @@ export default function TriviaPlanScreen({
       </div>
 
       <button onClick={startQuiz} className="relative w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl text-xs sm:text-sm font-extrabold text-card overflow-hidden tracking-wider uppercase bg-gradient-to-br from-primary to-primary/80">
-        <Play className="w-[16px] h-[16px] fill-current" />
-        Begin Quest
-      </button>
-      <p className="text-[10px] sm:text-[11px] text-center leading-5 px-4 sm:px-8 pb-2 text-muted-foreground/40">
-        Questions are drawn from across the Bible. Tap a scripture reference to read the passage before answering.
-      </p>
+        <Play className="w-[16px] h-[16px] fill-current" />{tt("Begin Quest")}</button>
+      <p className="text-[10px] sm:text-[11px] text-center leading-5 px-4 sm:px-8 pb-2 text-muted-foreground/40">{tt("Questions are drawn from across the Bible. Tap a scripture reference to read the passage before answering.")}</p>
     </div>
   );
 }

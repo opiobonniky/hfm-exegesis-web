@@ -3,6 +3,7 @@ import { Globe, Lock, Trash2, Eye, Loader2, CalendarDays } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import type { JournalModerationEntry } from "../hooks/useAdminJournalModeration";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   entry: JournalModerationEntry;
@@ -32,17 +33,17 @@ export function JournalEntryRow({
   return (
     <tr className="group border-b last:border-0 transition-colors hover:bg-primary/[0.03]">
       <td className="max-w-0 p-4 pl-5">
-        <button type="button" onClick={onView} title={entry.title || "Untitled"} className="block w-full text-left">
+        <button type="button" onClick={onView} title={entry.title || tt("Untitled")} className="block w-full text-left">
         <div className="line-clamp-2 break-words text-sm font-semibold leading-5 transition-colors group-hover:text-primary">
-          {entry.title || "Untitled"}
+          {entry.title || tt("Untitled")}
         </div>
         <div className="mt-1 truncate text-xs text-muted-foreground">
-          {entry.bookName ? `${entry.bookName} ${entry.chapter || ""}` : entry.category || "Journal entry"}
+          {entry.bookName ? `${entry.bookName} ${entry.chapter || ""}` : entry.category || tt("Journal entry")}
         </div>
         </button>
       </td>
       <td className="p-4">
-        <Badge variant="secondary" className="rounded-full">{entry.category || "general"}</Badge>
+        <Badge variant="secondary" className="rounded-full">{entry.category || tt("general")}</Badge>
       </td>
       <td className="p-4">
         <Badge variant={entry.isPublished ? "default" : "outline"} className="rounded-full">
@@ -51,7 +52,7 @@ export function JournalEntryRow({
           ) : (
             <Lock className="w-3 h-3 mr-1" />
           )}
-          {entry.isPublished ? "Public" : "Private"}
+          {entry.isPublished ? tt("Public") : tt("Private")}
         </Badge>
       </td>
       <td className="p-4">
@@ -67,7 +68,7 @@ export function JournalEntryRow({
             size="icon"
             className="h-7 w-7"
             onClick={onView}
-            title="View details"
+            title={tt("View details")}
           >
             <Eye className="w-3.5 h-3.5" />
           </Button>
@@ -77,7 +78,7 @@ export function JournalEntryRow({
             className="h-7 w-7"
             onClick={onTogglePublication}
             disabled={isLoading}
-            title={entry.isPublished ? "Make private" : "Make public"}
+            title={entry.isPublished ? tt("Make private") : tt("Make public")}
           >
             {isLoading ? (
               <Loader2 className="w-3.5 h-3.5 animate-spin" />

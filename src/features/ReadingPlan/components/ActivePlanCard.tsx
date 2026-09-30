@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { ProgressCircle } from "./ProgressCircle";
 import type { ReadingPlan } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   plan: ReadingPlan;
@@ -33,7 +34,7 @@ export function ActivePlanCard({ plan, pct, done, streak, nextDay, lastDay, isCo
                 <h3 className="font-bold text-foreground text-lg">{plan.title}</h3>
                 {isCompleted && (
                   <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700">
-                    <Trophy className="w-3 h-3" />{t.readingPlan?.badgeDone || "Done"}
+                    <Trophy className="w-3 h-3" />{t.readingPlan?.badgeDone || tt("Done")}
                   </span>
                 )}
               </div>
@@ -41,7 +42,7 @@ export function ActivePlanCard({ plan, pct, done, streak, nextDay, lastDay, isCo
                 {(t.readingPlan?.daysDone || "{completed} of {total} days done").replace("{completed}", String(done)).replace("{total}", String(total))}
               </p>
               <button onClick={onRemove} className="mt-3 text-xs text-muted-foreground/70 hover:text-red-500 transition-colors">
-                {t.readingPlan?.removePlanLink || "Remove plan"}
+                {t.readingPlan?.removePlanLink || tt("Remove plan")}
               </button>
             </div>
             <ProgressCircle percent={pct} color={accent} size={72} isRtl={isRtl} />
@@ -53,27 +54,27 @@ export function ActivePlanCard({ plan, pct, done, streak, nextDay, lastDay, isCo
           <div className="grid grid-cols-3 gap-4 bg-muted rounded-xl p-3 mb-4">
             <div className="text-center">
               <div className="flex items-center justify-center gap-1 text-amber-500 mb-1"><Flame className="w-4 h-4" /><span className="font-bold text-foreground">{streak}d</span></div>
-              <p className="text-xs text-muted-foreground">{t.readingPlan?.streak || "Streak"}</p>
+              <p className="text-xs text-muted-foreground">{t.readingPlan?.streak || tt("Streak")}</p>
             </div>
             <div className={cn("text-center", isRtl ? "border-r border-border" : "border-l border-border")}>
               <div className="flex items-center justify-center gap-1 text-emerald-500 mb-1"><CheckCircle className="w-4 h-4" /><span className="font-bold text-foreground">{done}</span></div>
-              <p className="text-xs text-muted-foreground">{t.readingPlan?.done || "Done"}</p>
+              <p className="text-xs text-muted-foreground">{t.readingPlan?.done || tt("Done")}</p>
             </div>
             <div className="text-center">
               <div className="flex items-center justify-center gap-1 text-muted-foreground mb-1">
                 <BookOpen className="w-4 h-4" />
                 <span className="font-bold text-foreground">{lastDay ? (t.readingPlan?.dayLabel || "Day {day}").replace("{day}", String(lastDay)) : "—"}</span>
               </div>
-              <p className="text-xs text-muted-foreground">{t.readingPlan?.lastRead || "Last read"}</p>
+              <p className="text-xs text-muted-foreground">{t.readingPlan?.lastRead || tt("Last read")}</p>
             </div>
           </div>
           {isCompleted ? (
             <div className="flex gap-3">
               <button onClick={onSummary} className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-border text-foreground/80 font-semibold hover:bg-muted transition-colors">
-                <Eye className="w-4 h-4" />{t.readingPlan?.summary || "Summary"}
+                <Eye className="w-4 h-4" />{t.readingPlan?.summary || tt("Summary")}
               </button>
               <button onClick={onRead} className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-muted text-foreground/80 font-semibold hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors">
-                <Play className="w-4 h-4" />{t.readingPlan?.revisit || "Revisit"}
+                <Play className="w-4 h-4" />{t.readingPlan?.revisit || tt("Revisit")}
               </button>
             </div>
           ) : (

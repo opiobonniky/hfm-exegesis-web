@@ -6,6 +6,7 @@ import { useLanguage } from "@/components/languages/languageProvider";
 import { sendPostRequest } from "@/services/api";
 import { ensureDataLoaded, getVerseText } from "@/utilities/bibleUtils";
 import { VERSE_HIGHLIGHT_COLORS } from "../constants";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export interface HighlightItem {
   id: number;
@@ -84,10 +85,10 @@ export function useHighlightsPage() {
         });
         if (res.returnCode === 200) {
           setHighlights((p) => p.filter((h) => h.id !== id));
-          toast({ title: "Highlight removed" });
+          toast({ title: tt("Highlight removed") });
         }
       } catch {
-        toast({ title: "Failed to delete", variant: "destructive" });
+        toast({ title: tt("Failed to delete"), variant: "destructive" });
       } finally {
         setDeleting(null);
       }

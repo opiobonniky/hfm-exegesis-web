@@ -5,6 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { useReadingPlanApi } from "../services";
 import type { ReadingPlanListItem, ReadingPlansResponse } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export interface ReadingPlanItem extends ReadingPlanListItem {}
 
@@ -90,7 +91,7 @@ export function useReadingPlansPage() {
         toast({ title: t.readingPlan?.toastFailedLoad || "Failed to delete", description: res.returnMessage, variant: "destructive" });
       }
     } catch {
-      toast({ title: t.common?.error || "Error", description: "Failed to delete plan", variant: "destructive" });
+      toast({ title: t.common?.error || "Error", description: tt("Failed to delete plan"), variant: "destructive" });
     } finally {
       setDeleting(false);
     }
@@ -110,7 +111,7 @@ export function useReadingPlansPage() {
         toast({ title: t.readingPlan?.toastUpdateFailed || "Failed to update", description: res.returnMessage, variant: "destructive" });
       }
     } catch {
-      toast({ title: t.common?.error || "Error", description: "Failed to update plan", variant: "destructive" });
+      toast({ title: t.common?.error || "Error", description: tt("Failed to update plan"), variant: "destructive" });
     } finally {
       setSaving(false);
     }

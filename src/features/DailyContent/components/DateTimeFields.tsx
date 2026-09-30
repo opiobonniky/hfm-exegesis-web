@@ -4,6 +4,7 @@
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { FormGrid } from "./FormGrid";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface DateTimeFieldsProps {
   selectedDate: Date;
@@ -21,7 +22,7 @@ export function DateTimeFields({
   return (
     <FormGrid columns={2}>
       <div className="space-y-2">
-        <Label>Date *</Label>
+        <Label>{tt("Date *")}</Label>
         <Input
           type="date"
           value={selectedDate.toISOString().split("T")[0]}
@@ -33,7 +34,7 @@ export function DateTimeFields({
         />
       </div>
       <div className="space-y-2">
-        <Label>Time</Label>
+        <Label>{tt("Time")}</Label>
         <Input type="time" value={selectedTime} onChange={handleTimeChange} />
       </div>
     </FormGrid>

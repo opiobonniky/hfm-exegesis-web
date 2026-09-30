@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { routes } from "@/components/Routes/routes";
 import { saveDailyExegesis } from "../services/add-daily-content-service";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export function useAddDailyExegesis() {
   const { t, isRtl } = useLanguage();
@@ -62,7 +63,7 @@ export function useAddDailyExegesis() {
   const handleSave = useCallback(async (e?: React.FormEvent) => {
     e?.preventDefault();
     if (saveDisabled) {
-      toast({ title: "Missing fields", description: "Title, passage reference, and teaching body are required", variant: "destructive" });
+      toast({ title: tt("Missing fields"), description: tt("Title, passage reference, and teaching body are required"), variant: "destructive" });
       return;
     }
     const payload: Record<string, any> = {
@@ -85,10 +86,10 @@ export function useAddDailyExegesis() {
         toast({ title: isEditing ? "Updated" : "Created", description: `Exegesis ${isEditing ? "updated" : "created"} successfully` });
         navigate(routes.dailyExegesis.path);
       } else {
-        toast({ title: "Error", description: res.returnMessage || "Failed to save", variant: "destructive" });
+        toast({ title: tt("Error"), description: res.returnMessage || "Failed to save", variant: "destructive" });
       }
     } catch {
-      toast({ title: "Error", description: "Failed to save exegesis", variant: "destructive" });
+      toast({ title: tt("Error"), description: tt("Failed to save exegesis"), variant: "destructive" });
     }
   }, [
     title, passageReference, teachingBody, introduction, contextSummary,

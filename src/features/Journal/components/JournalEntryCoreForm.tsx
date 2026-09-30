@@ -12,6 +12,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { CATEGORIES, MOODS, MOOD_MAP, getCategoryLabel, getMoodLabel } from "../constants";
 import { FormCard } from "./FormCard";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 const ENTRY_CATEGORIES = CATEGORIES.filter((category) => category.value !== "all");
 const INPUT_CLASS_NAME = "rounded-xl border-border dark:border-stone-800 bg-card dark:bg-stone-900 text-sm text-foreground dark:text-stone-200";
@@ -28,9 +29,9 @@ interface JournalEntryTitleFieldProps {
 export function JournalEntryTitleField({ t, title, onChange }: JournalEntryTitleFieldProps) {
   return (
     <div className="space-y-1.5">
-      <div className={LABEL_CLASS_NAME}>{t.journal.titleOptional || "Title (optional)"}</div>
+      <div className={LABEL_CLASS_NAME}>{t.journal.titleOptional || tt("Title (optional)")}</div>
       <Input
-        placeholder={t.journal.titlePlaceholder || "Give your entry a title..."}
+        placeholder={t.journal.titlePlaceholder || tt("Give your entry a title...")}
         value={title}
         onChange={onChange}
         className={INPUT_CLASS_NAME}
@@ -55,14 +56,14 @@ export function JournalEntryContentField({
   return (
     <div className="space-y-1.5">
       <div className="flex items-center justify-between">
-        <div className={LABEL_CLASS_NAME}>{t.journal.whatOnMind || "What's on your mind?"}</div>
+        <div className={LABEL_CLASS_NAME}>{t.journal.whatOnMind || tt("What's on your mind?")}</div>
         <div className="text-[11px] text-muted-foreground/70">
           <FileText className="w-3 h-3 inline mr-1" />
-          {wordCount} {wordCount === 1 ? t.journal.word || "word" : t.journal.words || "words"}
+          {wordCount} {wordCount === 1 ? t.journal.word || tt("word") : t.journal.words || tt("words")}
         </div>
       </div>
       <Textarea
-        placeholder={t.journal.contentPlaceholder || "Write your thoughts, feelings, or reflections..."}
+        placeholder={t.journal.contentPlaceholder || tt("Write your thoughts, feelings, or reflections...")}
         value={content}
         onChange={onChange}
         className={`${INPUT_CLASS_NAME} min-h-[200px]`}
@@ -85,7 +86,7 @@ export function JournalEntryCategoryField({
 }: JournalEntryCategoryFieldProps) {
   return (
     <div className="space-y-1.5">
-      <div className={LABEL_CLASS_NAME}>{t.journal.promptCategory || "Category"}</div>
+      <div className={LABEL_CLASS_NAME}>{t.journal.promptCategory || tt("Category")}</div>
       <Select value={category} onValueChange={onValueChange}>
         <SelectTrigger className={SELECT_CLASS_NAME}>
           <SelectValue />
@@ -117,13 +118,13 @@ export function JournalEntryMoodField({
 
   return (
     <div className="space-y-1.5">
-      <div className={LABEL_CLASS_NAME}>{t.journal.howFeeling || "How are you feeling?"}</div>
+      <div className={LABEL_CLASS_NAME}>{t.journal.howFeeling || tt("How are you feeling?")}</div>
       <Select value={mood} onValueChange={onValueChange}>
         <SelectTrigger className={SELECT_CLASS_NAME}>
-          <SelectValue placeholder={t.journal.selectMood || "Select mood"}>
+          <SelectValue placeholder={t.journal.selectMood || tt("Select mood")}>
             {selectedMood
               ? `${selectedMood.emoji} ${getMoodLabel(t, mood)}`
-              : t.journal.selectMood || "Select mood"}
+              : t.journal.selectMood || tt("Select mood")}
           </SelectValue>
         </SelectTrigger>
         <SelectContent>
@@ -167,7 +168,7 @@ export function JournalEntryCoreForm({
   onMoodChange,
 }: JournalEntryCoreFormProps) {
   return (
-    <FormCard title={t.journal.journalEntry || "Journal Entry"} icon={BookOpen}>
+    <FormCard title={t.journal.journalEntry || tt("Journal Entry")} icon={BookOpen}>
       <div className="space-y-4">
         <JournalEntryTitleField t={t} title={title} onChange={onTitleChange} />
         <JournalEntryContentField

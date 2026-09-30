@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Globe, BookOpen, Mic2, Heart, Sparkles, Trophy } from "lucide-react";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { animSlideLeft, animStagger, animCardUp } from "./animations";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 const FEATURES = [
   { key: "featureBibleAppTitle", descKey: "featureBibleAppDesc", icon: Globe },
@@ -27,12 +28,12 @@ export function FeaturesSection() {
         <div className="text-center mb-10 sm:mb-16 md:mb-10">
           <motion.div variants={animSlideLeft} initial="hidden" whileInView="visible" viewport={{ once: false, margin: "-80px" }}>
             <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-foreground mb-5 sm:mb-8 font-[family-name:var(--font-heading)] tracking-tighter leading-none">
-              {t.landing?.featuresTitle || "Our"}{" "}
-              <span className="text-brand-primary">{t.landing?.featuresTitleHighlight || "Spirit-Led"}</span>
-              <span className="block sm:inline"> {t.landing?.features || "Features"}</span>
+              {t.landing?.featuresTitle || tt("Our")}{" "}
+              <span className="text-brand-primary">{t.landing?.featuresTitleHighlight || tt("Spirit-Led")}</span>
+              <span className="block sm:inline"> {t.landing?.features || tt("Features")}</span>
             </h2>
             <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed font-medium">
-              {t.landing?.featuresDesc || "We are passionate Jesus followers dedicated to helping you shine with excellence and integrity."}
+              {t.landing?.featuresDesc || tt("We are passionate Jesus followers dedicated to helping you shine with excellence and integrity.")}
             </p>
           </motion.div>
         </div>

@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { ResourceCard } from "./shared";
 import { BIBLE_BOOKS_OT, BIBLE_BOOKS_NT } from "./constants";
 import type { BookPrologue } from "@/services/bookProloguesApi";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 // ── BookPrologueSection ───────────────────────────────────────────────────
 
@@ -29,8 +30,8 @@ export function BookPrologueSection({
             <BookOpen className="w-4 h-4 text-indigo-600 dark:text-indigo-400" strokeWidth={2.2} />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-bold text-foreground">About {bookName}</p>
-            <p className="text-[11px] text-muted-foreground">Book introduction & context</p>
+            <p className="text-sm font-bold text-foreground">{tt("About")}{bookName}</p>
+            <p className="text-[11px] text-muted-foreground">{tt("Book introduction & context")}</p>
           </div>
           <ChevronDown
             className={cn(
@@ -52,25 +53,25 @@ export function BookPrologueSection({
             <div className="flex flex-wrap gap-2">
               {prologue.author && (
                 <div className="rounded-lg bg-muted/50 border border-border px-3 py-1.5">
-                  <p className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">Author</p>
+                  <p className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">{tt("Author")}</p>
                   <p className="text-sm font-bold text-foreground">{prologue.author}</p>
                 </div>
               )}
               {prologue.audience && (
                 <div className="rounded-lg bg-muted/50 border border-border px-3 py-1.5">
-                  <p className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">Audience</p>
+                  <p className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">{tt("Audience")}</p>
                   <p className="text-sm font-bold text-foreground">{prologue.audience}</p>
                 </div>
               )}
               {prologue.dateWritten && (
                 <div className="rounded-lg bg-muted/50 border border-border px-3 py-1.5">
-                  <p className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">Date</p>
+                  <p className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">{tt("Date")}</p>
                   <p className="text-sm font-bold text-foreground">{prologue.dateWritten}</p>
                 </div>
               )}
               {prologue.locationWritten && (
                 <div className="rounded-lg bg-muted/50 border border-border px-3 py-1.5">
-                  <p className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">Location</p>
+                  <p className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">{tt("Location")}</p>
                   <p className="text-sm font-bold text-foreground">{prologue.locationWritten}</p>
                 </div>
               )}
@@ -78,23 +79,21 @@ export function BookPrologueSection({
 
             {prologue.keyTheme && (
               <div className="rounded-lg bg-indigo-500/5 border border-indigo-500/20 p-3">
-                <p className="text-[10px] font-extrabold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 mb-1">
-                  Key Theme
-                </p>
+                <p className="text-[10px] font-extrabold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 mb-1">{tt("Key Theme")}</p>
                 <p className="text-sm font-semibold text-foreground italic">{prologue.keyTheme}</p>
               </div>
             )}
 
             {prologue.purpose && (
               <div>
-                <p className="text-sm font-bold text-foreground mb-1.5">Purpose</p>
+                <p className="text-sm font-bold text-foreground mb-1.5">{tt("Purpose")}</p>
                 <p className="text-sm text-foreground/70 leading-6">{prologue.purpose}</p>
               </div>
             )}
 
             {prologue.mainThemes && prologue.mainThemes.length > 0 && (
               <div>
-                <p className="text-sm font-bold text-foreground mb-2">Main Themes</p>
+                <p className="text-sm font-bold text-foreground mb-2">{tt("Main Themes")}</p>
                 <div className="flex flex-wrap gap-1.5">
                   {prologue.mainThemes.map((t, i) => (
                     <Badge
@@ -111,9 +110,7 @@ export function BookPrologueSection({
 
             {prologue.christConnection && (
               <div className="rounded-lg bg-indigo-500/5 border border-indigo-500/20 p-3">
-                <p className="text-[10px] font-extrabold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 mb-1">
-                  Connection to Christ
-                </p>
+                <p className="text-[10px] font-extrabold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 mb-1">{tt("Connection to Christ")}</p>
                 <p className="text-sm text-foreground/70 leading-6">{prologue.christConnection}</p>
               </div>
             )}
@@ -196,19 +193,19 @@ export function AllBooksPrologueSection({
               <div className="flex flex-wrap gap-1.5">
                 {p.author && (
                   <div className="rounded-md bg-muted/50 border border-border px-2.5 py-1">
-                    <p className="text-[8px] font-semibold uppercase tracking-wider text-muted-foreground">Author</p>
+                    <p className="text-[8px] font-semibold uppercase tracking-wider text-muted-foreground">{tt("Author")}</p>
                     <p className="text-xs font-bold text-foreground">{p.author}</p>
                   </div>
                 )}
                 {p.audience && (
                   <div className="rounded-md bg-muted/50 border border-border px-2.5 py-1">
-                    <p className="text-[8px] font-semibold uppercase tracking-wider text-muted-foreground">Audience</p>
+                    <p className="text-[8px] font-semibold uppercase tracking-wider text-muted-foreground">{tt("Audience")}</p>
                     <p className="text-xs font-bold text-foreground">{p.audience}</p>
                   </div>
                 )}
                 {p.dateWritten && (
                   <div className="rounded-md bg-muted/50 border border-border px-2.5 py-1">
-                    <p className="text-[8px] font-semibold uppercase tracking-wider text-muted-foreground">Date</p>
+                    <p className="text-[8px] font-semibold uppercase tracking-wider text-muted-foreground">{tt("Date")}</p>
                     <p className="text-xs font-bold text-foreground">{p.dateWritten}</p>
                   </div>
                 )}
@@ -218,21 +215,19 @@ export function AllBooksPrologueSection({
                   className="rounded-lg p-2.5 border"
                   style={{ backgroundColor: `${accentColor}0D`, borderColor: `${accentColor}24` }}
                 >
-                  <p className="text-[9px] font-extrabold uppercase tracking-wider" style={{ color: accentColor }}>
-                    Key Theme
-                  </p>
+                  <p className="text-[9px] font-extrabold uppercase tracking-wider" style={{ color: accentColor }}>{tt("Key Theme")}</p>
                   <p className="text-sm font-semibold text-foreground italic mt-0.5">{p.keyTheme}</p>
                 </div>
               )}
               {p.purpose && (
                 <div>
-                  <p className="text-xs font-bold text-foreground mb-1">Purpose</p>
+                  <p className="text-xs font-bold text-foreground mb-1">{tt("Purpose")}</p>
                   <p className="text-sm text-foreground/70 leading-6">{p.purpose}</p>
                 </div>
               )}
               {p.mainThemes && p.mainThemes.length > 0 && (
                 <div>
-                  <p className="text-xs font-bold text-foreground mb-1.5">Main Themes</p>
+                  <p className="text-xs font-bold text-foreground mb-1.5">{tt("Main Themes")}</p>
                   <div className="flex flex-wrap gap-1.5">
                     {p.mainThemes.map((t, i) => (
                       <span
@@ -261,7 +256,7 @@ export function AllBooksPrologueSection({
         <div className="flex items-center gap-2 mb-2.5 px-1">
           <div className="w-0.5 h-3 rounded-full" style={{ backgroundColor: accentColor }} />
           <span className="text-xs font-extrabold text-foreground tracking-tight">{name}</span>
-          <span className="text-[11px] font-semibold text-muted-foreground">{visible.length} books</span>
+          <span className="text-[11px] font-semibold text-muted-foreground">{visible.length}{tt("books")}</span>
         </div>
         <div className="space-y-2">
           {visible.map((b) => renderBookCard(b))}
@@ -293,10 +288,9 @@ export function AllBooksPrologueSection({
               <BookOpen className="w-4 h-4 text-indigo-600 dark:text-indigo-400" strokeWidth={2.2} />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold text-foreground">Book Prologue Library</p>
+              <p className="text-sm font-bold text-foreground">{tt("Book Prologue Library")}</p>
               <p className="text-[11px] text-muted-foreground">
-                {prologues.length}{total ? ` of ${total}` : ""} book introductions
-              </p>
+                {prologues.length}{total ? ` of ${total}` : ""}{tt("book introductions")}</p>
             </div>
             <ChevronDown
               className={cn(
@@ -324,9 +318,7 @@ export function AllBooksPrologueSection({
                 <button
                   onClick={onLoadMore}
                   className="inline-flex items-center gap-1 text-xs font-bold text-primary hover:text-primary/80 transition-colors"
-                >
-                  Load more books
-                  <ChevronDown className="w-3 h-3" strokeWidth={2.5} />
+                >{tt("Load more books")}<ChevronDown className="w-3 h-3" strokeWidth={2.5} />
                 </button>
               )}
             </div>

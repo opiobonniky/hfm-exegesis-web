@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 // ─── Shared helpers ─────────────────────────────────────────────────────────
 
@@ -78,22 +79,18 @@ export function CreateUserForm({
       {/* Account Details */}
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-            Account Details
-          </CardTitle>
+          <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">{tt("Account Details")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <FormField icon={<User className="w-4 h-4" />} label="Username" error={errors.username} required>
-            <Input placeholder="e.g. johndoe123" value={form.username} onChange={(e) => updateField("username", e.target.value)} className="h-9 text-sm" />
+          <FormField icon={<User className="w-4 h-4" />} label={tt("Username")} error={errors.username} required>
+            <Input placeholder={tt("e.g. johndoe123")} value={form.username} onChange={(e) => updateField("username", e.target.value)} className="h-9 text-sm" />
           </FormField>
-          <FormField icon={<Mail className="w-4 h-4" />} label="Email" error={errors.email} required>
-            <Input type="email" placeholder="user@example.com" value={form.email} onChange={(e) => updateField("email", e.target.value)} className="h-9 text-sm" />
+          <FormField icon={<Mail className="w-4 h-4" />} label={tt("Email")} error={errors.email} required>
+            <Input type="email" placeholder={tt("user@example.com")} value={form.email} onChange={(e) => updateField("email", e.target.value)} className="h-9 text-sm" />
           </FormField>
           <div className="flex items-start gap-2.5 p-3 rounded-lg bg-primary/5 border border-primary/20">
             <KeyRound className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              A secure temporary password is <span className="font-medium text-foreground">auto-generated and emailed</span> to this address. The user will be prompted to change it after signing in.
-            </p>
+            <p className="text-xs text-muted-foreground leading-relaxed">{tt("A secure temporary password is")}<span className="font-medium text-foreground">{tt("auto-generated and emailed")}</span>{tt("to this address. The user will be prompted to change it after signing in.")}</p>
           </div>
         </CardContent>
       </Card>
@@ -101,35 +98,33 @@ export function CreateUserForm({
       {/* Personal Info */}
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-            Personal Information
-          </CardTitle>
+          <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">{tt("Personal Information")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <FormField label="First Name" error={errors.firstName} required>
-              <Input placeholder="First name" value={form.firstName} onChange={(e) => updateField("firstName", e.target.value)} className="h-9 text-sm" />
+            <FormField label={tt("First Name")} error={errors.firstName} required>
+              <Input placeholder={tt("First name")} value={form.firstName} onChange={(e) => updateField("firstName", e.target.value)} className="h-9 text-sm" />
             </FormField>
-            <FormField label="Last Name">
-              <Input placeholder="Last name" value={form.lastName} onChange={(e) => updateField("lastName", e.target.value)} className="h-9 text-sm" />
+            <FormField label={tt("Last Name")}>
+              <Input placeholder={tt("Last name")} value={form.lastName} onChange={(e) => updateField("lastName", e.target.value)} className="h-9 text-sm" />
             </FormField>
           </div>
-          <FormField icon={<Phone className="w-4 h-4" />} label="Phone Number">
+          <FormField icon={<Phone className="w-4 h-4" />} label={tt("Phone Number")}>
             <Input type="tel" placeholder="+1 (555) 123-4567" value={form.phoneNumber} onChange={(e) => updateField("phoneNumber", e.target.value)} className="h-9 text-sm" />
           </FormField>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <FormField label="Gender">
+            <FormField label={tt("Gender")}>
               <Select value={form.gender} onValueChange={(v) => updateField("gender", v)}>
                 <SelectTrigger className="h-9 text-sm"><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Not specified">Not specified</SelectItem>
-                  <SelectItem value="Male">Male</SelectItem>
-                  <SelectItem value="Female">Female</SelectItem>
-                  <SelectItem value="Other">Other</SelectItem>
+                  <SelectItem value="Not specified">{tt("Not specified")}</SelectItem>
+                  <SelectItem value="Male">{tt("Male")}</SelectItem>
+                  <SelectItem value="Female">{tt("Female")}</SelectItem>
+                  <SelectItem value="Other">{tt("Other")}</SelectItem>
                 </SelectContent>
               </Select>
             </FormField>
-            <FormField icon={<Calendar className="w-4 h-4" />} label="Date of Birth">
+            <FormField icon={<Calendar className="w-4 h-4" />} label={tt("Date of Birth")}>
               <Input type="date" value={form.dateOfBirth} onChange={(e) => updateField("dateOfBirth", e.target.value)} className="h-9 text-sm" />
             </FormField>
           </div>
@@ -139,30 +134,26 @@ export function CreateUserForm({
       {/* Role Selection */}
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-            Role Assignment
-          </CardTitle>
+          <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">{tt("Role Assignment")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <RadioGroup value={String(form.userRole)} onValueChange={(v) => updateField("userRole", Number(v))} className="space-y-3">
-            <RoleOption value="2" icon={<User className="w-5 h-5" />} title="Regular User" description="Can read the Bible, journal, take trivia, and access standard features" selected={form.userRole === 2} />
-            <RoleOption value="1" icon={<Shield className="w-5 h-5" />} title="Administrator" description="Full access to admin dashboard, content management, and user administration" selected={form.userRole === 1} />
+            <RoleOption value="2" icon={<User className="w-5 h-5" />} title={tt("Regular User")} description={tt("Can read the Bible, journal, take trivia, and access standard features")} selected={form.userRole === 2} />
+            <RoleOption value="1" icon={<Shield className="w-5 h-5" />} title={tt("Administrator")} description={tt("Full access to admin dashboard, content management, and user administration")} selected={form.userRole === 1} />
           </RadioGroup>
           <div className="flex items-start gap-2.5 p-3 rounded-lg bg-muted/50 border">
             <Info className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              The assigned role is included in the welcome email so the user knows their access level.
-            </p>
+            <p className="text-xs text-muted-foreground leading-relaxed">{tt("The assigned role is included in the welcome email so the user knows their access level.")}</p>
           </div>
         </CardContent>
       </Card>
 
       {/* Actions */}
       <div className="flex items-center justify-end gap-3 pb-8 pt-4">
-        <Button variant="outline" onClick={onCancel} disabled={saving}>Cancel</Button>
+        <Button variant="outline" onClick={onCancel} disabled={saving}>{tt("Cancel")}</Button>
         <Button onClick={onSubmit} disabled={saving} className="gap-2">
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-          {saving ? "Creating..." : "Create User"}
+          {saving ? tt("Creating...") : tt("Create User")}
         </Button>
       </div>
     </>

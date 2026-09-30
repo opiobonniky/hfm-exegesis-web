@@ -8,6 +8,7 @@ import {
   StrongsSearchTab,
 } from "./StrongsDictionaryComponents";
 import type { StrongsDictionaryPageData } from "../hooks/useStrongsDictionaryPage";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface StrongsStudyWorkspaceProps {
   mode: StrongsDictionaryPageData["mode"];
@@ -69,16 +70,12 @@ export function StrongsStudyWorkspace({
         <div className="mb-5 flex flex-col gap-4 border-b pb-5 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <div className="flex items-center gap-2">
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-primary">
-                Study workspace
-              </p>
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-primary">{tt("Study workspace")}</p>
               {searchCount > 0 && (
-                <span className="text-xs text-muted-foreground">{searchCount} matches</span>
+                <span className="text-xs text-muted-foreground">{searchCount}{tt("matches")}</span>
               )}
             </div>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Search definitions, original words, and verse-based study notes.
-            </p>
+            <p className="mt-1 text-sm text-muted-foreground">{tt("Search definitions, original words, and verse-based study notes.")}</p>
           </div>
           <LanguageFilter value={langFilter} onChange={onSetLangFilter} />
         </div>
@@ -89,14 +86,11 @@ export function StrongsStudyWorkspace({
         >
           <TabsList className="grid h-auto w-full grid-cols-3 bg-muted/70 p-1 sm:w-fit sm:min-w-[360px]">
             <TabsTrigger value="search" className="gap-2 py-2.5">
-              <Search className="h-4 w-4" /> Search
-            </TabsTrigger>
+              <Search className="h-4 w-4" />{tt("Search")}</TabsTrigger>
             <TabsTrigger value="browse" className="gap-2 py-2.5">
-              <BookOpen className="h-4 w-4" /> Browse
-            </TabsTrigger>
+              <BookOpen className="h-4 w-4" />{tt("Browse")}</TabsTrigger>
             <TabsTrigger value="favorites" className="gap-2 py-2.5">
-              <Heart className="h-4 w-4" /> Saved
-            </TabsTrigger>
+              <Heart className="h-4 w-4" />{tt("Saved")}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="search" className="mt-5">

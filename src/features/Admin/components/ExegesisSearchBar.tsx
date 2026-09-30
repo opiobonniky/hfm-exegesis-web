@@ -2,6 +2,7 @@
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface ExegesisSearchBarProps {
   value: string;
@@ -28,9 +29,7 @@ export function ExegesisSearchBar({
           className="pl-9"
         />
       </div>
-      <Button variant="outline" onClick={onSearch}>
-        Search
-      </Button>
+      <Button variant="outline" onClick={onSearch}>{tt("Search")}</Button>
     </div>
   );
 }

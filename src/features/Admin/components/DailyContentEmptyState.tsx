@@ -1,6 +1,7 @@
 // DailyContentEmptyState — empty state for content list
 import { CalendarDays, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   tab: string;
@@ -16,10 +17,10 @@ export function DailyContentEmptyState({ tab, typeLabel, onAdd }: Props) {
         <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-primary/5 ring-1 ring-primary/10">
           <CalendarDays className="w-6 h-6 text-primary/60" />
         </div>
-        <p className="font-semibold">No {tab} found</p>
-        <p className="text-sm text-muted-foreground/70 mt-1 max-w-sm">Create your first entry to get started.</p>
+        <p className="font-semibold">No {tab}{tt("found")}</p>
+        <p className="text-sm text-muted-foreground/70 mt-1 max-w-sm">{tt("Create your first entry to get started.")}</p>
         <Button variant="default" size="sm" className="mt-4" onClick={onAdd}>
-          <Plus className="w-4 h-4 mr-1.5" />Create {typeLabel}
+          <Plus className="w-4 h-4 mr-1.5" />{tt("Create")}{typeLabel}
         </Button>
       </div>
     </div>

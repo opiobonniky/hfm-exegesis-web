@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils";
 import { useLanguage } from "@/components/languages/languageProvider";
 import VoicePlayerBar from "@/components/VoicePlayerBar";
 import type { TTSVoice } from "@/services/ttsService";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface SpeechItem {
   verseKey: string;
@@ -59,12 +60,12 @@ function formatTime(seconds: number): string {
 }
 
 const SLEEP_TIMER_OPTIONS = [
-  { label: "Off", value: null },
-  { label: "5 min", value: 5 },
-  { label: "10 min", value: 10 },
-  { label: "15 min", value: 15 },
-  { label: "30 min", value: 30 },
-  { label: "60 min", value: 60 },
+  { label: tt("Off"), value: null },
+  { label: tt("5 min"), value: 5 },
+  { label: tt("10 min"), value: 10 },
+  { label: tt("15 min"), value: 15 },
+  { label: tt("30 min"), value: 30 },
+  { label: tt("60 min"), value: 60 },
 ] as const;
 
 export default function AudioPlayerControls({
@@ -164,7 +165,7 @@ export default function AudioPlayerControls({
                 "text-muted-foreground/70 hover:text-foreground hover:bg-muted/60",
                 showOverflow && "bg-muted/60 text-foreground",
               )}
-              title="More controls"
+              title={tt("More controls")}
             >
               <ChevronDown className="w-4 h-4" />
             </button>
@@ -173,9 +174,7 @@ export default function AudioPlayerControls({
             {/* Sleep Timer */}
             <div>
               <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-1.5 px-1 flex items-center gap-1.5">
-                <Timer className="w-3 h-3" />
-                Sleep Timer
-              </p>
+                <Timer className="w-3 h-3" />{tt("Sleep Timer")}</p>
               <div className="grid grid-cols-3 gap-1">
                 {SLEEP_TIMER_OPTIONS.map((opt) => (
                   <button
@@ -214,9 +213,7 @@ export default function AudioPlayerControls({
                       setSleepTimerRemaining(0);
                     }}
                     className="ml-auto text-[10px] text-muted-foreground hover:text-foreground underline"
-                  >
-                    Cancel
-                  </button>
+                  >{tt("Cancel")}</button>
                 </div>
               )}
             </div>
@@ -226,9 +223,7 @@ export default function AudioPlayerControls({
             {/* After Play */}
             <div>
               <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-1.5 px-1 flex items-center gap-1.5">
-                <RotateCcw className="w-3 h-3" />
-                After Play
-              </p>
+                <RotateCcw className="w-3 h-3" />{tt("After Play")}</p>
               <div className="grid grid-cols-2 gap-1">
                 <button
                   onClick={() => {
@@ -242,9 +237,7 @@ export default function AudioPlayerControls({
                       : "text-muted-foreground hover:text-foreground hover:bg-muted/60",
                   )}
                 >
-                  <Play className="w-3 h-3 mx-auto mb-0.5" />
-                  Stop
-                </button>
+                  <Play className="w-3 h-3 mx-auto mb-0.5" />{tt("Stop")}</button>
                 <button
                   onClick={() => {
                     onAfterPlayChange("continue");
@@ -257,9 +250,7 @@ export default function AudioPlayerControls({
                       : "text-muted-foreground hover:text-foreground hover:bg-muted/60",
                   )}
                 >
-                  <RotateCcw className="w-3 h-3 mx-auto mb-0.5" />
-                  Continue
-                </button>
+                  <RotateCcw className="w-3 h-3 mx-auto mb-0.5" />{tt("Continue")}</button>
               </div>
             </div>
           </PopoverContent>

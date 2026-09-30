@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/components/languages/languageProvider";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 const PRESETS = (t?: any) => [
   { label: t?.devotions?.presetLast7 || "Last 7 days", value: "last_7" },
@@ -36,7 +37,7 @@ export function DevotionFilterBar({
       <CardContent className="p-5 space-y-4">
         <div>
           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
-            {t.devotions?.quickRange || "Quick Range"}
+            {t.devotions?.quickRange || tt("Quick Range")}
           </p>
           <div className="flex flex-wrap gap-2">
             {PRESETS(t).map((p) => (
@@ -58,14 +59,14 @@ export function DevotionFilterBar({
         <div className="border-t border-border/40" />
         <div className="flex flex-col md:flex-row gap-4 md:items-end">
           <div className="flex-1 space-y-1">
-            <Label htmlFor="from-date">{t.common?.from || "From"}</Label>
+            <Label htmlFor="from-date">{t.common?.from || tt("From")}</Label>
             <Input id="from-date" type="date" value={fromDate} max={toDate || undefined} onChange={(e) => onFromChange(e.target.value)} />
             <Label htmlFor="to-date">{t.common?.to || "To"}</Label>
             <Input id="to-date" type="date" value={toDate} min={fromDate || undefined} onChange={(e) => onToChange(e.target.value)} />
           </div>
           <div className="flex gap-2">
-            <Button onClick={onApply} variant="secondary">{t.devotions?.apply || "Apply"}</Button>
-            {isFiltered && <Button onClick={onClear} variant="ghost">{t.devotions?.clear || "Clear"}</Button>}
+            <Button onClick={onApply} variant="secondary">{t.devotions?.apply || tt("Apply")}</Button>
+            {isFiltered && <Button onClick={onClear} variant="ghost">{t.devotions?.clear || tt("Clear")}</Button>}
           </div>
         </div>
         {filterError && <p className="text-sm text-destructive">{filterError}</p>}

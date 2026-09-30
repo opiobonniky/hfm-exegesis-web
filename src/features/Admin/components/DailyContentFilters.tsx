@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CONTENT_TABS } from "../constants";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 const ICONS: Record<string, typeof Sun> = { Sun, Sprout, BookOpen };
 interface Props {
@@ -49,7 +50,7 @@ export function ContentTabPanel({
           {tabConfig?.label || tab} <span className="text-muted-foreground font-normal ml-1">({total})</span>
         </h3>
         <Button size="sm" onClick={onAdd} className="gap-1.5">
-          <CalendarDays className="w-3.5 h-3.5" /> New {tabConfig?.label?.replace("Daily ", "") || "Entry"}
+          <CalendarDays className="w-3.5 h-3.5" />{tt("New")}{tabConfig?.label?.replace("Daily ", "") || tt("Entry")}
         </Button>
       </div>
       <div className="flex gap-2">
@@ -59,9 +60,7 @@ export function ContentTabPanel({
             className="pl-9 h-9 text-sm" />
         </div>
         {searchDate && (
-          <Button variant="ghost" size="sm" className="h-9 text-xs" onClick={onClearDate}>
-            ✕ Clear
-          </Button>
+          <Button variant="ghost" size="sm" className="h-9 text-xs" onClick={onClearDate}>{tt("✕ Clear")}</Button>
         )}
       </div>
       {children}

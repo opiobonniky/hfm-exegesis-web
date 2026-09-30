@@ -2,6 +2,7 @@
 
 import { CalendarDays } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface ReadingPlanCardProps {
   planName: string;
@@ -22,7 +23,7 @@ export default function ReadingPlanCard({ planName, description, totalDays, comp
       </div>
       <div className="space-y-1.5">
         <div className="h-1.5 overflow-hidden rounded-full bg-muted-foreground/10"><div className="h-full rounded-full bg-primary transition-all" style={{ width: `${pct}%` }} /></div>
-        <div className="flex justify-between text-xs text-muted-foreground/60"><span>{completedDays} of {totalDays} days</span><span>{totalDays - completedDays} left</span></div>
+        <div className="flex justify-between text-xs text-muted-foreground/60"><span>{completedDays} of {totalDays}{tt("days")}</span><span>{totalDays - completedDays} left</span></div>
       </div>
     </div>
   );

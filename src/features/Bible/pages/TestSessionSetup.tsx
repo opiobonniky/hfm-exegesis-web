@@ -1,6 +1,7 @@
 // TEMPORARY dev-only page for browser verification of the Bible reader.
 // Writes a session into localStorage from query params, then cleans the URL.
 import { useEffect } from "react";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export default function TestSessionSetup() {
   useEffect(() => {
@@ -23,5 +24,5 @@ export default function TestSessionSetup() {
     window.location.replace("/bible-reader?book=Genesis&chapter=2");
   }, []);
 
-  return <div style={{ padding: 40 }}>Setting up test session…</div>;
+  return <div style={{ padding: 40 }}>{tt("Setting up test session…")}</div>;
 }

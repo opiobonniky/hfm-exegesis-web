@@ -11,6 +11,7 @@ import { UserDetailInfoSection } from "../components/UserDetailInfoSection";
 import { DetailBackButton } from "../components/DetailPageLayout";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AdminPageContent } from "../components/AdminPageContent";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export default function AdminUserDetail() {
   const { data, actions } = useAdminUserDetail();
@@ -52,7 +53,7 @@ export default function AdminUserDetail() {
 
         <UserSessionsCard sessions={data.sessions} loading={data.sessionsLoading} />
 
-        <DetailBackButton label="Back to Users" onClick={() => actions.navigate("/admin/users")} />
+        <DetailBackButton label={tt("Back to Users")} onClick={() => actions.navigate("/admin/users")} />
       </AdminPageContent>
     </div>
   );

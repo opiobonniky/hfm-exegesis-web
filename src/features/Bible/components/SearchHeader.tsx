@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import SearchFilters from "./SearchFilters";
 import type { SearchScope } from "@/services/searchApi";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface SearchHeaderProps {
   isRtl: boolean;
@@ -36,7 +37,7 @@ export function SearchHeader({
       <div className="flex items-center justify-between px-4 sm:px-6 py-3">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center"><SearchIcon className="w-4 h-4 text-accent" /></div>
-          <h1 className="text-base font-bold tracking-tight text-foreground">Search</h1>
+          <h1 className="text-base font-bold tracking-tight text-foreground">{tt("Search")}</h1>
         </div>
       </div>
       <div className="px-4 sm:px-6 pb-3 space-y-3">
@@ -46,7 +47,7 @@ export function SearchHeader({
         <div className="relative">
           <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50 pointer-events-none" />
           <input ref={inputRef} value={query} onChange={(e) => setQuery(e.target.value, scope)}
-            placeholder={scope === "bible" ? "Search verses, words, phrases..." : scope === "journal" ? "Search journal entries..." : scope === "topics" ? "Search topics..." : "Search by Greek/Hebrew word..."}
+            placeholder={scope === "bible" ? tt("Search verses, words, phrases...") : scope === "journal" ? tt("Search journal entries...") : scope === "topics" ? tt("Search topics...") : tt("Search by Greek/Hebrew word...")}
             className="w-full h-11 pl-10 pr-10 rounded-xl border border-border/60 bg-background/80 text-sm placeholder:text-muted-foreground/40 focus:ring-2 focus:ring-primary/30 focus:border-primary/40 transition-all"
             autoCapitalize="none" autoCorrect="off" autoComplete="off" />
           {query.length > 0 && (

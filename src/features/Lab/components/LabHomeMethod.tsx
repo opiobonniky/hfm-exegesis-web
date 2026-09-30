@@ -1,13 +1,14 @@
 import { Timer } from "lucide-react";
 import { STAGE_META } from "../constants";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export function LabHomeMethod() {
   return (
     <section className="bg-muted/20 border-y border-border/20">
       <div className="max-w-2xl mx-auto w-full px-4 sm:px-6 py-6">
         <div className="text-center mb-5">
-          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-1">The Method</p>
-          <h3 className="text-base font-bold text-foreground">Four Steps to Deep Study</h3>
+          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-1">{tt("The Method")}</p>
+          <h3 className="text-base font-bold text-foreground">{tt("Four Steps to Deep Study")}</h3>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           {STAGE_META.map(({ key, label, desc, time }, idx) => (

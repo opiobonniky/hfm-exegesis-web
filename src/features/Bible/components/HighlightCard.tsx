@@ -4,6 +4,7 @@
 import { Highlighter, BookOpen, Trash2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface HighlightCardProps {
   bookName: string;
@@ -65,7 +66,7 @@ export function HighlightCard({
             size="icon"
             className="h-7 w-7"
             onClick={onGoToReader}
-            title="Open in reader"
+            title={tt("Open in reader")}
           >
             <BookOpen className="w-3.5 h-3.5" />
           </Button>
@@ -75,7 +76,7 @@ export function HighlightCard({
             className="h-7 w-7 text-destructive hover:text-destructive"
             onClick={onDelete}
             disabled={deleting}
-            title="Delete highlight"
+            title={tt("Delete highlight")}
           >
             {deleting ? (
               <Loader2 className="w-3.5 h-3.5 animate-spin" />

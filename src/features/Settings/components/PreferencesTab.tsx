@@ -5,6 +5,7 @@ import { Slider } from "@/components/ui/slider";
 import { useTheme } from "@/hooks/useTheme";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { LANGUAGE_NAMES, type Language } from "@/components/languages/type";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface PreferencesTabProps {
   fontSize: number;
@@ -22,20 +23,20 @@ export function PreferencesTab({ fontSize, onFontSizeChange, translation, onTran
         <div className="flex items-center gap-3">
           <Globe className="w-5 h-5 text-sky-600" />
           <div>
-            <h3 className="font-semibold">Language & Theme</h3>
-            <p className="text-xs text-muted-foreground">Customize your experience</p>
+            <h3 className="font-semibold">{tt("Language & Theme")}</h3>
+            <p className="text-xs text-muted-foreground">{tt("Customize your experience")}</p>
           </div>
         </div>
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <Label>Theme</Label>
+            <Label>{tt("Theme")}</Label>
             <div className="flex items-center gap-2">
               <button onClick={() => setThemeMode("light")} className={`p-2 rounded-lg ${themeMode === "light" ? "bg-primary text-primary-foreground" : "bg-muted"}`}><Sun className="w-4 h-4" /></button>
               <button onClick={() => setThemeMode("dark")} className={`p-2 rounded-lg ${themeMode === "dark" ? "bg-primary text-primary-foreground" : "bg-muted"}`}><Moon className="w-4 h-4" /></button>
             </div>
           </div>
           <div className="space-y-2">
-            <Label>Language</Label>
+            <Label>{tt("Language")}</Label>
             <Select value={currentLang} onValueChange={(v) => setLanguage(v as Language)}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -49,13 +50,13 @@ export function PreferencesTab({ fontSize, onFontSizeChange, translation, onTran
         <div className="flex items-center gap-3">
           <Type className="w-5 h-5 text-emerald-600" />
           <div>
-            <h3 className="font-semibold">Reading Preferences</h3>
-            <p className="text-xs text-muted-foreground">Adjust font size and translation</p>
+            <h3 className="font-semibold">{tt("Reading Preferences")}</h3>
+            <p className="text-xs text-muted-foreground">{tt("Adjust font size and translation")}</p>
           </div>
         </div>
-        <Label>Font Size: {fontSize}px</Label>
+        <Label>{tt("Font Size:")}{fontSize}px</Label>
         <Slider value={[fontSize]} onValueChange={(v) => onFontSizeChange(v[0])} min={12} max={28} step={1} />
-        <Label>Preferred Translation</Label>
+        <Label>{tt("Preferred Translation")}</Label>
         <Select value={translation} onValueChange={onTranslationChange}>
           <SelectTrigger><SelectValue /></SelectTrigger>
           <SelectContent>

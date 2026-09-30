@@ -1,5 +1,6 @@
 // AdminDailyContentHeader — header section for admin daily content page
 import { CalendarDays } from "lucide-react";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   subtitle?: string;
@@ -14,11 +15,9 @@ export function AdminDailyContentHeader({ subtitle }: Props) {
           <CalendarDays className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
         </div>
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
-            Daily Content Manager
-          </h1>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{tt("Daily Content Manager")}</h1>
           <p className="text-sm text-muted-foreground/80">
-            {subtitle || "Manage daily verses, devotions, and exegesis content"}
+            {subtitle || tt("Manage daily verses, devotions, and exegesis content")}
           </p>
         </div>
       </div>

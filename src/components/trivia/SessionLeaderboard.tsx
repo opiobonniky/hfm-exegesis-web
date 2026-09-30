@@ -6,6 +6,7 @@ import {
   Star,
   RotateCcw,
 } from "lucide-react";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface ComparisonData {
   current: {
@@ -36,7 +37,7 @@ export default function SessionLeaderboard({
 
   const stats = [
     {
-      label: "Score",
+      label: tt("Score"),
       current: `${current.correct}/${current.total}`,
       best: best.total > 0 ? `${best.correct}/${best.total}` : "—",
       bestPct: best.total > 0 ? `${best.percentage}%` : "",
@@ -45,7 +46,7 @@ export default function SessionLeaderboard({
       color: "#F59E0B",
     },
     {
-      label: "Accuracy",
+      label: tt("Accuracy"),
       current: `${current.percentage}%`,
       best: best.total > 0 ? `${best.percentage}%` : "—",
       isNew: isNewBest,
@@ -53,7 +54,7 @@ export default function SessionLeaderboard({
       color: "#22C55E",
     },
     {
-      label: "Streak",
+      label: tt("Streak"),
       current: `${current.streak}`,
       best: bestStreak > 0 ? `${bestStreak}` : "—",
       isNew: isNewStreak,
@@ -73,9 +74,7 @@ export default function SessionLeaderboard({
       {/* Header */}
       <div className="flex items-center gap-2 px-4 pt-4 pb-2">
         <Star className="w-4 h-4 text-primary" fill="hsl(var(--primary))" />
-        <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-primary/60">
-          Your Performance
-        </p>
+        <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-primary/60">{tt("Your Performance")}</p>
       </div>
 
       {/* Stats grid */}
@@ -125,18 +124,14 @@ export default function SessionLeaderboard({
                     <span className="inline-flex items-center gap-0.5 text-[9px] font-extrabold uppercase tracking-wider animate-pulse"
                       style={{ color: stat.color }}
                     >
-                      <Star className="w-2.5 h-2.5 fill-current" />
-                      New Best!
-                    </span>
+                      <Star className="w-2.5 h-2.5 fill-current" />{tt("New Best!")}</span>
                   )}
                 </div>
               </div>
 
               {/* Best ever */}
               <div className="text-right shrink-0">
-                <p className="text-[8px] font-bold uppercase tracking-wider text-muted-foreground/30">
-                  Best
-                </p>
+                <p className="text-[8px] font-bold uppercase tracking-wider text-muted-foreground/30">{tt("Best")}</p>
                 <p className="text-xs font-bold text-muted-foreground/60">
                   {stat.best}
                 </p>
@@ -159,16 +154,14 @@ export default function SessionLeaderboard({
         <p className="text-[9px] font-semibold text-muted-foreground/50">
           {best.total > 0
             ? `Best session: ${best.percentage}% on ${new Date(best.date).toLocaleDateString()}`
-            : "Complete a quiz to set your first record!"}
+            : tt("Complete a quiz to set your first record!")}
         </p>
         {onReset && (
           <button
             onClick={onReset}
             className="flex items-center gap-1 px-2 py-1 rounded-md text-[8px] font-bold uppercase tracking-wider text-muted-foreground/40 hover:text-muted-foreground hover:bg-muted transition-colors"
           >
-            <RotateCcw className="w-2.5 h-2.5" />
-            Reset
-          </button>
+            <RotateCcw className="w-2.5 h-2.5" />{tt("Reset")}</button>
         )}
       </div>
     </div>

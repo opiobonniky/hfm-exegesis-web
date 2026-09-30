@@ -3,17 +3,18 @@
 import { BookMarked, Star, Heart, Settings, History, type LucideIcon } from "lucide-react";
 import { routes } from "@/components/Routes/routes";
 import type { NavigateFunction } from "react-router-dom";
+import { tt } from '@/components/languages/hardcodedTranslate';
 interface QuickLink {
   label: string;
   icon: LucideIcon;
   route: string;
 }
 const QUICK_LINKS: QuickLink[] = [
-  { label: "Highlights", icon: Star, route: routes.highlights.path },
-  { label: "Notes", icon: BookMarked, route: routes.notes.path },
-  { label: "Favorites", icon: Heart, route: routes.favorites.path },
-  { label: "History", icon: History, route: routes.history.path },
-  { label: "Settings", icon: Settings, route: routes.settings.path },
+  { label: tt("Highlights"), icon: Star, route: routes.highlights.path },
+  { label: tt("Notes"), icon: BookMarked, route: routes.notes.path },
+  { label: tt("Favorites"), icon: Heart, route: routes.favorites.path },
+  { label: tt("History"), icon: History, route: routes.history.path },
+  { label: tt("Settings"), icon: Settings, route: routes.settings.path },
 ];
 interface QuickAccessIconsProps {
   navigate: NavigateFunction;
@@ -23,7 +24,7 @@ export default function QuickAccessIcons({ navigate }: QuickAccessIconsProps)
 {
   return (
       <section>
-        <h2 className="mb-3 text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Quick access</h2>
+        <h2 className="mb-3 text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">{tt("Quick access")}</h2>
         <div className="grid grid-cols-5 overflow-hidden rounded-2xl border border-[#d8d2c4] bg-[#faf8f2] dark:border-white/10 dark:bg-[#111b24]">
           {QUICK_LINKS.map((link) => (
               <button

@@ -15,6 +15,7 @@ import {
 import { cn } from "@/lib/utils";
 import { BIBLE_BOOKS } from "@/data/staticData";
 import { useState } from "react";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   value: string;
@@ -23,7 +24,7 @@ interface Props {
 
 export function LabBookSearchField({ value, onChange }: Props) {
   const [open, setOpen] = useState(false);
-  const selectedLabel = value || "Choose a book...";
+  const selectedLabel = value ? tt(value) : tt("Choose a book...");
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -43,9 +44,9 @@ export function LabBookSearchField({ value, onChange }: Props) {
       </PopoverTrigger>
       <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
         <Command>
-          <CommandInput placeholder="Type to filter Bible books..." autoFocus />
+          <CommandInput placeholder={tt("Type to filter Bible books...")} autoFocus />
           <CommandList>
-            <CommandEmpty>No matching book found.</CommandEmpty>
+            <CommandEmpty>{tt("No matching book found.")}</CommandEmpty>
             {BIBLE_BOOKS.map((book) => (
               <CommandItem
                 key={book}
@@ -61,7 +62,7 @@ export function LabBookSearchField({ value, onChange }: Props) {
                     value === book ? "opacity-100" : "opacity-0",
                   )}
                 />
-                {book}
+                {tt(book)}
               </CommandItem>
             ))}
           </CommandList>

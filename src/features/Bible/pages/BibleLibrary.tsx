@@ -5,6 +5,7 @@ import { useBibleLibrary } from "../hooks/useBibleLibrary";
 import {
   BiblePageLayout, BibleLibraryHeader, BibleLibraryEmpty, BibleLibraryLoading, BibleLibraryFooter, BibleBookList,
 } from "../components";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 const IS_DEV = import.meta.env.DEV;
 
@@ -34,13 +35,11 @@ export default function BibleLibrary() {
             role="alert"
             className="rounded-xl border border-amber-300/60 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-800/50 dark:bg-amber-950/30 dark:text-amber-300"
           >
-            {h.loadError} Showing the standard list until the server is reachable.
-          </div>
+            {h.loadError}{tt("Showing the standard list until the server is reachable.")}</div>
         </div>
       ) : IS_DEV ? (
         <div className="mx-auto max-w-4xl px-4 sm:px-6 pt-3">
-          <p className="text-[11px] text-muted-foreground">
-            Backend: <code className="rounded bg-muted px-1 py-0.5">{h.apiBaseUrl}</code>
+          <p className="text-[11px] text-muted-foreground">{tt("Backend:")}<code className="rounded bg-muted px-1 py-0.5">{h.apiBaseUrl}</code>
           </p>
         </div>
       ) : null}

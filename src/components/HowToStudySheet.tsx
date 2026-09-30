@@ -20,6 +20,7 @@ import {
   ArrowLeft,
   X,
 } from "lucide-react";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 // ── Types ──
 
@@ -53,11 +54,11 @@ interface StudyStep {
 const STEPS: (props: HowToStudySheetProps) => StudyStep[] = (props) => [
   {
     number: 1,
-    title: "Observe",
-    subtitle: "What does the text say?",
+    title: tt("Observe"),
+    subtitle: tt("What does the text say?"),
     icon: <Eye className="w-5 h-5" />,
     description:
-      "Begin by simply reading the passage. Notice what stands out. Look for repeated words, key phrases, and the flow of the argument.",
+      tt("Begin by simply reading the passage. Notice what stands out. Look for repeated words, key phrases, and the flow of the argument."),
     questions: [
       "What words or phrases repeat?",
       "Who is speaking? Who is listening?",
@@ -65,16 +66,16 @@ const STEPS: (props: HowToStudySheetProps) => StudyStep[] = (props) => [
       "What characters or parties are mentioned?",
     ],
     action: props.onMarkRepeatedWords
-      ? { label: "Mark Repeated Words", onClick: props.onMarkRepeatedWords }
+      ? { label: tt("Mark Repeated Words"), onClick: props.onMarkRepeatedWords }
       : null,
   },
   {
     number: 2,
-    title: "Ask",
-    subtitle: "What questions does the text raise?",
+    title: tt("Ask"),
+    subtitle: tt("What questions does the text raise?"),
     icon: <HelpCircle className="w-5 h-5" />,
     description:
-      "Good questions lead to good understanding. Write down what puzzles you or what you'd like to explore further.",
+      tt("Good questions lead to good understanding. Write down what puzzles you or what you'd like to explore further."),
     questions: [
       "Why did the author include this detail?",
       "What would this have meant to the original audience?",
@@ -85,11 +86,11 @@ const STEPS: (props: HowToStudySheetProps) => StudyStep[] = (props) => [
   },
   {
     number: 3,
-    title: "Understand",
-    subtitle: "What did this mean then?",
+    title: tt("Understand"),
+    subtitle: tt("What did this mean then?"),
     icon: <BookOpen className="w-5 h-5" />,
     description:
-      "Context is key. Use study tools to understand the historical, cultural, and literary background of the passage.",
+      tt("Context is key. Use study tools to understand the historical, cultural, and literary background of the passage."),
     questions: [
       "What was the historical context?",
       "What kind of writing is this — narrative, poetry, letter, prophecy?",
@@ -97,16 +98,16 @@ const STEPS: (props: HowToStudySheetProps) => StudyStep[] = (props) => [
       "What does the surrounding context tell us?",
     ],
     action: props.onOpenContext
-      ? { label: "Open Context", onClick: props.onOpenContext }
+      ? { label: tt("Open Context"), onClick: props.onOpenContext }
       : null,
   },
   {
     number: 4,
-    title: "Search",
-    subtitle: "What else does Scripture say?",
+    title: tt("Search"),
+    subtitle: tt("What else does Scripture say?"),
     icon: <Search className="w-5 h-5" />,
     description:
-      "Let Scripture interpret Scripture. Search for cross-references, themes, and how this passage connects to the whole Bible story.",
+      tt("Let Scripture interpret Scripture. Search for cross-references, themes, and how this passage connects to the whole Bible story."),
     questions: [
       "Where else does this theme appear in Scripture?",
       "Are there cross-references I should explore?",
@@ -114,16 +115,16 @@ const STEPS: (props: HowToStudySheetProps) => StudyStep[] = (props) => [
       "What does the broader biblical story tell us?",
     ],
     action: props.onSearchBible
-      ? { label: "Search the Bible", onClick: props.onSearchBible }
+      ? { label: tt("Search the Bible"), onClick: props.onSearchBible }
       : null,
   },
   {
     number: 5,
-    title: "Apply",
-    subtitle: "How should I respond?",
+    title: tt("Apply"),
+    subtitle: tt("How should I respond?"),
     icon: <PenLine className="w-5 h-5" />,
     description:
-      "The goal of Bible study is not just information, but transformation. Let the Word shape your belief, behavior, and prayers.",
+      tt("The goal of Bible study is not just information, but transformation. Let the Word shape your belief, behavior, and prayers."),
     questions: [
       "What should I believe because of this passage?",
       "Is there something I need to obey?",
@@ -131,7 +132,7 @@ const STEPS: (props: HowToStudySheetProps) => StudyStep[] = (props) => [
       "What can I pray based on this passage?",
     ],
     action: props.onOpenJournal
-      ? { label: "Open Journal", onClick: props.onOpenJournal }
+      ? { label: tt("Open Journal"), onClick: props.onOpenJournal }
       : null,
   },
 ];
@@ -207,7 +208,7 @@ export default function HowToStudySheet({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             {step.icon}
-            <span>How Do I Study This Passage?</span>
+            <span>{tt("How Do I Study This Passage?")}</span>
           </DialogTitle>
           <DialogDescription>
             {bookName && chapter && (
@@ -248,17 +249,14 @@ export default function HowToStudySheet({
             <Badge
               variant="outline"
               className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5"
-            >
-              Step {step.number} of {steps.length}
+            >{tt("Step")}{step.number} of {steps.length}
             </Badge>
             {isStepCompleted && (
               <Badge
                 variant="secondary"
                 className="text-[10px] font-bold gap-1 px-2 py-0.5"
               >
-                <CheckCircle2 className="w-3 h-3 text-emerald-500" />
-                Completed
-              </Badge>
+                <CheckCircle2 className="w-3 h-3 text-emerald-500" />{tt("Completed")}</Badge>
             )}
           </div>
 
@@ -275,9 +273,7 @@ export default function HowToStudySheet({
 
           {/* Guiding questions */}
           <div className="rounded-lg bg-muted/50 border border-border/50 p-3 space-y-2">
-            <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-              Guiding Questions
-            </p>
+            <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">{tt("Guiding Questions")}</p>
             <ul className="space-y-1.5">
               {step.questions.map((q, i) => (
                 <li key={i} className="flex items-start gap-2 text-xs text-foreground/70">
@@ -304,10 +300,7 @@ export default function HowToStudySheet({
           {isLast && (
             <div className="rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-800/30 p-3">
               <p className="text-[11px] text-amber-800 dark:text-amber-300 leading-relaxed">
-                <strong>Tip:</strong> Bible study is a lifelong journey. Return to these
-                steps anytime you read a passage. The goal is not speed, but depth — to
-                know God and be transformed by His Word.
-              </p>
+                <strong>{tt("Tip:")}</strong>{tt("Bible study is a lifelong journey. Return to these steps anytime you read a passage. The goal is not speed, but depth — to know God and be transformed by His Word.")}</p>
             </div>
           )}
         </div>
@@ -321,9 +314,7 @@ export default function HowToStudySheet({
             disabled={isFirst}
             className="gap-1 text-xs"
           >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            Previous
-          </Button>
+            <ArrowLeft className="w-3.5 h-3.5" />{tt("Previous")}</Button>
 
           <div className="flex items-center gap-2">
             {!isStepCompleted && currentStep < steps.length - 1 && (
@@ -332,9 +323,7 @@ export default function HowToStudySheet({
                 size="sm"
                 onClick={markComplete}
                 className="text-xs text-muted-foreground"
-              >
-                Skip
-              </Button>
+              >{tt("Skip")}</Button>
             )}
 
             {isLast ? (
@@ -344,9 +333,7 @@ export default function HowToStudySheet({
                 onClick={() => handleOpenChange(false)}
                 className="gap-1 text-xs"
               >
-                <CheckCircle2 className="w-3.5 h-3.5" />
-                Done
-              </Button>
+                <CheckCircle2 className="w-3.5 h-3.5" />{tt("Done")}</Button>
             ) : (
               <Button
                 variant={isStepCompleted ? "default" : "outline"}
@@ -357,7 +344,7 @@ export default function HowToStudySheet({
                 }}
                 className="gap-1 text-xs"
               >
-                {isStepCompleted ? "Next" : "Mark & Next"}
+                {isStepCompleted ? "Next" : tt("Mark & Next")}
                 <ArrowRight className="w-3.5 h-3.5" />
               </Button>
             )}

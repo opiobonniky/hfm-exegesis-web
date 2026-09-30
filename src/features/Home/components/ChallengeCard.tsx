@@ -2,6 +2,7 @@
 
 import { Trophy, Sparkles, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { tt } from '@/components/languages/hardcodedTranslate';
 interface ChallengeCardProps {
   onPress?: () => void;
 }
@@ -20,16 +21,13 @@ export default function ChallengeCard({ onPress }: ChallengeCardProps) {
           <Trophy className="w-4 h-4 text-rose-500" />
         </div>
         <div>
-          <p className="font-bold text-sm text-rose-800 dark:text-rose-300">Challenge Yourself</p>
-          <p className="text-[10px] text-rose-500 dark:text-rose-400">Bible Trivia Quiz</p>
+          <p className="font-bold text-sm text-rose-800 dark:text-rose-300">{tt("Challenge Yourself")}</p>
+          <p className="text-[10px] text-rose-500 dark:text-rose-400">{tt("Bible Trivia Quiz")}</p>
         </div>
         <ChevronRight className="w-4 h-4 text-rose-300 dark:text-rose-600 shrink-0 ml-auto" />
       </div>
-      <p className="text-xs text-rose-600/70 dark:text-rose-400/70 leading-relaxed mb-3">
-        Test your knowledge of the Scriptures with fun trivia questions across all difficulty levels!
-      </p>
-      <button className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-rose-700 py-2.5 text-xs font-bold text-white active:scale-[0.98] dark:bg-rose-600">
-        Play Trivia <Sparkles className="w-3.5 h-3.5" />
+      <p className="text-xs text-rose-600/70 dark:text-rose-400/70 leading-relaxed mb-3">{tt("Test your knowledge of the Scriptures with fun trivia questions across all difficulty levels!")}</p>
+      <button className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-rose-700 py-2.5 text-xs font-bold text-white active:scale-[0.98] dark:bg-rose-600">{tt("Play Trivia")}<Sparkles className="w-3.5 h-3.5" />
       </button>
     </div>
   );

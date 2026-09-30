@@ -2,6 +2,7 @@ import { ArrowLeft, Save, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { STAGE_ORDER } from "../constants";
 import type { LabStage } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   passageRef: string;
@@ -14,11 +15,11 @@ interface Props {
 }
 
 const STAGE_META: Record<string, { label: string; icon: string }> = {
-  look: { label: "Look", icon: "👁️" },
-  listen: { label: "Listen", icon: "👂" },
-  learn: { label: "Learn", icon: "📖" },
-  abide: { label: "Abide", icon: "🙏" },
-  apply: { label: "Apply", icon: "✅" },
+  look: { label: tt("Look"), icon: "👁️" },
+  listen: { label: tt("Listen"), icon: "👂" },
+  learn: { label: tt("Learn"), icon: "📖" },
+  abide: { label: tt("Abide"), icon: "🙏" },
+  apply: { label: tt("Apply"), icon: "✅" },
 };
 
 export function LabFlowHeader({ passageRef, stage, saving, completed, onBack, onSave, onGoToStage }: Props) {
@@ -31,22 +32,19 @@ export function LabFlowHeader({ passageRef, stage, saving, completed, onBack, on
         <div className="flex items-center justify-between h-14">
           <button onClick={onBack} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
             <ArrowLeft className="w-4 h-4" />
-            <span className="hidden sm:inline">Back</span>
+            <span className="hidden sm:inline">{tt("Back")}</span>
           </button>
           <div className="text-center min-w-0 flex-1 mx-4">
-            <h1 className="text-sm font-semibold text-foreground truncate">{passageRef || "Select Passage"}</h1>
+            <h1 className="text-sm font-semibold text-foreground truncate">{passageRef || tt("Select Passage")}</h1>
             {!completed && stage !== "passage" && (
               <p className="text-[10px] text-muted-foreground tracking-wider uppercase">
-                {STAGE_META[stage]?.icon} {STAGE_META[stage]?.label} Stage
-              </p>
+                {STAGE_META[stage]?.icon} {STAGE_META[stage]?.label}{tt("Stage")}</p>
             )}
           </div>
           {stage !== "passage" && !completed && (
             <button onClick={onSave} disabled={saving}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-primary hover:bg-primary/5 border border-primary/20 transition-colors disabled:opacity-50">
-              {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
-              Save
-            </button>
+              {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}{tt("Save")}</button>
           )}
         </div>
 

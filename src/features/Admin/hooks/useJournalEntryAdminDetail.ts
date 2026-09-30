@@ -4,6 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { adminApi } from "../services/adminApi";
 import type { JournalAdminDetail } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export function useJournalEntryAdminDetail() {
   const { entryId } = useParams<{ entryId: string }>();
@@ -22,12 +23,12 @@ export function useJournalEntryAdminDetail() {
         if (res?.returnCode === 200 && res.returnData) {
           setItem(res.returnData);
         } else {
-          toast({ title: "Not found", variant: "destructive" });
+          toast({ title: tt("Not found"), variant: "destructive" });
           navigate("/admin/journal-moderation");
         }
       })
       .catch(() => {
-        toast({ title: "Failed to load", variant: "destructive" });
+        toast({ title: tt("Failed to load"), variant: "destructive" });
         navigate("/admin/journal-moderation");
       })
       .finally(() => setLoading(false));
@@ -39,11 +40,11 @@ export function useJournalEntryAdminDetail() {
     try {
       const res = await adminApi.request("journal", "admin/delete", { id: item.id });
       if (res.returnCode === 200) {
-        toast({ title: "Deleted" });
+        toast({ title: tt("Deleted") });
         navigate("/admin/journal-moderation");
       }
     } catch {
-      toast({ title: "Failed to delete", variant: "destructive" });
+      toast({ title: tt("Failed to delete"), variant: "destructive" });
     } finally {
       setDeleting(false);
     }
@@ -65,7 +66,7 @@ export function useJournalEntryAdminDetail() {
         });
       }
     } catch {
-      toast({ title: "Failed to update", variant: "destructive" });
+      toast({ title: tt("Failed to update"), variant: "destructive" });
     }
   }, [item, toast]);
 

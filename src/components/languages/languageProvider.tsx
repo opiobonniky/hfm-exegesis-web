@@ -23,6 +23,7 @@ import sw from './sw.json';
 import ta from './ta.json';
 import te from './te.json';
 import ur from './ur.json';
+import { setRuntimeLanguage, tt } from './hardcodedTranslate';
 
 /** Storage key for persisting language preference */
 const STORAGE_KEY = 'exegesis-language';
@@ -50,6 +51,8 @@ interface LanguageContextType {
   setLanguage: (lang: Language) => Promise<void>;
   /** List of all supported language codes */
   supportedLanguages: Language[];
+  /** Translate a hardcoded page literal via the generated hardcoded dictionaries */
+  tt: (text: string) => string;
 }
 
 const LanguageContext = createContext<LanguageContextType | null>(null);
@@ -135,6 +138,9 @@ export const LanguageProvider: React.FC<Props> = ({ children }) => {
 
   const isRtl = isRtlLanguage(lang);
 
+  // Keep module-scope tt() (hardcodedTranslate) pointed at the active language.
+  setRuntimeLanguage(lang);
+
   const setLanguage = useCallback(async (newLang: Language) => {
     if (newLang === lang) return;
     setLang(newLang);
@@ -146,6 +152,10 @@ export const LanguageProvider: React.FC<Props> = ({ children }) => {
     // Update the <html> dir and lang attributes for RTL support
     document.documentElement.lang = newLang;
     document.documentElement.dir = isRtlLanguage(newLang) ? 'rtl' : 'ltr';
+
+    // Some translated labels are module-level configuration. Reload so those
+    // constants evaluate again using the newly persisted language.
+    window.location.reload();
   }, [lang]);
 
   // Initialize <html> attributes on mount for the stored/browser language
@@ -161,7 +171,8 @@ export const LanguageProvider: React.FC<Props> = ({ children }) => {
     isLoading: false,
     setLanguage,
     supportedLanguages: SUPPORTED_LANGUAGES,
-  }), [lang, t, setLanguage]);
+    tt,
+  }), [lang, t, isRtl, setLanguage]);
 
   return (
     <LanguageContext.Provider value={value}>

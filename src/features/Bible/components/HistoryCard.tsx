@@ -3,6 +3,7 @@
 
 import { BookOpen, Trash2, Loader2, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface HistoryCardProps {
   bookName: string;
@@ -57,7 +58,7 @@ export function HistoryCard({
             size="icon"
             className="h-7 w-7"
             onClick={onGoToReader}
-            title="Continue reading"
+            title={tt("Continue reading")}
           >
             <BookOpen className="w-3.5 h-3.5" />
           </Button>
@@ -67,7 +68,7 @@ export function HistoryCard({
             className="h-7 w-7 text-destructive hover:text-destructive"
             onClick={onDelete}
             disabled={deleting}
-            title="Remove from history"
+            title={tt("Remove from history")}
           >
             {deleting ? (
               <Loader2 className="w-3.5 h-3.5 animate-spin" />

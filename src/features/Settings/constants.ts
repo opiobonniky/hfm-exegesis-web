@@ -1,3 +1,4 @@
+import { tt } from '@/components/languages/hardcodedTranslate';
 // ─── Settings Constants ───────────────────────────────────────────────────────
 
 export const INITIAL_PROFILE = {
@@ -16,9 +17,9 @@ export const ADDITIONAL_FIELDS = [
   "servicePosition", "spiritualGifts",
 ] as const;
 export const TAB_CONFIG = [
-  { value: "profile", icon: "User", label: "Profile", short: "Profile" },
-  { value: "additional", icon: "Star", label: "Details", short: "Details" },
-  { value: "password", icon: "Lock", label: "Password", short: "Pass" },
-  { value: "preferences", icon: "Sliders", label: "Reading", short: "Read" },
-  { value: "notifications", icon: "Bell", label: "Notifications", short: "Notify" },
+  { value: "profile", icon: "User", label: tt("Profile"), short: "Profile" },
+  { value: "additional", icon: "Star", label: tt("Details"), short: "Details" },
+  { value: "password", icon: "Lock", label: tt("Password"), short: "Pass" },
+  { value: "preferences", icon: "Sliders", label: tt("Reading"), short: "Read" },
+  { value: "notifications", icon: "Bell", label: tt("Notifications"), short: "Notify" },
 ]

@@ -5,6 +5,7 @@ import {
   getDayLabel,
   type DailyChallengeEntry,
 } from "@/hooks/useDailyChallenge";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export default function StreakCalendar({
   weekHistory,
@@ -29,7 +30,7 @@ export default function StreakCalendar({
           bg: "hsl(var(--primary)/0.08)",
           border: "1px solid hsl(var(--primary)/0.3)",
           text: "hsl(var(--primary))",
-          label: "Today",
+          label: tt("Today"),
         };
       }
       return {
@@ -81,18 +82,14 @@ export default function StreakCalendar({
             fill={consecutiveDays >= 3 ? "#F59E0B" : "#F59E0B40"}
           />
           <span className="text-sm font-black text-foreground">
-            {consecutiveDays} day{consecutiveDays !== 1 ? "s" : ""}
+            {consecutiveDays}{tt("day")}{consecutiveDays !== 1 ? "s" : ""}
           </span>
-          <span className="text-[10px] font-semibold text-muted-foreground/60">
-            streak
-          </span>
+          <span className="text-[10px] font-semibold text-muted-foreground/60">{tt("streak")}</span>
         </div>
       )}
 
       {consecutiveDays === 0 && (
-        <p className="text-[10px] font-semibold text-muted-foreground/50">
-          Complete today's challenge to start your streak
-        </p>
+        <p className="text-[10px] font-semibold text-muted-foreground/50">{tt("Complete today's challenge to start your streak")}</p>
       )}
 
       {/* Calendar row */}
@@ -127,7 +124,7 @@ export default function StreakCalendar({
                   isToday ? "text-primary/60" : "text-muted-foreground/30",
                 )}
               >
-                {isToday ? "Now" : dateKey.slice(-2)}
+                {isToday ? tt("Now") : dateKey.slice(-2)}
               </span>
               {style.label && (
                 <span

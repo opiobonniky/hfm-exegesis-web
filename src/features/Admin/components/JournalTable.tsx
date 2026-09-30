@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { JournalEntryRow } from "./JournalEntryRow";
 import type { JournalModerationEntry } from "../hooks/useAdminJournalModeration";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface JournalTableProps {
   entries: JournalModerationEntry[];
@@ -44,22 +45,22 @@ export function JournalTable({
       <div className="hidden overflow-hidden rounded-2xl border border-border/70 bg-card/95 shadow-sm md:block">
         <div className="flex items-center justify-between border-b border-border/60 bg-gradient-to-r from-primary/[0.06] via-card to-accent/[0.06] px-5 py-4">
           <div>
-            <h2 className="font-semibold tracking-tight">Journal entries</h2>
-            <p className="text-xs text-muted-foreground">Review visibility and community content</p>
+            <h2 className="font-semibold tracking-tight">{tt("Journal entries")}</h2>
+            <p className="text-xs text-muted-foreground">{tt("Review visibility and community content")}</p>
           </div>
           <span className="rounded-full border border-primary/15 bg-primary/5 px-2.5 py-1 text-xs font-semibold text-primary">
-            {entries.length} {entries.length === 1 ? "entry" : "entries"}
+            {entries.length} {entries.length === 1 ? tt("entry") : tt("entries")}
           </span>
         </div>
         <div className="overflow-x-auto">
         <table className="w-full min-w-[860px] table-fixed">
           <thead className="bg-muted/30">
             <tr className="border-b">
-              <th className="w-[38%] px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Entry</th>
-              <th className="w-[18%] px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Category</th>
-              <th className="w-[16%] px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Visibility</th>
-              <th className="w-[14%] px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Created</th>
-              <th className="w-[14%] px-5 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">Actions</th>
+              <th className="w-[38%] px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">{tt("Entry")}</th>
+              <th className="w-[18%] px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">{tt("Category")}</th>
+              <th className="w-[16%] px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">{tt("Visibility")}</th>
+              <th className="w-[14%] px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">{tt("Created")}</th>
+              <th className="w-[14%] px-5 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">{tt("Actions")}</th>
             </tr>
           </thead>
           <tbody>
@@ -88,7 +89,7 @@ export function JournalTable({
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0 flex-1">
                 <button type="button" className="block w-full text-left font-medium text-sm leading-5 line-clamp-2 break-words" onClick={() => onView(entry)}>
-                  {entry.title || "Untitled"}
+                  {entry.title || tt("Untitled")}
                 </button>
                 {entry.bookName && (
                   <p className="text-xs text-muted-foreground">
@@ -105,13 +106,13 @@ export function JournalTable({
                 ) : (
                   <Lock className="w-2.5 h-2.5 mr-0.5" />
                 )}
-                {entry.isPublished ? "Public" : "Private"}
+                {entry.isPublished ? tt("Public") : tt("Private")}
               </Badge>
             </div>
             <div className="flex items-center justify-between mt-2 pt-2 border-t border-border/50">
               <div className="flex items-center gap-2">
                 <Badge variant="secondary" className="text-[10px]">
-                  {entry.category || "general"}
+                  {entry.category || tt("general")}
                 </Badge>
                 <span className="text-[10px] text-muted-foreground">
                   {formatDate(entry.createdOn)}
@@ -157,9 +158,7 @@ export function JournalTable({
         </div>
       )}
       {!hasMore && entries.length > 0 && (
-        <p className="py-4 text-center text-xs text-muted-foreground/50">
-          All entries loaded
-        </p>
+        <p className="py-4 text-center text-xs text-muted-foreground/50">{tt("All entries loaded")}</p>
       )}
     </>
   );

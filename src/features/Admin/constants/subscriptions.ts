@@ -1,8 +1,9 @@
+import { tt } from '@/components/languages/hardcodedTranslate';
 // ─── Admin Subscriptions Constants ────────────────────────────────────────────
 
 export const SUBSCRIPTION_TABS = [
-  { value: "tiers", label: "Subscription Tiers", icon: "ShieldCheck" },
-  { value: "subscribers", label: "Subscribers", icon: "Users" },
+  { value: "tiers", label: tt("Subscription Tiers"), icon: "ShieldCheck" },
+  { value: "subscribers", label: tt("Subscribers"), icon: "Users" },
 ] as const;
 
 export const SUBSCRIPTION_PAGE_SIZE = 20;

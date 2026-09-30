@@ -6,6 +6,7 @@ import { useLanguage } from "@/components/languages/languageProvider";
 import { useAuth } from "@/contexts/AuthContext";
 import { sendPostRequest } from "@/services/api";
 import type { DailyDevotionItem } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export interface EditState {
   title: string; content: string; bookName: string; chapter: string;
@@ -58,7 +59,7 @@ export function useDailyDevotionsPage() {
         setHasNext(res.returnData.hasNext ?? false);
         setHasPrevious(res.returnData.hasPrevious ?? false);
       }
-    } catch { toast({ title: "Failed to load", variant: "destructive" }); }
+    } catch { toast({ title: tt("Failed to load"), variant: "destructive" }); }
     finally { setLoading(false); }
   }, [fromDate, toDate, toast]);
   useEffect(() => { loadDevotions(page); }, [page, loadDevotions]);
@@ -87,11 +88,11 @@ export function useDailyDevotionsPage() {
       };
       const res = await sendPostRequest("admin", "add-daily-devotion", payload);
       if (res?.returnCode === 200) {
-        toast({ title: "Saved" }); setEditOpen(false); loadDevotions(page);
+        toast({ title: tt("Saved") }); setEditOpen(false); loadDevotions(page);
       } else {
-        toast({ title: "Save failed", description: res?.returnMessage, variant: "destructive" });
+        toast({ title: tt("Save failed"), description: res?.returnMessage, variant: "destructive" });
       }
-    } catch { toast({ title: "Error saving", variant: "destructive" }); }
+    } catch { toast({ title: tt("Error saving"), variant: "destructive" }); }
     finally { setIsSaving(false); }
   }, [editState, toast, loadDevotions, page]);
   const handleDelete = useCallback(async () => {
@@ -99,9 +100,9 @@ export function useDailyDevotionsPage() {
     setIsDeleting(true);
     try {
       const res = await sendPostRequest("admin", "delete-daily-devotion", { id: deleteTarget.id });
-      if (res?.returnCode === 200) { toast({ title: "Deleted" }); setDeleteOpen(false); setDeleteTarget(null); loadDevotions(page); }
-      else { toast({ title: "Delete failed", variant: "destructive" }); }
-    } catch { toast({ title: "Error", variant: "destructive" }); }
+      if (res?.returnCode === 200) { toast({ title: tt("Deleted") }); setDeleteOpen(false); setDeleteTarget(null); loadDevotions(page); }
+      else { toast({ title: tt("Delete failed"), variant: "destructive" }); }
+    } catch { toast({ title: tt("Error"), variant: "destructive" }); }
     finally { setIsDeleting(false); }
   }, [deleteTarget, toast, loadDevotions, page]);
 

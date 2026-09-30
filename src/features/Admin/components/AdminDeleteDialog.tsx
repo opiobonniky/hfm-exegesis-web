@@ -2,6 +2,7 @@
 import { AlertTriangle, Loader2, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   open: boolean;
@@ -23,11 +24,9 @@ export function AdminDeleteDialog({ open, onOpenChange, title = "Delete", descri
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
         <DialogFooter className="gap-2">
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={deleting}>Cancel</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={deleting}>{tt("Cancel")}</Button>
           <Button variant="destructive" onClick={onConfirm} disabled={deleting} className="gap-2">
-            {deleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
-            Delete
-          </Button>
+            {deleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}{tt("Delete")}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

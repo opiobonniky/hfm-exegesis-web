@@ -4,6 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { sendPostRequest } from "@/services/api";
 import { useSubscription } from "@/hooks/useSubscription";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export type BillingInterval = "month" | "year";
 export interface Plan {
@@ -73,7 +74,7 @@ export function useSowerPage() {
 
       if (isCurrentPlan) {
         toast({
-          title: "Subscription already active",
+          title: tt("Subscription already active"),
           description: `You already have the ${tierLabel} package. Use Manage Subscription to change or cancel it.`,
         });
         return;
@@ -90,13 +91,13 @@ export function useSowerPage() {
           window.location.href = res.returnData.url;
         } else {
           toast({
-            title: "Error",
+            title: tt("Error"),
             description: res.returnMessage,
             variant: "destructive",
           });
         }
       } catch {
-        toast({ title: "Error", variant: "destructive" });
+        toast({ title: tt("Error"), variant: "destructive" });
       } finally {
         setCheckoutLoading(null);
       }
@@ -135,10 +136,10 @@ export function useSowerPage() {
       if (res.returnCode === 200 && res.returnData?.url)
         window.open(res.returnData.url, "_blank");
       else {
-        toast({ title: "Error", variant: "destructive" });
+        toast({ title: tt("Error"), variant: "destructive" });
       }
     } catch {
-      toast({ title: "Error", variant: "destructive" });
+      toast({ title: tt("Error"), variant: "destructive" });
     } finally {
       setPortalLoading(false);
     }

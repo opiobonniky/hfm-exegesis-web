@@ -4,6 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { adminApi } from "../services/adminApi";
 import type { AdminUser, UserActivitySession } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export function useAdminUserDetail() {
   const { userId } = useParams<{ userId: string }>();
@@ -27,11 +28,11 @@ export function useAdminUserDetail() {
       if (found && found.id) {
         setUser(found as AdminUser);
       } else {
-        toast({ title: "User not found", variant: "destructive" });
+        toast({ title: tt("User not found"), variant: "destructive" });
         navigate("/admin/users");
       }
     } catch {
-      toast({ title: "Failed to load user", variant: "destructive" });
+      toast({ title: tt("Failed to load user"), variant: "destructive" });
       navigate("/admin/users");
     } finally {
       setLoading(false);
@@ -71,7 +72,7 @@ export function useAdminUserDetail() {
         toast({ title: newStatus ? "User activated" : "User deactivated" });
       }
     } catch {
-      toast({ title: "Failed to update status", variant: "destructive" });
+      toast({ title: tt("Failed to update status"), variant: "destructive" });
     } finally {
       setActionLoading(false);
     }
@@ -91,7 +92,7 @@ export function useAdminUserDetail() {
         toast({ title: newVerified ? "User verified" : "Verification removed" });
       }
     } catch {
-      toast({ title: "Failed to update verification", variant: "destructive" });
+      toast({ title: tt("Failed to update verification"), variant: "destructive" });
     } finally {
       setActionLoading(false);
     }
@@ -105,11 +106,11 @@ export function useAdminUserDetail() {
         username: user.username,
       });
       if (res.returnCode === 200) {
-        toast({ title: "User deleted" });
+        toast({ title: tt("User deleted") });
         navigate("/admin/users");
       }
     } catch {
-      toast({ title: "Failed to delete user", variant: "destructive" });
+      toast({ title: tt("Failed to delete user"), variant: "destructive" });
     } finally {
       setActionLoading(false);
     }

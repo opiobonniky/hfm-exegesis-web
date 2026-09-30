@@ -1,6 +1,7 @@
 // CreateUserHeader — header for the create user form
 import { ArrowLeft, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface CreateUserHeaderProps {
   onBack: () => void;
@@ -16,11 +17,8 @@ export function CreateUserHeader({ onBack }: CreateUserHeaderProps) {
           </Button>
           <div>
             <h1 className="text-lg font-semibold flex items-center gap-2">
-              <UserPlus className="w-5 h-5 text-primary" /> Create New User
-            </h1>
-            <p className="text-xs text-muted-foreground">
-              Add a new user to the system with a role assignment
-            </p>
+              <UserPlus className="w-5 h-5 text-primary" />{tt("Create New User")}</h1>
+            <p className="text-xs text-muted-foreground">{tt("Add a new user to the system with a role assignment")}</p>
           </div>
         </div>
       </div>

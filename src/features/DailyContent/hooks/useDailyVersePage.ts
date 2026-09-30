@@ -7,6 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { sendPostRequest } from "@/services/api";
 import { EMPTY_EDIT, type DailyVerseItem, type EditState } from "../types";
 import { safeDate, toYMD, isFuture, getPresetRange } from "../constants";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export function useDailyVersePage() {
   const { t, isRtl } = useLanguage();
@@ -73,7 +74,7 @@ export function useDailyVersePage() {
       }
 
     } catch {
-      toast({ title: "Failed to load", variant: "destructive" });
+      toast({ title: tt("Failed to load"), variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -155,16 +156,16 @@ export function useDailyVersePage() {
       };
       const res = await sendPostRequest("admin", "add-daily-verse", payload);
       if (res?.returnCode === 200) {
-        toast({ title: "Saved" });
+        toast({ title: tt("Saved") });
         setEditOpen(false);
         loadVerses(page);
       } else if (res?.returnCode === 409) {
         setConflictDialog({ open: true, conflict: res.returnData, payload });
       } else {
-        toast({ title: "Save failed", description: res?.returnMessage, variant: "destructive" });
+        toast({ title: tt("Save failed"), description: res?.returnMessage, variant: "destructive" });
       }
     } catch {
-      toast({ title: "Error saving", variant: "destructive" });
+      toast({ title: tt("Error saving"), variant: "destructive" });
     } finally {
       setIsSaving(false);
     }
@@ -176,14 +177,14 @@ export function useDailyVersePage() {
       const payload = { ...conflictDialog.payload, id: conflictDialog.conflict?.existing?.id };
       const res = await sendPostRequest("admin", "add-daily-verse", payload);
       if (res?.returnCode === 200) {
-        toast({ title: "Updated existing entry" });
+        toast({ title: tt("Updated existing entry") });
         setConflictDialog({ open: false, conflict: null, payload: null });
         loadVerses(page);
       } else {
-        toast({ title: "Update failed", description: res?.returnMessage, variant: "destructive" });
+        toast({ title: tt("Update failed"), description: res?.returnMessage, variant: "destructive" });
       }
     } catch {
-      toast({ title: "Error", variant: "destructive" });
+      toast({ title: tt("Error"), variant: "destructive" });
     }
   }, [conflictDialog, toast, loadVerses, page]);
 
@@ -199,15 +200,15 @@ export function useDailyVersePage() {
     try {
       const res = await sendPostRequest("admin", "delete-daily-verse", { id: deleteTarget.id });
       if (res?.returnCode === 200) {
-        toast({ title: "Deleted" });
+        toast({ title: tt("Deleted") });
         setDeleteOpen(false);
         setDeleteTarget(null);
         loadVerses(page);
       } else {
-        toast({ title: "Delete failed", variant: "destructive" });
+        toast({ title: tt("Delete failed"), variant: "destructive" });
       }
     } catch {
-      toast({ title: "Delete error", variant: "destructive" });
+      toast({ title: tt("Delete error"), variant: "destructive" });
     } finally {
       setIsDeleting(false);
     }

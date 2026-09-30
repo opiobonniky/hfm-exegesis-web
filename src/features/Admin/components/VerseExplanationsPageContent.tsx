@@ -18,6 +18,7 @@ import {
   VerseExplanationTable,
   VerseExplanationDeleteDialog,
 } from "../components";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 const PAGE_SIZE = 20;
 
@@ -91,7 +92,7 @@ export function VerseExplanationsPageContent() {
   return (
     <div className="min-h-screen bg-background">
       <AdminPageHeader
-        title="Verse Explanations Manager"
+        title={tt("Verse Explanations Manager")}
         subtitle={`${h.data.totalCount || 0} explanation${(h.data.totalCount || 0) !== 1 ? "s" : ""}`}
         icon={<Lightbulb className="w-5 h-5 text-primary" />}
         onBack={h.goBack}
@@ -103,7 +104,7 @@ export function VerseExplanationsPageContent() {
         <AdminSearchBar
           value={h.search}
           onChange={h.setSearch}
-          placeholder="Search by book name..."
+          placeholder={tt("Search by book name...")}
         />
 
         {h.loading && h.data.items.length === 0 ? (
@@ -111,7 +112,7 @@ export function VerseExplanationsPageContent() {
         ) : h.data.items.length === 0 ? (
           <AdminEmptyState
             icon={<Lightbulb className="w-12 h-12" />}
-            title="No explanations found"
+            title={tt("No explanations found")}
             description={h.search ? `No results for "${h.search}"` : undefined}
             onAction={() => navigate("/admin/add-verse-explanation")}
           />

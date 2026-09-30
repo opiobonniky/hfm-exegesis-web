@@ -18,6 +18,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export interface ComboboxOption {
   value: string;
@@ -77,7 +78,7 @@ export function Combobox({
         <Command>
           <CommandInput placeholder={searchPlaceholder} />
           <CommandList>
-            <CommandEmpty>No results found.</CommandEmpty>
+            <CommandEmpty>{tt("No results found.")}</CommandEmpty>
             {groupedOptions.map(([groupName, groupItems]) => (
               <CommandGroup key={groupName} heading={groupName === "General" ? undefined : groupName}>
                 {groupItems.map((opt) => (

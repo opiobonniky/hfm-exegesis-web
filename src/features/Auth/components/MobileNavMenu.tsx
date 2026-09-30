@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { LanguageSelector } from "./LanguageSelector";
 import { MenuItem } from "../types";
 import { LANGUAGE_NAMES, type Language } from "@/components/languages/type";
-import { hexToRgba } from "../utils"; // Assuming this helper is moved to utils
+import { hexToRgba } from "../utils";
+import { tt } from '@/components/languages/hardcodedTranslate'; // Assuming this helper is moved to utils
 
 interface MobileNavMenuProps {
   mobileMenuOpen: boolean;
@@ -32,7 +33,7 @@ export function MobileNavMenu({
         <div className="p-5 border-b border-border flex items-center justify-between bg-muted/50">
           <div className="flex items-center gap-2">
             <div className="w-1 h-5 bg-brand-primary rounded-full" />
-            <span className="font-black text-brand-primary uppercase tracking-widest text-sm">{t.landing?.menu || "Menu"}</span>
+            <span className="font-black text-brand-primary uppercase tracking-widest text-sm">{t.landing?.menu || tt("Menu")}</span>
           </div>
           <button onClick={() => setMobileMenuOpen(false)} className="p-2 text-muted-foreground hover:text-foreground transition-colors"><X className="w-5 h-5" /></button>
         </div>
@@ -79,8 +80,8 @@ export function MobileNavMenu({
             <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="w-full flex items-center gap-3 p-3.5 rounded-2xl hover:bg-brand-bg transition-all group text-left">
               <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-brand-primary/15 text-brand-primary"><ArrowRight className="w-5 h-5" /></div>
               <div className="flex-1 min-w-0">
-                <div className="text-xs font-black text-foreground uppercase tracking-widest">{t.landing?.signIn || "Sign In"}</div>
-                <div className="text-[11px] font-medium text-muted-foreground truncate">{t.landing?.signInDesc || "Access your account"}</div>
+                <div className="text-xs font-black text-foreground uppercase tracking-widest">{t.landing?.signIn || tt("Sign In")}</div>
+                <div className="text-[11px] font-medium text-muted-foreground truncate">{t.landing?.signInDesc || tt("Access your account")}</div>
               </div>
               <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
             </Link>
@@ -98,7 +99,7 @@ export function MobileNavMenu({
         <div className="p-5 border-t border-border space-y-3 bg-muted/50">
           <Link to="/login" className="block" onClick={() => setMobileMenuOpen(false)}>
             <Button className="w-full bg-brand-primary text-white font-black py-6 rounded-2xl shadow-xl shadow-brand-primary/20 text-base uppercase tracking-widest">
-              {t.landing?.getStartedBtn || "Get Started"}
+              {t.landing?.getStartedBtn || tt("Get Started")}
             </Button>
           </Link>
         </div>

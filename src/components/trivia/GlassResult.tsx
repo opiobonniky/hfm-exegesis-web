@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect } from "react";
 import { X, CheckCircle2, XCircle, Lightbulb } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { TriviaAnswerResult } from "@/services/triviaApi";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export default function GlassResult({
   result,
@@ -97,7 +98,7 @@ export default function GlassResult({
           </div>
           <div className={cn("flex-1", isRtl && "text-right")}>
             <p className="text-base font-black" style={{ color: accentColor }}>
-              {isCorrect ? "Correct!" : "Incorrect"}
+              {isCorrect ? tt("Correct!") : tt("Incorrect")}
             </p>
             {!isCorrect && (
               <p className="text-xs font-semibold mt-0.5 text-muted-foreground/80">
@@ -134,9 +135,9 @@ export default function GlassResult({
           }}
         >
           {autoAdvanceProgress != null && autoAdvanceProgress < 100 ? (
-            <span className="relative z-10">Continue — {Math.ceil((100 - autoAdvanceProgress) / 33)}s</span>
+            <span className="relative z-10">{tt("Continue —")}{Math.ceil((100 - autoAdvanceProgress) / 33)}s</span>
           ) : (
-            <span className="relative z-10">Continue</span>
+            <span className="relative z-10">{tt("Continue")}</span>
           )}
         </button>
       </div>

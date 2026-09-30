@@ -7,6 +7,7 @@ import { DetailLoading, DetailPageHeader, DetailContent, DetailBackButton } from
 import { DetailMetadataGrid } from "../components/DetailSection";
 import { JournalDetailContent, JournalDetailHeader } from "../components/JournalDetailContent";
 import { AdminDeleteDialog } from "../components/AdminDeleteDialog";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export default function JournalEntryAdminDetail() {
   const { data, actions } = useJournalEntryAdminDetail();
@@ -17,7 +18,7 @@ export default function JournalEntryAdminDetail() {
     <div className="min-h-screen bg-background">
       <DetailPageHeader
         icon={<BookOpen className="w-5 h-5 text-primary" />}
-        title="Journal Entry"
+        title={tt("Journal Entry")}
         subtitle={`by user ${data.item.userId?.slice(0, 8)}…`}
         onBack={() => actions.navigate("/admin/journal-moderation")}
         actions={
@@ -35,18 +36,18 @@ export default function JournalEntryAdminDetail() {
 
         <DetailMetadataGrid
           fields={[
-            { label: "Created", value: data.item.createdOn, format: "datetime" },
-            { label: "Updated", value: data.item.updatedOn, format: "datetime" },
+            { label: tt("Created"), value: data.item.createdOn, format: "datetime" },
+            { label: tt("Updated"), value: data.item.updatedOn, format: "datetime" },
           ]}
         />
 
-        <DetailBackButton label="Back to Journal" onClick={() => actions.navigate("/admin/journal-moderation")} />
+        <DetailBackButton label={tt("Back to Journal")} onClick={() => actions.navigate("/admin/journal-moderation")} />
       </DetailContent>
 
       <AdminDeleteDialog
         open={data.confirmDelete}
         onOpenChange={actions.setConfirmDelete}
-        title="Delete Journal Entry"
+        title={tt("Delete Journal Entry")}
         description={`Are you sure you want to delete "${data.item.title}"? This action cannot be undone.`}
         deleting={data.deleting}
         onConfirm={() => {

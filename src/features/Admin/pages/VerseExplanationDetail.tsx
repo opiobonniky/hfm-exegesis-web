@@ -6,6 +6,7 @@ import { useVerseExplanationDetail } from "../hooks/useVerseExplanationDetail";
 import { DetailLoading, DetailPageHeader, DetailContent, DetailBackButton } from "../components/DetailPageLayout";
 import { DetailMetadataGrid } from "../components/DetailSection";
 import { VerseExplanationDetailContent } from "../components/VerseExplanationDetailContent";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export default function VerseExplanationDetail() {
   const { data, actions } = useVerseExplanationDetail();
@@ -16,7 +17,7 @@ export default function VerseExplanationDetail() {
     <div className="min-h-screen bg-background">
       <DetailPageHeader
         icon={<Lightbulb className="w-5 h-5 text-primary" />}
-        title="Verse Explanation"
+        title={tt("Verse Explanation")}
         subtitle={`${data.item.bookName} ${data.item.chapter}:${data.item.verseNumber}`}
         badge={{
           label: data.item.isPublished !== false ? "Published" : "Draft",
@@ -31,12 +32,12 @@ export default function VerseExplanationDetail() {
 
         <DetailMetadataGrid
           fields={[
-            { label: "Created", value: data.item.createdOn, format: "datetime" },
-            { label: "Updated", value: data.item.updatedOn, format: "datetime" },
+            { label: tt("Created"), value: data.item.createdOn, format: "datetime" },
+            { label: tt("Updated"), value: data.item.updatedOn, format: "datetime" },
           ]}
         />
 
-        <DetailBackButton label="Back to Explanations" onClick={() => actions.navigate("/admin/verse-explanations")} />
+        <DetailBackButton label={tt("Back to Explanations")} onClick={() => actions.navigate("/admin/verse-explanations")} />
       </DetailContent>
     </div>
   );

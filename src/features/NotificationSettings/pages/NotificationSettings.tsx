@@ -10,6 +10,7 @@ import {
   NotificationSettingsLoading,
   PushNotificationCard,
 } from "../components";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export default function NotificationSettings() {
   const { data, actions } = useNotificationSettingsPage();
@@ -26,18 +27,18 @@ export default function NotificationSettings() {
       <NotificationHeader
         backLabel="Back"
         onBack={() => h.navigate(-1)}
-        title="Notifications"
-        subtitle="Manage your notification preferences"
+        title={tt("Notifications")}
+        subtitle={tt("Manage your notification preferences")}
         saveLabel={h.saving ? "Saving..." : "Save"}
         loading={h.saving}
         onSave={h.handleSave}
       />
 
       <NotificationCardContent>
-        <NotificationToggle label="Daily Verse Reminder" desc="Receive a daily Bible verse notification" checked={h.settings.dailyVerseReminder} onToggle={() => h.handleToggle("dailyVerseReminder")} />
-        <NotificationToggle label="Devotion Reminder" desc="Get reminded to read your daily devotion" checked={h.settings.devotionReminder} onToggle={() => h.handleToggle("devotionReminder")} />
-        <NotificationToggle label="Streak Reminder" desc="Don't break your reading streak" checked={h.settings.streakReminder} onToggle={() => h.handleToggle("streakReminder")} />
-        <NotificationToggle label="Email Notifications" desc="Receive notifications via email" checked={h.settings.emailNotifications} onToggle={() => h.handleToggle("emailNotifications")} />
+        <NotificationToggle label={tt("Daily Verse Reminder")} desc="Receive a daily Bible verse notification" checked={h.settings.dailyVerseReminder} onToggle={() => h.handleToggle("dailyVerseReminder")} />
+        <NotificationToggle label={tt("Devotion Reminder")} desc="Get reminded to read your daily devotion" checked={h.settings.devotionReminder} onToggle={() => h.handleToggle("devotionReminder")} />
+        <NotificationToggle label={tt("Streak Reminder")} desc="Don't break your reading streak" checked={h.settings.streakReminder} onToggle={() => h.handleToggle("streakReminder")} />
+        <NotificationToggle label={tt("Email Notifications")} desc="Receive notifications via email" checked={h.settings.emailNotifications} onToggle={() => h.handleToggle("emailNotifications")} />
         <PushNotificationCard
           supported={h.push.supported}
           permission={h.push.permission}
@@ -48,7 +49,7 @@ export default function NotificationSettings() {
           onDisable={h.handleDisablePush}
           onTest={h.handleTestPush}
         />
-        <NotificationTimePicker label="Reminder Time" value={h.settings.reminderTime} onChange={(v) => h.updateSettings({ reminderTime: v })} />
+        <NotificationTimePicker label={tt("Reminder Time")} value={h.settings.reminderTime} onChange={(v) => h.updateSettings({ reminderTime: v })} />
       </NotificationCardContent>
     </NotificationSettingsLayout>
   );

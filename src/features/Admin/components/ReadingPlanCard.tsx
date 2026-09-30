@@ -3,6 +3,7 @@ import { Edit2, Trash2, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import type { ReadingPlan } from "../hooks/useAdminReadingPlans";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   plan: ReadingPlan;
@@ -17,7 +18,7 @@ export function ReadingPlanCard({ plan, onEdit, onDelete, onView }: Props) {
       <div className="flex items-start justify-between mb-2">
         <h3 className="font-semibold text-sm line-clamp-1">{plan.title}</h3>
         <Badge variant={plan.isPublished ? "default" : "secondary"}>
-          {plan.isPublished ? "Published" : "Draft"}
+          {plan.isPublished ? tt("Published") : tt("Draft")}
         </Badge>
       </div>
       {plan.description && (
@@ -32,8 +33,7 @@ export function ReadingPlanCard({ plan, onEdit, onDelete, onView }: Props) {
           </Badge>
         )}
         <span className="text-[10px] text-muted-foreground">
-          {plan.durationDays} days
-        </span>
+          {plan.durationDays}{tt("days")}</span>
       </div>
       <div className="flex items-center gap-2 pt-2 border-t border-border/50">
         <Button
@@ -41,7 +41,7 @@ export function ReadingPlanCard({ plan, onEdit, onDelete, onView }: Props) {
           size="icon"
           className="h-7 w-7"
           onClick={onView}
-          title="View details"
+          title={tt("View details")}
         >
           <Eye className="w-3.5 h-3.5" />
         </Button>
@@ -51,16 +51,14 @@ export function ReadingPlanCard({ plan, onEdit, onDelete, onView }: Props) {
           onClick={onEdit}
           className="gap-1 h-7 text-xs"
         >
-          <Edit2 className="w-3 h-3" /> Edit
-        </Button>
+          <Edit2 className="w-3 h-3" />{tt("Edit")}</Button>
         <Button
           variant="ghost"
           size="sm"
           onClick={onDelete}
           className="gap-1 h-7 text-xs text-destructive hover:text-destructive"
         >
-          <Trash2 className="w-3 h-3" /> Delete
-        </Button>
+          <Trash2 className="w-3 h-3" />{tt("Delete")}</Button>
       </div>
     </div>
   );

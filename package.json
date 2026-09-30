@@ -21,7 +21,13 @@
     "lint:colors": "node scripts/check-hardcoded-colors.js",
     "lint:colors:verbose": "node scripts/check-hardcoded-colors.js --verbose",
     "lint:dark": "node scripts/check-dark-mode.js",
-    "lint:dark:update": "node scripts/check-dark-mode.js --update-baseline"
+    "lint:dark:update": "node scripts/check-dark-mode.js --update-baseline",
+    "translate:scan": "node scripts/find-hardcoded-strings.mjs",
+    "translate:gen": "node scripts/translate-locales.mjs",
+    "translate:self-check": "node scripts/translate-locales.mjs --self-check",
+    "translate:wire": "node scripts/apply-hardcoded-tt.mjs",
+    "translate:validate": "node scripts/validate-translations.mjs",
+    "translate:all:gtx": "npm run translate:scan && npm run translate:self-check && npm run translate:gen -- --provider gtx --hardcoded docs/hardcoded-source.json && npm run translate:wire && npm run translate:validate"
   },
   "dependencies": {
     "@eslint/js": "^9.32.0",

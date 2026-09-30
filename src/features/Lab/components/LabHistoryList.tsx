@@ -2,6 +2,7 @@ import { Play, CheckCircle2, FileText, ChevronRight, ScrollText } from "lucide-r
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import type { LabSession } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 const STATUS_LABELS: Record<string, string> = { look: "Look Stage", listen: "Listen Stage", learn: "Learn Stage", abide: "Abide Stage" };
 const TimeAgo = (d: string) => {
@@ -24,8 +25,8 @@ export function LabHistoryList({ history, handleResumeStudy, handleReviewStudy }
     <section className="max-w-2xl mx-auto w-full px-4 sm:px-6 py-6">
       <div className="flex items-center gap-2 mb-4">
         <ScrollText className="w-4 h-4 text-muted-foreground/50" />
-        <p className="text-xs font-bold text-foreground">Previous Studies</p>
-        <span className="text-[10px] text-muted-foreground/50 ml-auto">{history.length} total</span>
+        <p className="text-xs font-bold text-foreground">{tt("Previous Studies")}</p>
+        <span className="text-[10px] text-muted-foreground/50 ml-auto">{history.length}{tt("total")}</span>
       </div>
       <div className="space-y-2">
         {history.map((session) => {

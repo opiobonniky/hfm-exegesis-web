@@ -12,6 +12,7 @@ import {
   DetailPageInner,
 } from "../components";
 import { useDailyExegesisDetail } from "../hooks/useDailyExegesisDetail";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export default function DailyExegesisDetail() {
   const { data, actions } = useDailyExegesisDetail();
@@ -20,7 +21,7 @@ export default function DailyExegesisDetail() {
     return (
       <DailyContentDetailEmpty
         icon={Sparkles}
-        title="Exegesis not found"
+        title={tt("Exegesis not found")}
         message="No exegesis data was provided."
         onBack={actions.goBack}
       />
@@ -30,7 +31,7 @@ export default function DailyExegesisDetail() {
   return (
     <DetailPageLayout>
       <DailyContentDetailHeader
-        title={data.exegesis.title || "Daily Exegesis"}
+        title={data.exegesis.title || tt("Daily Exegesis")}
         subtitle={data.displayDate}
         onBack={actions.goBack}
         onEdit={actions.openEdit}
@@ -47,18 +48,18 @@ export default function DailyExegesisDetail() {
         </DetailTitleBlock>
 
         <DetailSection>
-          <TextBlock label="Passage Reference" value={data.exegesis.passageReference} icon={BookOpen} />
-          <TextBlock label="Teaching Body" value={data.exegesis.teachingBody} icon={MessageSquare} />
+          <TextBlock label={tt("Passage Reference")} value={data.exegesis.passageReference} icon={BookOpen} />
+          <TextBlock label={tt("Teaching Body")} value={data.exegesis.teachingBody} icon={MessageSquare} />
         </DetailSection>
 
         <DetailSection>
-          <TextBlock label="Introduction" value={data.exegesis.introduction} icon={Lightbulb} />
-          <TextBlock label="Context Summary" value={data.exegesis.contextSummary} icon={Layers} />
+          <TextBlock label={tt("Introduction")} value={data.exegesis.introduction} icon={Lightbulb} />
+          <TextBlock label={tt("Context Summary")} value={data.exegesis.contextSummary} icon={Layers} />
         </DetailSection>
 
         <DetailSection>
-          <TextBlock label="Application" value={data.exegesis.application} icon={Tag} />
-          <TextBlock label="Prayer" value={data.exegesis.prayer} icon={BookMarked} />
+          <TextBlock label={tt("Application")} value={data.exegesis.application} icon={Tag} />
+          <TextBlock label={tt("Prayer")} value={data.exegesis.prayer} icon={BookMarked} />
         </DetailSection>
 
         <TagsBlock tags={data.exegesis.tags} />

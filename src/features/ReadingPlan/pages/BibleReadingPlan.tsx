@@ -12,6 +12,7 @@ import { useBibleReadingPlanPage } from "../hooks/useBibleReadingPlanPage";
 import { ReadingPlanProgressTab } from "../components/ReadingPlanProgressTab";
 import { ReadingPlanBrowseTab } from "../components/ReadingPlanBrowseTab";
 import { StartPlanModal, RemovePlanModal } from "../components/PlanModals";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export default function BibleReadingPlan() {
   const { data, actions } = useBibleReadingPlanPage();
@@ -22,8 +23,8 @@ export default function BibleReadingPlan() {
         <PageHeader
           icon={<Shield className="h-5 w-5 text-teal-700" />}
           iconBg="bg-teal-100"
-          title={data.t.readingPlan?.readingPlans || "Reading Plans"}
-          subtitle={data.t.readingPlan?.buildHabit || "Build a daily Bible habit"}
+          title={data.t.readingPlan?.readingPlans || tt("Reading Plans")}
+          subtitle={data.t.readingPlan?.buildHabit || tt("Build a daily Bible habit")}
         />
 
         <StatChips

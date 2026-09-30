@@ -1,5 +1,6 @@
 import { BookOpen } from "lucide-react";
 import TierBadge from "@/components/TierBadge";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export function LabHomeHeader() {
   return (
@@ -10,8 +11,8 @@ export function LabHomeHeader() {
             <BookOpen className="w-4 h-4 text-primary" />
           </div>
           <div>
-            <h1 className="text-base sm:text-lg font-semibold tracking-wide text-foreground leading-none" style={{ fontFamily: "'Cinzel', serif" }}>Bible Study</h1>
-            <p className="text-[10px] text-muted-foreground tracking-widest uppercase leading-none mt-0.5">Study the Word Deeply</p>
+            <h1 className="text-base sm:text-lg font-semibold tracking-wide text-foreground leading-none" style={{ fontFamily: "'Cinzel', serif" }}>{tt("Bible Study")}</h1>
+            <p className="text-[10px] text-muted-foreground tracking-widest uppercase leading-none mt-0.5">{tt("Study the Word Deeply")}</p>
           </div>
         </div>
         <TierBadge />

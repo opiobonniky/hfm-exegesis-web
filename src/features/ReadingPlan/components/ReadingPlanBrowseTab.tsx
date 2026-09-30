@@ -1,6 +1,7 @@
 import { useLanguage } from "@/components/languages/languageProvider";
 import { BrowsePlanCard } from "./BrowsePlanCard";
 import type { ReadingPlan } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   plans: ReadingPlan[];
@@ -21,7 +22,7 @@ export function ReadingPlanBrowseTab({
   return (
     <div className="space-y-3">
       <p className="text-sm text-muted-foreground mb-4">
-        {t.readingPlan?.choosePlan || "Choose a plan that fits your spiritual journey"}
+        {t.readingPlan?.choosePlan || tt("Choose a plan that fits your spiritual journey")}
       </p>
       {plans.map((plan) => {
         const pr = userProgress.find((p: any) => p.planId === plan.planId);

@@ -4,6 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { BIBLE_VERSIONS } from "@/assets/bibleVersion/json/bibleVersions";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   verseText: string;
@@ -38,7 +39,7 @@ export function VerseTextArea(p: Props) {
           onClick={() => p.setIsVerseEditing(!p.isVerseEditing)}
         >
           <Pencil className="h-3 w-3 mr-1" />
-          {p.isVerseEditing ? "Done" : "Edit"}
+          {p.isVerseEditing ? tt("Done") : tt("Edit")}
         </Button>
       </Label>
       <div className="relative">
@@ -52,7 +53,7 @@ export function VerseTextArea(p: Props) {
             onChange={(e) => p.setVerseText(e.target.value)}
             readOnly={!p.isVerseEditing}
             className="min-h-[110px] resize-none font-serif leading-relaxed"
-            placeholder={p.isVerseEditing ? "Edit verse text..." : "Select a verse to see its text..."}
+            placeholder={p.isVerseEditing ? tt("Edit verse text...") : tt("Select a verse to see its text...")}
           />
         )}
         {p.book && p.chapter && p.verseNumber && (

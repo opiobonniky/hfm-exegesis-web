@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { BIBLE_BOOKS } from "@/data/staticData";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export interface WordStudyItem {
   strongsId?: string;
@@ -107,36 +108,30 @@ export function VerseExplanationFormDialog({
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-4xl h-[90vh] flex flex-col">
         <DialogHeader>
-          <DialogTitle>{editMode ? "Edit Detailed Explanation" : "Create Detailed Explanation"}</DialogTitle>
-          <DialogDescription>
-            Complete the structured study guide for this verse.
-          </DialogDescription>
+          <DialogTitle>{editMode ? tt("Edit Detailed Explanation") : tt("Create Detailed Explanation")}</DialogTitle>
+          <DialogDescription>{tt("Complete the structured study guide for this verse.")}</DialogDescription>
         </DialogHeader>
 
         <Tabs defaultValue="core" className="flex-1 flex flex-col overflow-hidden">
           <TabsList className="grid grid-cols-4 w-full">
             <TabsTrigger value="core" className="gap-2">
-              <BookOpen className="w-4 h-4" /> Core
-            </TabsTrigger>
+              <BookOpen className="w-4 h-4" />{tt("Core")}</TabsTrigger>
             <TabsTrigger value="exegesis" className="gap-2">
-              <Lightbulb className="w-4 h-4" /> Exegesis
-            </TabsTrigger>
+              <Lightbulb className="w-4 h-4" />{tt("Exegesis")}</TabsTrigger>
             <TabsTrigger value="study" className="gap-2">
-              <Target className="w-4 h-4" /> Study
-            </TabsTrigger>
+              <Target className="w-4 h-4" />{tt("Study")}</TabsTrigger>
             <TabsTrigger value="extras" className="gap-2">
-              <Tag className="w-4 h-4" /> Extras
-            </TabsTrigger>
+              <Tag className="w-4 h-4" />{tt("Extras")}</TabsTrigger>
           </TabsList>
 
           <ScrollArea className="flex-1 p-4">
             <TabsContent value="core" className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Book Name *</Label>
+                  <Label>{tt("Book Name *")}</Label>
                   <div className="relative">
                     <Input
-                      placeholder="Search for a book..."
+                      placeholder={tt("Search for a book...")}
                       value={form.bookName}
                       onChange={(e) => updateField("bookName", e.target.value)}
                     />
@@ -156,15 +151,15 @@ export function VerseExplanationFormDialog({
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label>Bible Version</Label>
+                  <Label>{tt("Bible Version")}</Label>
                   <Input
-                    placeholder="e.g., BSB, KJV"
+                    placeholder={tt("e.g., BSB, KJV")}
                     value={form.bibleVersion}
                     onChange={(e) => updateField("bibleVersion", e.target.value)}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Chapter *</Label>
+                  <Label>{tt("Chapter *")}</Label>
                   <Input
                     type="number"
                     value={form.chapter}
@@ -172,7 +167,7 @@ export function VerseExplanationFormDialog({
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Verse Number *</Label>
+                  <Label>{tt("Verse Number *")}</Label>
                   <Input
                     type="number"
                     value={form.verseNumber}
@@ -184,18 +179,18 @@ export function VerseExplanationFormDialog({
 
             <TabsContent value="exegesis" className="space-y-4">
               <div className="space-y-2">
-                <Label>Exegesis / Explanation *</Label>
+                <Label>{tt("Exegesis / Explanation *")}</Label>
                 <Textarea
-                  placeholder="Provide a detailed theological explanation of the verse..."
+                  placeholder={tt("Provide a detailed theological explanation of the verse...")}
                   value={form.exegesis.explanationText}
                   onChange={(e) => updateField("exegesis.explanationText", e.target.value)}
                   rows={10}
                 />
               </div>
               <div className="space-y-2">
-                <Label>Application</Label>
+                <Label>{tt("Application")}</Label>
                 <Textarea
-                  placeholder="How does this apply to daily faith?"
+                  placeholder={tt("How does this apply to daily faith?")}
                   value={form.exegesis.applicationText}
                   onChange={(e) => updateField("exegesis.applicationText", e.target.value)}
                   rows={5}
@@ -205,9 +200,9 @@ export function VerseExplanationFormDialog({
 
             <TabsContent value="study" className="space-y-6">
               <div className="space-y-4">
-                <Label className="text-lg font-bold">Introduction & Background</Label>
+                <Label className="text-lg font-bold">{tt("Introduction & Background")}</Label>
                 <div className="space-y-2">
-                  <Label className="text-xs">Verse Introduction</Label>
+                  <Label className="text-xs">{tt("Verse Introduction")}</Label>
                   <Textarea
                     value={form.studyMetadata.introduction}
                     onChange={(e) => updateField("studyMetadata.introduction", e.target.value)}
@@ -216,21 +211,21 @@ export function VerseExplanationFormDialog({
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="space-y-2">
-                    <Label className="text-xs">Author</Label>
+                    <Label className="text-xs">{tt("Author")}</Label>
                     <Input
                       value={form.studyMetadata.backgroundAuthor}
                       onChange={(e) => updateField("studyMetadata.backgroundAuthor", e.target.value)}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-xs">Book</Label>
+                    <Label className="text-xs">{tt("Book")}</Label>
                     <Input
                       value={form.studyMetadata.backgroundBook}
                       onChange={(e) => updateField("studyMetadata.backgroundBook", e.target.value)}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-xs">Context</Label>
+                    <Label className="text-xs">{tt("Context")}</Label>
                     <Input
                       value={form.studyMetadata.backgroundContext}
                       onChange={(e) => updateField("studyMetadata.backgroundContext", e.target.value)}
@@ -238,7 +233,7 @@ export function VerseExplanationFormDialog({
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-xs">Final Thoughts</Label>
+                  <Label className="text-xs">{tt("Final Thoughts")}</Label>
                   <Textarea
                     value={form.studyMetadata.finalThoughts}
                     onChange={(e) => updateField("studyMetadata.finalThoughts", e.target.value)}
@@ -249,13 +244,12 @@ export function VerseExplanationFormDialog({
 
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <Label className="text-lg font-bold">Strong Concordance Word Study</Label>
+                  <Label className="text-lg font-bold">{tt("Strong Concordance Word Study")}</Label>
                   <Button variant="outline" size="sm" className="gap-2" onClick={() => {
                     const newList = [...form.wordStudies, { strongsId: "", surfaceText: "", customDefinition: "", sortOrder: form.wordStudies.length }];
                     updateField("wordStudies", newList);
                   }}>
-                    <Plus className="w-3 h-3" /> Add Word
-                  </Button>
+                    <Plus className="w-3 h-3" />{tt("Add Word")}</Button>
                 </div>
                 <div className="space-y-3">
                   {form.wordStudies.map((ws, i) => (
@@ -274,12 +268,12 @@ export function VerseExplanationFormDialog({
                           next[i] = { ...next[i], strongsId: e.target.value };
                           updateField("wordStudies", next);
                         }} />
-                        <Input placeholder="Give Thanks" value={ws.surfaceText} onChange={(e) => {
+                        <Input placeholder={tt("Give Thanks")} value={ws.surfaceText} onChange={(e) => {
                           const next = [...form.wordStudies];
                           next[i] = { ...next[i], surfaceText: e.target.value };
                           updateField("wordStudies", next);
                         }} />
-                        <Input placeholder="Definition" value={ws.customDefinition} onChange={(e) => {
+                        <Input placeholder={tt("Definition")} value={ws.customDefinition} onChange={(e) => {
                           const next = [...form.wordStudies];
                           next[i] = { ...next[i], customDefinition: e.target.value };
                           updateField("wordStudies", next);
@@ -299,13 +293,12 @@ export function VerseExplanationFormDialog({
             <TabsContent value="extras" className="space-y-6">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <Label className="text-lg font-bold">Practical Applications</Label>
+                  <Label className="text-lg font-bold">{tt("Practical Applications")}</Label>
                   <Button variant="outline" size="sm" className="gap-2" onClick={() => {
                     const newList = [...form.practicalApps, { applicationText: "", sortOrder: form.practicalApps.length }];
                     updateField("practicalApps", newList);
                   }}>
-                    <Plus className="w-3 h-3" /> Add Point
-                  </Button>
+                    <Plus className="w-3 h-3" />{tt("Add Point")}</Button>
                 </div>
                 <div className="space-y-3">
                   {form.practicalApps.map((pa, i) => (
@@ -341,13 +334,12 @@ export function VerseExplanationFormDialog({
 
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <Label className="text-lg font-bold">Cross References</Label>
+                  <Label className="text-lg font-bold">{tt("Cross References")}</Label>
                   <Button variant="outline" size="sm" className="gap-2" onClick={() => {
                     const newList = [...form.crossReferences, { bookName: "", chapter: 0, verseNumber: 0, referenceText: "", commentary: "", sortOrder: form.crossReferences.length }];
                     updateField("crossReferences", newList);
                   }}>
-                    <Plus className="w-3 h-3" /> Add Ref
-                  </Button>
+                    <Plus className="w-3 h-3" />{tt("Add Ref")}</Button>
                 </div>
                 <div className="space-y-3">
                   {form.crossReferences.map((cr, i) => (
@@ -361,7 +353,7 @@ export function VerseExplanationFormDialog({
                         </Button>
                       </div>
                       <div className="grid grid-cols-4 gap-2 flex-1">
-                        <Input placeholder="Book" value={cr.bookName} onChange={(e) => {
+                        <Input placeholder={tt("Book")} value={cr.bookName} onChange={(e) => {
                           const next = [...form.crossReferences];
                           next[i] = { ...next[i], bookName: e.target.value };
                           updateField("crossReferences", next);
@@ -376,7 +368,7 @@ export function VerseExplanationFormDialog({
                           next[i] = { ...next[i], verseNumber: parseInt(e.target.value) || 0 };
                           updateField("crossReferences", next);
                         }} />
-                        <Input placeholder="Text" value={cr.referenceText} onChange={(e) => {
+                        <Input placeholder={tt("Text")} value={cr.referenceText} onChange={(e) => {
                           const next = [...form.crossReferences];
                           next[i] = { ...next[i], referenceText: e.target.value };
                           updateField("crossReferences", next);
@@ -384,7 +376,7 @@ export function VerseExplanationFormDialog({
                       </div>
                       <div className="mt-2 flex-1">
                         <Textarea
-                          placeholder="Commentary"
+                          placeholder={tt("Commentary")}
                           value={cr.commentary}
                           onChange={(e) => {
                             const next = [...form.crossReferences];
@@ -406,13 +398,12 @@ export function VerseExplanationFormDialog({
 
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <Label className="text-lg font-bold">Key Themes</Label>
+                  <Label className="text-lg font-bold">{tt("Key Themes")}</Label>
                   <Button variant="outline" size="sm" className="gap-2" onClick={() => {
                     const newList = [...form.themes, { themeName: "", sortOrder: form.themes.length }];
                     updateField("themes", newList);
                   }}>
-                    <Plus className="w-3 h-3" /> Add Theme
-                  </Button>
+                    <Plus className="w-3 h-3" />{tt("Add Theme")}</Button>
                 </div>
                 <div className="space-y-3">
                   {form.themes.map((t, i) => (
@@ -427,7 +418,7 @@ export function VerseExplanationFormDialog({
                       </div>
                       <Input
                         className="flex-1"
-                        placeholder="e.g., Covenant Faithfulness"
+                        placeholder={tt("e.g., Covenant Faithfulness")}
                         value={t.themeName}
                         onChange={(e) => {
                           const next = [...form.themes];
@@ -448,16 +439,14 @@ export function VerseExplanationFormDialog({
           </ScrollArea>
 
           <DialogFooter className="p-4 border-t">
-            <Button variant="outline" onClick={onClose}>
-              Cancel
-            </Button>
+            <Button variant="outline" onClick={onClose}>{tt("Cancel")}</Button>
             <Button onClick={onSave} disabled={saving} className="gap-2">
               {saving ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
                 <Save className="w-4 h-4" />
               )}{" "}
-              {editMode ? "Update" : "Create"}
+              {editMode ? tt("Update") : tt("Create")}
             </Button>
           </DialogFooter>
         </Tabs>

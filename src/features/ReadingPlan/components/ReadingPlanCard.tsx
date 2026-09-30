@@ -1,6 +1,7 @@
 import { BookOpen, Calendar, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { ReadingPlanListItem } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   plan: ReadingPlanListItem;
@@ -32,8 +33,8 @@ export function ReadingPlanCard({ plan, isRtl, t, onPress, onDelete }: Props) {
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
             <h3 className="text-sm font-bold truncate">{plan.title}</h3>
-            {completed && <span className="text-[10px] px-1.5 py-0.5 bg-emerald-100 text-emerald-700 rounded-full font-medium">Done</span>}
-            {started && !completed && <span className="text-[10px] px-1.5 py-0.5 bg-primary text-primary-foreground rounded-full font-medium">Active</span>}
+            {completed && <span className="text-[10px] px-1.5 py-0.5 bg-emerald-100 text-emerald-700 rounded-full font-medium">{tt("Done")}</span>}
+            {started && !completed && <span className="text-[10px] px-1.5 py-0.5 bg-primary text-primary-foreground rounded-full font-medium">{tt("Active")}</span>}
           </div>
           <p className="text-xs text-muted-foreground line-clamp-2">{plan.description}</p>
         </div>
@@ -55,8 +56,8 @@ export function ReadingPlanCard({ plan, isRtl, t, onPress, onDelete }: Props) {
         </div>
       </div>
       <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
-         <span className="flex items-center gap-1"><Calendar className="w-3 h-3" />{plan.totalDays || 0} days</span>
-        {started && <span>{progress}% complete</span>}
+         <span className="flex items-center gap-1"><Calendar className="w-3 h-3" />{plan.totalDays || 0}{tt("days")}</span>
+        {started && <span>{progress}{tt("% complete")}</span>}
       </div>
     </div>
   );

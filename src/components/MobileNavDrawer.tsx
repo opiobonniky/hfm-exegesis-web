@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/components/languages/languageProvider";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface MobileNavDrawerProps {
   selectedBook: string;
@@ -73,7 +74,7 @@ export default function MobileNavDrawer({
         side="bottom"
         className="h-[85vh] rounded-t-2xl p-0 flex flex-col"
       >
-        <SheetTitle className="sr-only">Navigate to Book, Chapter, or Verse</SheetTitle>
+        <SheetTitle className="sr-only">{tt("Navigate to Book, Chapter, or Verse")}</SheetTitle>
         {/* Handle bar */}
         <div className="flex justify-center pt-3 pb-1">
           <div className="w-10 h-1 rounded-full bg-border" />

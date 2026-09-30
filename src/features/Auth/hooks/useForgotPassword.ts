@@ -2,6 +2,7 @@
 import { useState, useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { sendPostRequest } from "@/services/api";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export function useForgotPassword() {
   const { toast } = useToast();
@@ -15,7 +16,7 @@ export function useForgotPassword() {
     setError(""); setLoading(true);
     try {
       const res = await sendPostRequest("auth", "forgot-password", { email });
-      if (res?.returnCode === 200) { setSent(true); toast({ title: "Reset link sent" }); }
+      if (res?.returnCode === 200) { setSent(true); toast({ title: tt("Reset link sent") }); }
       else { setError(res?.returnMessage || "Failed to send reset link"); }
     } catch { setError("Network error. Please try again."); }
     finally { setLoading(false); }

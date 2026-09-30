@@ -3,6 +3,7 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface PaginationBarProps {
   page: number;
@@ -25,7 +26,7 @@ export function PaginationBar({ page, totalPages, hasNext, hasPrevious, onPageCh
     <div className={cn("flex items-center justify-between mt-6 pt-4 border-t border-border", className)}>
       <Button variant="outline" size="sm" disabled={!hasPrevious} onClick={() => onPageChange(Math.max(0, page - 1))} className="gap-1">
         <ChevronLeft className="w-3.5 h-3.5" />
-        <span className="hidden sm:inline">Previous</span>
+        <span className="hidden sm:inline">{tt("Previous")}</span>
       </Button>
       <span className="text-xs text-muted-foreground">
         {label || `Page ${page + 1} of ${Math.max(totalPages, 1)}`}

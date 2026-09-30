@@ -2,6 +2,7 @@ import { Component, type ErrorInfo, type ReactNode } from "react";
 import { AlertTriangle, RefreshCw, ArrowLeft, Bug } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   children: ReactNode;
@@ -65,28 +66,23 @@ export class FeatureErrorBoundary extends Component<Props, State> {
             <AlertTriangle className="w-6 h-6 text-destructive" />
           </div>
           <h2 className="text-base font-bold text-foreground mb-1">
-            {featureName ? `${featureName} failed to load` : "Something went wrong"}
+            {featureName ? `${featureName} failed to load` : tt("Something went wrong")}
           </h2>
           <p className="text-sm text-muted-foreground mb-5 max-w-sm">
             {featureName
               ? `The ${featureName} section encountered an error. You can try reloading or go back.`
-              : "This section failed to load. This may be due to a temporary issue."}
+              : tt("This section failed to load. This may be due to a temporary issue.")}
           </p>
           <div className="flex items-center gap-2.5">
             <Button variant="default" size="sm" onClick={this.handleRetry} className="gap-1.5">
-              <RefreshCw className="w-3.5 h-3.5" />
-              Retry
-            </Button>
+              <RefreshCw className="w-3.5 h-3.5" />{tt("Retry")}</Button>
             <Button variant="outline" size="sm" onClick={this.handleGoBack} className="gap-1.5">
-              <ArrowLeft className="w-3.5 h-3.5" />
-              Go Back
-            </Button>
+              <ArrowLeft className="w-3.5 h-3.5" />{tt("Go Back")}</Button>
           </div>
           {showDetails && error && (
             <details className="mt-5 max-w-lg w-full">
               <summary className="text-[11px] text-muted-foreground/50 cursor-pointer hover:text-muted-foreground transition-colors flex items-center gap-1">
-                <Bug className="w-3 h-3" /> Error details
-              </summary>
+                <Bug className="w-3 h-3" />{tt("Error details")}</summary>
               <pre className="mt-2 text-[10px] text-left text-destructive/70 bg-muted/30 p-3 rounded-lg overflow-auto max-h-32 whitespace-pre-wrap">
                 {error.message}
                 {errorInfo?.componentStack && `\n\nComponent Stack:\n${errorInfo.componentStack}`}

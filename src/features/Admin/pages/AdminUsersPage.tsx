@@ -15,6 +15,7 @@ import {
 } from "../components";
 import { UsersTable } from "../components/UsersTable";
 import { AdminDeleteDialog } from "../components/AdminDeleteDialog";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export default function AdminUsersPage() {
   const { data, actions } = useAdminUsers();
@@ -33,7 +34,7 @@ export default function AdminUsersPage() {
   return (
     <div className="min-h-screen bg-background">
       <AdminPageHeader
-        title="User Management"
+        title={tt("User Management")}
         subtitle={`${data.totalCount || data.users.length} users`}
         icon={<Users className="w-5 h-5 text-primary" />}
         onBack={actions.goBack}
@@ -46,12 +47,12 @@ export default function AdminUsersPage() {
         <div className="flex items-center gap-3 mb-4 flex-wrap">
           <StatChip
             icon={<CircleDot className="w-3.5 h-3.5 text-emerald-500" />}
-            label="Active"
+            label={tt("Active")}
             value={activeCount}
           />
           <StatChip
             icon={<ShieldCheck className="w-3.5 h-3.5 text-purple-500" />}
-            label="Admins"
+            label={tt("Admins")}
             value={adminCount}
           />
         </div>
@@ -62,14 +63,14 @@ export default function AdminUsersPage() {
             <AdminSearchBar
               value={data.search}
               onChange={actions.setSearch}
-              placeholder="Search by name, email or username..."
+              placeholder={tt("Search by name, email or username...")}
             />
           </div>
           <Button
             variant="outline"
             size="icon"
             onClick={handleRefresh}
-            title="Refresh list"
+            title={tt("Refresh list")}
             className="h-9 w-9 shrink-0"
           >
             <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
@@ -81,7 +82,7 @@ export default function AdminUsersPage() {
         ) : data.users.length === 0 ? (
           <AdminEmptyState
             icon={<Users className="w-12 h-12" />}
-            title="No users found"
+            title={tt("No users found")}
             description={data.search ? `No results for "${data.search}"` : undefined}
           />
         ) : (
@@ -104,7 +105,7 @@ export default function AdminUsersPage() {
       <AdminDeleteDialog
         open={!!userToDelete}
         onOpenChange={(open) => !open && setUserToDelete(null)}
-        title="Delete User Permanently"
+        title={tt("Delete User Permanently")}
         deleting={!!userToDelete && data.actionLoading === userToDelete.id}
         onConfirm={() => {
           if (userToDelete) actions.handleDeleteUser(userToDelete);

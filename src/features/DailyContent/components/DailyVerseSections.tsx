@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { Layers, GraduationCap, Sparkles, ScrollText, ListChecks, BookMarked } from "lucide-react";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export const parseDate = (d: unknown): string => {
   if (!d) return new Date().toISOString();
@@ -65,6 +66,6 @@ export function WordStudyList({ items, accent = "hsl(var(--primary))" }: { items
 interface BackgroundProps { author?: string | null; book?: string | null; context?: string | null; accent?: string; }
 export function BackgroundSection({ author, book, context, accent = "hsl(var(--primary))" }: BackgroundProps) {
   if (!author && !book && !context) return null;
-  return <VerseSection label="Background" icon={Layers} accent={accent}><div className="space-y-3">{author && <div><SubLabel label="Author" accent={accent} /><p className="text-sm text-muted-foreground leading-relaxed">{author}</p></div>}{book && <div><SubLabel label="Book" accent={accent} /><p className="text-sm text-muted-foreground leading-relaxed">{book}</p></div>}{context && <div><SubLabel label="Context" accent={accent} /><p className="text-sm text-muted-foreground leading-relaxed">{context}</p></div>}</div></VerseSection>;
+  return <VerseSection label={tt("Background")} icon={Layers} accent={accent}><div className="space-y-3">{author && <div><SubLabel label={tt("Author")} accent={accent} /><p className="text-sm text-muted-foreground leading-relaxed">{author}</p></div>}{book && <div><SubLabel label={tt("Book")} accent={accent} /><p className="text-sm text-muted-foreground leading-relaxed">{tt(book)}</p></div>}{context && <div><SubLabel label={tt("Context")} accent={accent} /><p className="text-sm text-muted-foreground leading-relaxed">{context}</p></div>}</div></VerseSection>;
 }
 export { ScrollText, GraduationCap, ListChecks, Sparkles, BookMarked, Layers };

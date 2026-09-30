@@ -7,6 +7,7 @@ import {
   getLangLetter,
   getLangScript,
 } from "@/data/staticData";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 // ── Types ──
 
@@ -72,7 +73,7 @@ export default function WordCard({
                 className="text-[8px] font-bold px-1.5 py-0 gap-0.5 bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-950/30 dark:border-emerald-800/40 dark:text-emerald-400"
               >
                 <Bookmark className="w-2.5 h-2.5" />
-                {word.verseCount} {word.verseCount === 1 ? "verse" : "verses"}
+                {word.verseCount} {word.verseCount === 1 ? tt("verse") : tt("verses")}
               </Badge>
             )}
             {word.usageCount != null && (
@@ -93,9 +94,7 @@ export default function WordCard({
             </Badge>
             {word.hasVerseStudy && (
               <Badge variant="secondary" className="text-[8px] font-bold px-1.5 py-0 gap-0.5 bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-950/30 dark:border-amber-800/40 dark:text-amber-400">
-                <BookOpen className="w-2.5 h-2.5" />
-                Study note
-              </Badge>
+                <BookOpen className="w-2.5 h-2.5" />{tt("Study note")}</Badge>
             )}
             {showStrongsId && (
               <span className="text-[8px] font-mono text-muted-foreground/30">
@@ -159,7 +158,7 @@ export default function WordCard({
               e.stopPropagation();
               onOpenDialog();
             }}
-            title="Open in Word Study Dialog"
+            title={tt("Open in Word Study Dialog")}
             className="shrink-0 w-7 h-7 flex items-center justify-center rounded-md text-muted-foreground/30 hover:text-primary hover:bg-primary/10 transition-all"
           >
             <ExternalLink className="w-3.5 h-3.5" />

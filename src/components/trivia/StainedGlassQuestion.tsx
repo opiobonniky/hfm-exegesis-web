@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { Lightbulb, Target, BookOpen, ExternalLink, Check, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { parseOptions } from "@/services/triviaApi";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export default function StainedGlassQuestion({
   question,
@@ -87,9 +88,7 @@ export default function StainedGlassQuestion({
         />
 
         <p className="text-[9px] font-black text-primary/60 uppercase tracking-[0.15em] mb-2 flex items-center gap-1.5">
-          <Lightbulb className="w-2.5 h-2.5" />
-          Question
-        </p>
+          <Lightbulb className="w-2.5 h-2.5" />{tt("Question")}</p>
         <p
           className={cn(
             "text-base sm:text-lg font-bold leading-relaxed text-foreground",
@@ -122,9 +121,7 @@ export default function StainedGlassQuestion({
             <BookOpen className="w-4 h-4 text-primary" />
           </div>
           <div className="flex-1 text-left">
-            <p className="text-[9px] font-extrabold uppercase tracking-wider text-primary/50">
-              Read passage
-            </p>
+            <p className="text-[9px] font-extrabold uppercase tracking-wider text-primary/50">{tt("Read passage")}</p>
             <p className={cn("text-xs font-black text-primary", isRtl && "text-right")}>
               {question.bookName} {question.chapter ?? ""}
               {question.verseNumber ? `:${question.verseNumber}` : ""}
@@ -136,9 +133,7 @@ export default function StainedGlassQuestion({
 
       <div className="px-5 pb-5">
         <p className="text-[9px] font-black uppercase tracking-[0.15em] mb-2.5 flex items-center gap-1.5 text-primary/50">
-          <Target className="w-2.5 h-2.5" />
-          Choose an answer
-        </p>
+          <Target className="w-2.5 h-2.5" />{tt("Choose an answer")}</p>
         <div className={cn("grid grid-cols-2 gap-2")}>
           {options.map((option, index) => {
             const isSelected = selectedAnswer === index;

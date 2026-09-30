@@ -1,5 +1,6 @@
 // Font size controls — A− / A+ buttons with current size display
 import { cn } from "@/lib/utils";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface FontSizeControlsProps {
   fontSize: number;
@@ -18,7 +19,7 @@ export default function FontSizeControls({
         type="button"
         onClick={() => onFontSizeChange(Math.max(min, fontSize - step))}
         disabled={fontSize <= min}
-        aria-label="Decrease font size"
+        aria-label={tt("Decrease font size")}
         className="h-9 min-w-9 text-xs font-bold text-muted-foreground hover:text-foreground transition-colors rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-40"
       >
         A−
@@ -27,7 +28,7 @@ export default function FontSizeControls({
       <button
         onClick={() => onFontSizeChange(Math.min(max, fontSize + step))}
         disabled={fontSize >= max}
-        aria-label="Increase font size"
+        aria-label={tt("Increase font size")}
         type="button"
         className="h-9 min-w-9 text-xs font-bold text-muted-foreground hover:text-foreground transition-colors rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-40"
       >

@@ -9,6 +9,7 @@ import StudiesTab from "../components/StudiesTab";
 import ProloguesTab from "../components/ProloguesTab";
 import { StudyToolsHeader } from "../components/StudyToolsHeader";
 import { AdminPageContent } from "../components/AdminPageContent";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export default function AdminStudyTools() {
   const { data, actions } = useStudyTools();
@@ -19,10 +20,10 @@ export default function AdminStudyTools() {
 
         <Tabs value={data.activeTab} onValueChange={actions.setActiveTab}>
           <TabsList>
-            <TabsTrigger value="words">Words</TabsTrigger>
-            <TabsTrigger value="resources">Resources</TabsTrigger>
-            <TabsTrigger value="studies">Studies</TabsTrigger>
-            <TabsTrigger value="prologues">Prologues</TabsTrigger>
+            <TabsTrigger value="words">{tt("Words")}</TabsTrigger>
+            <TabsTrigger value="resources">{tt("Resources")}</TabsTrigger>
+            <TabsTrigger value="studies">{tt("Studies")}</TabsTrigger>
+            <TabsTrigger value="prologues">{tt("Prologues")}</TabsTrigger>
           </TabsList>
           <TabsContent value="words"><WordsTab state={{ ...data, ...actions }} /></TabsContent>
           <TabsContent value="resources"><ResourcesTab state={{ ...data, ...actions }} /></TabsContent>

@@ -15,6 +15,7 @@ import {
   DetailPageInner,
 } from "../components";
 import { parseList } from "../helpers/contentDetailHelpers";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export default function DailyVerseDetail() {
   const navigate = useNavigate();
@@ -28,7 +29,7 @@ export default function DailyVerseDetail() {
     return (
       <DailyContentDetailEmpty
         icon={BookOpen}
-        title="Verse not found"
+        title={tt("Verse not found")}
         message="No verse data was provided."
         onBack={() => navigate(-1)}
       />
@@ -40,7 +41,7 @@ export default function DailyVerseDetail() {
   return (
     <DetailPageLayout>
       <DailyContentDetailHeader
-        title="Daily Verse Detail"
+        title={tt("Daily Verse Detail")}
         subtitle={reference}
         onBack={() => navigate(-1)}
         onEdit={() => navigate(`/add-daily-verse`, { state: { verse } })}
@@ -60,28 +61,28 @@ export default function DailyVerseDetail() {
         {verse.verseText && <VerseTextDisplay text={verse.verseText} />}
 
         <DetailSection>
-          <TextBlock label="Explanation" value={verse.explanation} icon={Lightbulb} />
-          <TextBlock label="Application" value={verse.application} icon={Tag} />
-          <TextBlock label="Verse Introduction" value={verse.verseIntroduction} icon={BookMarked} />
-          <TextBlock label="Learn More" value={verse.learnMore} icon={Layers} />
+          <TextBlock label={tt("Explanation")} value={verse.explanation} icon={Lightbulb} />
+          <TextBlock label={tt("Application")} value={verse.application} icon={Tag} />
+          <TextBlock label={tt("Verse Introduction")} value={verse.verseIntroduction} icon={BookMarked} />
+          <TextBlock label={tt("Learn More")} value={verse.learnMore} icon={Layers} />
         </DetailSection>
 
         {(verse.backgroundAuthor || verse.backgroundBook || verse.backgroundContext) && (
-          <DetailSection title="Background">
-            <TextBlock label="Author" value={verse.backgroundAuthor} />
-            <TextBlock label="Book" value={verse.backgroundBook} />
-            <TextBlock label="Context" value={verse.backgroundContext} />
+          <DetailSection title={tt("Background")}>
+            <TextBlock label={tt("Author")} value={verse.backgroundAuthor} />
+            <TextBlock label={tt("Book")} value={verse.backgroundBook} />
+            <TextBlock label={tt("Context")} value={verse.backgroundContext} />
           </DetailSection>
         )}
 
         <WordStudiesBlock value={verse.wordStudies} />
 
         <DetailSection>
-          <ListBlock label="Practical Applications" items={parseList(verse.practicalApplications)} icon={Lightbulb} />
-          <ListBlock label="Key Themes" items={parseList(verse.keyThemes)} icon={Tag} />
-          <ListBlock label="Cross References" items={parseList(verse.crossReferences)} icon={Layers} />
-          <TextBlock label="Final Thoughts" value={verse.finalThoughts} />
-          <ListBlock label="Takeaways" items={parseList(verse.takeaways)} icon={BookMarked} />
+          <ListBlock label={tt("Practical Applications")} items={parseList(verse.practicalApplications)} icon={Lightbulb} />
+          <ListBlock label={tt("Key Themes")} items={parseList(verse.keyThemes)} icon={Tag} />
+          <ListBlock label={tt("Cross References")} items={parseList(verse.crossReferences)} icon={Layers} />
+          <TextBlock label={tt("Final Thoughts")} value={verse.finalThoughts} />
+          <ListBlock label={tt("Takeaways")} items={parseList(verse.takeaways)} icon={BookMarked} />
         </DetailSection>
       </DetailPageInner>
     </DetailPageLayout>

@@ -1,4 +1,5 @@
 import { BookOpen } from "lucide-react";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export function HeroSection() {
   return (
@@ -8,8 +9,8 @@ export function HeroSection() {
           <BookOpen className="h-8 w-8 text-primary" />
         </div>
       </div>
-      <h1 className="text-4xl font-bold tracking-tight mb-3">Exegesis</h1>
-      <p className="text-lg text-muted-foreground">A modern Bible study companion. Read, learn, and grow in God's Word.</p>
+      <h1 className="text-4xl font-bold tracking-tight mb-3">{tt("Exegesis")}</h1>
+      <p className="text-lg text-muted-foreground">{tt("A modern Bible study companion. Read, learn, and grow in God's Word.")}</p>
     </div>
   );
 }

@@ -9,6 +9,7 @@ import { BIBLE_BOOKS } from "@/data/staticData";
 import WordCard from "@/components/WordCard";
 import WordDetailSheet from "@/components/WordDetailSheet";
 import type { useStudyTools } from "../hooks/useStudyTools";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 type StudyToolsState = ReturnType<typeof useStudyTools>["data"] & ReturnType<typeof useStudyTools>["actions"];
 
@@ -57,9 +58,7 @@ export function WordsTab({ state }: WordsTabProps) {
       <div className="rounded-lg border border-border/50 bg-card p-4 space-y-3">
         <div className="flex items-center gap-2">
           <BookText className="w-4 h-4 text-primary" />
-          <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-            Browse words by book, chapter, or verse
-          </p>
+          <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">{tt("Browse words by book, chapter, or verse")}</p>
         </div>
         {verseBook && verseChapter && verseNum && (
           <div className="relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/10 via-card to-card p-5 shadow-sm">
@@ -69,52 +68,51 @@ export function WordsTab({ state }: WordsTabProps) {
                 <BookText className="h-5 w-5" />
               </div>
               <div className="min-w-0">
-                <p className="text-xs font-bold uppercase tracking-wider text-primary">Selected verse</p>
+                <p className="text-xs font-bold uppercase tracking-wider text-primary">{tt("Selected verse")}</p>
                 <h2 className="mt-1 text-lg font-bold">{verseBook} {verseChapter}:{verseNum}</h2>
                 {verseTextLoading ? (
                   <div className="mt-2 h-5 w-72 max-w-full animate-pulse rounded bg-muted" />
                 ) : verseText ? (
                   <p className="mt-2 font-serif text-sm italic leading-relaxed text-foreground/80">“{verseText}”</p>
                 ) : (
-                  <p className="mt-2 text-sm text-muted-foreground">Showing Strong&apos;s words attached to this verse.</p>
+                  <p className="mt-2 text-sm text-muted-foreground">{tt("Showing Strong's words attached to this verse.")}</p>
                 )}
                 <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-background/70 px-2.5 py-1 text-xs font-medium text-muted-foreground">
                   <Sparkles className="h-3.5 w-3.5 text-primary" />
-                  {words.length} {words.length === 1 ? "word" : "words"} available for this verse
-                </div>
+                  {words.length} {words.length === 1 ? tt("word") : tt("words")}{tt("available for this verse")}</div>
               </div>
             </div>
           </div>
         )}
         <div className="flex flex-wrap items-end gap-2 w-full">
           <div className="flex-1 min-w-[140px]">
-            <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Book</label>
+            <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{tt("Book")}</label>
             <Combobox
-              options={BIBLE_BOOKS.map((b) => ({ value: b, label: b }))}
+              options={BIBLE_BOOKS.map((b) => ({ value: b, label: tt(b) }))}
               value={verseBook}
               onChange={(v) => { if (v) handleBookChange(v); }}
-              placeholder="Select book"
+              placeholder={tt("Select book")}
               width="w-full"
             />
           </div>
           <div className="flex-1 min-w-[100px]">
-            <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Chapter</label>
+            <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{tt("Chapter")}</label>
             <Combobox
               options={verseChapList.map((c) => ({ value: String(c), label: `Ch. ${c}` }))}
               value={String(verseChapter)}
               onChange={(v) => { if (v) handleChapterChange(Number(v)); }}
-              placeholder="Select ch."
+              placeholder={tt("Select ch.")}
               disabled={verseChapList.length === 0}
               width="w-full"
             />
           </div>
           <div className="flex-1 min-w-[100px]">
-            <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Verse</label>
+            <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{tt("Verse")}</label>
             <Combobox
               options={verseNumList.map((v) => ({ value: String(v), label: `V. ${v}` }))}
               value={String(verseNum)}
               onChange={(v) => { if (v) setVerseNum(Number(v)); }}
-              placeholder="Select v."
+              placeholder={tt("Select v.")}
               disabled={verseNumList.length === 0}
               width="w-full"
             />
@@ -126,7 +124,7 @@ export function WordsTab({ state }: WordsTabProps) {
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="            Search all Strong&apos;s words..."
+            placeholder={tt("Search all Strong's words...")}
             value={wordSearch}
             onChange={(e) => setWordSearch(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && searchWords(wordSearch)}
@@ -134,9 +132,7 @@ export function WordsTab({ state }: WordsTabProps) {
           />
         </div>
         <Button size="sm" onClick={() => searchWords(wordSearch)} className="h-9 gap-1 text-xs">
-          {wordsLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Search className="w-3 h-3" />}
-          Search
-        </Button>
+          {wordsLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Search className="w-3 h-3" />}{tt("Search")}</Button>
       </div>
       {/* Results */}
       {wordsLoading ? (
@@ -148,9 +144,7 @@ export function WordsTab({ state }: WordsTabProps) {
       ) : words.length > 0 ? (
         <div className="space-y-3">
           {verseBook && verseChapter && verseNum && (
-            <p className="px-1 text-xs font-medium text-muted-foreground">
-              Strong&apos;s entries and verse-specific study notes
-            </p>
+            <p className="px-1 text-xs font-medium text-muted-foreground">{tt("Strong's entries and verse-specific study notes")}</p>
           )}
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {words.map((w) => (
@@ -164,12 +158,12 @@ export function WordsTab({ state }: WordsTabProps) {
         </div>
       ) : (
         <div className="text-center py-12 text-muted-foreground">
-          <p className="text-sm">No words found in the current search or verse.</p>
+          <p className="text-sm">{tt("No words found in the current search or verse.")}</p>
         </div>
       )}
       <div ref={loadMoreRef} className="flex min-h-10 items-center justify-center">
         {wordsLoadingMore && <Loader2 className="h-5 w-5 animate-spin text-primary" />}
-        {!wordsLoadingMore && words.length > 0 && !wordsHasMore && <p className="text-xs text-muted-foreground">You&apos;ve reached the end of the word list.</p>}
+        {!wordsLoadingMore && words.length > 0 && !wordsHasMore && <p className="text-xs text-muted-foreground">{tt("You've reached the end of the word list.")}</p>}
       </div>
       {/* Detail Sheet */}
       <WordDetailSheet

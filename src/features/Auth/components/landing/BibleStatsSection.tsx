@@ -2,11 +2,12 @@ import { motion } from "framer-motion";
 import { BookOpen, CalendarDays, Quote } from "lucide-react";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { animFadeUp, animStagger, animScaleIn } from "./animations";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 const STATS = [
-  { key: "bibleStatsBooks", stat: "66", label: "Books", icon: BookOpen },
-  { key: "bibleStatsChapters", stat: "1,189", label: "Chapters", icon: CalendarDays },
-  { key: "bibleStatsVerses", stat: "31,102", label: "Verses", icon: Quote },
+  { key: "bibleStatsBooks", stat: "66", label: tt("Books"), icon: BookOpen },
+  { key: "bibleStatsChapters", stat: "1,189", label: tt("Chapters"), icon: CalendarDays },
+  { key: "bibleStatsVerses", stat: "31,102", label: tt("Verses"), icon: Quote },
 ];
 
 export function BibleStatsSection() {
@@ -19,13 +20,13 @@ export function BibleStatsSection() {
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-card border border-border mb-5 shadow-sm">
               <BookOpen className="w-3.5 h-3.5 text-brand-primary" />
               <span className="text-[10px] sm:text-xs font-black text-muted-foreground uppercase tracking-widest">
-                {t.landing?.bibleStatsBadge || "The Holy Scriptures"}
+                {t.landing?.bibleStatsBadge || tt("The Holy Scriptures")}
               </span>
             </div>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-foreground font-[family-name:var(--font-heading)] tracking-tighter leading-none">
-              {t.landing?.bibleStatsTitle || "The"}{" "}
-              <span className="text-brand-primary">{t.landing?.bibleStatsTitleHighlight || "Word"}</span>
-              {t.landing?.bibleStatsOfGod || " of God"}
+              {t.landing?.bibleStatsTitle || tt("The")}{" "}
+              <span className="text-brand-primary">{t.landing?.bibleStatsTitleHighlight || tt("Word")}</span>
+              {t.landing?.bibleStatsOfGod || tt("of God")}
             </h2>
           </div>
           <motion.div variants={animStagger} initial="hidden" whileInView="visible" viewport={{ once: false, margin: "-60px" }} className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8">

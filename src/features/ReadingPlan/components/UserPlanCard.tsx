@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { routes } from "@/components/Routes/routes";
 import type { UserPlanItem } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   plan: UserPlanItem;
@@ -22,8 +23,7 @@ export default function UserPlanCard({ plan, t, onContinue, onRemove }: Props) {
           <div className="flex-1">
             <CardTitle className="text-xl">{plan.planName}</CardTitle>
             <p className="text-sm text-muted-foreground mt-1">
-              {plan.completedDays} of {plan.totalDays} days done
-            </p>
+              {plan.completedDays} of {plan.totalDays}{tt("days done")}</p>
           </div>
           <div className="w-16 h-16 relative">
             <svg className="w-16 h-16 -rotate-90">
@@ -38,24 +38,24 @@ export default function UserPlanCard({ plan, t, onContinue, onRemove }: Props) {
         <div className="h-2 bg-muted rounded-full overflow-hidden">
           <div className="h-full bg-primary rounded-full" style={{ width: `${pct}%` }} />
         </div>
-        <p className="text-xs text-muted-foreground text-center">{pct}% complete</p>
+        <p className="text-xs text-muted-foreground text-center">{pct}{tt("% complete")}</p>
 
         <div className="grid grid-cols-3 gap-2 bg-muted/50 rounded-lg p-3">
           <div className="text-center">
             <div className="flex items-center justify-center gap-1 text-amber-500 mb-1">
               <Flame className="w-4 h-4" /><span className="font-bold">{plan.streak}d</span>
             </div>
-            <p className="text-xs text-muted-foreground">Streak</p>
+            <p className="text-xs text-muted-foreground">{tt("Streak")}</p>
           </div>
           <div className="text-center border-l border-border">
             <div className="flex items-center justify-center gap-1 text-emerald-500 mb-1">
               <CheckCircle2 className="w-4 h-4" /><span className="font-bold">{plan.completedDays}</span>
             </div>
-            <p className="text-xs text-muted-foreground">Done</p>
+            <p className="text-xs text-muted-foreground">{tt("Done")}</p>
           </div>
           <div className="text-center border-l border-border">
             <div className="flex items-center justify-center gap-1 text-muted-foreground mb-1">
-              <BookOpen className="w-4 h-4" /><span className="font-bold">Day {Math.min(nextDay, plan.totalDays)}</span>
+              <BookOpen className="w-4 h-4" /><span className="font-bold">{tt("Day")}{Math.min(nextDay, plan.totalDays)}</span>
             </div>
             <p className="text-xs text-muted-foreground">Next</p>
           </div>
@@ -64,7 +64,7 @@ export default function UserPlanCard({ plan, t, onContinue, onRemove }: Props) {
         <div className="flex gap-2">
           <Button className="flex-1" onClick={() => onContinue(plan.planId)}>
             <Play className="w-4 h-4 mr-2" />
-            {plan.completedDays === 0 ? "Begin Day 1" : `Continue · Day ${nextDay}`}
+            {plan.completedDays === 0 ? tt("Begin Day 1") : `Continue · Day ${nextDay}`}
           </Button>
           <Button variant="outline" size="icon" onClick={() => onRemove(plan.planId)}>
             <Trash2 className="w-4 h-4 text-destructive" />

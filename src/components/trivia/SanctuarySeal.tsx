@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo } from "react";
 import { X, Sparkles, Zap, Award, PartyPopper } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 // ── Shared milestone constants (exported for use by TriviaPage) ──
 
@@ -18,39 +19,39 @@ export const MILESTONE_MESSAGES: Record<
   Record<string, { title: string; subtitle: string }>
 > = {
   3: {
-    elite: { title: "Bright Star!", subtitle: "You shine with wisdom!" },
-    strong: { title: "First Light!", subtitle: "A promising beginning!" },
-    solid: { title: "Dawn Breaks!", subtitle: "Keep seeking understanding!" },
-    growing: { title: "First Steps!", subtitle: "Every scholar starts here!" },
+    elite: { title: tt("Bright Star!"), subtitle: tt("You shine with wisdom!") },
+    strong: { title: tt("First Light!"), subtitle: tt("A promising beginning!") },
+    solid: { title: tt("Dawn Breaks!"), subtitle: tt("Keep seeking understanding!") },
+    growing: { title: tt("First Steps!"), subtitle: tt("Every scholar starts here!") },
   },
   5: {
-    elite: { title: "Crown of Wisdom!", subtitle: "Knowledge is your treasure!" },
-    strong: { title: "Solid Ground!", subtitle: "You're building deep roots!" },
-    solid: { title: "Steady Flame!", subtitle: "Keep the fire burning!" },
-    growing: { title: "Persistent Heart!", subtitle: "Patience bears fruit!" },
+    elite: { title: tt("Crown of Wisdom!"), subtitle: tt("Knowledge is your treasure!") },
+    strong: { title: tt("Solid Ground!"), subtitle: tt("You're building deep roots!") },
+    solid: { title: tt("Steady Flame!"), subtitle: tt("Keep the fire burning!") },
+    growing: { title: tt("Persistent Heart!"), subtitle: tt("Patience bears fruit!") },
   },
   10: {
-    elite: { title: "Scripture Scholar!", subtitle: "The Word dwells in you richly!" },
-    strong: { title: "Worthy Student!", subtitle: "Your diligence shines brightly!" },
-    solid: { title: "Faithful Seeker!", subtitle: "Keep knocking — the door opens!" },
-    growing: { title: "Steadfast Spirit!", subtitle: "Little by little, you grow!" },
+    elite: { title: tt("Scripture Scholar!"), subtitle: tt("The Word dwells in you richly!") },
+    strong: { title: tt("Worthy Student!"), subtitle: tt("Your diligence shines brightly!") },
+    solid: { title: tt("Faithful Seeker!"), subtitle: tt("Keep knocking — the door opens!") },
+    growing: { title: tt("Steadfast Spirit!"), subtitle: tt("Little by little, you grow!") },
   },
   25: {
     elite: {
-      title: "Master of the Word!",
-      subtitle: "A true disciple of the Scriptures!",
+      title: tt("Master of the Word!"),
+      subtitle: tt("A true disciple of the Scriptures!"),
     },
     strong: {
-      title: "Well Versed!",
-      subtitle: "A quarter century of questions — magnificent!",
+      title: tt("Well Versed!"),
+      subtitle: tt("A quarter century of questions — magnificent!"),
     },
     solid: {
-      title: "Devoted Mind!",
-      subtitle: "25 questions deep — unwavering dedication!",
+      title: tt("Devoted Mind!"),
+      subtitle: tt("25 questions deep — unwavering dedication!"),
     },
     growing: {
-      title: "Determined Soul!",
-      subtitle: "Steady persistence wins the race of faith!",
+      title: tt("Determined Soul!"),
+      subtitle: tt("Steady persistence wins the race of faith!"),
     },
   },
 };
@@ -90,8 +91,8 @@ export default function SanctuarySeal({
   const tier = getMessageTier(percentage);
   const msg = milestone
     ? MILESTONE_MESSAGES[milestone]?.[tier] ?? {
-        title: "Blessed!",
-        subtitle: "Well done, good and faithful servant!",
+        title: tt("Blessed!"),
+        subtitle: tt("Well done, good and faithful servant!"),
       }
     : { title: "", subtitle: "" };
   const IconComp = config?.icon || Sparkles;
@@ -167,9 +168,7 @@ export default function SanctuarySeal({
           <div className="px-6 pt-14 pb-6 flex flex-col items-center">
             <div className="flex items-center gap-2 mb-1">
               <div className="w-8 h-px bg-gradient-to-r from-transparent to-primary/40" />
-              <span className="text-[10px] font-bold text-primary/60 uppercase tracking-[0.25em]">
-                Milestone
-              </span>
+              <span className="text-[10px] font-bold text-primary/60 uppercase tracking-[0.25em]">{tt("Milestone")}</span>
               <div className="w-8 h-px bg-gradient-to-l from-transparent to-primary/40" />
             </div>
 
@@ -177,9 +176,7 @@ export default function SanctuarySeal({
               style={{ fontFamily: "'Cinzel', serif" }}>
               {milestone}
             </p>
-            <p className="text-[10px] font-bold text-primary/50 uppercase tracking-[0.2em] mt-1.5">
-              Questions Answered
-            </p>
+            <p className="text-[10px] font-bold text-primary/50 uppercase tracking-[0.2em] mt-1.5">{tt("Questions Answered")}</p>
 
             <div className="flex items-center gap-3 my-4 w-full max-w-[200px]">
               <div className="flex-1 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
@@ -202,18 +199,14 @@ export default function SanctuarySeal({
                 <p className="text-2xl font-black" style={{ color: accentColor }}>
                   {percentage}%
                 </p>
-                <p className="text-[9px] font-bold text-primary/50 uppercase tracking-wider">
-                  accuracy
-                </p>
+                <p className="text-[9px] font-bold text-primary/50 uppercase tracking-wider">{tt("accuracy")}</p>
               </div>
               <div className="w-px h-8 bg-foreground/[0.08]" />
               <div className="text-center">
                 <p className="text-sm font-bold text-foreground">
                   {correct}/{total}
                 </p>
-                <p className="text-[9px] font-bold text-primary/50 uppercase tracking-wider">
-                  score
-                </p>
+                <p className="text-[9px] font-bold text-primary/50 uppercase tracking-wider">{tt("score")}</p>
               </div>
             </div>
 
@@ -223,9 +216,7 @@ export default function SanctuarySeal({
               style={{
                 boxShadow: `0 4px 14px hsl(var(--primary)/0.25)`,
               }}
-            >
-              Continue
-            </button>
+            >{tt("Continue")}</button>
           </div>
         </div>
       </div>

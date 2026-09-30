@@ -2,6 +2,7 @@
 
 import { Shield, Loader2 } from "lucide-react";
 import { useLanguage } from "@/components/languages/languageProvider";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export default function SettingsLoading() {
   const { t } = useLanguage();
@@ -12,7 +13,7 @@ export default function SettingsLoading() {
         <Shield className="w-7 h-7 text-primary" />
         <Loader2 className="w-5 h-5 animate-spin text-primary absolute -bottom-1.5 -right-1.5 bg-background rounded-full p-0.5" />
       </div>
-      <p className="text-sm text-muted-foreground">{t.settings?.loading || "Loading..."}</p>
+      <p className="text-sm text-muted-foreground">{t.settings?.loading || tt("Loading...")}</p>
     </div>
   );
 }

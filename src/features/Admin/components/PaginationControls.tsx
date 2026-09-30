@@ -1,3 +1,4 @@
+import { tt } from '@/components/languages/hardcodedTranslate';
 // PaginationControls — simple page navigation controls
 interface Props {
   page: number;
@@ -12,8 +13,7 @@ export function PaginationControls({ page, total, pageSize, onPageChange }: Prop
 
   return (
     <div className="flex items-center justify-between pt-4 border-t border-border/40 mt-4">
-      <p className="text-xs text-muted-foreground">
-        Page {page + 1} of {totalPages}
+      <p className="text-xs text-muted-foreground">{tt("Page")}{page + 1} of {totalPages}
       </p>
       <div className="flex gap-1">
         <button

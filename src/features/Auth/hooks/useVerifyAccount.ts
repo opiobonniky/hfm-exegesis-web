@@ -2,6 +2,7 @@
 import { useState, useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { sendPostRequest } from "@/services/api";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export function useVerifyAccount() {
   const { toast } = useToast();
@@ -27,7 +28,7 @@ export function useVerifyAccount() {
     setError(""); setLoading(true);
     try {
       const res = await sendPostRequest("auth", "verify-email", { code: verificationCode });
-      if (res?.returnCode === 200) { setSuccess(true); toast({ title: "Account verified!" }); }
+      if (res?.returnCode === 200) { setSuccess(true); toast({ title: tt("Account verified!") }); }
       else { setError(res?.returnMessage || "Invalid code"); }
     } catch { setError("Network error. Please try again."); }
     finally { setLoading(false); }
@@ -37,9 +38,9 @@ export function useVerifyAccount() {
     setLoading(true);
     try {
       const res = await sendPostRequest("auth", "resend-verification", {});
-      if (res?.returnCode === 200) toast({ title: "Code resent!" });
-      else toast({ title: "Failed to resend", variant: "destructive" });
-    } catch { toast({ title: "Failed to resend", variant: "destructive" }); }
+      if (res?.returnCode === 200) toast({ title: tt("Code resent!") });
+      else toast({ title: tt("Failed to resend"), variant: "destructive" });
+    } catch { toast({ title: tt("Failed to resend"), variant: "destructive" }); }
     finally { setLoading(false); }
   }, [toast]);
 

@@ -3,6 +3,7 @@ import {
   HimFirstMediaPageLayout, HimFirstHero, HimFirstContentSection, HimFirstAnimated,
   HimFirstQuoteBlock, HimFirstHeading, HimFirstParagraph, HimFirstCTAButton,
 } from "../components";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 const OurVision = () => {
   const { data } = useHimFirstMediaPage();
@@ -13,15 +14,15 @@ const OurVision = () => {
       <HimFirstHero
         titleText={t.himFirstMedia?.ourVisionTitle || "Our"}
         titleHighlight={t.himFirstMedia?.ourVisionTitleHighlight || "Vision"}
-        subtitle={t.himFirstMedia?.ourVisionTagline || "To see every believer equipped with the Word of God through technology."}
+        subtitle={t.himFirstMedia?.ourVisionTagline || tt("To see every believer equipped with the Word of God through technology.")}
       />
 
       <HimFirstContentSection>
         <HimFirstAnimated>
-          <HimFirstHeading>{t.himFirstMedia?.ourVisionSectionTitle || "A Kingdom-Focused Future"}</HimFirstHeading>
-          <HimFirstParagraph className="mb-6">{t.himFirstMedia?.ourVisionPara1 || "Our vision is to build the most comprehensive Bible study platform."}</HimFirstParagraph>
-          <HimFirstParagraph className="mb-6">{t.himFirstMedia?.ourVisionPara2 || "We are committed to using cutting-edge digital tools to spread the Gospel."}</HimFirstParagraph>
-          <HimFirstParagraph className="mb-6">{t.himFirstMedia?.ourVisionPara3 || "We see a world where every Christian has a personalized Bible study experience."}</HimFirstParagraph>
+          <HimFirstHeading>{t.himFirstMedia?.ourVisionSectionTitle || tt("A Kingdom-Focused Future")}</HimFirstHeading>
+          <HimFirstParagraph className="mb-6">{t.himFirstMedia?.ourVisionPara1 || tt("Our vision is to build the most comprehensive Bible study platform.")}</HimFirstParagraph>
+          <HimFirstParagraph className="mb-6">{t.himFirstMedia?.ourVisionPara2 || tt("We are committed to using cutting-edge digital tools to spread the Gospel.")}</HimFirstParagraph>
+          <HimFirstParagraph className="mb-6">{t.himFirstMedia?.ourVisionPara3 || tt("We see a world where every Christian has a personalized Bible study experience.")}</HimFirstParagraph>
         </HimFirstAnimated>
 
         <HimFirstAnimated className="mt-12">
@@ -33,7 +34,7 @@ const OurVision = () => {
 
         <HimFirstAnimated className="mt-12 text-center">
           <HimFirstCTAButton to="/register">
-            {t.himFirstMedia?.ourVisionCta || "Join the Vision"}
+            {t.himFirstMedia?.ourVisionCta || tt("Join the Vision")}
           </HimFirstCTAButton>
         </HimFirstAnimated>
       </HimFirstContentSection>

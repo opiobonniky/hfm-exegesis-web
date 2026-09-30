@@ -5,6 +5,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "
 import { Button } from "@/components/ui/button";
 import { BookOpen, Info } from "lucide-react";
 import { useLanguage } from "@/components/languages/languageProvider";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface BibleSidebarProps {
   open: boolean;
@@ -47,8 +48,7 @@ export default function BibleSidebar({
             }}
           >
             <Info className="w-3.5 h-3.5" />
-            {selectedBook} Overview
-          </Button>
+            {selectedBook}{tt("Overview")}</Button>
         </div>
         <div className="min-h-0 flex-1">
           <BookPicker

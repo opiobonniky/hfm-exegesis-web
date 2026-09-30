@@ -6,6 +6,7 @@ import { Calendar, Clock, CheckCircle, XCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { fmtDate } from "../helpers/contentDetailHelpers";
 import type { DailyContentDetailMetaProps } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export function DailyContentDetailMeta({
   isPublished,
@@ -21,12 +22,10 @@ export function DailyContentDetailMeta({
         <Badge variant={isPublished ? "default" : "secondary"}>
           {isPublished ? (
             <>
-              <CheckCircle className="w-3 h-3 mr-1" /> Published
-            </>
+              <CheckCircle className="w-3 h-3 mr-1" />{tt("Published")}</>
           ) : (
             <>
-              <XCircle className="w-3 h-3 mr-1" /> Draft
-            </>
+              <XCircle className="w-3 h-3 mr-1" />{tt("Draft")}</>
           )}
         </Badge>
         {reference && (
@@ -49,10 +48,10 @@ export function DailyContentDetailMeta({
         )}
         {createdOn && (
           <span className="flex items-center gap-1">
-            <Clock className="w-3 h-3" /> Created {fmtDate(createdOn)}
+            <Clock className="w-3 h-3" />{tt("Created")}{fmtDate(createdOn)}
           </span>
         )}
-        {updatedOn && <span>Updated {fmtDate(updatedOn)}</span>}
+        {updatedOn && <span>{tt("Updated")}{fmtDate(updatedOn)}</span>}
       </div>
 
       <div className="h-px bg-border/40" />

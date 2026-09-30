@@ -3,6 +3,7 @@
 
 import { FileText, BookOpen, Edit2, Trash2, Loader2, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface NoteCardProps {
   bookName: string;
@@ -62,7 +63,7 @@ export function NoteCard({
             size="icon"
             className="h-7 w-7"
             onClick={onGoToReader}
-            title="Open in reader"
+            title={tt("Open in reader")}
           >
             <BookOpen className="w-3.5 h-3.5" />
           </Button>
@@ -71,7 +72,7 @@ export function NoteCard({
             size="icon"
             className="h-7 w-7"
             onClick={onEdit}
-            title="Edit note"
+            title={tt("Edit note")}
           >
             <Edit2 className="w-3.5 h-3.5" />
           </Button>
@@ -81,7 +82,7 @@ export function NoteCard({
             className="h-7 w-7 text-destructive hover:text-destructive"
             onClick={onDelete}
             disabled={deleting}
-            title="Delete note"
+            title={tt("Delete note")}
           >
             {deleting ? (
               <Loader2 className="w-3.5 h-3.5 animate-spin" />

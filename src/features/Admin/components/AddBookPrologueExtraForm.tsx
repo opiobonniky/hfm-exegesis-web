@@ -17,6 +17,7 @@ import { Plus, Trash2, Loader2 } from "lucide-react";
 import { adminApi } from "../services/adminApi";
 import type { AddBookPrologueModel } from "../types";
 import { PROLOGUE_TRANSLATIONS } from "../constants";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   state: AddBookPrologueModel;
@@ -53,17 +54,16 @@ export function AddBookPrologueExtraForm({ state: h }: Props) {
       <div className="space-y-6">
         <div className="flex items-center gap-2 text-sky-600 dark:text-sky-400">
           <Sparkles className="h-4 w-4" />
-          <span className="text-sm font-medium">Key scripture references</span>
+          <span className="text-sm font-medium">{tt("Key scripture references")}</span>
         </div>
-        <p className="text-xs text-muted-foreground italic">No references yet</p>
+        <p className="text-xs text-muted-foreground italic">{tt("No references yet")}</p>
         <Button
           type="button"
           variant="outline"
           onClick={h.addKeyScripture}
           className="gap-2"
         >
-          <Plus className="w-4 h-4" /> Add scripture reference
-        </Button>
+          <Plus className="w-4 h-4" />{tt("Add scripture reference")}</Button>
       </div>
     );
   }
@@ -72,7 +72,7 @@ export function AddBookPrologueExtraForm({ state: h }: Props) {
     <div className="space-y-6">
       <div className="flex items-center gap-2 text-sky-600 dark:text-sky-400">
         <Sparkles className="h-4 w-4" />
-        <span className="text-sm font-medium">Key scripture references</span>
+        <span className="text-sm font-medium">{tt("Key scripture references")}</span>
       </div>
 
       {keyScriptures.map((entry, i) => {
@@ -84,8 +84,7 @@ export function AddBookPrologueExtraForm({ state: h }: Props) {
             className="rounded-2xl border border-border bg-muted/20 p-4 space-y-3"
           >
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-foreground">
-                Reference #{i + 1}
+              <span className="text-xs font-semibold text-foreground">{tt("Reference #")}{i + 1}
               </span>
               <Button
                 type="button"
@@ -99,15 +98,13 @@ export function AddBookPrologueExtraForm({ state: h }: Props) {
             </div>
 
             <div className="space-y-2">
-              <Label className="text-xs font-medium text-foreground">
-                Translation
-              </Label>
+              <Label className="text-xs font-medium text-foreground">{tt("Translation")}</Label>
               <Select
                 value={entry.translation}
                 onValueChange={(v) => h.updateKeyScripture(i, { translation: v })}
               >
                 <SelectTrigger className="border-border bg-background text-foreground">
-                  <SelectValue placeholder="Select translation" />
+                  <SelectValue placeholder={tt("Select translation")} />
                 </SelectTrigger>
                 <SelectContent>
                   {PROLOGUE_TRANSLATIONS.map((t) => (
@@ -120,7 +117,7 @@ export function AddBookPrologueExtraForm({ state: h }: Props) {
             </div>
 
             <div className="space-y-2">
-              <Label className="text-xs font-medium text-foreground">Book</Label>
+              <Label className="text-xs font-medium text-foreground">{tt("Book")}</Label>
               <Combobox
                 options={h.bookOptions}
                 value={entry.bookName || undefined}
@@ -133,16 +130,14 @@ export function AddBookPrologueExtraForm({ state: h }: Props) {
                     text: "",
                   })
                 }
-                placeholder="Select book..."
+                placeholder={tt("Select book...")}
                 width="w-full"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
-                <Label className="text-xs font-medium text-foreground">
-                  Chapter
-                </Label>
+                <Label className="text-xs font-medium text-foreground">{tt("Chapter")}</Label>
                 <Select
                   value={entry.chapter != null ? String(entry.chapter) : ""}
                   onValueChange={(v) =>
@@ -156,7 +151,7 @@ export function AddBookPrologueExtraForm({ state: h }: Props) {
                   disabled={!entry.bookName}
                 >
                   <SelectTrigger className="border-border bg-background text-foreground">
-                    <SelectValue placeholder={entry.bookName ? "Select" : "Pick book"} />
+                    <SelectValue placeholder={entry.bookName ? tt("Select") : tt("Pick book")} />
                   </SelectTrigger>
                   <SelectContent>
                     {chapterOptions.map((c) => (
@@ -169,7 +164,7 @@ export function AddBookPrologueExtraForm({ state: h }: Props) {
               </div>
 
               <div className="space-y-2">
-                <Label className="text-xs font-medium text-foreground">Verse</Label>
+                <Label className="text-xs font-medium text-foreground">{tt("Verse")}</Label>
                 <Select
                   value={entry.verse != null ? String(entry.verse) : ""}
                   onValueChange={(v) =>
@@ -187,7 +182,7 @@ export function AddBookPrologueExtraForm({ state: h }: Props) {
                     ) : (
                       <SelectValue
                         placeholder={
-                          entry.chapter == null ? "Pick chapter" : "Select"
+                          entry.chapter == null ? tt("Pick chapter") : tt("Select")
                         }
                       />
                     )}
@@ -209,12 +204,10 @@ export function AddBookPrologueExtraForm({ state: h }: Props) {
               </p>
             )}
             <div className="space-y-2">
-              <Label className="text-xs font-medium text-foreground">
-                Verse Text (auto-filled)
-              </Label>
+              <Label className="text-xs font-medium text-foreground">{tt("Verse Text (auto-filled)")}</Label>
               <div className="rounded-lg border border-border bg-background p-3 text-sm text-foreground min-h-[48px]">
                 {entry.text ||
-                  "Select a verse to load its text automatically."}
+                  tt("Select a verse to load its text automatically.")}
               </div>
             </div>
           </div>
@@ -227,8 +220,7 @@ export function AddBookPrologueExtraForm({ state: h }: Props) {
         onClick={h.addKeyScripture}
         className="gap-2"
       >
-        <Plus className="w-4 h-4" /> Add scripture reference
-      </Button>
+        <Plus className="w-4 h-4" />{tt("Add scripture reference")}</Button>
     </div>
   );
 }

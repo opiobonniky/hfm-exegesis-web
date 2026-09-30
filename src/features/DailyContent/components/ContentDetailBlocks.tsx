@@ -2,6 +2,7 @@
 import { GraduationCap } from "lucide-react";
 import { parseWordStudies } from "../helpers/contentDetailHelpers";
 import type { TagsBlockProps, TextBlockProps } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 // ── Section label ──
 export function SectionLabel({ children, icon: Icon }: { children: React.ReactNode; icon?: any }) {
@@ -48,7 +49,7 @@ export function WordStudiesBlock({ value }: { value?: string | null }) {
   if (studies.length === 0) return null;
   return (
     <div className="py-3 border-b border-border/30 last:border-0">
-      <SectionLabel icon={GraduationCap}>Strong's Concordance Word Studies</SectionLabel>
+      <SectionLabel icon={GraduationCap}>{tt("Strong's Concordance Word Studies")}</SectionLabel>
       <div className="space-y-3">
         {studies.map((s, i) => (
           <div key={i} className="rounded-lg bg-muted/30 p-3 space-y-1">
@@ -71,7 +72,7 @@ export function TagsBlock({ tags }: TagsBlockProps) {
   if (tagList.length === 0) return null;
   return (
     <div className="py-3 border-b border-border/30 last:border-0">
-      <SectionLabel>Tags</SectionLabel>
+      <SectionLabel>{tt("Tags")}</SectionLabel>
       <div className="flex items-center gap-2 flex-wrap">
         {tagList.map((tag, i) => (
           <span key={i} className="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary font-medium">{tag}</span>

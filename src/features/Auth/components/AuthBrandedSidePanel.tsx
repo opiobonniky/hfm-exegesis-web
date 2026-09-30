@@ -2,6 +2,7 @@
  * AuthBrandedSidePanel — left branding panel for Auth pages.
  */
 import { ReactNode } from "react";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface AuthBrandedSidePanelProps {
   logoSrc: string;
@@ -23,7 +24,7 @@ export function AuthBrandedSidePanel({ logoSrc, logoAlt = "Exegesis", appName = 
           <span className="text-xl font-bold tracking-wide" style={{ fontFamily: "'Cinzel', serif" }}>{appName}</span>
         </div>
         {children}
-        <p className="text-white/30 text-xs">&copy; {new Date().getFullYear()} Exegesis Project</p>
+        <p className="text-white/30 text-xs">&copy; {new Date().getFullYear()}{tt("Exegesis Project")}</p>
       </div>
     </div>
   );

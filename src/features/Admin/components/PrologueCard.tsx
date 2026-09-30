@@ -3,6 +3,7 @@ import { Edit2, Trash2, Eye, User, BookOpen, Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface PrologueItem {
   bookName: string;
@@ -47,8 +48,7 @@ export function PrologueCard({ item, onEdit, onDelete, onView }: Props) {
               )}
               {item.chapters && (
                 <span className="text-xs text-muted-foreground flex items-center gap-1">
-                  <BookOpen className="w-3 h-3" /> {item.chapters} chapters
-                </span>
+                  <BookOpen className="w-3 h-3" /> {item.chapters}{tt("chapters")}</span>
               )}
             </div>
           </div>
@@ -56,7 +56,7 @@ export function PrologueCard({ item, onEdit, onDelete, onView }: Props) {
             variant={item.isPublished ? "default" : "secondary"}
             className="shrink-0 ml-2"
           >
-            {item.isPublished ? "Published" : "Draft"}
+            {item.isPublished ? tt("Published") : tt("Draft")}
           </Badge>
         </div>
       </CardHeader>
@@ -75,9 +75,7 @@ export function PrologueCard({ item, onEdit, onDelete, onView }: Props) {
             {preview}
           </p>
         ) : (
-          <p className="text-sm text-muted-foreground/50 italic mb-3">
-            No summary available
-          </p>
+          <p className="text-sm text-muted-foreground/50 italic mb-3">{tt("No summary available")}</p>
         )}
 
         {/* Actions */}
@@ -87,7 +85,7 @@ export function PrologueCard({ item, onEdit, onDelete, onView }: Props) {
             size="icon"
             className="h-9 w-9 sm:h-8 sm:w-8"
             onClick={onView}
-            title="View details"
+            title={tt("View details")}
           >
             <Eye className="w-3.5 h-3.5" />
           </Button>
@@ -97,16 +95,14 @@ export function PrologueCard({ item, onEdit, onDelete, onView }: Props) {
             onClick={onEdit}
             className="min-h-9 gap-1"
           >
-            <Edit2 className="w-3.5 h-3.5" /> Edit
-          </Button>
+            <Edit2 className="w-3.5 h-3.5" />{tt("Edit")}</Button>
           <Button
             variant="outline"
             size="sm"
             onClick={onDelete}
             className="min-h-9 gap-1 text-destructive hover:text-destructive"
           >
-            <Trash2 className="w-3.5 h-3.5" /> Delete
-          </Button>
+            <Trash2 className="w-3.5 h-3.5" />{tt("Delete")}</Button>
         </div>
       </CardContent>
     </Card>

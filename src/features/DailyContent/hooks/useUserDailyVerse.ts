@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { sendPostRequest } from "@/services/api";
 import type { DailyVerseItem } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export function useUserDailyVerse() {
   const { t, isRtl } = useLanguage();
@@ -29,9 +30,9 @@ export function useUserDailyVerse() {
             verseText: data.verseText || data.text || null,
           });
         } else
-          toast({ title: "No verse available today", variant: "destructive" });
+          toast({ title: tt("No verse available today"), variant: "destructive" });
       } catch {
-        toast({ title: "Failed to load verse", variant: "destructive" });
+        toast({ title: tt("Failed to load verse"), variant: "destructive" });
       } finally {
         setLoading(false);
         setRefreshing(false);
@@ -58,7 +59,7 @@ export function useUserDailyVerse() {
       : ref;
     navigator.clipboard
       .writeText(text)
-      .then(() => toast({ title: "Copied to clipboard" }));
+      .then(() => toast({ title: tt("Copied to clipboard") }));
   }, [verse, toast]);
   const handleShare = useCallback(async () => {
     if (!verse) return;
@@ -71,7 +72,7 @@ export function useUserDailyVerse() {
     } else {
       navigator.clipboard
         .writeText(text)
-        .then(() => toast({ title: "Copied to clipboard" }));
+        .then(() => toast({ title: tt("Copied to clipboard") }));
     }
   }, [verse, toast]);
   return {

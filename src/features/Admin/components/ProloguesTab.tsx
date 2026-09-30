@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { BIBLE_BOOKS } from "@/data/staticData";
 import { Combobox } from "@/components/ui/combobox";
 import type { useStudyTools } from "../hooks/useStudyTools";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 type StudyToolsState = ReturnType<typeof useStudyTools>["data"] & ReturnType<typeof useStudyTools>["actions"];
 
@@ -31,8 +32,8 @@ export default function ProloguesTab({ state }: ProloguesTabProps) {
     : prologues;
 
   const handleDelete = async (id: number) => {
-    if (await state.deletePrologue(id)) toast({ title: "Deleted", description: "Prologue deleted" });
-    else toast({ title: "Error", description: "Failed to delete", variant: "destructive" });
+    if (await state.deletePrologue(id)) toast({ title: tt("Deleted"), description: tt("Prologue deleted") });
+    else toast({ title: tt("Error"), description: tt("Failed to delete"), variant: "destructive" });
   };
 
   return (
@@ -46,16 +47,14 @@ export default function ProloguesTab({ state }: ProloguesTabProps) {
               prologueViewMode === "search" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground"
             }`}
           >
-            <Search className="w-3 h-3 inline mr-1" /> Search
-          </button>
+            <Search className="w-3 h-3 inline mr-1" />{tt("Search")}</button>
           <button
             onClick={() => setPrologueViewMode("browse")}
             className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
               prologueViewMode === "browse" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground"
             }`}
           >
-            <BookOpen className="w-3 h-3 inline mr-1" /> Browse by Book
-          </button>
+            <BookOpen className="w-3 h-3 inline mr-1" />{tt("Browse by Book")}</button>
         </div>
       </div>
       {/* Search or browse */}
@@ -63,7 +62,7 @@ export default function ProloguesTab({ state }: ProloguesTabProps) {
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="Search prologues..."
+            placeholder={tt("Search prologues...")}
             value={prologueSearch}
             onChange={(e) => setPrologueSearch(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && loadPrologues()}
@@ -72,10 +71,10 @@ export default function ProloguesTab({ state }: ProloguesTabProps) {
         </div>
       ) : (
         <Combobox
-          options={BIBLE_BOOKS.map((b) => ({ value: b, label: b }))}
+          options={BIBLE_BOOKS.map((b) => ({ value: b, label: tt(b) }))}
           value={selectedPrologueBook}
           onChange={(v) => setSelectedPrologueBook(v || "")}
-          placeholder="Select a book to browse"
+          placeholder={tt("Select a book to browse")}
           width="w-full"
         />
       )}
@@ -88,7 +87,7 @@ export default function ProloguesTab({ state }: ProloguesTabProps) {
         </div>
       ) : filteredPrologues.length === 0 ? (
         <div className="text-center py-12 text-muted-foreground">
-          <p className="text-sm">No prologues found.</p>
+          <p className="text-sm">{tt("No prologues found.")}</p>
         </div>
       ) : (
         <div className="space-y-2">
@@ -105,7 +104,7 @@ export default function ProloguesTab({ state }: ProloguesTabProps) {
                 <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
                   p.isPublished ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400" : "bg-muted text-muted-foreground"
                 }`}>
-                  {p.isPublished ? "Published" : "Draft"}
+                  {p.isPublished ? tt("Published") : tt("Draft")}
                 </span>
                 <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { setEditPrologue(p); setPrologueSheetOpen(true); }}>
                   <Edit2 className="w-3.5 h-3.5" />
@@ -122,7 +121,7 @@ export default function ProloguesTab({ state }: ProloguesTabProps) {
       <Sheet open={prologueSheetOpen} onOpenChange={setPrologueSheetOpen}>
         <SheetContent className="sm:max-w-lg">
           <SheetHeader>
-            <SheetTitle>{editPrologue ? "Edit Prologue" : "New Prologue"}</SheetTitle>
+            <SheetTitle>{editPrologue ? tt("Edit Prologue") : tt("New Prologue")}</SheetTitle>
           </SheetHeader>
           {editPrologue && (
             <PrologueForm
@@ -155,33 +154,31 @@ function PrologueForm({ initial, onSave, onCancel }: { initial: any; onSave: (d:
   return (
     <div className="space-y-4 mt-4">
       <div>
-        <label className="text-xs font-semibold text-muted-foreground">Book</label>
+        <label className="text-xs font-semibold text-muted-foreground">{tt("Book")}</label>
         <Combobox
-          options={BIBLE_BOOKS.map((b) => ({ value: b, label: b }))}
+          options={BIBLE_BOOKS.map((b) => ({ value: b, label: tt(b) }))}
           value={bookName}
           onChange={(v) => setBookName(v || "")}
-          placeholder="Select book"
+          placeholder={tt("Select book")}
           width="w-full"
         />
       </div>
       <div>
-        <label className="text-xs font-semibold text-muted-foreground">Title</label>
-        <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Prologue title" className="h-9 text-sm" />
+        <label className="text-xs font-semibold text-muted-foreground">{tt("Title")}</label>
+        <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={tt("Prologue title")} className="h-9 text-sm" />
       </div>
       <div>
-        <label className="text-xs font-semibold text-muted-foreground">Content</label>
-        <Textarea value={content} onChange={(e) => setContent(e.target.value)} rows={6} placeholder="Write the prologue..." className="text-sm" />
+        <label className="text-xs font-semibold text-muted-foreground">{tt("Content")}</label>
+        <Textarea value={content} onChange={(e) => setContent(e.target.value)} rows={6} placeholder={tt("Write the prologue...")} className="text-sm" />
       </div>
       <div className="flex items-center gap-2">
         <Switch checked={isPublished} onCheckedChange={setIsPublished} />
-        <span className="text-sm">Published</span>
+        <span className="text-sm">{tt("Published")}</span>
       </div>
       <div className="flex gap-2">
         <Button onClick={handleSave} disabled={saving || !bookName || !title} className="gap-1">
-          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-          Save
-        </Button>
-        <Button variant="outline" onClick={onCancel}>Cancel</Button>
+          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : null}{tt("Save")}</Button>
+        <Button variant="outline" onClick={onCancel}>{tt("Cancel")}</Button>
       </div>
     </div>
   );

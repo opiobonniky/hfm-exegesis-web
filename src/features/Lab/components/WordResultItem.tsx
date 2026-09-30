@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import type { StrongsWordEntry } from "@/data/staticData";
 import { getLangColor, getLangLetter } from "@/data/staticData";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   word: StrongsWordEntry;
@@ -29,12 +30,11 @@ export function WordResultItem({ word, onClick }: Props) {
             {word.transliteration && <span className="text-xs text-muted-foreground">{word.transliteration}</span>}
             {word.hasVerseStudy && (
               <Badge variant="secondary" className="gap-1 px-1.5 py-0 text-[9px] text-amber-700 dark:text-amber-400">
-                <Sparkles className="h-2.5 w-2.5" /> Study note
-              </Badge>
+                <Sparkles className="h-2.5 w-2.5" />{tt("Study note")}</Badge>
             )}
           </div>
           <p className="mt-1 text-base font-semibold text-foreground truncate">{word.originalWord || word.transliteration || word.strongsId}</p>
-          {word.surfaceText && <p className="mt-0.5 text-xs text-muted-foreground">Appears as “{word.surfaceText}”</p>}
+          {word.surfaceText && <p className="mt-0.5 text-xs text-muted-foreground">{tt("Appears as “")}{word.surfaceText}”</p>}
           {word.shortDefinition && <p className="mt-1 text-xs leading-relaxed text-muted-foreground/80 line-clamp-2">{word.shortDefinition}</p>}
         </div>
         <Info className="w-3.5 h-3.5 text-muted-foreground/30 group-hover:text-muted-foreground/60 shrink-0 mt-1" />

@@ -6,6 +6,7 @@ import { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import logoImage from "@/assets/logos/exegesis_bg_rm.webp";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   /** Quote text */
@@ -102,10 +103,10 @@ export function AuthBrandedPanel({
 
       {/* Footer */}
       <div className="absolute bottom-10 start-0 w-full px-16 flex justify-between items-center text-muted-foreground text-xs font-bold uppercase tracking-widest anim-fade" style={{ animationDelay: "0.5s" }}>
-        <span>&copy; 2026 Exegesis Bible</span>
+        <span>{tt("© 2026 Exegesis Bible")}</span>
         <div className="flex gap-6">
-          <span className="hover:text-white cursor-pointer transition-colors">Instagram</span>
-          <span className="hover:text-white cursor-pointer transition-colors">Twitter</span>
+          <span className="hover:text-white cursor-pointer transition-colors">{tt("Instagram")}</span>
+          <span className="hover:text-white cursor-pointer transition-colors">{tt("Twitter")}</span>
         </div>
       </div>
     </div>

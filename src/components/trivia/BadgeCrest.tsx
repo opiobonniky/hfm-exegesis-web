@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import type { BadgeDefinition } from "@/hooks/useBadges";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 const CATEGORY_COLORS: Record<string, string> = {
   milestone: "#6366F1", // indigo
@@ -136,9 +137,7 @@ export default function BadgeCrest({
         <p
           className="text-[8px] font-bold uppercase tracking-wider"
           style={{ color }}
-        >
-          Earned!
-        </p>
+        >{tt("Earned!")}</p>
       )}
     </div>
   );

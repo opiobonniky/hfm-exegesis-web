@@ -15,6 +15,7 @@ import {
 import { HIGHLIGHT_COLORS } from "@/hooks/useBible";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/components/languages/languageProvider";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 // ── Shared Verse Range Slider ─────────────────────────────────────────────────
 
@@ -40,7 +41,7 @@ function VerseRangeSlider({
       {/* Reference label */}
       <div className="flex items-center justify-between">
         <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-          {t.bibleReader?.verseRange || 'Verse Range'}
+          {t.bibleReader?.verseRange || tt("Verse Range")}
         </span>
         <span className="text-xs font-semibold text-foreground">
           {currentBook} {currentChapter}:{rangeStart}
@@ -73,7 +74,7 @@ function VerseRangeSlider({
           </Button>
           <div className="text-center min-w-[52px]">
             <p className="text-[10px] text-muted-foreground leading-none mb-0.5">
-              {t.common?.from || 'From'}
+              {t.common?.from || tt("From")}
             </p>
             <p className="text-sm font-bold text-foreground tabular-nums">
               {rangeStart}
@@ -182,7 +183,7 @@ function SelectedVersesDisplay({
   return (
     <div className="p-4 rounded-xl bg-muted/40 border border-border/40 space-y-2">
       <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-        {t.bibleReader?.selectedVerses || 'Selected Verses'}
+        {t.bibleReader?.selectedVerses || tt("Selected Verses")}
       </span>
       <div className="flex flex-wrap gap-1.5">
         {verseNums.map((n) => (
@@ -253,7 +254,7 @@ export function HighlightPickerModal({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Highlighter className="w-4 h-4 text-primary" />
-            {t.bibleReader?.highlight || 'Highlight'}
+            {t.bibleReader?.highlight || tt("Highlight")}
           </DialogTitle>
           <DialogDescription>
             {currentBook} {currentChapter}
@@ -295,7 +296,7 @@ export function HighlightPickerModal({
 
         <DialogFooter>
           <Button variant="ghost" onClick={onClose} className="text-sm">
-            {t.common?.cancel || 'Cancel'}
+            {t.common?.cancel || tt("Cancel")}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -352,7 +353,7 @@ export function NoteModal({
     <Dialog open={visible} onOpenChange={onClose}>
       <DialogContent className="max-w-sm w-full">
         <DialogHeader>
-          <DialogTitle>{t.bibleReader?.addNote || 'Add Note'}</DialogTitle>
+          <DialogTitle>{t.bibleReader?.addNote || tt("Add Note")}</DialogTitle>
           <DialogDescription>
             {currentBook} {currentChapter}
           </DialogDescription>
@@ -378,14 +379,14 @@ export function NoteModal({
           <textarea
             value={noteText}
             onChange={(e) => onNoteChange(e.target.value)}
-            placeholder={t.bibleReader?.notePlaceholder || 'Enter your note...'}
+            placeholder={t.bibleReader?.notePlaceholder || tt("Enter your note...")}
             className="w-full min-h-[120px] p-3 rounded-md border border-input bg-background text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-none"
             autoFocus
           />
 
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={onClose}>
-              {t.common?.cancel || 'Cancel'}
+              {t.common?.cancel || tt("Cancel")}
             </Button>
             <Button
               onClick={() =>
@@ -393,7 +394,7 @@ export function NoteModal({
               }
               disabled={isSaving || !noteText.trim()}
             >
-              {isSaving ? (t.bibleReader?.saving || 'Saving...') : (t.bibleReader?.saveNote || 'Save Note')}
+              {isSaving ? (t.bibleReader?.saving || tt("Saving...")) : (t.bibleReader?.saveNote || tt("Save Note"))}
             </Button>
           </div>
         </div>
@@ -479,7 +480,7 @@ export function RangePickerModal({
 
         <div className="flex justify-end gap-2 pt-1">
           <Button variant="outline" onClick={onClose}>
-            {t.common?.cancel || 'Cancel'}
+            {t.common?.cancel || tt("Cancel")}
           </Button>
           <Button
             onClick={() => {
@@ -521,11 +522,11 @@ export function SearchModal({
     <Dialog open={visible} onOpenChange={onClose}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>{t.bibleReader?.searchBible || 'Search Bible'}</DialogTitle>
+          <DialogTitle>{t.bibleReader?.searchBible || tt("Search Bible")}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           <Input
-            placeholder={t.bibleReader?.searchPlaceholder || 'Search for verses...'}
+            placeholder={t.bibleReader?.searchPlaceholder || tt("Search for verses...")}
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             autoFocus
@@ -533,13 +534,13 @@ export function SearchModal({
           <ScrollArea className="h-[300px]">
             {loading ? (
               <div className="flex items-center justify-center py-8 text-muted-foreground">
-                {t.bibleReader?.searching || 'Searching...'}
+                {t.bibleReader?.searching || tt("Searching...")}
               </div>
             ) : searchResults.length === 0 ? (
               <div className="flex items-center justify-center py-8 text-muted-foreground">
                 {searchQuery.length > 2
-                  ? (t.common?.noResults || 'No results found')
-                  : (t.bibleReader?.searchHint || 'Type at least 3 characters to search')}
+                  ? (t.common?.noResults || tt("No results found"))
+                  : (t.bibleReader?.searchHint || tt("Type at least 3 characters to search"))}
               </div>
             ) : (
               <div className="space-y-2">
@@ -590,7 +591,7 @@ export function ExplanationModal({
     <Dialog open={visible} onOpenChange={onClose}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>{t.bibleReader?.explanation || 'Verse Explanation'}</DialogTitle>
+          <DialogTitle>{t.bibleReader?.explanation || tt("Verse Explanation")}</DialogTitle>
           <DialogDescription>
             {currentBook} {currentChapter}
           </DialogDescription>
@@ -600,7 +601,7 @@ export function ExplanationModal({
         </div>
         <div className="flex justify-end">
           <Button variant="outline" onClick={onClose}>
-            {t.common?.close || 'Close'}
+            {t.common?.close || tt("Close")}
           </Button>
         </div>
       </DialogContent>
@@ -699,7 +700,7 @@ export function BookSelectorModal({
     <Dialog open={visible} onOpenChange={onClose}>
       <DialogContent className="max-w-sm">
         <DialogHeader>
-          <DialogTitle>{t.bibleReader?.selectBook || 'Select Book'}</DialogTitle>
+          <DialogTitle>{t.bibleReader?.selectBook || tt("Select Book")}</DialogTitle>
         </DialogHeader>
         <ScrollArea className="h-[300px]">
           <div className="space-y-1">
@@ -744,7 +745,7 @@ export function ChapterSelectorModal({
     <Dialog open={visible} onOpenChange={onClose}>
       <DialogContent className="max-w-sm">
         <DialogHeader>
-          <DialogTitle>{t.bibleReader?.selectChapter || 'Select Chapter'}</DialogTitle>
+          <DialogTitle>{t.bibleReader?.selectChapter || tt("Select Chapter")}</DialogTitle>
         </DialogHeader>
         <ScrollArea className="h-[300px]">
           <div className="grid grid-cols-5 gap-2">

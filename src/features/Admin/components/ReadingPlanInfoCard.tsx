@@ -2,6 +2,7 @@
 import { Calendar } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface ReadingPlanInfoCardProps {
   title: string;
@@ -28,7 +29,7 @@ export function ReadingPlanInfoCard({
             <div className="flex items-center gap-2 mt-1">
               {category && <Badge variant="outline">{category}</Badge>}
               {durationDays && (
-                <Badge variant="secondary">{durationDays} days</Badge>
+                <Badge variant="secondary">{durationDays}{tt("days")}</Badge>
               )}
             </div>
           </div>

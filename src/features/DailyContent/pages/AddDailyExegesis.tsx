@@ -12,6 +12,7 @@ import {
   PublishToggle,
   DateTimeFields,
 } from "../components";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export default function AddDailyExegesis() {
   const { data, actions } = useAddDailyExegesis();
@@ -22,101 +23,101 @@ export default function AddDailyExegesis() {
         backTo="/daily-exegesis"
         backLabel={data.t.common.back}
         icon={Sparkles}
-        title={data.isEditing ? "Edit Exegesis" : "Add Daily Exegesis"}
-        subtitle="Teach, explain, and apply Scripture with rich context"
+        title={data.isEditing ? tt("Edit Exegesis") : tt("Add Daily Exegesis")}
+        subtitle={tt("Teach, explain, and apply Scripture with rich context")}
       />
       <DailyContentFormCard
         icon={BookOpen}
-        title="Exegesis Details"
-        description="Provide the passage, teaching body, and supporting content"
+        title={tt("Exegesis Details")}
+        description={tt("Provide the passage, teaching body, and supporting content")}
         onSubmit={actions.handleSave}
       >
-        <Section title="Title">
-          <FormField label="Title" required>
+        <Section title={tt("Title")}>
+          <FormField label={tt("Title")} required>
             <Input
               value={data.title}
               onChange={(e) => actions.setTitle(e.target.value)}
-              placeholder="Enter exegesis title..."
+              placeholder={tt("Enter exegesis title...")}
               className="text-lg"
             />
           </FormField>
         </Section>
 
-        <Section title="Passage Reference">
-          <FormField label="Passage Reference" required description="The Bible passage this exegesis covers">
+        <Section title={tt("Passage Reference")}>
+          <FormField label={tt("Passage Reference")} required description={tt("The Bible passage this exegesis covers")}>
             <Input
               value={data.passageReference}
               onChange={(e) => actions.setPassageReference(e.target.value)}
-              placeholder="e.g., Psalm 46:10, John 15:1-5, Romans 8:28-30"
+              placeholder={tt("e.g., Psalm 46:10, John 15:1-5, Romans 8:28-30")}
             />
           </FormField>
         </Section>
 
-        <Section title="Teaching Body">
-          <FormField label="Teaching Body" required>
+        <Section title={tt("Teaching Body")}>
+          <FormField label={tt("Teaching Body")} required>
             <Textarea
               value={data.teachingBody}
               onChange={(e) => actions.setTeachingBody(e.target.value)}
-              placeholder="Write the main teaching content — the expository explanation of the passage..."
+              placeholder={tt("Write the main teaching content — the expository explanation of the passage...")}
               rows={10}
               className="min-h-[250px] leading-relaxed resize-none"
             />
           </FormField>
         </Section>
 
-        <Section title="Introduction & Context" defaultOpen={false}>
-          <FormField label="Introduction">
+        <Section title={tt("Introduction & Context")} defaultOpen={false}>
+          <FormField label={tt("Introduction")}>
             <Textarea
               value={data.introduction}
               onChange={(e) => actions.setIntroduction(e.target.value)}
-              placeholder="Introduce the passage, its purpose, and what the reader will learn..."
+              placeholder={tt("Introduce the passage, its purpose, and what the reader will learn...")}
               rows={4}
               className="resize-none"
             />
           </FormField>
-          <FormField label="Context Summary">
+          <FormField label={tt("Context Summary")}>
             <Textarea
               value={data.contextSummary}
               onChange={(e) => actions.setContextSummary(e.target.value)}
-              placeholder="Describe the historical, literary, and theological context..."
+              placeholder={tt("Describe the historical, literary, and theological context...")}
               rows={4}
               className="resize-none"
             />
           </FormField>
         </Section>
 
-        <Section title="Application & Prayer" defaultOpen={false}>
-          <FormField label="Application">
+        <Section title={tt("Application & Prayer")} defaultOpen={false}>
+          <FormField label={tt("Application")}>
             <Textarea
               value={data.application}
               onChange={(e) => actions.setApplication(e.target.value)}
-              placeholder="How should readers apply this passage to their lives?"
+              placeholder={tt("How should readers apply this passage to their lives?")}
               rows={4}
               className="resize-none"
             />
           </FormField>
-          <FormField label="Prayer">
+          <FormField label={tt("Prayer")}>
             <Textarea
               value={data.prayer}
               onChange={(e) => actions.setPrayer(e.target.value)}
-              placeholder="Write a prayer inspired by this passage..."
+              placeholder={tt("Write a prayer inspired by this passage...")}
               rows={4}
               className="resize-none"
             />
           </FormField>
         </Section>
 
-        <Section title="Tags" defaultOpen={false}>
-          <FormField label="Tags" description="Comma-separated tags for categorization">
+        <Section title={tt("Tags")} defaultOpen={false}>
+          <FormField label={tt("Tags")} description={tt("Comma-separated tags for categorization")}>
             <Input
               value={data.tags}
               onChange={(e) => actions.setTags(e.target.value)}
-              placeholder="e.g., daily, exegesis, psalms, trust"
+              placeholder={tt("e.g., daily, exegesis, psalms, trust")}
             />
           </FormField>
         </Section>
 
-        <Section title="Schedule & Publish">
+        <Section title={tt("Schedule & Publish")}>
           <PublishToggle
             published={data.published}
             onCheckedChange={actions.setPublished}

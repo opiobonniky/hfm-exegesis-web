@@ -7,6 +7,7 @@ import {
   sectionHasContent,
 } from "./constants";
 import type { ResourceSection } from "./constants";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 /** Counts come from the backend; `null`/`undefined` means "not counted yet". */
 export type SectionCounts = Record<string, number | null | undefined>;
@@ -38,7 +39,7 @@ export function SectionRail({
   return (
     <div
       role="tablist"
-      aria-label="Study sections"
+      aria-label={tt("Study sections")}
       className="flex items-center gap-1.5 overflow-x-auto scrollbar-none"
     >
       {visibleSections(counts, activeSection).map((section) => {
@@ -150,9 +151,7 @@ export function SectionPager({
         >
           <ChevronLeft className="size-4 shrink-0 text-muted-foreground" strokeWidth={2.2} />
           <span className="min-w-0">
-            <span className="block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-              Previous
-            </span>
+            <span className="block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{tt("Previous")}</span>
             <span className="block truncate text-xs font-bold text-foreground">
               {previous.heading}
             </span>

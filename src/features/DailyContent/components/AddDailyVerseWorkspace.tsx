@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import type { ReactNode } from "react";
 import type { AddDailyVersePageViewModel } from "../hooks/useAddDailyVerse";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   model: AddDailyVersePageViewModel;
@@ -30,25 +31,23 @@ export function AddDailyVerseWorkspace({ model: h, children }: Props) {
             <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
               <Sparkles className="h-5 w-5" />
             </div>
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-              Editor snapshot
-            </p>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">{tt("Editor snapshot")}</p>
             <h2 className="mt-1 text-lg font-semibold text-foreground">
               {reference}
             </h2>
           </div>
 
           <div className="space-y-4 p-5 text-sm">
-            <SnapshotRow icon={CalendarDays} label="Publish date">
+            <SnapshotRow icon={CalendarDays} label={tt("Publish date")}>
               {h.selectedDate.toLocaleDateString(undefined, {
                 month: "short",
                 day: "numeric",
               })}
             </SnapshotRow>
-            <SnapshotRow icon={Clock3} label="Time">
+            <SnapshotRow icon={Clock3} label={tt("Time")}>
               {h.selectedTime}
             </SnapshotRow>
-            <SnapshotRow icon={FileText} label="Translation">
+            <SnapshotRow icon={FileText} label={tt("Translation")}>
               {h.bibleVersion}
             </SnapshotRow>
 
@@ -61,12 +60,12 @@ export function AddDailyVerseWorkspace({ model: h, children }: Props) {
                       : "h-4 w-4 text-muted-foreground"
                   }
                 />
-                {h.published ? "Ready to publish" : "Saved as draft"}
+                {h.published ? tt("Ready to publish") : tt("Saved as draft")}
               </div>
               <p className="mt-3 text-xs leading-5 text-muted-foreground">
                 {takeawayCount > 0
                   ? `${takeawayCount} takeaway${takeawayCount === 1 ? "" : "s"} ready`
-                  : "Add takeaways in Rich Content"}
+                  : tt("Add takeaways in Rich Content")}
               </p>
             </div>
           </div>

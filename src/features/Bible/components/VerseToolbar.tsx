@@ -11,6 +11,7 @@ import {
 import { cn } from "@/lib/utils";
 import { bibleTheme } from "../theme/theme";
 import VerseToolbarColorPicker from "./VerseToolbarColorPicker";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface VerseToolbarProps {
   /** Unused display key kept for call-site compatibility. */
@@ -82,8 +83,8 @@ export default function VerseToolbar({
             ? toolbarButtonActive
             : toolbarButton,
         )}
-        title="Highlight verse"
-        aria-label="Highlight verse"
+        title={tt("Highlight verse")}
+        aria-label={tt("Highlight verse")}
         aria-expanded={showColors}
       >
         <Highlighter className="h-3.5 w-3.5" />
@@ -116,8 +117,8 @@ export default function VerseToolbar({
             ? "flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-rose-500 transition-colors duration-150 hover:bg-rose-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60"
             : toolbarButton,
         )}
-        title={isFavorited ? "Remove favorite" : "Add favorite"}
-        aria-label={isFavorited ? "Remove favorite" : "Add favorite"}
+        title={isFavorited ? tt("Remove favorite") : tt("Add favorite")}
+        aria-label={isFavorited ? tt("Remove favorite") : tt("Add favorite")}
         aria-pressed={isFavorited}
       >
         <Star className={cn("h-3.5 w-3.5", isFavorited && "fill-current")} />
@@ -131,7 +132,7 @@ export default function VerseToolbar({
           onExplain();
         }}
         className={cn(toolbarButton, "hover:text-primary")}
-        title="View explanation"
+        title={tt("View explanation")}
         aria-label={`Explain ${book} ${chapter}:${verse}`}
       >
         <BookOpenText className="h-3.5 w-3.5" />
@@ -145,7 +146,7 @@ export default function VerseToolbar({
           onMore();
         }}
         className={cn(toolbarButton)}
-        title="More verse actions"
+        title={tt("More verse actions")}
         aria-label={`More actions for ${book} ${chapter}:${verse}`}
       >
         <Ellipsis className="h-3.5 w-3.5" />

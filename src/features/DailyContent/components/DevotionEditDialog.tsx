@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { format, parseISO } from "date-fns";
 import { useLanguage } from "@/components/languages/languageProvider";
 import type { EditState } from "../hooks/useDailyDevotionsPage";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   open: boolean;
@@ -58,48 +59,48 @@ export function DevotionEditDialog({ open, onOpenChange, editState, onChange, on
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Lightbulb className="w-5 h-5 text-primary" />
-            {t.devotions?.editDevotion || "Edit Daily Devotion"}
+            {t.devotions?.editDevotion || tt("Edit Daily Devotion")}
           </DialogTitle>
-          <DialogDescription>{t.devotions?.editDevotionDesc || "Update the title, content, and optional Bible reference below."}</DialogDescription>
+          <DialogDescription>{t.devotions?.editDevotionDesc || tt("Update the title, content, and optional Bible reference below.")}</DialogDescription>
         </DialogHeader>
         <div className="space-y-5 py-2">
           <div className="space-y-2">
-            <Label>{t.common?.title || "Title"} *</Label>
-            <Input value={local.title} onChange={(e) => set("title", e.target.value)} placeholder={t.devotions?.devotionTitlePlaceholder || "Devotion title..."} />
+            <Label>{t.common?.title || tt("Title")} *</Label>
+            <Input value={local.title} onChange={(e) => set("title", e.target.value)} placeholder={t.devotions?.devotionTitlePlaceholder || tt("Devotion title...")} />
           </div>
           <div className="space-y-2">
-            <Label>{t.common?.content || "Content"} *</Label>
-            <Textarea value={local.content} onChange={(e) => set("content", e.target.value)} placeholder={t.devotions?.devotionContentPlaceholder || "Devotion content..."} className="min-h-[200px]" />
+            <Label>{t.common?.content || tt("Content")} *</Label>
+            <Textarea value={local.content} onChange={(e) => set("content", e.target.value)} placeholder={t.devotions?.devotionContentPlaceholder || tt("Devotion content...")} className="min-h-[200px]" />
           </div>
           <div className="grid grid-cols-3 gap-4">
             <div className="space-y-1.5">
-              <Label>{t.dailyVerse?.book || "Book"}</Label>
-              <Input value={local.bookName} onChange={(e) => set("bookName", e.target.value)} placeholder={t.dailyVerse?.selectBook || "e.g. Psalms"} />
+              <Label>{t.dailyVerse?.book || tt("Book")}</Label>
+              <Input value={local.bookName} onChange={(e) => set("bookName", e.target.value)} placeholder={t.dailyVerse?.selectBook || tt("e.g. Psalms")} />
             </div>
             <div className="space-y-1.5">
-              <Label>{t.dailyVerse?.chapter || "Chapter"}</Label>
-              <Input type="number" value={local.chapter} onChange={(e) => set("chapter", e.target.value)} placeholder={t.dailyVerse?.chapter || "Chapter"} />
+              <Label>{t.dailyVerse?.chapter || tt("Chapter")}</Label>
+              <Input type="number" value={local.chapter} onChange={(e) => set("chapter", e.target.value)} placeholder={t.dailyVerse?.chapter || tt("Chapter")} />
             </div>
             <div className="space-y-1.5">
-              <Label>{t.dailyVerse?.verse || "Verse"}</Label>
-              <Input type="number" value={local.verseNumber} onChange={(e) => set("verseNumber", e.target.value)} placeholder={t.dailyVerse?.verse || "Verse"} />
+              <Label>{t.dailyVerse?.verse || tt("Verse")}</Label>
+              <Input type="number" value={local.verseNumber} onChange={(e) => set("verseNumber", e.target.value)} placeholder={t.dailyVerse?.verse || tt("Verse")} />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label>{t.common?.date || "Date"}</Label>
+              <Label>{t.common?.date || tt("Date")}</Label>
               <Input type="date" value={format(dateVal, "yyyy-MM-dd")} onChange={(e) => handleDateChange(parseISO(e.target.value))} />
             </div>
             <div className="space-y-1.5">
-              <Label>{t.common?.time || "Time"}</Label>
+              <Label>{t.common?.time || tt("Time")}</Label>
               <Input type="time" value={local.selectedTime} onChange={handleTimeChange} />
             </div>
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>{t.common?.cancel || "Cancel"}</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>{t.common?.cancel || tt("Cancel")}</Button>
           <Button onClick={onSave} disabled={isSaving} className="gap-2">
-            {isSaving && <Loader2 className="w-4 h-4 animate-spin" />}{t.devotions?.saveChanges || "Save Changes"}
+            {isSaving && <Loader2 className="w-4 h-4 animate-spin" />}{t.devotions?.saveChanges || tt("Save Changes")}
           </Button>
         </DialogFooter>
       </DialogContent>

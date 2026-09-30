@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/components/languages/languageProvider";
 import type { DailyDevotionItem } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   item: DailyDevotionItem;
@@ -56,7 +57,7 @@ export function DevotionListItem({ item, isSelected, onSelect, onEdit, onDelete,
       </div>
           {item.isPublished && (
             <span className="inline-block mt-2 text-[10px] px-2 py-0.5 rounded-full bg-green-100 text-green-700 font-medium">
-              {(t as any).common?.published || "Published"}
+              {(t as any).common?.published || tt("Published")}
             </span>
           )}
     </div>

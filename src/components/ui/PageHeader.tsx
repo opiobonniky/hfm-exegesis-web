@@ -4,6 +4,7 @@ import { ArrowLeft, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useRTL } from "@/providers/RTLProvider";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface PageHeaderProps {
   title: string;
@@ -54,7 +55,7 @@ export function PageHeader({
             <RefreshCw
               className={cn("w-3.5 h-3.5", refreshing && "animate-spin")}
             />
-            <span className="hidden sm:inline">Refresh</span>
+            <span className="hidden sm:inline">{tt("Refresh")}</span>
           </Button>
         )}
       </div>

@@ -4,6 +4,7 @@
 import { BookOpen, PenLine } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { DailyExegesisActionsProps } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export function DailyExegesisActions({
   canOpenBible,
@@ -17,15 +18,13 @@ export function DailyExegesisActions({
         disabled={!canOpenBible}
         className="flex-1 gap-2 h-11"
       >
-        <BookOpen className="w-4 h-4" /> Open in Bible
-      </Button>
+        <BookOpen className="w-4 h-4" />{tt("Open in Bible")}</Button>
       <Button
         variant="outline"
         onClick={onSaveToJournal}
         className="flex-1 gap-2 h-11"
       >
-        <PenLine className="w-4 h-4" /> Save to Journal
-      </Button>
+        <PenLine className="w-4 h-4" />{tt("Save to Journal")}</Button>
     </div>
   );
 }

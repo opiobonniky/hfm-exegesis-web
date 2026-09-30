@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import type { TriviaFormData } from "../hooks/useAdminAddTriviaQuestionPage";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface TriviaOptionsSectionProps {
   form: TriviaFormData;
@@ -18,7 +19,7 @@ export function TriviaOptionsSection({ form, onFormChange, updateOption, addOpti
   return (
     <Card>
       <CardContent className="space-y-4 pt-6">
-        <Label className="mb-2 block">Answer Options *</Label>
+        <Label className="mb-2 block">{tt("Answer Options *")}</Label>
         <div className="space-y-2">
           {form.options.map((opt, i) => (
             <div key={i} className="flex items-center gap-2">
@@ -31,7 +32,7 @@ export function TriviaOptionsSection({ form, onFormChange, updateOption, addOpti
                     ? "border-emerald-500 bg-emerald-500 text-white"
                     : "border-muted-foreground/30 text-muted-foreground hover:border-primary"
                 )}
-                title="Mark as correct answer"
+                title={tt("Mark as correct answer")}
               >
                 {String.fromCharCode(65 + i)}
               </button>
@@ -45,9 +46,8 @@ export function TriviaOptionsSection({ form, onFormChange, updateOption, addOpti
           ))}
         </div>
         <Button variant="outline" size="sm" className="mt-2" onClick={addOption}>
-          <Plus className="mr-1 h-3 w-3" /> Add Option
-        </Button>
-        <p className="text-xs text-muted-foreground mt-1">Click the letter to mark the correct answer.</p>
+          <Plus className="mr-1 h-3 w-3" />{tt("Add Option")}</Button>
+        <p className="text-xs text-muted-foreground mt-1">{tt("Click the letter to mark the correct answer.")}</p>
       </CardContent>
     </Card>
   );

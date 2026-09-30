@@ -26,6 +26,7 @@ import { sendGetRequest } from "@/services/api";
 import type { StrongsEntry } from "@/services/strongsApi";
 import { cn } from "@/lib/utils";
 import { getLangColor, getLangLetter, getLangScript } from "@/data/staticData";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 // ── Types ──
 
@@ -261,14 +262,9 @@ export default function WordComparisonDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Shuffle className="w-4 h-4 text-primary shrink-0" />
-            <span className="text-sm font-bold text-foreground">
-              Word Comparison
-            </span>
+            <span className="text-sm font-bold text-foreground">{tt("Word Comparison")}</span>
           </DialogTitle>
-          <DialogDescription>
-            Compare two original language words side by side to see their
-            meanings, grammar, and usage differences.
-          </DialogDescription>
+          <DialogDescription>{tt("Compare two original language words side by side to see their meanings, grammar, and usage differences.")}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -276,24 +272,20 @@ export default function WordComparisonDialog({
           <div className="rounded-lg bg-muted/20 border border-border/50 p-3">
             <div className="flex items-center gap-2 mb-2">
               <BookText className="w-3.5 h-3.5 text-primary" />
-              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                Compare With
-              </span>
+              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{tt("Compare With")}</span>
               {comparisonId && (
                 <button
                   onClick={resetComparison}
                   className="ml-auto text-[10px] text-muted-foreground/50 hover:text-muted-foreground flex items-center gap-1"
                 >
-                  <X className="w-3 h-3" />
-                  Change
-                </button>
+                  <X className="w-3 h-3" />{tt("Change")}</button>
               )}
             </div>
 
             {!showSearch && !comparisonId && (
               <div className="flex items-center gap-2">
                 <Input
-                  placeholder="Search for a word to compare..."
+                  placeholder={tt("Search for a word to compare...")}
                   value={searchQuery}
                   onChange={(e) => {
                     setSearchQuery(e.target.value);
@@ -310,7 +302,7 @@ export default function WordComparisonDialog({
               <div className="space-y-2">
                 <div className="relative">
                   <Input
-                    placeholder="Search by word, transliteration, or meaning..."
+                    placeholder={tt("Search by word, transliteration, or meaning...")}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     autoFocus
@@ -367,8 +359,7 @@ export default function WordComparisonDialog({
                 )}
 
                 {!searchLoading && searchQuery.trim().length >= 2 && searchResults.length === 0 && (
-                  <p className="text-xs text-muted-foreground/60 text-center py-2">
-                    No words found matching "{searchQuery}"
+                  <p className="text-xs text-muted-foreground/60 text-center py-2">{tt("No words found matching \"")}{searchQuery}"
                   </p>
                 )}
               </div>
@@ -377,7 +368,7 @@ export default function WordComparisonDialog({
             {comparisonId && comparisonLoading && (
               <div className="flex items-center gap-2 py-1">
                 <Loader2 className="w-3.5 h-3.5 animate-spin text-muted-foreground" />
-                <span className="text-xs text-muted-foreground">Loading comparison...</span>
+                <span className="text-xs text-muted-foreground">{tt("Loading comparison...")}</span>
               </div>
             )}
 
@@ -407,9 +398,7 @@ export default function WordComparisonDialog({
             )}
 
             {comparisonId && comparisonError && !comparisonLoading && (
-              <p className="text-xs text-destructive">
-                Could not load comparison word. Try a different word.
-              </p>
+              <p className="text-xs text-destructive">{tt("Could not load comparison word. Try a different word.")}</p>
             )}
           </div>
 
@@ -420,8 +409,7 @@ export default function WordComparisonDialog({
             </div>
           ) : primaryError ? (
             <div className="text-center py-8">
-              <p className="text-sm text-muted-foreground">
-                Could not load word details for{" "}
+              <p className="text-sm text-muted-foreground">{tt("Could not load word details for")}{" "}
                 <span className="font-semibold">{primaryLabel || primaryStrongsId}</span>.
               </p>
             </div>
@@ -431,9 +419,7 @@ export default function WordComparisonDialog({
               <div className="grid grid-cols-[80px_1fr_1fr] sm:grid-cols-[100px_1fr_1fr] gap-2 px-2">
                 <div />
                 <div className="text-center">
-                  <Badge variant="secondary" className="text-[9px] font-bold gap-1 w-full justify-center">
-                    Primary
-                  </Badge>
+                  <Badge variant="secondary" className="text-[9px] font-bold gap-1 w-full justify-center">{tt("Primary")}</Badge>
                 </div>
                 <div className="text-center">
                   <Badge
@@ -443,14 +429,14 @@ export default function WordComparisonDialog({
                       !comparison && "text-muted-foreground/40",
                     )}
                   >
-                    {comparison ? "Comparison" : "—"}
+                    {comparison ? tt("Comparison") : "—"}
                   </Badge>
                 </div>
               </div>
 
               {/* Original word row */}
               <ComparisonRow
-                label="Original"
+                label={tt("Original")}
                 left={primary.originalWord}
                 right={comparison?.originalWord}
                 renderLeft={() => (
@@ -487,21 +473,21 @@ export default function WordComparisonDialog({
 
               {/* Transliteration */}
               <ComparisonRow
-                label="Transliteration"
+                label={tt("Transliteration")}
                 left={primary.transliteration}
                 right={comparison?.transliteration}
               />
 
               {/* Language */}
               <ComparisonRow
-                label="Language"
+                label={tt("Language")}
                 left={languageLabel(primary.language)}
                 right={comparison ? languageLabel(comparison.language) : null}
               />
 
               {/* Definition (short) */}
               <ComparisonRow
-                label="Definition"
+                label={tt("Definition")}
                 left={primary.shortDefinition}
                 right={comparison?.shortDefinition}
               />
@@ -509,7 +495,7 @@ export default function WordComparisonDialog({
               {/* Full Definition */}
               {(primary.fullDefinition || comparison?.fullDefinition) && (
                 <ComparisonRow
-                  label="Full Detail"
+                  label={tt("Full Detail")}
                   highlightDiff={false}
                   renderLeft={() => (
                     <p className="text-xs leading-5 text-foreground/80">{primary.fullDefinition || "—"}</p>
@@ -526,19 +512,19 @@ export default function WordComparisonDialog({
 
               {/* Part of Speech */}
               <ComparisonRow
-                label="POS"
+                label={tt("POS")}
                 left={primary.partOfSpeech}
                 right={comparison?.partOfSpeech}
               />
 
               {/* Grammar details */}
               <ComparisonRow
-                label="Case"
+                label={tt("Case")}
                 left={primary.grammaticalCase}
                 right={comparison?.grammaticalCase}
               />
               <ComparisonRow
-                label="Gender"
+                label={tt("Gender")}
                 left={primary.gender}
                 right={comparison?.gender}
               />
@@ -550,7 +536,7 @@ export default function WordComparisonDialog({
 
               {/* Usage Count */}
               <ComparisonRow
-                label="Usage"
+                label={tt("Usage")}
                 left={primary.usageCount != null ? `${primary.usageCount}×` : null}
                 right={comparison?.usageCount != null ? `${comparison.usageCount}×` : null}
               />
@@ -558,7 +544,7 @@ export default function WordComparisonDialog({
               {/* Cross References */}
               {(crossRefsA.length > 0 || crossRefsB.length > 0) && (
                 <ComparisonRow
-                  label="Cross Refs"
+                  label={tt("Cross Refs")}
                   highlightDiff={false}
                   renderLeft={() => (
                     <div className="flex flex-wrap gap-1">
@@ -593,10 +579,7 @@ export default function WordComparisonDialog({
               {!comparisonId && !showSearch && (
                 <div className="flex flex-col items-center py-6 text-center">
                   <ArrowRight className="w-8 h-8 text-muted-foreground/20 mb-2" />
-                  <p className="text-xs text-muted-foreground/60 max-w-xs">
-                    Search for a second word above to compare its meaning,
-                    grammar, and usage side by side.
-                  </p>
+                  <p className="text-xs text-muted-foreground/60 max-w-xs">{tt("Search for a second word above to compare its meaning, grammar, and usage side by side.")}</p>
                 </div>
               )}
             </div>
@@ -604,26 +587,24 @@ export default function WordComparisonDialog({
           {!comparisonId && !showSearch && primary && (
             <div className="rounded-lg bg-muted/10 border border-border/40 p-3">
               <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1">
-                <BookOpen className="w-3 h-3" />
-                Try Comparing With
-              </p>
+                <BookOpen className="w-3 h-3" />{tt("Try Comparing With")}</p>
               <div className="flex flex-wrap gap-1.5">
                 {(() => {
                   const isGreek = primary.language?.toLowerCase() === "greek";
                   const suggestions = isGreek
                     ? [
-                        { id: "G0026", label: "ἀγάπη (agape)" },
-                        { id: "G5368", label: "φιλέω (phileo)" },
-                        { id: "G0025", label: "ἀγαπάω (agapao)" },
-                        { id: "G4102", label: "πίστις (pistis)" },
-                        { id: "G3056", label: "λόγος (logos)" },
+                        { id: "G0026", label: tt("ἀγάπη (agape)") },
+                        { id: "G5368", label: tt("φιλέω (phileo)") },
+                        { id: "G0025", label: tt("ἀγαπάω (agapao)") },
+                        { id: "G4102", label: tt("πίστις (pistis)") },
+                        { id: "G3056", label: tt("λόγος (logos)") },
                       ]
                     : [
-                        { id: "H0430", label: "אֱלֹהִים (elohim)" },
-                        { id: "H3068", label: "יְהוָה (YHWH)" },
-                        { id: "H1697", label: "דָּבָר (dabar)" },
-                        { id: "H7307", label: "רוּחַ (ruach)" },
-                        { id: "H5315", label: "נֶפֶשׁ (nephesh)" },
+                        { id: "H0430", label: tt("אֱלֹהִים (elohim)") },
+                        { id: "H3068", label: tt("יְהוָה (YHWH)") },
+                        { id: "H1697", label: tt("דָּבָר (dabar)") },
+                        { id: "H7307", label: tt("רוּחַ (ruach)") },
+                        { id: "H5315", label: tt("נֶפֶשׁ (nephesh)") },
                       ];
                   return suggestions
                     .filter((s) => s.id !== primaryStrongsId)

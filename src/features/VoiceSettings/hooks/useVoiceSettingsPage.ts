@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { sendPostRequest } from "@/services/api";
 import { routes } from "@/components/Routes/routes";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export interface VoiceSettingsData {
   edgeEnabled: boolean;
@@ -61,11 +62,11 @@ export function useVoiceSettingsPage() {
     try {
       const res = await sendPostRequest("user", "update-voice-settings", settings);
       if (res.data?.returnCode === 200) {
-        toast({ title: "Saved", description: "Voice settings updated" });
+        toast({ title: tt("Saved"), description: tt("Voice settings updated") });
         navigate(routes.settings.path);
       } else { throw new Error(res.data?.returnMessage || "Failed"); }
     } catch (err: any) {
-      toast({ title: "Error", description: err.message || "Failed to save", variant: "destructive" });
+      toast({ title: tt("Error"), description: err.message || "Failed to save", variant: "destructive" });
     } finally { setSaving(false); }
   }, [settings, navigate, toast]);
   const updateSetting = <K extends keyof VoiceSettingsData>(key: K, value: VoiceSettingsData[K]) =>

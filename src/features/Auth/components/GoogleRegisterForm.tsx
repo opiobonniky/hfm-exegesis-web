@@ -4,6 +4,7 @@
  */
 import { Mail, User, Lock, Eye, EyeOff, ArrowRight } from "lucide-react";
 import { AuthLoadingButton } from "./AuthLoadingButton";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface GoogleRegisterFormProps {
   t: any;
@@ -33,21 +34,21 @@ export function GoogleRegisterForm({
   return (
     <form onSubmit={handleRegister} className="space-y-4">
       <div className="space-y-2">
-        <label className="text-sm font-medium">{t.auth?.username || "Username"}</label>
+        <label className="text-sm font-medium">{t.auth?.username || tt("Username")}</label>
         <div className="relative">
           <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <input type="text" placeholder={t.auth?.chooseUsername || "Choose a username"} value={username}
+          <input type="text" placeholder={t.auth?.chooseUsername || tt("Choose a username")} value={username}
             onChange={(e) => setUsername(e.target.value.replace(/\s/g, "").toLowerCase())}
             className="w-full pl-10 pr-3 py-2 border rounded-lg bg-background text-sm" />
         </div>
-        <p className="text-xs text-muted-foreground">{t.auth?.uniqueIdentifier || "This will be your unique identifier"}</p>
+        <p className="text-xs text-muted-foreground">{t.auth?.uniqueIdentifier || tt("This will be your unique identifier")}</p>
       </div>
 
       <div className="space-y-2">
-        <label className="text-sm font-medium">{t.auth?.createPassword || "Create Password"}</label>
+        <label className="text-sm font-medium">{t.auth?.createPassword || tt("Create Password")}</label>
         <div className="relative">
           <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <input type={showPassword ? "text" : "password"} placeholder={t.auth?.enterPassword || "Enter password"}
+          <input type={showPassword ? "text" : "password"} placeholder={t.auth?.enterPassword || tt("Enter password")}
             value={password} onChange={(e) => setPassword(e.target.value)}
             className="w-full pl-10 pr-10 py-2 border rounded-lg bg-background text-sm" />
           <button type="button" onClick={() => setShowPassword(!showPassword)}
@@ -58,20 +59,20 @@ export function GoogleRegisterForm({
       </div>
 
       <div className="space-y-2">
-        <label className="text-sm font-medium">{t.common?.confirmPassword || "Confirm Password"}</label>
+        <label className="text-sm font-medium">{t.common?.confirmPassword || tt("Confirm Password")}</label>
         <div className="relative">
           <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <input type={showPassword ? "text" : "password"} placeholder={t.common?.confirmPassword || "Confirm Password"}
+          <input type={showPassword ? "text" : "password"} placeholder={t.common?.confirmPassword || tt("Confirm Password")}
             value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}
             className="w-full pl-10 pr-3 py-2 border rounded-lg bg-background text-sm" />
         </div>
-        {passwordMismatch && <p className="text-xs text-red-500">{t.auth?.passwordsDoNotMatch || "Passwords do not match"}</p>}
+        {passwordMismatch && <p className="text-xs text-red-500">{t.auth?.passwordsDoNotMatch || tt("Passwords do not match")}</p>}
       </div>
 
       {error && <p className="text-sm text-red-500 text-center">{error}</p>}
 
       <AuthLoadingButton loading={loading}>
-        {t.auth?.continueBtn || "Continue"}<ArrowRight className="w-4 h-4 ml-2" />
+        {t.auth?.continueBtn || tt("Continue")}<ArrowRight className="w-4 h-4 ml-2" />
       </AuthLoadingButton>
     </form>
   );

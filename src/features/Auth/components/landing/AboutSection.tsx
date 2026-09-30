@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Users, ShieldCheck, Globe, Sparkles, Zap } from "lucide-react";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { animSlideLeft, animStagger, animCardUp } from "./animations";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 const VALUES = [
   { titleKey: "aboutValueRootedTitle", descKey: "aboutValueRootedDesc", icon: ShieldCheck, dt: "Rooted in Truth", dd: "Every insight is grounded in sound biblical scholarship." },
@@ -27,18 +28,18 @@ export function AboutSection() {
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-card border border-border mb-5">
               <Users className="w-3.5 h-3.5 text-brand-primary" />
               <span className="text-[10px] sm:text-xs text-muted-foreground font-black uppercase tracking-widest">
-                {L?.aboutBadge || "Our Calling"}
+                {L?.aboutBadge || tt("Our Calling")}
               </span>
             </div>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-foreground font-[family-name:var(--font-heading)] mb-6 leading-tight tracking-tighter">
-              {L?.aboutTitle || "Built for Kingdom"}{" "}
-              <span className="text-brand-primary">{L?.aboutTitleHighlight || "Impact"}</span>
+              {L?.aboutTitle || tt("Built for Kingdom")}{" "}
+              <span className="text-brand-primary">{L?.aboutTitleHighlight || tt("Impact")}</span>
             </h2>
             <div className="space-y-4 text-muted-foreground text-base sm:text-lg leading-relaxed font-medium">
-              <p>{L?.aboutPara1 || "At Exegesis, we believe your spiritual journey deserves more than just a casual reading."}</p>
-              <p>{L?.aboutPara2 || "We're not just another app—we're passionate Jesus followers."}</p>
+              <p>{L?.aboutPara1 || tt("At Exegesis, we believe your spiritual journey deserves more than just a casual reading.")}</p>
+              <p>{L?.aboutPara2 || tt("We're not just another app—we're passionate Jesus followers.")}</p>
               <p className="font-black text-brand-accent italic text-xl sm:text-2xl tracking-tight">
-                {L?.aboutMotto || "Quality, Service, & Integrity — Built for His Glory."}
+                {L?.aboutMotto || tt("Quality, Service, & Integrity — Built for His Glory.")}
               </p>
             </div>
             <div className="grid grid-cols-3 gap-4 sm:gap-8 mt-10">

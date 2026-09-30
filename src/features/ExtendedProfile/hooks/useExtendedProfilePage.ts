@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { sendPostRequest } from "@/services/api";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export interface ExtendedProfileData {
   middleName: string; alternativePhone: string; ministryGroup: string;
@@ -38,13 +39,13 @@ export function useExtendedProfilePage() {
     try {
       const res = await sendPostRequest("user", "update-extended-profile", form);
       if (res.returnCode === 200) {
-        toast({ title: "Saved", description: "Profile updated" });
+        toast({ title: tt("Saved"), description: tt("Profile updated") });
         navigate(-1);
       } else {
-        toast({ title: "Error", description: res.returnMessage, variant: "destructive" });
+        toast({ title: tt("Error"), description: res.returnMessage, variant: "destructive" });
       }
     } catch {
-      toast({ title: "Error", variant: "destructive" });
+      toast({ title: tt("Error"), variant: "destructive" });
     } finally { setSaving(false); }
   }, [form, navigate, toast]);
   const updateField = <K extends keyof ExtendedProfileData>(key: K, val: ExtendedProfileData[K]) =>

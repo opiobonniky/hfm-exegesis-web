@@ -3,6 +3,7 @@ import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { sendPostRequest } from "@/services/api";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export function useJournalEntry(entryId?: string) {
   const navigate = useNavigate();
@@ -34,7 +35,7 @@ export function useJournalEntry(entryId?: string) {
   });
 
   const handleSave = useCallback(async () => {
-    if (!title.trim() || !content.trim()) { toast({ title: "Title and content required", variant: "destructive" }); return; }
+    if (!title.trim() || !content.trim()) { toast({ title: tt("Title and content required"), variant: "destructive" }); return; }
     setSaving(true);
     try {
       const payload: any = { title, content, mood: mood || undefined, tags, isPrivate };
@@ -45,8 +46,8 @@ export function useJournalEntry(entryId?: string) {
       if (entryId) payload.id = entryId;
       const res = await sendPostRequest("journal", action, payload);
       if (res?.returnCode === 200) { toast({ title: entryId ? "Updated" : "Created" }); navigate("/journal"); }
-      else { toast({ title: "Save failed", variant: "destructive" }); }
-    } catch { toast({ title: "Error saving", variant: "destructive" }); }
+      else { toast({ title: tt("Save failed"), variant: "destructive" }); }
+    } catch { toast({ title: tt("Error saving"), variant: "destructive" }); }
     finally { setSaving(false); }
   }, [title, content, mood, tags, bookName, chapter, verseNumber, isPrivate, entryId, toast, navigate]);
 

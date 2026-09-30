@@ -2,6 +2,7 @@
 // All className and rendering logic lives here, not in the page
 import { User, Star, Lock, Sliders, Bell, type LucideIcon } from "lucide-react";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface TabItem {
   value: string;
@@ -18,11 +19,11 @@ const TAB_ICONS: Record<string, LucideIcon> = {
 };
 
 export const SETTINGS_TABS: TabItem[] = [
-  { value: "profile", label: "Profile", short: "Profile" },
-  { value: "additional", label: "Details", short: "Details" },
-  { value: "password", label: "Password", short: "Pass" },
-  { value: "preferences", label: "Reading", short: "Read" },
-  { value: "notifications", label: "Notifications", short: "Notify" },
+  { value: "profile", label: tt("Profile"), short: "Profile" },
+  { value: "additional", label: tt("Details"), short: "Details" },
+  { value: "password", label: tt("Password"), short: "Pass" },
+  { value: "preferences", label: tt("Reading"), short: "Read" },
+  { value: "notifications", label: tt("Notifications"), short: "Notify" },
 ];
 
 export function SettingsTabBar() {

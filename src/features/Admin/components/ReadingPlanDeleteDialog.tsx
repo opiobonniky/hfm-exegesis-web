@@ -8,6 +8,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface ReadingPlanDeleteDialogProps {
   open: boolean;
@@ -28,20 +29,15 @@ export function ReadingPlanDeleteDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Delete Reading Plan</DialogTitle>
+          <DialogTitle>{tt("Delete Reading Plan")}</DialogTitle>
         </DialogHeader>
-        <p className="text-sm text-muted-foreground">
-          Are you sure you want to delete &ldquo;{title}&rdquo;? This action
-          cannot be undone.
-        </p>
+        <p className="text-sm text-muted-foreground">{tt("Are you sure you want to delete “")}{title}{tt("”? This action cannot be undone.")}</p>
         <DialogFooter className="gap-2">
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
             disabled={deleting}
-          >
-            Cancel
-          </Button>
+          >{tt("Cancel")}</Button>
           <Button
             variant="destructive"
             onClick={onConfirm}
@@ -52,9 +48,7 @@ export function ReadingPlanDeleteDialog({
               <Loader2 className="w-4 h-4 animate-spin" />
             ) : (
               <Trash2 className="w-4 h-4" />
-            )}{" "}
-            Delete
-          </Button>
+            )}{" "}{tt("Delete")}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

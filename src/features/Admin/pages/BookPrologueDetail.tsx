@@ -8,6 +8,7 @@ import { PrologueDetailContent } from "../components/PrologueDetailContent";
 import { BookPrologueHero } from "../components/BookPrologueHero";
 import { BookProloguePageShell } from "../components/BookProloguePageShell";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export default function BookPrologueDetail() {
   const { data, actions } = useBookPrologueDetail();
@@ -15,9 +16,9 @@ export default function BookPrologueDetail() {
   if (data.loading) return <DetailLoading />;
   if (!data.bookName) return (
     <EmptyState
-      title="Book Prologue Not Found"
+      title={tt("Book Prologue Not Found")}
       message="The requested book prologue could not be found."
-      actionLabel="Go back"
+      actionLabel={tt("Go back")}
       onAction={() => actions.navigate(-1)}
     />
   );
@@ -38,16 +39,16 @@ export default function BookPrologueDetail() {
 
           <DetailMetadataGrid
             fields={[
-              { label: "Date Written", value: data.dateWritten },
-              { label: "Location", value: data.locationWritten },
-              { label: "Created By", value: data.createdBy },
-              { label: "Created", value: data.createdOn, format: "datetime" },
-              { label: "Updated", value: data.updatedOn, format: "datetime" },
+              { label: tt("Date Written"), value: data.dateWritten },
+              { label: tt("Location"), value: data.locationWritten },
+              { label: tt("Created By"), value: data.createdBy },
+              { label: tt("Created"), value: data.createdOn, format: "datetime" },
+              { label: tt("Updated"), value: data.updatedOn, format: "datetime" },
             ]}
           />
 
           <DetailBackButton
-            label="Back to Prologues"
+            label={tt("Back to Prologues")}
             onClick={() => actions.navigate("/admin/book-prologues")}
           />
         </DetailContent>

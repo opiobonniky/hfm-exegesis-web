@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { X } from "lucide-react";
 import type { BadgeDefinition } from "@/hooks/useBadges";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 const CATEGORY_COLORS: Record<string, string> = {
   milestone: "#6366F1",
@@ -78,12 +79,8 @@ export default function BadgeUnlockPanel({
             <p
               className="text-[10px] font-extrabold uppercase tracking-[0.2em] mb-1"
               style={{ color: "hsl(var(--primary)/0.6)" }}
-            >
-              Achievement Unlocked
-            </p>
-            <p className="text-lg font-black text-foreground" style={{ fontFamily: "'Cinzel', serif" }}>
-              Badges Earned!
-            </p>
+            >{tt("Achievement Unlocked")}</p>
+            <p className="text-lg font-black text-foreground" style={{ fontFamily: "'Cinzel', serif" }}>{tt("Badges Earned!")}</p>
           </div>
 
           {/* Badge cards */}
@@ -141,9 +138,7 @@ export default function BadgeUnlockPanel({
               color: "hsl(var(--primary-foreground))",
               boxShadow: "0 4px 12px hsl(var(--primary)/0.3)",
             }}
-          >
-            Continue
-          </button>
+          >{tt("Continue")}</button>
         </div>
       </div>
     </div>

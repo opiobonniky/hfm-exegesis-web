@@ -1,3 +1,4 @@
+import { tt } from '@/components/languages/hardcodedTranslate';
 export default function ScoreCrest({
   correct,
   total,
@@ -38,9 +39,7 @@ export default function ScoreCrest({
 
       <div className="flex flex-col items-center">
         <p className="text-xl font-black text-foreground">{percentage}%</p>
-        <p className="text-[7px] font-bold text-primary/50 uppercase tracking-[0.2em]">
-          accuracy
-        </p>
+        <p className="text-[7px] font-bold text-primary/50 uppercase tracking-[0.2em]">{tt("accuracy")}</p>
       </div>
     </div>
   );

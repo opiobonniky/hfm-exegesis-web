@@ -2,6 +2,7 @@
 
 import { BookOpen, Highlighter, StickyNote, Star, ChevronRight, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface ActivityItem {
   type: "read" | "highlight" | "note" | "plan" | "favorite";
@@ -22,11 +23,11 @@ interface RecentActivityProps {
 }
 
 const TYPE_CONFIG = {
-  read: { icon: BookOpen, color: "text-blue-500", bg: "bg-blue-100 dark:bg-blue-950/30", label: "Reading" },
-  highlight: { icon: Highlighter, color: "text-amber-500", bg: "bg-amber-100 dark:bg-amber-950/30", label: "Highlighted" },
-  note: { icon: StickyNote, color: "text-emerald-500", bg: "bg-emerald-100 dark:bg-emerald-950/30", label: "Noted" },
-  plan: { icon: BookOpen, color: "text-violet-500", bg: "bg-violet-100 dark:bg-violet-950/30", label: "Plan Progress" },
-  favorite: { icon: Star, color: "text-rose-500", bg: "bg-rose-100 dark:bg-rose-950/30", label: "Favorited" },
+  read: { icon: BookOpen, color: "text-blue-500", bg: "bg-blue-100 dark:bg-blue-950/30", label: tt("Reading") },
+  highlight: { icon: Highlighter, color: "text-amber-500", bg: "bg-amber-100 dark:bg-amber-950/30", label: tt("Highlighted") },
+  note: { icon: StickyNote, color: "text-emerald-500", bg: "bg-emerald-100 dark:bg-emerald-950/30", label: tt("Noted") },
+  plan: { icon: BookOpen, color: "text-violet-500", bg: "bg-violet-100 dark:bg-violet-950/30", label: tt("Plan Progress") },
+  favorite: { icon: Star, color: "text-rose-500", bg: "bg-rose-100 dark:bg-rose-950/30", label: tt("Favorited") },
 } as const;
 
 const timeAgo = (timestamp: string) => {

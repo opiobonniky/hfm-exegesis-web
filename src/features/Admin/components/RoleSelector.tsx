@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { USER_ROLE_MAP } from "../constants";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface RoleSelectorProps {
   userRole: number;
@@ -33,7 +34,7 @@ export function RoleSelector({
         <DropdownMenuTrigger asChild disabled={disabled || busy}>
           <button
             className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
-            title="Change role"
+            title={tt("Change role")}
           >
             <ShieldCheck className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">{role.label}</span>
@@ -50,7 +51,7 @@ export function RoleSelector({
       <DropdownMenuTrigger asChild disabled={disabled || busy}>
         <button
           className="inline-flex items-center focus:outline-none rounded-full hover:opacity-80 transition-opacity disabled:opacity-50"
-          title="Click to change role"
+          title={tt("Click to change role")}
         >
           <Badge variant="outline" className={`text-[10px] font-semibold gap-0.5 cursor-pointer ${role.color}`}>
             {role.label}
@@ -82,7 +83,7 @@ function RoleMenu({
           <span className={`w-2 h-2 rounded-full ${r.color.split(" ")[0]}`} />
           {r.label}
           {Number(id) === userRole && (
-            <span className="ml-auto text-[10px] text-muted-foreground">current</span>
+            <span className="ml-auto text-[10px] text-muted-foreground">{tt("current")}</span>
           )}
         </DropdownMenuItem>
       ))}

@@ -8,6 +8,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import type { AdminUser } from "../types";
 import { SUBSCRIPTION_TIER_COLORS } from "../constants";
 import { RoleSelector } from "./RoleSelector";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   user: AdminUser;
@@ -51,7 +52,7 @@ export function UserRowCard({
               className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-background ${
                 user.status ? "bg-emerald-500" : "bg-zinc-400"
               }`}
-              title={user.status ? "Active" : "Inactive"}
+              title={user.status ? tt("Active") : tt("Inactive")}
             />
           </div>
           <div className="min-w-0">
@@ -92,12 +93,11 @@ export function UserRowCard({
             }`}
           >
             <span className={`w-1.5 h-1.5 rounded-full ${user.status ? "bg-emerald-500" : "bg-zinc-400"}`} />
-            {user.status ? "Active" : "Inactive"}
+            {user.status ? tt("Active") : tt("Inactive")}
           </Badge>
           {user.emailVerified && (
             <Badge variant="outline" className="text-[10px] text-emerald-600 dark:text-emerald-400 border-emerald-200">
-              <CheckCircle className="w-2.5 h-2.5 mr-0.5" /> Verified
-            </Badge>
+              <CheckCircle className="w-2.5 h-2.5 mr-0.5" />{tt("Verified")}</Badge>
           )}
           {user.subscriptionTier && user.subscriptionTier !== "free" && (
             <Badge variant="outline" className={`text-[10px] ${tierColor}`}>
@@ -110,9 +110,9 @@ export function UserRowCard({
       {/* Last login / Joined */}
       <td className="p-3 hidden lg:table-cell">
         <div className="text-xs text-muted-foreground">
-          <div>{user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : "Never"}</div>
+          <div>{user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : tt("Never")}</div>
           <div className="text-[10px] opacity-60">
-            {user.loginCount ?? 0} login{(user.loginCount ?? 0) !== 1 ? "s" : ""} · joined{" "}
+            {user.loginCount ?? 0}{tt("login")}{(user.loginCount ?? 0) !== 1 ? "s" : ""}{tt("· joined")}{" "}
             {new Date(user.createdOn).toLocaleDateString()}
           </div>
         </div>
@@ -127,7 +127,7 @@ export function UserRowCard({
                 <Eye className="w-3.5 h-3.5 text-muted-foreground" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent>View details</TooltipContent>
+            <TooltipContent>{tt("View details")}</TooltipContent>
           </Tooltip>
 
           <Tooltip>
@@ -148,7 +148,7 @@ export function UserRowCard({
                 )}
               </Button>
             </TooltipTrigger>
-            <TooltipContent>{user.status ? "Deactivate" : "Activate"}</TooltipContent>
+            <TooltipContent>{user.status ? tt("Deactivate") : tt("Activate")}</TooltipContent>
           </Tooltip>
 
           <Tooltip>
@@ -167,7 +167,7 @@ export function UserRowCard({
                 )}
               </Button>
             </TooltipTrigger>
-            <TooltipContent>{user.emailVerified ? "Unverify" : "Verify"}</TooltipContent>
+            <TooltipContent>{user.emailVerified ? tt("Unverify") : tt("Verify")}</TooltipContent>
           </Tooltip>
 
           <Tooltip>
@@ -182,7 +182,7 @@ export function UserRowCard({
                 <Trash2 className="w-3.5 h-3.5" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent>Delete user permanently</TooltipContent>
+            <TooltipContent>{tt("Delete user permanently")}</TooltipContent>
           </Tooltip>
         </div>
       </td>

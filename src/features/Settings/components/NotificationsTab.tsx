@@ -1,16 +1,17 @@
 import { Bell, BookOpen, Heart, Flame, Mail } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface NotificationsTabProps {
   notifications: Record<string, boolean>;
   onToggle: (key: string, value: boolean) => void;
 }
 const items = [
-  { key: "dailyVerseReminder", label: "Daily Verse", desc: "Receive a daily Bible verse", icon: BookOpen, color: "text-primary" },
-  { key: "devotionReminder", label: "Devotion Reminder", desc: "Daily devotion notification", icon: Heart, color: "text-rose-500" },
-  { key: "emailNotifications", label: "Email Notifications", desc: "Receive updates via email", icon: Mail, color: "text-blue-500" },
-  { key: "pushNotifications", label: "Push Notifications", desc: "In-app notifications", icon: Bell, color: "text-violet-500" },
-  { key: "studyReminders", label: "Study Reminders", desc: "Reminders to study", icon: Flame, color: "text-amber-500" },
+  { key: "dailyVerseReminder", label: tt("Daily Verse"), desc: tt("Receive a daily Bible verse"), icon: BookOpen, color: "text-primary" },
+  { key: "devotionReminder", label: tt("Devotion Reminder"), desc: tt("Daily devotion notification"), icon: Heart, color: "text-rose-500" },
+  { key: "emailNotifications", label: tt("Email Notifications"), desc: tt("Receive updates via email"), icon: Mail, color: "text-blue-500" },
+  { key: "pushNotifications", label: tt("Push Notifications"), desc: tt("In-app notifications"), icon: Bell, color: "text-violet-500" },
+  { key: "studyReminders", label: tt("Study Reminders"), desc: tt("Reminders to study"), icon: Flame, color: "text-amber-500" },
 ];
 export function NotificationsTab({ notifications, onToggle }: NotificationsTabProps) {
   return (
@@ -20,8 +21,8 @@ export function NotificationsTab({ notifications, onToggle }: NotificationsTabPr
           <Bell className="w-5 h-5 text-violet-600" />
         </div>
         <div>
-          <h3 className="font-semibold">Notification Preferences</h3>
-          <p className="text-xs text-muted-foreground">Manage how you receive notifications</p>
+          <h3 className="font-semibold">{tt("Notification Preferences")}</h3>
+          <p className="text-xs text-muted-foreground">{tt("Manage how you receive notifications")}</p>
         </div>
       </div>
       {items.map(({ key, label, desc, icon: Icon, color }) => (

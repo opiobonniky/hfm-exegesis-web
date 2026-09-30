@@ -9,6 +9,7 @@ import { ReadingPlanAssignmentsCard } from "../components/ReadingPlanAssignments
 import { ReadingPlanQuizCard } from "../components/ReadingPlanQuizCard";
 import { Badge } from "@/components/ui/badge";
 import { Calendar } from "lucide-react";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export default function AdminReadingPlanDetail() {
   const { data, actions } = useAdminReadingPlanDetail();
@@ -47,11 +48,11 @@ export default function AdminReadingPlanDetail() {
 
         <DetailMetadataGrid
           fields={[
-            { label: "Created", value: data.item.createdOn, format: "datetime" },
+            { label: tt("Created"), value: data.item.createdOn, format: "datetime" },
           ]}
         />
 
-        <DetailBackButton label="Back to Reading Plans" onClick={() => actions.navigate("/admin/reading-plans")} />
+        <DetailBackButton label={tt("Back to Reading Plans")} onClick={() => actions.navigate("/admin/reading-plans")} />
       </DetailContent>
     </div>
   );

@@ -10,6 +10,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -52,7 +53,7 @@ export function ConfirmDialog({
                 : undefined
             }
           >
-            {loading ? "Loading..." : confirmLabel}
+            {loading ? tt("Loading...") : confirmLabel}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

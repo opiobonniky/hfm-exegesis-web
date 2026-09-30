@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { ADMIN_TOOLS } from "../constants";
 import type { LucideIcon } from "lucide-react";
 import { StatsSectionHeading } from "./AdminDashboardStats";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 const ICON_MAP: Record<string, LucideIcon> = {
   Sparkles,
@@ -40,8 +41,8 @@ export function AdminDashboardTools({ onNavigate }: Props) {
   return (
     <section className="space-y-3">
       <StatsSectionHeading
-        title="Management Tools"
-        subtitle="Jump into any admin area"
+        title={tt("Management Tools")}
+        subtitle={tt("Jump into any admin area")}
       />
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-8 bg-gray-100 rounded-md shadow-md dark:bg-white/[0.03] dark:shadow-none">
         {ADMIN_TOOLS.map((tool, index) => {

@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { adminApi } from "../services/adminApi";
 import type { ReadingPlan, ReadingPlanForm } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 export type { ReadingPlan, ReadingPlanForm };
 
 
@@ -51,7 +52,7 @@ export function useAdminReadingPlans() {
         const totalPages = Math.ceil(total / 20);
         setHasMore(apiPage < totalPages);
       } catch {
-        toast({ title: "Failed to load plans", variant: "destructive" });
+        toast({ title: tt("Failed to load plans"), variant: "destructive" });
       } finally {
         setLoading(false);
         setLoadingMore(false);
@@ -135,7 +136,7 @@ export function useAdminReadingPlans() {
         loadPlans(0, search);
       }
     } catch {
-      toast({ title: "Failed to save", variant: "destructive" });
+      toast({ title: tt("Failed to save"), variant: "destructive" });
     } finally {
       setSaving(false);
     }
@@ -150,11 +151,11 @@ export function useAdminReadingPlans() {
       });
       if (res.returnCode === 200) {
         setPlans((prev) => prev.filter((p) => p.id !== deletePlan.id));
-        toast({ title: "Deleted" });
+        toast({ title: tt("Deleted") });
         setDeletePlan(null);
       }
     } catch {
-      toast({ title: "Failed to delete", variant: "destructive" });
+      toast({ title: tt("Failed to delete"), variant: "destructive" });
     } finally {
       setDeleting(false);
     }

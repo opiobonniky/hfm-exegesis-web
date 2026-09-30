@@ -1,6 +1,7 @@
 import { Gauge } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AUDIO_SPEED_OPTIONS } from "../../constants";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface SpeedControlProps {
   speechRate: number;
@@ -12,7 +13,7 @@ export function SpeedControl({ speechRate, onSpeechRateChange }: SpeedControlPro
     <section className="rounded-xl border border-border/60 bg-background/70 p-3">
       <div className="mb-2.5 flex items-center gap-2">
         <Gauge className="h-4 w-4 text-primary" />
-        <span className="text-xs font-semibold text-foreground">Speed</span>
+        <span className="text-xs font-semibold text-foreground">{tt("Speed")}</span>
         <span className="ms-auto rounded-md bg-primary/10 px-1.5 py-0.5 text-[10px] font-bold text-primary">
           {speechRate}×
         </span>

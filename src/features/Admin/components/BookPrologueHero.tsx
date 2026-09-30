@@ -5,6 +5,7 @@ import { ArrowLeft, BookOpen, Pencil, User, ScrollText, CalendarDays } from "luc
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import type { BookPrologueDetail } from "../hooks/useBookPrologueDetail";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export function BookPrologueHero({
   item,
@@ -30,16 +31,14 @@ export function BookPrologueHero({
             onClick={onBack}
             className="text-primary-foreground/90 hover:bg-white/15 hover:text-primary-foreground -ml-2"
           >
-            <ArrowLeft className="w-4 h-4" /> Back
-          </Button>
+            <ArrowLeft className="w-4 h-4" />{tt("Back")}</Button>
           <Button
             variant="secondary"
             size="sm"
             onClick={onEdit}
             className="gap-1.5 bg-white/95 text-primary hover:bg-white"
           >
-            <Pencil className="w-3.5 h-3.5" /> Edit
-          </Button>
+            <Pencil className="w-3.5 h-3.5" />{tt("Edit")}</Button>
         </div>
 
         <div className="mt-6 flex flex-col gap-5 sm:flex-row sm:items-center">
@@ -59,11 +58,11 @@ export function BookPrologueHero({
                     : "bg-amber-300/90 text-amber-950 hover:bg-amber-300"
                 }
               >
-                {published ? "Published" : "Draft"}
+                {published ? tt("Published") : tt("Draft")}
               </Badge>
             </div>
             <p className="mt-2 text-sm sm:text-base text-primary-foreground/85">
-              {item.title || item.summary || "Book Prologue Overview"}
+              {item.title || item.summary || tt("Book Prologue Overview")}
             </p>
           </div>
         </div>

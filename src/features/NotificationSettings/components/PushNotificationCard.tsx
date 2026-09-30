@@ -3,6 +3,7 @@
 // a "send test" action. All logic comes from the hook via props (validator
 // rules: no business logic, no raw HTML in pages).
 import { NotificationToggle } from "./NotificationSettingsLayout";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface PushNotificationCardProps {
   supported: boolean;
@@ -35,7 +36,7 @@ export function PushNotificationCard({
   return (
     <div className="rounded-lg border bg-card text-card-foreground p-4 space-y-1">
       <NotificationToggle
-        label="Push Notifications"
+        label={tt("Push Notifications")}
         desc={
           !supported
             ? permissionCopy.unsupported
@@ -52,7 +53,7 @@ export function PushNotificationCard({
           disabled={busy}
           className="text-xs text-primary underline-offset-2 hover:underline disabled:opacity-50"
         >
-          {busy ? "Working…" : "Send test notification"}
+          {busy ? tt("Working…") : tt("Send test notification")}
         </button>
       )}
     </div>

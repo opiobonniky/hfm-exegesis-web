@@ -38,6 +38,7 @@ import { getLanguageName } from "@/components/languages/localeUtils";
 import { useAuth } from "@/contexts/AuthContext";
 import logoImage from "@/assets/logos/exegesis_bg_rm.webp";
 import lordsbookImage from "@/assets/logos/lordsbook.webp";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 function TikTokIcon({ className }: { className?: string }) {
   return (
@@ -162,7 +163,7 @@ const PublicLayout = () => {
                 <img src={logoImage} alt="Exegesis" className="w-full h-full object-contain" />
               </div>
               <span className="font-black text-base sm:text-xl text-brand-primary font-[family-name:var(--font-heading)] tracking-tighter">
-                {t.landing?.siteTitle || "EXEGESIS PROJECT"}
+                {t.landing?.siteTitle || tt("EXEGESIS PROJECT")}
               </span>
             </Link>
 
@@ -203,10 +204,10 @@ const PublicLayout = () => {
                   </SelectTrigger>
                   <SelectContent className="min-w-[140px]">
                     {[
-                      { label: "Primary", languages: ["en"] as Language[] },
-                      { label: "European", languages: ["de", "fr", "es", "pt", "it", "el", "ru"] as Language[] },
-                      { label: "Indian", languages: ["hi", "bn", "ta", "te", "mr", "gu", "kn", "ml", "pa", "ur"] as Language[] },
-                      { label: "Other", languages: ["ar", "sw", "ne", "fil"] as Language[] },
+                      { label: tt("Primary"), languages: ["en"] as Language[] },
+                      { label: tt("European"), languages: ["de", "fr", "es", "pt", "it", "el", "ru"] as Language[] },
+                      { label: tt("Indian"), languages: ["hi", "bn", "ta", "te", "mr", "gu", "kn", "ml", "pa", "ur"] as Language[] },
+                      { label: tt("Other"), languages: ["ar", "sw", "ne", "fil"] as Language[] },
                     ].map((group) => (
                       <SelectGroup key={group.label}>
                         <SelectLabel className="text-[9px] font-bold tracking-widest uppercase text-muted-foreground/50">{group.label}</SelectLabel>
@@ -228,12 +229,12 @@ const PublicLayout = () => {
               </div>
               <Link to="/login">
                 <Button variant="ghost" className="text-muted-foreground hover:text-primary font-black uppercase tracking-widest text-[10px]">
-                  {t.landing?.signIn || "Sign In"}
+                  {t.landing?.signIn || tt("Sign In")}
                 </Button>
               </Link>
               <Link to="/login">
                 <Button className="bg-brand-primary text-white hover:bg-brand-primary-dark font-black px-6 py-5 rounded-2xl shadow-xl shadow-brand-primary/20 uppercase tracking-widest text-xs">
-                  {t.landing?.getStartedBtn || "Get Started"}
+                  {t.landing?.getStartedBtn || tt("Get Started")}
                 </Button>
               </Link>
             </div>
@@ -248,12 +249,12 @@ const PublicLayout = () => {
                   <img src={logoImage} alt="Exegesis" className="w-full h-full object-contain" />
                 </div>
                 <span className="font-black text-xs text-brand-primary font-[family-name:var(--font-heading)] tracking-tighter">
-                  {t.landing?.siteTitle || "EXEGESIS PROJECT"}
+                  {t.landing?.siteTitle || tt("EXEGESIS PROJECT")}
                 </span>
               </div>
               <Link to="/login">
                 <Button variant="ghost" size="sm" className="font-black text-xs uppercase tracking-wider px-3 py-2 text-brand-primary">
-                  {t.landing?.signIn || "Sign In"}
+                  {t.landing?.signIn || tt("Sign In")}
                 </Button>
               </Link>
             </div>
@@ -268,7 +269,7 @@ const PublicLayout = () => {
             <div className="p-5 border-b border-border flex items-center justify-between bg-muted/50">
               <div className="flex items-center gap-2">
                 <div className="w-1 h-5 bg-brand-primary rounded-full" />
-                <span className="font-black text-brand-primary uppercase tracking-widest text-sm">{t.landing?.menu || "Menu"}</span>
+                <span className="font-black text-brand-primary uppercase tracking-widest text-sm">{t.landing?.menu || tt("Menu")}</span>
               </div>
               <button onClick={() => setMobileMenuOpen(false)} className="p-2 text-muted-foreground hover:text-foreground transition-colors"><X className="w-5 h-5" /></button>
             </div>
@@ -321,10 +322,10 @@ const PublicLayout = () => {
                   </SelectTrigger>
                   <SelectContent className="min-w-[140px]">
                     {[
-                      { label: "Primary", languages: ["en"] as Language[] },
-                      { label: "European", languages: ["de", "fr", "es", "pt", "it", "el", "ru"] as Language[] },
-                      { label: "Indian", languages: ["hi", "bn", "ta", "te", "mr", "gu", "kn", "ml", "pa", "ur"] as Language[] },
-                      { label: "Other", languages: ["ar", "sw", "ne", "fil"] as Language[] },
+                      { label: tt("Primary"), languages: ["en"] as Language[] },
+                      { label: tt("European"), languages: ["de", "fr", "es", "pt", "it", "el", "ru"] as Language[] },
+                      { label: tt("Indian"), languages: ["hi", "bn", "ta", "te", "mr", "gu", "kn", "ml", "pa", "ur"] as Language[] },
+                      { label: tt("Other"), languages: ["ar", "sw", "ne", "fil"] as Language[] },
                     ].map((group) => (
                       <SelectGroup key={group.label}>
                         <SelectLabel className="text-[9px] font-bold tracking-widest uppercase text-muted-foreground/50">{group.label}</SelectLabel>
@@ -348,7 +349,7 @@ const PublicLayout = () => {
             <div className="p-5 border-t border-border space-y-3 bg-muted/50">
               <Link to="/login" className="block" onClick={() => setMobileMenuOpen(false)}>
                 <Button className="w-full bg-brand-primary text-white font-black py-6 rounded-2xl shadow-xl shadow-brand-primary/20 text-base uppercase tracking-widest">
-                  {t.landing?.getStartedBtn || "Get Started"}
+                  {t.landing?.getStartedBtn || tt("Get Started")}
                 </Button>
               </Link>
             </div>
@@ -368,10 +369,10 @@ const PublicLayout = () => {
           <div className="flex flex-col lg:flex-row items-start justify-between gap-10 lg:gap-12">
             <div className="w-full lg:w-1/3">
               <p className="text-brand-accent/80 font-serif italic text-base sm:text-lg md:text-xl leading-relaxed max-w-sm">
-                &ldquo;{t.landing?.footerVerse || "Write the vision, and make it plain upon tables, that he may run that readeth it."}&rdquo;
+                &ldquo;{t.landing?.footerVerse || tt("Write the vision, and make it plain upon tables, that he may run that readeth it.")}&rdquo;
               </p>
               <p className="text-muted-foreground text-[10px] sm:text-xs font-black uppercase tracking-widest mt-4">
-                — {t.landing?.footerVerseRef || "Habakkuk 2:2"}
+                — {t.landing?.footerVerseRef || tt("Habakkuk 2:2")}
               </p>
             </div>
             <div className="w-full lg:w-1/3 text-center">
@@ -379,15 +380,15 @@ const PublicLayout = () => {
                 <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-white/5 p-2 flex items-center justify-center border border-white/10">
                   <img src={logoImage} alt="Exegesis" className="w-full h-full object-contain brightness-0 invert" />
                 </div>
-                <span className="text-xl sm:text-2xl font-black text-white font-[family-name:var(--font-heading)] tracking-tighter">{t.landing?.siteTitle || "EXEGESIS PROJECT"}</span>
+                <span className="text-xl sm:text-2xl font-black text-white font-[family-name:var(--font-heading)] tracking-tighter">{t.landing?.siteTitle || tt("EXEGESIS PROJECT")}</span>
               </div>
               <p className="text-muted-foreground text-sm sm:text-base leading-relaxed max-w-xs mx-auto">
-                {t.landing?.footerDesc || "Helping you shine with excellence and integrity through the power of the Word."}
+                {t.landing?.footerDesc || tt("Helping you shine with excellence and integrity through the power of the Word.")}
               </p>
             </div>
             <div className="w-full lg:w-1/3 lg:text-right">
               <h4 className="text-brand-accent font-serif text-lg sm:text-xl mb-6">
-                {t.landing?.footerConnect || "Connect With Us"}
+                {t.landing?.footerConnect || tt("Connect With Us")}
               </h4>
               <div className="flex items-center lg:justify-end gap-4">
                 <TooltipProvider>
@@ -413,7 +414,7 @@ const PublicLayout = () => {
               {(t.landing?.footerCopyright || "© {year} Exegesis. Built for Kingdom Impact.").replace("{year}", String(new Date().getFullYear()))}
             </p>
             <p className="text-muted-foreground text-[10px] sm:text-xs font-black uppercase tracking-widest">
-              {t.landing?.footerPoweredBy || "Powered by Him First Media Group."}
+              {t.landing?.footerPoweredBy || tt("Powered by Him First Media Group.")}
             </p>
           </div>
         </div>

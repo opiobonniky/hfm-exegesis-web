@@ -11,6 +11,7 @@ import {
   DAILY_CONTENT_VIEW_ROUTES,
   PAGE_SIZE,
 } from "../constants";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export function useAdminDailyContent() {
   const navigate = useNavigate();
@@ -54,7 +55,7 @@ export function useAdminDailyContent() {
           setTotal(res.returnData.totalElements || 0);
         }
       } catch {
-        toast({ title: "Failed to load content", variant: "destructive" });
+        toast({ title: tt("Failed to load content"), variant: "destructive" });
       } finally {
         setLoading(false);
       }
@@ -92,14 +93,14 @@ export function useAdminDailyContent() {
         [idKey]: deleteTarget.id,
       });
       if (res?.returnCode === 200) {
-        toast({ title: "Deleted" });
+        toast({ title: tt("Deleted") });
         setDeleteTarget(null);
         loadContent(type, page);
       } else {
-        toast({ title: "Delete failed", variant: "destructive" });
+        toast({ title: tt("Delete failed"), variant: "destructive" });
       }
     } catch {
-      toast({ title: "Error deleting", variant: "destructive" });
+      toast({ title: tt("Error deleting"), variant: "destructive" });
     } finally {
       setDeleting(false);
     }

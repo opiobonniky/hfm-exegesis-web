@@ -4,6 +4,7 @@ import { PLAN_CATEGORIES, PLAN_DIFFICULTIES, DIFF_BADGE } from "../constants";
 import { isDayComplete } from "../hooks/useAddReadingPlanPage";
 import type { PlanMeta } from "../hooks/useAddReadingPlanPage";
 import type { DayAssignment } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   meta: PlanMeta;
@@ -24,7 +25,7 @@ export function PlanStepReview({ meta, days, submitting, onPrev, onSubmit, t, is
       <div className="bg-card rounded-2xl border border-border/50 shadow-sm overflow-hidden">
         <div className="px-6 py-4 border-b border-border/50 bg-muted/50">
           <h2 className="font-bold text-foreground flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-teal-600" />{t.readingPlan?.reviewConfirm || "Review & Confirm"}
+            <CheckCircle2 className="w-4 h-4 text-teal-600" />{t.readingPlan?.reviewConfirm || tt("Review & Confirm")}
           </h2>
         </div>
         <div className="p-6 space-y-6">
@@ -33,7 +34,7 @@ export function PlanStepReview({ meta, days, submitting, onPrev, onSubmit, t, is
             {meta.description && <p className="text-sm text-muted-foreground">{meta.description}</p>}
             <div className="flex flex-wrap gap-2 pt-1">
               <span className="text-[11px] border border-border bg-card text-muted-foreground rounded-lg px-2 py-0.5 font-semibold">
-                {meta.totalDays} {t.readingPlan?.days || "days"}
+                {meta.totalDays} {t.readingPlan?.days || tt("days")}
               </span>
               <span className="text-[11px] border border-border bg-card text-muted-foreground rounded-lg px-2 py-0.5 font-semibold">
                 {tl(PLAN_CATEGORIES.find((c) => c.value === meta.category)?.labelKey || "catIntroduction")}
@@ -50,7 +51,7 @@ export function PlanStepReview({ meta, days, submitting, onPrev, onSubmit, t, is
           </div>
           <div>
             <div className="flex items-center justify-between mb-2">
-              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">{t.readingPlan?.dailyAssignments || "Daily Assignments"}</p>
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">{t.readingPlan?.dailyAssignments || tt("Daily Assignments")}</p>
             </div>
             <div className="rounded-xl border border-border/50 overflow-hidden divide-y divide-stone-50">
               {days.map((day) => {
@@ -69,7 +70,7 @@ export function PlanStepReview({ meta, days, submitting, onPrev, onSubmit, t, is
                           </p>
                         </>
                       ) : (
-                        <p className="text-xs text-muted-foreground/70 italic">{t.readingPlan?.notConfiguredEdit || "Not configured"}</p>
+                        <p className="text-xs text-muted-foreground/70 italic">{t.readingPlan?.notConfiguredEdit || tt("Not configured")}</p>
                       )}
                     </div>
                   </div>
@@ -81,13 +82,13 @@ export function PlanStepReview({ meta, days, submitting, onPrev, onSubmit, t, is
       </div>
       <div className="flex justify-between">
         <button type="button" onClick={onPrev} disabled={submitting} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-border bg-card text-muted-foreground hover:bg-muted text-sm font-semibold transition-all disabled:opacity-50">
-          <ArrowLeft className={cn("w-4 h-4", isRtl && "rotate-180")} />{t.common?.back || "Back"}
+          <ArrowLeft className={cn("w-4 h-4", isRtl && "rotate-180")} />{t.common?.back || tt("Back")}
         </button>
         <button type="button" onClick={onSubmit} disabled={submitting} className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-sm font-bold shadow-sm transition-all disabled:opacity-50">
           {submitting ? (
-            <><Loader2 className="w-4 h-4 animate-spin" />{t.readingPlan?.savingLabel || "Saving..."}</>
+            <><Loader2 className="w-4 h-4 animate-spin" />{t.readingPlan?.savingLabel || tt("Saving...")}</>
           ) : (
-            <><Save className="w-4 h-4" />{t.readingPlan?.createPlanTitle || "Create Plan"}</>
+            <><Save className="w-4 h-4" />{t.readingPlan?.createPlanTitle || tt("Create Plan")}</>
           )}
         </button>
       </div>

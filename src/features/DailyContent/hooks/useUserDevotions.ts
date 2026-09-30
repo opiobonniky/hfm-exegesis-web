@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { sendPostRequest } from "@/services/api";
 import type { DailyDevotionItem } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export function useUserDevotions() {
   const { t, isRtl } = useLanguage();
@@ -21,8 +22,8 @@ export function useUserDevotions() {
     try {
       const res = await sendPostRequest("bible", "get-todays-devotion", {});
       if (res?.returnCode === 200 && res?.returnData) setDevotion(res.returnData);
-      else toast({ title: "No devotion available today", variant: "destructive" });
-    } catch { toast({ title: "Failed to load devotion", variant: "destructive" }); }
+      else toast({ title: tt("No devotion available today"), variant: "destructive" });
+    } catch { toast({ title: tt("Failed to load devotion"), variant: "destructive" }); }
     finally { setLoading(false); setRefreshing(false); }
   }, [toast]);
   useEffect(() => { loadDevotion(); }, [loadDevotion]);
@@ -40,7 +41,7 @@ export function useUserDevotions() {
       : devotion.title;
     const text = `"${devotion.content.slice(0, 200)}..." — ${ref}`;
     navigator.clipboard.writeText(text).then(() =>
-      toast({ title: "Copied to clipboard" })
+      toast({ title: tt("Copied to clipboard") })
     );
   }, [devotion, toast]);
   const handleShare = useCallback(async () => {
@@ -50,7 +51,7 @@ export function useUserDevotions() {
       try { await navigator.share({ title: devotion.title, text }); } catch {}
     } else {
       navigator.clipboard.writeText(text).then(() =>
-        toast({ title: "Copied to clipboard" })
+        toast({ title: tt("Copied to clipboard") })
       );
     }
   }, [devotion, toast]);

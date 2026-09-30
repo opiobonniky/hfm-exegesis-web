@@ -4,6 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { sendPostRequest } from "@/services/api";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export function useVerifyAccountPage() {
   const navigate = useNavigate();
@@ -29,7 +30,7 @@ export function useVerifyAccountPage() {
       if (res?.returnCode === 200) {
         setSuccess(true);
         if (res.returnData) setUserInfo(res.returnData);
-        toast({ title: "Account verified!" });
+        toast({ title: tt("Account verified!") });
         setTimeout(() => navigate("/user-dashboard"), 2000);
       } else {
         setError(res?.returnMessage || "Invalid code");
@@ -41,9 +42,9 @@ export function useVerifyAccountPage() {
     setIsResending(true);
     try {
       const res = await sendPostRequest("auth", "resend-verification", { email });
-      if (res?.returnCode === 200) toast({ title: "Code resent!" });
-      else toast({ title: "Failed to resend", variant: "destructive" });
-    } catch { toast({ title: "Failed to resend", variant: "destructive" }); }
+      if (res?.returnCode === 200) toast({ title: tt("Code resent!") });
+      else toast({ title: tt("Failed to resend"), variant: "destructive" });
+    } catch { toast({ title: tt("Failed to resend"), variant: "destructive" }); }
     finally { setIsResending(false); }
   }, [email, toast]);
   return {

@@ -1,6 +1,7 @@
 import { ArrowLeft } from "lucide-react";
 import AnimatedNumber from "@/components/trivia/AnimatedNumber";
 import type { DifficultyFilter } from "@/hooks/useTrivia";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   onBack: () => void;
@@ -31,11 +32,9 @@ export default function TriviaPageHeader({ onBack, difficulty, score }: Props) {
             <ArrowLeft className="w-4 h-4 text-primary-foreground" />
           </button>
           <div>
-            <h1 className="text-base sm:text-lg font-bold tracking-wide leading-none text-primary-foreground" style={{ fontFamily: "'Cinzel', serif" }}>
-              Bible Trivia
-            </h1>
+            <h1 className="text-base sm:text-lg font-bold tracking-wide leading-none text-primary-foreground" style={{ fontFamily: "'Cinzel', serif" }}>{tt("Bible Trivia")}</h1>
             <p className="text-[10px] tracking-widest uppercase leading-none mt-0.5 text-primary-foreground/65">
-              {difficulty ? `${difficulty.charAt(0).toUpperCase() + difficulty.slice(1)} questions` : "All levels"}
+              {difficulty ? `${difficulty.charAt(0).toUpperCase() + difficulty.slice(1)} questions` : tt("All levels")}
             </p>
           </div>
         </div>

@@ -2,6 +2,7 @@
 import { BookText, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import BookOverviewTeaser from "./BookOverviewTeaser";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface BookCardProps {
   bookNumber: number;
@@ -40,10 +41,10 @@ export default function BookCard({ bookNumber, bookName, testament, chaptersCoun
             <p className="text-sm font-bold text-foreground truncate">{bookName}</p>
           </div>
           <div className="flex items-center gap-2 mt-0.5 ml-8">
-            <span className="text-[10px] font-semibold text-muted-foreground/60">{chaptersCount} {chaptersCount === 1 ? "chapter" : "chapters"}</span>
+            <span className="text-[10px] font-semibold text-muted-foreground/60">{chaptersCount} {chaptersCount === 1 ? tt("chapter") : tt("chapters")}</span>
             {totalVerses > 0 && <>
               <span className="text-[8px] text-muted-foreground/30">·</span>
-              <span className="text-[10px] font-semibold text-muted-foreground/60">{totalVerses} verses</span>
+              <span className="text-[10px] font-semibold text-muted-foreground/60">{totalVerses}{tt("verses")}</span>
             </>}
           </div>
         </div>
@@ -60,8 +61,8 @@ export default function BookCard({ bookNumber, bookName, testament, chaptersCoun
             <BookOverviewTeaser bookName={bookName} isRtl={isRtl ?? false} onClick={onBookOverview} />
           )}
           <div className="flex items-center justify-between">
-            <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.15em]">{bookName} — Chapters</p>
-            <span className="text-[9px] text-muted-foreground/40 font-medium">{chaptersCount} total</span>
+            <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.15em]">{bookName}{tt("— Chapters")}</p>
+            <span className="text-[9px] text-muted-foreground/40 font-medium">{chaptersCount}{tt("total")}</span>
           </div>
           <div className={cn("grid gap-1.5",
             chaptersCount <= 10 ? "grid-cols-5 sm:grid-cols-10" : chaptersCount <= 22 ? "grid-cols-5 sm:grid-cols-11" : "grid-cols-6 sm:grid-cols-12")}>

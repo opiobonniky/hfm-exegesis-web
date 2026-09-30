@@ -3,6 +3,7 @@ import { CheckCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar } from "@/components/ui/Avatar";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface UserProfileCardProps {
   firstName?: string;
@@ -51,12 +52,11 @@ export function UserProfileCard({
                 {role.label}
               </Badge>
               <Badge variant={status ? "default" : "destructive"} className="text-[10px]">
-                {status ? "Active" : "Inactive"}
+                {status ? tt("Active") : tt("Inactive")}
               </Badge>
               {emailVerified && (
                 <Badge variant="outline" className="text-[10px] text-emerald-600 dark:text-emerald-400 border-emerald-200">
-                  <CheckCircle className="w-2.5 h-2.5 mr-0.5" /> Verified
-                </Badge>
+                  <CheckCircle className="w-2.5 h-2.5 mr-0.5" />{tt("Verified")}</Badge>
               )}
               {subscriptionTier && subscriptionTier !== "free" && (
                 <Badge variant="outline" className={`text-[10px] ${tierColor}`}>

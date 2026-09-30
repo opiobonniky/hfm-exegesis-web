@@ -10,6 +10,7 @@ import {
   VoiceSliderCard,
   VoiceGridCard,
 } from "../components";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 function VoiceLoadingSpinner() {
   return (
@@ -28,8 +29,8 @@ export default function VoiceSettingsPage() {
   return (
     <VoiceSettingsLayout>
       <VoiceSettingsHeader
-        title="Reading Voice"
-        subtitle="Configure text-to-speech voice and playback"
+        title={tt("Reading Voice")}
+        subtitle={tt("Configure text-to-speech voice and playback")}
         saving={h.saving}
         onBack={h.goBack}
         onSave={h.handleSave}
@@ -56,7 +57,7 @@ export default function VoiceSettingsPage() {
 
       <VoiceGrid>
         <VoiceSliderCard
-          label="Speed"
+          label={tt("Speed")}
           icon={<svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>}
           iconColor="#f59e0b"
           value={h.settings.rate}
@@ -65,7 +66,7 @@ export default function VoiceSettingsPage() {
           onChange={(v) => h.updateSetting("rate", v)}
         />
         <VoiceSliderCard
-          label="Pitch"
+          label={tt("Pitch")}
           icon={<svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z" /></svg>}
           iconColor="#a855f7"
           value={h.settings.pitch}

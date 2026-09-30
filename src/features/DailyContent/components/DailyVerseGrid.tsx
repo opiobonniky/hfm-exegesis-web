@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { getVerseText } from "@/utilities/bibleUtils";
 import { formatShortDate, isToday, isFuture } from "../constants";
 import type { DailyVerseItem } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   verses: DailyVerseItem[];
@@ -31,7 +32,7 @@ export default function DailyVerseGrid({
   return (
     <div>
       <h2 className="text-lg font-bold mb-4">
-        {isFiltered ? "Filtered Verses" : "Verse Window"}
+        {isFiltered ? tt("Filtered Verses") : tt("Verse Window")}
       </h2>
       <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
         {verses.map((verse, index) => {
@@ -42,9 +43,7 @@ export default function DailyVerseGrid({
             <div key={verse.id} className="contents">
               {insertDivider && (
                 <div className="md:col-span-2 lg:col-span-3 flex items-center gap-3 py-1">
-                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                    Today & Past
-                  </span>
+                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{tt("Today & Past")}</span>
                   <div className="flex-1 h-px bg-border" />
                 </div>
               )}
@@ -70,7 +69,7 @@ export default function DailyVerseGrid({
                       {formatShortDate(verse.displayDate)}
                     </Badge>
                     {isFuture(verse.displayDate) && (
-                      <span className="text-[10px] font-semibold text-primary">Upcoming</span>
+                      <span className="text-[10px] font-semibold text-primary">{tt("Upcoming")}</span>
                     )}
                   </div>
                   {isAdmin && (
@@ -78,21 +77,21 @@ export default function DailyVerseGrid({
                       <button
                         onClick={(e) => { e.stopPropagation(); onView(verse); }}
                         className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-                        title="View details"
+                        title={tt("View details")}
                       >
                         <Eye className="w-3.5 h-3.5" />
                       </button>
                       <button
                         onClick={(e) => { e.stopPropagation(); onEdit(verse); }}
                         className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-                        title="Edit"
+                        title={tt("Edit")}
                       >
                         <Pencil className="w-3.5 h-3.5" />
                       </button>
                       <button
                         onClick={(e) => { e.stopPropagation(); onDelete(verse); }}
                         className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-destructive transition-colors"
-                        title="Delete"
+                        title={tt("Delete")}
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -120,11 +119,8 @@ export default function DailyVerseGrid({
             size="sm"
             disabled={!hasPrevious}
             onClick={() => onPageChange(page - 1)}
-          >
-            Previous
-          </Button>
-          <span className="text-xs text-muted-foreground">
-            Page {page + 1} of {Math.max(totalPages, 1)}
+          >{tt("Previous")}</Button>
+          <span className="text-xs text-muted-foreground">{tt("Page")}{page + 1} of {Math.max(totalPages, 1)}
           </span>
           <Button
             variant="outline"

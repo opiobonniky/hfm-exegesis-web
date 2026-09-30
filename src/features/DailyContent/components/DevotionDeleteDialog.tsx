@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { useLanguage } from "@/components/languages/languageProvider";
 import type { DailyDevotionItem } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   open: boolean;
@@ -19,8 +20,8 @@ export function DevotionDeleteDialog({ open, onOpenChange, target, isDeleting, o
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{t.devotions?.deleteDevotion || "Delete Devotion"}</DialogTitle>
-          <DialogDescription>{t.devotions?.deleteDevotionDesc || "This action cannot be undone."}</DialogDescription>
+          <DialogTitle>{t.devotions?.deleteDevotion || tt("Delete Devotion")}</DialogTitle>
+          <DialogDescription>{t.devotions?.deleteDevotionDesc || tt("This action cannot be undone.")}</DialogDescription>
         </DialogHeader>
         {target && (
           <div className="py-2">
@@ -29,10 +30,10 @@ export function DevotionDeleteDialog({ open, onOpenChange, target, isDeleting, o
           </div>
         )}
         <DialogFooter className="gap-2 sm:gap-0">
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isDeleting}>{t.common?.cancel || "Cancel"}</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isDeleting}>{t.common?.cancel || tt("Cancel")}</Button>
           <Button variant="destructive" onClick={onConfirm} disabled={isDeleting} className="gap-2">
             {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
-            {t.devotions?.deleteDevotion || "Delete Devotion"}
+            {t.devotions?.deleteDevotion || tt("Delete Devotion")}
           </Button>
         </DialogFooter>
       </DialogContent>

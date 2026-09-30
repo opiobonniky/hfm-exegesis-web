@@ -9,6 +9,7 @@ import { MenuItem } from "../../types";
 import { LanguageSelector } from "../LanguageSelector";
 import { NavMenuItem } from "../NavMenuItem";
 import { MobileNavMenu } from "../MobileNavMenu";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface NavBarProps {
   scrolled: boolean;
@@ -50,7 +51,7 @@ export function NavBar({ scrolled, mobileMenuOpen, setMobileMenuOpen, menuPanelR
                 <img src={logoImage} alt="Exegesis" className="w-full h-full object-contain" />
               </div>
               <span className={`font-black font-[family-name:var(--font-heading)] tracking-tighter whitespace-nowrap transition-all duration-300 ${scrolled ? "text-sm sm:text-lg lg:text-xl text-brand-primary opacity-100" : "text-xs opacity-0 pointer-events-none w-0 overflow-hidden"}`}>
-                {t.landing?.siteTitle || "EXEGESIS PROJECT"}
+                {t.landing?.siteTitle || tt("EXEGESIS PROJECT")}
               </span>
             </div>
 
@@ -70,7 +71,7 @@ export function NavBar({ scrolled, mobileMenuOpen, setMobileMenuOpen, menuPanelR
               </div>
               <Link to="/login">
                 <Button variant="ghost" className="bg-brand-primary text-white hover:bg-brand-primary-dark font-black px-6 py-5 rounded-2xl shadow-xl shadow-brand-primary/20 uppercase tracking-widest text-xs nav-signin">
-                  {t.landing?.signIn || "Sign In"}
+                  {t.landing?.signIn || tt("Sign In")}
                 </Button>
               </Link>
             </div>

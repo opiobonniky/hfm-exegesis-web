@@ -10,6 +10,7 @@ import { routes } from "@/components/Routes/routes";
 import { getDeviceInfo, getClientIP } from "@/lib/utils";
 import { GoogleAuthProvider, signInWithPopup, getRedirectResult } from "firebase/auth";
 import { auth, googleProvider } from "@/firebaseConfiguration/config";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export function useLoginPage() {
   const navigate = useNavigate();
@@ -71,7 +72,7 @@ export function useLoginPage() {
   // ─── Email/Password Login ──────────────────────────────────────────────────
   const handleLogin = useCallback(async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!email || !password) { toast({ title: "Please fill in all fields", variant: "destructive" }); return; }
+    if (!email || !password) { toast({ title: tt("Please fill in all fields"), variant: "destructive" }); return; }
     setIsLoading(true);
     try {
       const deviceInfo = getDeviceInfo();
@@ -79,7 +80,7 @@ export function useLoginPage() {
       const res = await sendPostRequest("auth", "login", { username: email, password, deviceInfo: { ...deviceInfo, ip: clientIP } });
       if (res?.returnCode === 200 && res.returnData) {
         setUserInfo(res.returnData);
-        toast({ title: "Welcome back!" });
+        toast({ title: tt("Welcome back!") });
         // Users on the admin-issued temporary password must change it first
         if (res.returnData.mustChangePassword) {
           navigate(routes.forceChangePassword.path, { replace: true });

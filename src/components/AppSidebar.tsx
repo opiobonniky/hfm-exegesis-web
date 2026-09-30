@@ -37,6 +37,7 @@ import {
 
 import { routes } from "./Routes/routes";
 import logoImage from "@/assets/logos/exegesis_bg_rm.webp";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 /* ───────────────────────────────────────────────────────────────────────────────
    Types
@@ -52,106 +53,94 @@ interface NavItem {
 
 const adminNavItems: NavItem[] = [
   {
-    title: "sidebar.dashboard",
+    title: "Dashboard",
     url: routes.dashboard.path,
     icon: LayoutDashboard,
   },
 
-  { title: "sidebar.users", url: routes.adminUsers.path, icon: Users },
-  { title: "sidebar.bible", url: routes.bibleReader.path, icon: BookText },
+  { title: "Users", url: routes.adminUsers.path, icon: Users },
+  { title: "Bible app", url: routes.bibleReader.path, icon: BookText },
   {
-    title: "sidebar.dailyContentAdmin",
+    title: "Daily Content",
     url: routes.adminDailyContent.path,
     icon: CalendarDays,
   },
   {
-    title: "sidebar.journalModeration",
+    title: "Journal Moderation",
     url: routes.adminJournalModeration.path,
     icon: PenLine,
   },
   {
-    title: "sidebar.bookPrologues",
+    title: "Book Prologues",
     url: routes.adminBookPrologues.path,
     icon: ScrollText,
   },
 
   {
-    title: "sidebar.explanations",
+    title: "Bible study",
     url: routes.adminVerseExplanations.path,
     icon: BookMarked,
   },
   {
-    title: "sidebar.readingPlans",
+    title: "Reading Plans",
     url: routes.readingPlans.path,
     icon: BookOpen,
   },
 
   {
-    title: "sidebar.studyTools",
+    title: "Study Tools",
     url: routes.adminStudyTools.path,
     icon: BookText,
   },
   {
-    title: "sidebar.triviaAdmin",
+    title: "Trivia Management",
     url: routes.adminTrivia.path,
     icon: HelpCircle,
   },
   {
-    title: "sidebar.subscriptionsAdmin",
+    title: "Subscriptions",
     url: routes.adminSubscriptions.path,
     icon: CreditCard,
   },
 ];
 
 const userNavItems: NavItem[] = [
-  { title: "sidebar.myDashboard", url: routes.home.path, icon: Home },
-  { title: "sidebar.bible", url: routes.bibleLibrary.path, icon: BookText },
-  { title: "sidebar.search", url: routes.search.path, icon: SearchIcon },
-  { title: "sidebar.dailyVerse", url: routes.userDailyVerse.path, icon: Sun },
+  { title: "My Dashboard", url: routes.home.path, icon: Home },
+  { title: "Bible app", url: routes.bibleLibrary.path, icon: BookText },
+  { title: "Search Bible", url: routes.search.path, icon: SearchIcon },
+  { title: "Verse Teaching", url: routes.userDailyVerse.path, icon: Sun },
   {
-    title: "sidebar.dailyExegesis",
+    title: "Daily Exegesis",
     url: routes.dailyExegesis.path,
     icon: BookOpen,
   },
   {
-    title: "sidebar.devotions",
+    title: "Verse Devotionals",
     url: routes.userDevotions.path,
     icon: SproutIcon,
   },
-  { title: "sidebar.readingPlans", url: routes.userPlans.path, icon: BookOpen },
+  { title: "Reading Plans", url: routes.userPlans.path, icon: BookOpen },
   {
-    title: "sidebar.highlights",
+    title: "Highlights",
     url: routes.highlights.path,
     icon: Highlighter,
   },
-  { title: "sidebar.notes", url: routes.notes.path, icon: FileText },
-  { title: "sidebar.favorites", url: routes.favorites.path, icon: Star },
-  { title: "sidebar.history", url: routes.history.path, icon: Clock },
-  { title: "sidebar.journal", url: routes.journal.path, icon: PenLine },
+  { title: "My Notes", url: routes.notes.path, icon: FileText },
+  { title: "Favorites", url: routes.favorites.path, icon: Star },
+  { title: "Reading History", url: routes.history.path, icon: Clock },
+  { title: "Journaling", url: routes.journal.path, icon: PenLine },
   {
-    title: "sidebar.exegesisLab",
+    title: "Dictionary",
     url: routes.strongsDictionary.path,
     icon: Microscope,
   },
-  { title: "sidebar.studyBible", url: routes.studyBible.path, icon: BookText },
-  { title: "sidebar.trivia", url: routes.trivia.path, icon: Sparkles },
+  { title: "Study Bible", url: routes.studyBible.path, icon: BookText },
+  { title: "Bible Trivia", url: routes.trivia.path, icon: Sparkles },
 ];
 
 const manageNavItems: NavItem[] = [
-  { title: "common.settings", url: routes.settings.path, icon: Plus },
+  { title: "Settings", url: routes.settings.path, icon: Plus },
 ];
-
-/* ─── Helpers ──────────────────────────────────────────────────────────────── */
-
-const getNavTitle = (t: any, key: string): string => {
-  const parts = key.split(".");
-  if (parts.length === 2 && t[parts[0]] && t[parts[0]][parts[1]]) {
-    return t[parts[0]][parts[1]];
-  }
-  if (key === "sidebar.journalModeration") return "Journal Moderation";
-  if (key === "sidebar.bookPrologues") return "Book Prologues";
-  return key;
-};
 
 /* ── Pill Nav Item ──────────────────────────────────────────────────────── */
 
@@ -166,7 +155,7 @@ function PillNavItem({
   collapsed: boolean;
   onNavClick?: () => void;
 }) {
-  const label = getNavTitle(useLanguage().t, item.title);
+  const label = tt(item.title);
   const Icon = item.icon;
 
   return (
@@ -298,8 +287,7 @@ function BibleNavItem({
 }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const t = useLanguage().t;
-  const label = getNavTitle(t, "sidebar.bible");
+  const label = tt("Bible app");
   const targetUrl = getBibleNavUrl();
   const isBibleReaderActive = location.pathname.startsWith(
     routes.bibleReader.path,
@@ -395,7 +383,7 @@ export function AppSidebar() {
   /* ── Render helper for nav list ── */
   const renderNavItems = (items: NavItem[]) =>
     items.map((item) => {
-      if (item.title === "sidebar.bible" && !isAdmin) {
+      if (item.url === routes.bibleLibrary.path && !isAdmin) {
         return (
           <li key={item.title}>
             <BibleNavItem
@@ -420,8 +408,8 @@ export function AppSidebar() {
   /* ── Render helper for collapsed nav items (with tooltips) ── */
   const renderCollapsedNavItems = (items: NavItem[]) =>
     items.map((item) => {
-      const label = getNavTitle(t, item.title);
-      if (item.title === "sidebar.bible" && !isAdmin) {
+      const label = tt(item.title);
+      if (item.url === routes.bibleLibrary.path && !isAdmin) {
         return (
           <li key={item.title}>
             <CollapsedTooltipButton label={label}>
@@ -590,7 +578,7 @@ export function AppSidebar() {
             </div>
             {!collapsed && (
               <span className="text-sm font-medium">
-                {t.sidebar?.logout || "Sign Out"}
+                {t.sidebar?.logout || tt("Sign Out")}
               </span>
             )}
           </button>

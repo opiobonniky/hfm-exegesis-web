@@ -5,6 +5,7 @@ import { useLanguage } from "@/components/languages/languageProvider";
 import { animSlideLeft, animFadeUp, animSlideRight } from "./animations";
 import logoImage from "@/assets/logos/exegesis_bg_rm.webp";
 import lordsBookImage from "@/assets/logos/lordsbook.webp";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 function TikTokIcon({ className }: { className?: string }) {
   return (
@@ -41,9 +42,9 @@ export function FooterSection() {
         <div className="flex flex-col lg:flex-row items-start justify-between gap-10 lg:gap-12">
           <motion.div variants={animSlideLeft} initial="hidden" whileInView="visible" viewport={{ once: true }} className="w-full lg:w-1/3">
             <p className="text-brand-accent/80 font-serif italic text-base sm:text-lg md:text-xl leading-relaxed max-w-sm">
-              &ldquo;{t.landing?.footerVerse || "Write the vision, and make it plain upon tables, that he may run that readeth it."}&rdquo;
+              &ldquo;{t.landing?.footerVerse || tt("Write the vision, and make it plain upon tables, that he may run that readeth it.")}&rdquo;
             </p>
-            <p className="text-muted-foreground text-[10px] sm:text-xs font-black uppercase tracking-widest mt-4">— {t.landing?.footerVerseRef || "Habakkuk 2:2"}</p>
+            <p className="text-muted-foreground text-[10px] sm:text-xs font-black uppercase tracking-widest mt-4">— {t.landing?.footerVerseRef || tt("Habakkuk 2:2")}</p>
           </motion.div>
           <motion.div variants={animFadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="w-full lg:w-1/3 text-center">
             <div className="flex items-center justify-center gap-3 mb-4">
@@ -51,15 +52,15 @@ export function FooterSection() {
                 <img src={logoImage} alt="Exegesis" className="w-full h-full object-contain brightness-0 invert" />
               </div>
               <span className="text-xl sm:text-2xl font-black text-white font-[family-name:var(--font-heading)] tracking-tighter">
-                {t.landing?.siteTitle || "EXEGESIS PROJECT"}
+                {t.landing?.siteTitle || tt("EXEGESIS PROJECT")}
               </span>
             </div>
             <p className="text-muted-foreground text-sm sm:text-base leading-relaxed max-w-xs mx-auto">
-              {t.landing?.footerDesc || "Helping you shine with excellence and integrity through the power of the Word."}
+              {t.landing?.footerDesc || tt("Helping you shine with excellence and integrity through the power of the Word.")}
             </p>
           </motion.div>
           <motion.div variants={animSlideRight} initial="hidden" whileInView="visible" viewport={{ once: true }} className="w-full lg:w-1/3 lg:text-right">
-            <h4 className="text-brand-accent font-serif text-lg sm:text-xl mb-6">{t.landing?.footerConnect || "Connect With Us"}</h4>
+            <h4 className="text-brand-accent font-serif text-lg sm:text-xl mb-6">{t.landing?.footerConnect || tt("Connect With Us")}</h4>
             <div className="flex items-center lg:justify-end gap-4">
               <TooltipProvider>
                 {socialLinks.map((s) => (
@@ -86,7 +87,7 @@ export function FooterSection() {
             {(t.landing?.footerCopyright || "© {year} Exegesis. Built for Kingdom Impact.").replace("{year}", String(new Date().getFullYear()))}
           </p>
           <p className="text-muted-foreground text-[10px] sm:text-xs font-medium">
-            {t.landing?.footerPoweredBy || "Powered by Him First Media Group."}
+            {t.landing?.footerPoweredBy || tt("Powered by Him First Media Group.")}
           </p>
         </div>
       </div>

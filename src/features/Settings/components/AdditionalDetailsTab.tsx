@@ -4,6 +4,7 @@ import { Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { ADDITIONAL_FIELDS } from "../constants";
+import { tt } from '@/components/languages/hardcodedTranslate';
 interface AdditionalDetailsTabProps {
   profile: any;
   onFieldChange: (field: string, value: string) => void;
@@ -14,7 +15,7 @@ export default function AdditionalDetailsTab({ profile, onFieldChange, onSave, s
   const { t } = useLanguage();
   return (
     <div className="rounded-2xl bg-card border border-border/50 p-4 sm:p-6 space-y-4">
-      <p className="text-sm text-muted-foreground">Additional profile details and emergency contact information.</p>
+      <p className="text-sm text-muted-foreground">{tt("Additional profile details and emergency contact information.")}</p>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {ADDITIONAL_FIELDS.map((f) => (
           <div key={f} className="space-y-2">
@@ -28,7 +29,7 @@ export default function AdditionalDetailsTab({ profile, onFieldChange, onSave, s
         ))}
       </div>
       <Button onClick={onSave} disabled={saving} className="bg-primary hover:bg-primary/90">
-        <Save className="w-4 h-4 mr-2" /> {t.settings?.saveChanges || "Save Changes"}
+        <Save className="w-4 h-4 mr-2" /> {t.settings?.saveChanges || tt("Save Changes")}
       </Button>
     </div>
   );

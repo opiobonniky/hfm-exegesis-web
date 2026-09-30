@@ -9,6 +9,7 @@ import {
   ADMIN_BOOK_PROLOGUE_EMPTY_FORM,
 } from "../constants";
 import type { AdminBookPrologue as BookPrologue } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 
 export function useAdminBookProloguesPage() {
@@ -53,7 +54,7 @@ export function useAdminBookProloguesPage() {
       setHasMore(data?.hasNext ?? raw.length === ADMIN_BOOK_PROLOGUES_PAGE_SIZE);
       setPage(pageNum);
     } catch {
-      toast({ title: "Failed to load prologues", variant: "destructive" });
+      toast({ title: tt("Failed to load prologues"), variant: "destructive" });
     } finally {
       setLoading(false);
       if (append) {
@@ -153,7 +154,7 @@ export function useAdminBookProloguesPage() {
       }
     } catch (e) {
       toast({
-        title: "Error",
+        title: tt("Error"),
         description: (e as Error).message,
         variant: "destructive",
       });
@@ -170,14 +171,14 @@ export function useAdminBookProloguesPage() {
         bookName: deleteItem.bookName,
       });
       if (res?.returnCode === 200 || res?.status === 200) {
-        toast({ title: "Deleted" });
+        toast({ title: tt("Deleted") });
         setDeleteItem(null);
         refresh();
       } else {
         throw new Error(res?.returnMessage || "Failed to delete");
       }
     } catch {
-      toast({ title: "Delete failed", variant: "destructive" });
+      toast({ title: tt("Delete failed"), variant: "destructive" });
     } finally {
       setDeleting(null);
     }

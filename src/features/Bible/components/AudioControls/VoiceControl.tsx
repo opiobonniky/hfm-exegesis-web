@@ -5,6 +5,7 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import type { TTSVoice } from "@/services/ttsService";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface VoiceControlProps {
   voices: TTSVoice[];
@@ -21,23 +22,21 @@ export function VoiceControl({ voices, selectedVoice, onVoiceChange }: VoiceCont
         <Mic className="h-4 w-4" />
       </span>
       <div className="min-w-0 flex-1">
-        <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-          Reading voice
-        </p>
+        <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{tt("Reading voice")}</p>
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
             <button
               type="button"
-              aria-label="Select voice"
+              aria-label={tt("Select voice")}
               className="mt-0.5 flex max-w-full items-center gap-1 text-start text-xs font-semibold text-foreground hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-              <span className="truncate">{selectedVoice?.name || "Default"}</span>
+              <span className="truncate">{selectedVoice?.name || tt("Default")}</span>
               <ChevronDown className="h-3 w-3 shrink-0 text-muted-foreground" />
             </button>
           </PopoverTrigger>
           <PopoverContent className="max-h-[300px] w-[260px] overflow-hidden p-0" align="end">
             <div className="border-b border-border/60 px-3 py-2.5">
-              <p className="text-xs font-bold text-foreground">Select reading voice</p>
+              <p className="text-xs font-bold text-foreground">{tt("Select reading voice")}</p>
             </div>
             <div className="max-h-[250px] overflow-y-auto p-1.5">
               {voices.map((voice) => (

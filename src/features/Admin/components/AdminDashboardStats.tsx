@@ -2,6 +2,7 @@
 import { Users, ShieldCheck, BarChart3, UserCheck } from "lucide-react";
 import { StatCard } from "./StatCard";
 import { AdminSignupRateCard } from "./AdminSignupRateCard";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   stats: {
@@ -22,33 +23,33 @@ export function AdminDashboardStats({ stats, loading }: Props) {
   return (
     <section className="space-y-3">
       <StatsSectionHeading
-        title="Overview"
-        subtitle="Platform statistics at a glance"
+        title={tt("Overview")}
+        subtitle={tt("Platform statistics at a glance")}
       />
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <StatCard
-          label="Total Users"
+          label={tt("Total Users")}
           value={value(stats?.totalUsers)}
           icon={Users}
           color="bg-primary/10 text-primary"
           gradient="from-primary via-white to-primary border-blue-200/80 dark:border-blue-500/20"
         />
         <StatCard
-          label="Active Users"
+          label={tt("Active Users")}
           value={value(stats?.activeUsers)}
           icon={UserCheck}
           color="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
           gradient="from-emerald-500 via-white to-teal-500 border-emerald-200/80 dark:border-emerald-500/20"
         />
         <StatCard
-          label="Verified"
+          label={tt("Verified")}
           value={value(stats?.verifiedUsers)}
           icon={ShieldCheck}
           color="bg-sky-500/10 text-sky-600 dark:text-sky-400"
           gradient="from-sky-300 via-white to-sky-300 border-sky-200/80 dark:border-sky-500/20"
         />
         <StatCard
-          label="Admins"
+          label={tt("Admins")}
           value={value(stats?.adminCount)}
           icon={BarChart3}
           color="bg-violet-500/10 text-violet-600 dark:text-violet-400"

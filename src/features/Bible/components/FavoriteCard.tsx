@@ -3,6 +3,7 @@
 
 import { Star, BookOpen, Trash2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface FavoriteCardProps {
   bookName: string;
@@ -54,7 +55,7 @@ export function FavoriteCard({
             size="icon"
             className="h-7 w-7"
             onClick={onGoToReader}
-            title="Open in reader"
+            title={tt("Open in reader")}
           >
             <BookOpen className="w-3.5 h-3.5" />
           </Button>
@@ -64,7 +65,7 @@ export function FavoriteCard({
             className="h-7 w-7 text-destructive hover:text-destructive"
             onClick={onDelete}
             disabled={deleting}
-            title="Remove favorite"
+            title={tt("Remove favorite")}
           >
             {deleting ? (
               <Loader2 className="w-3.5 h-3.5 animate-spin" />

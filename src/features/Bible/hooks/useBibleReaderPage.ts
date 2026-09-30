@@ -26,6 +26,7 @@ import type {
   VerseExplanationData,
   VerseActionTarget,
 } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 const parseRequestedChapter = (value: string | null) => {
   const chapter = Number.parseInt(value || "", 10);
@@ -483,7 +484,7 @@ export function useBibleReaderPage() {
         DEFAULT_HIGHLIGHT_COLOR_ID,
       );
     } catch {
-      toast.error("Unable to update the highlight");
+      toast.error(tt("Unable to update the highlight"));
     }
   }, [reader, verseActionTarget]);
 
@@ -496,7 +497,7 @@ export function useBibleReaderPage() {
         verseActionTarget.verse,
       );
     } catch {
-      toast.error("Unable to update the favorite");
+      toast.error(tt("Unable to update the favorite"));
     }
   }, [reader, verseActionTarget]);
 
@@ -518,9 +519,9 @@ export function useBibleReaderPage() {
     const text = `${verseActionTarget.book} ${verseActionTarget.chapter}:${verseActionTarget.verse} ${verseActionTarget.text}`;
     try {
       await navigator.clipboard.writeText(text);
-      toast.success("Verse copied");
+      toast.success(tt("Verse copied"));
     } catch {
-      toast.error("Unable to copy the verse");
+      toast.error(tt("Unable to copy the verse"));
     }
   }, [verseActionTarget]);
 
@@ -536,7 +537,7 @@ export function useBibleReaderPage() {
       );
     } catch (error) {
       if ((error as DOMException)?.name !== "AbortError") {
-        toast.error("Unable to share the verse");
+        toast.error(tt("Unable to share the verse"));
       }
     }
   }, [verseActionTarget]);
@@ -546,7 +547,7 @@ export function useBibleReaderPage() {
       try {
         await reader.toggleHighlight(book, chapter, verse, colorId);
       } catch {
-        toast.error("Unable to update the highlight");
+        toast.error(tt("Unable to update the highlight"));
       }
     },
     [reader],
@@ -557,7 +558,7 @@ export function useBibleReaderPage() {
       try {
         await reader.toggleFavorite(book, chapter, verse);
       } catch {
-        toast.error("Unable to update the favorite");
+        toast.error(tt("Unable to update the favorite"));
       }
     },
     [reader],
@@ -591,10 +592,10 @@ export function useBibleReaderPage() {
       .join("\n");
     try {
       await navigator.clipboard.writeText(text);
-      toast.success("Selected verses copied");
+      toast.success(tt("Selected verses copied"));
       clearSelection();
     } catch {
-      toast.error("Unable to copy the selected verses");
+      toast.error(tt("Unable to copy the selected verses"));
     }
   }, [clearSelection, selectedVerseData]);
 
@@ -607,14 +608,14 @@ export function useBibleReaderPage() {
       .join("\n");
     try {
       if (navigator.share)
-        await navigator.share({ title: "Selected Bible verses", text });
+        await navigator.share({ title: tt("Selected Bible verses"), text });
       else await navigator.clipboard.writeText(text);
       toast.success(
         navigator.share ? "Verses shared" : "Verses copied for sharing",
       );
     } catch (error) {
       if ((error as DOMException)?.name !== "AbortError")
-        toast.error("Unable to share the selected verses");
+        toast.error(tt("Unable to share the selected verses"));
     }
   }, [selectedVerseData]);
 
@@ -666,7 +667,7 @@ export function useBibleReaderPage() {
           `Highlighted ${selectedVerseData.length} verse${selectedVerseData.length === 1 ? "" : "s"}`,
         );
       } catch {
-        toast.error("Unable to highlight the selected verses");
+        toast.error(tt("Unable to highlight the selected verses"));
       } finally {
         setMultiHighlightSaving(false);
         clearSelection();
@@ -686,9 +687,9 @@ export function useBibleReaderPage() {
           reader.toggleHighlight(verse.book, verse.chapter, verse.verse, 0),
         ),
       );
-      toast.success("Highlights removed");
+      toast.success(tt("Highlights removed"));
     } catch {
-      toast.error("Unable to remove the highlights");
+      toast.error(tt("Unable to remove the highlights"));
     } finally {
       setMultiHighlightSaving(false);
       clearSelection();
@@ -703,9 +704,9 @@ export function useBibleReaderPage() {
           reader.toggleFavorite(verse.book, verse.chapter, verse.verse),
         ),
       );
-      toast.success("Favorites updated");
+      toast.success(tt("Favorites updated"));
     } catch {
-      toast.error("Unable to update favorites");
+      toast.error(tt("Unable to update favorites"));
     }
     clearSelection();
   }, [clearSelection, reader, selectedVerseData]);
@@ -747,7 +748,7 @@ export function useBibleReaderPage() {
           : "Note saved to selected verses",
       );
     } catch {
-      toast.error("Unable to save the note");
+      toast.error(tt("Unable to save the note"));
     } finally {
       setNoteSaving(false);
     }
@@ -825,9 +826,9 @@ export function useBibleReaderPage() {
         reader.selectedChapter,
         firstVerse.verse,
       );
-      toast.success("Chapter bookmark updated");
+      toast.success(tt("Chapter bookmark updated"));
     } catch {
-      toast.error("Unable to update the bookmark");
+      toast.error(tt("Unable to update the bookmark"));
     }
   }, [reader]);
 
@@ -841,9 +842,9 @@ export function useBibleReaderPage() {
       setNoteDialogOpen(false);
       setNoteText("");
       setNoteTargetKey(null);
-      toast.success("Note deleted");
+      toast.success(tt("Note deleted"));
     } catch {
-      toast.error("Unable to delete the note");
+      toast.error(tt("Unable to delete the note"));
     } finally {
       setNoteDeleting(false);
     }

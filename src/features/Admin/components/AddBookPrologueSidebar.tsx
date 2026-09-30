@@ -2,6 +2,7 @@
 import { BookOpen, CheckCircle2, Globe2, Layers, Sparkles } from "lucide-react";
 import type { AddBookPrologueModel } from "../types";
 import type { PrologueStepId } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   state: AddBookPrologueModel;
@@ -30,7 +31,7 @@ export function AddBookPrologueSidebar({
   return (
     <aside className="rounded-2xl border border-border bg-card p-4 shadow-sm">
       <div className="mb-4 flex items-center justify-between">
-        <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">Workflow</p>
+        <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">{tt("Workflow")}</p>
         <span className="rounded-full border border-border bg-muted px-2 py-1 text-[10px] text-muted-foreground">
           {currentStepIndex + 1}/{h.steps.length}
         </span>
@@ -76,12 +77,12 @@ export function AddBookPrologueSidebar({
       </div>
 
       <div className="mt-6 rounded-xl border border-border bg-muted/40 p-3">
-        <p className="text-[11px] uppercase tracking-[0.24em] text-muted-foreground">Required</p>
+        <p className="text-[11px] uppercase tracking-[0.24em] text-muted-foreground">{tt("Required")}</p>
         <ul className="mt-3 space-y-2 text-sm text-foreground">
           <li className="flex items-center justify-between gap-2">
-            <span>Book & title</span>
+            <span>{tt("Book & title")}</span>
             <span className={basicComplete ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground"}>
-              {basicComplete ? "Ready" : "Missing"}
+              {basicComplete ? tt("Ready") : tt("Missing")}
             </span>
           </li>
         </ul>

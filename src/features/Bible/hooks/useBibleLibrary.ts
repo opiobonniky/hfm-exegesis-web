@@ -8,6 +8,7 @@ import { routes } from "@/components/Routes/routes";
 import { BIBLE_BOOKS } from "../constants";
 
 import type { LibraryBookInfo, CovenantFilter } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 // Local 66-book fallback so the Library never renders empty if the backend is
 // unreachable / misconfigured (e.g. wrong base URL pointing at production).
@@ -67,9 +68,9 @@ export function useBibleLibrary() {
     verses: books.reduce((s, b) => s + (b.totalVerses || 0), 0),
   }), [books]);
   const tabs = useMemo(() => [
-    { value: "all" as CovenantFilter, label: "All Books", count: books.length },
-    { value: "ot" as CovenantFilter, label: "Old Testament", count: stats.ot },
-    { value: "nt" as CovenantFilter, label: "New Testament", count: stats.nt },
+    { value: "all" as CovenantFilter, label: tt("All Books"), count: books.length },
+    { value: "ot" as CovenantFilter, label: tt("Old Testament"), count: stats.ot },
+    { value: "nt" as CovenantFilter, label: tt("New Testament"), count: stats.nt },
   ], [books.length, stats]);
   const goToChapter = useCallback((book: string, ch: number) => {
     navigate(`${routes.bibleReader.path}?book=${encodeURIComponent(book)}&chapter=${ch}`);

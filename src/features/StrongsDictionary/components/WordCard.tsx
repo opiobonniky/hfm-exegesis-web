@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import type { StrongsWord } from "../hooks/useStrongsDictionaryPage";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface WordCardProps {
   word: StrongsWord;
@@ -34,28 +35,27 @@ export function WordCard({ word, isSelected, isFavorited, onSelect, onToggleFavo
             <div className="mb-3 flex items-center gap-2">
               <Badge className="font-mono text-xs">{word.strongsNumber}</Badge>
               <Badge variant="outline" className="text-xs capitalize">
-                {word.language === "hebrew" ? "Hebrew" : "Greek"}
+                {word.language === "hebrew" ? tt("Hebrew") : tt("Greek")}
               </Badge>
             </div>
-            <p className="text-xl font-black tracking-tight">{word.hebrewWord || "Unnamed word"}</p>
+            <p className="text-xl font-black tracking-tight">{word.hebrewWord || tt("Unnamed word")}</p>
             <p className="text-sm text-muted-foreground italic">
               {word.transliteration}{word.pronunciation && ` (${word.pronunciation})`}
             </p>
-            <p className="mt-2 line-clamp-2 text-sm leading-6 text-muted-foreground">{word.meaning || "No short definition available."}</p>
+            <p className="mt-2 line-clamp-2 text-sm leading-6 text-muted-foreground">{word.meaning || tt("No short definition available.")}</p>
             <div className="mt-3 flex flex-wrap gap-2 text-xs text-muted-foreground">
               <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-1">
                 <Languages className="h-3 w-3" /> {word.language}
               </span>
               {word.kjvOccurrences > 0 && (
-                <span className="rounded-full bg-muted px-2 py-1">{word.kjvOccurrences} occurrences</span>
+                <span className="rounded-full bg-muted px-2 py-1">{word.kjvOccurrences}{tt("occurrences")}</span>
               )}
             </div>
             {word.contextualStudies && word.contextualStudies.length > 0 && (
               <div className="mt-3 space-y-1.5 text-xs font-semibold text-primary">
                 <div className="flex items-center gap-1.5">
                 <BookOpen className="h-3.5 w-3.5" />
-                {word.contextualStudies.length} verse {word.contextualStudies.length === 1 ? "study" : "studies"} available
-                </div>
+                {word.contextualStudies.length}{tt("verse")}{word.contextualStudies.length === 1 ? tt("study") : tt("studies")}{tt("available")}</div>
                 <p className="line-clamp-2 font-normal text-muted-foreground">
                   {word.contextualStudies[0].customDefinition || word.contextualStudies[0].surfaceText}
                 </p>
@@ -69,8 +69,7 @@ export function WordCard({ word, isSelected, isFavorited, onSelect, onToggleFavo
                 event.stopPropagation();
                 onSelect(word);
               }}
-            >
-              Open word study <ArrowRight className="h-3.5 w-3.5" />
+            >{tt("Open word study")}<ArrowRight className="h-3.5 w-3.5" />
             </Button>
           </div>
           <Button

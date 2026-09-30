@@ -3,6 +3,7 @@ import { Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   label: string;
@@ -34,11 +35,10 @@ export function AddBookPrologueArrayField({
           onClick={onAdd}
           className="h-6 text-xs gap-1"
         >
-          <Plus className="w-3 h-3" /> Add
-        </Button>
+          <Plus className="w-3 h-3" />{tt("Add")}</Button>
       </div>
       {values.length === 0 && (
-        <p className="text-xs text-muted-foreground italic">No items yet</p>
+        <p className="text-xs text-muted-foreground italic">{tt("No items yet")}</p>
       )}
       {values.map((val, i) => (
         <div key={`${field}-${i}`} className="flex items-center gap-2">

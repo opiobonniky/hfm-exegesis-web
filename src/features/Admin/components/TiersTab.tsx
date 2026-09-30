@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SubscriptionTierCard } from "./SubscriptionTierCard";
 import type { SubscriptionTier } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   tiers: SubscriptionTier[];
@@ -17,7 +18,7 @@ export function TiersTab({ tiers, loading, counts, onEdit, onDelete }: Props) {
   return (
     <Card className="border-border/50">
       <CardHeader>
-        <CardTitle className="text-base">All Tiers ({tiers.length})</CardTitle>
+        <CardTitle className="text-base">{tt("All Tiers (")}{tiers.length})</CardTitle>
       </CardHeader>
       <CardContent className="p-0">
         {loading ? (
@@ -29,10 +30,8 @@ export function TiersTab({ tiers, loading, counts, onEdit, onDelete }: Props) {
         ) : tiers.length === 0 ? (
           <div className="flex flex-col items-center py-16 text-center px-4">
             <CreditCard className="w-10 h-10 mb-3 text-muted-foreground/40" />
-            <p className="font-medium">No tiers created yet</p>
-            <p className="text-xs text-muted-foreground mt-1">
-              Click &quot;Seed Defaults&quot; or create one manually
-            </p>
+            <p className="font-medium">{tt("No tiers created yet")}</p>
+            <p className="text-xs text-muted-foreground mt-1">{tt("Click \"Seed Defaults\" or create one manually")}</p>
           </div>
         ) : (
           <div className="divide-y divide-border/40">

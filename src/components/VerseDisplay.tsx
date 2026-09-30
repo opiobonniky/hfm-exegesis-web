@@ -10,6 +10,7 @@ import {
   type SpeechItem,
   renderVerseWithStrongs,
 } from "@/lib/bibleHelpers";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -196,7 +197,7 @@ export default function VerseDisplay({
                   {cd.book} {cd.chapter}
                 </h2>
                 <span className="text-xs text-muted-foreground ml-auto">
-                  {cd.verses.length} {t.bibleReader?.verses || "verses"}
+                  {cd.verses.length} {t.bibleReader?.verses || tt("verses")}
                 </span>
               </div>
 
@@ -206,7 +207,7 @@ export default function VerseDisplay({
                   <div className="flex items-center gap-2 mb-2">
                     <Lightbulb className="w-3.5 h-3.5 text-amber-500" />
                     <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                      {t.bibleReader?.reflections || "Reflections"}
+                      {t.bibleReader?.reflections || tt("Reflections")}
                     </span>
                   </div>
                   <div className="flex flex-wrap gap-1.5">
@@ -316,7 +317,7 @@ export default function VerseDisplay({
                               className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950/30 text-[10px] text-amber-700 dark:text-amber-300 font-medium border border-amber-200/50 dark:border-amber-800/30"
                             >
                               <Lightbulb className="w-2.5 h-2.5" />
-                              {t.bibleReader?.dailyVerse || "Daily Verse"}
+                              {t.bibleReader?.dailyVerse || tt("Daily Verse")}
                             </button>
                           )}
                         </div>
@@ -328,7 +329,7 @@ export default function VerseDisplay({
                               <div className="flex items-center gap-2 py-2">
                                 <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
                                 <span className="text-xs text-muted-foreground">
-                                  {t.bibleReader?.loadingExplanation || "Loading..."}
+                                  {t.bibleReader?.loadingExplanation || tt("Loading...")}
                                 </span>
                               </div>
                             ) : explanation ? (
@@ -353,15 +354,15 @@ export default function VerseDisplay({
                                     className="text-xs font-medium text-primary hover:underline"
                                   >
                                     {isFullExpanded
-                                      ? (t.bibleReader?.showLess || "Show less")
-                                      : (t.bibleReader?.readMore || "Read more")}
+                                      ? (t.bibleReader?.showLess || tt("Show less"))
+                                      : (t.bibleReader?.readMore || tt("Read more"))}
                                   </button>
                                 )}
                                 {/* Journal prompts */}
                                 {prompts.length > 0 && (
                                   <div className="pt-2 border-t border-border/30 mt-2">
                                     <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
-                                      {t.bibleReader?.journalPrompts || "Journal Prompts"}
+                                      {t.bibleReader?.journalPrompts || tt("Journal Prompts")}
                                     </p>
                                     <div className="flex flex-wrap gap-1">
                                       {prompts.map((p) => (
@@ -391,8 +392,8 @@ export default function VerseDisplay({
                           )}
                         >
                           {verseExpanded
-                            ? (t.bibleReader?.hideExplanation || "Hide explanation")
-                            : (t.bibleReader?.explain || "Explain")}
+                            ? (t.bibleReader?.hideExplanation || tt("Hide explanation"))
+                            : (t.bibleReader?.explain || tt("Explain"))}
                         </button>
 
                         {/* ── Daily verse ref trigger ── */}
@@ -401,7 +402,7 @@ export default function VerseDisplay({
                             onClick={() => onDailyVerseRef(verseKey)}
                             className="mt-0.5 ml-2 text-[10px] font-medium text-muted-foreground opacity-0 group-hover:opacity-100 hover:text-amber-500 transition-opacity"
                           >
-                            {t.bibleReader?.setAsDaily || "Set as daily verse"}
+                            {t.bibleReader?.setAsDaily || tt("Set as daily verse")}
                           </button>
                         )}
                       </div>
@@ -420,7 +421,7 @@ export default function VerseDisplay({
         {chapters.length > 0 && !loading && (
           <div className="text-center py-8 text-muted-foreground/40">
             <p className="text-xs">
-              {t.bibleReader?.endOfReading || "— End —"}
+              {t.bibleReader?.endOfReading || tt("— End —")}
             </p>
           </div>
         )}

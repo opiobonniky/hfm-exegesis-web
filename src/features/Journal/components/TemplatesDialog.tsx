@@ -7,6 +7,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import type { JournalEntryTemplate } from "../hooks/useJournalEntryPage";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface TemplatesDialogProps {
   open: boolean;
@@ -95,7 +96,7 @@ export function TemplatesDialog({
       <DialogContent className="rounded-2xl border-border dark:border-stone-800">
         <DialogHeader>
           <DialogTitle className="text-foreground dark:text-stone-200">
-            {t.journal.chooseTemplate || "Choose a Template"}
+            {t.journal.chooseTemplate || tt("Choose a Template")}
           </DialogTitle>
         </DialogHeader>
         <div className="grid gap-3 max-h-[60vh] overflow-y-auto">

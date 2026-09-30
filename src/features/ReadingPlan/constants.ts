@@ -1,6 +1,7 @@
 // ─── Reading Plan Constants ────────────────────────────────────────────────────
 
 import { BookOpen, Calendar, CheckCircle2 } from "lucide-react";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export const DIFFICULTY_CONFIG: Record<string, { color: string; bg: string }> = {
   easy: { color: "text-emerald-700", bg: "bg-emerald-50 border-emerald-200" },
@@ -42,9 +43,9 @@ export const formatDate = (iso: string | null, locale = "en-US"): string => {
 };
 
 export const PLAN_STEPS = [
-  { id: 1, label: "stepPlanInfo", icon: BookOpen },
-  { id: 2, label: "stepDailyContent", icon: Calendar },
-  { id: 3, label: "stepReviewSave", icon: CheckCircle2 },
+  { id: 1, label: tt("stepPlanInfo"), icon: BookOpen },
+  { id: 2, label: tt("stepDailyContent"), icon: Calendar },
+  { id: 3, label: tt("stepReviewSave"), icon: CheckCircle2 },
 ];
 
 export const PLAN_CATEGORIES = [

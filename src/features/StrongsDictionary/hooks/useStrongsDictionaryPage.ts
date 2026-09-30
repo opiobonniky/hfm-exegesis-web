@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { sendGetRequest, sendPostRequest } from "@/services/api";
 import { searchStrongs } from "../services";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export interface ContextualStudy {
   surfaceText: string | null;
@@ -105,8 +106,8 @@ export function useStrongsDictionaryPage() {
       } catch {
         if (requestId === searchRequestRef.current) {
           toast({
-            title: "Error",
-            description: "Search failed",
+            title: tt("Error"),
+            description: tt("Search failed"),
             variant: "destructive",
           });
         }
@@ -150,8 +151,8 @@ export function useStrongsDictionaryPage() {
         }
       } catch {
         toast({
-          title: "Error",
-          description: "Browse failed",
+          title: tt("Error"),
+          description: tt("Browse failed"),
           variant: "destructive",
         });
       } finally {

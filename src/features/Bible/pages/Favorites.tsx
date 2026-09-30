@@ -5,6 +5,7 @@ import { Star } from "lucide-react";
 import { useFavoritesPage } from "../hooks/useFavoritesPage";
 import { BiblePageLayout } from "../components/BiblePageLayout";
 import { FavoritesList } from "../components";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export default function Favorites() {
   const { data, actions } = useFavoritesPage();
@@ -12,7 +13,7 @@ export default function Favorites() {
 
   return (
     <BiblePageLayout
-      title="My Favorites"
+      title={tt("My Favorites")}
       count={h.favorites.length}
       contentCount={h.filtered.length}
       isRtl={h.isRtl}
@@ -23,7 +24,7 @@ export default function Favorites() {
       loading={h.loading}
       onRefresh={h.refresh}
       searchPlaceholder="Search favorites by verse reference..."
-      emptyTitle="No favorites yet"
+      emptyTitle={tt("No favorites yet")}
       emptyMessage="Star verses while reading to save them here"
       emptyIcon={<Star className="w-8 h-8 text-muted-foreground/30 mb-4" />}
     >

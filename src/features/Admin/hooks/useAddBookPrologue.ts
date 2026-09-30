@@ -13,6 +13,7 @@ import {
 } from "../constants";
 import { fetchBookPrologue, upsertBookPrologue } from "../services/bookProloguesApi";
 import type { KeyScriptureEntry, PrologueEditorForm, PrologueStepId, AddBookPrologueModel } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 const cloneEmpty = (): PrologueEditorForm => ({
   ...PROLOGUE_FORM_EMPTY,
@@ -115,14 +116,14 @@ export function useAddBookPrologue() {
     fetchBookPrologue(decodeURIComponent(params.bookName))
       .then((data) => {
         if (!data) {
-          toast({ title: "Not found", variant: "destructive" });
+          toast({ title: tt("Not found"), variant: "destructive" });
           navigate("/admin/book-prologues");
           return;
         }
         setForm(data);
       })
       .catch(() => {
-        toast({ title: "Failed to load", variant: "destructive" });
+        toast({ title: tt("Failed to load"), variant: "destructive" });
         navigate("/admin/book-prologues");
       })
       .finally(() => setLoadingExisting(false));
@@ -243,11 +244,11 @@ export function useAddBookPrologue() {
         });
         navigate("/admin/book-prologues");
       } else {
-        toast({ title: "Error", description: result.message || "Failed to save", variant: "destructive" });
+        toast({ title: tt("Error"), description: result.message || "Failed to save", variant: "destructive" });
       }
     } catch (err) {
       toast({
-        title: "Network error",
+        title: tt("Network error"),
         description: err instanceof Error ? err.message : "Failed to save",
         variant: "destructive",
       });

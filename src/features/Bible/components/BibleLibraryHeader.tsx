@@ -5,6 +5,7 @@ import { ReactNode, RefObject } from "react";
 import { BookOpen, Search, X, Library, Scroll, Bookmark } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface BibleLibraryHeaderProps {
   stats: { chapters: number; verses: number };
@@ -35,17 +36,17 @@ export function BibleLibraryHeader({
             </div>
           </div>
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-foreground leading-tight" style={{ fontFamily: "'Cinzel', serif" }}>The Bible</h1>
+            <h1 className="text-xl sm:text-2xl font-bold text-foreground leading-tight" style={{ fontFamily: "'Cinzel', serif" }}>{tt("The Bible")}</h1>
             <p className="text-[11px] text-muted-foreground/70 tracking-wider mt-0.5">
-              <span className="text-indigo-500 font-semibold">66 books</span> · <span className="text-amber-500 font-semibold">{stats.chapters} chapters</span>
-              {stats.verses > 0 && <> · <span className="font-semibold">{stats.verses.toLocaleString()} verses</span></>}
+              <span className="text-indigo-500 font-semibold">{tt("66 books")}</span> · <span className="text-amber-500 font-semibold">{stats.chapters}{tt("chapters")}</span>
+              {stats.verses > 0 && <> · <span className="font-semibold">{stats.verses.toLocaleString()}{tt("verses")}</span></>}
             </p>
           </div>
         </div>
 
         <div className="relative mb-3">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/60 pointer-events-none" />
-          <Input ref={searchRef} placeholder="Search books..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+          <Input ref={searchRef} placeholder={tt("Search books...")} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10 pr-10 h-10 text-sm bg-muted/40 border-border/40 rounded-xl" />
           {searchQuery && <button onClick={clearSearch} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/60 hover:text-foreground"><X className="w-4 h-4" /></button>}
         </div>
@@ -59,7 +60,7 @@ export function BibleLibraryHeader({
                   covenant === tab.value ? "bg-background text-foreground shadow-sm border border-border/40" : "text-muted-foreground/70 hover:text-foreground hover:bg-muted/40")}>
                 <Icon className={cn("w-3.5 h-3.5", covenant === tab.value ? "text-primary" : "text-muted-foreground/50")} />
                 <span className="hidden sm:inline">{tab.label}</span>
-                <span className="sm:hidden">{tab.value === "all" ? "All" : tab.value === "ot" ? "OT" : "NT"}</span>
+                <span className="sm:hidden">{tab.value === "all" ? tt("All") : tab.value === "ot" ? "OT" : "NT"}</span>
                 <span className={cn("text-[9px] px-1.5 py-0.5 rounded-full font-bold", covenant === tab.value ? "bg-primary/10 text-primary" : "bg-muted/50 text-muted-foreground/60")}>{tab.count}</span>
               </button>
             );

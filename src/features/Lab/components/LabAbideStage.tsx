@@ -1,5 +1,6 @@
 import { Heart, Sparkles, Crosshair, Footprints, BookMarked, Globe, Lock, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   reflection: string;
@@ -17,10 +18,10 @@ interface Props {
 }
 
 const QUESTIONS = [
-  { id: 1, icon: Sparkles, label: "What has God shown you?", placeholder: "Record what the Lord has revealed to you through this passage...", color: "emerald" },
-  { id: 2, icon: Crosshair, label: "How does this strengthen your faith?", placeholder: "What truths have deepened your trust in God?", color: "blue" },
-  { id: 3, icon: Footprints, label: "What is your next step?", placeholder: "One specific, practical action you will take this week...", color: "amber" },
-  { id: 4, icon: BookMarked, label: "What have you gained?", placeholder: "What spiritual insight or treasure are you taking away?", color: "purple" },
+  { id: 1, icon: Sparkles, label: tt("What has God shown you?"), placeholder: tt("Record what the Lord has revealed to you through this passage..."), color: "emerald" },
+  { id: 2, icon: Crosshair, label: tt("How does this strengthen your faith?"), placeholder: tt("What truths have deepened your trust in God?"), color: "blue" },
+  { id: 3, icon: Footprints, label: tt("What is your next step?"), placeholder: tt("One specific, practical action you will take this week..."), color: "amber" },
+  { id: 4, icon: BookMarked, label: tt("What have you gained?"), placeholder: tt("What spiritual insight or treasure are you taking away?"), color: "purple" },
 ];
 
 const COLOR_MAP: Record<string, { bg: string; border: string; icon: string }> = {
@@ -46,11 +47,11 @@ export default function LabAbideStage({
         </div>
         <div>
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Step 4 of 5</span>
-            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-rose-500/10 text-rose-600 font-semibold">~10 min</span>
+            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{tt("Step 4 of 5")}</span>
+            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-rose-500/10 text-rose-600 font-semibold">{tt("~10 min")}</span>
           </div>
-          <h2 className="text-base font-bold text-foreground">Abide — Reflect and Respond</h2>
-          <p className="text-xs text-muted-foreground">The goal of study is transformation. Record what God has shown you.</p>
+          <h2 className="text-base font-bold text-foreground">{tt("Abide — Reflect and Respond")}</h2>
+          <p className="text-xs text-muted-foreground">{tt("The goal of study is transformation. Record what God has shown you.")}</p>
         </div>
       </div>
 
@@ -85,17 +86,15 @@ export default function LabAbideStage({
         className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-card border border-border/40 hover:bg-muted/20 transition-colors w-full text-left">
         {isPublic ? <Globe className="w-4 h-4 text-amber-500" /> : <Lock className="w-4 h-4 text-green-500" />}
         <div>
-          <p className="text-sm font-medium text-foreground">{isPublic ? "Public" : "Private"}</p>
-          <p className="text-[10px] text-muted-foreground">{isPublic ? "Anyone can read" : "Only you can see"}</p>
+          <p className="text-sm font-medium text-foreground">{isPublic ? tt("Public") : tt("Private")}</p>
+          <p className="text-[10px] text-muted-foreground">{isPublic ? tt("Anyone can read") : tt("Only you can see")}</p>
         </div>
       </button>
 
       {/* Save & Continue */}
       <button onClick={onAdvance} disabled={saving}
         className="w-full py-3 rounded-xl bg-primary text-primary-foreground text-sm font-bold shadow-lg hover:shadow-xl hover:opacity-90 transition-all disabled:opacity-50 flex items-center justify-center gap-2">
-        {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-        Save & Complete Study
-      </button>
+        {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : null}{tt("Save & Complete Study")}</button>
     </div>
   );
 }

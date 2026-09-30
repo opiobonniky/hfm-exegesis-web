@@ -28,6 +28,7 @@ import { cn } from "@/lib/utils";
 import { getChapterStudyTools, type ChapterStudyTools } from "@/services/studyToolsApi";
 import { getBookPrologue, type BookPrologue } from "@/services/bookProloguesApi";
 import { getVerseResources, type VerseResourceData } from "@/services/verseResourcesApi";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 // ── Types ──
 
@@ -55,48 +56,48 @@ interface ToolTypeConfig {
 const TOOL_TYPES: ToolTypeConfig[] = [
   {
     key: "COMMAND",
-    label: "Commands",
-    description: "Imperative verbs and direct instructions in this passage",
+    label: tt("Commands"),
+    description: tt("Imperative verbs and direct instructions in this passage"),
     icon: <Command className="w-4 h-4" />,
     color: "text-blue-600 dark:text-blue-400",
     bgColor: "bg-blue-50 dark:bg-blue-950/30",
   },
   {
     key: "PROMISE",
-    label: "Promises",
-    description: "God's promises declared in this passage",
+    label: tt("Promises"),
+    description: tt("God's promises declared in this passage"),
     icon: <ShieldCheck className="w-4 h-4" />,
     color: "text-emerald-600 dark:text-emerald-400",
     bgColor: "bg-emerald-50 dark:bg-emerald-950/30",
   },
   {
     key: "WARNING",
-    label: "Warnings",
-    description: "Cautions and admonitions to pay attention to",
+    label: tt("Warnings"),
+    description: tt("Cautions and admonitions to pay attention to"),
     icon: <AlertTriangle className="w-4 h-4" />,
     color: "text-amber-600 dark:text-amber-400",
     bgColor: "bg-amber-50 dark:bg-amber-950/30",
   },
   {
     key: "REPEATED_WORD",
-    label: "Repeated Words",
-    description: "Key words and themes that appear multiple times",
+    label: tt("Repeated Words"),
+    description: tt("Key words and themes that appear multiple times"),
     icon: <Repeat className="w-4 h-4" />,
     color: "text-purple-600 dark:text-purple-400",
     bgColor: "bg-purple-50 dark:bg-purple-950/30",
   },
   {
     key: "TRANSITION",
-    label: "Transition Words",
-    description: "Therefore, but, for, because, if, then — the logical connectors",
+    label: tt("Transition Words"),
+    description: tt("Therefore, but, for, because, if, then — the logical connectors"),
     icon: <ArrowRightLeft className="w-4 h-4" />,
     color: "text-cyan-600 dark:text-cyan-400",
     bgColor: "bg-cyan-50 dark:bg-cyan-950/30",
   },
   {
     key: "CONTRAST",
-    label: "ArrowLeftRights",
-    description: "Light/darkness, flesh/spirit, death/life — opposing ideas",
+    label: tt("ArrowLeftRights"),
+    description: tt("Light/darkness, flesh/spirit, death/life — opposing ideas"),
     icon: <ArrowLeftRight className="w-4 h-4" />,
     color: "text-rose-600 dark:text-rose-400",
     bgColor: "bg-rose-50 dark:bg-rose-950/30",
@@ -190,11 +191,9 @@ export default function StudyToolsSheet({
       <SheetContent side="right" className="w-full sm:max-w-md p-0 flex flex-col">
         <SheetHeader className="px-5 pt-5 pb-3 border-b border-border/40">
           <SheetTitle className="flex items-center gap-2">
-            <Lightbulb className="w-5 h-5 text-amber-500" />
-            Study Tools
-          </SheetTitle>
+            <Lightbulb className="w-5 h-5 text-amber-500" />{tt("Study Tools")}</SheetTitle>
           <SheetDescription>
-            {bookName} · Chapter {chapter}
+            {bookName}{tt("· Chapter")}{chapter}
           </SheetDescription>
         </SheetHeader>
 
@@ -209,7 +208,7 @@ export default function StudyToolsSheet({
             }}
           >
             <Lightbulb className="w-4 h-4 text-amber-500" />
-            <span>How Do I Study This Passage?</span>
+            <span>{tt("How Do I Study This Passage?")}</span>
           </Button>
         </div>
 
@@ -230,7 +229,7 @@ export default function StudyToolsSheet({
                   <BookOpen className="w-4 h-4 text-indigo-600 dark:text-indigo-400" strokeWidth={2.2} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold text-foreground">About {bookName}</p>
+                  <p className="text-sm font-bold text-foreground">{tt("About")}{bookName}</p>
                   <p className="text-[10px] text-muted-foreground">
                     {prologue.keyTheme || `${prologue.author ? `${prologue.author} · ` : ""}Book introduction & context`}
                   </p>
@@ -258,7 +257,7 @@ export default function StudyToolsSheet({
                       <div className="inline-flex items-center gap-1.5 rounded-lg bg-background border border-border/50 px-2.5 py-1.5">
                         <User className="w-3 h-3 text-muted-foreground" strokeWidth={2} />
                         <div>
-                          <p className="text-[8px] font-semibold uppercase tracking-wider text-muted-foreground">Author</p>
+                          <p className="text-[8px] font-semibold uppercase tracking-wider text-muted-foreground">{tt("Author")}</p>
                           <p className="text-xs font-bold text-foreground">{prologue.author}</p>
                         </div>
                       </div>
@@ -267,7 +266,7 @@ export default function StudyToolsSheet({
                       <div className="inline-flex items-center gap-1.5 rounded-lg bg-background border border-border/50 px-2.5 py-1.5">
                         <User className="w-3 h-3 text-muted-foreground" strokeWidth={2} />
                         <div>
-                          <p className="text-[8px] font-semibold uppercase tracking-wider text-muted-foreground">Audience</p>
+                          <p className="text-[8px] font-semibold uppercase tracking-wider text-muted-foreground">{tt("Audience")}</p>
                           <p className="text-xs font-bold text-foreground">{prologue.audience}</p>
                         </div>
                       </div>
@@ -276,7 +275,7 @@ export default function StudyToolsSheet({
                       <div className="inline-flex items-center gap-1.5 rounded-lg bg-background border border-border/50 px-2.5 py-1.5">
                         <Calendar className="w-3 h-3 text-muted-foreground" strokeWidth={2} />
                         <div>
-                          <p className="text-[8px] font-semibold uppercase tracking-wider text-muted-foreground">Date</p>
+                          <p className="text-[8px] font-semibold uppercase tracking-wider text-muted-foreground">{tt("Date")}</p>
                           <p className="text-xs font-bold text-foreground">{prologue.dateWritten}</p>
                         </div>
                       </div>
@@ -285,7 +284,7 @@ export default function StudyToolsSheet({
                       <div className="inline-flex items-center gap-1.5 rounded-lg bg-background border border-border/50 px-2.5 py-1.5">
                         <MapPin className="w-3 h-3 text-muted-foreground" strokeWidth={2} />
                         <div>
-                          <p className="text-[8px] font-semibold uppercase tracking-wider text-muted-foreground">Location</p>
+                          <p className="text-[8px] font-semibold uppercase tracking-wider text-muted-foreground">{tt("Location")}</p>
                           <p className="text-xs font-bold text-foreground">{prologue.locationWritten}</p>
                         </div>
                       </div>
@@ -295,9 +294,7 @@ export default function StudyToolsSheet({
                   {/* Key Theme */}
                   {prologue.keyTheme && (
                     <div className="rounded-lg bg-indigo-500/5 border border-indigo-500/20 p-2.5">
-                      <p className="text-[9px] font-extrabold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 mb-0.5">
-                        Key Theme
-                      </p>
+                      <p className="text-[9px] font-extrabold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 mb-0.5">{tt("Key Theme")}</p>
                       <p className="text-xs font-semibold text-foreground italic">{prologue.keyTheme}</p>
                     </div>
                   )}
@@ -305,7 +302,7 @@ export default function StudyToolsSheet({
                   {/* Purpose */}
                   {prologue.purpose && (
                     <div>
-                      <p className="text-[11px] font-bold text-foreground mb-1">Purpose</p>
+                      <p className="text-[11px] font-bold text-foreground mb-1">{tt("Purpose")}</p>
                       <p className="text-xs text-foreground/70 leading-6">{prologue.purpose}</p>
                     </div>
                   )}
@@ -313,7 +310,7 @@ export default function StudyToolsSheet({
                   {/* Main Themes */}
                   {prologue.mainThemes && prologue.mainThemes.length > 0 && (
                     <div>
-                      <p className="text-[11px] font-bold text-foreground mb-1.5">Main Themes ({prologue.mainThemes.length})</p>
+                      <p className="text-[11px] font-bold text-foreground mb-1.5">{tt("Main Themes (")}{prologue.mainThemes.length})</p>
                       <div className="flex flex-wrap gap-1.5">
                         {prologue.mainThemes.map((theme, i) => (
                           <Badge
@@ -333,9 +330,7 @@ export default function StudyToolsSheet({
                     <div className="rounded-lg bg-rose-500/5 border border-rose-500/20 p-2.5">
                       <div className="flex items-center gap-1.5 mb-1">
                         <Heart className="w-3 h-3 text-rose-500" strokeWidth={2.5} />
-                        <p className="text-[9px] font-extrabold uppercase tracking-wider text-rose-600 dark:text-rose-400">
-                          Connection to Christ
-                        </p>
+                        <p className="text-[9px] font-extrabold uppercase tracking-wider text-rose-600 dark:text-rose-400">{tt("Connection to Christ")}</p>
                       </div>
                       <p className="text-xs text-foreground/70 leading-6">{prologue.christConnection}</p>
                     </div>
@@ -352,32 +347,21 @@ export default function StudyToolsSheet({
             </div>
           ) : error ? (
             <div className="text-center py-16">
-              <p className="text-sm text-muted-foreground">
-                Could not load study tools for this chapter.
-              </p>
-              <Button variant="outline" size="sm" onClick={fetchTools} className="mt-3">
-                Retry
-              </Button>
+              <p className="text-sm text-muted-foreground">{tt("Could not load study tools for this chapter.")}</p>
+              <Button variant="outline" size="sm" onClick={fetchTools} className="mt-3">{tt("Retry")}</Button>
             </div>
           ) : !hasAnyTools ? (
             <div className="text-center py-8 space-y-3">
               <BookOpen className="w-10 h-10 text-muted-foreground/40 mx-auto" />
-              <p className="text-sm text-muted-foreground">
-                No study tools available for this chapter yet.
-              </p>
-              <p className="text-xs text-muted-foreground/60 max-w-xs mx-auto">
-                Study tools are created by the content team. Check back later or try{" "}
+              <p className="text-sm text-muted-foreground">{tt("No study tools available for this chapter yet.")}</p>
+              <p className="text-xs text-muted-foreground/60 max-w-xs mx-auto">{tt("Study tools are created by the content team. Check back later or try")}{" "}
                 <button
                   onClick={() => {
                     onOpenHowToStudy();
                     onOpenChange(false);
                   }}
                   className="text-primary underline underline-offset-2 hover:text-primary/80"
-                >
-                  How Do I Study This?
-                </button>{" "}
-                for guided study.
-              </p>
+                >{tt("How Do I Study This?")}</button>{" "}{tt("for guided study.")}</p>
             </div>
           ) : (
             <>
@@ -430,7 +414,7 @@ export default function StudyToolsSheet({
                                   <button
                                     onClick={() => onGoToVerse(item.verseRefs)}
                                     className="shrink-0 mt-0.5 text-muted-foreground hover:text-primary transition-colors"
-                                    title="Go to verse"
+                                    title={tt("Go to verse")}
                                   >
                                     <ExternalLink className="w-3 h-3" />
                                   </button>
@@ -472,9 +456,7 @@ export default function StudyToolsSheet({
               {/* Section header */}
               <div className="flex items-center gap-2">
                 <div className="w-0.5 h-3.5 rounded-full bg-amber-500" />
-                <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-                  Verse Resources
-                </span>
+                <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">{tt("Verse Resources")}</span>
                 <span className="text-[10px] text-muted-foreground/60">
                   {bookName} {chapter}:{effectiveVerse}
                 </span>
@@ -485,8 +467,7 @@ export default function StudyToolsSheet({
                 <div>
                   <div className="flex items-center gap-1.5 mb-2">
                     <BookMarked className="w-3.5 h-3.5 text-sky-500" strokeWidth={2.5} />
-                    <span className="text-xs font-bold text-foreground">
-                      Cross References ({verseResources.crossReferences.length})
+                    <span className="text-xs font-bold text-foreground">{tt("Cross References (")}{verseResources.crossReferences.length})
                     </span>
                   </div>
                   <div className="space-y-1.5">
@@ -518,8 +499,7 @@ export default function StudyToolsSheet({
                     ))}
                     {verseResources.crossReferences.length > 5 && (
                       <p className="text-[10px] text-center text-muted-foreground py-1">
-                        +{verseResources.crossReferences.length - 5} more cross-references
-                      </p>
+                        +{verseResources.crossReferences.length - 5}{tt("more cross-references")}</p>
                     )}
                   </div>
                 </div>
@@ -530,8 +510,7 @@ export default function StudyToolsSheet({
                 <div>
                   <div className="flex items-center gap-1.5 mb-2">
                     <Search className="w-3.5 h-3.5 text-violet-500" strokeWidth={2.5} />
-                    <span className="text-xs font-bold text-foreground">
-                      Word Studies ({verseResources.wordStudies.length})
+                    <span className="text-xs font-bold text-foreground">{tt("Word Studies (")}{verseResources.wordStudies.length})
                     </span>
                   </div>
                   <div className="space-y-1.5">
@@ -566,8 +545,7 @@ export default function StudyToolsSheet({
                 <div>
                   <div className="flex items-center gap-1.5 mb-2">
                     <MessageSquareText className="w-3.5 h-3.5 text-blue-500" strokeWidth={2.5} />
-                    <span className="text-xs font-bold text-foreground">
-                      Commentaries ({verseResources.commentaries.length})
+                    <span className="text-xs font-bold text-foreground">{tt("Commentaries (")}{verseResources.commentaries.length})
                     </span>
                   </div>
                   <div className="space-y-1.5">
@@ -590,8 +568,7 @@ export default function StudyToolsSheet({
                     ))}
                     {verseResources.commentaries.length > 2 && (
                       <p className="text-[10px] text-center text-muted-foreground py-1">
-                        +{verseResources.commentaries.length - 2} more commentaries
-                      </p>
+                        +{verseResources.commentaries.length - 2}{tt("more commentaries")}</p>
                     )}
                   </div>
                 </div>

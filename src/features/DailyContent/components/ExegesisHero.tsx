@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import type { ExegesisHeroProps } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export function ExegesisHero({ item, series, onSelect, onOpenBible, displayDate, isUpcoming, canOpenBible }: ExegesisHeroProps) {
   return (
@@ -13,7 +14,7 @@ export function ExegesisHero({ item, series, onSelect, onOpenBible, displayDate,
           <div className="flex items-center gap-2">
             <Calendar className="w-4 h-4" />
             <span className="text-sm font-medium">{displayDate}</span>
-            {isUpcoming && <Badge variant="secondary" className="text-xs font-bold px-2 py-0.5 ml-2">Upcoming</Badge>}
+            {isUpcoming && <Badge variant="secondary" className="text-xs font-bold px-2 py-0.5 ml-2">{tt("Upcoming")}</Badge>}
           </div>
           <h1 className="text-2xl sm:text-3xl font-black leading-tight">{item.title}</h1>
           <Button variant="secondary" onClick={onOpenBible} disabled={!canOpenBible} className="w-max gap-2">

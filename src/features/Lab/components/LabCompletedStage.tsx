@@ -1,5 +1,6 @@
 import { CheckCircle2, BookOpen, ArrowRight, RotateCcw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   passageRef: string;
@@ -22,12 +23,8 @@ export default function LabCompletedStage({ passageRef, onReset, journalEntryId 
         </div>
 
         <div>
-          <h2 className="text-xl font-bold text-foreground" style={{ fontFamily: "'Cinzel', serif" }}>
-            Study Complete!
-          </h2>
-          <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
-            You've journeyed through <span className="font-semibold text-foreground">{passageRef}</span> with the 5-stage method.
-          </p>
+          <h2 className="text-xl font-bold text-foreground" style={{ fontFamily: "'Cinzel', serif" }}>{tt("Study Complete!")}</h2>
+          <p className="text-sm text-muted-foreground mt-2 leading-relaxed">{tt("You've journeyed through")}<span className="font-semibold text-foreground">{passageRef}</span>{tt("with the 5-stage method.")}</p>
         </div>
 
         {/* Stage summary */}
@@ -45,16 +42,12 @@ export default function LabCompletedStage({ passageRef, onReset, journalEntryId 
           {journalEntryId && (
             <button onClick={() => navigate(`/journal/${journalEntryId}`)}
               className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground text-sm font-bold shadow-lg hover:shadow-xl hover:opacity-90 transition-all">
-              <BookOpen className="w-4 h-4" />
-              View in Journal
-              <ArrowRight className="w-3.5 h-3.5" />
+              <BookOpen className="w-4 h-4" />{tt("View in Journal")}<ArrowRight className="w-3.5 h-3.5" />
             </button>
           )}
           <button onClick={onReset}
             className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl border border-border/40 text-muted-foreground text-sm font-medium hover:bg-muted/20 transition-colors">
-            <RotateCcw className="w-4 h-4" />
-            Start New Study
-          </button>
+            <RotateCcw className="w-4 h-4" />{tt("Start New Study")}</button>
         </div>
       </div>
     </div>

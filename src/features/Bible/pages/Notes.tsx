@@ -5,6 +5,7 @@ import { useNotesPage } from "../hooks/useNotesPage";
 import { BiblePageLayout } from "../components/BiblePageLayout";
 import { EditNoteDialog } from "../components/EditNoteDialog";
 import { NotesList } from "../components";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export default function Notes() {
   const { data, actions } = useNotesPage();
@@ -13,7 +14,7 @@ export default function Notes() {
   return (
     <>
       <BiblePageLayout
-        title="My Notes"
+        title={tt("My Notes")}
         count={h.notes.length}
         contentCount={h.filtered.length}
         isRtl={h.isRtl}
@@ -24,7 +25,7 @@ export default function Notes() {
         loading={h.loading}
         onRefresh={h.refresh}
         searchPlaceholder="Search notes by verse or content..."
-        emptyTitle="No notes yet"
+        emptyTitle={tt("No notes yet")}
         emptyMessage="Add notes to verses while reading to see them here"
       >
         <NotesList

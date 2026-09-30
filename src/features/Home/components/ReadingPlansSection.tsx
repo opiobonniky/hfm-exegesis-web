@@ -2,6 +2,7 @@
 
 import { ArrowRight } from "lucide-react";
 import type { UserDashboardPlan } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 interface ReadingPlansSectionProps {
   plans: UserDashboardPlan[];
   onSeeAll?: () => void;
@@ -13,13 +14,11 @@ export default function ReadingPlansSection({ plans, onSeeAll, onPressPlan }: Re
     <section>
       <div className="mb-4 flex items-end justify-between">
         <div>
-          <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#946b30] dark:text-[#d9b879]">Keep the rhythm</p>
-          <h2 className="mt-1 font-serif text-2xl font-semibold text-[#173346] dark:text-[#f5f0e5]">Your reading plans</h2>
+          <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#946b30] dark:text-[#d9b879]">{tt("Keep the rhythm")}</p>
+          <h2 className="mt-1 font-serif text-2xl font-semibold text-[#173346] dark:text-[#f5f0e5]">{tt("Your reading plans")}</h2>
         </div>
         {onSeeAll && (
-          <button onClick={onSeeAll} className="rounded-full px-3 py-2 text-xs font-semibold text-[#173346] transition-colors hover:bg-[#e8e1d2] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary dark:text-[#f5f0e5] dark:hover:bg-white/10">
-            See all
-          </button>
+          <button onClick={onSeeAll} className="rounded-full px-3 py-2 text-xs font-semibold text-[#173346] transition-colors hover:bg-[#e8e1d2] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary dark:text-[#f5f0e5] dark:hover:bg-white/10">{tt("See all")}</button>
         )}
       </div>
       <div className="overflow-hidden rounded-2xl border border-[#d8d2c4] bg-[#faf8f2] dark:border-white/10 dark:bg-[#111b24]">
@@ -33,8 +32,8 @@ export default function ReadingPlansSection({ plans, onSeeAll, onPressPlan }: Re
             >
               <div className="mb-3 flex items-center justify-between gap-4">
                 <div className="min-w-0">
-                  <p className="truncate font-semibold text-foreground">{plan.planName || plan.description || "Reading Plan"}</p>
-                  <p className="mt-1 text-xs text-muted-foreground">Day {plan.completedDays} of {plan.totalDays}</p>
+                  <p className="truncate font-semibold text-foreground">{plan.planName || plan.description || tt("Reading Plan")}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">{tt("Day")}{plan.completedDays} of {plan.totalDays}</p>
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="font-serif text-xl font-semibold text-[#946b30] dark:text-[#d9b879]">{pct}%</span>

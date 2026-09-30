@@ -12,6 +12,7 @@ import { bibleApi } from "@/services/bibleApi";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { TESTAMENTS } from "../constants";
 import type { EditState } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   open: boolean;
@@ -99,77 +100,73 @@ export default function EditVerseDialog({
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <BookOpen className="w-5 h-5" />Edit Daily Verse
-          </DialogTitle>
-          <DialogDescription>Update the verse reference, date, and reflection below.</DialogDescription>
+            <BookOpen className="w-5 h-5" />{tt("Edit Daily Verse")}</DialogTitle>
+          <DialogDescription>{tt("Update the verse reference, date, and reflection below.")}</DialogDescription>
         </DialogHeader>
         <div className="space-y-5 py-2">
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             <div className="space-y-1.5">
-              <Label className="text-xs">Testament</Label>
-              <Combobox options={TESTAMENTS(t)} value={localState.testament || ""} onChange={(v) => testament("testament", v)} placeholder="Select testament" width="w-full" />
+              <Label className="text-xs">{tt("Testament")}</Label>
+              <Combobox options={TESTAMENTS(t)} value={localState.testament || ""} onChange={(v) => testament("testament", v)} placeholder={tt("Select testament")} width="w-full" />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs">Book</Label>
-              <Combobox options={books.map((b: string) => ({ value: b, label: b }))} value={localState.book || ""} onChange={(v) => testament("book", v)} placeholder="Select book" disabled={!localState.testament} width="w-full" />
+              <Label className="text-xs">{tt("Book")}</Label>
+              <Combobox options={books.map((b: string) => ({ value: b, label: tt(b) }))} value={localState.book || ""} onChange={(v) => testament("book", v)} placeholder={tt("Select book")} disabled={!localState.testament} width="w-full" />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs">Chapter</Label>
-              <Combobox options={chapters.map((c: number) => ({ value: String(c), label: String(c) }))} value={localState.chapter} onChange={(v) => testament("chapter", v)} placeholder="Select chapter" disabled={!localState.book} width="w-full" />
+              <Label className="text-xs">{tt("Chapter")}</Label>
+              <Combobox options={chapters.map((c: number) => ({ value: String(c), label: String(c) }))} value={localState.chapter} onChange={(v) => testament("chapter", v)} placeholder={tt("Select chapter")} disabled={!localState.book} width="w-full" />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs">Verse</Label>
-              <Combobox options={maxVerses > 0 ? Array.from({ length: maxVerses }, (_, i) => i + 1).map((v) => ({ value: String(v), label: String(v) })) : []} value={localState.verseNumber} onChange={(v) => testament("verseNumber", v)} placeholder="Select verse" disabled={!localState.chapter} width="w-full" />
+              <Label className="text-xs">{tt("Verse")}</Label>
+              <Combobox options={maxVerses > 0 ? Array.from({ length: maxVerses }, (_, i) => i + 1).map((v) => ({ value: String(v), label: String(v) })) : []} value={localState.verseNumber} onChange={(v) => testament("verseNumber", v)} placeholder={tt("Select verse")} disabled={!localState.chapter} width="w-full" />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs">Version</Label>
-              <Combobox options={BIBLE_VERSIONS.map(v => ({ value: v.id, label: `${v.name} (${v.abbreviation})` }))} value={localState.bibleVersion} onChange={(v) => testament("bibleVersion", v)} placeholder="Select version" width="w-full" />
+              <Label className="text-xs">{tt("Version")}</Label>
+              <Combobox options={BIBLE_VERSIONS.map(v => ({ value: v.id, label: `${v.name} (${v.abbreviation})` }))} value={localState.bibleVersion} onChange={(v) => testament("bibleVersion", v)} placeholder={tt("Select version")} width="w-full" />
             </div>
           </div>
           {verseTextValue && (
             <div className="space-y-1.5">
-              <Label className="text-xs">Verse Text <span className="text-muted-foreground font-normal">(edit to override)</span></Label>
+              <Label className="text-xs">{tt("Verse Text")}<span className="text-muted-foreground font-normal">{tt("(edit to override)")}</span></Label>
               <Textarea value={verseTextValue} onChange={(e) => testament("verseText", e.target.value)} className="resize-none font-serif leading-relaxed min-h-[80px]" />
             </div>
           )}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label className="text-xs">Date</Label>
+              <Label className="text-xs">{tt("Date")}</Label>
               <Input type="date" value={localState.displayDate} onChange={(e) => testament("displayDate", e.target.value)} />
             </div>
           </div>
           <div className="space-y-1.5">
             <Label className="flex items-center gap-1.5 text-xs">
-              <Lightbulb className="w-3.5 h-3.5" />Explanation <span className="text-destructive">*</span>
+              <Lightbulb className="w-3.5 h-3.5" />{tt("Explanation")}<span className="text-destructive">*</span>
             </Label>
             <Textarea
               value={localState.explanation}
               onChange={(e) => testament("explanation", e.target.value)}
               rows={5}
               className="resize-none"
-              placeholder="Explain what this verse means..."
+              placeholder={tt("Explain what this verse means...")}
               required
             />
           </div>
           <div className="space-y-1.5">
             <Label className="flex items-center gap-1.5 text-xs">
-              <Lightbulb className="w-3.5 h-3.5 text-muted-foreground" />
-              Learn More <span className="text-muted-foreground font-normal">(optional)</span>
+              <Lightbulb className="w-3.5 h-3.5 text-muted-foreground" />{tt("Learn More")}<span className="text-muted-foreground font-normal">{tt("(optional)")}</span>
             </Label>
             <Textarea
               value={localState.learnMore}
               onChange={(e) => testament("learnMore", e.target.value)}
               rows={3}
-              placeholder="Additional resources..."
+              placeholder={tt("Additional resources...")}
             />
           </div>
         </div>
         <DialogFooter className="gap-2 sm:gap-0">
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSaving}>Cancel</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSaving}>{tt("Cancel")}</Button>
           <Button onClick={onSave} disabled={isSaving || !verseTextValue.trim() || !localState.explanation.trim()} className="gap-2">
-            {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-            Save Changes
-          </Button>
+            {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}{tt("Save Changes")}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

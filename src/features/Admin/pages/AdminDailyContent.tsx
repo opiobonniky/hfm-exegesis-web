@@ -12,6 +12,7 @@ import {
 import { DailyContentGrid } from "../components/DailyContentGrid";
 import { AdminDailyContentHeader } from "../components/AdminDailyContentHeader";
 import { PaginationControls } from "../components/PaginationControls";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 const AdminDailyContent = () => {
   const { data, actions } = useAdminDailyContent();
@@ -124,7 +125,7 @@ const AdminDailyContent = () => {
         open={!!data.deleteTarget}
         onOpenChange={actions.handleDeleteOpenChange}
         title={`Delete ${data.typeLabel}`}
-        description="This action cannot be undone."
+        description={tt("This action cannot be undone.")}
         deleting={data.deleting}
         onConfirm={actions.confirmDelete}
       />

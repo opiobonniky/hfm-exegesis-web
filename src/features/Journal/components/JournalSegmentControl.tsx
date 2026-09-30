@@ -1,5 +1,6 @@
 import { BookText, Globe, Filter } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   viewMode: string; setViewMode: (v: string) => void;
@@ -14,15 +15,15 @@ export function JournalSegmentControl({ viewMode, setViewMode, showFilters, setS
         <div className="flex items-center gap-2">
           <button onClick={() => setViewMode("my")} className={cn("inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold border transition-all",
             viewMode === "my" ? "bg-foreground/10 text-foreground border-border shadow-sm" : "bg-card dark:bg-stone-900 text-muted-foreground dark:text-muted-foreground/70 border-border dark:border-stone-800 hover:bg-muted dark:hover:bg-stone-800",
-          )}><BookText className="w-3.5 h-3.5" />My Ledger</button>
+          )}><BookText className="w-3.5 h-3.5" />{tt("My Ledger")}</button>
           <button onClick={() => setViewMode("discover")} className={cn("inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold border transition-all",
             viewMode === "discover" ? "bg-foreground/10 text-foreground border-border shadow-sm" : "bg-card dark:bg-stone-900 text-muted-foreground dark:text-muted-foreground/70 border-border dark:border-stone-800 hover:bg-muted dark:hover:bg-stone-800",
-          )}><Globe className="w-3.5 h-3.5" />Community</button>
+          )}><Globe className="w-3.5 h-3.5" />{tt("Community")}</button>
           <div className="flex-1" />
           <button onClick={() => setShowFilters(!showFilters)} className={cn("inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold border transition-all",
             showFilters || hasActiveFilters ? "bg-foreground/10 text-foreground border-border" : "bg-card dark:bg-stone-900 text-muted-foreground dark:text-muted-foreground/70 border-border dark:border-stone-800 hover:bg-muted dark:hover:bg-stone-800",
           )}>
-            <Filter className="w-3.5 h-3.5" />Filters{hasActiveFilters && <span className="w-2 h-2 rounded-full bg-amber-500" />}
+            <Filter className="w-3.5 h-3.5" />{tt("Filters")}{hasActiveFilters && <span className="w-2 h-2 rounded-full bg-amber-500" />}
           </button>
         </div>
       </div>

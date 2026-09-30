@@ -5,6 +5,7 @@ import {
   GoogleRegisterWrapper,
   GoogleRegisterForm, GoogleRegisterHeader, GoogleRegisterEmailCard, GoogleRegisterFooter,
 } from "../components";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 const GoogleRegister = () => {
   const { data, actions } = useGoogleRegisterPage();
@@ -27,7 +28,7 @@ const GoogleRegister = () => {
       <GoogleRegisterHeader
         photoUrl={photoUrl} firstName={firstName} lastName={lastName}
         welcomeText={(t.auth?.welcomeUser || "Welcome, {name}!").replace("{name}", firstName)}
-        description={t.auth?.completeRegistrationDesc || "Complete your registration to get started"}
+        description={t.auth?.completeRegistrationDesc || tt("Complete your registration to get started")}
       />
 
       <GoogleRegisterEmailCard email={email} firstName={firstName} lastName={lastName} />
@@ -41,7 +42,7 @@ const GoogleRegister = () => {
         handleRegister={handleRegister}
       />
 
-      <GoogleRegisterFooter label={t.auth?.useDifferentAccount || "Use different account"} onClick={() => navigate("/login")} />
+      <GoogleRegisterFooter label={t.auth?.useDifferentAccount || tt("Use different account")} onClick={() => navigate("/login")} />
     </GoogleRegisterWrapper>
   );
 };

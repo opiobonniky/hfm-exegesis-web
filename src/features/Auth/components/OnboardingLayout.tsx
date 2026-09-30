@@ -3,6 +3,7 @@
  */
 import { ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface OnboardingLayoutProps {
   gradient: string;
@@ -44,9 +45,9 @@ export function OnboardingBottomControls({ children }: { children: ReactNode }) 
 export function OnboardingBranding() {
   return (
     <div className="flex items-center justify-center gap-1.5 mt-6">
-      <span className="text-[10px] font-medium text-white/30 tracking-wider uppercase">Exegesis Project</span>
+      <span className="text-[10px] font-medium text-white/30 tracking-wider uppercase">{tt("Exegesis Project")}</span>
       <span className="text-[10px] text-white/20">&middot;</span>
-      <span className="text-[10px] text-white/30 italic">The Living Text</span>
+      <span className="text-[10px] text-white/30 italic">{tt("The Living Text")}</span>
     </div>
   );
 }

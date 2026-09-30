@@ -4,6 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { adminApi } from "../services/adminApi";
 import type { TriviaQuestionDetail } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export function useTriviaDetail() {
   const { questionId } = useParams<{ questionId: string }>();
@@ -20,12 +21,12 @@ export function useTriviaDetail() {
         if (res?.returnCode === 200 && res.returnData) {
           setQuestion(res.returnData);
         } else {
-          toast({ title: "Question not found", variant: "destructive" });
+          toast({ title: tt("Question not found"), variant: "destructive" });
           navigate("/admin/trivia");
         }
       })
       .catch(() => {
-        toast({ title: "Failed to load", variant: "destructive" });
+        toast({ title: tt("Failed to load"), variant: "destructive" });
         navigate("/admin/trivia");
       })
       .finally(() => setLoading(false));

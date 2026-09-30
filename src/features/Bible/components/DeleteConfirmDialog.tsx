@@ -11,6 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface DeleteConfirmDialogProps {
   open: boolean;
@@ -45,9 +46,7 @@ export function DeleteConfirmDialog({
         </DialogHeader>
         {children}
         <DialogFooter className="gap-2">
-          <Button variant="outline" onClick={onClose} disabled={loading}>
-            Cancel
-          </Button>
+          <Button variant="outline" onClick={onClose} disabled={loading}>{tt("Cancel")}</Button>
           <Button
             variant="destructive"
             onClick={onConfirm}

@@ -9,6 +9,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface VerseExplanationDeleteDialogProps {
   open: boolean;
@@ -36,10 +37,8 @@ export function VerseExplanationDeleteDialog({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <AlertTriangle className="w-5 h-5 text-destructive" /> Delete
-          </DialogTitle>
-          <DialogDescription>
-            Delete explanation for{" "}
+            <AlertTriangle className="w-5 h-5 text-destructive" />{tt("Delete")}</DialogTitle>
+          <DialogDescription>{tt("Delete explanation for")}{" "}
             <strong>
               {bookName} {chapter}:{verseNumber}
             </strong>
@@ -47,9 +46,7 @@ export function VerseExplanationDeleteDialog({
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className="gap-2 sm:gap-0">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>{tt("Cancel")}</Button>
           <Button
             variant="destructive"
             onClick={onConfirm}
@@ -60,9 +57,7 @@ export function VerseExplanationDeleteDialog({
               <Loader2 className="w-4 h-4 animate-spin" />
             ) : (
               <Trash2 className="w-4 h-4" />
-            )}{" "}
-            Delete
-          </Button>
+            )}{" "}{tt("Delete")}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

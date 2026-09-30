@@ -9,6 +9,7 @@ import { PlanStepMeta } from "../components/PlanStepMeta";
 import { PlanStepDays } from "../components/PlanStepDays";
 import { PlanStepReview } from "../components/PlanStepReview";
 import { BookOpen } from "lucide-react";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export default function AddReadingPlan() {
   const { data, actions } = useAddReadingPlanPage();
@@ -21,8 +22,8 @@ export default function AddReadingPlan() {
           onBack={() => data.navigate("/reading-plans")}
           icon={<BookOpen className="h-5 w-5 text-teal-700" />}
           iconBg="bg-teal-100"
-          title={data.t.readingPlan?.createPlanTitle || "Create Plan"}
-          subtitle={data.t.readingPlan?.adminPlanBuilder || "Plan Builder"}
+          title={data.t.readingPlan?.createPlanTitle || tt("Create Plan")}
+          subtitle={data.t.readingPlan?.adminPlanBuilder || tt("Plan Builder")}
         />
 
         <PlanStepIndicator currentStep={data.step} t={data.t} />

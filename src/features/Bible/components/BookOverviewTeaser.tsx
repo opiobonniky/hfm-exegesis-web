@@ -1,6 +1,7 @@
 // BookOverviewTeaser — card shown above chapter grid linking to full BookOverview
 import { BookMarked, ChevronRight, ChevronLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface BookOverviewTeaserProps {
   bookName: string;
@@ -27,9 +28,8 @@ export default function BookOverviewTeaser({
         <BookMarked className="w-5 h-5 text-primary" />
       </div>
       <div className="flex-1 min-w-0 text-start">
-        <p className="text-sm font-bold text-primary">Book Overview</p>
-        <p className="text-[11px] text-muted-foreground truncate">
-          Read the introduction to {bookName}
+        <p className="text-sm font-bold text-primary">{tt("Book Overview")}</p>
+        <p className="text-[11px] text-muted-foreground truncate">{tt("Read the introduction to")}{bookName}
         </p>
       </div>
       <Chevron

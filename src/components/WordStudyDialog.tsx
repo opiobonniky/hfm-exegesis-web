@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { getStrongsEntry } from "@/services/strongsApi";
 import type { StrongsEntry } from "@/services/strongsApi";
 import { cn } from "@/lib/utils";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 // ── Types ──
 
@@ -84,7 +85,7 @@ export default function WordStudyDialog({
           <DialogTitle className="flex items-center gap-2">
             <BookText className="w-4 h-4 text-primary shrink-0" />
             <span className="text-sm font-bold text-foreground">
-              {entry?.originalWord || surfaceText || "Word Study"}
+              {entry?.originalWord || surfaceText || tt("Word Study")}
             </span>
           </DialogTitle>
           <DialogDescription>
@@ -108,8 +109,7 @@ export default function WordStudyDialog({
             </div>
           ) : error ? (
             <div className="text-center py-6">
-              <p className="text-sm text-muted-foreground">
-                Could not load word details for{" "}
+              <p className="text-sm text-muted-foreground">{tt("Could not load word details for")}{" "}
                 <span className="font-semibold">{surfaceText || strongsId}</span>.
               </p>
               <Button
@@ -132,9 +132,7 @@ export default function WordStudyDialog({
                 }}
                 className="mt-2 gap-1.5"
               >
-                <Search className="w-3.5 h-3.5" />
-                Retry
-              </Button>
+                <Search className="w-3.5 h-3.5" />{tt("Retry")}</Button>
             </div>
           ) : entry ? (
             <>
@@ -146,7 +144,7 @@ export default function WordStudyDialog({
                     className="text-[10px] font-bold gap-1"
                   >
                     <Languages className="w-3 h-3" />
-                    {entry.language === "greek" ? "Greek" : entry.language === "hebrew" ? "Hebrew" : entry.language}
+                    {entry.language === "greek" ? tt("Greek") : entry.language === "hebrew" ? tt("Hebrew") : entry.language}
                   </Badge>
                 )}
                 {entry.transliteration && (
@@ -158,9 +156,7 @@ export default function WordStudyDialog({
 
               {/* Plain-English Explanation */}
               <div className="rounded-lg bg-primary/5 border border-primary/20 p-4">
-                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">
-                  What It Means
-                </p>
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">{tt("What It Means")}</p>
                 <p className="text-sm font-medium text-foreground leading-6">
                   {entry.shortDefinition}
                 </p>
@@ -169,9 +165,7 @@ export default function WordStudyDialog({
               {/* Full Definition */}
               {entry.fullDefinition && (
                 <div className="rounded-lg bg-card border border-border p-4">
-                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">
-                    More Detail
-                  </p>
+                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">{tt("More Detail")}</p>
                   <p className="text-sm text-foreground leading-6">
                     {entry.fullDefinition}
                   </p>
@@ -182,9 +176,7 @@ export default function WordStudyDialog({
               {entry.usageCount != null && (
                 <div className="flex items-center gap-2">
                   <Hash className="w-3.5 h-3.5 text-muted-foreground" />
-                  <span className="text-xs text-muted-foreground">
-                    Used <strong>{entry.usageCount}×</strong> in Scripture
-                  </span>
+                  <span className="text-xs text-muted-foreground">{tt("Used")}<strong>{entry.usageCount}×</strong>{tt("in Scripture")}</span>
                 </div>
               )}
 
@@ -192,9 +184,7 @@ export default function WordStudyDialog({
               {(entry.partOfSpeech || entry.grammaticalCase || entry.gender || entry.number) && (
                 <div className="rounded-lg bg-card border border-border p-3">
                   <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                    <Info className="w-3 h-3" />
-                    Grammar (Plain English)
-                  </p>
+                    <Info className="w-3 h-3" />{tt("Grammar (Plain English)")}</p>
                   <div className="flex flex-wrap gap-1.5">
                     {entry.partOfSpeech && (
                       <Badge variant="outline" className="text-[10px] font-semibold px-2 py-0.5 bg-indigo-500/5 border-indigo-500/20 text-indigo-600 dark:text-indigo-400">
@@ -203,8 +193,7 @@ export default function WordStudyDialog({
                     )}
                     {entry.grammaticalCase && (
                       <Badge variant="outline" className="text-[10px] font-semibold px-2 py-0.5">
-                        {entry.grammaticalCase} case
-                      </Badge>
+                        {entry.grammaticalCase}{tt("case")}</Badge>
                     )}
                     {entry.gender && (
                       <Badge variant="outline" className="text-[10px] font-semibold px-2 py-0.5">
@@ -224,12 +213,10 @@ export default function WordStudyDialog({
               {entry.adminExplanation && (
                 <div className="rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200/30 p-3">
                   <div className="flex items-center justify-between mb-1.5">
-                    <p className="text-xs font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider">
-                      Study Note
-                    </p>
+                    <p className="text-xs font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider">{tt("Study Note")}</p>
                     <button
                       onClick={copyStudyNote}
-                      title={copiedStudyNote ? "Copied!" : "Copy study note"}
+                      title={copiedStudyNote ? tt("Copied!") : tt("Copy study note")}
                       className="shrink-0 w-6 h-6 flex items-center justify-center rounded-md text-amber-500/50 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-500/10 transition-all"
                     >
                       {copiedStudyNote ? (
@@ -249,9 +236,7 @@ export default function WordStudyDialog({
               {entry.crossReferences && (
                 <div className="rounded-lg bg-card border border-border p-3">
                   <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5 flex items-center gap-1">
-                    <BookOpen className="w-3 h-3" />
-                    Cross References
-                  </p>
+                    <BookOpen className="w-3 h-3" />{tt("Cross References")}</p>
                   <p className="text-xs text-foreground/80 leading-5">
                     {entry.crossReferences}
                   </p>

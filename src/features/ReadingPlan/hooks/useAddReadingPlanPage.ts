@@ -5,6 +5,7 @@ import { useLanguage } from "@/components/languages/languageProvider";
 import { useReadingPlanApi } from "../services";
 import type { DayAssignment, QuizQuestion } from "../types";
 import { routes } from "@/components/Routes/routes";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export interface PlanMeta {
   title: string;
@@ -146,7 +147,7 @@ export function useAddReadingPlanPage() {
       toast({ title: t.readingPlan?.planCreated || "Plan created", description: t.readingPlan?.planCreated || "Plan created successfully" });
       navigate(routes.readingPlans.path);
     } catch {
-      toast({ title: t.common?.error || "Error", description: "Failed to create plan", variant: "destructive" });
+      toast({ title: t.common?.error || "Error", description: tt("Failed to create plan"), variant: "destructive" });
     } finally {
       setSubmitting(false);
     }

@@ -3,6 +3,7 @@ import { Edit2, Trash2, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   id: number;
@@ -32,15 +33,15 @@ export function TriviaQuestionCard({ question, difficulty, category, isActive, o
             <Badge variant="outline" className={cn("text-[10px]", difficultyColor(difficulty))}>{difficulty}</Badge>
             <Badge variant="outline" className="text-[10px] bg-muted">{category?.replace("-", " ")}</Badge>
             {isActive ? (
-              <Badge variant="outline" className="text-[10px] bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-800/40">Active</Badge>
+              <Badge variant="outline" className="text-[10px] bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-800/40">{tt("Active")}</Badge>
             ) : (
-              <Badge variant="outline" className="text-[10px] bg-muted text-muted-foreground">Inactive</Badge>
+              <Badge variant="outline" className="text-[10px] bg-muted text-muted-foreground">{tt("Inactive")}</Badge>
             )}
           </div>
         </div>
         <div className="flex items-center gap-1 shrink-0">
           {onView && (
-            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={onView} title="View details">
+            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={onView} title={tt("View details")}>
               <Eye className="w-4 h-4 text-foreground/60" />
             </Button>
           )}

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import type { StrongsWord } from "../hooks/useStrongsDictionaryPage";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface WordDetailProps {
   word: StrongsWord;
@@ -35,13 +36,13 @@ export function WordDetail({ word, isFavorited, onToggleFavorite }: WordDetailPr
               </Badge>
             </div>
             <CardTitle className="text-3xl font-black tracking-tight sm:text-4xl">
-              {word.hebrewWord || "Unnamed word"}
+              {word.hebrewWord || tt("Unnamed word")}
             </CardTitle>
             {word.transliteration && (
               <p className="mt-2 text-sm italic text-muted-foreground">{word.transliteration}</p>
             )}
           </div>
-          <Button variant="secondary" size="icon" onClick={() => onToggleFavorite(word)} aria-label="Save word">
+          <Button variant="secondary" size="icon" onClick={() => onToggleFavorite(word)} aria-label={tt("Save word")}>
             <Star className={cn("h-5 w-5", isFavorited ? "fill-amber-400 text-amber-400" : "text-muted-foreground")} />
           </Button>
         </div>
@@ -49,11 +50,11 @@ export function WordDetail({ word, isFavorited, onToggleFavorite }: WordDetailPr
       <CardContent className="space-y-6 p-5 sm:p-6">
         <div className="grid grid-cols-2 gap-3">
           <div className="rounded-2xl bg-muted/60 p-3">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Occurrences</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{tt("Occurrences")}</p>
             <p className="mt-1 text-xl font-black">{word.kjvOccurrences}</p>
           </div>
           <div className="rounded-2xl bg-muted/60 p-3">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Verse studies</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{tt("Verse studies")}</p>
             <p className="mt-1 text-xl font-black">{studies.length}</p>
           </div>
         </div>
@@ -61,26 +62,26 @@ export function WordDetail({ word, isFavorited, onToggleFavorite }: WordDetailPr
         <section className="space-y-3">
           <div className="flex items-center gap-2">
             <div className="rounded-lg bg-primary/10 p-2 text-primary"><BookOpen className="h-4 w-4" /></div>
-            <h3 className="font-bold">Core definition</h3>
+            <h3 className="font-bold">{tt("Core definition")}</h3>
           </div>
           <div className="rounded-2xl border border-primary/15 bg-primary/[0.04] p-4">
-            <p className="text-sm leading-7">{word.strongsDef || word.meaning || "No definition available."}</p>
+            <p className="text-sm leading-7">{word.strongsDef || word.meaning || tt("No definition available.")}</p>
           </div>
         </section>
 
         <div className="grid gap-3 sm:grid-cols-2">
-          {word.pronunciation && <DetailField label="Pronunciation" value={word.pronunciation} />}
-          {word.bdbEntry && <DetailField label="Additional note" value={word.bdbEntry} />}
+          {word.pronunciation && <DetailField label={tt("Pronunciation")} value={word.pronunciation} />}
+          {word.bdbEntry && <DetailField label={tt("Additional note")} value={word.bdbEntry} />}
         </div>
 
         {studies.length > 0 && (
           <section className="space-y-3 border-t pt-5">
             <div className="flex items-end justify-between gap-3">
               <div>
-                <p className="text-xs font-bold uppercase tracking-widest text-primary">From the study library</p>
-                <h3 className="mt-1 text-lg font-black">Verse word studies</h3>
+                <p className="text-xs font-bold uppercase tracking-widest text-primary">{tt("From the study library")}</p>
+                <h3 className="mt-1 text-lg font-black">{tt("Verse word studies")}</h3>
               </div>
-              <Badge variant="outline">{studies.length} found</Badge>
+              <Badge variant="outline">{studies.length}{tt("found")}</Badge>
             </div>
             <div className="space-y-3">
               {studies.map((study, index) => (

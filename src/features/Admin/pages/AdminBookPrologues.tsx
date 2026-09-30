@@ -13,6 +13,7 @@ import {
 } from "../components";
 import { PrologueGrid } from "../components/PrologueGrid";
 import { PrologueDeleteDialog } from "../components/PrologueDeleteDialog";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export default function AdminBookPrologues() {
   const { data, actions } = useAdminBookProloguesPage();
@@ -21,7 +22,7 @@ export default function AdminBookPrologues() {
   return (
     <div className="min-h-screen bg-background">
       <AdminPageHeader
-        title="Book Prologues Manager"
+        title={tt("Book Prologues Manager")}
         subtitle={`${data.totalCount} prologues`}
         icon={<ScrollText className="w-5 h-5 text-primary" />}
         onBack={() => navigate("/admin")}
@@ -34,7 +35,7 @@ export default function AdminBookPrologues() {
           value={data.search}
           onChange={actions.setSearch}
           onSearch={() => actions.refresh()}
-          placeholder="Search by book name..."
+          placeholder={tt("Search by book name...")}
         />
 
         {data.loading && data.items.length === 0 ? (
@@ -42,7 +43,7 @@ export default function AdminBookPrologues() {
         ) : data.items.length === 0 ? (
           <AdminEmptyState
             icon={<ScrollText className="w-12 h-12" />}
-            title="No prologues found"
+            title={tt("No prologues found")}
             message={
               data.search
                 ? "Try a different search term"

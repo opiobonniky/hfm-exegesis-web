@@ -4,6 +4,7 @@ import { VerseLoadingSkeleton, VerseEmptyState } from "../components/VerseStates
 import { VerseContent } from "../components/VerseContent";
 import { UserVerseStickyHeader } from "../components/UserVerseStickyHeader";
 import { fmtDate, isToday } from "../helpers";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export default function UserDailyVerse() {
   const { data, actions } = useUserDailyVerse();
@@ -15,7 +16,7 @@ export default function UserDailyVerse() {
   return (
     <div ref={h.scrollRef} className="min-h-screen bg-background" dir={h.isRtl ? "rtl" : "ltr"}>
       <UserVerseStickyHeader
-        label={isToday(h.verse.displayDate) ? "Today\u2019s Verse" : fmtDate(h.verse.displayDate)}
+        label={isToday(h.verse.displayDate) ? tt("Today’s Verse") : fmtDate(h.verse.displayDate)}
         scrolled={h.scrolled}
         refreshing={h.refreshing}
         onBack={() => h.navigate(-1)}

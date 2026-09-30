@@ -1,10 +1,11 @@
+import { tt } from '@/components/languages/hardcodedTranslate';
 // ─── Admin Trivia Constants ───────────────────────────────────────────────────
 
 export const TRIVIA_TABS = [
-  { value: "overview", label: "Overview", icon: "BarChart3" },
-  { value: "questions", label: "Questions", icon: "HelpCircle" },
-  { value: "users", label: "User Performance", icon: "Users" },
-  { value: "performance", label: "Question Stats", icon: "TrendingUp" },
+  { value: "overview", label: tt("Overview"), icon: "BarChart3" },
+  { value: "questions", label: tt("Questions"), icon: "HelpCircle" },
+  { value: "users", label: tt("User Performance"), icon: "Users" },
+  { value: "performance", label: tt("Question Stats"), icon: "TrendingUp" },
 ] as const;
 
 export const DIFFICULTY_OPTIONS = ["all", "easy", "medium", "hard"] as const;

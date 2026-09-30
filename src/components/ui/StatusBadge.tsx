@@ -2,19 +2,20 @@
 
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 type StatusVariant = "published" | "draft" | "active" | "inactive" | "completed" | "pending" | "error" | "success" | "info";
 
 const STATUS_CONFIG: Record<StatusVariant, { label: string; className: string }> = {
-  published: { label: "Published", className: "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400" },
-  draft: { label: "Draft", className: "bg-muted text-muted-foreground" },
-  active: { label: "Active", className: "bg-blue-100 text-blue-700 dark:bg-blue-950/50 dark:text-blue-400" },
-  inactive: { label: "Inactive", className: "bg-muted text-muted-foreground" },
-  completed: { label: "Completed", className: "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400" },
-  pending: { label: "Pending", className: "bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-400" },
-  error: { label: "Error", className: "bg-red-100 text-red-700 dark:bg-red-950/50 dark:text-red-400" },
-  success: { label: "Success", className: "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400" },
-  info: { label: "Info", className: "bg-blue-100 text-blue-700 dark:bg-blue-950/50 dark:text-blue-400" },
+  published: { label: tt("Published"), className: "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400" },
+  draft: { label: tt("Draft"), className: "bg-muted text-muted-foreground" },
+  active: { label: tt("Active"), className: "bg-blue-100 text-blue-700 dark:bg-blue-950/50 dark:text-blue-400" },
+  inactive: { label: tt("Inactive"), className: "bg-muted text-muted-foreground" },
+  completed: { label: tt("Completed"), className: "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400" },
+  pending: { label: tt("Pending"), className: "bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-400" },
+  error: { label: tt("Error"), className: "bg-red-100 text-red-700 dark:bg-red-950/50 dark:text-red-400" },
+  success: { label: tt("Success"), className: "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400" },
+  info: { label: tt("Info"), className: "bg-blue-100 text-blue-700 dark:bg-blue-950/50 dark:text-blue-400" },
 };
 
 interface StatusBadgeProps {

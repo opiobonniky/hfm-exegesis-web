@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { sendPostRequest } from "@/services/api";
 import { routes } from "@/components/Routes/routes";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export function useForceChangePasswordPage() {
   const navigate = useNavigate();
@@ -73,20 +74,20 @@ export function useForceChangePasswordPage() {
           setUserInfo({ ...userInfo, mustChangePassword: false });
         }
         toast({
-          title: "Password Updated",
-          description: "Your new password is ready. Welcome to Exegesis!",
+          title: tt("Password Updated"),
+          description: tt("Your new password is ready. Welcome to Exegesis!"),
         });
         navigate(userInfo?.userRole === 1 ? routes.dashboard.path : routes.userDashboard.path, { replace: true });
       } else {
         toast({
-          title: "Could not update password",
+          title: tt("Could not update password"),
           description: res?.returnMessage || "Please try again.",
           variant: "destructive",
         });
       }
     } catch (err: any) {
       toast({
-        title: "Could not update password",
+        title: tt("Could not update password"),
         description: err?.message || "Please try again.",
         variant: "destructive",
       });

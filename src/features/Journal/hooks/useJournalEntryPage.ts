@@ -17,6 +17,7 @@ import {
   getVersesCountForChapter,
 } from "@/utilities/bibleUtils";
 import type { JournalEntryFormData } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export interface JournalEntryData extends Omit<JournalEntryFormData, "id"> {
   isPrivate: boolean;
@@ -269,7 +270,7 @@ export function useJournalEntryPage() {
 
   const handleSave = useCallback(async () => {
     if (!entry.title.trim() && !entry.content.trim()) {
-      toast({ title: "Title or content required", variant: "destructive" });
+      toast({ title: tt("Title or content required"), variant: "destructive" });
       return;
     }
 
@@ -290,7 +291,7 @@ export function useJournalEntryPage() {
         });
       }
     } catch {
-      toast({ title: "Error", variant: "destructive" });
+      toast({ title: tt("Error"), variant: "destructive" });
     } finally {
       setSaving(false);
     }

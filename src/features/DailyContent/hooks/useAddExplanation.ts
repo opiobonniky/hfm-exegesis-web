@@ -13,6 +13,7 @@ import type {
   VerseExplanationStepId,
   WordStudyItem,
 } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 const parseTakeaways = (value: unknown): string[] => {
   if (Array.isArray(value)) {
@@ -433,12 +434,12 @@ export function useAddExplanation() {
           setExistingFound(true);
           setExistingId(d.id ?? null);
         } else {
-          toast({ title: "Not found", variant: "destructive" });
+          toast({ title: tt("Not found"), variant: "destructive" });
           navigate("/admin/verse-explanations");
         }
       })
       .catch(() => {
-        toast({ title: "Failed to load", variant: "destructive" });
+        toast({ title: tt("Failed to load"), variant: "destructive" });
         navigate("/admin/verse-explanations");
       })
       .finally(() => setLoadingExisting(false));
@@ -691,14 +692,14 @@ export function useAddExplanation() {
         navigate("/admin/verse-explanations");
       } else {
         toast({
-          title: "Error",
+          title: tt("Error"),
           description: res?.returnMessage || "Failed to save",
           variant: "destructive",
         });
       }
     } catch (e: any) {
       toast({
-        title: "Network error",
+        title: tt("Network error"),
         description: e.message,
         variant: "destructive",
       });

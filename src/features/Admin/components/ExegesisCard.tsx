@@ -3,6 +3,7 @@ import { BookOpen, CalendarDays, Edit2, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   id: number;
@@ -26,7 +27,7 @@ export function ExegesisCard({ title, passageReference, displayDate, teachingBod
             </p>
           </div>
           <Badge variant={isPublished ? "default" : "secondary"} className="shrink-0 ml-2">
-            {isPublished ? "Published" : "Draft"}
+            {isPublished ? tt("Published") : tt("Draft")}
           </Badge>
         </div>
       </CardHeader>
@@ -39,11 +40,9 @@ export function ExegesisCard({ title, passageReference, displayDate, teachingBod
         <p className="text-sm text-muted-foreground line-clamp-3 mb-4">{teachingBody}</p>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={onEdit} className="gap-1">
-            <Edit2 className="w-3.5 h-3.5" /> Edit
-          </Button>
+            <Edit2 className="w-3.5 h-3.5" />{tt("Edit")}</Button>
           <Button variant="outline" size="sm" onClick={onDelete} className="gap-1 text-destructive hover:text-destructive">
-            <Trash2 className="w-3.5 h-3.5" /> Delete
-          </Button>
+            <Trash2 className="w-3.5 h-3.5" />{tt("Delete")}</Button>
         </div>
       </CardContent>
     </Card>

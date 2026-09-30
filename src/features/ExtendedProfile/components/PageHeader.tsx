@@ -1,5 +1,6 @@
 import { ArrowLeft, Save, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   goBack: () => void;
@@ -15,14 +16,12 @@ export function PageHeader({ goBack, handleSave, saving }: Props) {
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <div>
-          <h1 className="text-2xl font-bold">Additional Information</h1>
-          <p className="text-sm text-muted-foreground">Ministry details and emergency contacts</p>
+          <h1 className="text-2xl font-bold">{tt("Additional Information")}</h1>
+          <p className="text-sm text-muted-foreground">{tt("Ministry details and emergency contacts")}</p>
         </div>
       </div>
       <Button onClick={handleSave} disabled={saving}>
-        {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-        Save
-      </Button>
+        {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}{tt("Save")}</Button>
     </div>
   );
 }

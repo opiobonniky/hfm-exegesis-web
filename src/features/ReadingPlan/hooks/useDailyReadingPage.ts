@@ -4,6 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { useReadingPlanApi } from "../services";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Chapter {
   id: number;
@@ -200,10 +201,10 @@ export function useDailyReadingPage() {
         setIsCompleted(true);
         setSubmittedIds((prev) => new Set(prev).add(dayNumber));
         setShowConfetti(true);
-        toast({ title: "Day completed!" });
+        toast({ title: tt("Day completed!") });
       }
     } catch {
-      toast({ title: "Submission failed", variant: "destructive" });
+      toast({ title: tt("Submission failed"), variant: "destructive" });
     } finally {
       setIsSubmitting(false);
     }

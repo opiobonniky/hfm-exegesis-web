@@ -8,6 +8,7 @@ import {
   OnboardingControls, AuthBackButton, AuthSkipButton, AuthSlideButton, AuthAccountLink,
   OnboardingSlidesRenderer,
 } from "../components";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export default function OnboardingPage() {
   const { data, actions } = useOnboardingPage();
@@ -33,7 +34,7 @@ export default function OnboardingPage() {
           <AuthSlideButton onClick={goNext} isLast={isLast} />
           {(isFirst || isLast) && (
             <AuthAccountLink onClick={() => { completeOnboarding(); window.location.href = routes.login.path; }}
-              label={isFirst ? "I already have an account" : "Sign in instead"} />
+              label={isFirst ? tt("I already have an account") : tt("Sign in instead")} />
           )}
         </OnboardingControls>
         <OnboardingBranding />

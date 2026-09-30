@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { DIFFICULTY_COLOR, DIFFICULTY_KEYS, CATEGORY_KEYS } from "../constants";
 import type { ReadingPlan } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   plan: ReadingPlan;
@@ -38,8 +39,8 @@ export function BrowsePlanCard({ plan, isActive, hasStarted, isCompleted, done, 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap mb-1">
             <h3 className="font-bold text-foreground">{plan.title}</h3>
-            {isCompleted && <span className="text-xs px-2 py-1 rounded-full bg-emerald-100 text-emerald-700 font-semibold">{t.readingPlan?.badgeDone || "Done"}</span>}
-            {isActive && !isCompleted && <span className="text-xs px-2 py-1 rounded-full bg-teal-100 text-teal-700 font-semibold">{t.readingPlan?.badgeActive || "Active"}</span>}
+            {isCompleted && <span className="text-xs px-2 py-1 rounded-full bg-emerald-100 text-emerald-700 font-semibold">{t.readingPlan?.badgeDone || tt("Done")}</span>}
+            {isActive && !isCompleted && <span className="text-xs px-2 py-1 rounded-full bg-teal-100 text-teal-700 font-semibold">{t.readingPlan?.badgeActive || tt("Active")}</span>}
           </div>
           <p className="text-sm text-muted-foreground line-clamp-2 mb-3">{plan.description}</p>
           <div className="flex flex-wrap gap-2 mb-3">
@@ -47,7 +48,7 @@ export function BrowsePlanCard({ plan, isActive, hasStarted, isCompleted, done, 
               {t.readingPlan?.[DIFFICULTY_KEYS[plan.difficulty]] || plan.difficulty}
             </span>
             <span className="text-xs px-2 py-1 rounded-lg font-medium bg-muted text-muted-foreground">
-              {t.readingPlan?.[CATEGORY_KEYS[plan.category]] || plan.category} · {total} {t.readingPlan?.days || "days"}
+              {t.readingPlan?.[CATEGORY_KEYS[plan.category]] || plan.category} · {total} {t.readingPlan?.days || tt("days")}
             </span>
             {plan.questionsEnabled && (
               <span className="text-xs px-2 py-1 rounded-lg font-medium bg-violet-100 text-violet-700">{t.readingPlan?.badgeQA || "Q&A"}</span>

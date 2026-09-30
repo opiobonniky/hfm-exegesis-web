@@ -1,10 +1,11 @@
 import { Languages, Library, Sparkles } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 const OVERVIEW_ITEMS = [
-  { label: "Languages", value: "Hebrew + Greek", icon: Languages },
-  { label: "Study scope", value: "Bible-wide", icon: Library },
-  { label: "Context", value: "Verse studies", icon: Sparkles },
+  { label: tt("Languages"), value: "Hebrew + Greek", icon: Languages },
+  { label: tt("Study scope"), value: "Bible-wide", icon: Library },
+  { label: tt("Context"), value: "Verse studies", icon: Sparkles },
 ];
 
 export function StrongsOverviewStats() {

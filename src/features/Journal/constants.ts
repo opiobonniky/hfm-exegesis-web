@@ -1,3 +1,4 @@
+import { tt } from '@/components/languages/hardcodedTranslate';
 // ─── Journal Constants ────────────────────────────────────────────────────────
 
 export const CATEGORIES = [
@@ -77,19 +78,19 @@ export function formatDate(dateStr: string): string {
 }
 
 export const CATEGORY_META: Record<string, { labelKey: string; label: string; color: string }> = {
-  general: { labelKey: "categoryGeneral", label: "General", color: "bg-zinc-500" },
-  study: { labelKey: "categoryStudy", label: "Study", color: "bg-blue-500" },
-  prayer: { labelKey: "categoryPrayer", label: "Prayer", color: "bg-violet-500" },
-  gratitude: { labelKey: "categoryGratitude", label: "Gratitude", color: "bg-amber-500" },
-  reflection: { labelKey: "categoryReflection", label: "Reflection", color: "bg-emerald-500" },
-  application: { labelKey: "categoryApplication", label: "Application", color: "bg-indigo-500" },
+  general: { labelKey: "categoryGeneral", label: tt("General"), color: "bg-zinc-500" },
+  study: { labelKey: "categoryStudy", label: tt("Study"), color: "bg-blue-500" },
+  prayer: { labelKey: "categoryPrayer", label: tt("Prayer"), color: "bg-violet-500" },
+  gratitude: { labelKey: "categoryGratitude", label: tt("Gratitude"), color: "bg-amber-500" },
+  reflection: { labelKey: "categoryReflection", label: tt("Reflection"), color: "bg-emerald-500" },
+  application: { labelKey: "categoryApplication", label: tt("Application"), color: "bg-indigo-500" },
 };
 
 export const MOOD_EMOJI_MAP: Record<string, { label: string; emoji: string }> = {
-  happy: { label: "Happy", emoji: "😊" }, grateful: { label: "Grateful", emoji: "🙏" },
-  peaceful: { label: "Peaceful", emoji: "🕊️" }, thoughtful: { label: "Thoughtful", emoji: "🤔" },
-  motivated: { label: "Motivated", emoji: "💪" }, hopeful: { label: "Hopeful", emoji: "🌟" },
-  challenged: { label: "Challenged", emoji: "🧗" }, blessed: { label: "Blessed", emoji: "✨" },
+  happy: { label: tt("Happy"), emoji: "😊" }, grateful: { label: tt("Grateful"), emoji: "🙏" },
+  peaceful: { label: tt("Peaceful"), emoji: "🕊️" }, thoughtful: { label: tt("Thoughtful"), emoji: "🤔" },
+  motivated: { label: tt("Motivated"), emoji: "💪" }, hopeful: { label: tt("Hopeful"), emoji: "🌟" },
+  challenged: { label: tt("Challenged"), emoji: "🧗" }, blessed: { label: tt("Blessed"), emoji: "✨" },
 };
 
 export const MOOD_MAP: Record<string, { value: string; key: string; emoji: string }> = Object.fromEntries(

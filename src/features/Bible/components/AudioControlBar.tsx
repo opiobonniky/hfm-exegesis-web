@@ -11,6 +11,7 @@ import { RepeatControl } from "./AudioControls/RepeatControl";
 import { PlaybackControls } from "./AudioControls/PlaybackControls";
 import { VerseTickBar } from "./AudioControls/VerseTickBar";
 import ReaderDock from "./ReaderDock";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export default function AudioControlBar({
   audioState,
@@ -87,17 +88,17 @@ export default function AudioControlBar({
             )}
             aria-label={
               audioState.isBuffering
-                ? "Buffering"
+                ? tt("Buffering")
                 : audioState.isPaused
-                  ? "Paused"
-                  : "Now playing"
+                  ? tt("Paused")
+                  : tt("Now playing")
             }
             title={
               audioState.isBuffering
-                ? "Buffering"
+                ? tt("Buffering")
                 : audioState.isPaused
-                  ? "Paused"
-                  : "Now playing"
+                  ? tt("Paused")
+                  : tt("Now playing")
             }
           >
             {audioState.isBuffering ? (
@@ -132,7 +133,7 @@ export default function AudioControlBar({
         <button
           type="button"
           onClick={() => setExpanded((current) => !current)}
-          aria-label={expanded ? "Hide audio settings" : "Show audio settings"}
+          aria-label={expanded ? tt("Hide audio settings") : tt("Show audio settings")}
           aria-expanded={expanded}
           className={cn(
             "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",

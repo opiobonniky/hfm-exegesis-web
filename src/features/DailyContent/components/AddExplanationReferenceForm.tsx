@@ -9,6 +9,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { AddExplanationReferenceFormProps } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export function AddExplanationReferenceForm(props: AddExplanationReferenceFormProps) {
   const { bookName, chapter, verseNumber, bibleVersion, sortedTranslationOptions, bookOptions, chapterOptions, verseOptions, verseOptionsLoading, verseTextLoading, selectedVerseText, maxChapterNumber, maxVerseNumber, selectedVerse, verseLoadingForTrigger, updateField } = props;
@@ -27,31 +28,31 @@ export function AddExplanationReferenceForm(props: AddExplanationReferenceFormPr
     <div className="space-y-6">
       <div className="flex items-center gap-2 text-sky-600">
         <BookOpen className="h-4 w-4" />
-        <span className="text-sm font-medium">Verse reference</span>
+        <span className="text-sm font-medium">{tt("Verse reference")}</span>
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="space-y-2 md:col-span-2">
-          <Label className="text-sm font-medium text-foreground">Book name</Label>
+          <Label className="text-sm font-medium text-foreground">{tt("Book name")}</Label>
           <Combobox
             options={bookOptions}
             value={h.form.bookName || undefined}
             onChange={(value) =>
               h.updateField("bookName", value)
             }
-            placeholder="Select book..."
+            placeholder={tt("Select book...")}
             width="w-full"
           />
         </div>
 
         <div className="space-y-2">
-          <Label className="text-sm font-medium text-foreground">Bible version</Label>
+          <Label className="text-sm font-medium text-foreground">{tt("Bible version")}</Label>
           <Select
             value={h.form.bibleVersion}
             onValueChange={(v) => h.updateField("bibleVersion", v)}
           >
             <SelectTrigger className="border-border bg-background text-foreground">
-              <SelectValue placeholder="Select a Bible version" />
+              <SelectValue placeholder={tt("Select a Bible version")} />
             </SelectTrigger>
             <SelectContent>
               {sortedTranslationOptions.map((t) => (
@@ -64,7 +65,7 @@ export function AddExplanationReferenceForm(props: AddExplanationReferenceFormPr
         </div>
 
         <div className="space-y-2">
-          <Label className="text-sm font-medium text-foreground">Chapter</Label>
+          <Label className="text-sm font-medium text-foreground">{tt("Chapter")}</Label>
           <Select
             value={h.form.chapter || ""}
             onValueChange={(v) => {
@@ -74,7 +75,7 @@ export function AddExplanationReferenceForm(props: AddExplanationReferenceFormPr
             disabled={!h.form.bookName}
           >
             <SelectTrigger className="border-border bg-background text-foreground">
-              <SelectValue placeholder={h.form.bookName ? "Select" : "Pick book"} />
+              <SelectValue placeholder={h.form.bookName ? tt("Select") : tt("Pick book")} />
             </SelectTrigger>
             <SelectContent>
               {chapterOptions.map((c) => (
@@ -87,12 +88,12 @@ export function AddExplanationReferenceForm(props: AddExplanationReferenceFormPr
           <p className="text-xs text-muted-foreground">
             {h.form.bookName
               ? `Total chapters: ${h.maxChapterNumber}`
-              : "Select a book to view chapter options"}
+              : tt("Select a book to view chapter options")}
           </p>
         </div>
 
         <div className="space-y-2">
-          <Label className="text-sm font-medium text-foreground">Verse number</Label>
+          <Label className="text-sm font-medium text-foreground">{tt("Verse number")}</Label>
           <Select
             value={selectedVerse != null ? String(selectedVerse) : ""}
             onValueChange={(v) => h.updateField("verseNumber", v)}
@@ -109,10 +110,10 @@ export function AddExplanationReferenceForm(props: AddExplanationReferenceFormPr
                 <SelectValue
                   placeholder={
                     !h.form.bookName
-                      ? "Pick book"
+                      ? tt("Pick book")
                       : !h.form.chapter
-                        ? "Pick chapter"
-                        : "Select"
+                        ? tt("Pick chapter")
+                        : tt("Select")
                   }
                 />
               )}
@@ -128,14 +129,14 @@ export function AddExplanationReferenceForm(props: AddExplanationReferenceFormPr
           <p className="text-xs text-muted-foreground">
             {h.form.bookName && h.form.chapter
               ? `Verses in chapter: ${h.maxVerseNumber}`
-              : "Select a book and chapter to view verse options"}
+              : tt("Select a book and chapter to view verse options")}
           </p>
         </div>
       </div>
 
       <div className="rounded-2xl border border-border bg-muted/30 p-4">
         <div className="mb-2 flex items-center justify-between gap-2">
-          <Label className="text-sm font-semibold text-foreground">Selected verse text</Label>
+          <Label className="text-sm font-semibold text-foreground">{tt("Selected verse text")}</Label>
           {h.verseTextLoading && <span className="inline-flex h-4 w-4 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent" />}
         </div>
         <div className="min-h-[80px] rounded-xl border border-border bg-background p-3 text-sm leading-relaxed text-foreground/90">
@@ -144,8 +145,8 @@ export function AddExplanationReferenceForm(props: AddExplanationReferenceFormPr
           ) : (
             <p className="text-muted-foreground italic">
               {h.form.bookName && h.form.chapter && h.form.verseNumber && h.form.bibleVersion
-                ? "Verse text is loading..."
-                : "Choose a book, chapter, verse, and version to preview the verse text."}
+                ? tt("Verse text is loading...")
+                : tt("Choose a book, chapter, verse, and version to preview the verse text.")}
             </p>
           )}
         </div>

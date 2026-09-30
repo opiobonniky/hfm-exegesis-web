@@ -5,6 +5,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DIFFICULTY_OPTIONS } from "../constants";
 import type { TriviaFormData } from "../hooks/useAdminAddTriviaQuestionPage";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface TriviaMetadataSectionProps {
   form: TriviaFormData;
@@ -14,19 +15,19 @@ interface TriviaMetadataSectionProps {
 export function TriviaMetadataSection({ form, onFormChange }: TriviaMetadataSectionProps) {
   return (
     <Card>
-      <CardHeader><CardTitle>Details</CardTitle></CardHeader>
+      <CardHeader><CardTitle>{tt("Details")}</CardTitle></CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <Label>Category *</Label>
+            <Label>{tt("Category *")}</Label>
             <Input
               value={form.category}
               onChange={(e) => onFormChange((p) => ({ ...p, category: e.target.value }))}
-              placeholder="e.g. creation, gospel, prophets"
+              placeholder={tt("e.g. creation, gospel, prophets")}
             />
           </div>
           <div>
-            <Label>Difficulty</Label>
+            <Label>{tt("Difficulty")}</Label>
             <Select value={form.difficulty} onValueChange={(v) => onFormChange((p) => ({ ...p, difficulty: v }))}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -40,7 +41,7 @@ export function TriviaMetadataSection({ form, onFormChange }: TriviaMetadataSect
         <div className="flex items-center justify-between border-t pt-4">
           <div className="flex items-center gap-2">
             <Switch checked={form.isActive} onCheckedChange={(checked) => onFormChange((p) => ({ ...p, isActive: checked }))} />
-            <Label>Active (visible to users)</Label>
+            <Label>{tt("Active (visible to users)")}</Label>
           </div>
         </div>
       </CardContent>

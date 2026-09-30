@@ -1,3 +1,4 @@
+import { tt } from '@/components/languages/hardcodedTranslate';
 // ─── DailyContent Constants ────────────────────────────────────────────────────
 
 export const SMART_PAGE_SIZE = 6;
@@ -16,23 +17,23 @@ export const VERSE_EXPLANATION_STEP_ORDER = [
 export const VERSE_EXPLANATION_STEPS = [
   {
     id: "reference",
-    label: "Reference",
-    description: "Verse & translation",
+    label: tt("Reference"),
+    description: tt("Verse & translation"),
   },
   {
     id: "exegesis",
-    label: "Exegesis",
-    description: "Main insight",
+    label: tt("Exegesis"),
+    description: tt("Main insight"),
   },
   {
     id: "study",
-    label: "Study",
-    description: "Context & word study",
+    label: tt("Study"),
+    description: tt("Context & word study"),
   },
   {
     id: "extras",
-    label: "Extras",
-    description: "Applications & themes",
+    label: tt("Extras"),
+    description: tt("Applications & themes"),
   },
 ] as const;
 

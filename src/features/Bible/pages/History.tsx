@@ -6,6 +6,7 @@ import { useHistoryPage } from "../hooks/useHistoryPage";
 import { BiblePageLayout } from "../components/BiblePageLayout";
 import { DeleteConfirmDialog } from "../components/DeleteConfirmDialog";
 import { HistoryClearAction, HistoryList } from "../components";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export default function History() {
   const { data, actions } = useHistoryPage();
@@ -14,7 +15,7 @@ export default function History() {
   return (
     <>
       <BiblePageLayout
-        title="Reading History"
+        title={tt("Reading History")}
         count={h.history.length}
         contentCount={h.filtered.length}
         isRtl={h.isRtl}
@@ -25,7 +26,7 @@ export default function History() {
         loading={h.loading}
         onRefresh={h.refresh}
         searchPlaceholder="Search history by verse reference..."
-        emptyTitle="No reading history"
+        emptyTitle={tt("No reading history")}
         emptyMessage="Chapters you read will appear here"
         emptyIcon={<HistoryIcon className="w-8 h-8 text-muted-foreground/30 mb-4" />}
         actions={<HistoryClearAction visible={h.history.length > 0} onClear={h.openClearAllDialog} />}

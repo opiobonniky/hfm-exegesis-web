@@ -1,6 +1,7 @@
 import { ArrowLeft, CheckCircle2, Loader2, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { AddExplanationHeaderBarProps } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export function AddExplanationHeaderBar({ isEditMode, isValid, saving, goBack, handleSave }: AddExplanationHeaderBarProps) {
   return (
@@ -12,18 +13,18 @@ export function AddExplanationHeaderBar({ isEditMode, isValid, saving, goBack, h
               <ArrowLeft className="h-4 w-4" />
             </Button>
             <div className="min-w-0">
-              <p className="text-[11px] uppercase tracking-[0.22em] text-sky-600">Study workflow</p>
+              <p className="text-[11px] uppercase tracking-[0.22em] text-sky-600">{tt("Study workflow")}</p>
               <h1 className="truncate text-lg font-bold text-foreground sm:text-xl">
-                {isEditMode ? "Edit Verse Explanation" : "Create Verse Explanation"}
+                {isEditMode ? tt("Edit Verse Explanation") : tt("Create Verse Explanation")}
               </h1>
             </div>
           </div>
 
           <div className="flex items-center gap-2 self-start lg:self-auto">
-            <Button variant="outline" onClick={goBack}>Cancel</Button>
+            <Button variant="outline" onClick={goBack}>{tt("Cancel")}</Button>
             <Button onClick={handleSave} disabled={!isValid || saving} className="gap-2">
               {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-              {isEditMode ? "Update" : "Create"}
+              {isEditMode ? tt("Update") : tt("Create")}
             </Button>
           </div>
         </div>

@@ -6,6 +6,7 @@ import { useLanguage } from "@/components/languages/languageProvider";
 import { sendPostRequest } from "@/services/api";
 import { getDeviceInfo, getClientIP } from "@/lib/utils";
 import { routes } from "@/components/Routes/routes";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export function useGoogleRegisterPage() {
   const navigate = useNavigate();
@@ -43,7 +44,7 @@ export function useGoogleRegisterPage() {
       });
       if (res?.returnCode === 200 && res.returnData) {
         setUserInfo(res.returnData);
-        toast({ title: "Welcome!" });
+        toast({ title: tt("Welcome!") });
         navigate(res.returnData.userRole === 1 ? routes.dashboard.path : routes.userDashboard.path);
       } else {
         setError(res?.returnMessage || "Registration failed");

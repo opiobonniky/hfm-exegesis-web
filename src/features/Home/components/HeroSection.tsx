@@ -6,6 +6,7 @@ import { useLanguage } from "@/components/languages/languageProvider";
 import { routes } from "@/components/Routes/routes";
 import { getGreeting } from "../utils";
 import type { UserDashboardVerse } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface HeroSectionProps {
   userName: string;
@@ -33,7 +34,7 @@ export default function HeroSection({ userName, initial, verse }: HeroSectionPro
           <button
             onClick={() => navigate(routes.settings.path)}
             className="flex h-10 w-10 items-center justify-center rounded-full border border-[#d8d2c4] bg-transparent transition-colors hover:border-[#173346] hover:bg-[#ebe6da] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary dark:border-white/15 dark:hover:bg-white/10"
-            aria-label="Open settings"
+            aria-label={tt("Open settings")}
           >
             <Settings className="h-4.5 w-4.5 text-muted-foreground" />
           </button>
@@ -43,15 +44,9 @@ export default function HeroSection({ userName, initial, verse }: HeroSectionPro
 
         <div className="grid items-stretch gap-5 lg:grid-cols-[0.82fr_1.18fr] lg:gap-8">
           <div className="flex flex-col justify-center border-s-2 border-[#b88a44] py-2 ps-5 lg:py-6 lg:ps-7">
-            <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.22em] text-[#946b30] dark:text-[#d9b879]">
-              Your daily rhythm
-            </p>
-            <h2 className="max-w-xl font-serif text-4xl font-semibold leading-[1.05] tracking-tight text-[#173346] dark:text-[#f5f0e5] sm:text-5xl">
-              Make room for the Word.
-            </h2>
-            <p className="mt-4 max-w-md text-sm leading-6 text-muted-foreground sm:text-base">
-              Read with attention, study with purpose, and carry one truth into the rest of your day.
-            </p>
+            <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.22em] text-[#946b30] dark:text-[#d9b879]">{tt("Your daily rhythm")}</p>
+            <h2 className="max-w-xl font-serif text-4xl font-semibold leading-[1.05] tracking-tight text-[#173346] dark:text-[#f5f0e5] sm:text-5xl">{tt("Make room for the Word.")}</h2>
+            <p className="mt-4 max-w-md text-sm leading-6 text-muted-foreground sm:text-base">{tt("Read with attention, study with purpose, and carry one truth into the rest of your day.")}</p>
           </div>
 
           {verse && (
@@ -63,8 +58,7 @@ export default function HeroSection({ userName, initial, verse }: HeroSectionPro
               <div>
                 <div className="mb-6 flex items-center justify-between">
                   <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-[#d8c9aa]">
-                    <BookOpen className="h-4 w-4 text-[#d7aa62]" /> Verse of the day
-                  </div>
+                    <BookOpen className="h-4 w-4 text-[#d7aa62]" />{tt("Verse of the day")}</div>
                   <span className="flex h-9 w-9 items-center justify-center rounded-full border border-white/20 transition-colors group-hover:bg-white/10">
                     <ArrowRight className="h-4 w-4 rtl:rotate-180" />
                   </span>

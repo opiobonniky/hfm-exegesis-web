@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { PRESETS, formatDisplayDate } from "../constants";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   fromDate: string;
@@ -30,9 +31,7 @@ export default function VerseFilterBar({
   return (
     <div className="space-y-3">
       <div className="border border-border rounded-2xl p-5 space-y-4">
-        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-          Quick Range
-        </p>
+        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">{tt("Quick Range")}</p>
         <div className="flex flex-wrap gap-2">
           {presets.map((p) => (
             <button
@@ -52,7 +51,7 @@ export default function VerseFilterBar({
         <div className="border-t border-border" />
         <div className="flex flex-col md:flex-row gap-4 md:items-end">
           <div className="flex-1 space-y-1">
-            <Label className="text-xs">From</Label>
+            <Label className="text-xs">{tt("From")}</Label>
             <Input
               type="date"
               value={fromDate}
@@ -71,12 +70,10 @@ export default function VerseFilterBar({
           </div>
           <div className="flex gap-2 shrink-0">
             <Button size="sm" onClick={onApply} className="gap-1.5">
-              <Search className="w-3.5 h-3.5" />Apply
-            </Button>
+              <Search className="w-3.5 h-3.5" />{tt("Apply")}</Button>
             {isFiltered && (
               <Button variant="outline" size="sm" onClick={onClear} className="gap-1">
-                <X className="w-3.5 h-3.5" />Clear
-              </Button>
+                <X className="w-3.5 h-3.5" />{tt("Clear")}</Button>
             )}
           </div>
         </div>
@@ -89,7 +86,7 @@ export default function VerseFilterBar({
             <CalendarRange className="w-4 h-4 shrink-0" />
             <span>
               {fromDate && (
-                <>from <strong className="text-foreground">{formatDisplayDate(fromDate)}</strong></>
+                <>{tt("from")}<strong className="text-foreground">{formatDisplayDate(fromDate)}</strong></>
               )}
               {toDate && (
                 <> to <strong className="text-foreground">{formatDisplayDate(toDate)}</strong></>
@@ -103,15 +100,11 @@ export default function VerseFilterBar({
             </button>
           </>
         ) : (
-          <span>
-            Showing today{" "}
+          <span>{tt("Showing today")}{" "}
             {futureCount > 0 && (
               <>
-                + <strong className="text-foreground">{futureCount}</strong> upcoming
-              </>
-            )}{" "}
-            + recent history
-          </span>
+                + <strong className="text-foreground">{futureCount}</strong>{tt("upcoming")}</>
+            )}{" "}{tt("+ recent history")}</span>
         )}
       </div>
     </div>

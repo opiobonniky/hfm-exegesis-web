@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import type { EditNoteDialogProps } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export function EditNoteDialog({
   open,
@@ -35,7 +36,7 @@ export function EditNoteDialog({
         <div className="border-b border-border/60 bg-primary/[0.04] px-6 py-5">
           <DialogHeader>
             <DialogTitle className="font-[family-name:var(--font-heading)] text-xl">
-              {isEdit ? "Edit note" : "Add a verse note"}
+              {isEdit ? tt("Edit note") : tt("Add a verse note")}
             </DialogTitle>
             <DialogDescription>
               {verseRef
@@ -43,8 +44,8 @@ export function EditNoteDialog({
                   ? `Editing note for ${verseRef}`
                   : `The note will be saved to ${verseRef}.`
                 : isEdit
-                  ? "Update your note."
-                  : "The note will be saved to every selected verse."}
+                  ? tt("Update your note.")
+                  : tt("The note will be saved to every selected verse.")}
             </DialogDescription>
           </DialogHeader>
         </div>
@@ -53,7 +54,7 @@ export function EditNoteDialog({
           <Textarea
             value={text}
             onChange={(event) => onTextChange(event.target.value)}
-            placeholder="Write your note..."
+            placeholder={tt("Write your note...")}
             rows={7}
             className="resize-none border-border/70 bg-background text-base leading-relaxed"
           />
@@ -72,15 +73,11 @@ export function EditNoteDialog({
                     <Loader2 className="w-4 h-4 animate-spin" />
                   ) : (
                     <Trash2 className="w-4 h-4" />
-                  )}
-                  Delete
-                </Button>
+                  )}{tt("Delete")}</Button>
               )}
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" onClick={onClose} disabled={saving}>
-                Cancel
-              </Button>
+              <Button variant="outline" onClick={onClose} disabled={saving}>{tt("Cancel")}</Button>
               <Button
                 onClick={onSave}
                 disabled={!text.trim() || saving}
@@ -91,7 +88,7 @@ export function EditNoteDialog({
                 ) : (
                   <Save className="w-4 h-4" />
                 )}
-                {isEdit ? "Update" : "Save note"}
+                {isEdit ? tt("Update") : tt("Save note")}
               </Button>
             </div>
           </DialogFooter>

@@ -7,6 +7,7 @@ import VerseToolbar from "./VerseToolbar";
 import type { ChapterData, ReaderHighlight } from "../types";
 import type { ChapterHeading } from "@/services/bibleApi";
 import { getVerseHighlightStyle } from "../constants";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface ChapterContentProps {
   chapters: ChapterData[];
@@ -100,9 +101,7 @@ export default function ChapterContent({
             aria-labelledby={`${chapterKey}-title`}
           >
             <header className="mb-8 border-b border-border/60 pb-6 text-center sm:mb-10 sm:pb-8">
-              <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.24em] text-primary/70">
-                Chapter
-              </p>
+              <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.24em] text-primary/70">{tt("Chapter")}</p>
               <h2
                 id={`${chapterKey}-title`}
                 className="font-[family-name:var(--font-heading)] text-2xl font-bold tracking-tight text-foreground sm:text-3xl"

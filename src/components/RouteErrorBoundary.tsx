@@ -2,6 +2,7 @@ import { Component, type ErrorInfo, type ReactNode } from "react";
 import { AlertTriangle, RefreshCw, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   children: ReactNode;
@@ -48,14 +49,8 @@ export class RouteErrorBoundary extends Component<Props, State> {
           <div className="w-16 h-16 rounded-2xl bg-destructive/10 flex items-center justify-center mb-5 ring-1 ring-destructive/10">
             <AlertTriangle className="w-7 h-7 text-destructive" />
           </div>
-          <h2 className="text-lg font-bold text-foreground mb-2">
-            Something went wrong
-          </h2>
-          <p className="text-sm text-muted-foreground mb-6 max-w-md">
-            This page failed to load. This may be due to a temporary network
-            issue or a build update. You can try reloading or return to the
-            dashboard.
-          </p>
+          <h2 className="text-lg font-bold text-foreground mb-2">{tt("Something went wrong")}</h2>
+          <p className="text-sm text-muted-foreground mb-6 max-w-md">{tt("This page failed to load. This may be due to a temporary network issue or a build update. You can try reloading or return to the dashboard.")}</p>
           <div className="flex items-center gap-3">
             <Button
               variant="default"
@@ -63,24 +58,18 @@ export class RouteErrorBoundary extends Component<Props, State> {
               onClick={this.handleRetry}
               className="gap-2"
             >
-              <RefreshCw className="w-3.5 h-3.5" />
-              Try Again
-            </Button>
+              <RefreshCw className="w-3.5 h-3.5" />{tt("Try Again")}</Button>
             <Button
               variant="outline"
               size="sm"
               onClick={this.handleGoHome}
               className="gap-2"
             >
-              <Home className="w-3.5 h-3.5" />
-              Go Home
-            </Button>
+              <Home className="w-3.5 h-3.5" />{tt("Go Home")}</Button>
           </div>
           {this.state.error && (
             <details className="mt-6 max-w-md w-full">
-              <summary className="text-[11px] text-muted-foreground/50 cursor-pointer hover:text-muted-foreground transition-colors">
-                Error details
-              </summary>
+              <summary className="text-[11px] text-muted-foreground/50 cursor-pointer hover:text-muted-foreground transition-colors">{tt("Error details")}</summary>
               <pre className="mt-2 text-[10px] text-left text-destructive/70 bg-muted/30 p-3 rounded-lg overflow-auto max-h-24">
                 {this.state.error.message}
               </pre>

@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Eye, BookOpen, MessageSquareQuote, ChevronLeft, ChevronRight, Copy, Check, Share2, NotebookPen, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LOOK_PROMPTS } from "../constants";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Verse { verseNumber: number; text: string; }
 
@@ -66,11 +67,11 @@ export default function LabLookStage({
         </div>
         <div>
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Step 1 of 5</span>
-            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-blue-500/10 text-blue-600 font-semibold">~10 min</span>
+            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{tt("Step 1 of 5")}</span>
+            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-blue-500/10 text-blue-600 font-semibold">{tt("~10 min")}</span>
           </div>
-          <h2 className="text-base font-bold text-foreground">Look — Read and Observe</h2>
-          <p className="text-xs text-muted-foreground">What does the text say? Observe carefully.</p>
+          <h2 className="text-base font-bold text-foreground">{tt("Look — Read and Observe")}</h2>
+          <p className="text-xs text-muted-foreground">{tt("What does the text say? Observe carefully.")}</p>
         </div>
       </div>
 
@@ -78,7 +79,7 @@ export default function LabLookStage({
       {versesLoading ? (
         <div className="p-6 rounded-xl border border-border/40 bg-card flex items-center justify-center gap-2">
           <Loader2 className="w-4 h-4 animate-spin text-primary" />
-          <span className="text-sm text-muted-foreground">Loading passage...</span>
+          <span className="text-sm text-muted-foreground">{tt("Loading passage...")}</span>
         </div>
       ) : passageVerses.length > 0 ? (
         <div className="rounded-xl border border-primary/20 bg-card overflow-hidden">
@@ -119,7 +120,7 @@ export default function LabLookStage({
         <textarea
           value={promptNotes}
           onChange={(e) => handleTextChange(e.target.value)}
-          placeholder="Write your observation here..."
+          placeholder={tt("Write your observation here...")}
           className="w-full p-4 text-sm text-foreground bg-transparent resize-none focus:outline-none min-h-[120px]"
         />
         <div className="flex items-center justify-between px-4 pb-3">
@@ -141,12 +142,12 @@ export default function LabLookStage({
       <div className="rounded-xl border border-border/40 bg-card overflow-hidden">
         <div className="flex items-center gap-2 px-4 py-3 border-b border-border/30">
           <NotebookPen className="w-4 h-4 text-primary" />
-          <span className="text-sm font-semibold text-foreground">Your Observations</span>
+          <span className="text-sm font-semibold text-foreground">{tt("Your Observations")}</span>
         </div>
         <textarea
           value={lookNotes}
           onChange={(e) => setLookNotes(e.target.value)}
-          placeholder="What did you observe? Write freely..."
+          placeholder={tt("What did you observe? Write freely...")}
           className="w-full p-4 text-sm text-foreground bg-transparent resize-none focus:outline-none min-h-[140px]"
         />
       </div>
@@ -154,9 +155,7 @@ export default function LabLookStage({
       {/* Continue button */}
       <button onClick={onAdvance} disabled={saving}
         className="w-full py-3 rounded-xl bg-primary text-primary-foreground text-sm font-bold shadow-lg hover:shadow-xl hover:opacity-90 transition-all disabled:opacity-50 flex items-center justify-center gap-2">
-        {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-        Save & Continue to Listen →
-      </button>
+        {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : null}{tt("Save & Continue to Listen →")}</button>
     </div>
   );
 }

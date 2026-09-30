@@ -1,5 +1,6 @@
 import { CheckCircle2, Target, BookOpen, Link, ClipboardList, ChevronRight, CheckCircle, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Verse { verseNumber: number; text: string; }
 
@@ -37,11 +38,11 @@ export default function LabApplyStage({
         </div>
         <div>
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Step 5 of 5</span>
-            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 font-semibold">~10 min</span>
+            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{tt("Step 5 of 5")}</span>
+            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 font-semibold">{tt("~10 min")}</span>
           </div>
-          <h2 className="text-base font-bold text-foreground">Apply — Live It Out</h2>
-          <p className="text-xs text-muted-foreground">Choose one practical way to apply this passage to your life this week.</p>
+          <h2 className="text-base font-bold text-foreground">{tt("Apply — Live It Out")}</h2>
+          <p className="text-xs text-muted-foreground">{tt("Choose one practical way to apply this passage to your life this week.")}</p>
         </div>
       </div>
 
@@ -74,7 +75,7 @@ export default function LabApplyStage({
       <button onClick={onOpenBibleReader}
         className="flex items-center gap-2.5 w-full px-4 py-3 rounded-xl border border-border/40 bg-card hover:bg-muted/20 transition-colors text-left">
         <Link className="w-4 h-4 text-emerald-600" />
-        <span className="text-sm font-medium text-emerald-600 flex-1">View verse in full context</span>
+        <span className="text-sm font-medium text-emerald-600 flex-1">{tt("View verse in full context")}</span>
         <ChevronRight className="w-4 h-4 text-muted-foreground" />
       </button>
 
@@ -82,8 +83,8 @@ export default function LabApplyStage({
       <button className="flex items-center gap-2.5 w-full px-4 py-3 rounded-xl border border-border/40 bg-card hover:bg-muted/20 transition-colors text-left">
         <ClipboardList className="w-4 h-4 text-primary" />
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-foreground">Challenge Library</p>
-          <p className="text-[10px] text-muted-foreground">Browse community challenges for this passage</p>
+          <p className="text-sm font-medium text-foreground">{tt("Challenge Library")}</p>
+          <p className="text-[10px] text-muted-foreground">{tt("Browse community challenges for this passage")}</p>
         </div>
         <ChevronRight className="w-4 h-4 text-muted-foreground" />
       </button>
@@ -95,14 +96,14 @@ export default function LabApplyStage({
             <Target className="w-4 h-4 text-primary" />
           </div>
           <div className="flex-1">
-            <p className="text-sm font-semibold text-foreground">Your Challenge</p>
-            <p className="text-[10px] text-muted-foreground">What specific step will you take this week?</p>
+            <p className="text-sm font-semibold text-foreground">{tt("Your Challenge")}</p>
+            <p className="text-[10px] text-muted-foreground">{tt("What specific step will you take this week?")}</p>
           </div>
         </div>
         <textarea
           value={challengeText}
           onChange={(e) => setChallengeText(e.target.value)}
-          placeholder="Write a specific, actionable challenge for yourself..."
+          placeholder={tt("Write a specific, actionable challenge for yourself...")}
           className="w-full px-4 pb-4 text-sm text-foreground bg-transparent resize-none focus:outline-none min-h-[100px]"
         />
       </div>
@@ -114,14 +115,14 @@ export default function LabApplyStage({
             <CheckCircle className="w-4 h-4 text-green-600" />
           </div>
           <div className="flex-1">
-            <p className="text-sm font-semibold text-foreground">My Results</p>
-            <p className="text-[10px] text-muted-foreground">How did it go? What did you learn?</p>
+            <p className="text-sm font-semibold text-foreground">{tt("My Results")}</p>
+            <p className="text-[10px] text-muted-foreground">{tt("How did it go? What did you learn?")}</p>
           </div>
         </div>
         <textarea
           value={resultsText}
           onChange={(e) => setResultsText(e.target.value)}
-          placeholder="Record your results and insights after following through..."
+          placeholder={tt("Record your results and insights after following through...")}
           className="w-full px-4 pb-4 text-sm text-foreground bg-transparent resize-none focus:outline-none min-h-[100px]"
         />
       </div>
@@ -129,9 +130,7 @@ export default function LabApplyStage({
       {/* Complete button */}
       <button onClick={onComplete} disabled={saving}
         className="w-full py-3 rounded-xl bg-primary text-primary-foreground text-sm font-bold shadow-lg hover:shadow-xl hover:opacity-90 transition-all disabled:opacity-50 flex items-center justify-center gap-2">
-        {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
-        Complete Verse Study
-      </button>
+        {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}{tt("Complete Verse Study")}</button>
     </div>
   );
 }

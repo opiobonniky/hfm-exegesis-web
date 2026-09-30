@@ -1,5 +1,6 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   page: number;
@@ -22,8 +23,7 @@ export function ReadingPlanPagination({ page, setPage, totalPages, hasNext, hasP
       >
         <ChevronLeft className="w-4 h-4" />
       </Button>
-      <span className="text-xs text-muted-foreground font-medium">
-        Page {page} of {totalPages}
+      <span className="text-xs text-muted-foreground font-medium">{tt("Page")}{page} of {totalPages}
       </span>
       <Button
         variant="outline"

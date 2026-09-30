@@ -7,6 +7,7 @@ import { Combobox } from "@/components/ui/combobox";
 import { BIBLE_BOOKS } from "@/data/staticData";
 import type { useStudyTools } from "../hooks/useStudyTools";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 type Model = ReturnType<typeof useStudyTools>["data"] & ReturnType<typeof useStudyTools>["actions"];
 
@@ -59,38 +60,38 @@ export default function StudyResourceEditor({ state, onBack }: StudyResourceEdit
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" onClick={onBack}><ArrowLeft className="h-5 w-5" /></Button>
           <div>
-            <p className="text-xs font-bold uppercase tracking-wider text-primary">Admin study tools</p>
-            <h1 className="text-2xl font-black">Add Verse Study Resources</h1>
-            <p className="text-sm text-muted-foreground">Attach Strong&apos;s studies, cross-references, and research notes to a verse.</p>
+            <p className="text-xs font-bold uppercase tracking-wider text-primary">{tt("Admin study tools")}</p>
+            <h1 className="text-2xl font-black">{tt("Add Verse Study Resources")}</h1>
+            <p className="text-sm text-muted-foreground">{tt("Attach Strong's studies, cross-references, and research notes to a verse.")}</p>
           </div>
         </div>
         <Button onClick={handleSave} disabled={resourceSaving || !verseBook || !verseChapter || !verseNum} className="gap-2">
           {resourceSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-          {saved ? "Saved" : currentResource?.id ? "Update resources" : "Save resources"}
+          {saved ? tt("Saved") : currentResource?.id ? tt("Update resources") : tt("Save resources")}
         </Button>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-5">
         <TabsList className="h-auto w-full justify-start gap-1 overflow-x-auto rounded-xl border bg-card p-1">
-          <TabsTrigger value="reference" className="shrink-0 gap-1.5"><BookOpen className="h-4 w-4" />Reference</TabsTrigger>
-          <TabsTrigger value="words" className="shrink-0">Words <TabCount count={wordStudies.length} /></TabsTrigger>
-          <TabsTrigger value="crossRefs" className="shrink-0">Cross references <TabCount count={crossRefs.length} /></TabsTrigger>
-          <TabsTrigger value="commentaries" className="shrink-0">Commentaries <TabCount count={commentaries.length} /></TabsTrigger>
-          <TabsTrigger value="dictionary" className="shrink-0">Dictionary <TabCount count={dictTerms.length} /></TabsTrigger>
-          <TabsTrigger value="topics" className="shrink-0">Topics <TabCount count={topics.length} /></TabsTrigger>
+          <TabsTrigger value="reference" className="shrink-0 gap-1.5"><BookOpen className="h-4 w-4" />{tt("Reference")}</TabsTrigger>
+          <TabsTrigger value="words" className="shrink-0">{tt("Words")}<TabCount count={wordStudies.length} /></TabsTrigger>
+          <TabsTrigger value="crossRefs" className="shrink-0">{tt("Cross references")}<TabCount count={crossRefs.length} /></TabsTrigger>
+          <TabsTrigger value="commentaries" className="shrink-0">{tt("Commentaries")}<TabCount count={commentaries.length} /></TabsTrigger>
+          <TabsTrigger value="dictionary" className="shrink-0">{tt("Dictionary")}<TabCount count={dictTerms.length} /></TabsTrigger>
+          <TabsTrigger value="topics" className="shrink-0">{tt("Topics")}<TabCount count={topics.length} /></TabsTrigger>
         </TabsList>
 
         <TabsContent value="reference">
           <section className="rounded-2xl border bg-card p-4 sm:p-6 space-y-4">
-            <div><div className="flex items-center gap-2"><BookOpen className="h-4 w-4 text-primary" /><h2 className="font-semibold">Verse reference</h2></div><p className="mt-1 text-sm text-muted-foreground">Choose the verse that these study resources explain.</p></div>
+            <div><div className="flex items-center gap-2"><BookOpen className="h-4 w-4 text-primary" /><h2 className="font-semibold">{tt("Verse reference")}</h2></div><p className="mt-1 text-sm text-muted-foreground">{tt("Choose the verse that these study resources explain.")}</p></div>
             <div className="grid gap-3 sm:grid-cols-3">
-              <Combobox options={BIBLE_BOOKS.map((book) => ({ value: book, label: book }))} value={verseBook} onChange={(v) => v && handleBookChange(v)} placeholder="Select book" width="w-full" />
-              <Combobox options={verseChapList.map((chapter) => ({ value: String(chapter), label: `Chapter ${chapter}` }))} value={verseChapter ? String(verseChapter) : ""} onChange={(v) => v && handleChapterChange(Number(v))} placeholder="Select chapter" disabled={!verseBook} width="w-full" />
-              <Combobox options={verseNumList.map((verse) => ({ value: String(verse), label: `Verse ${verse}` }))} value={verseNum ? String(verseNum) : ""} onChange={(v) => v && setVerseNum(Number(v))} placeholder="Select verse" disabled={!verseChapter} width="w-full" />
+              <Combobox options={BIBLE_BOOKS.map((book) => ({ value: book, label: tt(book) }))} value={verseBook} onChange={(v) => v && handleBookChange(v)} placeholder={tt("Select book")} width="w-full" />
+              <Combobox options={verseChapList.map((chapter) => ({ value: String(chapter), label: `Chapter ${chapter}` }))} value={verseChapter ? String(verseChapter) : ""} onChange={(v) => v && handleChapterChange(Number(v))} placeholder={tt("Select chapter")} disabled={!verseBook} width="w-full" />
+              <Combobox options={verseNumList.map((verse) => ({ value: String(verse), label: `Verse ${verse}` }))} value={verseNum ? String(verseNum) : ""} onChange={(v) => v && setVerseNum(Number(v))} placeholder={tt("Select verse")} disabled={!verseChapter} width="w-full" />
             </div>
             {(verseTextLoading || verseText) && (
               <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
-                <p className="mb-2 text-xs font-bold uppercase tracking-wider text-primary">Selected verse</p>
+                <p className="mb-2 text-xs font-bold uppercase tracking-wider text-primary">{tt("Selected verse")}</p>
                 {verseTextLoading ? (
                   <div className="h-5 w-3/4 animate-pulse rounded bg-muted" />
                 ) : (
@@ -100,15 +101,15 @@ export default function StudyResourceEditor({ state, onBack }: StudyResourceEdit
                 )}
               </div>
             )}
-            {resourcesLoading && <p className="text-xs text-muted-foreground">Loading existing resources...</p>}
+            {resourcesLoading && <p className="text-xs text-muted-foreground">{tt("Loading existing resources...")}</p>}
           </section>
           <TabNavigation onPrevious={handlePrevious} onContinue={handleContinue} isSaving={resourceSaving} isFirst />
         </TabsContent>
-        <TabsContent value="words"><ResourceSection title="Strong&apos;s word studies" description="Use the Strong&apos;s ID stored on VerseWordStudyEntry and add the contextual explanation." onAdd={addWord} addLabel="Add word study">{wordStudies.map((item: any, index) => <div key={index} className="grid gap-2 rounded-xl border p-3 sm:grid-cols-[140px_1fr_1fr_auto]"><Input placeholder="H3068" aria-label="Strong's ID, for example H3068" value={item.strongs || ""} onChange={(e) => setWordStudies(wordStudies.map((x: any, i) => i === index ? { ...x, strongs: e.target.value } : x))} /><Input placeholder="יְהוָה (YHWH)" aria-label="Original word, for example YHWH" value={item.word} onChange={(e) => setWordStudies(wordStudies.map((x: any, i) => i === index ? { ...x, word: e.target.value } : x))} /><Textarea placeholder="Explain this word in this verse..." aria-label="Contextual word explanation" value={item.meaning} onChange={(e) => setWordStudies(wordStudies.map((x: any, i) => i === index ? { ...x, meaning: e.target.value } : x))} /><Button variant="ghost" size="icon" onClick={() => setWordStudies(wordStudies.filter((_, i) => i !== index))}><Trash2 className="h-4 w-4 text-destructive" /></Button></div>)}</ResourceSection><TabNavigation onPrevious={handlePrevious} onContinue={handleContinue} isSaving={resourceSaving} /></TabsContent>
-        <TabsContent value="crossRefs"><ResourceSection title="Cross references" description="Connect this verse to related passages and explain the relationship." onAdd={addCrossRef} addLabel="Add cross reference">{crossRefs.map((item, index) => <div key={index} className="grid gap-2 rounded-xl border p-3 sm:grid-cols-[220px_1fr_auto]"><Input placeholder="Psalm 105:1" aria-label="Cross-reference, for example Psalm 105:1" value={item.ref} onChange={(e) => setCrossRefs(crossRefs.map((x, i) => i === index ? { ...x, ref: e.target.value } : x))} /><Textarea placeholder="Explain how this passage is related..." aria-label="Cross-reference explanation" value={item.text} onChange={(e) => setCrossRefs(crossRefs.map((x, i) => i === index ? { ...x, text: e.target.value } : x))} /><Button variant="ghost" size="icon" onClick={() => setCrossRefs(crossRefs.filter((_, i) => i !== index))}><Trash2 className="h-4 w-4 text-destructive" /></Button></div>)}</ResourceSection><TabNavigation onPrevious={handlePrevious} onContinue={handleContinue} isSaving={resourceSaving} /></TabsContent>
-        <TabsContent value="commentaries"><ResourceSection title="Commentaries" onAdd={addCommentary} addLabel="Add commentary">{commentaries.map((item, index) => <div key={index} className="grid gap-2 rounded-xl border p-3 sm:grid-cols-[1fr_1fr_auto]"><Input placeholder="Author" value={item.author} onChange={(e) => setCommentaries(commentaries.map((x, i) => i === index ? { ...x, author: e.target.value } : x))} /><Input placeholder="Title" value={item.title} onChange={(e) => setCommentaries(commentaries.map((x, i) => i === index ? { ...x, title: e.target.value } : x))} /><Button variant="ghost" size="icon" aria-label="Remove commentary" onClick={() => setCommentaries(commentaries.filter((_, i) => i !== index))}><Trash2 className="h-4 w-4 text-destructive" /></Button><Textarea className="sm:col-span-3" placeholder="Commentary" value={item.text} onChange={(e) => setCommentaries(commentaries.map((x, i) => i === index ? { ...x, text: e.target.value } : x))} /></div>)}</ResourceSection><TabNavigation onPrevious={handlePrevious} onContinue={handleContinue} isSaving={resourceSaving} /></TabsContent>
-        <TabsContent value="dictionary"><ResourceSection title="Dictionary terms" onAdd={addDictionary} addLabel="Add term">{dictTerms.map((item, index) => <div key={index} className="grid gap-2 rounded-xl border p-3 sm:grid-cols-[1fr_1fr_auto]"><Input placeholder="Term" value={item.term} onChange={(e) => setDictTerms(dictTerms.map((x, i) => i === index ? { ...x, term: e.target.value } : x))} /><Input placeholder="Pronunciation" value={item.pronunciation} onChange={(e) => setDictTerms(dictTerms.map((x, i) => i === index ? { ...x, pronunciation: e.target.value } : x))} /><Button variant="ghost" size="icon" aria-label="Remove dictionary term" onClick={() => setDictTerms(dictTerms.filter((_, i) => i !== index))}><Trash2 className="h-4 w-4 text-destructive" /></Button><Input placeholder="Definition" value={item.definition} onChange={(e) => setDictTerms(dictTerms.map((x, i) => i === index ? { ...x, definition: e.target.value } : x))} /><Textarea className="sm:col-span-2" placeholder="Description" value={item.description} onChange={(e) => setDictTerms(dictTerms.map((x, i) => i === index ? { ...x, description: e.target.value } : x))} /></div>)}</ResourceSection><TabNavigation onPrevious={handlePrevious} onContinue={handleContinue} isSaving={resourceSaving} /></TabsContent>
-        <TabsContent value="topics"><ResourceSection title="Related topics" onAdd={addTopic} addLabel="Add topic"><div className="flex flex-wrap gap-2">{topics.map((item, index) => <div key={index} className="flex items-center gap-1 rounded-full border px-2 py-1"><Input className="h-7 w-36 border-0 bg-transparent p-1" placeholder="Topic" value={item.name} onChange={(e) => setTopics(topics.map((x, i) => i === index ? { ...x, name: e.target.value } : x))} /><Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setTopics(topics.filter((_, i) => i !== index))}><Trash2 className="h-3 w-3 text-destructive" /></Button></div>)}</div></ResourceSection><TabNavigation onPrevious={handlePrevious} onContinue={handleContinue} isSaving={resourceSaving} isLast /></TabsContent>
+        <TabsContent value="words"><ResourceSection title={tt("Strong's word studies")} description={tt("Use the Strong's ID stored on VerseWordStudyEntry and add the contextual explanation.")} onAdd={addWord} addLabel="Add word study">{wordStudies.map((item: any, index) => <div key={index} className="grid gap-2 rounded-xl border p-3 sm:grid-cols-[140px_1fr_1fr_auto]"><Input placeholder="H3068" aria-label={tt("Strong's ID, for example H3068")} value={item.strongs || ""} onChange={(e) => setWordStudies(wordStudies.map((x: any, i) => i === index ? { ...x, strongs: e.target.value } : x))} /><Input placeholder={tt("יְהוָה (YHWH)")} aria-label={tt("Original word, for example YHWH")} value={item.word} onChange={(e) => setWordStudies(wordStudies.map((x: any, i) => i === index ? { ...x, word: e.target.value } : x))} /><Textarea placeholder={tt("Explain this word in this verse...")} aria-label={tt("Contextual word explanation")} value={item.meaning} onChange={(e) => setWordStudies(wordStudies.map((x: any, i) => i === index ? { ...x, meaning: e.target.value } : x))} /><Button variant="ghost" size="icon" onClick={() => setWordStudies(wordStudies.filter((_, i) => i !== index))}><Trash2 className="h-4 w-4 text-destructive" /></Button></div>)}</ResourceSection><TabNavigation onPrevious={handlePrevious} onContinue={handleContinue} isSaving={resourceSaving} /></TabsContent>
+        <TabsContent value="crossRefs"><ResourceSection title={tt("Cross references")} description={tt("Connect this verse to related passages and explain the relationship.")} onAdd={addCrossRef} addLabel="Add cross reference">{crossRefs.map((item, index) => <div key={index} className="grid gap-2 rounded-xl border p-3 sm:grid-cols-[220px_1fr_auto]"><Input placeholder={tt("Psalm 105:1")} aria-label={tt("Cross-reference, for example Psalm 105:1")} value={item.ref} onChange={(e) => setCrossRefs(crossRefs.map((x, i) => i === index ? { ...x, ref: e.target.value } : x))} /><Textarea placeholder={tt("Explain how this passage is related...")} aria-label={tt("Cross-reference explanation")} value={item.text} onChange={(e) => setCrossRefs(crossRefs.map((x, i) => i === index ? { ...x, text: e.target.value } : x))} /><Button variant="ghost" size="icon" onClick={() => setCrossRefs(crossRefs.filter((_, i) => i !== index))}><Trash2 className="h-4 w-4 text-destructive" /></Button></div>)}</ResourceSection><TabNavigation onPrevious={handlePrevious} onContinue={handleContinue} isSaving={resourceSaving} /></TabsContent>
+        <TabsContent value="commentaries"><ResourceSection title={tt("Commentaries")} onAdd={addCommentary} addLabel="Add commentary">{commentaries.map((item, index) => <div key={index} className="grid gap-2 rounded-xl border p-3 sm:grid-cols-[1fr_1fr_auto]"><Input placeholder={tt("Author")} value={item.author} onChange={(e) => setCommentaries(commentaries.map((x, i) => i === index ? { ...x, author: e.target.value } : x))} /><Input placeholder={tt("Title")} value={item.title} onChange={(e) => setCommentaries(commentaries.map((x, i) => i === index ? { ...x, title: e.target.value } : x))} /><Button variant="ghost" size="icon" aria-label={tt("Remove commentary")} onClick={() => setCommentaries(commentaries.filter((_, i) => i !== index))}><Trash2 className="h-4 w-4 text-destructive" /></Button><Textarea className="sm:col-span-3" placeholder={tt("Commentary")} value={item.text} onChange={(e) => setCommentaries(commentaries.map((x, i) => i === index ? { ...x, text: e.target.value } : x))} /></div>)}</ResourceSection><TabNavigation onPrevious={handlePrevious} onContinue={handleContinue} isSaving={resourceSaving} /></TabsContent>
+        <TabsContent value="dictionary"><ResourceSection title={tt("Dictionary terms")} onAdd={addDictionary} addLabel="Add term">{dictTerms.map((item, index) => <div key={index} className="grid gap-2 rounded-xl border p-3 sm:grid-cols-[1fr_1fr_auto]"><Input placeholder={tt("Term")} value={item.term} onChange={(e) => setDictTerms(dictTerms.map((x, i) => i === index ? { ...x, term: e.target.value } : x))} /><Input placeholder={tt("Pronunciation")} value={item.pronunciation} onChange={(e) => setDictTerms(dictTerms.map((x, i) => i === index ? { ...x, pronunciation: e.target.value } : x))} /><Button variant="ghost" size="icon" aria-label={tt("Remove dictionary term")} onClick={() => setDictTerms(dictTerms.filter((_, i) => i !== index))}><Trash2 className="h-4 w-4 text-destructive" /></Button><Input placeholder={tt("Definition")} value={item.definition} onChange={(e) => setDictTerms(dictTerms.map((x, i) => i === index ? { ...x, definition: e.target.value } : x))} /><Textarea className="sm:col-span-2" placeholder={tt("Description")} value={item.description} onChange={(e) => setDictTerms(dictTerms.map((x, i) => i === index ? { ...x, description: e.target.value } : x))} /></div>)}</ResourceSection><TabNavigation onPrevious={handlePrevious} onContinue={handleContinue} isSaving={resourceSaving} /></TabsContent>
+        <TabsContent value="topics"><ResourceSection title={tt("Related topics")} onAdd={addTopic} addLabel="Add topic"><div className="flex flex-wrap gap-2">{topics.map((item, index) => <div key={index} className="flex items-center gap-1 rounded-full border px-2 py-1"><Input className="h-7 w-36 border-0 bg-transparent p-1" placeholder={tt("Topic")} value={item.name} onChange={(e) => setTopics(topics.map((x, i) => i === index ? { ...x, name: e.target.value } : x))} /><Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setTopics(topics.filter((_, i) => i !== index))}><Trash2 className="h-3 w-3 text-destructive" /></Button></div>)}</div></ResourceSection><TabNavigation onPrevious={handlePrevious} onContinue={handleContinue} isSaving={resourceSaving} isLast /></TabsContent>
       </Tabs>
     </div>
   );
@@ -134,15 +135,13 @@ function TabNavigation({
   return (
     <div className="mt-5 flex items-center justify-between gap-3 rounded-2xl border bg-card p-3">
       <Button variant="ghost" onClick={onPrevious} disabled={isFirst} className="gap-2">
-        <ArrowLeft className="h-4 w-4" />
-        Previous
-      </Button>
+        <ArrowLeft className="h-4 w-4" />{tt("Previous")}</Button>
       <p className="hidden text-xs text-muted-foreground sm:block">
-        {isLast ? "Save your final changes when ready." : "Your changes are saved before continuing."}
+        {isLast ? tt("Save your final changes when ready.") : tt("Your changes are saved before continuing.")}
       </p>
       <Button onClick={onContinue} disabled={isSaving} className="gap-2">
         {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : isLast ? <Check className="h-4 w-4" /> : <ArrowRight className="h-4 w-4" />}
-        {isSaving ? "Saving..." : isLast ? "Save changes" : "Continue & save"}
+        {isSaving ? tt("Saving...") : isLast ? tt("Save changes") : tt("Continue & save")}
       </Button>
     </div>
   );

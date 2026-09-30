@@ -36,6 +36,7 @@ import { BIBLE_BOOKS, getLangColor, getLangLetter, getLangScript } from "@/data/
 import { getChaptersForBook, getVersesCountForChapter, getVerseText } from "@/utilities/bibleUtils";
 import { getVersionById } from "@/assets/bibleVersion/json/bibleVersions";
 import { getVerseResources, type Crossref } from "@/services/verseResourcesApi";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 // ── Types ──
 
@@ -383,8 +384,7 @@ export function WordDetailSheet({
           <SheetDescription>
             {/* Show English word prominently as the main description */}
             <div className="space-y-1">
-              <p className="text-xs font-bold text-foreground/80">
-                English: {displayTitle}
+              <p className="text-xs font-bold text-foreground/80">{tt("English:")}{displayTitle}
               </p>
               {(displayWord || displayTransliteration) && (
                 <p className="text-xs text-foreground/60">
@@ -429,8 +429,7 @@ export function WordDetailSheet({
           {/* Error state */}
           {error && !wordEntry && (
             <div className="text-center py-6">
-              <p className="text-sm text-muted-foreground">
-                Could not load word details for{" "}
+              <p className="text-sm text-muted-foreground">{tt("Could not load word details for")}{" "}
                 <span className="font-semibold">{surfaceText || strongsId}</span>.
               </p>
             </div>
@@ -453,8 +452,7 @@ export function WordDetailSheet({
                 {displayUsageCount != null && (
                   <Badge variant="outline" className="text-[10px] font-bold gap-1">
                     <Hash className="w-3 h-3" />
-                    {displayUsageCount}× in Scripture
-                  </Badge>
+                    {displayUsageCount}{tt("× in Scripture")}</Badge>
                 )}
                 {displayStrongsId && (
                   <Badge variant="outline" className="text-[10px] font-mono text-muted-foreground">
@@ -468,9 +466,7 @@ export function WordDetailSheet({
                 <div className="rounded-lg bg-muted/20 border border-border/50 p-3 space-y-3">
                   <div className="flex items-center gap-1.5 mb-1">
                     <BookOpen className="w-3 h-3 text-primary" />
-                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                      Verse Context
-                    </span>
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{tt("Verse Context")}</span>
                     {(wsBook && wsChapter > 0 && wsVerse > 0) && (
                       <Badge variant="outline" className="text-[8px] font-mono px-1.5 py-0 ml-auto">
                         {wsBook} {wsChapter}:{wsVerse}
@@ -481,12 +477,12 @@ export function WordDetailSheet({
                   {/* Book / Chapter / Verse / Translation comboboxes */}
                   <div className="flex flex-wrap items-end gap-1.5">
                     <div className="flex-1 min-w-[100px]">
-                      <label className="text-[8px] font-bold text-muted-foreground/60 uppercase tracking-wider">Book</label>
+                      <label className="text-[8px] font-bold text-muted-foreground/60 uppercase tracking-wider">{tt("Book")}</label>
                       <Combobox
-                        options={BIBLE_BOOKS.map((b) => ({ value: b, label: b }))}
+                        options={BIBLE_BOOKS.map((b) => ({ value: b, label: tt(b) }))}
                         value={wsBook}
                         onChange={(v) => { if (v) setWsBook(v); }}
-                        placeholder="Book"
+                        placeholder={tt("Book")}
                         searchPlaceholder="Search..."
                         width="w-full"
                       />
@@ -516,9 +512,9 @@ export function WordDetailSheet({
                       />
                     </div>
                     <div className="flex-1 min-w-[100px]">
-                      <label className="text-[8px] font-bold text-muted-foreground/60 uppercase tracking-wider">Transl</label>
+                      <label className="text-[8px] font-bold text-muted-foreground/60 uppercase tracking-wider">{tt("Transl")}</label>
                       <Combobox
-                        options={translations?.length ? translations : (translationBadge ? [{ value: translationBadge, label: translationBadge }] : [{ value: "BSB", label: "BSB" }])}
+                        options={translations?.length ? translations : (translationBadge ? [{ value: translationBadge, label: translationBadge }] : [{ value: "BSB", label: tt("BSB") }])}
                         value={wsTransl}
                         onChange={(v) => { if (v) setWsTransl(v); }}
                         placeholder="-"
@@ -539,9 +535,7 @@ export function WordDetailSheet({
                         </p>
                       </div>
                     ) : (
-                      <p className="text-[10px] text-muted-foreground/40 italic">
-                        Select a verse to preview.
-                      </p>
+                      <p className="text-[10px] text-muted-foreground/40 italic">{tt("Select a verse to preview.")}</p>
                     );
                   })()}
                 </div>
@@ -578,12 +572,10 @@ export function WordDetailSheet({
               {/* Explanation (shortDefinition) */}
               <div className="rounded-lg bg-primary/5 border border-primary/20 p-4">
                 <div className="flex items-center justify-between mb-1.5">
-                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                    What It Means
-                  </p>
+                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">{tt("What It Means")}</p>
                   <button
                     onClick={copyDefinition}
-                    title={copiedDefinition ? "Copied!" : "Copy definition"}
+                    title={copiedDefinition ? tt("Copied!") : tt("Copy definition")}
                     className="shrink-0 w-6 h-6 flex items-center justify-center rounded-md text-muted-foreground/30 hover:text-primary hover:bg-primary/10 transition-all -mr-1"
                   >
                     {copiedDefinition ? (
@@ -601,9 +593,7 @@ export function WordDetailSheet({
               {/* Full definition */}
               {displayFullDef && (
                 <div className="rounded-lg bg-card border border-border/50 p-4">
-                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">
-                    More Detail
-                  </p>
+                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">{tt("More Detail")}</p>
                   <p className="text-sm text-foreground/80 leading-6">
                     {displayFullDef}
                   </p>
@@ -614,9 +604,7 @@ export function WordDetailSheet({
               {(displayPartOfSpeech || displayGrammaticalCase || displayGender || displayNumber) && (
                 <div className="rounded-lg bg-card border border-border/50 p-3">
                   <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1">
-                    <Info className="w-3 h-3" />
-                    Grammar
-                  </p>
+                    <Info className="w-3 h-3" />{tt("Grammar")}</p>
                   <div className="flex flex-wrap gap-1.5">
                     {displayPartOfSpeech && (
                       <Badge variant="outline" className="text-[10px] font-semibold px-2 py-0.5 bg-indigo-500/5 border-indigo-500/20 text-indigo-600 dark:text-indigo-400">
@@ -625,8 +613,7 @@ export function WordDetailSheet({
                     )}
                     {displayGrammaticalCase && (
                       <Badge variant="outline" className="text-[10px] font-semibold px-2 py-0.5">
-                        {displayGrammaticalCase} case
-                      </Badge>
+                        {displayGrammaticalCase}{tt("case")}</Badge>
                     )}
                     {displayGender && (
                       <Badge variant="outline" className="text-[10px] font-semibold px-2 py-0.5">
@@ -646,9 +633,7 @@ export function WordDetailSheet({
               {displayCrossReferences && (
                 <div className="rounded-lg bg-card border border-border/50 p-3">
                   <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1">
-                    <BookOpen className="w-3 h-3" />
-                    Cross References
-                  </p>
+                    <BookOpen className="w-3 h-3" />{tt("Cross References")}</p>
                   <div className="space-y-2">
                     {displayCrossReferences.split(",").map((ref, i) => {
                       const trimmed = ref.trim();
@@ -668,9 +653,7 @@ export function WordDetailSheet({
               {exegesisCrossReferences.length > 0 && (
                 <div className="rounded-lg bg-card border border-sky-200/60 dark:border-sky-900/60 p-3">
                   <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1">
-                    <Link2 className="w-3 h-3 text-sky-600" />
-                    Exegesis Cross References
-                    <Badge variant="outline" className="text-[8px] font-mono px-1 py-0 ml-auto">
+                    <Link2 className="w-3 h-3 text-sky-600" />{tt("Exegesis Cross References")}<Badge variant="outline" className="text-[8px] font-mono px-1 py-0 ml-auto">
                       {exegesisCrossReferences.length}
                     </Badge>
                   </p>
@@ -698,9 +681,7 @@ export function WordDetailSheet({
               {displayVerseReferences.length > 0 && (crossReferencesLoading || verseCrossReferences.length > 0) && (
                 <div className="rounded-lg bg-card border border-sky-200/60 dark:border-sky-900/60 p-3">
                   <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1">
-                    <Link2 className="w-3 h-3 text-sky-600" />
-                    Verse Cross References
-                    {!crossReferencesLoading && (
+                    <Link2 className="w-3 h-3 text-sky-600" />{tt("Verse Cross References")}{!crossReferencesLoading && (
                       <Badge variant="outline" className="text-[8px] font-mono px-1 py-0 ml-auto">
                         {verseCrossReferences.length}
                       </Badge>
@@ -708,9 +689,7 @@ export function WordDetailSheet({
                   </p>
                   {crossReferencesLoading ? (
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                      Loading verse references...
-                    </div>
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />{tt("Loading verse references...")}</div>
                   ) : (
                     <div className="space-y-2">
                       {verseCrossReferences.map((ref, i) => (
@@ -738,9 +717,7 @@ export function WordDetailSheet({
               {displayVerseReferences.length > 0 && (
                 <div className="rounded-lg bg-card border border-border/50 p-3">
                   <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1">
-                    <Bookmark className="w-3 h-3" />
-                    Attached Verses
-                    <Badge variant="outline" className="text-[8px] font-mono px-1 py-0 ml-auto">
+                    <Bookmark className="w-3 h-3" />{tt("Attached Verses")}<Badge variant="outline" className="text-[8px] font-mono px-1 py-0 ml-auto">
                       {displayVerseReferences.length}
                     </Badge>
                   </p>
@@ -802,12 +779,10 @@ export function WordDetailSheet({
               {displayAdminExplanation && (
                 <div className="rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200/30 p-3">
                   <div className="flex items-center justify-between mb-1">
-                    <p className="text-[10px] font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider">
-                      Study Note
-                    </p>
+                    <p className="text-[10px] font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider">{tt("Study Note")}</p>
                     <button
                       onClick={copyStudyNote}
-                      title={copiedStudyNote ? "Copied!" : "Copy study note"}
+                      title={copiedStudyNote ? tt("Copied!") : tt("Copy study note")}
                       className="shrink-0 w-6 h-6 flex items-center justify-center rounded-md text-amber-500/50 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-500/10 transition-all"
                     >
                       {copiedStudyNote ? (
@@ -832,9 +807,7 @@ export function WordDetailSheet({
                     className="gap-1.5"
                     onClick={onEdit}
                   >
-                    <Edit2 className="w-3.5 h-3.5" />
-                    Edit Entry
-                  </Button>
+                    <Edit2 className="w-3.5 h-3.5" />{tt("Edit Entry")}</Button>
                 </div>
               )}
 
@@ -847,18 +820,14 @@ export function WordDetailSheet({
                     className="w-full gap-2 text-xs text-muted-foreground hover:text-foreground"
                     onClick={() => setShowWordDialog(true)}
                   >
-                    <ExternalLink className="w-3.5 h-3.5" />
-                    Open in Word Study Dialog
-                  </Button>
+                    <ExternalLink className="w-3.5 h-3.5" />{tt("Open in Word Study Dialog")}</Button>
                   <Button
                     size="sm"
                     variant="ghost"
                     className="w-full gap-2 text-xs text-muted-foreground hover:text-primary"
                     onClick={() => setShowComparison(true)}
                   >
-                    <Shuffle className="w-3.5 h-3.5" />
-                    Compare with Another Word
-                  </Button>
+                    <Shuffle className="w-3.5 h-3.5" />{tt("Compare with Another Word")}</Button>
                 </div>
               )}
 
@@ -879,8 +848,7 @@ export function WordDetailSheet({
                         );
                       }}
                     >
-                      <ExternalLink className="w-3.5 h-3.5" />
-                      View all words in {verseRef}
+                      <ExternalLink className="w-3.5 h-3.5" />{tt("View all words in")}{verseRef}
                     </Button>
                   </div>
                 );
@@ -893,7 +861,7 @@ export function WordDetailSheet({
             <p className="text-sm text-muted-foreground text-center py-4">
               {surfaceText
                 ? `No study data available for "${surfaceText}".`
-                : "No word details available."}
+                : tt("No word details available.")}
             </p>
           )}
         </div>
@@ -926,27 +894,23 @@ export function WordDetailSheet({
             className="bg-popover/95 backdrop-blur-sm border border-border/60 rounded-xl shadow-2xl p-4 w-64"
             onClick={(e) => e.stopPropagation()}
           >
-            <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2.5">
-              Keyboard Shortcuts
-            </h4>
+            <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2.5">{tt("Keyboard Shortcuts")}</h4>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-xs text-foreground/70">Open Word Study Dialog</span>
+                <span className="text-xs text-foreground/70">{tt("Open Word Study Dialog")}</span>
                 <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono font-bold">D</kbd>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-xs text-foreground/70">Show shortcuts</span>
+                <span className="text-xs text-foreground/70">{tt("Show shortcuts")}</span>
                 <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono font-bold">?</kbd>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-xs text-foreground/70">Close sheet</span>
-                <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono font-bold">Esc</kbd>
+                <span className="text-xs text-foreground/70">{tt("Close sheet")}</span>
+                <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono font-bold">{tt("Esc")}</kbd>
               </div>
             </div>
             <div className="mt-2.5 pt-2 border-t border-border/40">
-              <p className="text-[10px] text-muted-foreground/50 text-center">
-                Press <kbd className="px-1 bg-muted rounded text-[9px] font-mono font-bold">?</kbd> or click outside to dismiss
-              </p>
+              <p className="text-[10px] text-muted-foreground/50 text-center">{tt("Press")}<kbd className="px-1 bg-muted rounded text-[9px] font-mono font-bold">?</kbd>{tt("or click outside to dismiss")}</p>
             </div>
           </div>
         </div>

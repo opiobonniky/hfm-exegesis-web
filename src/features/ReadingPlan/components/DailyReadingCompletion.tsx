@@ -1,5 +1,6 @@
 import { CheckCircle, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   isCompleted: boolean;
@@ -15,7 +16,7 @@ export function DailyCompletionButton({ isCompleted, canComplete, isSubmitting, 
     return (
       <div className="flex items-center justify-center gap-2 p-4 rounded-2xl bg-green-500/5 border border-green-200">
         <CheckCircle className="w-5 h-5 text-green-600" />
-        <span className="text-sm font-semibold text-green-700">Day {dayNumber} completed!</span>
+        <span className="text-sm font-semibold text-green-700">{tt("Day")}{dayNumber}{tt("completed!")}</span>
       </div>
     );
   }
@@ -29,13 +30,10 @@ export function DailyCompletionButton({ isCompleted, canComplete, isSubmitting, 
       >
         {isSubmitting ? (
           <span className="flex items-center gap-2">
-            <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-            Submitting...
-          </span>
+            <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />{tt("Submitting...")}</span>
         ) : (
           <span className="flex items-center gap-2">
-            <Send className="w-4 h-4" />
-            Complete Day {dayNumber}
+            <Send className="w-4 h-4" />{tt("Complete Day")}{dayNumber}
           </span>
         )}
       </Button>

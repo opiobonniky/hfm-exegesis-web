@@ -12,6 +12,7 @@ import {
 } from "@/utilities/bibleUtils";
 import { parseStructuredField } from "../helpers/contentDetailHelpers";
 import { getDailyDevotionVerse, getDailyDevotionVerses, saveDailyDevotion } from "../services/add-daily-content-service";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export function useAddDailyDevotion() {
   const { t, isRtl } = useLanguage();
@@ -124,10 +125,10 @@ export function useAddDailyDevotion() {
     [chapters],
   );
   const bibleVersionOptions = useMemo(() => [
-    { value: "BSB", label: "BSB (Berean Study Bible)" },
-    { value: "KJV", label: "KJV (King James)" },
-    { value: "ESV", label: "ESV" },
-    { value: "NIV", label: "NIV" },
+    { value: "BSB", label: tt("BSB (Berean Study Bible)") },
+    { value: "KJV", label: tt("KJV (King James)") },
+    { value: "ESV", label: tt("ESV") },
+    { value: "NIV", label: tt("NIV") },
   ], []);
 
   // Set verse text reliably once a verse is selected (from the cached chapter).
@@ -174,7 +175,7 @@ export function useAddDailyDevotion() {
   const handleSave = useCallback(async (e?: React.FormEvent) => {
     e?.preventDefault();
     if (saveDisabled) {
-      toast({ title: "Missing fields", description: "Title and content are required", variant: "destructive" });
+      toast({ title: tt("Missing fields"), description: tt("Title and content are required"), variant: "destructive" });
       return;
     }
     const payload: Record<string, any> = {

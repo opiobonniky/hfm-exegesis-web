@@ -6,6 +6,7 @@ import type {
   TriviaPerformanceUser as UserPerf,
   TriviaPerformanceQuestion as QuestionPerf,
 } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 export function useAdminTriviaPerformancePage() {
   const { toast } = useToast();
   const [tab, setTab] = useState("overview");
@@ -24,7 +25,7 @@ export function useAdminTriviaPerformancePage() {
         setUsers(d.users || []);
         setQuestions(d.questions || []);
       }
-    } catch { toast({ title: "Error", variant: "destructive" }); }
+    } catch { toast({ title: tt("Error"), variant: "destructive" }); }
     finally { setLoading(false); }
   }, [toast]);
   useEffect(() => { loadAll(); }, [loadAll]);

@@ -1,6 +1,7 @@
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 const CATEGORIES = ["all", "intro", "whole-bible", "nt", "ot", "book", "topical"];
 
@@ -21,7 +22,7 @@ export function ReadingPlanFilters({ search, setSearch, catFilter, setCatFilter,
         <Input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search plans..."
+          placeholder={tt("Search plans...")}
           className="pl-9"
         />
       </div>
@@ -37,7 +38,7 @@ export function ReadingPlanFilters({ search, setSearch, catFilter, setCatFilter,
                 : "bg-muted text-muted-foreground hover:bg-muted/80",
             )}
           >
-            {cat === "all" ? "All" : t.readingPlan?.[`cat${cat.charAt(0).toUpperCase() + cat.slice(1).replace("-", "")}`] || cat}
+            {cat === "all" ? tt("All") : t.readingPlan?.[`cat${cat.charAt(0).toUpperCase() + cat.slice(1).replace("-", "")}`] || cat}
           </button>
         ))}
       </div>

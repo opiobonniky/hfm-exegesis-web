@@ -5,6 +5,7 @@ import {
   HimFirstMediaPageLayout, HimFirstHero, HimFirstContentSection, HimFirstAnimated,
   HimFirstQuoteBlock, HimFirstSmallText, HimFirstCTAButton, HimFirstFounderGrid,
 } from "../components";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 const Founders = () => {
   const { data } = useHimFirstMediaPage();
@@ -15,7 +16,7 @@ const Founders = () => {
       <HimFirstHero
         titleText={t.himFirstMedia?.foundersTitle || "Our"}
         titleHighlight={t.himFirstMedia?.foundersTitleHighlight || "Founders"}
-        subtitle={t.himFirstMedia?.foundersTagline || "The men and women God used to birth this vision."}
+        subtitle={t.himFirstMedia?.foundersTagline || tt("The men and women God used to birth this vision.")}
       />
 
       <HimFirstContentSection>
@@ -30,7 +31,7 @@ const Founders = () => {
 
         <HimFirstAnimated className="mt-12 text-center">
           <HimFirstCTAButton to="/register">
-            {t.himFirstMedia?.foundersCta || "Join the Movement"}
+            {t.himFirstMedia?.foundersCta || tt("Join the Movement")}
           </HimFirstCTAButton>
         </HimFirstAnimated>
       </HimFirstContentSection>

@@ -8,6 +8,7 @@ import {
   ShieldCheck,
   Trophy,
 } from "lucide-react";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export function GlassCard({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
@@ -79,7 +80,7 @@ export function StatusBadge({ active, completed }: { active: boolean; completed:
     return (
       <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border border-emerald-200 bg-emerald-50 text-emerald-700">
         <Trophy className="w-3 h-3" />
-        {t.readingPlan.completedLabel || "Completed"}
+        {t.readingPlan.completedLabel || tt("Completed")}
       </span>
     );
   }
@@ -88,7 +89,7 @@ export function StatusBadge({ active, completed }: { active: boolean; completed:
     return (
       <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border border-sky-200 bg-sky-50 text-sky-700">
         <ShieldCheck className="w-3 h-3" />
-        {t.readingPlan.activeLabel || "Active"}
+        {t.readingPlan.activeLabel || tt("Active")}
       </span>
     );
   }
@@ -96,7 +97,7 @@ export function StatusBadge({ active, completed }: { active: boolean; completed:
   return (
     <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border border-border bg-muted text-muted-foreground">
       <CircleOff className="w-3 h-3" />
-      {t.common.inactive || "Inactive"}
+      {t.common.inactive || tt("Inactive")}
     </span>
   );
 }

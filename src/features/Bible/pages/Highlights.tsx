@@ -4,6 +4,7 @@
 import { useHighlightsPage } from "../hooks/useHighlightsPage";
 import { BiblePageLayout } from "../components/BiblePageLayout";
 import { HighlightsList } from "../components";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export default function Highlights() {
   const { data, actions } = useHighlightsPage();
@@ -11,7 +12,7 @@ export default function Highlights() {
 
   return (
     <BiblePageLayout
-      title="My Highlights"
+      title={tt("My Highlights")}
       count={h.highlights.length}
       contentCount={h.filtered.length}
       isRtl={h.isRtl}
@@ -22,7 +23,7 @@ export default function Highlights() {
       loading={h.loading}
       onRefresh={h.refresh}
       searchPlaceholder="Search highlights by verse or note..."
-      emptyTitle="No highlights yet"
+      emptyTitle={tt("No highlights yet")}
       emptyMessage="Highlight verses while reading to see them here"
     >
       <HighlightsList

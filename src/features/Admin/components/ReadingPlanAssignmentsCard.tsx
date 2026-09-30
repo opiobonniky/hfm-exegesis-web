@@ -1,6 +1,7 @@
 // ReadingPlanAssignmentsCard — list of daily assignments
 import { BookOpen } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Assignment {
   dayNumber: number;
@@ -21,8 +22,7 @@ export function ReadingPlanAssignmentsCard({
   return (
     <Card>
       <CardHeader className="pb-3">
-        <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-          Daily Assignments ({assignments.length})
+        <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">{tt("Daily Assignments (")}{assignments.length})
         </CardTitle>
       </CardHeader>
       <CardContent>

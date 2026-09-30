@@ -5,6 +5,7 @@ import { DetailLoading, DetailPageHeader, DetailContent, DetailBackButton } from
 import { DetailMetadataGrid } from "../components/DetailSection";
 import { TriviaDetailContent, TriviaDetailActions } from "../components/TriviaDetailContent";
 import { useTriviaDetail } from "../hooks/useTriviaDetail";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export default function TriviaDetail() {
   const { data, actions } = useTriviaDetail();
@@ -16,7 +17,7 @@ export default function TriviaDetail() {
     <div className="min-h-screen bg-background">
       <DetailPageHeader
         icon={null}
-        title="Trivia Question Detail"
+        title={tt("Trivia Question Detail")}
         subtitle={`Question #${data.question.id}`}
         onBack={() => actions.navigate("/admin/trivia")}
       />
@@ -26,8 +27,8 @@ export default function TriviaDetail() {
 
         <DetailMetadataGrid
           fields={[
-            { label: "Created", value: data.question.createdOn, format: "datetime" },
-            { label: "Updated", value: data.question.updatedOn, format: "datetime" },
+            { label: tt("Created"), value: data.question.createdOn, format: "datetime" },
+            { label: tt("Updated"), value: data.question.updatedOn, format: "datetime" },
           ]}
         />
 

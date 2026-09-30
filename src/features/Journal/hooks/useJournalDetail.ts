@@ -17,6 +17,7 @@ import type {
   JournalDetailReflectionSection,
   JournalDetailSelectedWord,
 } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export function useJournalDetail(): JournalDetailPageModel {
   const navigate = useNavigate();
@@ -76,7 +77,7 @@ export function useJournalDetail(): JournalDetailPageModel {
       await navigator.share({ title: entry.title || undefined, text: entry.content || undefined });
     } catch (error) {
       if (error instanceof DOMException && error.name === "AbortError") return;
-      toast({ title: "Failed to share", variant: "destructive" });
+      toast({ title: tt("Failed to share"), variant: "destructive" });
     }
   }, [entry, handleCopy, toast]);
 
@@ -124,7 +125,7 @@ export function useJournalDetail(): JournalDetailPageModel {
     try {
       const response = await exportJournalEntry(entry.id);
       if (response?.returnCode !== 200 || !response.returnData) {
-        toast({ title: "Export failed", variant: "destructive" });
+        toast({ title: tt("Export failed"), variant: "destructive" });
         return;
       }
       const { content, filename, mimeType } = response.returnData as { content: string; filename?: string; mimeType?: string };
@@ -137,9 +138,9 @@ export function useJournalDetail(): JournalDetailPageModel {
       anchor.click();
       anchor.remove();
       URL.revokeObjectURL(url);
-      toast({ title: "PDF downloaded" });
+      toast({ title: tt("PDF downloaded") });
     } catch {
-      toast({ title: "Export failed", variant: "destructive" });
+      toast({ title: tt("Export failed"), variant: "destructive" });
     } finally {
       setExporting(false);
     }

@@ -5,6 +5,7 @@ import { Clock, Star, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { JournalPageEntry } from "../hooks/useJournalPageFull";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 const CATEGORY_COLORS: Record<string, { bg: string; text: string; dot: string }> = {
   reflection: { bg: "bg-amber-50 dark:bg-amber-950/30", text: "text-amber-700 dark:text-amber-300", dot: "bg-amber-500" },
@@ -74,14 +75,14 @@ export function JournalEntryCard({
       <div className={cn("flex items-center gap-2 mb-2", selectionMode && "ml-7")}>
         <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold", cat.bg, cat.text)}>
           <span className={cn("w-1.5 h-1.5 rounded-full", cat.dot)} />
-          {entry.category || "note"}
+          {entry.category || tt("note")}
         </span>
         {entry.isFavorite && <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />}
       </div>
 
       {/* Title */}
       <h3 className={cn("font-semibold text-sm text-foreground line-clamp-2 mb-1", selectionMode && "ml-7")}>
-        {entry.title || "Untitled Entry"}
+        {entry.title || tt("Untitled Entry")}
       </h3>
 
       {/* Verse reference */}

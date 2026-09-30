@@ -4,6 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useReadingPlanApi } from "../services/index";
 import type { DayAssignment, PlanMeta, QuizQuestion } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export function useEditReadingPlanPage() {
   const navigate = useNavigate();
@@ -84,7 +85,7 @@ export function useEditReadingPlanPage() {
           );
         }
       } catch {
-        toast({ title: "Failed to load plan", variant: "destructive" });
+        toast({ title: tt("Failed to load plan"), variant: "destructive" });
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -103,9 +104,9 @@ export function useEditReadingPlanPage() {
         isActive: meta.isPublished,
         totalDays: meta.totalDays,
       });
-      if (res?.returnCode === 200) toast({ title: "Plan updated" });
+      if (res?.returnCode === 200) toast({ title: tt("Plan updated") });
     } catch {
-      toast({ title: "Save failed", variant: "destructive" });
+      toast({ title: tt("Save failed"), variant: "destructive" });
     } finally {
       setSavingMeta(false);
     }

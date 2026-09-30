@@ -10,6 +10,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { CrossReferencePicker } from "./CrossReferencePicker";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Field {
   label: string;
@@ -40,48 +41,48 @@ interface Props {
 export function StructuredContentSection(p: Props) {
   const fields: Field[] = [
     {
-      label: "Strong's Concordance Word Studies",
+      label: tt("Strong's Concordance Word Studies"),
       icon: <GraduationCap className="h-4 w-4 text-teal-500" />,
       value: p.wordStudies,
       onChange: p.setWordStudies,
       placeholder:
-        "Immediately | eutheōs — Strong's G2112 | Means at once or without delay.",
-      hint: "One study per line: Word | Strong's ID | Definition",
+        tt("Immediately | eutheōs — Strong's G2112 | Means at once or without delay."),
+      hint: tt("One study per line: Word | Strong's ID | Definition"),
       rows: 8,
     },
     {
-      label: "Practical Applications",
+      label: tt("Practical Applications"),
       icon: <ListChecks className="h-4 w-4 text-green-500" />,
       value: p.practicalApplications,
       onChange: p.setPracticalApplications,
-      placeholder: "Respond promptly when God's direction is confirmed.",
-      hint: "One application per line",
+      placeholder: tt("Respond promptly when God's direction is confirmed."),
+      hint: tt("One application per line"),
       rows: 7,
     },
     {
-      label: "Key Themes",
+      label: tt("Key Themes"),
       icon: <Sparkles className="h-4 w-4 text-amber-500" />,
       value: p.keyThemes,
       onChange: p.setKeyThemes,
-      placeholder: "Immediate obedience",
-      hint: "One theme per line",
+      placeholder: tt("Immediate obedience"),
+      hint: tt("One theme per line"),
       rows: 5,
     },
     {
-      label: "Final Thoughts",
+      label: tt("Final Thoughts"),
       icon: <BookMarked className="h-4 w-4 text-rose-500" />,
       value: p.finalThoughts,
       onChange: p.setFinalThoughts,
-      placeholder: "Summarize the enduring truth of this verse...",
+      placeholder: tt("Summarize the enduring truth of this verse..."),
       rows: 4,
     },
     {
-      label: "Takeaways",
+      label: tt("Takeaways"),
       icon: <Lightbulb className="h-4 w-4 text-violet-500" />,
       value: p.takeaways,
       onChange: p.setTakeaways,
-      placeholder: "God expects prompt obedience to clear direction.",
-      hint: "One takeaway per line",
+      placeholder: tt("God expects prompt obedience to clear direction."),
+      hint: tt("One takeaway per line"),
     },
   ];
   return (

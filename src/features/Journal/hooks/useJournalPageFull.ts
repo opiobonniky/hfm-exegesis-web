@@ -5,6 +5,7 @@ import { useLanguage } from "@/components/languages/languageProvider";
 import { useToast } from "@/hooks/use-toast";
 import { useSubscription } from "@/hooks/useSubscription";
 import { sendPostRequest } from "@/services/api";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export type JournalViewMode = "my" | "discover";
 
@@ -83,11 +84,11 @@ export function useJournalPageFull() {
       if (res.returnCode === 200 && res.returnData?.url) {
         window.open(res.returnData.url, "_blank");
       } else {
-        toast({ title: "Portal error", description: res.returnMessage || "Could not open billing portal.", variant: "destructive" });
+        toast({ title: tt("Portal error"), description: res.returnMessage || "Could not open billing portal.", variant: "destructive" });
       }
     } catch (error) {
       const description = error instanceof Error ? error.message : "Something went wrong";
-      toast({ title: "Error", description, variant: "destructive" });
+      toast({ title: tt("Error"), description, variant: "destructive" });
     } finally {
       setSowerPortalLoading(false);
     }
@@ -117,7 +118,7 @@ export function useJournalPageFull() {
         setHasPrevious(data.hasPrevious || false);
       }
     } catch {
-      toast({ title: "Failed to load", variant: "destructive" });
+      toast({ title: tt("Failed to load"), variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -154,14 +155,14 @@ export function useJournalPageFull() {
     try {
       const res = await sendPostRequest("journal", "delete", { id: deleteDialog.id });
       if (res?.returnCode === 200) {
-        toast({ title: "Deleted" });
+        toast({ title: tt("Deleted") });
         setDeleteDialog(null);
         loadEntries(page);
       } else {
-        toast({ title: "Delete failed", variant: "destructive" });
+        toast({ title: tt("Delete failed"), variant: "destructive" });
       }
     } catch {
-      toast({ title: "Error", variant: "destructive" });
+      toast({ title: tt("Error"), variant: "destructive" });
     } finally {
       setDeleting(false);
     }

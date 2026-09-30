@@ -15,6 +15,7 @@ import { AuthLogoImage } from "../components/AuthLogoImage";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import logoImage from "@/assets/logos/exegesis_bg_rm.webp";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export default function ForceChangePassword() {
   const { data, actions } = useForceChangePasswordPage();
@@ -35,19 +36,14 @@ export default function ForceChangePassword() {
               <div className="mx-auto w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center">
                 <ShieldAlert className="w-6 h-6 text-amber-600" />
               </div>
-              <h1 className="text-2xl font-bold text-foreground">Set a New Password</h1>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Your account was created with a temporary password. For your
-                security, please create your own password before continuing.
-              </p>
+              <h1 className="text-2xl font-bold text-foreground">{tt("Set a New Password")}</h1>
+              <p className="text-sm text-muted-foreground leading-relaxed">{tt("Your account was created with a temporary password. For your security, please create your own password before continuing.")}</p>
             </div>
 
             <form onSubmit={actions.handleSubmit} className="space-y-5" noValidate>
               {/* Temporary password */}
               <div className="space-y-1.5">
-                <Label htmlFor="currentPassword" className="text-xs font-medium">
-                  Temporary Password
-                </Label>
+                <Label htmlFor="currentPassword" className="text-xs font-medium">{tt("Temporary Password")}</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
                   <input
@@ -58,7 +54,7 @@ export default function ForceChangePassword() {
                     onFocus={() => actions.setFocusedField("currentPassword")}
                     onBlur={() => actions.handleBlur("currentPassword")}
                     autoComplete="current-password"
-                    placeholder="From your welcome email"
+                    placeholder={tt("From your welcome email")}
                     className="w-full h-11 pl-9 pr-10 rounded-lg border bg-background text-sm outline-none transition-colors focus:border-primary"
                   />
                   <button
@@ -78,7 +74,7 @@ export default function ForceChangePassword() {
               {/* New password */}
               <FloatingInput
                 id="newPassword"
-                label="New Password"
+                label={tt("New Password")}
                 icon={Lock}
                 type={data.showPassword ? "text" : "password"}
                 value={data.newPassword}
@@ -97,7 +93,7 @@ export default function ForceChangePassword() {
               {/* Confirm password */}
               <FloatingInput
                 id="confirmPassword"
-                label="Confirm Password"
+                label={tt("Confirm Password")}
                 icon={Lock}
                 type={data.showPassword ? "text" : "password"}
                 value={data.confirmPassword}
@@ -113,19 +109,14 @@ export default function ForceChangePassword() {
               <Button type="submit" disabled={data.isLoading} className="w-full h-11 gap-2">
                 {data.isLoading ? (
                   <>
-                    <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                    Updating...
-                  </>
+                    <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />{tt("Updating...")}</>
                 ) : (
-                  "Update Password & Continue"
+                  tt("Update Password & Continue")
                 )}
               </Button>
             </form>
 
-            <p className="text-xs text-muted-foreground text-center">
-              Tip: use at least 8 characters with uppercase, lowercase, a number,
-              and a special character.
-            </p>
+            <p className="text-xs text-muted-foreground text-center">{tt("Tip: use at least 8 characters with uppercase, lowercase, a number, and a special character.")}</p>
           </div>
         </AuthFormCard>
       </ForgotPasswordContentWrapper>

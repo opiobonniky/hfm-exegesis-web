@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useLanguage } from "@/components/languages/languageProvider";
 import { useRTL } from "@/providers/RTLProvider";
 import { cn } from "@/lib/utils";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface ProfileTabProps {
   profile: any;
@@ -59,17 +60,17 @@ export function ProfileTab({ profile, isPayingUser, tierLabel, expiresLabel, sav
             <Select value={profile.gender || "none"} onValueChange={(v) => onProfileChange("gender", v === "none" ? "" : v)}>
               <SelectTrigger><SelectValue placeholder={t.settings?.genderPlaceholder} /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">Prefer not to say</SelectItem>
-                <SelectItem value="Male">Male</SelectItem>
-                <SelectItem value="Female">Female</SelectItem>
-                <SelectItem value="Other">Other</SelectItem>
+                <SelectItem value="none">{tt("Prefer not to say")}</SelectItem>
+                <SelectItem value="Male">{tt("Male")}</SelectItem>
+                <SelectItem value="Female">{tt("Female")}</SelectItem>
+                <SelectItem value="Other">{tt("Other")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
         </div>
         <Button onClick={onSaveProfile} disabled={saving} className="bg-primary hover:bg-primary/90">
           {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-           {saving ? "Saving..." : (t as any).settings?.saveProfile || "Save Profile"}
+           {saving ? tt("Saving...") : (t as any).settings?.saveProfile || tt("Save Profile")}
         </Button>
       </div>
       <div className="rounded-2xl bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-950/40 dark:to-purple-950/40 border border-violet-200 dark:border-violet-800/40 p-4 sm:p-6">
@@ -79,13 +80,13 @@ export function ProfileTab({ profile, isPayingUser, tierLabel, expiresLabel, sav
               {isPayingUser ? <Sparkles className="w-5 h-5 text-violet-600" /> : <Sprout className="w-5 h-5 text-violet-600" />}
             </div>
             <div>
-              <h3 className="font-semibold text-violet-900 dark:text-violet-100">Sower Status</h3>
-              <p className="text-xs text-violet-600/70 dark:text-violet-300/70">{isPayingUser ? "Supporting the mission" : "Support the Word, unlock tools"}</p>
+              <h3 className="font-semibold text-violet-900 dark:text-violet-100">{tt("Sower Status")}</h3>
+              <p className="text-xs text-violet-600/70 dark:text-violet-300/70">{isPayingUser ? tt("Supporting the mission") : tt("Support the Word, unlock tools")}</p>
             </div>
           </div>
           <Button variant={isPayingUser ? "outline" : "default"} size="sm" onClick={onSowerAction} disabled={sowerLoading}
             className={cn("gap-1.5 text-xs font-bold h-9", !isPayingUser && "bg-violet-600 hover:bg-violet-700 text-white")}>
-            {sowerLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : isPayingUser ? "Manage" : "Upgrade"}
+            {sowerLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : isPayingUser ? tt("Manage") : tt("Upgrade")}
           </Button>
         </div>
       </div>

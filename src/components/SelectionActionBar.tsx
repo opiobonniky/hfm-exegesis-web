@@ -2,6 +2,7 @@ import { X, Volume2, VolumeX, Highlighter, BookMarked, Star, Copy, PenLine, Shar
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { ToolbarBtn } from "@/lib/bibleHelpers";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export interface SelectionActionBarProps {
   onExplainLocal: (selectedVerses: string[]) => void;
@@ -154,7 +155,7 @@ export default function SelectionActionBar({
         <ToolbarBtn
           onClick={onNavigateToStudy}
           icon={<Library className="w-3 h-3" />}
-          label="Study"
+          label={tt("Study")}
           compact
         />
       </div>

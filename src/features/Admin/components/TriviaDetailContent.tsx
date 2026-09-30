@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DetailSection } from "./DetailSection";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface TriviaQuestion {
   id: number;
@@ -52,7 +53,7 @@ export function TriviaDetailContent({ question }: { question: TriviaQuestion }) 
           <div className="flex items-start justify-between gap-3">
             <CardTitle className="text-lg leading-relaxed">{question.question}</CardTitle>
             <Badge variant={question.isActive ? "default" : "secondary"} className="shrink-0">
-              {question.isActive ? "Active" : "Inactive"}
+              {question.isActive ? tt("Active") : tt("Inactive")}
             </Badge>
           </div>
           <div className="flex items-center gap-2 flex-wrap mt-2">
@@ -76,7 +77,7 @@ export function TriviaDetailContent({ question }: { question: TriviaQuestion }) 
 
       {/* Explanation */}
       {question.explanation && (
-        <DetailSection title="Explanation">
+        <DetailSection title={tt("Explanation")}>
           <p className="text-sm leading-relaxed text-foreground/80 whitespace-pre-wrap">
             {question.explanation}
           </p>
@@ -91,9 +92,7 @@ function TriviaOptions({ options, correctAnswer }: { options: string[]; correctA
   return (
     <Card>
       <CardHeader className="pb-3">
-        <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-          Answer Options
-        </CardTitle>
+        <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">{tt("Answer Options")}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-2">
         {options.map((option, idx) => {
@@ -120,9 +119,7 @@ function TriviaOptions({ options, correctAnswer }: { options: string[]; correctA
                 {option}
               </span>
               {isCorrect && (
-                <Badge variant="outline" className="ml-auto text-[10px] bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400">
-                  Correct Answer
-                </Badge>
+                <Badge variant="outline" className="ml-auto text-[10px] bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400">{tt("Correct Answer")}</Badge>
               )}
             </div>
           );
@@ -142,12 +139,8 @@ export function TriviaDetailActions({
 }) {
   return (
     <div className="flex gap-2">
-      <Button variant="outline" onClick={onEdit} className="gap-2">
-        Edit Question
-      </Button>
-      <Button variant="ghost" onClick={onBack}>
-        Back to Trivia
-      </Button>
+      <Button variant="outline" onClick={onEdit} className="gap-2">{tt("Edit Question")}</Button>
+      <Button variant="ghost" onClick={onBack}>{tt("Back to Trivia")}</Button>
     </div>
   );
 }

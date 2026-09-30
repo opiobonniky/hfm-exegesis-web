@@ -1,5 +1,6 @@
 import { BookOpen, CheckCircle2, Lightbulb, Tag, Target } from "lucide-react";
 import type { AddExplanationSidebarProps } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export function AddExplanationSidebar({
   currentStep,
@@ -10,16 +11,16 @@ export function AddExplanationSidebar({
   onStepChange,
 }: AddExplanationSidebarProps) {
   const steps = [
-    { id: "reference", label: "Reference", description: "Verse & translation", icon: BookOpen },
-    { id: "exegesis", label: "Exegesis", description: "Main insight", icon: Lightbulb },
-    { id: "study", label: "Study", description: "Context & word study", icon: Target },
-    { id: "extras", label: "Extras", description: "Applications & themes", icon: Tag },
+    { id: "reference", label: tt("Reference"), description: tt("Verse & translation"), icon: BookOpen },
+    { id: "exegesis", label: tt("Exegesis"), description: tt("Main insight"), icon: Lightbulb },
+    { id: "study", label: tt("Study"), description: tt("Context & word study"), icon: Target },
+    { id: "extras", label: tt("Extras"), description: tt("Applications & themes"), icon: Tag },
   ] as const;
 
   return (
     <aside className="rounded-2xl border border-border bg-card p-4 shadow-sm">
       <div className="mb-4 flex items-center justify-between">
-        <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">Workflow</p>
+        <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">{tt("Workflow")}</p>
         <span className="rounded-full border border-border bg-muted px-2 py-1 text-[10px] text-muted-foreground">{currentStepIndex + 1}/{steps.length}</span>
       </div>
 
@@ -56,15 +57,15 @@ export function AddExplanationSidebar({
       </div>
 
       <div className="mt-6 rounded-xl border border-border bg-muted/40 p-3">
-        <p className="text-[11px] uppercase tracking-[0.24em] text-muted-foreground">Required</p>
+        <p className="text-[11px] uppercase tracking-[0.24em] text-muted-foreground">{tt("Required")}</p>
         <ul className="mt-3 space-y-2 text-sm text-foreground">
           <li className="flex items-center justify-between gap-2">
-            <span>Reference</span>
-            <span className={referenceComplete ? "text-emerald-600" : "text-muted-foreground"}>{referenceComplete ? "Ready" : "Missing"}</span>
+            <span>{tt("Reference")}</span>
+            <span className={referenceComplete ? "text-emerald-600" : "text-muted-foreground"}>{referenceComplete ? tt("Ready") : tt("Missing")}</span>
           </li>
           <li className="flex items-center justify-between gap-2">
-            <span>Explanation</span>
-            <span className={exegesisComplete ? "text-emerald-600" : "text-muted-foreground"}>{exegesisComplete ? "Ready" : "Missing"}</span>
+            <span>{tt("Explanation")}</span>
+            <span className={exegesisComplete ? "text-emerald-600" : "text-muted-foreground"}>{exegesisComplete ? tt("Ready") : tt("Missing")}</span>
           </li>
         </ul>
       </div>

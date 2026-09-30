@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/components/languages/languageProvider";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface PasswordTabProps {
   saving: boolean;
@@ -81,11 +82,11 @@ export function PasswordTab({ saving, onSave }: PasswordTabProps) {
               {show.confirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
           </div>
-          {confirm && newPass !== confirm && <p className="text-xs text-destructive">Passwords don't match</p>}
+          {confirm && newPass !== confirm && <p className="text-xs text-destructive">{tt("Passwords don't match")}</p>}
         </div>
         <Button onClick={handleSubmit} disabled={saving || !current || !newPass || newPass !== confirm} className="bg-primary hover:bg-primary/90">
           {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-          {saving ? "Updating..." : t.settings?.updatePassword || "Update Password"}
+          {saving ? tt("Updating...") : t.settings?.updatePassword || tt("Update Password")}
         </Button>
       </div>
     </div>

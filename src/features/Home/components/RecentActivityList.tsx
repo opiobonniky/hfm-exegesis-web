@@ -5,6 +5,7 @@ import { routes } from "@/components/Routes/routes";
 import { timeAgo } from "../utils";
 import type { UserDashboardActivity } from "../types";
 import type { NavigateFunction } from "react-router-dom";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface RecentActivityListProps {
   activities: UserDashboardActivity[];
@@ -19,10 +20,10 @@ export default function RecentActivityList({ activities, maxItems = 5, navigate,
   return (
     <section>
       <div className="flex items-center justify-between mb-3">
-        <h2 className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Recent activity</h2>
+        <h2 className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">{tt("Recent activity")}</h2>
         {onSeeAll && (
           <button onClick={onSeeAll}
-            className="text-xs font-semibold text-[#946b30] hover:text-[#6f4e1f] dark:text-[#d9b879]">All</button>
+            className="text-xs font-semibold text-[#946b30] hover:text-[#6f4e1f] dark:text-[#d9b879]">{tt("All")}</button>
         )}
       </div>
       <div className="overflow-hidden rounded-2xl border border-[#d8d2c4] bg-[#faf8f2] dark:border-white/10 dark:bg-[#111b24]">

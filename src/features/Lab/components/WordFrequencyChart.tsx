@@ -1,6 +1,7 @@
 import { BarChart3 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { LabChartItem, LabChartMode } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   data: LabChartItem[];
@@ -18,13 +19,13 @@ export function WordFrequencyChart({ data, onWordClick, mode, onModeChange, lang
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-1.5">
           <BarChart3 className="w-3.5 h-3.5 text-primary" />
-          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Word Frequency</span>
+          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{tt("Word Frequency")}</span>
         </div>
         <div className="flex items-center gap-1">
           {(["frequency", "partOfSpeech"] as LabChartMode[]).map((m) => (
             <button key={m} onClick={() => onModeChange(m)}
               className={cn("px-2 py-0.5 rounded text-[10px] font-semibold transition-colors", mode === m ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted")}>
-              {m === "frequency" ? "Freq" : "POS"}
+              {m === "frequency" ? tt("Freq") : tt("POS")}
             </button>
           ))}
         </div>

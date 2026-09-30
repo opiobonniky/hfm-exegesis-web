@@ -5,6 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { sendPostRequest } from "@/services/api";
 import { ensureDataLoaded, getVerseText } from "@/utilities/bibleUtils";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export interface NoteItem {
   id: number;
@@ -62,9 +63,9 @@ export function useNotesPage() {
       const res = await sendPostRequest("bible", "delete-verse-note", { noteId: id });
       if (res.returnCode === 200) {
         setNotes((p) => p.filter((n) => n.id !== id));
-        toast({ title: "Note deleted" });
+        toast({ title: tt("Note deleted") });
       }
-    } catch { toast({ title: "Failed to delete", variant: "destructive" }); }
+    } catch { toast({ title: tt("Failed to delete"), variant: "destructive" }); }
     finally { setDeleting(null); }
   }, [toast]);
 
@@ -85,11 +86,11 @@ export function useNotesPage() {
       });
       if (res.returnCode === 200) {
         setNotes((p) => p.map((n) => n.id === editingNote.id ? { ...n, note: editText.trim(), updatedOn: new Date().toISOString() } : n));
-        toast({ title: "Note updated" });
+        toast({ title: tt("Note updated") });
         setEditingNote(null);
         setEditText("");
       }
-    } catch { toast({ title: "Failed to save", variant: "destructive" }); }
+    } catch { toast({ title: tt("Failed to save"), variant: "destructive" }); }
     finally { setSaving(false); }
   }, [editingNote, editText, toast]);
 

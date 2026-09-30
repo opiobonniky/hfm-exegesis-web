@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import { DayCardEdit } from "./DayCardEdit";
 import { isDayComplete } from "../hooks/useAddReadingPlanPage";
 import type { DayAssignment } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   meta: { totalDays: number; questionsEnabled: boolean };
@@ -26,9 +27,9 @@ export function PlanStepDays({
           <div>
             <h2 className="font-bold text-foreground flex items-center gap-2">
               <Calendar className="w-4 h-4 text-teal-600" />
-              {t.readingPlan?.dailyContentTitle || "Daily Content"} — {meta.totalDays} {t.readingPlan?.days || "days"}
+              {t.readingPlan?.dailyContentTitle || tt("Daily Content")} — {meta.totalDays} {t.readingPlan?.days || tt("days")}
             </h2>
-            <p className="text-xs text-muted-foreground/70 mt-0.5">{t.readingPlan?.dailyContentDesc || "Configure each day's reading"}</p>
+            <p className="text-xs text-muted-foreground/70 mt-0.5">{t.readingPlan?.dailyContentDesc || tt("Configure each day's reading")}</p>
           </div>
           <span className="text-[11px] border border-emerald-200 bg-emerald-50 text-emerald-700 rounded-lg px-2 py-1 font-bold">
             {(t.readingPlan?.daysReady || "{ready}/{total} ready")
@@ -52,10 +53,10 @@ export function PlanStepDays({
       </div>
       <div className="flex justify-between">
         <button type="button" onClick={onPrev} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-border bg-card text-muted-foreground hover:bg-muted text-sm font-semibold transition-all">
-          <ArrowLeft className={cn("w-4 h-4", isRtl && "rotate-180")} />{t.common?.back || "Back"}
+          <ArrowLeft className={cn("w-4 h-4", isRtl && "rotate-180")} />{t.common?.back || tt("Back")}
         </button>
         <button type="button" onClick={onNext} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-sm font-semibold shadow-sm transition-all">
-          {t.readingPlan?.stepReviewSave || "Review & Save"} <ArrowRight className={cn("w-4 h-4", isRtl && "rotate-180")} />
+          {t.readingPlan?.stepReviewSave || tt("Review & Save")} <ArrowRight className={cn("w-4 h-4", isRtl && "rotate-180")} />
         </button>
       </div>
     </div>

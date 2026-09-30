@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { routes } from "@/components/Routes/routes";
 import { CATEGORY_KEYS, DIFFICULTY_KEYS } from "../constants";
 import type { UserPlanReadingPlan, UserPlan } from "../hooks/useUserPlansPage";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   plans: UserPlanReadingPlan[];
@@ -49,8 +50,8 @@ export default function UserBrowseTab({
         <Card className="border-teal-200 dark:border-teal-800/50 bg-teal-50/50 dark:bg-teal-950/20">
           <CardContent className="py-12 text-center">
             <BookOpen className="w-16 h-16 mx-auto mb-4 text-teal-400 dark:text-teal-500" />
-            <h3 className="text-xl font-semibold mb-2">No plans found</h3>
-            <p className="text-muted-foreground">Check back later for new reading plans.</p>
+            <h3 className="text-xl font-semibold mb-2">{tt("No plans found")}</h3>
+            <p className="text-muted-foreground">{tt("Check back later for new reading plans.")}</p>
           </CardContent>
         </Card>
       ) : (
@@ -72,8 +73,8 @@ export default function UserBrowseTab({
                     <div className="flex-1">
                       <div className="flex items-center gap-2 flex-wrap">
                         <CardTitle className="text-base">{plan.title}</CardTitle>
-                        {isCompleted && <span className="text-xs px-2 py-1 bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 rounded-full">Done</span>}
-                        {isActive && <span className="text-xs px-2 py-1 bg-primary text-primary-foreground rounded-full">Active</span>}
+                        {isCompleted && <span className="text-xs px-2 py-1 bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 rounded-full">{tt("Done")}</span>}
+                        {isActive && <span className="text-xs px-2 py-1 bg-primary text-primary-foreground rounded-full">{tt("Active")}</span>}
                       </div>
                       <CardDescription className="mt-1 line-clamp-2">{plan.description}</CardDescription>
                     </div>
@@ -86,7 +87,7 @@ export default function UserBrowseTab({
                   <div className="flex flex-wrap gap-2">
                     <span className="text-xs px-2 py-1 bg-muted rounded-lg font-medium border">{t.readingPlan?.[DIFFICULTY_KEYS[plan.difficulty]] || plan.difficulty}</span>
                     <span className="text-xs px-2 py-1 bg-muted rounded-lg font-medium">{catLabel(plan.category)}</span>
-                    <span className="text-xs px-2 py-1 bg-muted rounded-lg font-medium">{plan.totalDays} days</span>
+                    <span className="text-xs px-2 py-1 bg-muted rounded-lg font-medium">{plan.totalDays}{tt("days")}</span>
                     {plan.questionsEnabled && <span className="text-xs px-2 py-1 bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300 rounded-lg font-medium">Q&A</span>}
                   </div>
                   {hasStarted && userPlan && (
@@ -102,12 +103,12 @@ export default function UserBrowseTab({
                   <div className="flex gap-2">
                     {hasStarted ? (
                       <Button className="flex-1" onClick={() => onViewDetail(plan.planId)}>
-                        {isCompleted ? "View Summary" : "Continue Reading"}<ChevronRight className="w-4 h-4 ml-1" />
+                        {isCompleted ? tt("View Summary") : tt("Continue Reading")}<ChevronRight className="w-4 h-4 ml-1" />
                       </Button>
                     ) : (
-                      <Button className="flex-1" onClick={() => onStartPlan(plan.planId)} disabled={!plan.isActive}>Start Plan</Button>
+                      <Button className="flex-1" onClick={() => onStartPlan(plan.planId)} disabled={!plan.isActive}>{tt("Start Plan")}</Button>
                     )}
-                    <Button variant="outline" onClick={() => onViewDetail(plan.planId)}>Details</Button>
+                    <Button variant="outline" onClick={() => onViewDetail(plan.planId)}>{tt("Details")}</Button>
                   </div>
                 </CardContent>
               </Card>

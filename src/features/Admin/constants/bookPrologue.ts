@@ -3,6 +3,7 @@
 // (modeled after the DailyContent AddExplanation flow).
 
 import type { PrologueStepId } from "../types";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export const PROLOGUE_STEP_ORDER = [
   "basic",
@@ -12,10 +13,10 @@ export const PROLOGUE_STEP_ORDER = [
 ] as const;
 
 export const PROLOGUE_STEPS: { id: PrologueStepId; label: string; description: string }[] = [
-  { id: "basic", label: "Basic", description: "Book, title & overview" },
-  { id: "context", label: "Context", description: "Author & historical setting" },
-  { id: "themes", label: "Themes", description: "Themes, people & lessons" },
-  { id: "extra", label: "Extra", description: "Scripture & applications" },
+  { id: "basic", label: tt("Basic"), description: tt("Book, title & overview") },
+  { id: "context", label: tt("Context"), description: tt("Author & historical setting") },
+  { id: "themes", label: tt("Themes"), description: tt("Themes, people & lessons") },
+  { id: "extra", label: tt("Extra"), description: tt("Scripture & applications") },
 ];
 
 export const PROLOGUE_CONTENT_MAX = 20000;
@@ -46,11 +47,11 @@ export const PROLOGUE_FORM_EMPTY = {
 };
 
 export const PROLOGUE_TRANSLATIONS = [
-  { id: "Berean", label: "Berean Standard Bible (BSB)" },
-  { id: "KJV", label: "King James Version (KJV)" },
-  { id: "NIV", label: "New International Version (NIV)" },
-  { id: "ESV", label: "English Standard Version (ESV)" },
-  { id: "NASB", label: "New American Standard Bible (NASB)" },
+  { id: "Berean", label: tt("Berean Standard Bible (BSB)") },
+  { id: "KJV", label: tt("King James Version (KJV)") },
+  { id: "NIV", label: tt("New International Version (NIV)") },
+  { id: "ESV", label: tt("English Standard Version (ESV)") },
+  { id: "NASB", label: tt("New American Standard Bible (NASB)") },
 ] as const;
 
 export const ADMIN_BOOK_PROLOGUE_EMPTY_FORM = {

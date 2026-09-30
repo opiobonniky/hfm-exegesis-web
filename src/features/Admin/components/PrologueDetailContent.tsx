@@ -9,6 +9,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { BookPrologueDetail } from "../hooks/useBookPrologueDetail";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export function PrologueDetailContent({ item }: { item: BookPrologueDetail }) {
   const p = item;
@@ -33,8 +34,7 @@ export function PrologueDetailContent({ item }: { item: BookPrologueDetail }) {
                 )}
                 {p.chapters != null && (
                   <Badge variant="secondary" className="gap-1.5 text-xs">
-                    <BookOpen className="w-3 h-3" /> {p.chapters} chapters
-                  </Badge>
+                    <BookOpen className="w-3 h-3" /> {p.chapters}{tt("chapters")}</Badge>
                 )}
                 {p.audience && (
                   <Badge variant="outline" className="text-xs">{p.audience}</Badge>
@@ -49,7 +49,7 @@ export function PrologueDetailContent({ item }: { item: BookPrologueDetail }) {
       {p.authorDetail && (
         <LongTextCard
           icon={<User className="w-4 h-4" />}
-          title="About the Author"
+          title={tt("About the Author")}
           accent="sky"
         >
           {p.authorDetail}
@@ -59,7 +59,7 @@ export function PrologueDetailContent({ item }: { item: BookPrologueDetail }) {
       {p.summary && (
         <LongTextCard
           icon={<MessageCircle className="w-4 h-4" />}
-          title="Summary"
+          title={tt("Summary")}
           accent="indigo"
         >
           {p.summary}
@@ -69,7 +69,7 @@ export function PrologueDetailContent({ item }: { item: BookPrologueDetail }) {
       {p.purpose && (
         <LongTextCard
           icon={<Target className="w-4 h-4" />}
-          title="Purpose"
+          title={tt("Purpose")}
           accent="emerald"
         >
           {p.purpose}
@@ -79,7 +79,7 @@ export function PrologueDetailContent({ item }: { item: BookPrologueDetail }) {
       {p.keyTheme && (
         <LongTextCard
           icon={<Sparkles className="w-4 h-4" />}
-          title="Key Theme"
+          title={tt("Key Theme")}
           accent="amber"
         >
           {p.keyTheme}
@@ -89,7 +89,7 @@ export function PrologueDetailContent({ item }: { item: BookPrologueDetail }) {
       {p.background && (
         <LongTextCard
           icon={<Landmark className="w-4 h-4" />}
-          title="Historical Background"
+          title={tt("Historical Background")}
           accent="violet"
         >
           {p.background}
@@ -99,7 +99,7 @@ export function PrologueDetailContent({ item }: { item: BookPrologueDetail }) {
       {p.lessons && (
         <LongTextCard
           icon={<GraduationCap className="w-4 h-4" />}
-          title="Key Lessons"
+          title={tt("Key Lessons")}
           accent="teal"
         >
           {p.lessons}
@@ -109,7 +109,7 @@ export function PrologueDetailContent({ item }: { item: BookPrologueDetail }) {
       {p.christConnection && (
         <LongTextCard
           icon={<Church className="w-4 h-4" />}
-          title="Christ Connection"
+          title={tt("Christ Connection")}
           accent="rose"
         >
           {p.christConnection}
@@ -131,8 +131,7 @@ export function PrologueDetailContent({ item }: { item: BookPrologueDetail }) {
         <Card className="shadow-sm">
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-              <Layers className="w-4 h-4" /> Main Themes
-            </CardTitle>
+              <Layers className="w-4 h-4" />{tt("Main Themes")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-2">
@@ -150,7 +149,7 @@ export function PrologueDetailContent({ item }: { item: BookPrologueDetail }) {
       {p.keyPeople && p.keyPeople.length > 0 && (
         <PrologueBadgeList
           icon={<Users className="w-4 h-4" />}
-          title="Key People"
+          title={tt("Key People")}
           items={p.keyPeople}
           variant="outline"
         />
@@ -160,7 +159,7 @@ export function PrologueDetailContent({ item }: { item: BookPrologueDetail }) {
       {p.keyVerses && p.keyVerses.length > 0 && (
         <PrologueBadgeList
           icon={<BookMarked className="w-4 h-4" />}
-          title="Key Verses"
+          title={tt("Key Verses")}
           items={p.keyVerses}
           variant="outline"
         />
@@ -228,8 +227,7 @@ function PrologueApplications({ applications }: { applications: string[] }) {
     <Card className="shadow-sm overflow-hidden">
       <CardHeader className="bg-gradient-to-r from-emerald-500/10 to-transparent pb-3">
         <CardTitle className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-          <Lightbulb className="w-4 h-4" /> Key Applications for Today
-        </CardTitle>
+          <Lightbulb className="w-4 h-4" />{tt("Key Applications for Today")}</CardTitle>
       </CardHeader>
       <CardContent>
         <ul className="space-y-3">
@@ -256,8 +254,7 @@ function PrologueKeyScripture({
     <Card className="shadow-sm overflow-hidden">
       <CardHeader className="bg-gradient-to-r from-sky-500/10 to-transparent pb-3">
         <CardTitle className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-          <Quote className="w-4 h-4" /> Key Scripture
-        </CardTitle>
+          <Quote className="w-4 h-4" />{tt("Key Scripture")}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
         {scriptures.map((s, i) => (
@@ -321,8 +318,7 @@ function PrologueStructure({
     <Card className="shadow-sm">
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-          <BookOpen className="w-4 h-4" /> Chapter Structure
-        </CardTitle>
+          <BookOpen className="w-4 h-4" />{tt("Chapter Structure")}</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="relative space-y-3 max-h-72 overflow-y-auto pl-2">

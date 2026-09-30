@@ -1,4 +1,5 @@
 import { Search, Loader2 } from "lucide-react";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export function AdminSearchBar({
   value, onChange, onSearch, placeholder,
@@ -17,7 +18,7 @@ export function AdminSearchBar({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && onSearch?.()}
-          placeholder={placeholder || "Search..."}
+          placeholder={placeholder || tt("Search...")}
           className="min-h-11 w-full rounded-xl border border-border bg-background py-2 pl-9 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
         />
       </div>
@@ -40,9 +41,7 @@ export function AdminEmptyState({
       <h3 className="text-lg font-semibold text-foreground">{title}</h3>
       {(description || message) && <p className="text-sm text-muted-foreground mt-1">{description || message}</p>}
       {onAction && (
-        <button onClick={onAction} className="mt-4 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors">
-          Get Started
-        </button>
+        <button onClick={onAction} className="mt-4 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors">{tt("Get Started")}</button>
       )}
     </div>
   );
