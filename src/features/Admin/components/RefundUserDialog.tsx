@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import type { SubscribedUser } from "../types";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { StableLoadingContent } from "@/components/ui/StableLoadingContent";
 
 interface Props {
   user: SubscribedUser | null;
@@ -56,7 +57,7 @@ export function RefundUserDialog({ user, loading, onOpenChange, onConfirm }: Pro
             disabled={loading}
             className="gap-2 w-full sm:w-auto"
           >
-            {loading ? <><Loader2 className="w-4 h-4 animate-spin" />{tt("Processing...")}</> : <><RotateCcw className="w-4 h-4" />{tt("Refund & Cancel")}</>}
+            <StableLoadingContent loading={loading} idle={<><RotateCcw className="w-4 h-4" /><span>{tt("Refund & Cancel")}</span></>} pending={<><Loader2 className="w-4 h-4 animate-spin" /><span>{tt("Processing...")}</span></>} />
           </Button>
         </DialogFooter>
       </DialogContent>

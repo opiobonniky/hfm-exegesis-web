@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { StableLoadingContent } from "@/components/ui/StableLoadingContent";
 
 // ─── Shared helpers ─────────────────────────────────────────────────────────
 
@@ -152,8 +153,7 @@ export function CreateUserForm({
       <div className="flex items-center justify-end gap-3 pb-8 pt-4">
         <Button variant="outline" onClick={onCancel} disabled={saving}>{tt("Cancel")}</Button>
         <Button onClick={onSubmit} disabled={saving} className="gap-2">
-          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-          {saving ? tt("Creating...") : tt("Create User")}
+          <StableLoadingContent loading={saving} idle={<><Save className="w-4 h-4" /><span>{tt("Create User")}</span></>} pending={<><Loader2 className="w-4 h-4 animate-spin" /><span>{tt("Creating...")}</span></>} />
         </Button>
       </div>
     </>

@@ -38,9 +38,9 @@ export function PreferencesTab({ fontSize, onFontSizeChange, translation, onTran
           <div className="space-y-2">
             <Label>{tt("Language")}</Label>
             <Select value={currentLang} onValueChange={(v) => setLanguage(v as Language)}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {Object.entries(LANGUAGE_NAMES).map(([code, name]) => <SelectItem key={code} value={code}>{name}</SelectItem>)}
+              <SelectTrigger className="notranslate" translate="no"><SelectValue /></SelectTrigger>
+              <SelectContent className="notranslate" translate="no">
+                {Object.entries(LANGUAGE_NAMES).map(([code, name]) => <SelectItem key={code} value={code} onClick={() => setLanguage(code as Language)}>{name}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>

@@ -7,7 +7,6 @@ import {
   ForgotPasswordSubmitButton, ForgotPasswordFormContent,
   ForgotPasswordFooter, ForgotPasswordContentWrapper,
 } from "../components";
-import { AnimatePresence } from "framer-motion";
 import { Mail, KeyRound, Lock } from "lucide-react";
 import logoImage from "@/assets/logos/exegesis_bg_rm.webp";
 import { tt } from '@/components/languages/hardcodedTranslate';
@@ -27,19 +26,18 @@ export default function ForgotPassword() {
             description={h.step === "email" ? (h.t.auth?.enterEmailForRecovery || tt("Enter your email to receive a recovery code.")) : (h.t.auth?.enterCodeAndPassword || tt("Enter the 6-digit code and your new password."))}
             logoSrc={logoImage}
           >
-            <AnimatePresence mode="wait">
-              {h.step === "email" ? (
-                <form key="email" onSubmit={h.handleRequestReset} className="space-y-6">
-                  <FloatingInput id="email" label={h.t.common?.email || tt("Email Address")} icon={Mail}
-                    type="email" value={h.email} onChange={(e) => h.setEmail(e.target.value)}
-                    focused={h.focusedField === "email"} setFocused={h.setFocusedField}
-                    handleBlur={() => h.handleBlur("email")} error={h.getFieldError("email")} touched={!!h.touchedFields.email} />
-                  <ForgotPasswordSubmitButton isLoading={h.isLoading}>
-                    {h.t.auth?.sendResetCode || tt("Send Reset Code")} <ArrowRight className="w-5 h-5" />
-                  </ForgotPasswordSubmitButton>
-                </form>
-              ) : (
-                <form key="reset" onSubmit={h.handleResetPassword} className="space-y-6">
+            {h.step === "email" ? (
+              <form key="email" onSubmit={h.handleRequestReset} className="space-y-6">
+                <FloatingInput id="email" label={h.t.common?.email || tt("Email Address")} icon={Mail}
+                  type="email" value={h.email} onChange={(e) => h.setEmail(e.target.value)}
+                  focused={h.focusedField === "email"} setFocused={h.setFocusedField}
+                  handleBlur={() => h.handleBlur("email")} error={h.getFieldError("email")} touched={!!h.touchedFields.email} />
+                <ForgotPasswordSubmitButton isLoading={h.isLoading}>
+                  {h.t.auth?.sendResetCode || tt("Send Reset Code")} <ArrowRight className="w-5 h-5" />
+                </ForgotPasswordSubmitButton>
+              </form>
+            ) : (
+              <form key="reset" onSubmit={h.handleResetPassword} className="space-y-6">
                   <FloatingInput id="code" label={h.t.auth?.resetCode || tt("Reset Code")} icon={KeyRound}
                     value={h.code} onChange={(e) => h.setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
                     focused={h.focusedField === "code"} setFocused={h.setFocusedField}
@@ -61,9 +59,8 @@ export default function ForgotPassword() {
                   <ForgotPasswordSubmitButton isLoading={h.isLoading}>
                     {h.t.auth?.resetPassword || tt("Reset Password")} <CheckCircle2 className="w-5 h-5" />
                   </ForgotPasswordSubmitButton>
-                </form>
-              )}
-            </AnimatePresence>
+              </form>
+            )}
 
             <ForgotPasswordFooter
               rememberLabel={h.t.auth?.rememberPassword || "Remember your password?"}

@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { StableLoadingContent } from "@/components/ui/StableLoadingContent";
 
 interface PasswordTabProps {
   saving: boolean;
@@ -85,8 +86,7 @@ export function PasswordTab({ saving, onSave }: PasswordTabProps) {
           {confirm && newPass !== confirm && <p className="text-xs text-destructive">{tt("Passwords don't match")}</p>}
         </div>
         <Button onClick={handleSubmit} disabled={saving || !current || !newPass || newPass !== confirm} className="bg-primary hover:bg-primary/90">
-          {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-          {saving ? tt("Updating...") : t.settings?.updatePassword || tt("Update Password")}
+          <StableLoadingContent loading={saving} idle={t.settings?.updatePassword || tt("Update Password")} pending={<><Loader2 className="w-4 h-4 animate-spin" /><span>{tt("Updating...")}</span></>} />
         </Button>
       </div>
     </div>

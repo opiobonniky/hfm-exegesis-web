@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import type { SubscribedUser } from "../types";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { StableLoadingContent } from "@/components/ui/StableLoadingContent";
 
 interface Props {
   user: SubscribedUser | null;
@@ -68,19 +69,11 @@ export function SuspendUserDialog({
             disabled={loading}
             className="gap-2 w-full sm:w-auto"
           >
-            {loading ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />{tt("Processing...")}</>
-            ) : (
-              <>
-                {isSuspended ? (
-                  <RotateCcw className="w-4 h-4" />
-                ) : (
-                  <Ban className="w-4 h-4" />
-                )}{" "}
-                {isSuspended ? tt("Unsuspend") : tt("Suspend")}
-              </>
-            )}
+            <StableLoadingContent
+              loading={loading}
+              idle={<>{isSuspended ? <RotateCcw className="w-4 h-4" /> : <Ban className="w-4 h-4" />}<span key={isSuspended ? "unsuspend" : "suspend"}>{isSuspended ? tt("Unsuspend") : tt("Suspend")}</span></>}
+              pending={<><Loader2 className="w-4 h-4 animate-spin" /><span>{tt("Processing...")}</span></>}
+            />
           </Button>
         </DialogFooter>
       </DialogContent>

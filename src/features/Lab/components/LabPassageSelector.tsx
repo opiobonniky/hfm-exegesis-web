@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { MAX_CHAPTERS, SUGGESTED_PASSAGES } from "@/features/Lab/constants";
 import { BOOK_NAMES } from "../constants";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { StableLoadingContent } from "@/components/ui/StableLoadingContent";
 
 interface Props {
   bookName: string;
@@ -177,8 +178,11 @@ export default function LabPassageSelector({
           <div className="mt-8 flex justify-center">
             <button onClick={onBeginStudy} disabled={loading}
               className="flex items-center gap-2 px-8 py-3 rounded-xl bg-primary text-primary-foreground text-sm font-bold shadow-lg hover:shadow-xl hover:opacity-90 transition-all disabled:opacity-50">
-              <Sparkles className="w-4 h-4" />
-              {loading ? tt("Starting study...") : tt("Begin Study")}
+              <StableLoadingContent
+                loading={loading}
+                idle={<><Sparkles className="w-4 h-4" /><span>{tt("Begin Study")}</span></>}
+                pending={tt("Starting study...")}
+              />
             </button>
           </div>
         )}

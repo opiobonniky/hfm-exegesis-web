@@ -1,7 +1,6 @@
 "use client";
 
 import { Eye, EyeOff } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
 import type { LucideIcon } from "lucide-react";
 
 interface FloatingInputProps {
@@ -88,18 +87,9 @@ export default function FloatingInput({
           )}
         </div>
       </div>
-      <AnimatePresence>
-        {error && touched && (
-          <motion.p
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="text-[10px] font-black text-red-500 uppercase tracking-widest pl-1"
-          >
-            {error}
-          </motion.p>
-        )}
-      </AnimatePresence>
+      <p className={`min-h-4 text-[10px] font-black text-red-500 uppercase tracking-widest pl-1 transition-all ${error && touched ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-1"}`}>
+        {error && touched ? <span key={error}>{error}</span> : null}
+      </p>
     </div>
   );
 }

@@ -48,19 +48,19 @@ export function AuthLanguagePicker({
           onValueChange={(v) => onLanguageChange(v as Language)}
           disabled={langLoading}
         >
-          <SelectTrigger className="h-7 text-xs border-0 bg-transparent shadow-none p-0 gap-1 text-muted-foreground hover:text-foreground/80 focus:ring-0 [&>svg]:hidden">
+          <SelectTrigger className="notranslate h-7 text-xs border-0 bg-transparent shadow-none p-0 gap-1 text-muted-foreground hover:text-foreground/80 focus:ring-0 [&>svg]:hidden" translate="no">
             <SelectValue>
               <span>{LANGUAGE_NAMES[currentLang as Language]}</span>
             </SelectValue>
           </SelectTrigger>
-          <SelectContent className="min-w-[140px]">
+          <SelectContent className="notranslate min-w-[140px]" translate="no">
             {LANGUAGE_GROUPS.map((group) => (
               <SelectGroup key={group.key}>
                 <SelectLabel className="text-[10px] font-bold tracking-widest uppercase text-muted-foreground/50">
                   {labels[group.key as keyof typeof labels] || group.key}
                 </SelectLabel>
                 {group.languages.map((code) => (
-                  <SelectItem key={code} value={code} className="py-1.5 text-xs">
+                  <SelectItem key={code} value={code} className="py-1.5 text-xs" onClick={() => onLanguageChange(code)}>
                     <div className="flex items-center justify-between w-full gap-2">
                       <div className="flex items-center gap-1.5 min-w-0">
                         <span>{LANGUAGE_NAMES[code]}</span>

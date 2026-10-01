@@ -12,7 +12,7 @@ export function RegisterNextButton({ label, onClick }: RegisterNextButtonProps) 
       onClick={onClick}
       className="w-full h-12 rounded-2xl bg-primary text-primary-foreground font-bold text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-all"
     >
-      {label} <ChevronRight className="w-4 h-4" />
+      <span>{label}</span> <ChevronRight className="w-4 h-4" />
     </button>
   );
 }

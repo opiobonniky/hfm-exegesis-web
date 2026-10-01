@@ -199,10 +199,10 @@ const PublicLayout = () => {
               <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-muted border border-border">
                 <Globe className="w-3 h-3 text-muted-foreground" />
                 <Select value={currentLang} onValueChange={(value) => setLanguage(value as Language)} disabled={langLoading}>
-                  <SelectTrigger className="h-6 text-[10px] border-0 bg-transparent shadow-none p-0 gap-1 text-muted-foreground hover:text-foreground focus:ring-0 [&>svg]:hidden">
+                  <SelectTrigger className="notranslate h-6 text-[10px] border-0 bg-transparent shadow-none p-0 gap-1 text-muted-foreground hover:text-foreground focus:ring-0 [&>svg]:hidden" translate="no">
                     <SelectValue><span className="font-bold">{LANGUAGE_NAMES[currentLang]}</span></SelectValue>
                   </SelectTrigger>
-                  <SelectContent className="min-w-[140px]">
+                  <SelectContent className="notranslate min-w-[140px]" translate="no">
                     {[
                       { label: tt("Primary"), languages: ["en"] as Language[] },
                       { label: tt("European"), languages: ["de", "fr", "es", "pt", "it", "el", "ru"] as Language[] },
@@ -212,7 +212,7 @@ const PublicLayout = () => {
                       <SelectGroup key={group.label}>
                         <SelectLabel className="text-[9px] font-bold tracking-widest uppercase text-muted-foreground/50">{group.label}</SelectLabel>
                         {group.languages.map((code) => (
-                          <SelectItem key={code} value={code} className="py-1 text-[11px]">
+                          <SelectItem key={code} value={code} className="py-1 text-[11px]" onClick={() => setLanguage(code)}>
                             <div className="flex items-center justify-between w-full gap-2">
                               <div className="flex items-center gap-1 min-w-0">
                                 <span>{LANGUAGE_NAMES[code]}</span>
@@ -317,10 +317,10 @@ const PublicLayout = () => {
               <div className="flex items-center gap-2 px-3 py-2 rounded-full bg-muted border border-border">
                 <Globe className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
                 <Select value={currentLang} onValueChange={(value) => setLanguage(value as Language)} disabled={langLoading}>
-                  <SelectTrigger className="h-6 text-xs border-0 bg-transparent shadow-none p-0 gap-1 text-muted-foreground hover:text-foreground focus:ring-0 [&>svg]:hidden flex-1">
+                  <SelectTrigger className="notranslate h-6 text-xs border-0 bg-transparent shadow-none p-0 gap-1 text-muted-foreground hover:text-foreground focus:ring-0 [&>svg]:hidden flex-1" translate="no">
                     <SelectValue><span className="font-bold">{LANGUAGE_NAMES[currentLang]}</span></SelectValue>
                   </SelectTrigger>
-                  <SelectContent className="min-w-[140px]">
+                  <SelectContent className="notranslate min-w-[140px]" translate="no">
                     {[
                       { label: tt("Primary"), languages: ["en"] as Language[] },
                       { label: tt("European"), languages: ["de", "fr", "es", "pt", "it", "el", "ru"] as Language[] },
@@ -330,7 +330,7 @@ const PublicLayout = () => {
                       <SelectGroup key={group.label}>
                         <SelectLabel className="text-[9px] font-bold tracking-widest uppercase text-muted-foreground/50">{group.label}</SelectLabel>
                         {group.languages.map((code) => (
-                          <SelectItem key={code} value={code} className="py-1 text-[11px]">
+                          <SelectItem key={code} value={code} className="py-1 text-[11px]" onClick={() => setLanguage(code)}>
                             <div className="flex items-center justify-between w-full gap-2">
                               <div className="flex items-center gap-1 min-w-0">
                                 <span>{LANGUAGE_NAMES[code]}</span>

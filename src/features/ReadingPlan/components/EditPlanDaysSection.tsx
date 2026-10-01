@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { DayCardEdit } from "./DayCardEdit";
 import type { DayAssignment } from "../types";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { StableLoadingContent } from "@/components/ui/StableLoadingContent";
 
 interface EditPlanDaysSectionProps {
   days: DayAssignment[];
@@ -53,8 +54,7 @@ export function EditPlanDaysSection({
                 disabled={savingDay === dayIndex}
                 className="gap-1.5"
               >
-                <Save className="h-3.5 w-3.5" />
-                {savingDay === dayIndex ? tt("Saving...") : tt("Save day")}
+                <StableLoadingContent loading={savingDay === dayIndex} idle={<><Save className="h-3.5 w-3.5" /><span>{tt("Save day")}</span></>} pending={tt("Saving...")} />
               </Button>
             </div>
           )}

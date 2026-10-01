@@ -11,8 +11,8 @@
  *   4. Already-wired calls:    tt("…")   (keeps the list stable after wiring)
  *
  * Outputs:
- *   docs/hardcoded-source.json        — unique texts (sorted by usage) → feeds
- *                                       `translate-locales.mjs --hardcoded`
+ *   docs/hardcoded-source.json        — unique texts (sorted by usage) used
+ *                                       to audit Google widget coverage
  *   docs/hardcoded-strings-report.md  — human report with file:line references
  *
  * Every hit is still reviewed before wiring: `apply-hardcoded-tt.mjs` wraps the
@@ -34,7 +34,6 @@ const SCAN_DIRS = [
 ];
 const OUT_SOURCE = resolve(ROOT, 'docs/hardcoded-source.json');
 const OUT_REPORT = resolve(ROOT, 'docs/hardcoded-strings-report.md');
-const OUT_EN_DICTIONARY = resolve(ROOT, 'src/components/languages/hardcoded.en.json');
 
 /** Attribute names whose string values are user-facing text. */
 const LABEL_PROPS = new Set([
@@ -290,10 +289,6 @@ function main() {
 
   const sourceTexts = records.map((r) => r.text);
   writeFileSync(OUT_SOURCE, JSON.stringify(sourceTexts, null, 2) + '\n');
-  writeFileSync(
-    OUT_EN_DICTIONARY,
-    JSON.stringify(Object.fromEntries(sourceTexts.map((text) => [text, text])), null, 2) + '\n',
-  );
 
   const lines = [
     '# Hardcoded UI Strings (not in locale JSON)',
@@ -315,7 +310,6 @@ function main() {
   console.log(`Unique candidate strings: ${records.length}`);
   console.log(`By kind: ${Object.entries(byKind).sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k}=${v}`).join(' ')}`);
   console.log(`Source list → ${OUT_SOURCE}`);
-  console.log(`English dict → ${OUT_EN_DICTIONARY}`);
   console.log(`Report      → ${OUT_REPORT}`);
 }
 

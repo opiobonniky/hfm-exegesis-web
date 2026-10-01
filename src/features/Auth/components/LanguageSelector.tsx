@@ -14,10 +14,10 @@ interface LanguageSelectorProps {
 export function LanguageSelector({ value, onChange, disabled, className }: LanguageSelectorProps) {
   return (
     <Select value={value} onValueChange={onChange} disabled={disabled}>
-      <SelectTrigger className={className}>
+      <SelectTrigger className={`notranslate ${className ?? ''}`} translate="no">
         <SelectValue><span className="font-bold">{LANGUAGE_NAMES[value as Language]}</span></SelectValue>
       </SelectTrigger>
-      <SelectContent className="min-w-[140px]">
+      <SelectContent className="notranslate min-w-[140px]" translate="no">
         {[
           { label: tt("Primary"), languages: ["en"] as Language[] },
           { label: tt("European"), languages: ["de", "fr", "es", "pt", "it", "el", "ru"] as Language[] },
@@ -27,7 +27,7 @@ export function LanguageSelector({ value, onChange, disabled, className }: Langu
           <SelectGroup key={group.label}>
             <SelectLabel className="text-[9px] font-bold tracking-widest uppercase text-muted-foreground/50">{group.label}</SelectLabel>
             {group.languages.map((code) => (
-              <SelectItem key={code} value={code} className="py-1 text-[11px]">
+              <SelectItem key={code} value={code} className="py-1 text-[11px]" onClick={() => onChange(code)}>
                 <div className="flex items-center justify-between w-full gap-2">
                   <div className="flex items-center gap-1 min-w-0">
                     <span>{LANGUAGE_NAMES[code]}</span>

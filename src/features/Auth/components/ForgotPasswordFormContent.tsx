@@ -18,12 +18,12 @@ export function ForgotPasswordFormContent({ badgeLabel, heading, description, lo
       </div>
 
       <div className="space-y-3 text-center">
-        <AuthBadge label={badgeLabel} />
+        <AuthBadge key={badgeLabel} label={badgeLabel} />
         <h1 className="text-3xl font-black tracking-tight text-foreground leading-none">
-          {heading}
+          <span key={heading}>{heading}</span>
         </h1>
         <p className="text-muted-foreground text-[15px] font-medium leading-relaxed">
-          {description}
+          <span key={description}>{description}</span>
         </p>
       </div>
 

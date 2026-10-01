@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { SUBSCRIPTION_INTERVALS } from "../constants";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { StableLoadingContent } from "@/components/ui/StableLoadingContent";
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -68,7 +69,7 @@ export function TierFormDialog({ open, onOpenChange, form, onFormChange, saving,
         <DialogFooter className="flex-col-reverse sm:flex-row gap-2">
           <Button variant="outline" onClick={() => onOpenChange(false)} className="w-full sm:w-auto">{tt("Cancel")}</Button>
           <Button onClick={onSave} disabled={saving} className="gap-2 w-full sm:w-auto">
-            {saving ? <><Loader2 className="w-4 h-4 animate-spin" />{tt("Saving...")}</> : <><Save className="w-4 h-4" />{tt("Save")}</>}
+            <StableLoadingContent loading={saving} idle={<><Save className="w-4 h-4" /><span>{tt("Save")}</span></>} pending={<><Loader2 className="w-4 h-4 animate-spin" /><span>{tt("Saving...")}</span></>} />
           </Button>
         </DialogFooter>
       </DialogContent>

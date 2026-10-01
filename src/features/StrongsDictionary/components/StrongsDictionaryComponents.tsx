@@ -9,6 +9,7 @@ import { BIBLE_BOOKS } from "@/data/staticData";
 import type { StrongsWord } from "../hooks/useStrongsDictionaryPage";
 import { WordCard } from "./WordCard";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { StableLoadingContent } from "@/components/ui/StableLoadingContent";
 
 interface StrongsHeaderProps {
   onBack: () => void;
@@ -85,7 +86,7 @@ export function StrongsSearchTab({
             onKeyDown={(e) => e.key === "Enter" && submitSearch()} />
         </div>
         <Button onClick={submitSearch} disabled={searchLoading} className="mt-2 w-full sm:mt-0 sm:w-auto">
-          {searchLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : tt("Search")}
+          <StableLoadingContent loading={searchLoading} idle={tt("Search")} pending={<Loader2 className="h-4 w-4 animate-spin" />} />
         </Button>
       </div>
       {searchResults.length > 0 && (

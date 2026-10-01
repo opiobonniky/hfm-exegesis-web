@@ -1,6 +1,7 @@
 import { CheckCircle, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { StableLoadingContent } from "@/components/ui/StableLoadingContent";
 
 interface Props {
   isCompleted: boolean;
@@ -28,14 +29,11 @@ export function DailyCompletionButton({ isCompleted, canComplete, isSubmitting, 
         disabled={!canComplete || isSubmitting}
         className="w-full h-12 rounded-2xl text-sm font-semibold"
       >
-        {isSubmitting ? (
-          <span className="flex items-center gap-2">
-            <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />{tt("Submitting...")}</span>
-        ) : (
-          <span className="flex items-center gap-2">
-            <Send className="w-4 h-4" />{tt("Complete Day")}{dayNumber}
-          </span>
-        )}
+        <StableLoadingContent
+          loading={isSubmitting}
+          idle={<><Send className="w-4 h-4" /><span>{tt("Complete Day")}{dayNumber}</span></>}
+          pending={<><span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" /><span>{tt("Submitting...")}</span></>}
+        />
       </Button>
       {!canComplete && incompleteMessage && (
         <p className="text-center text-xs text-muted-foreground">{incompleteMessage}</p>

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import SearchResultCard from "./SearchResultCard";
 import type { SearchResult, JournalSearchResult, TopicResult, LemmaResult, CrossTranslationResult } from "@/services/searchApi";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { StableLoadingContent } from "@/components/ui/StableLoadingContent";
 
 type SearchResultItem = SearchResult | JournalSearchResult | TopicResult | LemmaResult | CrossTranslationResult;
 
@@ -80,7 +81,7 @@ export function SearchResultsList({ results, scope, total, loading, hasMore, loa
       {hasMore && (
         <div className="flex justify-center pt-2">
           <Button variant="outline" size="sm" onClick={loadMore} disabled={loading} className="gap-2 rounded-xl">
-            {loading && <Loader2 className="w-3 h-3 animate-spin" />}{loading ? tt("Loading...") : tt("Load More")}
+            <StableLoadingContent loading={loading} idle={tt("Load More")} pending={<><Loader2 className="w-3 h-3 animate-spin" /><span>{tt("Loading...")}</span></>} />
           </Button>
         </div>
       )}

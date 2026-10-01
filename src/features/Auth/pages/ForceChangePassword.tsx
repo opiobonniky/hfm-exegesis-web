@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import logoImage from "@/assets/logos/exegesis_bg_rm.webp";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { StableLoadingContent } from "@/components/ui/StableLoadingContent";
 
 export default function ForceChangePassword() {
   const { data, actions } = useForceChangePasswordPage();
@@ -107,12 +108,11 @@ export default function ForceChangePassword() {
               />
 
               <Button type="submit" disabled={data.isLoading} className="w-full h-11 gap-2">
-                {data.isLoading ? (
-                  <>
-                    <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />{tt("Updating...")}</>
-                ) : (
-                  tt("Update Password & Continue")
-                )}
+                <StableLoadingContent
+                  loading={data.isLoading}
+                  idle={tt("Update Password & Continue")}
+                  pending={<><span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" /><span>{tt("Updating...")}</span></>}
+                />
               </Button>
             </form>
 

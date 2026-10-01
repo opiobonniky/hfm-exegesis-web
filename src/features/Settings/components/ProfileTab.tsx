@@ -9,6 +9,7 @@ import { useLanguage } from "@/components/languages/languageProvider";
 import { useRTL } from "@/providers/RTLProvider";
 import { cn } from "@/lib/utils";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { StableLoadingContent } from "@/components/ui/StableLoadingContent";
 
 interface ProfileTabProps {
   profile: any;
@@ -69,8 +70,7 @@ export function ProfileTab({ profile, isPayingUser, tierLabel, expiresLabel, sav
           </div>
         </div>
         <Button onClick={onSaveProfile} disabled={saving} className="bg-primary hover:bg-primary/90">
-          {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-           {saving ? tt("Saving...") : (t as any).settings?.saveProfile || tt("Save Profile")}
+          <StableLoadingContent loading={saving} idle={(t as any).settings?.saveProfile || tt("Save Profile")} pending={<><Loader2 className="w-4 h-4 animate-spin" /><span>{tt("Saving...")}</span></>} />
         </Button>
       </div>
       <div className="rounded-2xl bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-950/40 dark:to-purple-950/40 border border-violet-200 dark:border-violet-800/40 p-4 sm:p-6">
@@ -86,7 +86,7 @@ export function ProfileTab({ profile, isPayingUser, tierLabel, expiresLabel, sav
           </div>
           <Button variant={isPayingUser ? "outline" : "default"} size="sm" onClick={onSowerAction} disabled={sowerLoading}
             className={cn("gap-1.5 text-xs font-bold h-9", !isPayingUser && "bg-violet-600 hover:bg-violet-700 text-white")}>
-            {sowerLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : isPayingUser ? tt("Manage") : tt("Upgrade")}
+            <StableLoadingContent loading={sowerLoading} idle={<span key={isPayingUser ? "manage" : "upgrade"}>{isPayingUser ? tt("Manage") : tt("Upgrade")}</span>} pending={<Loader2 className="w-3 h-3 animate-spin" />} />
           </Button>
         </div>
       </div>

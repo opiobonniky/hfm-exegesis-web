@@ -164,6 +164,45 @@
   }
 }
 
+/* Google Translate Element runs as a hidden controller; the app's existing
+   language selectors remain the visible UI. */
+#google_translate_element {
+  position: fixed !important;
+  inset-inline-start: -10000px !important;
+  top: 0 !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Google injects its own UI (loading spinner, banner frame, original-text
+   tooltips, helper iframes) as direct children of <body>, outside the hidden
+   widget container. All of it shares the `VIpgJd-ZVi9od-` namespace, but the
+   hashes after it change between Google deploys, so match the prefix rather
+   than individual classes. Without this the widget's loading spinner stays on
+   screen instead of disappearing when translation settles. */
+[class^='VIpgJd-ZVi9od-'],
+[class*=' VIpgJd-ZVi9od-'],
+.goog-te-banner-frame,
+.goog-te-balloon-frame,
+.goog-te-spinner,
+#goog-gt-tt,
+body > .skiptranslate {
+  display: none !important;
+}
+
+html,
+body {
+  top: 0 !important;
+}
+
+.goog-text-highlight {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
 @layer base {
   * {
     @apply border-border;

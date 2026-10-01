@@ -11,6 +11,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { StableLoadingContent } from "@/components/ui/StableLoadingContent";
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -53,7 +54,7 @@ export function ConfirmDialog({
                 : undefined
             }
           >
-            {loading ? tt("Loading...") : confirmLabel}
+            <StableLoadingContent loading={!!loading} idle={confirmLabel} pending={tt("Loading...")} />
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

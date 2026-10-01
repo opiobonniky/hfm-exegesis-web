@@ -10,6 +10,7 @@ import { formatReadableDate } from "../utils";
 import type { SubscriptionTier, SubscribedUser } from "../types";
 import { SUBSCRIPTION_TIER_OPTIONS } from "../constants";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { StableLoadingContent } from "@/components/ui/StableLoadingContent";
 
 interface Props {
   user: SubscribedUser | null;
@@ -82,7 +83,7 @@ export function ManageUserDialog({ user, tiers, loading, onOpenChange, onSave }:
             disabled={loading}
             className="gap-2 w-full sm:w-auto"
           >
-            {loading ? <><Loader2 className="w-4 h-4 animate-spin" />{tt("Saving...")}</> : <><Save className="w-4 h-4" />{tt("Save")}</>}
+            <StableLoadingContent loading={loading} idle={<><Save className="w-4 h-4" /><span>{tt("Save")}</span></>} pending={<><Loader2 className="w-4 h-4 animate-spin" /><span>{tt("Saving...")}</span></>} />
           </Button>
         </DialogFooter>
       </DialogContent>

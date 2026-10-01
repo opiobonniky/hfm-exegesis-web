@@ -5,6 +5,7 @@ import { isDayComplete } from "../hooks/useAddReadingPlanPage";
 import type { PlanMeta } from "../hooks/useAddReadingPlanPage";
 import type { DayAssignment } from "../types";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { StableLoadingContent } from "@/components/ui/StableLoadingContent";
 
 interface Props {
   meta: PlanMeta;
@@ -85,11 +86,11 @@ export function PlanStepReview({ meta, days, submitting, onPrev, onSubmit, t, is
           <ArrowLeft className={cn("w-4 h-4", isRtl && "rotate-180")} />{t.common?.back || tt("Back")}
         </button>
         <button type="button" onClick={onSubmit} disabled={submitting} className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-sm font-bold shadow-sm transition-all disabled:opacity-50">
-          {submitting ? (
-            <><Loader2 className="w-4 h-4 animate-spin" />{t.readingPlan?.savingLabel || tt("Saving...")}</>
-          ) : (
-            <><Save className="w-4 h-4" />{t.readingPlan?.createPlanTitle || tt("Create Plan")}</>
-          )}
+          <StableLoadingContent
+            loading={submitting}
+            idle={<><Save className="w-4 h-4" /><span>{t.readingPlan?.createPlanTitle || tt("Create Plan")}</span></>}
+            pending={<><Loader2 className="w-4 h-4 animate-spin" /><span>{t.readingPlan?.savingLabel || tt("Saving...")}</span></>}
+          />
         </button>
       </div>
     </div>

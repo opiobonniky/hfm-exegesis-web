@@ -12,7 +12,7 @@ interface AuthBackButtonProps {
 export function AuthBackButton({ onClick, label = "Back" }: AuthBackButtonProps) {
   return (
     <button onClick={onClick} className="flex items-center gap-1 text-sm font-semibold text-white/60 hover:text-white transition-colors">
-      <ChevronLeft className="w-4 h-4" />{label}
+      <ChevronLeft className="w-4 h-4" /><span>{label}</span>
     </button>
   );
 }

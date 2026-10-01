@@ -3,6 +3,12 @@ import App from "./App.tsx";
 import "./index.css";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { RouteErrorBoundary } from "@/components/RouteErrorBoundary";
+import { installDomStabilityGuards } from "@/lib/domStability";
+
+// Must run before React mounts: Google Translate deletes React-owned text nodes
+// and replaces them with <font> wrappers, which breaks every later commit that
+// removes them. See @/lib/domStability.
+installDomStabilityGuards();
 
 const GOOGLE_CLIENT_ID = "270479211517-kinap7kv1bcd3dlpuodt5fkju361fdqb.apps.googleusercontent.com";
 

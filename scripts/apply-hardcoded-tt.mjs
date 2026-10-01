@@ -125,8 +125,8 @@ function toastCalleeName(callee) {
 
 /**
  * Collect span edits for one file: [{ start, end, replacement, kind }].
- * Only strings present in the source list are wrapped, which keeps this in
- * lockstep with the dictionaries produced by translate-locales.mjs.
+ * Only strings present in the source list are wrapped, keeping static UI text
+ * explicit and auditable while Google Translate handles the rendered DOM.
  */
 function collectEdits(ast, source, allow, rel) {
   const edits = [];

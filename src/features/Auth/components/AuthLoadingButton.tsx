@@ -4,6 +4,7 @@
  */
 import { ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import { StableLoadingContent } from "@/components/ui/StableLoadingContent";
 
 interface Props {
   children: ReactNode;
@@ -35,11 +36,11 @@ export function AuthLoadingButton({
       disabled={disabled || loading}
       onClick={onClick}
     >
-      {loading ? (
-        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-      ) : (
-        children
-      )}
+      <StableLoadingContent
+        loading={!!loading}
+        idle={children}
+        pending={<span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
+      />
     </button>
   );
 }

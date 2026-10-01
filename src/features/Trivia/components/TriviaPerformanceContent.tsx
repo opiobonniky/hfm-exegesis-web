@@ -5,6 +5,7 @@ import { DIFFICULTY_LABELS } from "../constants";
 import { triviaPerformanceTheme as theme } from "../theme/theme";
 import type { TriviaAnswerHistory, TriviaPerformanceStats } from "../types";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { StableLoadingContent } from "@/components/ui/StableLoadingContent";
 
 const statsConfig = [
   ["Answered", "totalAnswered", BarChart3],
@@ -45,7 +46,7 @@ export function TriviaPerformanceContent({ stats, answers, hasNext, loadingMore,
           </div>}
         </div>;
       })}</div>}
-      {hasNext && <button onClick={onLoadMore} disabled={loadingMore} className={cn(theme.primaryButton, "mt-4 w-full rounded-xl py-2.5 text-sm font-bold disabled:opacity-60")}>{loadingMore ? tt("Loading...") : tt("Load more history")}</button>}
+      {hasNext && <button onClick={onLoadMore} disabled={loadingMore} className={cn(theme.primaryButton, "mt-4 w-full rounded-xl py-2.5 text-sm font-bold disabled:opacity-60")}><StableLoadingContent loading={loadingMore} idle={tt("Load more history")} pending={tt("Loading...")} /></button>}
     </section>
   </div>;
 }
