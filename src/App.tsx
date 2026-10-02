@@ -10,6 +10,7 @@ import PublicLayout from "@/components/PublicLayout";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { RouteSuspense } from "@/components/RouteSuspense";
 import { SubscriptionExpiredHandler } from "@/components/SubscriptionExpiredHandler";
+import { RouteScrollManager } from "@/components/RouteScrollManager";
 import { PageSkeleton } from "@/components/ui/skeletons";
 import SplashScreen from "@/components/SplashScreen";
 import { Loader2 } from "lucide-react";
@@ -160,6 +161,7 @@ const App = () => {
             <Toaster />
             <Sonner />
             <SubscriptionExpiredHandler />
+            <RouteScrollManager />
             <AppRoutes />
           </TooltipProvider>
         </LanguageProvider>

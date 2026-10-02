@@ -90,7 +90,7 @@ export function AppLayout() {
               )}
             </button>
           </header>
-          <div className="flex-1 min-h-0 overflow-auto pb-16 md:pb-0">
+          <div data-scroll-root className="flex-1 min-h-0 overflow-auto pb-16 md:pb-0">
             <Outlet />
           </div>
         </main>
