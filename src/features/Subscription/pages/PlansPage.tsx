@@ -1,6 +1,7 @@
 "use client";
 
 import { usePublicNav } from "@/features/Auth/hooks/usePublicNav";
+import { usePublicPlanTiers } from "../hooks/usePublicPlanTiers";
 import { NavBar, FooterSection } from "@/features/Auth/components/landing";
 import { tt } from "@/components/languages/hardcodedTranslate";
 import { PlansShell } from "../components/PlansShell";
@@ -8,10 +9,11 @@ import { PlansHero } from "../components/PlansHero";
 import { PlansTierStrip } from "../components/PlansTierStrip";
 import { PlansFeatureMatrix } from "../components/PlansFeatureMatrix";
 import { PlansCta } from "../components/PlansCta";
-import { FEATURED_TIER_INDEX, PLAN_TIER_NAMES, PUBLIC_PLAN_MATRIX } from "../constants";
+import { FEATURED_TIER_INDEX } from "../constants";
 
 export default function PlansPage() {
   const { data, actions } = usePublicNav();
+  const plans = usePublicPlanTiers();
 
   return (
     <PlansShell>
@@ -39,13 +41,14 @@ export default function PlansPage() {
         lead={tt(
           "Every plan includes the free Bible reader. Paid plans add study tools, journaling, and insights that grow your understanding."
         )}
+        tierOverrides={plans.data.tierOverrides}
       />
       <PlansFeatureMatrix
         eyebrow={tt("FEATURE BY FEATURE")}
         title={tt("Everything You Need to Grow in Scripture")}
         lead={tt("Free and paid tools, side by side, so you can choose with confidence.")}
-        categories={PUBLIC_PLAN_MATRIX}
-        tierNames={PLAN_TIER_NAMES}
+        categories={plans.data.categories}
+        tierNames={plans.data.tierNames}
         featuredTierIndex={FEATURED_TIER_INDEX}
       />
       <PlansCta

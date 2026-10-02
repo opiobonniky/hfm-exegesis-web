@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import type { TierOverride } from "@/features/Auth/utils";
 
 // ─── Subscription Types ────────────────────────────────────────────────────────
 
@@ -80,6 +81,8 @@ export interface PlansTierStripProps {
   eyebrow: string;
   title: string;
   lead: string;
+  /** Backend-supplied name/price/limit overrides keyed by tier id. */
+  tierOverrides?: Record<string, TierOverride>;
 }
 
 export interface PlansCtaNoteProps {

@@ -11,7 +11,7 @@ import {
   ReadingPlansSection,
   StudyApproachSection,
 } from "../components/landing";
-import { LANDING_FEATURES, LANDING_FEATURED_PLANS, LANDING_HERO, LANDING_PLAN_COLUMNS, LANDING_SECTIONS, LANDING_STUDY_STEPS } from "../constants/landing";
+import { LANDING_FEATURES, LANDING_HERO, LANDING_PLAN_COLUMNS, LANDING_SECTIONS, LANDING_STUDY_STEPS } from "../constants/landing";
 
 export default function Landing() {
   const { data, actions } = useLandingPage();
@@ -64,7 +64,7 @@ export default function Landing() {
         eyebrow={LANDING_SECTIONS.plans.eyebrow}
         title={LANDING_SECTIONS.plans.title}
         body={LANDING_SECTIONS.plans.body}
-        plans={LANDING_FEATURED_PLANS}
+        plans={data.plans}
         ctaLabel={LANDING_SECTIONS.plans.ctaLabel}
         ctaHref={LANDING_SECTIONS.plans.ctaHref}
       />

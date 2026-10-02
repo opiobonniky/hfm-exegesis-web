@@ -2,9 +2,10 @@ import { BookOpen, Gem, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
 import { formatPrice, TIERS } from "./SowerTierCards";
 import { tt } from "@/components/languages/hardcodedTranslate";
+import type { TierOverride } from "@/features/Auth/utils";
 import type { PlansTierStripProps } from "../types";
 
-export function PlansTierStrip({ eyebrow, title, lead }: PlansTierStripProps) {
+export function PlansTierStrip({ eyebrow, title, lead, tierOverrides }: PlansTierStripProps) {
   return (
     <section className="px-4 sm:px-6 lg:px-12 pt-4 pb-8 sm:pt-8 sm:pb-12 bg-background">
       <div className="w-full max-w-5xl mx-auto">
@@ -20,6 +21,14 @@ export function PlansTierStrip({ eyebrow, title, lead }: PlansTierStripProps) {
           {TIERS.map((tier, index) => {
             const Icon = tier.icon ?? BookOpen;
             const isFeatured = tier.id === "legacy_sower";
+            // Backend-supplied pricing/name/limits override the curated copy
+            // when available; everything else (icon, features, layout) stays
+            // in code because the API cannot express design decisions.
+            const live: TierOverride = tierOverrides?.[tier.id] ?? {};
+            const tierName = live.name ?? tier.name;
+            const tierDescription = live.description ?? tier.description;
+            const monthlyPrice = live.monthlyPrice ?? tier.monthlyPrice;
+            const slotLimit = live.slotLimit === undefined ? tier.slotLimit : live.slotLimit;
             return (
               <motion.article
                 key={tier.id}
@@ -49,7 +58,7 @@ export function PlansTierStrip({ eyebrow, title, lead }: PlansTierStripProps) {
                   </span>
                   <div className="min-w-0">
                     <h3 className="text-base sm:text-lg font-black font-[family-name:var(--font-heading)] tracking-tight text-foreground">
-                      {tier.name}
+                      {tierName}
                     </h3>
                     <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                       {tier.subtitle}
@@ -59,13 +68,13 @@ export function PlansTierStrip({ eyebrow, title, lead }: PlansTierStripProps) {
 
                 <div className="mt-6 flex items-baseline gap-1.5">
                   <span className="text-3xl sm:text-4xl font-black tracking-tighter text-foreground">
-                    {tier.monthlyPrice === 0 ? tt("Free") : formatPrice(tier.monthlyPrice)}
+                    {monthlyPrice === 0 ? tt("Free") : formatPrice(monthlyPrice)}
                   </span>
-                  {tier.monthlyPrice === 0 ? null : (
+                  {monthlyPrice === 0 ? null : (
                     <span className="text-xs font-semibold text-muted-foreground">{tt("/month")}</span>
                   )}
                 </div>
-                <p className="mt-2 text-sm text-muted-foreground font-medium leading-relaxed">{tier.description}</p>
+                <p className="mt-2 text-sm text-muted-foreground font-medium leading-relaxed">{tierDescription}</p>
 
                 <ul className="mt-6 space-y-2.5">
                   {tier.features.map((feature) => (
@@ -94,10 +103,10 @@ export function PlansTierStrip({ eyebrow, title, lead }: PlansTierStripProps) {
                 </ul>
 
                 <p className="mt-auto pt-6 text-[11px] font-semibold text-muted-foreground/80">
-                  {tier.monthlyPrice === 0
+                  {monthlyPrice === 0
                     ? tt("No account required to start reading.")
-                    : tier.slotLimit
-                      ? tt("Limited to the first {count} supporters.").replace("{count}", String(tier.slotLimit))
+                    : slotLimit
+                      ? tt("Limited to the first {count} supporters.").replace("{count}", String(slotLimit))
                       : tt("Unlimited access, cancel anytime.")}
                 </p>
               </motion.article>
