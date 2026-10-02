@@ -27,6 +27,7 @@ export default function Landing() {
         setExpandedMobileSection={actions.setExpandedMobileSection}
         onMenuClick={actions.handleMenuClick}
         menuItems={data.menuItems}
+        activeNavKey={data.activeNavKey}
       />
       <HeroSection
         eyebrow={LANDING_HERO.eyebrow}

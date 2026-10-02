@@ -24,6 +24,7 @@ export default function PlansPage() {
         setExpandedMobileSection={actions.setExpandedMobileSection}
         onMenuClick={actions.handleMenuClick}
         menuItems={data.menuItems}
+        activeNavKey={data.activeNavKey}
       />
       <PlansHero
         eyebrow={tt("CHOOSE YOUR PLAN")}

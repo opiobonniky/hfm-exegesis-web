@@ -105,12 +105,14 @@ export interface LandingNavProps {
   setExpandedMobileSection: (v: string | null) => void;
   onMenuClick: (href?: string) => void;
   menuItems: MenuItem[];
+  activeNavKey: string | null;
 }
 
 export interface NavMenuItemProps {
   item: MenuItem;
   scrolled: boolean;
   onMenuClick: (href?: string) => void;
+  active: boolean;
 }
 
 export type MobileNavMenuProps = Omit<LandingNavProps, "scrolled"> & {

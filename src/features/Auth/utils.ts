@@ -19,3 +19,15 @@ export const scrollToSectionId = (sectionId: string): boolean => {
   element.scrollIntoView({ behavior: "smooth", block: "start" });
   return true;
 };
+export const getActiveSectionId = (sectionIds: string[]): string | null => {
+  if (typeof window === "undefined") return null;
+  const offset = window.innerHeight * 0.35;
+  let active: string | null = null;
+  for (const id of sectionIds) {
+    const element = document.getElementById(id);
+    if (!element) continue;
+    if (element.getBoundingClientRect().top - offset <= 0) active = id;
+  }
+  if (active) return active;
+  return document.getElementById(sectionIds[sectionIds.length - 1]) ? (sectionIds[sectionIds.length - 1] ?? null) : null;
+};

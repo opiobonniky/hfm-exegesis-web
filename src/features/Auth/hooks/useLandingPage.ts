@@ -34,6 +34,7 @@ export function useLandingPage() {
       mobileMenuOpen: nav.data.mobileMenuOpen,
       menuPanelRef: nav.data.menuPanelRef,
       expandedMobileSection: nav.data.expandedMobileSection,
+      activeNavKey: nav.data.activeNavKey,
     },
     actions: {
       setMobileMenuOpen: nav.actions.setMobileMenuOpen,

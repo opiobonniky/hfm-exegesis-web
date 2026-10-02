@@ -20,6 +20,7 @@ export function NavBar({
   setExpandedMobileSection,
   onMenuClick,
   menuItems,
+  activeNavKey,
 }: LandingNavProps) {
   const { t, setLanguage, lang: currentLang, isLoading: langLoading } = useLanguage();
 
@@ -39,7 +40,13 @@ export function NavBar({
 
             <div className="hidden xl:flex items-center gap-1 absolute left-1/2 -translate-x-1/2">
               {menuItems.map((item) => (
-                <NavMenuItem key={item.href ?? item.label} item={item} scrolled={scrolled} onMenuClick={onMenuClick} />
+                <NavMenuItem
+                  key={item.href ?? item.label}
+                  item={item}
+                  scrolled={scrolled}
+                  onMenuClick={onMenuClick}
+                  active={item.subItems ? item.subItems.some((sub) => sub.href === activeNavKey) : Boolean(item.href) && item.href === activeNavKey}
+                />
               ))}
             </div>
 
@@ -87,6 +94,7 @@ export function NavBar({
         setExpandedMobileSection={setExpandedMobileSection}
         menuItems={menuItems}
         onMenuClick={onMenuClick}
+        activeNavKey={activeNavKey}
         currentLang={currentLang}
         setLanguage={setLanguage}
         langLoading={langLoading}

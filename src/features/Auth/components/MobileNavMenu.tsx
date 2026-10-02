@@ -20,6 +20,7 @@ export function MobileNavMenu({
   currentLang,
   setLanguage,
   langLoading,
+  activeNavKey,
 }: MobileNavMenuProps) {
   const { t } = useLanguage();
 
@@ -90,8 +91,11 @@ export function MobileNavMenu({
                 <button
                   key={item.href ?? item.label}
                   type="button"
+                  aria-current={Boolean(item.href) && item.href === activeNavKey ? "true" : undefined}
                   onClick={() => onMenuClick(item.href)}
-                  className="w-full flex items-center gap-3 p-3.5 rounded-2xl hover:bg-brand-bg transition-all group text-left"
+                  className={`w-full flex items-center gap-3 p-3.5 rounded-2xl transition-all group text-left ${
+                    item.href && item.href === activeNavKey ? "bg-brand-primary/10 ring-1 ring-brand-primary/30" : "hover:bg-brand-bg"
+                  }`}
                 >
                   <div
                     className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"

@@ -1,19 +1,21 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { BookOpen, CalendarDays, Compass, Layers, Mail as MailIcon, Users } from "lucide-react";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { tt } from "@/components/languages/hardcodedTranslate";
 import { LANDING_NAV_ABOUT_SUBITEMS } from "../constants/landing";
-import { landingCopy, scrollToSectionId } from "../utils";
+import { getActiveSectionId, landingCopy, scrollToSectionId } from "../utils";
 import type { MenuItem } from "../types";
 
 export function usePublicNav() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { t } = useLanguage();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const menuPanelRef = useRef<HTMLDivElement | null>(null);
   const [scrolled, setScrolled] = useState(false);
   const [expandedMobileSection, setExpandedMobileSection] = useState<string | null>(null);
+  const [activeNavKey, setActiveNavKey] = useState<string | null>(null);
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 50);
@@ -31,6 +33,24 @@ export function usePublicNav() {
     if (mobileMenuOpen) document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, [mobileMenuOpen]);
+
+  useEffect(() => {
+    if (location.pathname !== "/") {
+      setActiveNavKey(location.pathname);
+      return;
+    }
+    const sectionIds = ["home", "features", "approach", "plans", "about", "choose-plan", "contact"];
+    const available = sectionIds.filter((id) => document.getElementById(id));
+    if (available.length === 0) return;
+    const handler = () => setActiveNavKey(`#${getActiveSectionId(available)}`);
+    handler();
+    window.addEventListener("scroll", handler, { passive: true });
+    window.addEventListener("resize", handler);
+    return () => {
+      window.removeEventListener("scroll", handler);
+      window.removeEventListener("resize", handler);
+    };
+  }, [location.pathname]);
 
   useEffect(() => {
     if (mobileMenuOpen) document.body.style.overflow = "hidden";
@@ -119,6 +139,7 @@ export function usePublicNav() {
       mobileMenuOpen,
       menuPanelRef,
       expandedMobileSection,
+      activeNavKey,
     },
     actions: {
       setMobileMenuOpen,
