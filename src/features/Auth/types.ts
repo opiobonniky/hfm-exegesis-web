@@ -1,5 +1,8 @@
 // ─── Auth Types ────────────────────────────────────────────────────────────────
 
+import type { RefObject } from "react";
+import type { Language } from "@/components/languages/type";
+
 export interface User {
   id: string;
   name: string;
@@ -89,4 +92,145 @@ export interface LoginPageModel {
   privacyLabel: string;
   privacyLinkLabel: string;
   additionalNote: string;
+}
+
+// ─── Landing Page ────────────────────────────────────────────────────────────────
+
+export interface LandingNavProps {
+  scrolled: boolean;
+  mobileMenuOpen: boolean;
+  setMobileMenuOpen: (v: boolean) => void;
+  menuPanelRef: RefObject<HTMLDivElement | null>;
+  expandedMobileSection: string | null;
+  setExpandedMobileSection: (v: string | null) => void;
+  onMenuClick: (href?: string) => void;
+  menuItems: MenuItem[];
+}
+
+export interface NavMenuItemProps {
+  item: MenuItem;
+  scrolled: boolean;
+  onMenuClick: (href?: string) => void;
+}
+
+export type MobileNavMenuProps = Omit<LandingNavProps, "scrolled"> & {
+  currentLang: string;
+  setLanguage: (lang: Language) => void;
+  langLoading: boolean;
+};
+
+export interface HeroSectionProps {
+  eyebrow: string;
+  title: string;
+  body: string;
+  support: string;
+  primaryLabel: string;
+  primaryHref: string;
+  secondaryLabel: string;
+  onSecondaryClick: () => void;
+  previewVerse: string;
+  previewReference: string;
+  previewTranslation: string;
+}
+
+export interface LandingFeatureItem {
+  icon: React.ElementType;
+  title: string;
+  description: string;
+}
+
+export interface FeaturesSectionProps {
+  eyebrow: string;
+  title: string;
+  lead: string;
+  features: LandingFeatureItem[];
+  ctaLabel: string;
+  ctaTarget: string;
+  onCtaClick: () => void;
+  note: string;
+}
+
+export interface LandingStepItem {
+  icon: React.ElementType;
+  title: string;
+  description: string;
+}
+
+export interface StudyApproachSectionProps {
+  eyebrow: string;
+  title: string;
+  lead: string;
+  steps: LandingStepItem[];
+  ctaLabel: string;
+  ctaHref: string;
+}
+
+export interface LandingPlanItem {
+  title: string;
+  meta: string;
+  description: string;
+}
+
+export interface ReadingPlansSectionProps {
+  eyebrow: string;
+  title: string;
+  body: string;
+  plans: LandingPlanItem[];
+  ctaLabel: string;
+  ctaHref: string;
+}
+
+export interface AboutSectionProps {
+  eyebrow: string;
+  title: string;
+  paragraphs: string[];
+  ctaLabel: string;
+  ctaHref: string;
+}
+
+export interface LandingPlanColumn {
+  title: string;
+  description: string;
+  items: string[];
+  featured: boolean;
+}
+
+export interface PlanComparisonSectionProps {
+  eyebrow: string;
+  title: string;
+  body: string;
+  bodySecondary: string;
+  columns: LandingPlanColumn[];
+  primaryLabel: string;
+  primaryHref: string;
+  secondaryLabel: string;
+  secondaryHref: string;
+}
+
+export interface CtaSectionProps {
+  title: string;
+  body: string;
+  primaryLabel: string;
+  primaryHref: string;
+  secondaryLabel: string;
+  secondaryHref: string;
+}
+
+export interface FooterSectionProps {
+  id: string;
+}
+
+export interface LandingShellProps {
+  children: React.ReactNode;
+}
+
+export interface LandingSectionHeaderProps {
+  eyebrow: string;
+  title: string;
+  lead?: string;
+  tone?: "default" | "onDark";
+}
+
+export interface LandingContentWrapperProps {
+  children: React.ReactNode;
 }

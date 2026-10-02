@@ -1,72 +1,74 @@
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Users, ShieldCheck, Globe, Sparkles, Zap } from "lucide-react";
-import { useLanguage } from "@/components/languages/languageProvider";
-import { animSlideLeft, animStagger, animCardUp } from "./animations";
-import { tt } from '@/components/languages/hardcodedTranslate';
+import { ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { animFadeUp, animSlideLeft } from "./animations";
+import { LandingSectionHeader } from "./LandingSectionHeader";
+import logoImage from "@/assets/logos/exegesis_bg_rm.webp";
+import heroBgWebp from "@/assets/logos/hero-bg.webp";
+import heroBgJpeg from "@/assets/logos/hero-bg.jpeg";
+import { tt } from "@/components/languages/hardcodedTranslate";
+import type { AboutSectionProps } from "../../types";
 
-const VALUES = [
-  { titleKey: "aboutValueRootedTitle", descKey: "aboutValueRootedDesc", icon: ShieldCheck, dt: "Rooted in Truth", dd: "Every insight is grounded in sound biblical scholarship." },
-  { titleKey: "aboutValueGlobalTitle", descKey: "aboutValueGlobalDesc", icon: Globe, dt: "Global Community", dd: "Pray, testify, and grow alongside believers worldwide." },
-  { titleKey: "aboutValueSpiritTitle", descKey: "aboutValueSpiritDesc", icon: Sparkles, dt: "Spirit-Led Tech", dd: "Modern technology to illuminate ancient wisdom." },
-  { titleKey: "aboutValueGrowingTitle", descKey: "aboutValueGrowingDesc", icon: Zap, dt: "Always Growing", dd: "Constant updates and fresh content." },
-];
-
-const STATS = [
-  { key: "aboutStatVerses", defaultStat: "31K+", labelKey: "aboutStatVersesLabel", defaultLabel: "Verses Explored" },
-  { key: "aboutStatDaily", defaultStat: "150+", labelKey: "aboutStatDailyLabel", defaultLabel: "Daily Insights" },
-  { key: "aboutStatGlobal", defaultStat: "Global", labelKey: "aboutStatGlobalLabel", defaultLabel: "Kingdom Reach" },
-];
-
-export function AboutSection() {
-  const { t } = useLanguage();
-  const L = t.landing as any;
+export function AboutSection({ eyebrow, title, paragraphs, ctaLabel, ctaHref }: AboutSectionProps) {
   return (
-    <section id="about" className="px-4 sm:px-6 lg:px-12 py-14 sm:py-20 md:py-28 bg-brand-card">
-      <div className="w-full max-w-screen-xl mx-auto px-4 sm:px-0">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-          <motion.div variants={animSlideLeft} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-80px" }}>
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-card border border-border mb-5">
-              <Users className="w-3.5 h-3.5 text-brand-primary" />
-              <span className="text-[10px] sm:text-xs text-muted-foreground font-black uppercase tracking-widest">
-                {L?.aboutBadge || tt("Our Calling")}
-              </span>
-            </div>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-foreground font-[family-name:var(--font-heading)] mb-6 leading-tight tracking-tighter">
-              {L?.aboutTitle || tt("Built for Kingdom")}{" "}
-              <span className="text-brand-primary">{L?.aboutTitleHighlight || tt("Impact")}</span>
-            </h2>
-            <div className="space-y-4 text-muted-foreground text-base sm:text-lg leading-relaxed font-medium">
-              <p>{L?.aboutPara1 || tt("At Exegesis, we believe your spiritual journey deserves more than just a casual reading.")}</p>
-              <p>{L?.aboutPara2 || tt("We're not just another app—we're passionate Jesus followers.")}</p>
-              <p className="font-black text-brand-accent italic text-xl sm:text-2xl tracking-tight">
-                {L?.aboutMotto || tt("Quality, Service, & Integrity — Built for His Glory.")}
-              </p>
-            </div>
-            <div className="grid grid-cols-3 gap-4 sm:gap-8 mt-10">
-              {STATS.map((s) => (
-                <div key={s.key}>
-                  <p className="text-2xl sm:text-3xl font-black text-brand-primary tracking-tighter">{L?.[s.key] || s.defaultStat}</p>
-                  <p className="text-[10px] sm:text-xs text-muted-foreground mt-1 font-bold uppercase tracking-widest">{L?.[s.labelKey] || s.defaultLabel}</p>
+    <section id="about" className="py-14 sm:py-20 md:py-24 px-4 sm:px-6 lg:px-12 bg-background">
+      <div className="w-full max-w-screen-xl mx-auto grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+        <motion.div
+          variants={animSlideLeft}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-80px" }}
+          className="order-2 lg:order-1"
+        >
+          <LandingSectionHeader eyebrow={eyebrow} title={title} />
+          <div className="mt-6 space-y-4 text-sm sm:text-base text-muted-foreground leading-relaxed font-medium">
+            {paragraphs.map((paragraph) => (
+              <p key={paragraph}>{paragraph}</p>
+            ))}
+          </div>
+          <div className="mt-8">
+            <Link to={ctaHref}>
+              <Button
+                variant="outline"
+                className="border-2 border-border bg-transparent text-foreground hover:border-primary hover:text-primary px-8 py-5 rounded-2xl font-black text-xs sm:text-sm uppercase tracking-widest"
+              >
+                {ctaLabel}
+                <ArrowRight className="ml-2 w-4 h-4" />
+              </Button>
+            </Link>
+          </div>
+        </motion.div>
+
+        <motion.div
+          variants={animFadeUp}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-80px" }}
+          className="order-1 lg:order-2"
+        >
+          <div className="relative mx-auto w-full max-w-md">
+            <div className="absolute inset-0 rounded-[2.5rem] bg-brand-primary/10 blur-2xl" />
+            <div className="relative rounded-[2.5rem] overflow-hidden border border-border shadow-xl">
+              <picture>
+                <source srcSet={heroBgWebp} type="image/webp" />
+                <img src={heroBgJpeg} alt={tt("The Exegesis Project")} className="w-full h-72 sm:h-96 object-cover" loading="lazy" />
+              </picture>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+              <div className="absolute bottom-0 inset-x-0 p-6 flex items-center gap-4">
+                <img src={logoImage} alt={tt("Exegesis")} className="w-12 h-12 object-contain" />
+                <div>
+                  <p className="text-sm font-black uppercase tracking-widest text-white">
+                    {tt("The Exegesis Project")}
+                  </p>
+                  <p className="text-xs text-white/70 font-medium">
+                    {tt("Read with attention. Reflect with care.")}
+                  </p>
                 </div>
-              ))}
+              </div>
             </div>
-          </motion.div>
-          <motion.div variants={animStagger} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-60px" }} className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
-            {VALUES.map((v) => {
-              const title = L?.[v.titleKey] || v.dt;
-              const desc = L?.[v.descKey] || v.dd;
-              return (
-                <motion.div key={v.titleKey} variants={animCardUp} className="bg-card border border-border rounded-[2rem] p-6 sm:p-7 hover:shadow-xl transition-all duration-500 group">
-                  <div className="w-11 h-11 sm:w-13 sm:h-13 rounded-2xl bg-brand-bg flex items-center justify-center mb-4 group-hover:bg-brand-primary/10 transition-colors">
-                    <v.icon className="w-5 h-5 sm:w-6 sm:h-6 text-brand-primary" />
-                  </div>
-                  <h4 className="font-black text-base sm:text-lg text-brand-primary mb-2 font-[family-name:var(--font-heading)] tracking-tight">{title}</h4>
-                  <p className="text-muted-foreground text-sm leading-relaxed font-medium">{desc}</p>
-                </motion.div>
-              );
-            })}
-          </motion.div>
-        </div>
+          </div>
+        </motion.div>
       </div>
     </section>
   );

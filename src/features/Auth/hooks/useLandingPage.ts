@@ -1,62 +1,46 @@
-import { useState, useEffect, useRef } from "react";
+import { useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { sendPostRequest } from "@/services/api";
 import { useAuth } from "@/contexts/AuthContext";
+import { scrollToSectionId } from "../utils";
+import { usePublicNav } from "./usePublicNav";
 
 export function useLandingPage() {
   const navigate = useNavigate();
   const { userInfo, loading: authLoading } = useAuth();
-  const [dailyVerse, setDailyVerse] = useState<any>(null);
-  const [verseLoading, setVerseLoading] = useState(true);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const menuPanelRef = useRef<HTMLDivElement | null>(null);
-  const [scrolled, setScrolled] = useState(false);
-  const [expandedMobileSection, setExpandedMobileSection] = useState<string | null>(null);
+  const nav = usePublicNav();
 
-  // Track scroll position
-  useEffect(() => {
-    const handler = () => setScrolled(window.scrollY > 50);
-    handler();
-    window.addEventListener("scroll", handler, { passive: true });
-    return () => window.removeEventListener("scroll", handler);
-  }, []);
-
-  // Load daily verse
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const res = await sendPostRequest("bible", "get-todays-verse", {});
-        if (res?.returnCode === 200 && res.returnData) setDailyVerse(res.returnData);
-      } catch {} finally { setVerseLoading(false); }
-    };
-    load();
-  }, []);
-
-  // Close mobile menu on outside click
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (menuPanelRef.current && !menuPanelRef.current.contains(e.target as Node)) {
-        setMobileMenuOpen(false);
-      }
-    };
-    if (mobileMenuOpen) document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [mobileMenuOpen]);
-
-  // Lock body scroll when mobile menu is open
-  useEffect(() => {
-    if (mobileMenuOpen) document.body.style.overflow = "hidden";
-    else document.body.style.overflow = "";
-    return () => { document.body.style.overflow = ""; };
-  }, [mobileMenuOpen]);
-
-  // Redirect to dashboard if already authenticated
   useEffect(() => {
     if (!authLoading && userInfo) navigate("/dashboard", { replace: true });
   }, [userInfo, authLoading, navigate]);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const pending = (window.history.state as { scrollTo?: string } | null)?.scrollTo;
+    if (pending) scrollToSectionId(pending);
+  }, []);
+
+  const handleExploreFeatures = useCallback(() => {
+    scrollToSectionId("features");
+  }, []);
+
+  const handleExploreStudyTools = useCallback(() => {
+    scrollToSectionId("approach");
+  }, []);
+
   return {
-    data: { dailyVerse, verseLoading, mobileMenuOpen, menuPanelRef, scrolled, expandedMobileSection, authLoading, userInfo },
-    actions: { navigate, setMobileMenuOpen, setExpandedMobileSection },
+    data: {
+      menuItems: nav.data.menuItems,
+      scrolled: nav.data.scrolled,
+      mobileMenuOpen: nav.data.mobileMenuOpen,
+      menuPanelRef: nav.data.menuPanelRef,
+      expandedMobileSection: nav.data.expandedMobileSection,
+    },
+    actions: {
+      setMobileMenuOpen: nav.actions.setMobileMenuOpen,
+      setExpandedMobileSection: nav.actions.setExpandedMobileSection,
+      handleMenuClick: nav.actions.handleMenuClick,
+      handleExploreFeatures,
+      handleExploreStudyTools,
+    },
   };
 }

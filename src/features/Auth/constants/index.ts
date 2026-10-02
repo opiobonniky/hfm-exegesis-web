@@ -64,3 +64,5 @@ export const SLIDES: Slide[] = [
     iconColor: "text-white",
   },
 ];
+
+export * from "./landing";

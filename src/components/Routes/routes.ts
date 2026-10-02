@@ -83,6 +83,7 @@ const StrongsDictionary = lazy(() => import("@/features/StrongsDictionary/pages/
 const GuestEntry = lazy(() => import("@/features/GuestEntry/pages/GuestEntry"));
 const DailyExegesis = lazy(() => import("@/features/DailyContent/pages/DailyExegesis"));
 const SowerPage = lazy(() => import("@/features/Subscription/pages/SowerPage"));
+const PlansPage = lazy(() => import("@/features/Subscription/pages/PlansPage"));
 const BibleLibrary = lazy(() => import("@/features/Bible/pages/BibleLibrary"));
 const VerseResources = lazy(() => import("@/features/Bible/pages/VerseResources"));
 const Onboarding = lazy(() => import("@/features/Auth/pages/Onboarding"));
@@ -711,6 +712,13 @@ const routeConfigs = {
     isProtected: true,
     requiresLayout: true,
     title: tt("Sower"),
+  },
+  publicPlans: {
+    path: "/plans",
+    component: PlansPage,
+    isProtected: false,
+    requiresLayout: false,
+    title: tt("Compare Plans"),
   },
   verseResources: {
     path: "/verse-resources",

@@ -1,28 +1,8 @@
 import { Check, X } from "lucide-react";
 import { TIERS } from "./SowerTierCards";
+import { PUBLIC_PLAN_MATRIX } from "../constants";
 import { tt } from '@/components/languages/hardcodedTranslate';
 
-const COMPARISON = [
-  { category: "Reading", items: [{ label: tt("Bible Reader (all translations)"), free: true, legacy: true, covenant: true }] },
-  { category: "Study Tools", items: [
-    { label: tt("Basic Search"), free: true, legacy: true, covenant: true },
-    { label: tt("Strong's / Topics / Lemma Search"), free: false, legacy: true, covenant: true },
-    { label: tt("Cross-Translation Search"), free: false, legacy: true, covenant: true },
-    { label: tt("Exegesis Lab (full 4 stages)"), free: false, legacy: true, covenant: true },
-    { label: tt("Reading Plans with progress"), free: false, legacy: true, covenant: true },
-  ]},
-  { category: "Journaling", items: [
-    { label: tt("Basic Notes"), free: true, legacy: true, covenant: true },
-    { label: tt("Legacy Ledger (full journal)"), free: false, legacy: true, covenant: true },
-    { label: tt("Journal Export"), free: false, legacy: true, covenant: true },
-  ]},
-  { category: "AI & Analytics", items: [
-    { label: tt("Explain Bible & Study Notes"), free: false, legacy: true, covenant: true },
-    { label: tt("Prayers & Reflection"), free: false, legacy: false, covenant: true },
-    { label: tt("Advanced Analytics"), free: false, legacy: false, covenant: true },
-    { label: tt("Early Access Features"), free: false, legacy: false, covenant: true },
-  ]},
-];
 export function SowerFeatureComparison() {
   return (
     <section className="bg-card border-t border-border/50 py-14">
@@ -40,7 +20,7 @@ export function SowerFeatureComparison() {
               </tr>
             </thead>
             <tbody>
-              {COMPARISON.map((section) => (
+              {PUBLIC_PLAN_MATRIX.map((section) => (
                 <tbody key={section.category}>
                   <tr className="border-t border-border/30">
                     <td colSpan={4} className="py-2.5 text-[10px] font-black text-primary uppercase tracking-wider">{section.category}</td>

@@ -1,9 +1,12 @@
 export { NavBar } from "./NavBar";
+export { LandingShell } from "./LandingShell";
+export { LandingSectionHeader } from "./LandingSectionHeader";
 export { HeroSection } from "./HeroSection";
 export { FeaturesSection } from "./FeaturesSection";
-export { BibleStatsSection } from "./BibleStatsSection";
-export { ExegesisSection } from "./ExegesisSection";
+export { StudyApproachSection } from "./StudyApproachSection";
+export { ReadingPlansSection } from "./ReadingPlansSection";
 export { AboutSection } from "./AboutSection";
+export { PlanComparisonSection } from "./PlanComparisonSection";
 export { CTASection } from "./CTASection";
 export { FooterSection } from "./FooterSection";
 export * from "./animations";
