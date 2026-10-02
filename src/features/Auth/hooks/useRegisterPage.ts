@@ -9,6 +9,7 @@ import { getDeviceInfo, getClientIP } from "@/lib/utils";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth, googleProvider } from "@/firebaseConfiguration/config";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { getPasswordError } from "@/lib/passwordPolicy";
 
 export function useRegisterPage() {
   const navigate = useNavigate();
@@ -35,7 +36,7 @@ export function useRegisterPage() {
       case "lastName": return !v.trim() ? "Last name is required" : "";
       case "email": return !v.trim() ? "Email is required" : !/\S+@\S+\.\S+/.test(v) ? "Invalid email" : "";
       case "username": return !v.trim() ? "Username is required" : v.length < 3 ? "Too short" : "";
-      case "password": return !v ? "Password is required" : v.length < 8 ? "Min 8 characters" : "";
+      case "password": return getPasswordError(v);
       case "confirmPassword": return !v ? "Confirm password" : v !== formData.password ? "Passwords do not match" : "";
       default: return "";
     }

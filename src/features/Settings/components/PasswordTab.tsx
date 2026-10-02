@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { tt } from '@/components/languages/hardcodedTranslate';
 import { StableLoadingContent } from "@/components/ui/StableLoadingContent";
+import { getPasswordError } from "@/lib/passwordPolicy";
 
 interface PasswordTabProps {
   saving: boolean;
@@ -31,9 +32,11 @@ export function PasswordTab({ saving, onSave }: PasswordTabProps) {
   const [confirm, setConfirm] = useState("");
   const [show, setShow] = useState({ current: false, new: false, confirm: false });
   const strength = getStrength(newPass);
+  const passwordError = newPass ? getPasswordError(newPass) : "";
   const handleSubmit = () => {
     if (!current || !newPass || !confirm) return;
     if (newPass !== confirm) return;
+    if (passwordError) return;
     onSave(current, newPass);
     setCurrent(""); setNewPass(""); setConfirm("");
   };
@@ -84,8 +87,9 @@ export function PasswordTab({ saving, onSave }: PasswordTabProps) {
             </button>
           </div>
           {confirm && newPass !== confirm && <p className="text-xs text-destructive">{tt("Passwords don't match")}</p>}
+          {!confirm && passwordError && <p className="text-xs text-destructive">{passwordError}</p>}
         </div>
-        <Button onClick={handleSubmit} disabled={saving || !current || !newPass || newPass !== confirm} className="bg-primary hover:bg-primary/90">
+        <Button onClick={handleSubmit} disabled={saving || !current || !newPass || newPass !== confirm || !!passwordError} className="bg-primary hover:bg-primary/90">
           <StableLoadingContent loading={saving} idle={t.settings?.updatePassword || tt("Update Password")} pending={<><Loader2 className="w-4 h-4 animate-spin" /><span>{tt("Updating...")}</span></>} />
         </Button>
       </div>

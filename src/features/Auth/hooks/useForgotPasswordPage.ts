@@ -4,6 +4,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { sendPostRequest, ApiError } from "@/services/api";
+import { getPasswordError } from "@/lib/passwordPolicy";
 
 export function useForgotPasswordPage() {
   const navigate = useNavigate();
@@ -33,9 +34,7 @@ export function useForgotPasswordPage() {
         if (value.length < 6) return t.auth?.enterSixDigitCode || "Enter 6-digit code";
         return "";
       case "newPassword":
-        if (!value) return t.auth?.passwordRequired || "Password is required";
-        if (value.length < 8) return t.auth?.minCharacters || "Minimum 8 characters";
-        return "";
+        return getPasswordError(value);
       case "confirmPassword":
         if (!value) return t.auth?.confirmPasswordRequired || "Confirm your password";
         if (value !== newPassword) return t.auth?.passwordsDoNotMatch || "Passwords do not match";
