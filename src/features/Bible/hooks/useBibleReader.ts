@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { sendPostRequest, API_BASE_URL } from "@/services/api";
-import { bibleApi } from "@/services/bibleApi";
+import { bibleApi, mapTranslationId } from "@/services/bibleApi";
 import { getChapterHeadingsCached } from "@/services/chapterHeadings";
 import type {
   ChapterData,
@@ -17,6 +17,10 @@ import {
   isBibleBook,
   type BibleBookName,
 } from "../constants";
+import {
+  getBibleCatalogLanguage,
+  getPreferredBibleId,
+} from "../services/freeBibleTranslations";
 
 
 const INITIAL_CHAPTER_COUNT = 3;
@@ -29,6 +33,9 @@ const parsePositiveInteger = (value: string | null) => {
 
 export function useBibleReader() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const { lang: language } = useLanguage();
+  const requestedTranslationRef = useRef(searchParams.get("translation") || "");
+  requestedTranslationRef.current = searchParams.get("translation") || "";
   const initialBook: BibleBookName = isBibleBook(searchParams.get("book"))
     ? (searchParams.get("book") as BibleBookName)
     : "Genesis";
@@ -44,9 +51,12 @@ export function useBibleReader() {
   const [selectedVerse, setSelectedVerse] = useState<number | null>(
     parsePositiveInteger(searchParams.get("verse")),
   );
-  const [versionId, setVersionId] = useState(
-    searchParams.get("translation") || "Berean",
+  const [versionId, setVersionId] = useState(() =>
+    mapTranslationId(
+      searchParams.get("translation") || getPreferredBibleId(language),
+    ),
   );
+  const [resolvedLanguage, setResolvedLanguage] = useState<string | null>(null);
   const [chapters, setChapters] = useState<ChapterData[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -65,27 +75,71 @@ export function useBibleReader() {
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const chapterRefs = useRef<Record<string, HTMLDivElement>>({});
   const verseRefs = useRef<Record<string, HTMLSpanElement | null>>({});
-
-  const { lang: language } = useLanguage();
+  const chapterRequestRef = useRef(0);
 
   useEffect(() => {
-    import("@/services/bibleApi").then(({ bibleApi }) => {
-      bibleApi.getTranslations(language)
-        .then((data) => {
-          // Always include the currently selected translation even if not in the list
-          const list = data || [];
-          const currentInList = list.some((t: TranslationOption) => t.id === versionId);
-          if (!currentInList && versionId) {
-            const current = list.find((t: TranslationOption) => t.id === versionId);
-            if (current) list.unshift(current);
-          }
-          setAvailableTranslations(list.length > 0 ? list : data || []);
-        })
-        .catch((error) =>
-          console.error("Failed to load Bible translations:", error),
+    let cancelled = false;
+    const preferred = getPreferredBibleId(language);
+
+    chapterRequestRef.current += 1;
+    setResolvedLanguage(null);
+    setLoading(true);
+    setLoadError(null);
+    setChapters([]);
+
+    bibleApi
+      .getTranslations(getBibleCatalogLanguage(language))
+      .then((data) => {
+        if (cancelled) return;
+
+        const list = data || [];
+        let stored = "";
+        try {
+          stored = localStorage.getItem("preferred_translation") || "";
+        } catch {
+          // Storage can be unavailable in restricted browser contexts.
+        }
+        const candidates = [requestedTranslationRef.current, stored, preferred]
+          .filter(Boolean)
+          .map(mapTranslationId);
+        const nextVersion =
+          candidates.find((candidate) =>
+            list.some((translation) => translation.id === candidate),
+          ) ||
+          list[0]?.id ||
+          preferred;
+
+        setAvailableTranslations(list);
+        setVersionId(nextVersion);
+        try {
+          localStorage.setItem("preferred_translation", nextVersion);
+        } catch {
+          // The reader still works when storage is unavailable.
+        }
+        setSearchParams(
+          (current) => {
+            if (current.get("translation") === nextVersion) return current;
+            const next = new URLSearchParams(current);
+            next.set("translation", nextVersion);
+            return next;
+          },
+          { replace: true },
         );
-    });
-  }, [language, versionId]);
+        setResolvedLanguage(language);
+      })
+      .catch((error) => {
+        if (cancelled) return;
+        console.error("Failed to load Bible translations:", error);
+        setAvailableTranslations([]);
+        setVersionId(preferred);
+        setResolvedLanguage(language);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [language, setSearchParams]);
+
   const fetchChapters = useCallback(
     async (
       book: BibleBookName,
@@ -93,6 +147,7 @@ export function useBibleReader() {
       count: number,
       translation: string,
       append: boolean,
+      requestId: number,
     ) => {
       const max = BIBLE_BOOK_CHAPTERS[book];
       const numbers = Array.from(
@@ -104,6 +159,7 @@ export function useBibleReader() {
         return;
       }
       const data = await bibleApi.getVersesBatch(translation, book, numbers);
+      if (requestId !== chapterRequestRef.current) return;
       const loaded = numbers.map((chapter): ChapterData => {
         const item = data.find((entry) => entry.chapterNumber === chapter);
         return {
@@ -133,6 +189,7 @@ export function useBibleReader() {
           ),
         ),
       ).then((results) => {
+        if (requestId !== chapterRequestRef.current) return;
         setHeadingsByChapter((current) => {
           const next = { ...current };
           for (const { chapter, headings } of results) {
@@ -145,6 +202,9 @@ export function useBibleReader() {
     [language],
   );
   useEffect(() => {
+    if (resolvedLanguage !== language) return;
+
+    const requestId = ++chapterRequestRef.current;
     setLoading(true);
     setLoadError(null);
     setChapters([]);
@@ -154,15 +214,27 @@ export function useBibleReader() {
       INITIAL_CHAPTER_COUNT,
       versionId,
       false,
+      requestId,
     )
       .catch((error) => {
+        if (requestId !== chapterRequestRef.current) return;
         console.error(error);
         setLoadError(
           `Unable to load this passage. ${error?.message || "Network error"}. Backend: ${API_BASE_URL}`,
         );
       })
-      .finally(() => setLoading(false));
-  }, [fetchChapters, loadStartChapter, reloadToken, selectedBook, versionId]);
+      .finally(() => {
+        if (requestId === chapterRequestRef.current) setLoading(false);
+      });
+  }, [
+    fetchChapters,
+    language,
+    loadStartChapter,
+    reloadToken,
+    resolvedLanguage,
+    selectedBook,
+    versionId,
+  ]);
 
   /**
    * Hydrate the user's saved highlights, favorites, and notes once on mount
@@ -247,10 +319,21 @@ export function useBibleReader() {
   );
   const selectTranslation = useCallback(
     (translation: string) => {
-      setVersionId(translation);
+      const nextVersion = mapTranslationId(translation);
+      setVersionId(nextVersion);
       setLoadStartChapter(selectedChapter);
+      try {
+        localStorage.setItem("preferred_translation", nextVersion);
+      } catch {
+        // The in-memory selection remains usable without storage.
+      }
+      setSearchParams((current) => {
+        const next = new URLSearchParams(current);
+        next.set("translation", nextVersion);
+        return next;
+      });
     },
-    [selectedChapter],
+    [selectedChapter, setSearchParams],
   );
   const loadMore = useCallback(async () => {
     if (loading || loadingMore || !hasMore || !chapters.length) return;
@@ -262,6 +345,7 @@ export function useBibleReader() {
         INITIAL_CHAPTER_COUNT,
         versionId,
         true,
+        chapterRequestRef.current,
       );
     } finally {
       setLoadingMore(false);
