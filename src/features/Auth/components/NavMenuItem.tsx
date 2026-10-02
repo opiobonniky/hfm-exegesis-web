@@ -3,19 +3,18 @@ import { tt } from "@/components/languages/hardcodedTranslate";
 import type { NavMenuItemProps } from "../types";
 
 export function NavMenuItem({ item, scrolled, onMenuClick, active }: NavMenuItemProps) {
+  const sizeClass = scrolled ? "text-[10px]" : "text-xs sm:text-sm";
+  const idleColor = scrolled ? "text-muted-foreground hover:text-primary" : "text-white/90 hover:text-white";
+  const activeColor = scrolled ? "text-primary" : "text-white";
+
   if (item.subItems) {
     return (
       <div className="relative group">
         <button
           type="button"
-          className={`relative px-3 py-2 font-black rounded-xl transition-all whitespace-nowrap uppercase tracking-widest active:scale-95 nav-menu-item flex items-center gap-1 ${
-            active
-              ? scrolled
-                ? "text-primary bg-muted"
-                : "text-white bg-white/10"
-              : scrolled
-                ? "text-[10px] text-muted-foreground hover:text-primary hover:bg-muted"
-                : "text-xs sm:text-sm text-white/90"
+          aria-current={active ? "true" : undefined}
+          className={`px-3 py-2 font-black rounded-xl transition-all whitespace-nowrap uppercase tracking-widest active:scale-95 nav-menu-item flex items-center gap-1 ${sizeClass} ${
+            active ? `${activeColor} bg-brand-primary/10` : `${idleColor} hover:bg-brand-bg`
           }`}
         >
           {item.label}
@@ -44,12 +43,8 @@ export function NavMenuItem({ item, scrolled, onMenuClick, active }: NavMenuItem
       type="button"
       onClick={() => onMenuClick(item.href)}
       aria-current={active ? "true" : undefined}
-      className={`relative px-3 py-2 font-black rounded-xl transition-all whitespace-nowrap uppercase tracking-widest active:scale-95 nav-menu-item after:absolute after:left-3 after:right-3 after:-bottom-0.5 after:h-0.5 after:rounded-full after:transition-colors ${
-        active
-          ? scrolled
-            ? "text-primary after:bg-primary"
-            : "text-white after:bg-brand-accent"
-          : `${scrolled ? "text-[10px] text-muted-foreground" : "text-xs sm:text-sm text-white/90"} hover:text-primary after:bg-transparent`
+      className={`relative px-3 py-2 font-black rounded-xl transition-all whitespace-nowrap uppercase tracking-widest active:scale-95 nav-menu-item after:absolute after:left-3 after:right-3 after:-bottom-0.5 after:h-0.5 after:rounded-full after:transition-colors ${sizeClass} ${
+        active ? `${activeColor} after:bg-brand-accent` : `${idleColor} after:bg-transparent`
       }`}
     >
       {item.label || tt("Home")}
