@@ -75,7 +75,7 @@ export function useRegisterPage() {
       });
       if (res?.returnCode === 200) {
         toast({ title: tt("Registration successful!") });
-        navigate("/verify-account", { state: { email: formData.email } });
+        navigate(routes.verifyAccount.path, { state: { email: formData.email } });
       } else if (res?.returnCode === 405 && res.returnData?.needsRegistration) {
         navigate(routes.googleRegister.path, { state: res.returnData });
       } else {

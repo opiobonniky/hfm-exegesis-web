@@ -50,7 +50,7 @@ export default function FloatingInput({
         </div>
         <div className="flex-1 relative">
           <input
-            type={type}
+            type={isPassword && showPassword ? "text" : type}
             name={id}
             id={id}
             value={value}
@@ -80,6 +80,8 @@ export default function FloatingInput({
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
+              aria-label={showPassword ? "Hide password" : "Show password"}
+              aria-pressed={showPassword}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/70 hover:text-muted-foreground transition-colors p-1.5"
             >
               {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}

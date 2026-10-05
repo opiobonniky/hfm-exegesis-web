@@ -87,6 +87,10 @@ export function useLoginPage() {
           return;
         }
         navigate(routes.landing.path);
+      } else if (res?.returnCode === 405 && res.returnData?.needsVerification) {
+        navigate(routes.verifyAccount.path, {
+          state: { email: res.returnData.email || email },
+        });
       } else {
         toast({ title: res?.returnMessage || "Login failed", variant: "destructive" });
       }

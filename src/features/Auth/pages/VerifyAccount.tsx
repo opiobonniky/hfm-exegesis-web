@@ -12,7 +12,7 @@ import { tt } from '@/components/languages/hardcodedTranslate';
 const VerifyAccount = () => {
   const { data, actions } = useVerifyAccountPage();
   const p = { ...data, ...actions };
-  const { t, isRtl, email, setEmail, code, setCode, isLoading, isResending, handleVerify, handleResend } = p;
+  const { t, isRtl, email, emailLocked, setEmail, code, setCode, isLoading, isResending, error, handleVerify, handleResend } = p;
 
   return (
     <div className="min-h-screen flex" dir={isRtl ? "rtl" : "ltr"}>
@@ -37,7 +37,8 @@ const VerifyAccount = () => {
             placeholder={tt("you@example.com")}
             value={email}
             onChange={setEmail}
-            readOnly
+            readOnly={emailLocked}
+            required
           />
           <VerifyInputField
             id="code"
@@ -47,8 +48,14 @@ const VerifyAccount = () => {
             value={code}
             onChange={(v) => setCode(v.replace(/\D/g, "").slice(0, 6))}
             isCode
+            required
           />
-          <AuthLoadingButton loading={isLoading} disabled={code.length < 6}>
+          {error && (
+            <p role="alert" className="text-sm font-medium text-destructive">
+              {error}
+            </p>
+          )}
+          <AuthLoadingButton loading={isLoading} disabled={!email.trim() || code.length < 6}>
             {t.auth?.verifyAccount || tt("Verify Account")}
             <ArrowRight className="w-4 h-4" />
           </AuthLoadingButton>
