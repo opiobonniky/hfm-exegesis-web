@@ -38,7 +38,7 @@ export function ProtectedRoute() {
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to={routes.landing.path} replace />;
   }
 
   // Interlock: users on a temporary (admin-issued) password must change it
@@ -56,10 +56,7 @@ export function ProtectedRoute() {
   );
 
   if (isAdminOnlyRoute && !isAdmin) {
-    if (currentPath === routes.dashboard.path) {
-      return <Navigate to={routes.userDashboard.path} replace />;
-    }
-    return <Navigate to={routes.userDashboard.path} replace />;
+    return <Navigate to={routes.landing.path} replace />;
   }
 
   return <Outlet />;

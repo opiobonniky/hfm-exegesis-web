@@ -2,7 +2,7 @@ import { useEffect, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Navigate, Routes, Route } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { LanguageProvider } from "@/components/languages/languageProvider";
 import { AppLayout } from "@/components/AppLayout";
@@ -43,6 +43,38 @@ const AuthLoader = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+const dashboardAliasPaths = [
+  routes.home.path,
+  routes.dashboard.path,
+  routes.userDashboard.path,
+];
+
+const RoleAwareRoot = () => {
+  const { isAuthenticated, userInfo } = useAuth();
+  const Landing = routes.landing.component;
+
+  if (!isAuthenticated) {
+    return <Landing />;
+  }
+
+  if (userInfo?.mustChangePassword) {
+    return <Navigate to={routes.forceChangePassword.path} replace />;
+  }
+
+  const Dashboard =
+    userInfo?.userRole === 1
+      ? routes.dashboard.component
+      : routes.userDashboard.component;
+
+  return (
+    <AppLayout>
+      <RouteSuspense featureName={userInfo?.userRole === 1 ? "Dashboard" : "My Dashboard"}>
+        <Dashboard />
+      </RouteSuspense>
+    </AppLayout>
+  );
+};
+
 /** Initialize theme on mount — reads localStorage and applies the class */
 function ThemeInitializer() {
   // Calling useTheme here applies the stored theme to <html> on first render
@@ -67,9 +99,13 @@ function BibleDataPreloader() {
 }
 
 const AppRoutes = () => {
-  const publicRoutes = getPublicRoutes();
+  const publicRoutes = getPublicRoutes().filter(
+    (route) => route.path !== routes.landing.path,
+  );
   const publicLayoutRoutes = getPublicLayoutRoutes();
-  const layoutRoutes = getLayoutRoutes();
+  const layoutRoutes = getLayoutRoutes().filter(
+    (route) => !dashboardAliasPaths.includes(route.path),
+  );
   const notFoundRoute = routes.notFound;
 
   // Get protected routes that don't require layout (like dailyReading)
@@ -82,6 +118,7 @@ const AppRoutes = () => {
       <AuthLoader>
         <Suspense fallback={<RouteLoader />}>
           <Routes>
+            <Route path={routes.landing.path} element={<RoleAwareRoot />} />
             {publicRoutes.map((route) => (
               <Route
                 key={route.path}
@@ -110,6 +147,13 @@ const AppRoutes = () => {
               </Route>
             )}
             <Route element={<ProtectedRoute />}>
+              {dashboardAliasPaths.map((path) => (
+                <Route
+                  key={path}
+                  path={path}
+                  element={<Navigate to={routes.landing.path} replace />}
+                />
+              ))}
               {/* Routes that use AppLayout */}
               <Route element={<AppLayout />}>
                 {layoutRoutes.map((route) => (

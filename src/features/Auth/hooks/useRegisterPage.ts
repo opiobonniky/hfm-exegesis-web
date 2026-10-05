@@ -98,7 +98,7 @@ export function useRegisterPage() {
       });
       if (res?.returnCode === 200 && res.returnData) {
         setUserInfo(res.returnData);
-        navigate(res.returnData.userRole === 1 ? routes.dashboard.path : routes.userDashboard.path);
+        navigate(routes.landing.path);
       } else if (res?.returnCode === 201 && res.returnData?.needsRegistration) {
         navigate(routes.googleRegister.path, { state: res.returnData });
       } else {

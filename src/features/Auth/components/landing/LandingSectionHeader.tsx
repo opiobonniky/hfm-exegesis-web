@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { animFadeUp } from "./animations";
 import type { LandingSectionHeaderProps } from "../../types";
 
-export function LandingSectionHeader({ eyebrow, title, lead, tone = "default" }: LandingSectionHeaderProps) {
+export function LandingSectionHeader({ eyebrow, title, lead, tone = "default", align = "center" }: LandingSectionHeaderProps) {
   const onDark = tone === "onDark";
   return (
     <motion.div
@@ -10,7 +10,7 @@ export function LandingSectionHeader({ eyebrow, title, lead, tone = "default" }:
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, margin: "-80px" }}
-      className="text-center max-w-3xl mx-auto"
+      className={`max-w-3xl ${align === "left" ? "text-left mr-auto" : "text-center mx-auto"}`}
     >
       <span
         className={`inline-flex items-center px-3 py-1.5 rounded-full border text-[10px] sm:text-xs font-black uppercase tracking-widest ${

@@ -42,7 +42,7 @@ async function loginViaRealAPI(page: Page, tier?: string) {
   // Step 2: Log in via real backend API
   console.log(`📡 Logging in as ${LOGIN_USERNAME}...`);
   let token: string;
-  let userData: any;
+  let userData: Record<string, unknown>;
 
   try {
     const resp = await page.request.post(`${BACKEND}/auth/login`, {
@@ -85,14 +85,14 @@ async function loginViaRealAPI(page: Page, tier?: string) {
   console.log("✅ Auth injected during splash");
 
   // Step 4: Full page reload so AuthProvider re-reads localStorage on mount
-  await page.goto(`${BASE}/user-dashboard`, { waitUntil: "domcontentloaded" });
+  await page.goto(`${BASE}/`, { waitUntil: "domcontentloaded" });
   console.log(`📍 Reloaded at ${page.url()}: token should be found on mount`);
 
   // Step 5: Wait deterministically for dashboard content, not a fixed timeout.
   // After reload, the flow is:
   //   - React mounts, SplashScreen overlay shows (~2s timer)
   //   - AuthProvider.loadAuth reads localStorage → finds token → isAuthenticated=true
-  //   - After 2s: SplashScreen.handleComplete navigates to /user-dashboard
+  //   - After 2s: SplashScreen.handleComplete leaves the canonical root route active
   //   - UserDashboard renders with "Explore" heading, "Daily Verse" button, etc.
   try {
     await page.waitForSelector('text="Explore"', { timeout: 10000 });

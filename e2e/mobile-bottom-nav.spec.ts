@@ -59,7 +59,7 @@ async function loginViaAPI(page: Page) {
   );
 
   // Reload — AuthProvider picks up localStorage on mount
-  await page.goto(`${BASE}/user-dashboard`, { waitUntil: "domcontentloaded" });
+  await page.goto(`${BASE}/`, { waitUntil: "domcontentloaded" });
 
   // Wait for splash to finish and dashboard content to render
   try {
@@ -87,7 +87,7 @@ interface TabTestCase {
 // area. Without this, `text=Journal` matches the Journal tab button in the
 // bottom nav itself (instant resolve, no wait for actual page content).
 const TABS: TabTestCase[] = [
-  { label: "Home",    path: "/user-dashboard", navIndex: 0, contentSelector: "main >> text=Explore" },
+  { label: "Home",    path: "/",               navIndex: 0, contentSelector: "main >> text=Explore" },
   { label: "Bible",   path: "/bible-library",  navIndex: 1, contentSelector: "main >> text=Bible" },
   { label: "Lab",     path: "/lab",            navIndex: 2, contentSelector: "main >> text=Exegesis Lab" },
   { label: "Journal", path: "/journal",        navIndex: 3, contentSelector: "main >> text=Journal" },

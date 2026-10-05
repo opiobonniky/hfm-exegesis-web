@@ -20,7 +20,7 @@ async function loginAs(page: Page, username: string, password: string) {
   // Click submit button
   await page.locator('button[type="submit"], button:has-text("Sign In"), button:has-text("Log In")').first().click();
   // Wait for dashboard to load
-  await page.waitForURL(/dashboard|user-dashboard/, { timeout: 15_000 });
+  await page.waitForURL((url) => url.pathname === "/", { timeout: 15_000 });
 }
 
 /** Navigate to the app origin first, then clear localStorage and redirect to login. */
@@ -86,7 +86,7 @@ test.describe("Free User — subscription gating", () => {
   });
 
   test("Sidebar shows Free Reader tier badge", async ({ page }) => {
-    await page.goto("/user-dashboard");
+    await page.goto("/");
     // The sidebar should have a tier badge showing "Free Reader"
     // This might be in the sidebar footer
     const tierBadge = page.locator("text=Free Reader").first();
@@ -131,7 +131,7 @@ test.describe("Premium User (legacy_sower) — all features unlocked", () => {
   });
 
   test("Sidebar shows Legacy Sower tier badge", async ({ page }) => {
-    await page.goto("/user-dashboard");
+    await page.goto("/");
     const tierBadge = page.locator("text=Legacy Sower").first();
     await expect(tierBadge).toBeVisible({ timeout: 5_000 });
   });

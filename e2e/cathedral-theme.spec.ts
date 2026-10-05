@@ -342,7 +342,7 @@ test.describe("Dashboard — dark and cathedral mode backgrounds and contrast", 
 
   test("15. Dashboard in dark mode: bg-background resolves to dark HSL", async ({ page }) => {
     await page.evaluate(() => localStorage.setItem("theme_mode", "dark"));
-    await page.goto("/user-dashboard", { waitUntil: "domcontentloaded" });
+    await page.goto("/", { waitUntil: "domcontentloaded" });
     await page.waitForTimeout(2000);
 
     expect(await getHtmlClasses(page)).toContain("dark");
@@ -370,7 +370,7 @@ test.describe("Dashboard — dark and cathedral mode backgrounds and contrast", 
 
   test("16. Dashboard in cathedral mode: bg-background resolves to dark/purple HSL", async ({ page }) => {
     await page.evaluate(() => localStorage.setItem("theme_mode", "cathedral"));
-    await page.goto("/user-dashboard", { waitUntil: "domcontentloaded" });
+    await page.goto("/", { waitUntil: "domcontentloaded" });
     await page.waitForTimeout(2000);
 
     expect(await getHtmlClasses(page)).toContain("cathedral");
@@ -398,7 +398,7 @@ test.describe("Dashboard — dark and cathedral mode backgrounds and contrast", 
 
   test("17. Dashboard text-foreground vs text-muted-foreground contrast in dark mode", async ({ page }) => {
     await page.evaluate(() => localStorage.setItem("theme_mode", "dark"));
-    await page.goto("/user-dashboard", { waitUntil: "domcontentloaded" });
+    await page.goto("/", { waitUntil: "domcontentloaded" });
     await page.waitForTimeout(2000);
 
     // Check a visible heading element for text-foreground
@@ -435,7 +435,7 @@ test.describe("Dashboard — dark and cathedral mode backgrounds and contrast", 
 
   test("18. Dashboard dark mode: computed card background matches bg-card", async ({ page }) => {
     await page.evaluate(() => localStorage.setItem("theme_mode", "dark"));
-    await page.goto("/user-dashboard", { waitUntil: "domcontentloaded" });
+    await page.goto("/", { waitUntil: "domcontentloaded" });
     await page.waitForTimeout(2000);
 
     // Check --card resolves to dark

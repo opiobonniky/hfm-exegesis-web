@@ -1,8 +1,8 @@
-import { AuthStepIndicator, AuthAccountLink } from "../components";
-import logoImage from "@/assets/logos/exegesis_bg_rm.webp";
-import { tt } from '@/components/languages/hardcodedTranslate';
+import { AuthAccountLink, AuthLogo } from "../components";
+import { tt } from "@/components/languages/hardcodedTranslate";
 
 interface RegisterFormPanelProps {
+  logoSrc: string;
   createAccountLabel: string;
   haveAccountLabel: string;
   loginLabel: string;
@@ -10,25 +10,48 @@ interface RegisterFormPanelProps {
   children: React.ReactNode;
 }
 
-export function RegisterFormPanel({ createAccountLabel, haveAccountLabel, loginLabel, step, children }: RegisterFormPanelProps) {
+export function RegisterFormPanel({ logoSrc, createAccountLabel, haveAccountLabel, loginLabel, step, children }: RegisterFormPanelProps) {
   return (
-    <div className="flex-1 flex flex-col justify-center px-6 sm:px-12 lg:px-16 py-10">
-      <div className="max-w-md mx-auto w-full">
-        <div className="lg:hidden flex items-center gap-3 mb-8">
-          <img src={logoImage} alt="Exegesis" className="w-8 h-8 rounded-lg" />
-          <span className="text-lg font-bold" style={{ fontFamily: "'Cinzel', serif" }}>{tt("EXEGESIS")}</span>
-        </div>
-
-        <h2 className="text-2xl font-bold text-foreground mb-1">{createAccountLabel}</h2>
-        <p className="text-sm text-muted-foreground mb-6">
-          {haveAccountLabel}{" "}
-          <AuthAccountLink to="/login" label={loginLabel} />
-        </p>
-
-         <AuthStepIndicator steps={2} current={step} />
-
-        {children}
+    <main className="relative flex-1 overflow-y-auto bg-background">
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute -right-24 top-10 size-72 rounded-full bg-primary/5 blur-3xl" />
+        <div className="absolute -left-24 bottom-0 size-64 rounded-full bg-accent/10 blur-3xl" />
       </div>
-    </div>
+
+      <div className="relative mx-auto flex min-h-dvh w-full max-w-2xl items-center px-4 py-8 sm:px-8 lg:py-12">
+        <div className="w-full rounded-[2rem] border border-border/70 bg-card/90 px-5 py-7 shadow-2xl shadow-foreground/5 backdrop-blur-sm sm:px-10 sm:py-9">
+          <div className="flex justify-center">
+            <AuthLogo src={logoSrc} linkTo="/" size="w-24 h-24 sm:w-28 sm:h-28" />
+          </div>
+
+          <div className="mb-6 text-center">
+            <div className="mb-3 inline-flex items-center rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-primary">
+              {tt("Step")} {step} {tt("of")} 2
+            </div>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">{createAccountLabel}</h1>
+            <p className="mt-2 text-sm text-muted-foreground">
+              {haveAccountLabel}{" "}
+              <AuthAccountLink to="/login" label={loginLabel} />
+            </p>
+          </div>
+
+          <div className="mb-7 grid grid-cols-2 gap-2" aria-label={`${tt("Step")} ${step} ${tt("of")} 2`}>
+            {[tt("Your details"), tt("Secure account")].map((label, index) => {
+              const stepNumber = index + 1;
+              const isActive = step >= stepNumber;
+
+              return (
+                <div key={label} className="space-y-2">
+                  <div className={`h-1.5 rounded-full transition-colors ${isActive ? "bg-primary" : "bg-muted"}`} />
+                  <span className={`text-xs font-semibold ${isActive ? "text-foreground" : "text-muted-foreground"}`}>{label}</span>
+                </div>
+              );
+            })}
+          </div>
+
+          {children}
+        </div>
+      </div>
+    </main>
   );
 }

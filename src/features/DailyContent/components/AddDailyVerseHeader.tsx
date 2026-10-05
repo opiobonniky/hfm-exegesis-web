@@ -12,7 +12,7 @@ export function AddDailyVerseHeader({ model: h }: Props) {
   return (
     <div className="fade-up">
       <DailyContentPageHeader
-        backTo={routes.dashboard.path}
+        backTo={routes.landing.path}
         backLabel={h.t.common.back}
         icon={Sun}
         title={h.isEditing ? tt("Edit Daily Verse") : h.t.dailyVerse.addVerseTitle}

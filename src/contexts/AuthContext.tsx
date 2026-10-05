@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
 import { sendPostRequest } from "@/services/api";
 import { enableWebPush, disableWebPush, syncPushTokenIfPermitted } from "@/services/pushService";
+import { routes } from "@/components/Routes/routes";
 
 export interface UserInfo {
   id?: string;
@@ -72,13 +73,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   // ── Load auth + subscription data on mount ──
   useEffect(() => {
     const loadAuth = () => {
-      if (userInfo) {
-        // Admin users (role 1) go to admin dashboard; regular users go to home dashboard
-        const target = userInfo.userRole === 1 ? "/dashboard" : "/home";
-        navigate(target, { replace: true });
-        return;
-      }
-
       try {
         setLoading(true);
         const token = localStorage.getItem(TOKEN_KEY);
@@ -154,7 +148,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       title: "Signed out",
       description: "You have been logged out.",
     });
-    navigate("/login", { replace: true });
+    navigate(routes.login.path, { replace: true });
   }, [navigate]);
 
   useEffect(() => {

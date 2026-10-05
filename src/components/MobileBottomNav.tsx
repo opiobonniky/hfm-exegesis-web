@@ -38,8 +38,8 @@ const NAV_TABS: NavTab[] = [
   {
     label: tt("Home"),
     icon: Home,
-    path: routes.home.path,
-    activePaths: [routes.home.path, routes.userDashboard.path],
+    path: routes.landing.path,
+    activePaths: [routes.landing.path],
   },
   {
     label: tt("Bible"),
@@ -78,7 +78,11 @@ export default function MobileBottomNav() {
   const { hasAccess } = useSubscription();
 
   const isActive = (tab: NavTab) =>
-    tab.activePaths.some((p) => location.pathname.startsWith(p));
+    tab.activePaths.some((p) =>
+      p === routes.landing.path
+        ? location.pathname === p
+        : location.pathname.startsWith(p),
+    );
 
   const getLabel = (baseLabel: string): string => {
     const key = `sidebar.${baseLabel.toLowerCase()}`;

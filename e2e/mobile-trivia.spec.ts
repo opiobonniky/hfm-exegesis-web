@@ -47,7 +47,7 @@ async function loginViaAPI(page: Page) {
   );
 
   // Reload — AuthProvider picks up localStorage on mount
-  await page.goto(`${BASE}/user-dashboard`, { waitUntil: "domcontentloaded" });
+  await page.goto(`${BASE}/`, { waitUntil: "domcontentloaded" });
 
   // Wait for splash to finish and dashboard to render
   try {

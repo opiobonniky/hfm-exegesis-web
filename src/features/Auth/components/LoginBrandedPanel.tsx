@@ -21,7 +21,7 @@ export function LoginBrandedPanel({
       tagline={
         <>
           {taglineStart}
-          <AuthHighlightText text={wordLabel} />
+          <AuthHighlightText text={wordLabel} className="justify-center" />
           {taglineEnd}
         </>
       }

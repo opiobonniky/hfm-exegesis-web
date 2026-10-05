@@ -77,7 +77,7 @@ export function useForceChangePasswordPage() {
           title: tt("Password Updated"),
           description: tt("Your new password is ready. Welcome to Exegesis!"),
         });
-        navigate(userInfo?.userRole === 1 ? routes.dashboard.path : routes.userDashboard.path, { replace: true });
+        navigate(routes.landing.path, { replace: true });
       } else {
         toast({
           title: tt("Could not update password"),

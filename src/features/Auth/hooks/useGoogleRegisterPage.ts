@@ -45,7 +45,7 @@ export function useGoogleRegisterPage() {
       if (res?.returnCode === 200 && res.returnData) {
         setUserInfo(res.returnData);
         toast({ title: tt("Welcome!") });
-        navigate(res.returnData.userRole === 1 ? routes.dashboard.path : routes.userDashboard.path);
+        navigate(routes.landing.path);
       } else {
         setError(res?.returnMessage || "Registration failed");
       }

@@ -1,11 +1,11 @@
 // ── test-nav-redirect.spec.ts ──────────────────────────────────────────────
-// Verify that the SplashScreen no longer hijacks navigation to /user-dashboard.
+// Verify that the SplashScreen no longer hijacks navigation to the dashboard.
 //
 // After the fix: authenticated users should be able to navigate to any page
 // (e.g. /journal, /search, /bible-reader, /settings) and stay on that page
-// instead of being redirected to /user-dashboard.
+// instead of being redirected to the root dashboard.
 
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
 
 const BASE = "http://localhost:8080";
 const BACKEND = "http://127.0.0.1:5001";
@@ -17,7 +17,7 @@ const PASSWORD = "TestPass123!";
  * localStorage, then do a full page reload so AuthProvider picks it up.
  * Returns once the dashboard (identified by "Explore" selector) has rendered.
  */
-async function loginAndWait(page: any, targetUrl: string) {
+async function loginAndWait(page: Page, targetUrl: string) {
   // 1. Navigate to the target URL — splash shows while auth loads
   await page.goto(`${BASE}${targetUrl}`, { waitUntil: "domcontentloaded" });
   await page.waitForTimeout(500);
@@ -65,7 +65,7 @@ const TEST_PAGES = [
   { path: "/user-devotions", label: "User Devotions" },
 ];
 
-test.describe("Navigation: no redirect to /user-dashboard after splash", () => {
+test.describe("Navigation: no redirect to the dashboard after splash", () => {
   for (const { path, label } of TEST_PAGES) {
     test(`Navigating to ${path} (${label}) stays on the page`, async ({ page }) => {
       await loginAndWait(page, path);

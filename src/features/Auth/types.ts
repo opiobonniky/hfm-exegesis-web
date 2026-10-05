@@ -231,6 +231,7 @@ export interface LandingSectionHeaderProps {
   title: string;
   lead?: string;
   tone?: "default" | "onDark";
+  align?: "left" | "center";
 }
 
 export interface LandingContentWrapperProps {

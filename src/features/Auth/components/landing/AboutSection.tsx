@@ -21,7 +21,7 @@ export function AboutSection({ eyebrow, title, paragraphs, ctaLabel, ctaHref }: 
           viewport={{ once: true, margin: "-80px" }}
           className="order-2 lg:order-1"
         >
-          <LandingSectionHeader eyebrow={eyebrow} title={title} />
+          <LandingSectionHeader eyebrow={eyebrow} title={title} align="left" />
           <div className="mt-6 space-y-4 text-sm sm:text-base text-muted-foreground leading-relaxed font-medium">
             {paragraphs.map((paragraph) => (
               <p key={paragraph}>{paragraph}</p>

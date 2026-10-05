@@ -2,15 +2,13 @@ import { ChevronRight } from "lucide-react";
 
 interface RegisterNextButtonProps {
   label: string;
-  onClick: () => void;
 }
 
-export function RegisterNextButton({ label, onClick }: RegisterNextButtonProps) {
+export function RegisterNextButton({ label }: RegisterNextButtonProps) {
   return (
     <button
-      type="button"
-      onClick={onClick}
-      className="w-full h-12 rounded-2xl bg-primary text-primary-foreground font-bold text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-all"
+      type="submit"
+      className="w-full h-12 rounded-2xl bg-primary text-primary-foreground font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-primary/20 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-primary/25 transition-all"
     >
       <span>{label}</span> <ChevronRight className="w-4 h-4" />
     </button>

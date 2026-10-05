@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, type ReactNode } from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/components/languages/languageProvider';
@@ -37,13 +37,17 @@ function matchRouteTitle(pathname: string): string | null {
   return null;
 }
 
-export function AppLayout() {
+export function AppLayout({ children }: { children?: ReactNode }) {
   const { isAuthenticated, userInfo } = useAuth();
   const { isRtl } = useLanguage();
   const { themeMode, setThemeMode } = useTheme();
   const location = useLocation();
 
   const pageTitle = useMemo(() => {
+    if (location.pathname === routes.landing.path) {
+      return userInfo?.userRole === 1 ? tt('Dashboard') : tt('My Dashboard');
+    }
+
     // Try route-matching first
     const routeTitle = matchRouteTitle(location.pathname);
     if (routeTitle) return routeTitle;
@@ -61,7 +65,7 @@ export function AppLayout() {
   }, [pageTitle]);
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to={routes.landing.path} replace />;
   }
 
   return (
@@ -91,7 +95,7 @@ export function AppLayout() {
             </button>
           </header>
           <div data-scroll-root className="flex-1 min-h-0 overflow-auto pb-16 md:pb-0">
-            <Outlet />
+            {children ?? <Outlet />}
           </div>
         </main>
         <MobileBottomNav />

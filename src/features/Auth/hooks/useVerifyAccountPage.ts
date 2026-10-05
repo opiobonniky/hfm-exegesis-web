@@ -4,6 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { sendPostRequest } from "@/services/api";
+import { routes } from "@/components/Routes/routes";
 import { tt } from '@/components/languages/hardcodedTranslate';
 
 export function useVerifyAccountPage() {
@@ -31,7 +32,7 @@ export function useVerifyAccountPage() {
         setSuccess(true);
         if (res.returnData) setUserInfo(res.returnData);
         toast({ title: tt("Account verified!") });
-        setTimeout(() => navigate("/user-dashboard"), 2000);
+        setTimeout(() => navigate(routes.landing.path), 2000);
       } else {
         setError(res?.returnMessage || "Invalid code");
       }

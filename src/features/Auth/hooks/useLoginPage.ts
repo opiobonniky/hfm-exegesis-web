@@ -27,7 +27,7 @@ export function useLoginPage() {
   const [passwordFocused, setPasswordFocused] = useState(false);
 
   useEffect(() => {
-    if (!authLoading && userInfo) navigate("/dashboard", { replace: true });
+    if (!authLoading && userInfo) navigate(routes.landing.path, { replace: true });
   }, [userInfo, authLoading, navigate]);
 
   useEffect(() => {
@@ -53,7 +53,7 @@ export function useLoginPage() {
       if (returnCode === 200 && returnData) {
         const ui = { token: returnData.token, tokenType: returnData.tokenType, id: returnData.id, username: returnData.username, email: returnData.email, firstName: returnData.firstName, lastName: returnData.lastName, profilePhotoUrl: returnData.profilePhotoUrl, userRole: returnData.userRole, roleName: returnData.roleName };
         setUserInfo(ui);
-        navigate(returnData.userRole === 1 ? routes.dashboard.path : routes.userDashboard.path);
+        navigate(routes.landing.path);
       } else if (returnCode === 201 && returnData?.needsRegistration) {
         navigate(routes.googleRegister.path, { state: { googleId: returnData.googleId, email: returnData.email, firstName: returnData.firstName, lastName: returnData.lastName, photoUrl: returnData.photoUrl } });
       } else {
@@ -86,7 +86,7 @@ export function useLoginPage() {
           navigate(routes.forceChangePassword.path, { replace: true });
           return;
         }
-        navigate(res.returnData.userRole === 1 ? routes.dashboard.path : routes.userDashboard.path);
+        navigate(routes.landing.path);
       } else {
         toast({ title: res?.returnMessage || "Login failed", variant: "destructive" });
       }

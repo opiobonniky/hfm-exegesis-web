@@ -47,6 +47,7 @@ interface NavItem {
   title: string;
   url: string;
   icon: React.ComponentType<{ className?: string }>;
+  activePaths?: string[];
 }
 
 /* ─── Nav items ────────────────────────────────────────────────────────────── */
@@ -54,7 +55,7 @@ interface NavItem {
 const adminNavItems: NavItem[] = [
   {
     title: "Dashboard",
-    url: routes.dashboard.path,
+    url: routes.landing.path,
     icon: LayoutDashboard,
   },
 
@@ -105,7 +106,11 @@ const adminNavItems: NavItem[] = [
 ];
 
 const userNavItems: NavItem[] = [
-  { title: "My Dashboard", url: routes.home.path, icon: Home },
+  {
+    title: "My Dashboard",
+    url: routes.landing.path,
+    icon: Home,
+  },
   { title: "Bible app", url: routes.bibleLibrary.path, icon: BookText },
   { title: "Search Bible", url: routes.search.path, icon: SearchIcon },
   { title: "Verse Teaching", url: routes.userDailyVerse.path, icon: Sun },
@@ -161,6 +166,7 @@ function PillNavItem({
   return (
     <NavLink
       to={item.url}
+      end={item.url === routes.landing.path}
       onClick={onNavClick}
       className={cn(
         "group flex items-center gap-3 w-full transition-all duration-200",
@@ -274,7 +280,9 @@ function getBibleNavUrl(): string {
         return `${routes.bibleReader.path}?book=${encodeURIComponent(book)}&chapter=${chapter}`;
       }
     }
-  } catch {}
+  } catch {
+    // Ignore malformed saved positions and fall back to the library.
+  }
   return routes.bibleLibrary.path;
 }
 
@@ -379,6 +387,8 @@ export function AppSidebar() {
   const isAdmin = userInfo?.userRole === 1;
   const mainNavItems = isAdmin ? adminNavItems : userNavItems;
   const isActive = (path: string) => location.pathname === path;
+  const isNavItemActive = (item: NavItem) =>
+    (item.activePaths ?? [item.url]).some(isActive);
 
   /* ── Render helper for nav list ── */
   const renderNavItems = (items: NavItem[]) =>
@@ -397,7 +407,7 @@ export function AppSidebar() {
         <li key={item.title}>
           <PillNavItem
             item={item}
-            isActive={isActive(item.url)}
+            isActive={isNavItemActive(item)}
             collapsed={collapsed}
             onNavClick={closeMobileSidebar}
           />
@@ -423,7 +433,7 @@ export function AppSidebar() {
           <CollapsedTooltipButton label={label}>
             <PillNavItem
               item={item}
-              isActive={isActive(item.url)}
+              isActive={isNavItemActive(item)}
               collapsed
               onNavClick={closeMobileSidebar}
             />
@@ -497,7 +507,7 @@ export function AppSidebar() {
           className={collapsed ? "px-2 pt-4 pb-2" : "px-4 pt-6 pb-4"}
         >
           <NavLink
-            to={isAdmin ? routes.dashboard.path : routes.home.path}
+            to={routes.landing.path}
             className={cn(
               "group relative block overflow-hidden rounded-2xl border border-primary-foreground/20 bg-primary-foreground/10 p-2 transition-all duration-200 hover:border-primary-foreground/35 hover:bg-primary-foreground/15 hover:shadow-sm",
               collapsed ? "mx-auto" : "",
