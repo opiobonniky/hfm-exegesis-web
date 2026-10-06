@@ -64,7 +64,7 @@ export default function LabApplyStage({
             {passageVerses.map((v) => (
               <div key={v.verseNumber} className="flex gap-2">
                 <sup className="text-[10px] font-bold text-emerald-500 mt-1 shrink-0">{v.verseNumber}</sup>
-                <p className="text-sm leading-7 text-foreground/90">{v.text}</p>
+                <p translate="no" className="notranslate text-sm leading-7 text-foreground/90">{v.text}</p>
               </div>
             ))}
           </div>

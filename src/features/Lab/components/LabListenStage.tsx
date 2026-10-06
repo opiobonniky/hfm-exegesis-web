@@ -63,8 +63,8 @@ export default function LabListenStage({
                 isPlaying && audio.currentVerseIdx === idx && "bg-purple-500/10"
               )}>
                 <sup className="text-[10px] font-bold text-purple-500 mt-1 shrink-0">{v.verseNumber}</sup>
-                <p className={cn(
-                  "text-sm leading-6 transition-colors",
+                <p translate="no" className={cn(
+                  "notranslate text-sm leading-6 transition-colors",
                   isPlaying && audio.currentVerseIdx === idx ? "text-foreground font-medium" : "text-foreground/80"
                 )}>{v.text}</p>
               </div>
