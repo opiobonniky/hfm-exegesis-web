@@ -84,7 +84,6 @@ export function useBibleReaderPage() {
   const loadedPassageRef = useRef<string | null>(null);
   const visibleChapterRef = useRef(reader.selectedChapter);
   const { chapters, chapterRefs, setVisibleChapter } = reader;
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [translationOpen, setTranslationOpen] = useState(false);
   const [translationSearch, setTranslationSearch] = useState("");
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -875,7 +874,8 @@ export function useBibleReaderPage() {
       isRtl,
       backLabel: t.common.back,
       searchLabel: t.common.search,
-      selectBookChapterLabel: t.bibleReader.selectBookChapter,
+      selectBookLabel: t.bibleReader.selectBook,
+      selectChapterLabel: t.bibleReader.selectChapter,
       listenLabel: t.bibleReader.listen,
       stopLabel: t.bibleReader.stop,
       selectedBook: reader.selectedBook,
@@ -887,9 +887,6 @@ export function useBibleReaderPage() {
       translationSearch,
       fontSize,
       scrollRef,
-      sidebarOpen,
-      backendBooks: reader.backendBooks,
-      booksLoading: reader.booksLoading,
       chapters: reader.chapters,
       headingsByChapter: reader.headingsByChapter,
       audioVerseKey,
@@ -945,8 +942,12 @@ export function useBibleReaderPage() {
     },
     actions: {
       goBack: () => navigate(-1),
-      toggleSidebar: () => setSidebarOpen((open) => !open),
-      closeSidebar: () => setSidebarOpen(false),
+      openBookSelection: () =>
+        navigate(`/bible-books?book=${encodeURIComponent(reader.selectedBook)}`),
+      openChapterSelection: () =>
+        navigate(
+          `/bible-chapters?book=${encodeURIComponent(reader.selectedBook)}&chapter=${reader.selectedChapter}`,
+        ),
       openBookOverview: () =>
         navigate(
           `/book-overview?book=${encodeURIComponent(reader.selectedBook)}`,
@@ -957,7 +958,6 @@ export function useBibleReaderPage() {
       setTranslationSearch,
       updateFontSize,
       openSearch: () => navigate("/search"),
-      navigateToChapter: reader.navigateTo,
       toggleVerse: reader.toggleVerse,
       handleToggleHighlight,
       handleToggleFavorite,

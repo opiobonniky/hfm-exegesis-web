@@ -14,14 +14,13 @@ export default function BibleReader() {
 
   // The toolbar is positioned at z-[70], above every overlay, so it would float
   // in front of any panel that covers the verse it belongs to. Hide it whenever
-  // a panel is open — the verse menus, and the sidebar overlay.
+  // a panel is open.
   const verseToolbarHidden =
     data.hasSelection ||
     data.verseActionsOpen ||
     data.drawerOpen ||
     data.noteDialogOpen ||
     data.multiHighlightDialogOpen ||
-    data.sidebarOpen ||
     data.translationOpen ||
     data.audioActive;
 
@@ -34,7 +33,8 @@ export default function BibleReader() {
         bookName={data.selectedBook}
         chapter={data.selectedChapter}
         backLabel={data.backLabel}
-        selectBookChapterLabel={data.selectBookChapterLabel}
+        selectBookLabel={data.selectBookLabel}
+        selectChapterLabel={data.selectChapterLabel}
         searchLabel={data.searchLabel}
         listenLabel={data.listenLabel}
         stopLabel={data.stopLabel}
@@ -46,7 +46,8 @@ export default function BibleReader() {
         translationSearch={data.translationSearch}
         fontSize={data.fontSize}
         onBack={actions.goBack}
-        onToggleSidebar={actions.toggleSidebar}
+        onSelectBook={actions.openBookSelection}
+        onSelectChapter={actions.openChapterSelection}
         onBookOverview={actions.openBookOverview}
         onAudioToggle={actions.handleReadChapter}
         onTranslationSelect={actions.selectTranslation}
@@ -58,12 +59,8 @@ export default function BibleReader() {
       <BibleReaderBody
         scrollRef={data.scrollRef}
         fontSize={data.fontSize}
-        sidebarOpen={data.sidebarOpen}
-        isRtl={data.isRtl}
-        books={data.backendBooks}
         selectedBook={data.selectedBook}
         selectedChapter={data.selectedChapter}
-        booksLoading={data.booksLoading}
         chapters={data.chapters}
         headingsByChapter={data.headingsByChapter}
         audioVerseKey={data.audioVerseKey}
@@ -87,9 +84,6 @@ export default function BibleReader() {
         canGoPrev={data.canGoPrev}
         canGoNext={data.canGoNext}
         onFontSizeChange={actions.updateFontSize}
-        onCloseSidebar={actions.closeSidebar}
-        onSelectChapter={actions.navigateToChapter}
-        onBookOverview={actions.openBookOverview}
         onToggleVerse={actions.toggleVerse}
         onToggleHighlight={actions.handleToggleHighlight}
         onToggleFavorite={actions.handleToggleFavorite}

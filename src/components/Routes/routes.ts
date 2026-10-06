@@ -25,6 +25,8 @@ const ReadingPlans = lazy(() => import("@/features/ReadingPlan/pages/ReadingPlan
 const EditReadingPlan = lazy(() => import("@/features/ReadingPlan/pages/EditReadingPlan"));
 
 const BibleReader = lazy(() => import("@/features/Bible/pages/BibleReader"));
+const BibleBookSelection = lazy(() => import("@/features/Bible/pages/BibleBookSelection"));
+const BibleChapterSelection = lazy(() => import("@/features/Bible/pages/BibleChapterSelection"));
 const TestSessionSetup = lazy(() => import("@/features/Bible/pages/TestSessionSetup"));
 const BookOverview = lazy(() => import("@/features/Bible/pages/BookOverview"));
 const UserDashboard = lazy(() => import("@/features/Home/pages/UserDashboard"));
@@ -283,6 +285,20 @@ const routeConfigs = {
     isProtected: true,
     requiresLayout: true,
     title: tt("Bible Reader"),
+  },
+  bibleBookSelection: {
+    path: "/bible-books",
+    component: BibleBookSelection,
+    isProtected: true,
+    requiresLayout: true,
+    title: tt("Select Book"),
+  },
+  bibleChapterSelection: {
+    path: "/bible-chapters",
+    component: BibleChapterSelection,
+    isProtected: true,
+    requiresLayout: true,
+    title: tt("Select Chapter"),
   },
   testSession: {
     path: "/test-session",

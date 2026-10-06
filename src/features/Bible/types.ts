@@ -230,11 +230,59 @@ export interface VerseActionSheetProps {
 
 export type HeadingsByChapter = Record<string, ChapterHeading[]>;
 
+export type BibleTestament = "Old" | "New";
+
+export interface BibleSelectionBook {
+  bookNumber: number;
+  bookName: string;
+  maxChapter: number;
+  testament: BibleTestament;
+}
+
+export interface BibleBookSelectionProps {
+  books: BibleSelectionBook[];
+  tabs: Array<{ value: BibleTestament; label: string; count: number }>;
+  activeTestament: BibleTestament;
+  selectedBook: string | null;
+  searchQuery: string;
+  isFiltering: boolean;
+  isRtl: boolean;
+  title: string;
+  subtitle: string;
+  searchPlaceholder: string;
+  noResultsLabel: string;
+  chaptersLabel: string;
+  currentBookLabel: string;
+  backLabel: string;
+  onBack: () => void;
+  onSearchChange: (query: string) => void;
+  onClearSearch: () => void;
+  onTestamentChange: (testament: BibleTestament) => void;
+  onSelectBook: (bookName: string) => void;
+}
+
+export interface BibleChapterSelectionProps {
+  chapters: number[];
+  currentChapter: number;
+  isRtl: boolean;
+  title: string;
+  subtitle: string;
+  summaryLabel: string;
+  totalLabel: string;
+  chapterLabel: string;
+  selectBookLabel: string;
+  backLabel: string;
+  onBack: () => void;
+  onSelectBook: () => void;
+  onSelectChapter: (chapter: number) => void;
+}
+
 export interface BibleReaderHeaderProps {
   bookName: string;
   chapter: number;
   backLabel: string;
-  selectBookChapterLabel: string;
+  selectBookLabel: string;
+  selectChapterLabel: string;
   searchLabel: string;
   listenLabel: string;
   stopLabel: string;
@@ -246,7 +294,8 @@ export interface BibleReaderHeaderProps {
   translationSearch: string;
   fontSize: number;
   onBack: () => void;
-  onToggleSidebar: () => void;
+  onSelectBook: () => void;
+  onSelectChapter: () => void;
   onBookOverview: () => void;
   onAudioToggle: () => void;
   onTranslationSelect: (id: string) => void;
@@ -259,12 +308,8 @@ export interface BibleReaderHeaderProps {
 export interface BibleReaderBodyProps {
   scrollRef: RefObject<HTMLDivElement>;
   fontSize: number;
-  sidebarOpen: boolean;
-  isRtl: boolean;
-  books: { bookNumber: number; bookName: string; maxChapter: number }[];
   selectedBook: string;
   selectedChapter: number;
-  booksLoading: boolean;
   chapters: ChapterData[];
   headingsByChapter?: HeadingsByChapter;
   audioVerseKey?: string | null;
@@ -293,9 +338,6 @@ export interface BibleReaderBodyProps {
   canGoPrev: boolean;
   canGoNext: boolean;
   onFontSizeChange: (size: number) => void;
-  onCloseSidebar: () => void;
-  onSelectChapter: (book: string, chapter: number) => void;
-  onBookOverview: () => void;
   onToggleVerse: (key: string) => void;
   onToggleHighlight: (
     book: string,

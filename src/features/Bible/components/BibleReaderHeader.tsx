@@ -6,6 +6,7 @@ import {
   Search,
   ChevronDown,
   BookOpen,
+  Layers3,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import FontSizeControls from "./FontSizeControls";
@@ -17,7 +18,8 @@ export default function BibleReaderHeader({
   bookName,
   chapter,
   backLabel,
-  selectBookChapterLabel,
+  selectBookLabel,
+  selectChapterLabel,
   searchLabel,
   listenLabel,
   stopLabel,
@@ -29,7 +31,8 @@ export default function BibleReaderHeader({
   translationSearch,
   fontSize,
   onBack,
-  onToggleSidebar,
+  onSelectBook,
+  onSelectChapter,
   onBookOverview,
   onAudioToggle,
   onTranslationSelect,
@@ -52,24 +55,34 @@ export default function BibleReaderHeader({
           <ArrowLeft className={`h-4 w-4 ${isRtl ? "rotate-180" : ""}`} />
         </Button>
 
-        {/* Book / Chapter */}
+        {/* Book */}
         <button
-          onClick={onToggleSidebar}
-          aria-label={selectBookChapterLabel}
-          aria-haspopup="dialog"
+          type="button"
+          onClick={onSelectBook}
+          aria-label={selectBookLabel}
           className="group flex min-w-0 items-center gap-2 rounded-xl px-2 py-1.5 text-start transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:px-3"
         >
           <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
             <BookOpen className="h-4 w-4" />
           </span>
-          <span className="flex min-w-0 flex-col">
-            <span className="max-w-[8rem] truncate font-[family-name:var(--font-heading)] text-sm font-bold leading-tight tracking-tight text-foreground sm:max-w-[14rem] sm:text-base">
-              {bookName}
-            </span>
-            <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">{tt("Chapter")}{chapter}
-            </span>
+          <span className="max-w-[5.5rem] truncate font-[family-name:var(--font-heading)] text-sm font-bold leading-tight tracking-tight text-foreground sm:max-w-[12rem] sm:text-base">
+            {bookName}
           </span>
           <ChevronDown className="h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform group-hover:translate-y-0.5" />
+        </button>
+
+        {/* Chapter */}
+        <button
+          type="button"
+          onClick={onSelectChapter}
+          aria-label={selectChapterLabel}
+          className="group flex shrink-0 items-center gap-1.5 rounded-xl px-2 py-2 text-start transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:px-3"
+        >
+          <Layers3 className="h-4 w-4 text-primary" />
+          <span className="text-xs font-bold text-foreground sm:text-sm">
+            <span className="hidden sm:inline">{tt("Chapter")} </span>{chapter}
+          </span>
+          <ChevronDown className="h-3.5 w-3.5 text-muted-foreground transition-transform group-hover:translate-y-0.5" />
         </button>
 
         <div className="flex-1" />

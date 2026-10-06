@@ -24,6 +24,10 @@ export const BIBLE_BOOKS = Object.entries(BIBLE_BOOK_CHAPTERS).map(
     maxChapter,
   }),
 );
+export const BIBLE_SELECTION_BOOKS = BIBLE_BOOKS.map((book) => ({
+  ...book,
+  testament: book.bookNumber <= 39 ? ("Old" as const) : ("New" as const),
+}));
 export function isBibleBook(book: string | null): book is BibleBookName {
   return Boolean(book && book in BIBLE_BOOK_CHAPTERS);
 }

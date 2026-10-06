@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { LoadingSkeleton } from "@/components/verseResources";
 import type { BibleReaderBodyProps } from "../types";
-import BibleSidebar from "./BibleSidebar";
 import ChapterContent from "./ChapterContent";
 import AudioControlBar from "./AudioControlBar";
 import FontSizeControls from "./FontSizeControls";
@@ -16,12 +15,8 @@ import { tt } from '@/components/languages/hardcodedTranslate';
 export default function BibleReaderBody({
   scrollRef,
   fontSize,
-  sidebarOpen,
-  isRtl,
-  books,
   selectedBook,
   selectedChapter,
-  booksLoading,
   chapters,
   headingsByChapter,
   audioVerseKey,
@@ -45,9 +40,6 @@ export default function BibleReaderBody({
   canGoPrev,
   canGoNext,
   onFontSizeChange,
-  onCloseSidebar,
-  onSelectChapter,
-  onBookOverview,
   onToggleVerse,
   onToggleHighlight,
   onToggleFavorite,
@@ -73,19 +65,6 @@ export default function BibleReaderBody({
 }: BibleReaderBodyProps) {
   return (
     <div className="relative flex min-h-0 flex-1 overflow-hidden">
-      {/* Sidebar: absolute overlay */}
-      <BibleSidebar
-        open={sidebarOpen}
-        onClose={onCloseSidebar}
-        isRtl={isRtl}
-        books={books}
-        selectedBook={selectedBook}
-        selectedChapter={selectedChapter}
-        onSelect={onSelectChapter}
-        onBookOverview={onBookOverview}
-        loading={booksLoading}
-      />
-
       {/* Content column: flex-col so main scrolls independently */}
       <div className="relative flex min-h-0 min-w-0 flex-1 flex-col">
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-primary/[0.035] via-transparent to-accent/[0.025]" />

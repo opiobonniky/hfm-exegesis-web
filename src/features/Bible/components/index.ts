@@ -8,6 +8,8 @@ export { default as TranslationPicker } from "./TranslationPicker";
 export { default as BibleSidebar } from "./BibleSidebar";
 export { default as VerseExplanationDrawer } from "./VerseExplanationDrawer";
 export { default as BibleReaderHeader } from "./BibleReaderHeader";
+export { default as BibleBookSelection } from "./BibleBookSelection";
+export { default as BibleChapterSelection } from "./BibleChapterSelection";
 export { default as SearchResultCard } from "./SearchResultCard";
 export { default as SearchFilters } from "./SearchFilters";
 export { default as SearchSkeleton } from "./SearchSkeleton";
