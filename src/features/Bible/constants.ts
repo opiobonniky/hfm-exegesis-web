@@ -85,6 +85,14 @@ export const BIBLE_READER_MIN_FONT_SIZE = 12;
 export const BIBLE_READER_MAX_FONT_SIZE = 48;
 export const BIBLE_READER_DEFAULT_FONT_SIZE = 20;
 
+export const VERSE_ACTION_TONE_CLASSES = {
+  primary: "bg-primary/10 text-primary",
+  info: "bg-[hsl(var(--info)/0.12)] text-[hsl(var(--info))]",
+  success: "bg-[hsl(var(--success)/0.12)] text-[hsl(var(--success))]",
+  warning: "bg-[hsl(var(--warning)/0.14)] text-[hsl(var(--warning))]",
+  accent: "bg-accent/15 text-accent-foreground",
+} as const;
+
 /**
  * Verse highlight palette — mirrors the mobile app's
  * `app/src/utilits/HIGHLIGHT_COLORS.ts` exactly (same ids, same hex values)

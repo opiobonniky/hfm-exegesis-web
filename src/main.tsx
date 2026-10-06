@@ -16,18 +16,37 @@ const GOOGLE_CLIENT_ID = "270479211517-kinap7kv1bcd3dlpuodt5fkju361fdqb.apps.goo
 // In development: unregister any previously-installed SW and clear all caches.
 // Old SWs cache stale Vite chunks which break HMR and cause duplicate React
 // instances (→ "Invalid hook call" errors).
-if ("serviceWorker" in navigator) {
+async function prepareServiceWorker() {
+  if (!("serviceWorker" in navigator)) return true;
+
   if (import.meta.env.DEV) {
-    navigator.serviceWorker.getRegistrations().then((regs) => {
-      for (const reg of regs) {
-        reg.unregister();
-        console.log("[SW] Unregistered:", reg.scope);
-      }
-    });
+    const isAppWorker = (worker?: ServiceWorker | null) =>
+      Boolean(worker && new URL(worker.scriptURL).pathname === "/sw.js");
+    const wasControlled = isAppWorker(navigator.serviceWorker.controller);
+    const registrations = (await navigator.serviceWorker.getRegistrations()).filter(
+      (registration) =>
+        isAppWorker(registration.active) ||
+        isAppWorker(registration.installing) ||
+        isAppWorker(registration.waiting),
+    );
+    const removals = await Promise.all(
+      registrations.map(async (registration) => {
+        const removed = await registration.unregister();
+        if (removed) console.log("[SW] Unregistered:", registration.scope);
+        return removed;
+      }),
+    );
+
     if ("caches" in window) {
-      caches.keys().then((keys) =>
-        Promise.all(keys.map((k) => caches.delete(k))),
-      );
+      const keys = await caches.keys();
+      await Promise.all(keys.map((key) => caches.delete(key)));
+    }
+
+    // A removed worker controls this document until the next navigation. Do not
+    // mount against its stale module graph; reload once after unregistering it.
+    if (wasControlled && removals.some(Boolean)) {
+      window.location.reload();
+      return false;
     }
   } else {
     window.addEventListener("load", () => {
@@ -41,12 +60,23 @@ if ("serviceWorker" in navigator) {
         });
     });
   }
+
+  return true;
 }
 
-createRoot(document.getElementById("root")!).render(
-  <RouteErrorBoundary onReset={() => window.location.reload()}>
-    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-      <App />
-    </GoogleOAuthProvider>
-  </RouteErrorBoundary>
-);
+void prepareServiceWorker()
+  .catch((error) => {
+    console.warn("[SW] Cleanup failed; continuing without cleanup", error);
+    return true;
+  })
+  .then((shouldMount) => {
+    if (!shouldMount) return;
+
+    createRoot(document.getElementById("root")!).render(
+      <RouteErrorBoundary onReset={() => window.location.reload()}>
+        <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+          <App />
+        </GoogleOAuthProvider>
+      </RouteErrorBoundary>,
+    );
+  });

@@ -105,13 +105,14 @@ describe("useBibleReader translation selection", () => {
       wrapper: wrapper("/bible?book=Genesis&chapter=1&translation=KJV"),
     });
 
-    await waitFor(() => expect(result.current.data.versionId).toBe("KJV"));
-
-    expect(mocks.getVersesBatch).toHaveBeenCalledWith(
-      "KJV",
-      "Genesis",
-      [1, 2, 3],
-    );
+    await waitFor(() => {
+      expect(result.current.data.versionId).toBe("KJV");
+      expect(mocks.getVersesBatch).toHaveBeenCalledWith(
+        "KJV",
+        "Genesis",
+        [1, 2, 3],
+      );
+    });
     expect(localStorage.getItem("preferred_translation")).toBe("KJV");
   });
 
@@ -165,5 +166,51 @@ describe("useBibleReader translation selection", () => {
 
     expect(result.current.data.versionId).toBe("French");
     expect(result.current.data.chapters[0]?.verses[0]?.text).toBe("Français 1");
+  });
+
+  it("preserves loaded chapters when scrolling updates the visible chapter", async () => {
+    mocks.getTranslations.mockResolvedValue([
+      { id: "Berean", name: "Berean", language: "en" },
+    ]);
+    mocks.getVersesBatch.mockImplementation(
+      (_translation: string, _book: string, chapters: number[]) =>
+        Promise.resolve(
+          chapters.map((chapterNumber) => ({
+            chapterNumber,
+            verses: [{ verseNumber: 1, text: `Verse ${chapterNumber}` }],
+          })),
+        ),
+    );
+
+    const { result } = renderHook(() => useBibleReader(), {
+      wrapper: wrapper(
+        "/bible-reader?book=Genesis&chapter=1&translation=Berean",
+      ),
+    });
+
+    await waitFor(() =>
+      expect(result.current.data.chapters.map((chapter) => chapter.chapter)).toEqual([
+        1, 2, 3,
+      ]),
+    );
+
+    await act(async () => {
+      await result.current.actions.loadMore();
+    });
+
+    await waitFor(() =>
+      expect(result.current.data.chapters.map((chapter) => chapter.chapter)).toEqual([
+        1, 2, 3, 4, 5, 6,
+      ]),
+    );
+    expect(mocks.getTranslations).toHaveBeenCalledTimes(1);
+
+    act(() => result.current.actions.setVisibleChapter(3));
+
+    await waitFor(() => expect(result.current.data.selectedChapter).toBe(3));
+    expect(result.current.data.chapters.map((chapter) => chapter.chapter)).toEqual([
+      1, 2, 3, 4, 5, 6,
+    ]);
+    expect(mocks.getTranslations).toHaveBeenCalledTimes(1);
   });
 });

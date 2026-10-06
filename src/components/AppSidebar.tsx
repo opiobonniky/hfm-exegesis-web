@@ -111,7 +111,7 @@ const userNavItems: NavItem[] = [
     url: routes.landing.path,
     icon: Home,
   },
-  { title: "Bible app", url: routes.bibleLibrary.path, icon: BookText },
+  { title: "Bible app", url: routes.bibleBookSelection.path, icon: BookText },
   { title: "Search Bible", url: routes.search.path, icon: SearchIcon },
   { title: "Verse Teaching", url: routes.userDailyVerse.path, icon: Sun },
   {
@@ -281,9 +281,9 @@ function getBibleNavUrl(): string {
       }
     }
   } catch {
-    // Ignore malformed saved positions and fall back to the library.
+    // Ignore malformed saved positions and fall back to book selection.
   }
-  return routes.bibleLibrary.path;
+  return routes.bibleBookSelection.path;
 }
 
 function BibleNavItem({
@@ -300,10 +300,14 @@ function BibleNavItem({
   const isBibleReaderActive = location.pathname.startsWith(
     routes.bibleReader.path,
   );
-  const isBibleLibraryActive = location.pathname.startsWith(
-    routes.bibleLibrary.path,
-  );
-  const active = isBibleReaderActive || isBibleLibraryActive;
+  const isBibleSelectionActive = [
+    routes.bibleBookSelection.path,
+    routes.bibleChapterSelection.path,
+    routes.bibleBookSelectionLegacyLibrary.path,
+    routes.bibleBookSelectionLegacy.path,
+    routes.bookOverview.path,
+  ].some((path) => location.pathname.startsWith(path));
+  const active = isBibleReaderActive || isBibleSelectionActive;
 
   return (
     <button
@@ -393,7 +397,7 @@ export function AppSidebar() {
   /* ── Render helper for nav list ── */
   const renderNavItems = (items: NavItem[]) =>
     items.map((item) => {
-      if (item.url === routes.bibleLibrary.path && !isAdmin) {
+      if (item.url === routes.bibleBookSelection.path && !isAdmin) {
         return (
           <li key={item.title}>
             <BibleNavItem
@@ -419,7 +423,7 @@ export function AppSidebar() {
   const renderCollapsedNavItems = (items: NavItem[]) =>
     items.map((item) => {
       const label = tt(item.title);
-      if (item.url === routes.bibleLibrary.path && !isAdmin) {
+      if (item.url === routes.bibleBookSelection.path && !isAdmin) {
         return (
           <li key={item.title}>
             <CollapsedTooltipButton label={label}>

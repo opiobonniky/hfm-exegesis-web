@@ -86,7 +86,6 @@ const GuestEntry = lazy(() => import("@/features/GuestEntry/pages/GuestEntry"));
 const DailyExegesis = lazy(() => import("@/features/DailyContent/pages/DailyExegesis"));
 const SowerPage = lazy(() => import("@/features/Subscription/pages/SowerPage"));
 const PlansPage = lazy(() => import("@/features/Subscription/pages/PlansPage"));
-const BibleLibrary = lazy(() => import("@/features/Bible/pages/BibleLibrary"));
 const VerseResources = lazy(() => import("@/features/Bible/pages/VerseResources"));
 const Onboarding = lazy(() => import("@/features/Auth/pages/Onboarding"));
 const WhoWeAre = lazy(() => import("@/features/HimFirstMedia/pages/WhoWeAre"));
@@ -99,7 +98,7 @@ const Founders = lazy(() => import("@/features/HimFirstMedia/pages/Founders"));
 // Route configuration interface
 export interface RouteConfig {
   path: string;
-  component: ComponentType<any>;
+  component: ComponentType;
   isProtected: boolean;
   requiresLayout?: boolean; // Whether to use AppLayout
   requiresPublicLayout?: boolean; // Whether to use PublicLayout
@@ -744,20 +743,19 @@ const routeConfigs = {
     title: tt("Verse Resources"),
   },
 
-  bibleLibrary: {
+  bibleBookSelectionLegacyLibrary: {
     path: "/bible-library",
-    component: BibleLibrary,
+    component: BibleBookSelection,
     isProtected: true,
     requiresLayout: true,
-    title: tt("Bible Library"),
+    title: tt("Select Book"),
   },
-  // Backward-compat alias
-  bibleLibraryLegacy: {
+  bibleBookSelectionLegacy: {
     path: "/bible",
-    component: BibleLibrary,
+    component: BibleBookSelection,
     isProtected: true,
     requiresLayout: true,
-    title: tt("Bible Library"),
+    title: tt("Select Book"),
   },
 
   // ==================== PUBLIC HIM FIRST MEDIA PAGES ====================
@@ -838,11 +836,11 @@ export const getProtectedRoutes = () =>
 
 // Helper function to get all public routes (excluding those that use PublicLayout)
 export const getPublicRoutes = () =>
-  Object.values(routes).filter((route:any) => !route.isProtected && !route.requiresPublicLayout);
+  Object.values(routes).filter((route) => !route.isProtected && !route.requiresPublicLayout);
 
 // Helper function to get public routes that use PublicLayout
 export const getPublicLayoutRoutes = () =>
-  Object.values(routes).filter((route:any) => !route.isProtected && route.requiresPublicLayout);
+  Object.values(routes).filter((route) => !route.isProtected && route.requiresPublicLayout);
 
 // Helper function to get routes that require layout
 export const getLayoutRoutes = () =>

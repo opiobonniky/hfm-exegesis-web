@@ -33,6 +33,8 @@ const parsePositiveInteger = (value: string | null) => {
 
 export function useBibleReader() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const setSearchParamsRef = useRef(setSearchParams);
+  setSearchParamsRef.current = setSearchParams;
   const { lang: language } = useLanguage();
   const requestedTranslationRef = useRef(searchParams.get("translation") || "");
   requestedTranslationRef.current = searchParams.get("translation") || "";
@@ -116,7 +118,7 @@ export function useBibleReader() {
         } catch {
           // The reader still works when storage is unavailable.
         }
-        setSearchParams(
+        setSearchParamsRef.current(
           (current) => {
             if (current.get("translation") === nextVersion) return current;
             const next = new URLSearchParams(current);
@@ -138,7 +140,7 @@ export function useBibleReader() {
     return () => {
       cancelled = true;
     };
-  }, [language, setSearchParams]);
+  }, [language]);
 
   const fetchChapters = useCallback(
     async (

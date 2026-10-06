@@ -22,8 +22,10 @@ function getBibleUrl(): string {
         return `${routes.bibleReader.path}?book=${encodeURIComponent(book)}&chapter=${chapter}`;
       }
     }
-  } catch {}
-  return routes.bibleLibrary.path;
+  } catch {
+    // Ignore malformed saved positions and open book selection instead.
+  }
+  return routes.bibleBookSelection.path;
 }
 
 interface NavTab {
@@ -44,11 +46,14 @@ const NAV_TABS: NavTab[] = [
   {
     label: tt("Bible"),
     icon: BookOpen,
-    path: routes.bibleLibrary.path,
+    path: routes.bibleBookSelection.path,
     activePaths: [
-      routes.bibleLibrary.path,
-      routes.bibleLibraryLegacy.path,
+      routes.bibleBookSelection.path,
+      routes.bibleChapterSelection.path,
+      routes.bibleBookSelectionLegacyLibrary.path,
+      routes.bibleBookSelectionLegacy.path,
       routes.bibleReader.path,
+      routes.bookOverview.path,
     ],
   },
   {
@@ -85,12 +90,10 @@ export default function MobileBottomNav() {
     );
 
   const getLabel = (baseLabel: string): string => {
-    const key = `sidebar.${baseLabel.toLowerCase()}`;
-    const parts = key.split(".");
-    if (parts.length === 2 && (t as any)[parts[0]]?.[parts[1]]) {
-      return (t as any)[parts[0]][parts[1]];
-    }
-    return baseLabel;
+    const translated = (t.sidebar as Record<string, string>)[
+      baseLabel.toLowerCase()
+    ];
+    return translated || baseLabel;
   };
 
   const handleTabClick = (tab: NavTab) => {

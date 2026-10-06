@@ -88,7 +88,7 @@ export default function ChapterContent({
   };
 
   return (
-    <div className="mx-auto w-full  space-y-16 pb-10 sm:space-y-20 sm:pb-16">
+    <div className="mx-auto w-full max-w-5xl space-y-16 pb-10 sm:space-y-20 sm:pb-16">
       {chapters.map((ch) => {
         const chapterKey = `${ch.book}-${ch.chapter}`;
         return (

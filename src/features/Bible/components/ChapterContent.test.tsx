@@ -49,6 +49,11 @@ function renderChapterContent(toolbarHidden: boolean) {
 // ── Tests ──
 
 describe("ChapterContent verse toolbar visibility", () => {
+  it("constrains chapter text to the reader width", () => {
+    const { container } = renderChapterContent(false);
+    expect(container.firstElementChild).toHaveClass("max-w-5xl");
+  });
+
   it("renders a toolbar for every verse while no overlay is open", () => {
     const { container } = renderChapterContent(false);
     expect(getToolbars(container)).toHaveLength(chapters[0].verses.length);

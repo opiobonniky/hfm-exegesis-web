@@ -1,20 +1,12 @@
-import { LucideIcon } from "lucide-react";
+import type { ActionSectionProps } from "../types";
 
-interface ActionSectionProps {
-  title: string;
-  children: React.ReactNode;
-  gridCols?: string;
-}
-
-export function ActionSection({ title, children, gridCols = "grid-cols-1 gap-2 sm:grid-cols-2" }: ActionSectionProps) {
+export function ActionSection({ title, children }: ActionSectionProps) {
   return (
-    <section className="space-y-2.5">
-      <h2 className="px-1 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+    <section className="border-t border-border/70 pt-3 first:border-t-0">
+      <h2 className="pb-2 text-[11px] font-extrabold uppercase tracking-[0.08em] text-muted-foreground">
         {title}
       </h2>
-      <div className={`grid ${gridCols}`}>
-        {children}
-      </div>
+      <div>{children}</div>
     </section>
   );
 }

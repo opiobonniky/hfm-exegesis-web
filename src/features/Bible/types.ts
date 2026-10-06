@@ -1,4 +1,4 @@
-import type { MutableRefObject, RefObject } from "react";
+import type { MutableRefObject, ReactNode, RefObject } from "react";
 import type { LucideIcon } from "lucide-react";
 import type { ChapterHeading } from "@/services/bibleApi";
 import type {
@@ -14,14 +14,6 @@ export interface BookInfo {
   testament: "OT" | "NT";
   chapters: number;
   group: string;
-}
-
-export interface LibraryBookInfo {
-  bookNumber: number;
-  bookName: string;
-  testament: string;
-  chaptersCount: number;
-  totalVerses: number;
 }
 
 export interface BibleVersion {
@@ -95,7 +87,6 @@ export interface Translation {
   abbreviation: string;
 }
 
-export type CovenantFilter = "all" | "ot" | "nt";
 export type ActivityType = "all" | "highlights" | "notes" | "favorites" | "history";
 /** Every study section the Verse Resources page can be routed to. */
 export type ResourceSectionKey =
@@ -197,12 +188,42 @@ export interface ActionButtonProps {
   title: string;
   description?: string;
   onClick: () => void;
+  tone?: VerseActionTone;
   /**
    * How many entries this action leads to, when known. Rendered as a badge.
    * Actions whose section is empty are filtered out by the caller before
    * render, so there is no disabled state here.
    */
   count?: number | null;
+}
+
+export type VerseActionTone =
+  | "primary"
+  | "info"
+  | "success"
+  | "warning"
+  | "accent";
+
+export interface ActionSectionProps {
+  title: string;
+  children: ReactNode;
+}
+
+export interface LabStageItemProps {
+  index: number;
+  title: string;
+  description: string;
+  onClick: () => void;
+}
+
+export interface VerseResourceAction {
+  section: ResourceSectionKey;
+  icon: LucideIcon;
+  title: string;
+  description: string;
+  count: number | null;
+  tone: VerseActionTone;
+  onClick: () => void;
 }
 
 export interface VerseActionSheetProps {

@@ -2,9 +2,9 @@
 // Cache-first for static assets, network-first for API calls, offline fallback.
 // In development (?dev=true), bypasses all caching to avoid stale HMR bundles.
 
-const CACHE_NAME = "exegesis-v4";
-const STATIC_CACHE = "exegesis-static-v4";
-const API_CACHE = "exegesis-api-v4";
+const CACHE_NAME = "exegesis-v5";
+const STATIC_CACHE = "exegesis-static-v5";
+const API_CACHE = "exegesis-api-v5";
 
 // Detect development mode: localhost or 127.0.0.1 → no caching.
 const IS_DEV = self.location.hostname === "localhost" || self.location.hostname === "127.0.0.1";
@@ -106,14 +106,38 @@ self.addEventListener("fetch", (event) => {
     return; // Don't intercept — let the browser handle all requests normally
   }
 
-  // ── Static assets (cache-first) ──
+  // ── Executable assets (network-first) ──
+  // Never let an old application chunk create a second React/context graph.
   if (
     url.origin === self.location.origin &&
     (request.destination === "style" ||
       request.destination === "script" ||
-      request.destination === "font" ||
+      url.pathname.match(/\.(css|js)$/))
+  ) {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          if (response.ok) {
+            const cloned = response.clone();
+            caches.open(STATIC_CACHE).then((cache) => cache.put(request, cloned));
+          }
+          return response;
+        })
+        .catch(() =>
+          caches.match(request).then(
+            (cached) => cached || new Response("Offline", { status: 503 }),
+          ),
+        ),
+    );
+    return;
+  }
+
+  // ── Static media (cache-first) ──
+  if (
+    url.origin === self.location.origin &&
+    (request.destination === "font" ||
       request.destination === "image" ||
-      url.pathname.match(/\.(css|js|woff2?|ttf|png|jpg|jpeg|svg|ico|json)$/))
+      url.pathname.match(/\.(woff2?|ttf|png|jpg|jpeg|svg|ico|json)$/))
   ) {
     event.respondWith(
       caches.match(request).then((cached) => {

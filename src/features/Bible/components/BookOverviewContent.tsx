@@ -1,5 +1,5 @@
 // BookOverviewContent — displays all prologue sections for a book
-import { BookOpen, Info } from "lucide-react";
+import { BookOpen, CalendarDays, MapPin, PenLine } from "lucide-react";
 import type { BookPrologue } from "@/services/bookProloguesApi";
 import { tt } from '@/components/languages/hardcodedTranslate';
 
@@ -96,41 +96,71 @@ export default function BookOverviewContent({
   testamentLabel,
 }: BookOverviewContentProps) {
   return (
-    <div className="pb-6">
+    <div className="mx-auto w-full max-w-3xl pb-6">
       {/* Title hero section */}
-      <div className="relative overflow-hidden bg-gradient-to-b from-primary/5 via-primary/[0.02] to-transparent">
-        <div className="px-4 sm:px-6 pt-8 pb-6 text-center space-y-3">
-          <div className="mx-auto flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20">
-            <BookOpen className="w-8 h-8 text-primary" />
+      <section className="relative isolate overflow-hidden border-b border-border/70 bg-card">
+        <div className="pointer-events-none absolute -right-24 -top-28 size-72 rounded-full bg-primary/[0.08] blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-32 -left-20 size-64 rounded-full bg-accent/10 blur-3xl" />
+
+        <div className="relative px-5 py-9 text-center sm:px-8 sm:py-12">
+          <div className="mx-auto mb-5 flex size-14 rotate-3 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 shadow-sm sm:size-16">
+            <BookOpen className="size-7 -rotate-3 text-primary sm:size-8" aria-hidden="true" />
           </div>
-          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
+
+          <div className="mb-3 flex items-center justify-center gap-3">
+            <span className="h-px w-8 bg-primary/30" aria-hidden="true" />
+            <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-primary">
+              {tt("Book overview")}
+            </p>
+            <span className="h-px w-8 bg-primary/30" aria-hidden="true" />
+          </div>
+
+          <h1 className="font-[family-name:var(--font-heading)] text-4xl font-bold tracking-[-0.03em] text-foreground sm:text-5xl">
             {bookName}
           </h1>
+
           {designation && (
-            <p className="text-sm text-primary font-medium">{designation}</p>
+            <p className="mx-auto mt-3 max-w-xl text-sm font-medium leading-6 text-muted-foreground sm:text-base">
+              {designation}
+            </p>
           )}
-          <div className="flex items-center justify-center gap-2 flex-wrap">
-            <span className="inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full bg-primary/10 text-primary border border-primary/20">
+
+          <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
+            <span className="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
               {testamentLabel}
             </span>
             {prologue.chapters && (
-              <span className="inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full bg-muted text-muted-foreground border border-border">
-                {prologue.chapters}{tt("Chapters")}</span>
+              <span className="inline-flex items-center rounded-full border border-border/80 bg-background/70 px-3 py-1 text-xs font-semibold text-muted-foreground shadow-sm backdrop-blur-sm">
+                {prologue.chapters} {tt("Chapters")}
+              </span>
             )}
           </div>
+
           {(prologue.author || prologue.authorDetail) && (
-            <p className="text-xs text-muted-foreground">{tt("Written by")}<span className="font-medium text-foreground">{prologue.authorDetail || prologue.author}</span>
+            <div className="mx-auto mt-7 flex max-w-xl flex-wrap items-center justify-center gap-x-5 gap-y-2 border-t border-border/70 pt-5 text-sm text-muted-foreground">
+              <span className="inline-flex items-center gap-1.5">
+                <PenLine className="size-3.5 text-primary/70" aria-hidden="true" />
+                {tt("Written by")}{" "}
+                <span className="font-semibold text-foreground">
+                  {prologue.author || prologue.authorDetail}
+                </span>
+              </span>
               {prologue.dateWritten && (
-                <> · {prologue.dateWritten}</>
+                <span className="inline-flex items-center gap-1.5">
+                  <CalendarDays className="size-3.5 text-primary/70" aria-hidden="true" />
+                  {prologue.dateWritten}
+                </span>
               )}
               {prologue.locationWritten && (
-                <> · {prologue.locationWritten}</>
+                <span className="inline-flex items-center gap-1.5">
+                  <MapPin className="size-3.5 text-primary/70" aria-hidden="true" />
+                  {prologue.locationWritten}
+                </span>
               )}
-            </p>
+            </div>
           )}
         </div>
-        <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
-      </div>
+      </section>
       {/* Content sections */}
       <div className="px-4 sm:px-6 pt-6 space-y-6">
         <DetailBlock label={tt("Overview")} value={prologue.summary} />

@@ -41,11 +41,22 @@ const renderSheet = () => {
 };
 
 describe("VerseActionSheet Lab steps", () => {
+  it("renders the app-style Lab card, numbered steps, and described action rows", () => {
+    renderSheet();
+
+    expect(screen.getByText("Lab project")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Open Verse in Lab/i })).toBeInTheDocument();
+    expect(screen.getByText("01")).toBeInTheDocument();
+    expect(screen.getByText("05")).toBeInTheDocument();
+    expect(screen.getByText("Hear this verse read aloud.")).toBeInTheDocument();
+    expect(screen.getByText("Copy the verse text and reference.")).toBeInTheDocument();
+  });
+
   it("starts Look directly", async () => {
     const user = userEvent.setup();
     const { onOpenChange, onStartLab } = renderSheet();
 
-    await user.click(screen.getByRole("button", { name: /Look/i }));
+    await user.click(screen.getByText("Look").closest("button")!);
 
     expect(onOpenChange).toHaveBeenCalledWith(false);
     expect(onStartLab).toHaveBeenCalledWith("look");
