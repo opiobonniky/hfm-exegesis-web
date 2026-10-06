@@ -26,6 +26,7 @@ import type {
   VerseExplanationData,
   VerseActionTarget,
 } from "../types";
+import { getContiguousVerseRange } from "../utils/selectedVerseRange";
 import { tt } from '@/components/languages/hardcodedTranslate';
 
 const parseRequestedChapter = (value: string | null) => {
@@ -450,8 +451,10 @@ export function useBibleReaderPage() {
       navigate(
         actionUrl("/bible-study", {
           verseStart: String(verseActionTarget.verse),
-          verseEnd: String(verseActionTarget.verse),
-          stage,
+          verseEnd: String(
+            verseActionTarget.verseEnd ?? verseActionTarget.verse,
+          ),
+          requestedStage: stage,
         }),
       );
     },
@@ -577,6 +580,18 @@ export function useBibleReaderPage() {
         chapter: chapter.chapter,
       })),
   );
+
+  const handleOpenSelectedVerseActions = useCallback(() => {
+    const target = getContiguousVerseRange(selectedVerseData);
+    if (!target) {
+      toast.error(
+        tt('Exegesis Lab requires consecutive verses from one chapter.'),
+      );
+      return;
+    }
+    setVerseActionTarget(target);
+    setVerseActionsOpen(true);
+  }, [selectedVerseData]);
 
   const clearSelection = useCallback(
     () => reader.clearSelectedVerses(),
@@ -959,6 +974,7 @@ export function useBibleReaderPage() {
       handleCopySelected,
       handleShareSelected,
       handleListenSelectedAudio,
+      handleOpenSelectedVerseActions,
       clearSelection,
       handlePrevChapter,
       handleNextChapter,

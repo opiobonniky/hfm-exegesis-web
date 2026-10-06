@@ -67,13 +67,15 @@ export interface LabChartItem {
 }
 
 // ─── LabFlow types ──────────────────────────────────────────────────────────────
-export type LabStage = "passage" | "look" | "listen" | "learn" | "abide" | "apply" | "completed";
+export type LabProcessStage = "look" | "listen" | "learn" | "abide" | "apply";
+export type LabStage = "passage" | LabProcessStage | "completed";
 export type PassageSubStage = "book" | "chapter" | "verse";
 export type LearnTab = "exegesis" | "language" | "history" | "prologue";
 
 export interface LabFlowState {
   sessionId: string | null;
   stage: LabStage;
+  requestedStage: LabProcessStage | null;
   completed: boolean;
   loading: boolean;
   saving: boolean;

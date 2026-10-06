@@ -233,7 +233,7 @@ export function useLabFlowPage() {
       if ((e.ctrlKey || e.metaKey) && e.key === "s") { e.preventDefault(); if (lab.data.stage !== "passage" && lab.data.stage !== "completed") lab.actions.saveCurrentProgress(); showShortcutHint("Progress saved!"); }
       if (lab.data.stage === "completed" && e.key.toLowerCase() === "r") { e.preventDefault(); lab.actions.resetAll(); }
       const num = parseInt(e.key);
-      if (num >= 1 && num <= STAGE_ORDER.length) { const target = STAGE_ORDER[num - 1]; const currentIdx = STAGE_ORDER.indexOf(lab.data.stage); if (num - 1 < currentIdx) { lab.actions.goToStage(target); showShortcutHint(`Jumped to ${target}`); } }
+      if (num >= 1 && num <= STAGE_ORDER.length) { const target = STAGE_ORDER[num - 1]; const currentIdx = STAGE_ORDER.findIndex((stage) => stage === lab.data.stage); if (num - 1 < currentIdx) { lab.actions.goToStage(target); showShortcutHint(`Jumped to ${target}`); } }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);

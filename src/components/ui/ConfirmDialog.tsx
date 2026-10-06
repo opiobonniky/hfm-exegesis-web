@@ -23,6 +23,7 @@ interface ConfirmDialogProps {
   variant?: "default" | "destructive";
   onConfirm: () => void;
   loading?: boolean;
+  hideCancel?: boolean;
 }
 
 export function ConfirmDialog({
@@ -35,6 +36,7 @@ export function ConfirmDialog({
   variant = "default",
   onConfirm,
   loading,
+  hideCancel = false,
 }: ConfirmDialogProps) {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
@@ -44,7 +46,9 @@ export function ConfirmDialog({
           <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={loading}>{cancelLabel}</AlertDialogCancel>
+          {!hideCancel && (
+            <AlertDialogCancel disabled={loading}>{cancelLabel}</AlertDialogCancel>
+          )}
           <AlertDialogAction
             onClick={onConfirm}
             disabled={loading}

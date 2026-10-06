@@ -117,6 +117,7 @@ export type VerseActionTarget = {
   book: string;
   chapter: number;
   verse: number;
+  verseEnd?: number;
   text: string;
 };
 

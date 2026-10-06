@@ -44,7 +44,7 @@ export default function VerseActionSheet({
   onCopy,
 }: VerseActionSheetProps) {
   const reference = target
-    ? `${target.book} ${target.chapter}:${target.verse}`
+    ? `${target.book} ${target.chapter}:${target.verse}${target.verseEnd && target.verseEnd !== target.verse ? `-${target.verseEnd}` : ''}`
     : "";
 
   // "3 commentaries", "2 cross references", … shown beside each resource

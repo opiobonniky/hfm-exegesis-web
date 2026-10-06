@@ -6,9 +6,12 @@ import {
   saveStageProgress,
   saveProgress,
 } from "@/services/exegesisApi";
-import { BOOK_NAMES } from "../constants";
-import type { LabStage, LabFlowState } from "../types";
+import { BOOK_NAMES, STAGE_ORDER } from "../constants";
+import type { LabProcessStage, LabStage, LabFlowState } from "../types";
 import { saveAbideProgress, saveApplyProgress } from "../services/save-flow-progress";
+
+const isProcessStage = (value: string | null): value is LabProcessStage =>
+  Boolean(value && STAGE_ORDER.includes(value as LabProcessStage));
 
 export function useLabFlow() {
   const [searchParams] = useSearchParams();
@@ -18,11 +21,20 @@ export function useLabFlow() {
   const initialVs = searchParams.get("verseStart") || "";
   const initialVe = searchParams.get("verseEnd") || "";
   const initialSessionId = searchParams.get("sessionId") || "";
-  const initialStage = searchParams.get("stage") as LabStage | null;
+  const stageParam = searchParams.get("stage");
+  const requestedStageParam =
+    searchParams.get("requestedStage") || (!initialSessionId ? stageParam : null);
+  const requestedStage = isProcessStage(requestedStageParam)
+    ? requestedStageParam
+    : null;
+  const initialPassageRef = initialBook
+    ? `${initialBook} ${initialChapter}:${initialVs}${initialVe && initialVe !== initialVs ? `-${initialVe}` : ''}`
+    : "";
 
   const [state, setState] = useState<LabFlowState>({
     sessionId: initialSessionId || null,
-    stage: initialStage || (initialBook ? "look" : "passage"),
+    stage: initialBook ? "look" : "passage",
+    requestedStage,
     completed: false,
     loading: false,
     saving: false,
@@ -31,7 +43,7 @@ export function useLabFlow() {
     chapter: initialChapter,
     verseStart: initialVs,
     verseEnd: initialVe,
-    passageRef: "",
+    passageRef: initialPassageRef,
     lookNotes: "",
     currentPromptIdx: 0,
     selectedRepeats: 3,
@@ -75,6 +87,12 @@ export function useLabFlow() {
             verseStart: session.verseStart?.toString() || stateRef.current.verseStart,
             verseEnd: session.verseEnd?.toString() || stateRef.current.verseEnd,
             passageRef: session.passageRef || "",
+            stage: isProcessStage(session.currentStage)
+              ? session.currentStage
+              : session.completed
+                ? "completed"
+                : "look",
+            completed: session.completed,
             lookNotes: session.lookNotes || "",
             learnNotes: session.learnNotes || "",
             reflection: session.abideReflection || "",
@@ -95,7 +113,7 @@ export function useLabFlow() {
         update({ loading: false, error: "Failed to load session" });
       }
     })();
-  }, [initialSessionId]);
+  }, [initialSessionId, update]);
 
   const startSessionAction = useCallback(async () => {
     const { bookName, chapter, verseStart, verseEnd } = stateRef.current;
@@ -133,6 +151,27 @@ export function useLabFlow() {
       update({ loading: false, error: e?.message || "Failed to start session" });
     }
   }, [update]);
+
+  const autoStartedRef = useRef(false);
+  useEffect(() => {
+    if (
+      autoStartedRef.current ||
+      initialSessionId ||
+      !initialBook ||
+      !initialChapter ||
+      !initialVs
+    ) {
+      return;
+    }
+    autoStartedRef.current = true;
+    startSessionAction();
+  }, [
+    initialBook,
+    initialChapter,
+    initialSessionId,
+    initialVs,
+    startSessionAction,
+  ]);
 
   const goToStage = useCallback((stage: LabStage) => {
     update({ stage });
@@ -321,6 +360,7 @@ export function useLabFlow() {
     setState({
       sessionId: null,
       stage: "passage",
+      requestedStage: null,
       completed: false,
       loading: false,
       saving: false,

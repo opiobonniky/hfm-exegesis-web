@@ -16,11 +16,14 @@ export default function BibleReader() {
   // in front of any panel that covers the verse it belongs to. Hide it whenever
   // a panel is open — the verse menus, and the sidebar overlay.
   const verseToolbarHidden =
+    data.hasSelection ||
     data.verseActionsOpen ||
     data.drawerOpen ||
     data.noteDialogOpen ||
     data.multiHighlightDialogOpen ||
-    data.sidebarOpen;
+    data.sidebarOpen ||
+    data.translationOpen ||
+    data.audioActive;
 
   return (
     <div
@@ -107,7 +110,7 @@ export default function BibleReader() {
         onScrollBottom={actions.scrollToBottom}
         onBookmark={actions.handleBookmark}
         onAudioToggle={actions.handleReadChapter}
-        onMore={()=>actions.setVerseActionsOpen(p=>!p)}
+        onMore={actions.handleOpenSelectedVerseActions}
       />
       <VerseExplanationDrawer
         open={data.drawerOpen}

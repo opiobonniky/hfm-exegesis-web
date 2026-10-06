@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import type { useLabFlowPage } from "../hooks/useLabFlowPage";
 import LabPassageSelector from "./LabPassageSelector";
 import LabLookStage from "./LabLookStage";
@@ -6,6 +7,9 @@ import LabLearnStage from "./LabLearnStage";
 import LabAbideStage from "./LabAbideStage";
 import LabApplyStage from "./LabApplyStage";
 import LabCompletedStage from "./LabCompletedStage";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { tt } from "@/components/languages/hardcodedTranslate";
+import { STAGE_LABELS, STAGE_ORDER, STAGE_PURPOSE } from "../constants";
 
 interface Props {
   h: ReturnType<typeof useLabFlowPage>;
@@ -15,6 +19,25 @@ export function LabFlowStageContent({ h }: Props) {
   const { data, actions } = h;
   const lab = data.lab;
   const labActions = actions.lab;
+  const [guidanceDismissed, setGuidanceDismissed] = useState(false);
+  const [seenStage, setSeenStage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (lab.requestedStage !== seenStage) {
+      setSeenStage(lab.requestedStage ?? null);
+      setGuidanceDismissed(false);
+    }
+  }, [lab.requestedStage, seenStage]);
+
+  const requestedStep = lab.requestedStage
+    ? STAGE_ORDER.indexOf(lab.requestedStage) + 1
+    : 0;
+  const showGuidance = Boolean(
+    lab.requestedStage &&
+      lab.requestedStage !== "look" &&
+      lab.stage === "look" &&
+      !guidanceDismissed,
+  );
 
   return (
     <div className="flex-1 overflow-y-auto">
@@ -139,6 +162,26 @@ export function LabFlowStageContent({ h }: Props) {
           />
         )}
       </div>
+
+      <ConfirmDialog
+        open={showGuidance}
+        onOpenChange={(nextOpen) => {
+          if (!nextOpen) setGuidanceDismissed(true);
+        }}
+        title={
+          lab.requestedStage
+            ? `${tt("Step")} ${requestedStep}: ${tt(STAGE_LABELS[lab.requestedStage])}`
+            : ""
+        }
+        description={
+          lab.requestedStage
+            ? `${tt(STAGE_PURPOSE[lab.requestedStage])} ${tt("Every Exegesis Lab study begins with Step 1: Look. Start there and continue through each step in order.")}`
+            : ""
+        }
+        confirmLabel={tt("Start with Step 1")}
+        onConfirm={() => setGuidanceDismissed(true)}
+        hideCancel
+      />
     </div>
   );
 }

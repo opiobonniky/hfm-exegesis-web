@@ -1,9 +1,9 @@
 // LabFlow constants — chapter counts, stage config, passage suggestions
 import { Eye, Ear, Heart, BookText, Search, LibraryBig } from "lucide-react";
-import type { LabStage, LearnTab } from "./types";
+import type { LabProcessStage, LearnTab } from "./types";
 import { tt } from '@/components/languages/hardcodedTranslate';
 
-export const STAGE_ORDER: LabStage[] = ["look", "listen", "learn", "abide", "apply"];
+export const STAGE_ORDER: LabProcessStage[] = ["look", "listen", "learn", "abide", "apply"];
 
 export const LISTEN_OPTIONS = [
   { label: "1x", value: 1 },
@@ -47,11 +47,11 @@ export const BOOK_NAMES = [
 ];
 
 export const STAGE_ICONS: Record<string, any> = {
-  look: Eye, listen: Ear, learn: BookText, abide: Heart,
+  look: Eye, listen: Ear, learn: BookText, abide: Heart, apply: BookText,
 };
 
 export const STAGE_LABELS: Record<string, string> = {
-  look: "Look", listen: "Listen", learn: "Learn", abide: "Abide",
+  look: "Look", listen: "Listen", learn: "Learn", abide: "Abide", apply: "Apply",
 };
 
 export const STAGE_PURPOSE: Record<string, string> = {
@@ -59,10 +59,11 @@ export const STAGE_PURPOSE: Record<string, string> = {
   listen: "Read slowly and attentively — let the words settle into your heart.",
   learn: "Study deeply — explore the meaning, context, and connections.",
   abide: "Reflect and respond — what is God saying to you through this passage?",
+  apply: "Put the truth into practice with one specific, actionable next step.",
 };
 
 export const STAGE_TIME: Record<string, string> = {
-  look: "~10 min", listen: "~5 min", learn: "~15 min", abide: "~10 min",
+  look: "~10 min", listen: "~5 min", learn: "~15 min", abide: "~10 min", apply: "~10 min",
 };
 
 export const SUGGESTED_PASSAGES = [
