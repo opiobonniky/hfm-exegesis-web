@@ -32,6 +32,7 @@ export const getBookPrologue = async (
       "book-prologues",
       "get",
       { bookName },
+      { includeLanguage: false },
     );
     if (res.returnCode !== 200)
       throw new Error(res.returnMessage || "Failed to fetch book prologue");
@@ -52,11 +53,16 @@ export const getAllBookPrologues = async (params?: {
     data: BookPrologue[];
     total: number;
     hasNext: boolean;
-  }>("book-prologues", "get-all", {
-    page: params?.page ?? 0,
-    pageSize: params?.pageSize ?? 12,
-    search: params?.search || undefined,
-  });
+  }>(
+    "book-prologues",
+    "get-all",
+    {
+      page: params?.page ?? 0,
+      pageSize: params?.pageSize ?? 12,
+      search: params?.search || undefined,
+    },
+    { includeLanguage: false },
+  );
   if (res.returnCode !== 200)
     throw new Error(res.returnMessage || "Failed to fetch book prologues");
   return res.returnData ?? { data: [], total: 0, hasNext: false };

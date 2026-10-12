@@ -18,7 +18,12 @@ export const bibleApi = {
   getReadHistory: (page = 0, size = 50) =>
     sendPostRequest("bible", "get-read-history", { pageSize: size }),
   getLastReadPosition: (bookName: string) =>
-    sendPostRequest<LastReadPosition | null>("bible", "get-last-read-position", { bookName }),
+    sendPostRequest<LastReadPosition | null>(
+      "bible",
+      "get-last-read-position",
+      { bookName },
+      { includeLanguage: false },
+    ),
   search: (query: string, page = 0, size = 20) =>
     sendPostRequest("bible", "search", { query, page, size }),
   getVerseResources: (book: string, chapter: number, verse: number) =>

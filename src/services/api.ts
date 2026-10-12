@@ -14,6 +14,10 @@ interface GenericResponse<T = any> {
   returnData?: T;
 }
 
+interface PostRequestOptions {
+  includeLanguage?: boolean;
+}
+
 // Backend origin used for all API calls.
 // Resolution order (highest priority first):
 //   1. VITE_API_URL — explicit override via .env / CI / runtime (recommended)
@@ -153,12 +157,13 @@ export const sendPostRequest = async <T = any>(
   controller: string,
   request: string,
   data: object = {},
+  options: PostRequestOptions = {},
 ): Promise<GenericResponse<T>> => {
   try {
     const lang = localStorage.getItem("exegesis-language") || "en";
     const response = await api.post<GenericResponse<T>>(
       `/${controller}/${request}`,
-      { ...data, lang },
+      options.includeLanguage === false ? data : { ...data, lang },
     );
     return response.data;
   } catch (error: any) {
