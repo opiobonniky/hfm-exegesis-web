@@ -35,7 +35,7 @@ export function ReadingSettingsHeader({ saving, onBack, onSave }: ReadingSetting
 }
 
 export function LanguageSection() {
-  const { lang, setLanguage } = useLanguage();
+  const { lang, setLanguage, isLoading } = useLanguage();
 
   return (
     <Card>
@@ -47,7 +47,11 @@ export function LanguageSection() {
         <CardDescription>{tt("Choose the language used throughout the app")}</CardDescription>
       </CardHeader>
       <CardContent>
-        <Select value={lang} onValueChange={(value) => setLanguage(value as Language)}>
+        <Select
+          value={lang}
+          onValueChange={(value) => setLanguage(value as Language)}
+          disabled={isLoading}
+        >
           <SelectTrigger className="notranslate" translate="no">
             <SelectValue />
           </SelectTrigger>

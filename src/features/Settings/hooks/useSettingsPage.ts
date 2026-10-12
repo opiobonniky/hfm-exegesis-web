@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { sendPostRequest, TOKEN_KEY } from "@/services/api";
 import { useLanguage } from "@/components/languages/languageProvider";
-import { useRTL } from "@/providers/RTLProvider";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useTheme } from "@/hooks/useTheme";
 import { routes } from "@/components/Routes/routes";
@@ -13,8 +12,7 @@ import { tt } from '@/components/languages/hardcodedTranslate';
 export function useSettingsPage() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { t } = useLanguage();
-  const { isRtl } = useRTL();
+  const { t, isRtl } = useLanguage();
   const { isPayingUser, tierLabel, expiresLabel } = useSubscription();
   const { themeMode, setThemeMode } = useTheme();
   const [loading, setLoading] = useState(true);

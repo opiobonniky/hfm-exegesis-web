@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { getLanguageOptionLabel } from "./localeUtils";
 
 describe("getLanguageOptionLabel", () => {
@@ -11,5 +11,19 @@ describe("getLanguageOptionLabel", () => {
 
   it("does not repeat an identical native and localized name", () => {
     expect(getLanguageOptionLabel("fr", "fr")).toBe("Français");
+  });
+
+  it("uses only the native name when localized names are unavailable", () => {
+    const displayNames = vi
+      .spyOn(Intl, "DisplayNames")
+      .mockImplementation(() => {
+        throw new Error("unsupported");
+      });
+
+    try {
+      expect(getLanguageOptionLabel("de", "fr")).toBe("Deutsch");
+    } finally {
+      displayNames.mockRestore();
+    }
   });
 });

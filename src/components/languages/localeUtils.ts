@@ -98,7 +98,8 @@ export const getLanguageOptionLabel = (
 ): string => {
   const nativeName = LANGUAGE_NAMES[lang];
   const localizedName = getLanguageName(lang, displayLang);
-  return nativeName.localeCompare(localizedName, undefined, { sensitivity: 'base' }) === 0
+  return localizedName === lang ||
+    nativeName.localeCompare(localizedName, undefined, { sensitivity: 'base' }) === 0
     ? nativeName
     : `${nativeName} (${localizedName})`;
 };

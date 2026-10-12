@@ -17,7 +17,7 @@ interface PreferencesTabProps {
 
 export function PreferencesTab({ fontSize, onFontSizeChange, translation, onTranslationChange }: PreferencesTabProps) {
   const { themeMode, setThemeMode } = useTheme();
-  const { lang: currentLang, setLanguage } = useLanguage();
+  const { lang: currentLang, setLanguage, isLoading: languageLoading } = useLanguage();
   return (
     <div className="space-y-4">
       <div className="rounded-2xl bg-card border border-border/50 p-4 sm:p-6 space-y-6">
@@ -38,7 +38,11 @@ export function PreferencesTab({ fontSize, onFontSizeChange, translation, onTran
           </div>
           <div className="space-y-2">
             <Label>{tt("Language")}</Label>
-            <Select value={currentLang} onValueChange={(v) => setLanguage(v as Language)}>
+            <Select
+              value={currentLang}
+              onValueChange={(v) => setLanguage(v as Language)}
+              disabled={languageLoading}
+            >
               <SelectTrigger className="notranslate" translate="no"><SelectValue /></SelectTrigger>
               <SelectContent className="notranslate" translate="no">
                 {(Object.keys(LANGUAGE_NAMES) as Language[]).map((code) => (
