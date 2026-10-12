@@ -1,17 +1,102 @@
-import { Loader2, Send } from "lucide-react";
+import { Loader2, Paperclip, Send, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { tt } from "@/components/languages/hardcodedTranslate";
 import {
   MAX_MESSAGE_LENGTH,
   MAX_SUBJECT_LENGTH,
   MIN_MESSAGE_LENGTH,
+  SUPPORT_ATTACH_HINT,
+  SUPPORT_ATTACHMENT_ACCEPT,
   SUPPORT_CATEGORY_OPTIONS,
   SUPPORT_PRIORITIES,
   SUPPORT_QUICK_PROMPTS,
 } from "../constants";
+import { formatSupportFileSize, isImageAttachment } from "../utils";
 import type { SupportComposerProps } from "../types";
 
+/** Attachment picker row — a hidden file input driven by the paperclip button. */
+function AttachmentPicker({
+  attachment,
+  uploadingAttachment,
+  onSelectFile,
+  onClearAttachment,
+}: Pick<
+  SupportComposerProps,
+  "attachment" | "uploadingAttachment" | "onSelectFile" | "onClearAttachment"
+>) {
+  return (
+    <div>
+      <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+        {tt("Attachment (optional)")}
+      </label>
+
+      {attachment ? (
+        <div className="flex items-center gap-3 rounded-xl border border-border bg-muted/30 p-2">
+          {isImageAttachment(attachment.url) ? (
+            <img
+              src={attachment.url}
+              alt={attachment.name}
+              className="h-10 w-10 rounded-lg object-cover"
+            />
+          ) : (
+            <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-xs font-bold text-primary">
+              PDF
+            </span>
+          )}
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-medium text-foreground">{attachment.name}</p>
+            {!!attachment.size && (
+              <p className="text-xs text-muted-foreground">
+                {formatSupportFileSize(attachment.size)}
+              </p>
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={onClearAttachment}
+            className="rounded-full p-1.5 text-muted-foreground hover:bg-muted"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      ) : (
+        <div>
+          <label
+            className={cn(
+              "inline-flex items-center gap-2 rounded-xl border border-border px-3 py-2 text-sm text-muted-foreground hover:bg-muted/60",
+              uploadingAttachment && "cursor-wait opacity-50",
+            )}
+          >
+            <input
+              type="file"
+              accept={SUPPORT_ATTACHMENT_ACCEPT}
+              className="hidden"
+              disabled={uploadingAttachment}
+              onChange={e => {
+                const picked = e.target.files?.[0];
+                if (picked) onSelectFile(picked);
+                e.target.value = "";
+              }}
+            />
+            {uploadingAttachment ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Paperclip className="h-4 w-4" />
+            )}
+            {uploadingAttachment ? tt("Uploading…") : tt("Attach a screenshot")}
+          </label>
+          <p className="mt-1 text-xs text-muted-foreground">{SUPPORT_ATTACH_HINT}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function SupportComposer({
+  attachment,
+  uploadingAttachment,
+  onSelectFile,
+  onClearAttachment,
   subject,
   message,
   category,
@@ -118,6 +203,13 @@ export function SupportComposer({
           ))}
         </div>
       </div>
+
+      <AttachmentPicker
+        attachment={attachment}
+        uploadingAttachment={uploadingAttachment}
+        onSelectFile={onSelectFile}
+        onClearAttachment={onClearAttachment}
+      />
 
       <div className="flex items-center justify-end gap-2 pt-2">
         <button

@@ -1,17 +1,25 @@
-import { Loader2, SendHorizontal } from "lucide-react";
+import { Loader2, Paperclip, SendHorizontal, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { tt } from "@/components/languages/hardcodedTranslate";
-import { SUPPORT_REPLY_PLACEHOLDER } from "../constants";
+import {
+  SUPPORT_ATTACHMENT_ACCEPT,
+  SUPPORT_ATTACH_HINT,
+  SUPPORT_REPLY_PLACEHOLDER,
+} from "../constants";
 import type { SupportThreadProps } from "../types";
-import { formatSupportDateTime } from "../utils";
+import { formatSupportDateTime, formatSupportFileSize, isImageAttachment } from "../utils";
 import { SupportCategoryBadge, SupportStatusBadge } from "./SupportStatusBadge";
 
 export function SupportThread({
   ticket,
   reply,
   sending,
+  attachment,
+  uploadingAttachment,
   onChangeReply,
   onSend,
+  onSelectFile,
+  onClearAttachment,
   footer,
 }: SupportThreadProps) {
   return (
@@ -54,7 +62,29 @@ export function SupportThread({
                 <div className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                   {mine ? tt("User") : tt("Support team")}
                 </div>
-                <p className="whitespace-pre-wrap leading-relaxed">{message.body}</p>
+                {!!message.attachment &&
+                  (isImageAttachment(message.attachment) ? (
+                    <a href={message.attachment} target="_blank" rel="noreferrer">
+                      <img
+                        src={message.attachment}
+                        alt={message.attachmentName || tt("Attachment")}
+                        className="mb-2 max-h-56 rounded-lg border border-border object-cover"
+                      />
+                    </a>
+                  ) : (
+                    <a
+                      href={message.attachment}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="mb-2 inline-flex items-center gap-2 rounded-lg border border-border px-2 py-1 text-xs font-medium text-primary hover:bg-muted"
+                    >
+                      <Paperclip className="h-3.5 w-3.5" />
+                      {message.attachmentName || tt("Attachment")}
+                    </a>
+                  ))}
+                {!!message.body && (
+                  <p className="whitespace-pre-wrap leading-relaxed">{message.body}</p>
+                )}
                 <div className="mt-1.5 text-right text-[11px] text-muted-foreground">
                   {formatSupportDateTime(message.createdOn)}
                 </div>
@@ -64,7 +94,48 @@ export function SupportThread({
         })}
       </div>
 
+      {!!attachment && (
+        <div className="mt-3 flex items-center gap-2 rounded-xl border border-border bg-muted/30 p-2">
+          <Paperclip className="h-4 w-4 shrink-0 text-muted-foreground" />
+          <span className="min-w-0 flex-1 truncate text-xs text-foreground">
+            {attachment.name}
+            {attachment.size ? ` · ${formatSupportFileSize(attachment.size)}` : ""}
+          </span>
+          <button
+            type="button"
+            onClick={onClearAttachment}
+            className="rounded-full p-1 text-muted-foreground hover:bg-muted"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      )}
+
       <div className="mt-4 flex items-end gap-2 border-t border-border pt-3">
+        <label
+          title={SUPPORT_ATTACH_HINT}
+          className={cn(
+            "inline-flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full border border-border text-muted-foreground hover:bg-muted",
+            uploadingAttachment && "cursor-wait opacity-50",
+          )}
+        >
+          <input
+            type="file"
+            accept={SUPPORT_ATTACHMENT_ACCEPT}
+            className="hidden"
+            disabled={uploadingAttachment}
+            onChange={e => {
+              const picked = e.target.files?.[0];
+              if (picked) onSelectFile(picked);
+              e.target.value = "";
+            }}
+          />
+          {uploadingAttachment ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Paperclip className="h-4 w-4" />
+          )}
+        </label>
         <textarea
           value={reply}
           onChange={e => onChangeReply(e.target.value)}
@@ -75,7 +146,7 @@ export function SupportThread({
         <button
           type="button"
           onClick={onSend}
-          disabled={!reply.trim() || sending}
+          disabled={(!reply.trim() && !attachment) || sending || uploadingAttachment}
           className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-primary text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-40"
         >
           {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <SendHorizontal className="h-4 w-4" />}

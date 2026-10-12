@@ -4,10 +4,17 @@
 import { sendPostRequest } from "@/services/api";
 import type {
   NewSupportTicketPayload,
+  SupportAttachment,
   SupportStats,
   SupportTicketDetail,
   SupportTicketsPage,
 } from "../types";
+
+/** Store a screenshot/PDF so it can be attached to a message. */
+export const uploadSupportAttachment = (attachment: {
+  attachment: string;
+  fileName: string;
+}) => sendPostRequest<SupportAttachment>("support", "upload", attachment);
 
 // ── Reader endpoints ─────────────────────────────────────────────────────────
 export const createSupportTicket = (payload: NewSupportTicketPayload) =>
@@ -22,8 +29,17 @@ export const getMySupportTickets = (params: {
 export const getSupportTicket = (ticketId: number) =>
   sendPostRequest<SupportTicketDetail>("support", "get-ticket", { ticketId });
 
-export const replyToSupportTicket = (ticketId: number, message: string) =>
-  sendPostRequest<SupportTicketDetail>("support", "reply", { ticketId, message });
+export const replyToSupportTicket = (
+  ticketId: number,
+  message: string,
+  attachment?: SupportAttachment | null,
+) =>
+  sendPostRequest<SupportTicketDetail>("support", "reply", {
+    ticketId,
+    message,
+    attachment: attachment?.url ?? null,
+    attachmentName: attachment?.name ?? null,
+  });
 
 // ── Admin endpoints ──────────────────────────────────────────────────────────
 export const getAdminSupportTickets = (params: {
@@ -37,8 +53,17 @@ export const getAdminSupportTickets = (params: {
 export const getAdminSupportTicket = (ticketId: number) =>
   sendPostRequest<SupportTicketDetail>("support", "admin/get-ticket", { ticketId });
 
-export const adminReplyToTicket = (ticketId: number, message: string) =>
-  sendPostRequest<SupportTicketDetail>("support", "admin/reply", { ticketId, message });
+export const adminReplyToTicket = (
+  ticketId: number,
+  message: string,
+  attachment?: SupportAttachment | null,
+) =>
+  sendPostRequest<SupportTicketDetail>("support", "admin/reply", {
+    ticketId,
+    message,
+    attachment: attachment?.url ?? null,
+    attachmentName: attachment?.name ?? null,
+  });
 
 export const updateSupportTicketStatus = (
   ticketId: number,

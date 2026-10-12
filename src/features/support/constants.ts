@@ -8,6 +8,8 @@ import type {
 } from "./types";
 
 export const SUPPORT_PAGE_SIZE = 20;
+export const MAX_ATTACHMENT_BYTES = 5 * 1024 * 1024;
+export const SUPPORT_ATTACHMENT_ACCEPT = "image/jpeg,image/png,image/webp,application/pdf";
 export const MAX_SUBJECT_LENGTH = 140;
 export const MIN_SUBJECT_LENGTH = 3;
 export const MAX_MESSAGE_LENGTH = 4000;
@@ -74,5 +76,7 @@ export const SUPPORT_QUICK_PROMPTS: string[] = [
   tt("My subscription is active but content is locked."),
 ];
 
+export const SUPPORT_ATTACH_LABEL = tt("Attach a screenshot");
+export const SUPPORT_ATTACH_HINT = tt("Screenshots (jpg, png, webp) or PDF, up to 5MB.");
 export const SUPPORT_REPLY_PLACEHOLDER = tt("Write a reply…");
 export const SUPPORT_EXPECTED_REPLY_WINDOW = tt("We usually reply within 24 hours.");

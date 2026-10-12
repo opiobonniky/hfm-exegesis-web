@@ -28,6 +28,7 @@ export interface SupportMessage {
   senderRole: SupportSenderRole;
   body: string;
   attachment?: string | null;
+  attachmentName?: string | null;
   createdOn: string;
 }
 
@@ -55,7 +56,13 @@ export interface SupportTicketSummary {
   updatedOn: string;
   resolvedAt: string | null;
   messageCount: number;
-  lastMessage: { body: string; senderRole: SupportSenderRole; createdOn: string } | null;
+  lastMessage: {
+    body: string;
+    senderRole: SupportSenderRole;
+    createdOn: string;
+    attachment?: string | null;
+    attachmentName?: string | null;
+  } | null;
   user?: SupportUserSummary | null;
 }
 
@@ -80,6 +87,14 @@ export interface SupportStats {
   unreadCount: number;
 }
 
+/** A file stored by POST /support/upload, ready to attach to a message. */
+export interface SupportAttachment {
+  url: string;
+  name: string;
+  size?: number;
+  type?: string;
+}
+
 // ─── Component prop contracts (kept here by feature convention) ──────────────
 export interface SupportTicketListProps {
   tickets: SupportTicketSummary[];
@@ -92,12 +107,20 @@ export interface SupportThreadProps {
   ticket: SupportTicketDetail;
   reply: string;
   sending: boolean;
+  attachment: SupportAttachment | null;
+  uploadingAttachment: boolean;
   onChangeReply: (value: string) => void;
   onSend: () => void;
+  onSelectFile: (file: File) => void;
+  onClearAttachment: () => void;
   footer?: ReactNode;
 }
 
 export interface SupportComposerProps {
+  attachment: SupportAttachment | null;
+  uploadingAttachment: boolean;
+  onSelectFile: (file: File) => void;
+  onClearAttachment: () => void;
   subject: string;
   message: string;
   category: SupportCategory;
@@ -118,4 +141,6 @@ export interface NewSupportTicketPayload {
   category: SupportCategory;
   priority?: SupportPriority;
   deviceInfo?: string;
+  attachment?: string | null;
+  attachmentName?: string | null;
 }

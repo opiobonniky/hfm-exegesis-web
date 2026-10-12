@@ -17,6 +17,7 @@ import {
   MIN_SUBJECT_LENGTH,
   SUPPORT_PAGE_SIZE,
 } from "../constants";
+import { useSupportAttachment } from "./useSupportAttachment";
 import type {
   SupportCategory,
   SupportFilter,
@@ -31,6 +32,11 @@ const deviceInfo = () =>
 export function useSupportPage() {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const attachmentPicker = useSupportAttachment();
+  const pickedAttachment = attachmentPicker.data.attachment;
+  const uploadingAttachment = attachmentPicker.data.uploading;
+  const selectAttachment = attachmentPicker.actions.selectFile;
+  const clearAttachment = attachmentPicker.actions.clear;
 
   const [tickets, setTickets] = useState<SupportTicketSummary[]>([]);
   const [totalCount, setTotalCount] = useState(0);
@@ -118,13 +124,14 @@ export function useSupportPage() {
 
   const sendReply = useCallback(async () => {
     const body = reply.trim();
-    if (!body || !activeTicket) return;
+    if ((!body && !pickedAttachment) || !activeTicket) return;
     setSending(true);
     try {
-      const res = await replyToSupportTicket(activeTicket.id, body);
+      const res = await replyToSupportTicket(activeTicket.id, body, pickedAttachment);
       if (res.returnCode === 200 && res.returnData) {
         setActiveTicket(res.returnData);
         setReply("");
+        clearAttachment();
         load().catch(() => {});
       } else {
         toast({ title: tt("Could not send reply"), description: res.returnMessage });
@@ -134,14 +141,15 @@ export function useSupportPage() {
     } finally {
       setSending(false);
     }
-  }, [reply, activeTicket, toast, load]);
+  }, [reply, activeTicket, toast, load, pickedAttachment, clearAttachment]);
 
   const canSubmit = useMemo(
     () =>
       subject.trim().length >= MIN_SUBJECT_LENGTH &&
-      message.trim().length >= MIN_MESSAGE_LENGTH &&
-      !submitting,
-    [subject, message, submitting],
+      (message.trim().length >= MIN_MESSAGE_LENGTH || !!pickedAttachment) &&
+      !submitting &&
+      !uploadingAttachment,
+    [subject, message, submitting, pickedAttachment, uploadingAttachment],
   );
 
   const submit = useCallback(async () => {
@@ -154,6 +162,8 @@ export function useSupportPage() {
         category,
         priority,
         deviceInfo: deviceInfo(),
+        attachment: pickedAttachment?.url ?? null,
+        attachmentName: pickedAttachment?.name ?? null,
       });
       if (res.returnCode === 201 || res.returnCode === 200) {
         toast({
@@ -165,6 +175,7 @@ export function useSupportPage() {
         setMessage("");
         setCategory("technical");
         setPriority("normal");
+        clearAttachment();
         await load();
         if (res.returnData?.id) {
           const detail = await getSupportTicket(res.returnData.id);
@@ -180,7 +191,7 @@ export function useSupportPage() {
     } finally {
       setSubmitting(false);
     }
-  }, [canSubmit, subject, message, category, priority, toast, load]);
+  }, [canSubmit, subject, message, category, priority, toast, load, pickedAttachment, clearAttachment]);
 
   const goToSettings = useCallback(() => navigate(routes.settings.path), [navigate]);
 
@@ -203,8 +214,12 @@ export function useSupportPage() {
       loadingThread,
       reply,
       sending,
+      attachment: pickedAttachment,
+      uploadingAttachment,
     },
     actions: {
+      selectAttachment,
+      clearAttachment,
       setSubject,
       setMessage,
       setCategory,

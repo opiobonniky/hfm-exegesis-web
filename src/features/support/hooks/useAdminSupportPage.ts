@@ -12,6 +12,7 @@ import {
   updateSupportTicketStatus,
 } from "../services/support-service";
 import { SUPPORT_PAGE_SIZE } from "../constants";
+import { useSupportAttachment } from "./useSupportAttachment";
 import type {
   SupportCategory,
   SupportFilter,
@@ -24,6 +25,11 @@ import type {
 export function useAdminSupportPage() {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const attachmentPicker = useSupportAttachment();
+  const pickedAttachment = attachmentPicker.data.attachment;
+  const uploadingAttachment = attachmentPicker.data.uploading;
+  const selectAttachment = attachmentPicker.actions.selectFile;
+  const clearAttachment = attachmentPicker.actions.clear;
 
   const [tickets, setTickets] = useState<SupportTicketSummary[]>([]);
   const [totalCount, setTotalCount] = useState(0);
@@ -141,13 +147,14 @@ export function useAdminSupportPage() {
 
   const sendReply = useCallback(async () => {
     const body = reply.trim();
-    if (!body || !activeTicket) return;
+    if ((!body && !pickedAttachment) || !activeTicket) return;
     setSending(true);
     try {
-      const res = await adminReplyToTicket(activeTicket.id, body);
+      const res = await adminReplyToTicket(activeTicket.id, body, pickedAttachment);
       if (res.returnCode === 200 && res.returnData) {
         setActiveTicket(res.returnData);
         setReply("");
+        clearAttachment();
         toast({ title: tt("Reply sent") });
         load().catch(() => {});
       } else {
@@ -158,7 +165,7 @@ export function useAdminSupportPage() {
     } finally {
       setSending(false);
     }
-  }, [reply, activeTicket, toast, load]);
+  }, [reply, activeTicket, toast, load, pickedAttachment, clearAttachment]);
 
   const changeStatus = useCallback(
     async (status: SupportStatus) => {
@@ -199,8 +206,12 @@ export function useAdminSupportPage() {
       reply,
       sending,
       updatingStatus,
+      attachment: pickedAttachment,
+      uploadingAttachment,
     },
     actions: {
+      selectAttachment,
+      clearAttachment,
       setSearch,
       setReply,
       changeFilter,

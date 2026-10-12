@@ -127,8 +127,12 @@ export default function AdminSupport() {
                   ticket={h.activeTicket}
                   reply={h.reply}
                   sending={h.sending}
+                  attachment={h.attachment}
+                  uploadingAttachment={h.uploadingAttachment}
                   onChangeReply={h.setReply}
                   onSend={h.sendReply}
+                  onSelectFile={h.selectAttachment}
+                  onClearAttachment={h.clearAttachment}
                   footer={
                     <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-border pt-3">
                       {SUPPORT_STATUS_OPTIONS.map(option => (

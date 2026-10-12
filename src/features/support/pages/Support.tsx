@@ -72,6 +72,10 @@ export default function Support() {
               onChangeMessage={h.setMessage}
               onChangeCategory={h.setCategory}
               onChangePriority={h.setPriority}
+              attachment={h.attachment}
+              uploadingAttachment={h.uploadingAttachment}
+              onSelectFile={h.selectAttachment}
+              onClearAttachment={h.clearAttachment}
               onSubmit={h.submit}
               onCancel={h.closeComposer}
             />
@@ -133,8 +137,12 @@ export default function Support() {
                   ticket={h.activeTicket}
                   reply={h.reply}
                   sending={h.sending}
+                  attachment={h.attachment}
+                  uploadingAttachment={h.uploadingAttachment}
                   onChangeReply={h.setReply}
                   onSend={h.sendReply}
+                  onSelectFile={h.selectAttachment}
+                  onClearAttachment={h.clearAttachment}
                 />
               </div>
             ) : (
