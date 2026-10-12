@@ -1,10 +1,14 @@
-import { ArrowLeft, Save, Loader2, Type, Sun, Moon, Monitor, BookOpen } from "lucide-react";
+import { ArrowLeft, Save, Loader2, Type, Sun, Moon, Monitor, BookOpen, Globe } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import type { FontSize } from "../hooks/useReadingSettingsPage";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { useLanguage } from "@/components/languages/languageProvider";
+import { getLanguageOptionLabel } from "@/components/languages/localeUtils";
+import { LANGUAGE_NAMES, type Language } from "@/components/languages/type";
 
 interface ReadingSettingsHeaderProps {
   saving: boolean;
@@ -27,6 +31,36 @@ export function ReadingSettingsHeader({ saving, onBack, onSave }: ReadingSetting
       <Button onClick={onSave} disabled={saving}>
         {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}{tt("Save")}</Button>
     </div>
+  );
+}
+
+export function LanguageSection() {
+  const { lang, setLanguage } = useLanguage();
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Globe className="h-5 w-5 text-primary" />
+          {tt("Language")}
+        </CardTitle>
+        <CardDescription>{tt("Choose the language used throughout the app")}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Select value={lang} onValueChange={(value) => setLanguage(value as Language)}>
+          <SelectTrigger className="notranslate" translate="no">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent className="notranslate" translate="no">
+            {(Object.keys(LANGUAGE_NAMES) as Language[]).map((code) => (
+              <SelectItem key={code} value={code}>
+                {getLanguageOptionLabel(code, lang)}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </CardContent>
+    </Card>
   );
 }
 

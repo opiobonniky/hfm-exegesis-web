@@ -1,5 +1,5 @@
 import type { Language } from './type';
-import { RTL_LANGUAGES } from './type';
+import { LANGUAGE_NAMES, RTL_LANGUAGES } from './type';
 
 
 /** Returns true if the language uses a right-to-left writing system. */
@@ -89,4 +89,16 @@ export const getLanguageName = (lang: Language, displayLang: Language): string =
   } catch {
     return lang;
   }
+};
+
+/** Native language name with a localized label when the two differ. */
+export const getLanguageOptionLabel = (
+  lang: Language,
+  displayLang: Language,
+): string => {
+  const nativeName = LANGUAGE_NAMES[lang];
+  const localizedName = getLanguageName(lang, displayLang);
+  return nativeName.localeCompare(localizedName, undefined, { sensitivity: 'base' }) === 0
+    ? nativeName
+    : `${nativeName} (${localizedName})`;
 };

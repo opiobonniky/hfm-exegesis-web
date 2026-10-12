@@ -1,5 +1,6 @@
 export {
   ReadingSettingsHeader,
+  LanguageSection,
   FontSizeSection,
   DisplayOptionsSection,
   ThemeSection,

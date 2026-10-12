@@ -5,6 +5,7 @@ import { Slider } from "@/components/ui/slider";
 import { useTheme } from "@/hooks/useTheme";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { LANGUAGE_NAMES, type Language } from "@/components/languages/type";
+import { getLanguageOptionLabel } from "@/components/languages/localeUtils";
 import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface PreferencesTabProps {
@@ -40,7 +41,11 @@ export function PreferencesTab({ fontSize, onFontSizeChange, translation, onTran
             <Select value={currentLang} onValueChange={(v) => setLanguage(v as Language)}>
               <SelectTrigger className="notranslate" translate="no"><SelectValue /></SelectTrigger>
               <SelectContent className="notranslate" translate="no">
-                {Object.entries(LANGUAGE_NAMES).map(([code, name]) => <SelectItem key={code} value={code} onClick={() => setLanguage(code as Language)}>{name}</SelectItem>)}
+                {(Object.keys(LANGUAGE_NAMES) as Language[]).map((code) => (
+                  <SelectItem key={code} value={code}>
+                    {getLanguageOptionLabel(code, currentLang)}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

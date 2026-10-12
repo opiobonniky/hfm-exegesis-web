@@ -3,6 +3,7 @@
 import { useReadingSettingsPage } from "../hooks/useReadingSettingsPage";
 import {
   ReadingSettingsHeader,
+  LanguageSection,
   FontSizeSection,
   DisplayOptionsSection,
   ThemeSection,
@@ -19,6 +20,7 @@ export default function ReadingSettingsPage() {
         onBack={h.goBack}
         onSave={h.handleSave}
       />
+      <LanguageSection />
       <FontSizeSection
         fontSize={h.fontSize}
         fontSizePx={h.fontSizePx}
