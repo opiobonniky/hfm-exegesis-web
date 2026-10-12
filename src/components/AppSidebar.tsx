@@ -21,6 +21,7 @@ import {
   Star,
   Clock,
   ScrollText,
+  LifeBuoy,
 } from "lucide-react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -103,6 +104,11 @@ const adminNavItems: NavItem[] = [
     url: routes.adminSubscriptions.path,
     icon: CreditCard,
   },
+  {
+    title: "Support Inbox",
+    url: routes.adminSupport.path,
+    icon: LifeBuoy,
+  },
 ];
 
 const userNavItems: NavItem[] = [
@@ -141,6 +147,7 @@ const userNavItems: NavItem[] = [
   },
   { title: "Study Bible", url: routes.studyBible.path, icon: BookText },
   { title: "Bible Trivia", url: routes.trivia.path, icon: Sparkles },
+  { title: "Support", url: routes.support.path, icon: LifeBuoy },
 ];
 
 const manageNavItems: NavItem[] = [

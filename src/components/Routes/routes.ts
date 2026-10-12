@@ -85,6 +85,8 @@ const StrongsDictionary = lazy(() => import("@/features/StrongsDictionary/pages/
 const GuestEntry = lazy(() => import("@/features/GuestEntry/pages/GuestEntry"));
 const DailyExegesis = lazy(() => import("@/features/DailyContent/pages/DailyExegesis"));
 const SowerPage = lazy(() => import("@/features/Subscription/pages/SowerPage"));
+const Support = lazy(() => import("@/features/support/pages/Support"));
+const AdminSupport = lazy(() => import("@/features/support/pages/AdminSupport"));
 const PlansPage = lazy(() => import("@/features/Subscription/pages/PlansPage"));
 const VerseResources = lazy(() => import("@/features/Bible/pages/VerseResources"));
 const Onboarding = lazy(() => import("@/features/Auth/pages/Onboarding"));
@@ -741,6 +743,22 @@ const routeConfigs = {
     isProtected: true,
     requiresLayout: true,
     title: tt("Verse Resources"),
+  },
+
+  // ==================== SUPPORT (complaints / messages to the team) ====================
+  support: {
+    path: "/support",
+    component: Support,
+    isProtected: true,
+    requiresLayout: true,
+    title: tt("Support"),
+  },
+  adminSupport: {
+    path: "/admin/support",
+    component: AdminSupport,
+    isProtected: true,
+    requiresLayout: true,
+    title: tt("Support Inbox"),
   },
 
   bibleBookSelectionLegacyLibrary: {
