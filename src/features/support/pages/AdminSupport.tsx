@@ -193,6 +193,7 @@ export default function AdminSupport() {
                   onSend={h.sendReply}
                   onSelectFile={h.selectAttachment}
                   onClearAttachment={h.clearAttachment}
+                  onMessagesVisible={h.markThreadRead}
                   footer={
                     <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-border pt-3">
                       {SUPPORT_STATUS_OPTIONS.map(option => (

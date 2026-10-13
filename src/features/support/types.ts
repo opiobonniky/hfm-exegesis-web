@@ -123,6 +123,7 @@ export interface SupportThreadProps {
   onSend: () => void;
   onSelectFile: (file: File) => void;
   onClearAttachment: () => void;
+  onMessagesVisible?: () => void;
   footer?: ReactNode;
 }
 

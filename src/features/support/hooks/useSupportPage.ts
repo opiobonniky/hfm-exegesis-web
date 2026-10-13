@@ -1,5 +1,5 @@
 // All state, effects and actions for the reader Support page.
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { routes } from "@/components/Routes/routes";
@@ -58,9 +58,12 @@ export function useSupportPage() {
   const [loadingThread, setLoadingThread] = useState(false);
   const [reply, setReply] = useState("");
   const [sending, setSending] = useState(false);
+  const listRequestSequence = useRef(0);
+  const threadRequestSequence = useRef(0);
 
   const load = useCallback(
     async (activeFilter: SupportFilter = filter, showLoading = false) => {
+      const sequence = ++listRequestSequence.current;
       if (showLoading) setLoading(true);
       try {
         const res = await getMySupportTickets({
@@ -68,6 +71,7 @@ export function useSupportPage() {
           pageSize: SUPPORT_PAGE_SIZE,
           ...(activeFilter === "all" ? {} : { status: activeFilter }),
         });
+        if (sequence !== listRequestSequence.current) return;
         if (res.returnCode === 200 && res.returnData) {
           setTickets(res.returnData.tickets ?? []);
           setTotalCount(res.returnData.totalCount ?? 0);
@@ -77,9 +81,10 @@ export function useSupportPage() {
           setError(res.returnMessage || tt("Could not load your messages."));
         }
       } catch (err) {
+        if (sequence !== listRequestSequence.current) return;
         setError((err as Error)?.message || tt("Could not load your messages."));
       } finally {
-        if (showLoading) setLoading(false);
+        if (sequence === listRequestSequence.current) setLoading(false);
       }
     },
     [filter],
@@ -100,43 +105,62 @@ export function useSupportPage() {
   );
 
   const openThread = useCallback(async (ticket: SupportTicketSummary) => {
+    const sequence = ++threadRequestSequence.current;
     setLoadingThread(true);
     setActiveTicket(null);
     try {
-      const res = await getSupportTicket(ticket.id);
+      const res = await getSupportTicket(ticket.id, false);
+      if (sequence !== threadRequestSequence.current) return;
       if (res.returnCode === 200 && res.returnData) {
         setActiveTicket(res.returnData);
-        setTickets(current =>
-          current.map(item =>
-            item.id === ticket.id ? { ...item, userUnread: false } : item,
-          ),
-        );
-        setUnreadCount(current =>
-          ticket.userUnread ? Math.max(current - 1, 0) : current,
-        );
-        refreshUnread().catch(() => {});
       } else {
         toast({ title: tt("Could not open conversation"), description: res.returnMessage });
       }
     } catch (err) {
+      if (sequence !== threadRequestSequence.current) return;
       toast({ title: tt("Could not open conversation"), description: (err as Error)?.message });
     } finally {
-      setLoadingThread(false);
+      if (sequence === threadRequestSequence.current) setLoadingThread(false);
     }
-  }, [toast, refreshUnread]);
+  }, [toast]);
+
+  const markThreadRead = useCallback(async () => {
+    const ticket = activeTicket;
+    if (!ticket?.userUnread || document.visibilityState !== "visible") return;
+    const sequence = ++threadRequestSequence.current;
+    try {
+      const response = await getSupportTicket(ticket.id, true);
+      if (
+        sequence !== threadRequestSequence.current ||
+        response.returnCode !== 200 ||
+        !response.returnData
+      ) return;
+      setActiveTicket(current => current?.id === ticket.id ? response.returnData! : current);
+      setTickets(current =>
+        current.map(item => item.id === ticket.id ? { ...item, userUnread: false } : item),
+      );
+      load(filter).catch(() => {});
+      refreshUnread().catch(() => {});
+    } catch {
+      // A later realtime refresh retries the read acknowledgement.
+    }
+  }, [activeTicket, filter, load, refreshUnread]);
 
   useEffect(() => {
     if (supportRevision === 0) return;
     load(filter).catch(() => {});
     if (activeTicket?.id) {
       const activeId = activeTicket.id;
-      const markRead = document.visibilityState === "visible";
-      getSupportTicket(activeId, markRead).then(response => {
-        if (response.returnCode === 200 && response.returnData) {
+      const sequence = ++threadRequestSequence.current;
+      getSupportTicket(activeId, false).then(response => {
+        if (
+          sequence === threadRequestSequence.current &&
+          response.returnCode === 200 &&
+          response.returnData
+        ) {
           setActiveTicket(current =>
             current?.id === activeId ? response.returnData! : current,
           );
-          if (markRead) refreshUnread().catch(() => {});
         }
       }).catch(() => {});
     }
@@ -146,6 +170,7 @@ export function useSupportPage() {
   }, [supportRevision]);
 
   const closeThread = useCallback(() => {
+    threadRequestSequence.current += 1;
     setActiveTicket(null);
     setReply("");
   }, []);
@@ -260,6 +285,7 @@ export function useSupportPage() {
       openThread,
       closeThread,
       sendReply,
+      markThreadRead,
       refresh: () => load(),
       goToSettings,
     },

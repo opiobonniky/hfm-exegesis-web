@@ -143,6 +143,7 @@ export default function Support() {
                   onSend={h.sendReply}
                   onSelectFile={h.selectAttachment}
                   onClearAttachment={h.clearAttachment}
+                  onMessagesVisible={h.markThreadRead}
                 />
               </div>
             ) : (

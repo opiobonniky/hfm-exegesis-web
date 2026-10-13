@@ -1,5 +1,5 @@
 // State, effects and actions for the admin support inbox.
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { routes } from "@/components/Routes/routes";
@@ -47,12 +47,15 @@ export function useAdminSupportPage() {
   const [reply, setReply] = useState("");
   const [sending, setSending] = useState(false);
   const [updatingStatus, setUpdatingStatus] = useState(false);
+  const listRequestSequence = useRef(0);
+  const threadRequestSequence = useRef(0);
 
   const load = useCallback(
     async (
       overrides?: { filter?: SupportFilter; category?: SupportCategory | "all"; search?: string },
       showLoading = false,
     ) => {
+      const sequence = ++listRequestSequence.current;
       if (showLoading) setLoading(true);
       const activeFilter = overrides?.filter ?? filter;
       const activeCategory = overrides?.category ?? category;
@@ -70,6 +73,8 @@ export function useAdminSupportPage() {
           getSupportStats(),
         ]);
 
+        if (sequence !== listRequestSequence.current) return;
+
         if (listRes.returnCode === 200 && listRes.returnData) {
           setTickets(listRes.returnData.tickets ?? []);
           setTotalCount(listRes.returnData.totalCount ?? 0);
@@ -82,9 +87,10 @@ export function useAdminSupportPage() {
           setStats(statsRes.returnData);
         }
       } catch (err) {
+        if (sequence !== listRequestSequence.current) return;
         setError((err as Error)?.message || tt("Could not load conversations."));
       } finally {
-        if (showLoading) setLoading(false);
+        if (sequence === listRequestSequence.current) setLoading(false);
       }
     },
     [filter, category, search],
@@ -117,47 +123,64 @@ export function useAdminSupportPage() {
 
   const openThread = useCallback(
     async (ticket: SupportTicketSummary) => {
+      const sequence = ++threadRequestSequence.current;
       setLoadingThread(true);
       setActiveTicket(null);
       try {
-        const res = await getAdminSupportTicket(ticket.id);
+        const res = await getAdminSupportTicket(ticket.id, false);
+        if (sequence !== threadRequestSequence.current) return;
         if (res.returnCode === 200 && res.returnData) {
           setActiveTicket(res.returnData);
-          setTickets(current =>
-            current.map(item =>
-              item.id === ticket.id ? { ...item, adminUnread: false } : item,
-            ),
-          );
-          setStats(current =>
-            current
-              ? { ...current, unreadCount: Math.max(current.unreadCount - 1, 0) }
-              : current,
-          );
-          refreshUnread().catch(() => {});
         } else {
           toast({ title: tt("Could not open conversation"), description: res.returnMessage });
         }
       } catch (err) {
+        if (sequence !== threadRequestSequence.current) return;
         toast({ title: tt("Could not open conversation"), description: (err as Error)?.message });
       } finally {
-        setLoadingThread(false);
+        if (sequence === threadRequestSequence.current) setLoadingThread(false);
       }
     },
-    [toast, refreshUnread],
+    [toast],
   );
+
+  const markThreadRead = useCallback(async () => {
+    const ticket = activeTicket;
+    if (!ticket?.adminUnread || document.visibilityState !== "visible") return;
+    const sequence = ++threadRequestSequence.current;
+    try {
+      const response = await getAdminSupportTicket(ticket.id, true);
+      if (
+        sequence !== threadRequestSequence.current ||
+        response.returnCode !== 200 ||
+        !response.returnData
+      ) return;
+      setActiveTicket(current => current?.id === ticket.id ? response.returnData! : current);
+      setTickets(current =>
+        current.map(item => item.id === ticket.id ? { ...item, adminUnread: false } : item),
+      );
+      load().catch(() => {});
+      refreshUnread().catch(() => {});
+    } catch {
+      // A later realtime refresh retries the read acknowledgement.
+    }
+  }, [activeTicket, load, refreshUnread]);
 
   useEffect(() => {
     if (supportRevision === 0) return;
     load().catch(() => {});
     if (activeTicket?.id) {
       const activeId = activeTicket.id;
-      const markRead = document.visibilityState === "visible";
-      getAdminSupportTicket(activeId, markRead).then(response => {
-        if (response.returnCode === 200 && response.returnData) {
+      const sequence = ++threadRequestSequence.current;
+      getAdminSupportTicket(activeId, false).then(response => {
+        if (
+          sequence === threadRequestSequence.current &&
+          response.returnCode === 200 &&
+          response.returnData
+        ) {
           setActiveTicket(current =>
             current?.id === activeId ? response.returnData! : current,
           );
-          if (markRead) refreshUnread().catch(() => {});
         }
       }).catch(() => {});
     }
@@ -165,6 +188,7 @@ export function useAdminSupportPage() {
   }, [supportRevision]);
 
   const closeThread = useCallback(() => {
+    threadRequestSequence.current += 1;
     setActiveTicket(null);
     setReply("");
   }, []);
@@ -244,6 +268,7 @@ export function useAdminSupportPage() {
       openThread,
       closeThread,
       sendReply,
+      markThreadRead,
       changeStatus,
       refresh: () => load(),
       goBack,

@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { Check, CheckCheck, Loader2, Paperclip, SendHorizontal, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { tt } from "@/components/languages/hardcodedTranslate";
@@ -21,8 +22,37 @@ export function SupportThread({
   onSend,
   onSelectFile,
   onClearAttachment,
+  onMessagesVisible,
   footer,
 }: SupportThreadProps) {
+  const messagesRef = useRef<HTMLDivElement>(null);
+  const endRef = useRef<HTMLDivElement>(null);
+  const nearBottomRef = useRef(true);
+  const previousTicketId = useRef<number | null>(null);
+  const lastMessageId = ticket.messages.at(-1)?.id;
+
+  useEffect(() => {
+    const messages = messagesRef.current;
+    const openedTicket = previousTicketId.current !== ticket.id;
+    previousTicketId.current = ticket.id;
+    if (messages && (openedTicket || nearBottomRef.current)) {
+      messages.scrollTo({ top: messages.scrollHeight });
+    }
+  }, [ticket.id, lastMessageId]);
+
+  useEffect(() => {
+    const end = endRef.current;
+    if (!end || !onMessagesVisible) return;
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries.some(entry => entry.isIntersecting)) onMessagesVisible();
+      },
+      { root: messagesRef.current, threshold: 1 },
+    );
+    observer.observe(end);
+    return () => observer.disconnect();
+  }, [lastMessageId, onMessagesVisible, ticket.id]);
+
   return (
     <div className="flex h-full flex-col">
       <div className="rounded-xl border border-border bg-muted/30 p-4">
@@ -47,7 +77,15 @@ export function SupportThread({
         {footer}
       </div>
 
-      <div className="mt-4 flex-1 space-y-3 overflow-y-auto pr-1">
+      <div
+        ref={messagesRef}
+        onScroll={event => {
+          const target = event.currentTarget;
+          nearBottomRef.current =
+            target.scrollHeight - target.scrollTop - target.clientHeight < 48;
+        }}
+        className="mt-4 min-h-48 max-h-[60dvh] flex-1 space-y-3 overflow-y-auto pr-1"
+      >
         {ticket.messages.map(message => {
           const mine = message.senderRole === viewerRole;
           return (
@@ -114,6 +152,7 @@ export function SupportThread({
             </div>
           );
         })}
+        <div ref={endRef} className="h-px" aria-hidden="true" />
       </div>
 
       {!!attachment && (
