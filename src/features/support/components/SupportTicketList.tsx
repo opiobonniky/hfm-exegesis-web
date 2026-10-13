@@ -32,14 +32,16 @@ export function SupportTicketList({
             type="button"
             onClick={() => onSelect(ticket)}
             className={cn(
-              "flex w-full items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/50",
-              unread && "bg-primary/5",
+              "flex w-full items-start gap-3 px-4 py-3 text-left transition-colors",
+              unread
+                ? "bg-amber-500/10 hover:bg-amber-500/15"
+                : "bg-card hover:bg-muted/50",
             )}
           >
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
-                {unread && <span className="h-2 w-2 shrink-0 rounded-full bg-primary" />}
-                <span className="truncate text-sm font-semibold text-foreground">
+                {unread && <span className="h-2 w-2 shrink-0 rounded-full bg-amber-500" />}
+                <span className={cn("truncate text-sm text-foreground", unread ? "font-bold" : "font-medium")}>
                   {ticket.subject}
                 </span>
                 <SupportStatusBadge status={ticket.status} />
@@ -63,7 +65,12 @@ export function SupportTicketList({
                   </span>
                 )}
                 <span>· {ticket.messageCount} {tt("messages")}</span>
-                <span>· {formatSupportDate(ticket.lastMessageAt || ticket.createdOn)}</span>
+                <time
+                  dateTime={ticket.lastMessageAt || ticket.createdOn}
+                  title={new Date(ticket.lastMessageAt || ticket.createdOn).toLocaleString()}
+                >
+                  · {formatSupportDate(ticket.lastMessageAt || ticket.createdOn)}
+                </time>
               </div>
             </div>
 

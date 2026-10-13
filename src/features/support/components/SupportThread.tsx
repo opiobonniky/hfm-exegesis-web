@@ -1,4 +1,4 @@
-import { Loader2, Paperclip, SendHorizontal, X } from "lucide-react";
+import { Check, CheckCheck, Loader2, Paperclip, SendHorizontal, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { tt } from "@/components/languages/hardcodedTranslate";
 import {
@@ -12,6 +12,7 @@ import { SupportCategoryBadge, SupportStatusBadge } from "./SupportStatusBadge";
 
 export function SupportThread({
   ticket,
+  viewerRole = "user",
   reply,
   sending,
   attachment,
@@ -48,19 +49,23 @@ export function SupportThread({
 
       <div className="mt-4 flex-1 space-y-3 overflow-y-auto pr-1">
         {ticket.messages.map(message => {
-          const mine = message.senderRole === "user";
+          const mine = message.senderRole === viewerRole;
           return (
             <div key={message.id} className={cn("flex", mine ? "justify-end" : "justify-start")}>
               <div
                 className={cn(
                   "max-w-[80%] rounded-2xl border px-3.5 py-2.5 text-sm",
-                  mine
-                    ? "border-primary/40 bg-primary/10 text-foreground"
-                    : "border-border bg-muted/40 text-foreground",
+                  message.senderRole === "admin"
+                    ? "border-emerald-500/30 bg-emerald-500/10 text-foreground"
+                    : "border-sky-500/30 bg-sky-500/10 text-foreground",
                 )}
               >
                 <div className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                  {mine ? tt("User") : tt("Support team")}
+                  {mine
+                    ? tt("You")
+                    : viewerRole === "admin"
+                      ? tt("Reader")
+                      : tt("Support team")}
                 </div>
                 {!!message.attachment &&
                   (isImageAttachment(message.attachment) ? (
@@ -85,8 +90,25 @@ export function SupportThread({
                 {!!message.body && (
                   <p className="whitespace-pre-wrap leading-relaxed">{message.body}</p>
                 )}
-                <div className="mt-1.5 text-right text-[11px] text-muted-foreground">
-                  {formatSupportDateTime(message.createdOn)}
+                <div className="mt-1.5 flex items-center justify-end gap-1 text-[11px] text-muted-foreground">
+                  <time
+                    dateTime={message.createdOn}
+                    title={new Date(message.createdOn).toLocaleString()}
+                  >
+                    {formatSupportDateTime(message.createdOn)}
+                  </time>
+                  {mine && (
+                    <span
+                      title={message.readAt ? tt("Read") : message.deliveredAt ? tt("Delivered") : tt("Sent")}
+                      className={cn(message.readAt && "text-emerald-500")}
+                    >
+                      {message.deliveredAt ? (
+                        <CheckCheck className="h-3.5 w-3.5" />
+                      ) : (
+                        <Check className="h-3.5 w-3.5" />
+                      )}
+                    </span>
+                  )}
                 </div>
               </div>
             </div>

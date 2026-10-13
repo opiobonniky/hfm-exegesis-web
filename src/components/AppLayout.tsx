@@ -1,15 +1,16 @@
 import { useEffect, useMemo, type ReactNode } from 'react';
-import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/components/languages/languageProvider';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import MobileBottomNav from '@/components/MobileBottomNav';
-import { Menu, Sun, Moon } from 'lucide-react';
+import { Bell, Menu, Sun, Moon } from 'lucide-react';
 import { Button } from './ui/button';
 import { useTheme } from '@/hooks/useTheme';
 import { routes } from './Routes/routes';
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { useSupportRealtime } from '@/features/support/contexts/SupportRealtimeContext';
 
 /**
  * Try to match the current pathname to a route config and return its title.
@@ -42,6 +43,11 @@ export function AppLayout({ children }: { children?: ReactNode }) {
   const { isRtl } = useLanguage();
   const { themeMode, setThemeMode } = useTheme();
   const location = useLocation();
+  const navigate = useNavigate();
+  const { userUnreadCount, adminUnreadCount } = useSupportRealtime();
+  const supportUnreadCount = userInfo?.userRole === 1
+    ? adminUnreadCount
+    : userUnreadCount;
 
   const pageTitle = useMemo(() => {
     if (location.pathname === routes.landing.path) {
@@ -82,17 +88,32 @@ export function AppLayout({ children }: { children?: ReactNode }) {
             <h1 className="text-base md:text-lg font-semibold text-foreground">
               {pageTitle}
             </h1>
-            <button
-              onClick={() => setThemeMode(themeMode === "dark" ? "light" : "dark")}
-              className="ms-auto flex items-center justify-center w-8 h-8 rounded-lg hover:bg-muted transition-all active:scale-95"
-              title={themeMode === "dark" ? tt("Switch to light mode") : tt("Switch to dark mode")}
-            >
-              {themeMode === "dark" ? (
-                <Sun className="w-4 h-4 text-muted-foreground" />
-              ) : (
-                <Moon className="w-4 h-4 text-muted-foreground" />
-              )}
-            </button>
+            <div className="ms-auto flex items-center gap-1">
+              <button
+                onClick={() => navigate(userInfo?.userRole === 1 ? routes.adminSupport.path : routes.support.path)}
+                className="relative flex items-center justify-center w-8 h-8 rounded-lg hover:bg-muted transition-all active:scale-95"
+                title={tt("Support messages")}
+                aria-label={`${tt("Support messages")}: ${supportUnreadCount} ${tt("unread")}`}
+              >
+                <Bell className="w-4 h-4 text-muted-foreground" />
+                {supportUnreadCount > 0 && (
+                  <span className="absolute -end-1 -top-1 min-w-4 h-4 px-1 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold leading-4 text-center">
+                    {supportUnreadCount > 99 ? "99+" : supportUnreadCount}
+                  </span>
+                )}
+              </button>
+              <button
+                onClick={() => setThemeMode(themeMode === "dark" ? "light" : "dark")}
+                className="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-muted transition-all active:scale-95"
+                title={themeMode === "dark" ? tt("Switch to light mode") : tt("Switch to dark mode")}
+              >
+                {themeMode === "dark" ? (
+                  <Sun className="w-4 h-4 text-muted-foreground" />
+                ) : (
+                  <Moon className="w-4 h-4 text-muted-foreground" />
+                )}
+              </button>
+            </div>
           </header>
           <div data-scroll-root className="flex-1 min-h-0 overflow-auto pb-16 md:pb-0">
             {children ?? <Outlet />}

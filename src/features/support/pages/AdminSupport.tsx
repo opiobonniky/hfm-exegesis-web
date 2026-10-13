@@ -1,7 +1,14 @@
 // AdminSupport — admin inbox for reader complaints / messages (thin page).
 "use client";
 
-import { Inbox, LifeBuoy, X } from "lucide-react";
+import {
+  Inbox,
+  LifeBuoy,
+  MessageSquareText,
+  RefreshCw,
+  Search,
+  X,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { tt } from "@/components/languages/hardcodedTranslate";
 import { useAdminSupportPage } from "../hooks/useAdminSupportPage";
@@ -12,25 +19,52 @@ import {
   SUPPORT_STATUS_OPTIONS,
 } from "../constants";
 
+const STATUS_TONES = {
+  open: "bg-sky-500",
+  in_progress: "bg-amber-500",
+  resolved: "bg-emerald-500",
+  closed: "bg-slate-400",
+} as const;
+
 export default function AdminSupport() {
   const { data, actions } = useAdminSupportPage();
   const h = { ...data, ...actions };
 
   return (
-    <div className="min-h-screen bg-background p-4 md:p-6">
-      <div className="mx-auto w-full max-w-6xl space-y-6">
-        <div className="flex items-start gap-3 rounded-2xl border border-border bg-muted/30 p-4">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/15">
-            <Inbox className="h-5 w-5 text-primary" />
+    <div className="min-h-full bg-gradient-to-b from-primary/[0.04] via-background to-background p-4 md:p-6">
+      <div className="mx-auto w-full max-w-7xl space-y-5">
+        <section className="relative overflow-hidden rounded-3xl border border-border/80 bg-card p-5 shadow-sm md:p-6">
+          <div className="absolute -right-16 -top-20 h-52 w-52 rounded-full bg-primary/10 blur-3xl" />
+          <div className="relative flex flex-wrap items-start gap-4">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-sm">
+              <Inbox className="h-5 w-5" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="text-xl font-bold tracking-tight text-foreground md:text-2xl">
+                  {tt("Support Inbox")}
+                </h1>
+                {!!h.stats?.unreadCount && (
+                  <span className="rounded-full bg-destructive px-2.5 py-1 text-xs font-bold text-destructive-foreground">
+                    {h.stats.unreadCount} {tt("unread")}
+                  </span>
+                )}
+              </div>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {h.totalCount} {tt("conversations")} · {tt("Reader questions and issue reports")}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={h.refresh}
+              disabled={h.loading}
+              className="inline-flex h-10 items-center gap-2 rounded-xl border border-border bg-background px-3 text-sm font-semibold text-foreground transition-colors hover:bg-muted disabled:opacity-50"
+            >
+              <RefreshCw className={cn("h-4 w-4", h.loading && "animate-spin")} />
+              <span className="hidden sm:inline">{tt("Refresh")}</span>
+            </button>
           </div>
-          <div className="min-w-0 flex-1">
-            <h1 className="text-lg font-bold text-foreground">{tt("Support Inbox")}</h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {h.totalCount} {tt("conversations")}
-              {h.stats?.unreadCount ? ` · ${h.stats.unreadCount} ${tt("awaiting reply")}` : ""}
-            </p>
-          </div>
-        </div>
+        </section>
 
         {h.stats && (
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
@@ -40,61 +74,85 @@ export default function AdminSupport() {
                 type="button"
                 onClick={() => h.changeFilter(option.id)}
                 className={cn(
-                  "rounded-xl border p-3 text-left transition-colors",
-                  h.filter === option.id ? "border-primary bg-primary/5" : "border-border hover:bg-muted/50",
+                  "group rounded-2xl border bg-card p-4 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md",
+                  h.filter === option.id
+                    ? "border-primary ring-2 ring-primary/10"
+                    : "border-border/80",
                 )}
               >
-                <div className="text-2xl font-bold text-foreground">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    {option.label}
+                  </span>
+                  <span className={cn("h-2.5 w-2.5 rounded-full", STATUS_TONES[option.id])} />
+                </div>
+                <div className="mt-3 text-3xl font-bold tracking-tight text-foreground">
                   {h.stats?.counts?.[option.id] ?? 0}
                 </div>
-                <div className="text-xs text-muted-foreground">{option.label}</div>
               </button>
             ))}
           </div>
         )}
 
-        <div className="flex flex-wrap items-center gap-2">
-          <input
-            type="text"
-            value={h.search}
-            onChange={e => h.setSearch(e.target.value)}
-            onKeyDown={e => e.key === "Enter" && h.runSearch()}
-            placeholder={tt("Search subject, code or email…")}
-            className="min-h-11 min-w-[240px] flex-1 rounded-xl border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-          />
-          <select
-            value={h.category}
-            onChange={e => h.changeCategory(e.target.value as never)}
-            className="min-h-11 rounded-xl border border-border bg-background px-3 text-sm"
-          >
-            <option value="all">{tt("All categories")}</option>
-            {SUPPORT_CATEGORY_OPTIONS.map(option => (
-              <option key={option.id} value={option.id}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-          <div className="flex flex-wrap gap-2">
+        <section className="rounded-2xl border border-border/80 bg-card p-3 shadow-sm md:p-4">
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="relative min-w-[240px] flex-1">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <input
+                type="search"
+                value={h.search}
+                onChange={e => h.setSearch(e.target.value)}
+                onKeyDown={e => e.key === "Enter" && h.runSearch()}
+                placeholder={tt("Search subject, code or email…")}
+                aria-label={tt("Search support conversations")}
+                className="min-h-11 w-full rounded-xl border border-border bg-background pl-9 pr-3 text-sm outline-none transition-shadow focus:ring-2 focus:ring-ring"
+              />
+            </div>
+            <select
+              value={h.category}
+              onChange={e => h.changeCategory(e.target.value as never)}
+              aria-label={tt("Filter by category")}
+              className="min-h-11 rounded-xl border border-border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-ring"
+            >
+              <option value="all">{tt("All categories")}</option>
+              {SUPPORT_CATEGORY_OPTIONS.map(option => (
+                <option key={option.id} value={option.id}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
             {SUPPORT_FILTERS.map(filter => (
               <button
                 key={filter.id}
                 type="button"
                 onClick={() => h.changeFilter(filter.id)}
                 className={cn(
-                  "rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors",
+                  "shrink-0 rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-colors",
                   h.filter === filter.id
-                    ? "border-primary bg-primary/10 text-primary"
-                    : "border-border text-muted-foreground hover:bg-muted/60",
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-border text-muted-foreground hover:bg-muted",
                 )}
               >
                 {filter.label}
               </button>
             ))}
           </div>
-        </div>
+        </section>
 
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
-          <div>
+        <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.2fr)]">
+          <section className="overflow-hidden rounded-2xl border border-border/80 bg-card shadow-sm">
+            <div className="flex items-center justify-between border-b border-border px-4 py-3">
+              <div className="flex items-center gap-2">
+                <MessageSquareText className="h-4 w-4 text-primary" />
+                <h2 className="text-sm font-bold text-foreground">{tt("Conversations")}</h2>
+              </div>
+              <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-semibold text-muted-foreground">
+                {h.totalCount}
+              </span>
+            </div>
+            <div className="max-h-[62vh] overflow-y-auto p-3 lg:max-h-[calc(100dvh-13rem)]">
             {h.loading ? (
               <div className="py-14 text-center text-sm text-muted-foreground">
                 {tt("Loading conversations…")}
@@ -114,17 +172,19 @@ export default function AdminSupport() {
                 emptyMessage={tt("No conversations match these filters.")}
               />
             )}
-          </div>
+            </div>
+          </section>
 
-          <div className="min-h-[320px]">
+          <section className="min-h-[360px] lg:sticky lg:top-4 lg:h-[calc(100dvh-7rem)]">
             {h.loadingThread ? (
-              <div className="flex h-full items-center justify-center rounded-2xl border border-border text-sm text-muted-foreground">
+              <div className="flex h-full items-center justify-center rounded-2xl border border-border bg-card text-sm text-muted-foreground shadow-sm">
                 {tt("Loading conversation…")}
               </div>
             ) : h.activeTicket ? (
-              <div className="rounded-2xl border border-border bg-card p-4">
+              <div className="h-full overflow-hidden rounded-2xl border border-border/80 bg-card p-4 shadow-sm">
                 <SupportThread
                   ticket={h.activeTicket}
+                  viewerRole="admin"
                   reply={h.reply}
                   sending={h.sending}
                   attachment={h.attachment}
@@ -165,8 +225,10 @@ export default function AdminSupport() {
                 />
               </div>
             ) : (
-              <div className="flex h-full flex-col items-center justify-center rounded-2xl border border-dashed border-border p-8 text-center">
-                <LifeBuoy className="mb-3 h-8 w-8 text-muted-foreground" />
+              <div className="flex h-full flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-card/60 p-8 text-center">
+                <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10">
+                  <LifeBuoy className="h-7 w-7 text-primary" />
+                </div>
                 <p className="text-sm font-semibold text-foreground">
                   {tt("Select a conversation")}
                 </p>
@@ -175,7 +237,7 @@ export default function AdminSupport() {
                 </p>
               </div>
             )}
-          </div>
+          </section>
         </div>
       </div>
     </div>

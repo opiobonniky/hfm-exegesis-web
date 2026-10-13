@@ -21,10 +21,12 @@ import type {
   SupportTicketDetail,
   SupportTicketSummary,
 } from "../types";
+import { useSupportRealtime } from "../contexts/SupportRealtimeContext";
 
 export function useAdminSupportPage() {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { supportRevision, refreshUnread } = useSupportRealtime();
   const attachmentPicker = useSupportAttachment();
   const pickedAttachment = attachmentPicker.data.attachment;
   const uploadingAttachment = attachmentPicker.data.uploading;
@@ -47,8 +49,11 @@ export function useAdminSupportPage() {
   const [updatingStatus, setUpdatingStatus] = useState(false);
 
   const load = useCallback(
-    async (overrides?: { filter?: SupportFilter; category?: SupportCategory | "all"; search?: string }) => {
-      setLoading(true);
+    async (
+      overrides?: { filter?: SupportFilter; category?: SupportCategory | "all"; search?: string },
+      showLoading = false,
+    ) => {
+      if (showLoading) setLoading(true);
       const activeFilter = overrides?.filter ?? filter;
       const activeCategory = overrides?.category ?? category;
       const activeSearch = overrides?.search ?? search;
@@ -79,14 +84,14 @@ export function useAdminSupportPage() {
       } catch (err) {
         setError((err as Error)?.message || tt("Could not load conversations."));
       } finally {
-        setLoading(false);
+        if (showLoading) setLoading(false);
       }
     },
     [filter, category, search],
   );
 
   useEffect(() => {
-    load().catch(() => {});
+    load(undefined, true).catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -128,6 +133,7 @@ export function useAdminSupportPage() {
               ? { ...current, unreadCount: Math.max(current.unreadCount - 1, 0) }
               : current,
           );
+          refreshUnread().catch(() => {});
         } else {
           toast({ title: tt("Could not open conversation"), description: res.returnMessage });
         }
@@ -137,8 +143,26 @@ export function useAdminSupportPage() {
         setLoadingThread(false);
       }
     },
-    [toast],
+    [toast, refreshUnread],
   );
+
+  useEffect(() => {
+    if (supportRevision === 0) return;
+    load().catch(() => {});
+    if (activeTicket?.id) {
+      const activeId = activeTicket.id;
+      const markRead = document.visibilityState === "visible";
+      getAdminSupportTicket(activeId, markRead).then(response => {
+        if (response.returnCode === 200 && response.returnData) {
+          setActiveTicket(current =>
+            current?.id === activeId ? response.returnData! : current,
+          );
+          if (markRead) refreshUnread().catch(() => {});
+        }
+      }).catch(() => {});
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [supportRevision]);
 
   const closeThread = useCallback(() => {
     setActiveTicket(null);

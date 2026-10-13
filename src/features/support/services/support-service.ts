@@ -8,6 +8,7 @@ import type {
   SupportStats,
   SupportTicketDetail,
   SupportTicketsPage,
+  SupportUnreadSummary,
 } from "../types";
 
 /** Store a screenshot/PDF so it can be attached to a message. */
@@ -26,8 +27,14 @@ export const getMySupportTickets = (params: {
   pageSize?: number;
 }) => sendPostRequest<SupportTicketsPage>("support", "get-my-tickets", params);
 
-export const getSupportTicket = (ticketId: number) =>
-  sendPostRequest<SupportTicketDetail>("support", "get-ticket", { ticketId });
+export const getSupportTicket = (ticketId: number, markRead = true) =>
+  sendPostRequest<SupportTicketDetail>("support", "get-ticket", {
+    ticketId,
+    markRead,
+  });
+
+export const getSupportUnreadSummary = () =>
+  sendPostRequest<SupportUnreadSummary>("support", "get-unread", {});
 
 export const replyToSupportTicket = (
   ticketId: number,
@@ -50,8 +57,11 @@ export const getAdminSupportTickets = (params: {
   pageSize?: number;
 }) => sendPostRequest<SupportTicketsPage>("support", "admin/get-tickets", params);
 
-export const getAdminSupportTicket = (ticketId: number) =>
-  sendPostRequest<SupportTicketDetail>("support", "admin/get-ticket", { ticketId });
+export const getAdminSupportTicket = (ticketId: number, markRead = true) =>
+  sendPostRequest<SupportTicketDetail>("support", "admin/get-ticket", {
+    ticketId,
+    markRead,
+  });
 
 export const adminReplyToTicket = (
   ticketId: number,

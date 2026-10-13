@@ -25,6 +25,7 @@ import type {
   SupportTicketDetail,
   SupportTicketSummary,
 } from "../types";
+import { useSupportRealtime } from "../contexts/SupportRealtimeContext";
 
 const deviceInfo = () =>
   typeof navigator === "undefined" ? "web" : `web · ${navigator.userAgent.slice(0, 120)}`;
@@ -32,6 +33,7 @@ const deviceInfo = () =>
 export function useSupportPage() {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { supportRevision, refreshUnread } = useSupportRealtime();
   const attachmentPicker = useSupportAttachment();
   const pickedAttachment = attachmentPicker.data.attachment;
   const uploadingAttachment = attachmentPicker.data.uploading;
@@ -58,8 +60,8 @@ export function useSupportPage() {
   const [sending, setSending] = useState(false);
 
   const load = useCallback(
-    async (activeFilter: SupportFilter = filter) => {
-      setLoading(true);
+    async (activeFilter: SupportFilter = filter, showLoading = false) => {
+      if (showLoading) setLoading(true);
       try {
         const res = await getMySupportTickets({
           page: 1,
@@ -77,15 +79,17 @@ export function useSupportPage() {
       } catch (err) {
         setError((err as Error)?.message || tt("Could not load your messages."));
       } finally {
-        setLoading(false);
+        if (showLoading) setLoading(false);
       }
     },
     [filter],
   );
 
   useEffect(() => {
-    load().catch(() => {});
-  }, [load]);
+    load("all", true).catch(() => {});
+    // Initial loading is the only fetch that replaces the list with a loader.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const changeFilter = useCallback(
     (next: SupportFilter) => {
@@ -107,6 +111,10 @@ export function useSupportPage() {
             item.id === ticket.id ? { ...item, userUnread: false } : item,
           ),
         );
+        setUnreadCount(current =>
+          ticket.userUnread ? Math.max(current - 1, 0) : current,
+        );
+        refreshUnread().catch(() => {});
       } else {
         toast({ title: tt("Could not open conversation"), description: res.returnMessage });
       }
@@ -115,7 +123,27 @@ export function useSupportPage() {
     } finally {
       setLoadingThread(false);
     }
-  }, [toast]);
+  }, [toast, refreshUnread]);
+
+  useEffect(() => {
+    if (supportRevision === 0) return;
+    load(filter).catch(() => {});
+    if (activeTicket?.id) {
+      const activeId = activeTicket.id;
+      const markRead = document.visibilityState === "visible";
+      getSupportTicket(activeId, markRead).then(response => {
+        if (response.returnCode === 200 && response.returnData) {
+          setActiveTicket(current =>
+            current?.id === activeId ? response.returnData! : current,
+          );
+          if (markRead) refreshUnread().catch(() => {});
+        }
+      }).catch(() => {});
+    }
+    // Realtime revision is the trigger; `load` and the active id represent the
+    // latest render and intentionally do not trigger this effect themselves.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [supportRevision]);
 
   const closeThread = useCallback(() => {
     setActiveTicket(null);
@@ -132,7 +160,7 @@ export function useSupportPage() {
         setActiveTicket(res.returnData);
         setReply("");
         clearAttachment();
-        load().catch(() => {});
+        load(filter).catch(() => {});
       } else {
         toast({ title: tt("Could not send reply"), description: res.returnMessage });
       }
@@ -141,7 +169,7 @@ export function useSupportPage() {
     } finally {
       setSending(false);
     }
-  }, [reply, activeTicket, toast, load, pickedAttachment, clearAttachment]);
+  }, [reply, activeTicket, toast, load, filter, pickedAttachment, clearAttachment]);
 
   const canSubmit = useMemo(
     () =>

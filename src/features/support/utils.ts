@@ -21,21 +21,40 @@ export const fileToBase64 = (file: File): Promise<string> =>
     reader.readAsDataURL(file);
   });
 
-/** "12 Mar" — used in the conversation list. */
-export const formatSupportDate = (value: string): string => {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "";
-  return date.toLocaleDateString(undefined, { day: "numeric", month: "short" });
-};
+const sameCalendarDay = (left: Date, right: Date) =>
+  left.getFullYear() === right.getFullYear() &&
+  left.getMonth() === right.getMonth() &&
+  left.getDate() === right.getDate();
 
-/** "12 Mar, 14:05" — used inside a conversation. */
-export const formatSupportDateTime = (value: string): string => {
+/** Compact conversation time: now, 2min, 3h, Yesterday, Tue, or Oct 1. */
+export const formatSupportTime = (
+  value: string,
+  now = new Date(),
+  locale?: string,
+): string => {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "";
-  return date.toLocaleString(undefined, {
-    day: "numeric",
+
+  const elapsedMs = Math.max(0, now.getTime() - date.getTime());
+  const elapsedMinutes = Math.floor(elapsedMs / 60_000);
+  if (elapsedMinutes < 1) return "now";
+  if (elapsedMinutes < 60) return `${elapsedMinutes}min`;
+  if (sameCalendarDay(date, now)) return `${Math.floor(elapsedMinutes / 60)}h`;
+
+  const yesterday = new Date(now);
+  yesterday.setDate(now.getDate() - 1);
+  if (sameCalendarDay(date, yesterday)) return "Yesterday";
+
+  if (elapsedMs < 7 * 86_400_000) {
+    return date.toLocaleDateString(locale, { weekday: "short" });
+  }
+
+  return date.toLocaleDateString(locale, {
     month: "short",
-    hour: "2-digit",
-    minute: "2-digit",
+    day: "numeric",
+    ...(date.getFullYear() === now.getFullYear() ? {} : { year: "numeric" }),
   });
 };
+
+export const formatSupportDate = formatSupportTime;
+export const formatSupportDateTime = formatSupportTime;

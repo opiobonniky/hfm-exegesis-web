@@ -22,6 +22,7 @@ import {
   getPublicLayoutRoutes,
   routes,
 } from "./components/Routes/routes";
+import { SupportRealtimeProvider } from "@/features/support/contexts/SupportRealtimeContext";
 
 const RouteLoader = () => (
   <div className="min-h-screen bg-background">
@@ -200,15 +201,17 @@ const App = () => {
       <ThemeInitializer />
       <BibleDataPreloader />
       <AuthProvider>
-        <LanguageProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <SubscriptionExpiredHandler />
-            <RouteScrollManager />
-            <AppRoutes />
-          </TooltipProvider>
-        </LanguageProvider>
+        <SupportRealtimeProvider>
+          <LanguageProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <SubscriptionExpiredHandler />
+              <RouteScrollManager />
+              <AppRoutes />
+            </TooltipProvider>
+          </LanguageProvider>
+        </SupportRealtimeProvider>
       </AuthProvider>
     </BrowserRouter>
   );

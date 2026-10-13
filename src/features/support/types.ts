@@ -29,6 +29,8 @@ export interface SupportMessage {
   body: string;
   attachment?: string | null;
   attachmentName?: string | null;
+  deliveredAt?: string | null;
+  readAt?: string | null;
   createdOn: string;
 }
 
@@ -62,6 +64,8 @@ export interface SupportTicketSummary {
     createdOn: string;
     attachment?: string | null;
     attachmentName?: string | null;
+    deliveredAt?: string | null;
+    readAt?: string | null;
   } | null;
   user?: SupportUserSummary | null;
 }
@@ -87,6 +91,11 @@ export interface SupportStats {
   unreadCount: number;
 }
 
+export interface SupportUnreadSummary {
+  userUnreadCount: number;
+  adminUnreadCount: number;
+}
+
 /** A file stored by POST /support/upload, ready to attach to a message. */
 export interface SupportAttachment {
   url: string;
@@ -105,6 +114,7 @@ export interface SupportTicketListProps {
 
 export interface SupportThreadProps {
   ticket: SupportTicketDetail;
+  viewerRole?: SupportSenderRole;
   reply: string;
   sending: boolean;
   attachment: SupportAttachment | null;
