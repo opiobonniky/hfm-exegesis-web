@@ -1,4 +1,9 @@
 // ─── Support utils ────────────────────────────────────────────────────────────
+import type {
+  SupportHelpItem,
+  SupportHelpTopic,
+  SupportHelpTopicId,
+} from "./types";
 
 /** Image attachments preview inline; anything else shows as a file chip. */
 export const isImageAttachment = (url?: string | null): boolean =>
@@ -58,3 +63,71 @@ export const formatSupportTime = (
 
 export const formatSupportDate = formatSupportTime;
 export const formatSupportDateTime = formatSupportTime;
+
+// ─── Help centre (FAQ) helpers ───────────────────────────────────────────────
+
+export type SupportHelpTopicFilter = "all" | SupportHelpTopicId;
+
+/** Lower-case, trimmed, accent-free, single-spaced search text. */
+export const normalizeHelpQuery = (value: string): string =>
+  value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[’‘]/g, "'")
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, " ");
+
+const searchableHelpText = (item: SupportHelpItem): string =>
+  normalizeHelpQuery(
+    [item.question, item.answer, ...(item.steps ?? []), ...(item.keywords ?? [])].join(" "),
+  );
+
+/**
+ * Items matching the topic chip and every word in the query.
+ * Matching is word-based so "reset password" finds the "forgot password" item.
+ */
+export const filterSupportHelp = (
+  items: SupportHelpItem[],
+  query: string,
+  topic: SupportHelpTopicFilter = "all",
+): SupportHelpItem[] => {
+  const words = normalizeHelpQuery(query).split(" ").filter(Boolean);
+  return items.filter(item => {
+    if (topic !== "all" && item.topic !== topic) return false;
+    if (words.length === 0) return true;
+    const haystack = searchableHelpText(item);
+    return words.every(word => haystack.includes(word));
+  });
+};
+
+export interface SupportHelpGroup {
+  topic: SupportHelpTopic;
+  items: SupportHelpItem[];
+}
+
+/** Groups items under their topic, keeping topic order and skipping empty topics. */
+export const groupSupportHelp = (
+  items: SupportHelpItem[],
+  topics: SupportHelpTopic[],
+): SupportHelpGroup[] =>
+  topics
+    .map(topic => ({ topic, items: items.filter(item => item.topic === topic.id) }))
+    .filter(group => group.items.length > 0);
+
+/** Featured items first, then fill from the rest, capped at `limit`. */
+export const pickFeaturedHelp = (
+  items: SupportHelpItem[],
+  limit: number,
+): SupportHelpItem[] => {
+  if (limit <= 0) return [];
+  const featured = items.filter(item => item.featured);
+  const rest = items.filter(item => !item.featured);
+  return [...featured, ...rest].slice(0, limit);
+};
+
+/** Subject line used when a reader still needs help after reading an answer. */
+export const helpItemToSubject = (item: SupportHelpItem, maxLength: number): string => {
+  const subject = `Help with: ${item.question.replace(/[??]+$/u, "").trim()}`;
+  return subject.length > maxLength ? subject.slice(0, maxLength).trimEnd() : subject;
+};

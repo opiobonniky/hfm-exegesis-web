@@ -7,6 +7,7 @@ import { tt } from "@/components/languages/hardcodedTranslate";
 import { useSupportPage } from "../hooks/useSupportPage";
 import {
   SupportComposer,
+  SupportFaq,
   SupportThread,
   SupportTicketList,
 } from "../components";
@@ -81,6 +82,13 @@ export default function Support() {
             />
           </div>
         )}
+
+        <SupportFaq
+          onAsk={prefill => {
+            h.openComposerWith(prefill);
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }}
+        />
 
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
           <div className="space-y-3">

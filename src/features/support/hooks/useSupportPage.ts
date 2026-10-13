@@ -248,6 +248,16 @@ export function useSupportPage() {
 
   const goToSettings = useCallback(() => navigate(routes.settings.path), [navigate]);
 
+  /** The help centre can open the composer with a category and ready-made subject. */
+  const openComposerWith = useCallback(
+    (prefill: { category?: SupportCategory; subject?: string }) => {
+      if (prefill.category) setCategory(prefill.category);
+      if (prefill.subject) setSubject(prefill.subject);
+      setComposerOpen(true);
+    },
+    [],
+  );
+
   return {
     data: {
       tickets,
@@ -280,6 +290,7 @@ export function useSupportPage() {
       setReply,
       changeFilter,
       openComposer: () => setComposerOpen(true),
+      openComposerWith,
       closeComposer: () => setComposerOpen(false),
       submit,
       openThread,

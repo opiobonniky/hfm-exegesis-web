@@ -155,3 +155,44 @@ export interface NewSupportTicketPayload {
   attachment?: string | null;
   attachmentName?: string | null;
 }
+
+// ─── Help centre (FAQ) ───────────────────────────────────────────────────────
+
+/** Grouping bucket for help articles — shown as chips above the list. */
+export type SupportHelpTopicId =
+  | "account"
+  | "bible"
+  | "study"
+  | "subscription"
+  | "notifications"
+  | "support";
+
+export interface SupportHelpTopic {
+  id: SupportHelpTopicId;
+  label: string;
+  description: string;
+}
+
+/** In-app destination offered at the bottom of an answer ("Open settings"). */
+export interface SupportHelpLink {
+  label: string;
+  /** Key into the app's route config (see @/components/Routes/routes). */
+  route: string;
+}
+
+export interface SupportHelpItem {
+  id: string;
+  topic: SupportHelpTopicId;
+  question: string;
+  /** Short plain-language answer, shown first. */
+  answer: string;
+  /** Optional numbered steps shown under the answer. */
+  steps?: string[];
+  /** Extra words that should match this item when searching. */
+  keywords?: string[];
+  /** Pre-selected category when the reader still needs to message us. */
+  category: SupportCategory;
+  link?: SupportHelpLink;
+  /** Surfaced on the Support page before opening the full help centre. */
+  featured?: boolean;
+}

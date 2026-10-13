@@ -3,3 +3,4 @@ export { SupportStatusBadge, SupportCategoryBadge, SupportPriorityDot } from "./
 export { SupportTicketList } from "./SupportTicketList";
 export { SupportThread } from "./SupportThread";
 export { SupportComposer } from "./SupportComposer";
+export { SupportFaq } from "./SupportFaq";
