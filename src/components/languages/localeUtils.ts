@@ -31,6 +31,15 @@ export const getLocale = (lang: Language): string => {
     ru: 'ru-RU',
     ne: 'ne-NP',
     fil: 'fil-PH',
+    as: 'as-IN',
+    doi: 'doi-IN',
+    kok: 'kok-IN',
+    mai: 'mai-IN',
+    mni: 'mni-IN',
+    or: 'or-IN',
+    sa: 'sa-IN',
+    sat: 'sat-IN',
+    sd: 'sd-PK',
   };
   return localeMap[lang] || 'en-US';
 };

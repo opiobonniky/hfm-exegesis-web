@@ -29,6 +29,15 @@ export const SUPPORTED_LANGUAGES = [
   "ru",
   "ne",
   "fil",
+  "as",
+  "doi",
+  "kok",
+  "mai",
+  "mni",
+  "or",
+  "sa",
+  "sat",
+  "sd",
 ] as const;
 
 export type Language = (typeof SUPPORTED_LANGUAGES)[number];
@@ -56,10 +65,19 @@ export const LANGUAGE_NAMES: Record<Language, string> = {
   ru: "Русский",
   ne: "नेपाली",
   fil: "Filipino",
+  as: "অসমীয়া",
+  doi: "डोगरी",
+  kok: "कोंकणी",
+  mai: "मैथिली",
+  mni: "ꯃꯤꯇꯩ ꯂꯣꯟ",
+  or: "ଓଡ଼ିଆ",
+  sa: "संस्कृतम्",
+  sat: "ᱥᱟᱱᱛᱟᱲᱤ",
+  sd: "سنڌي",
 };
 
 /** RTL languages */
-export const RTL_LANGUAGES: Language[] = ["ar", "ur"];
+export const RTL_LANGUAGES: Language[] = ["ar", "ur", "sd"];
 
 /** Translation strings structure organized by page */
 export interface Translations {
