@@ -6,6 +6,7 @@ const SCRIPT_ID = 'google-translate-element-script';
 const CALLBACK_NAME = 'googleTranslateElementInit';
 const GOOGLE_LANGUAGE_CODES: Partial<Record<Language, string>> = {
   fil: 'tl',
+  kok: 'gom',
   // Google spells Meitei with its script tag
   mni: 'mni-Mtei',
 };

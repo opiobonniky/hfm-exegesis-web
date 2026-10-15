@@ -29,7 +29,7 @@ interface Props {
 const LANGUAGE_GROUPS = [
   { key: "primary", languages: ["en"] as Language[] },
   { key: "european", languages: ["de", "fr", "es", "pt", "it", "el", "ru"] as Language[] },
-  { key: "indian", languages: ["hi", "bn", "ta", "te", "mr", "gu", "kn", "ml", "pa", "ur"] as Language[] },
+  { key: "indian", languages: ["hi", "bn", "ta", "te", "mr", "gu", "kn", "ml", "pa", "ur", "as", "doi", "kok", "mai", "mni", "or", "sa", "sat", "sd"] as Language[] },
   { key: "other", languages: ["ar", "sw", "ne", "fil"] as Language[] },
 ];
 

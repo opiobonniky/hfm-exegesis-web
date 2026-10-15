@@ -31,6 +31,20 @@ describe('applyGoogleLanguage', () => {
     expect(selector.value).toBe('tl');
   });
 
+  it.each([
+    ['kok', 'gom'],
+    ['mni', 'mni-Mtei'],
+  ] as const)('maps %s to Google\'s %s language code', (language, googleCode) => {
+    const selector = document.createElement('select');
+    selector.className = 'goog-te-combo';
+    selector.innerHTML = `<option value=""></option><option value="${googleCode}">${language}</option>`;
+    document.body.appendChild(selector);
+
+    expect(applyGoogleLanguage(language)).toBe(true);
+    expect(selector.value).toBe(googleCode);
+    expect(document.cookie).toContain(`googtrans=/en/${googleCode}`);
+  });
+
   it('returns false while the Google selector is not ready', () => {
     expect(applyGoogleLanguage('fr')).toBe(false);
   });

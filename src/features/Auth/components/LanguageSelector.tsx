@@ -21,7 +21,7 @@ export function LanguageSelector({ value, onChange, disabled, className }: Langu
         {[
           { label: tt("Primary"), languages: ["en"] as Language[] },
           { label: tt("European"), languages: ["de", "fr", "es", "pt", "it", "el", "ru"] as Language[] },
-          { label: tt("Indian"), languages: ["hi", "bn", "ta", "te", "mr", "gu", "kn", "ml", "pa", "ur"] as Language[] },
+          { label: tt("Indian"), languages: ["hi", "bn", "ta", "te", "mr", "gu", "kn", "ml", "pa", "ur", "as", "doi", "kok", "mai", "mni", "or", "sa", "sat", "sd"] as Language[] },
           { label: tt("Other"), languages: ["ar", "sw", "ne", "fil"] as Language[] },
         ].map((group) => (
           <SelectGroup key={group.label}>
