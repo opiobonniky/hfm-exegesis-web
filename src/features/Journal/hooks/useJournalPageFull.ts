@@ -108,7 +108,7 @@ export function useJournalPageFull() {
         startDate: startDate || undefined,
         endDate: endDate || undefined,
         viewMode,
-      });
+      }, { includeLanguage: true });
       if (res?.returnCode === 200 && res?.returnData) {
         const data = res.returnData;
         const items = data.entries || data.content || data || [];

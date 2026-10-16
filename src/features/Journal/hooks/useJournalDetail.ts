@@ -121,6 +121,7 @@ export function useJournalDetail(): JournalDetailPageModel {
 
   const handleExportPdf = useCallback(async () => {
     if (!entry) return;
+    const lang = localStorage.getItem("exegesis-language") || "en";
     setExporting(true);
     try {
       const response = await exportJournalEntry(entry.id);
