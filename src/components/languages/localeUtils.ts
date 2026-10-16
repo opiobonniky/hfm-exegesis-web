@@ -40,6 +40,14 @@ export const getLocale = (lang: Language): string => {
     sa: 'sa-IN',
     sat: 'sat-IN',
     sd: 'sd-PK',
+    id: 'id-ID',
+    ja: 'ja-JP',
+    ko: 'ko-KR',
+    zh: 'zh-CN',
+    pl: 'pl-PL',
+    ro: 'ro-RO',
+    tr: 'tr-TR',
+    uk: 'uk-UA',
   };
   return localeMap[lang] || 'en-US';
 };

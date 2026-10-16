@@ -38,6 +38,14 @@ export const SUPPORTED_LANGUAGES = [
   "sa",
   "sat",
   "sd",
+  "id",
+  "ja",
+  "ko",
+  "zh",
+  "pl",
+  "ro",
+  "tr",
+  "uk",
 ] as const;
 
 export type Language = (typeof SUPPORTED_LANGUAGES)[number];
@@ -74,6 +82,14 @@ export const LANGUAGE_NAMES: Record<Language, string> = {
   sa: "संस्कृतम्",
   sat: "ᱥᱟᱱᱛᱟᱲᱤ",
   sd: "سنڌي",
+  id: "Bahasa Indonesia",
+  ja: "日本語",
+  ko: "한국어",
+  zh: "中文",
+  pl: "Polski",
+  ro: "Română",
+  tr: "Türkçe",
+  uk: "Українська",
 };
 
 /** RTL languages */

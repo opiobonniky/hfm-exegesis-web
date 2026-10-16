@@ -9,6 +9,7 @@ const GOOGLE_LANGUAGE_CODES: Partial<Record<Language, string>> = {
   kok: 'gom',
   // Google spells Meitei with its script tag
   mni: 'mni-Mtei',
+  zh: 'zh-CN',
 };
 
 type GoogleTranslateConstructor = new (
