@@ -1,10 +1,12 @@
 // src/contexts/AuthContext.tsx
 
-import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from "react";
+import React, { createContext, useContext, useEffect, useState, useCallback, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { signOut } from "firebase/auth";
 import { toast } from "@/hooks/use-toast";
+import { auth } from "@/firebaseConfiguration/config";
 import { sendPostRequest } from "@/services/api";
-import { enableWebPush, disableWebPush, syncPushTokenIfPermitted } from "@/services/pushService";
+import { disableWebPush, syncPushTokenIfPermitted } from "@/services/pushService";
 import { routes } from "@/components/Routes/routes";
 
 export interface UserInfo {
@@ -27,7 +29,7 @@ type AuthContextType = {
   isAuthenticated: boolean;
   loading: boolean;
   authLoading: boolean;
-  logout: () => void;
+  logout: () => Promise<void>;
   subscriptionTier: string;
   accessExpiresAt: string | null;
   subscriptionLoading: boolean;
@@ -47,6 +49,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [loading, setLoading] = useState(true);
   const [subscriptionTier, setSubscriptionTier] = useState<string>("free");
   const [accessExpiresAt, setAccessExpiresAt] = useState<string | null>(null);
+  const logoutInProgress = useRef(false);
 
   const navigate = useNavigate(); // ← add this back
   // ── Fetch subscription status from backend ──
@@ -81,6 +84,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         if (token && userStr) {
           const parsed = JSON.parse(userStr);
           setUserInfoState({ ...parsed, token });
+          void syncPushTokenIfPermitted();
         }
       } catch (err) {
         console.error("Failed to parse auth data", err);
@@ -137,23 +141,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, [fetchSubscriptionStatus]);
 
-  const logout = useCallback(() => {
-    localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(USER_KEY);
-    localStorage.removeItem(SUBSCRIPTION_KEY);
-    setUserInfoState(null);
-    setSubscriptionTier("free");
-    setAccessExpiresAt(null);
-    toast({
-      title: "Signed out",
-      description: "You have been logged out.",
-    });
-    navigate(routes.login.path, { replace: true });
+  const logout = useCallback(async () => {
+    if (logoutInProgress.current) return;
+    logoutInProgress.current = true;
+
+    try {
+      // Keep the backend token available while unregistering this device's push token.
+      await Promise.allSettled([disableWebPush(), signOut(auth)]);
+    } finally {
+      localStorage.removeItem(TOKEN_KEY);
+      localStorage.removeItem(USER_KEY);
+      localStorage.removeItem(SUBSCRIPTION_KEY);
+      setUserInfoState(null);
+      setSubscriptionTier("free");
+      setAccessExpiresAt(null);
+      toast({
+        title: "Signed out",
+        description: "You have been logged out.",
+      });
+      navigate(routes.login.path, { replace: true });
+      logoutInProgress.current = false;
+    }
   }, [navigate]);
 
   useEffect(() => {
     const handleSessionExpired = () => {
-      logout();
+      void logout();
       toast({
         title: "Session Expired",
         description: "Please sign in again.",

@@ -33,13 +33,9 @@ export function useGoogleRegisterPage() {
     try {
       const deviceInfo = getDeviceInfo();
       const clientIP = await getClientIP();
-      const res = await sendPostRequest("auth", "google-register", {
-        googleId: state?.googleId,
-        email: state?.email,
-        firstName: state?.firstName,
-        lastName: state?.lastName,
-        photoUrl: state?.photoUrl,
-        phoneNumber, username,
+      const res = await sendPostRequest("auth", "complete-google-registration", {
+        registrationProof: state?.registrationProof,
+        phoneNumber, username, password,
         deviceInfo: { ...deviceInfo, ip: clientIP },
       });
       if (res?.returnCode === 200 && res.returnData) {
@@ -51,7 +47,7 @@ export function useGoogleRegisterPage() {
       }
     } catch { setError("Network error. Please try again."); }
     finally { setLoading(false); }
-  }, [state, phoneNumber, username, toast, setUserInfo, navigate]);
+  }, [state, phoneNumber, username, password, toast, setUserInfo, navigate]);
 
   return {
     data: { t, isRtl, state, phoneNumber, username, password, confirmPassword, showPassword, passwordMismatch, loading, error },

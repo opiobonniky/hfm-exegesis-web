@@ -1,7 +1,6 @@
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
-import { GoogleOAuthProvider } from "@react-oauth/google";
 import { RouteErrorBoundary } from "@/components/RouteErrorBoundary";
 import { installDomStabilityGuards } from "@/lib/domStability";
 
@@ -9,8 +8,6 @@ import { installDomStabilityGuards } from "@/lib/domStability";
 // and replaces them with <font> wrappers, which breaks every later commit that
 // removes them. See @/lib/domStability.
 installDomStabilityGuards();
-
-const GOOGLE_CLIENT_ID = "270479211517-kinap7kv1bcd3dlpuodt5fkju361fdqb.apps.googleusercontent.com";
 
 // ── Service worker management ────────────────────────────────────────────────
 // In development: unregister any previously-installed SW and clear all caches.
@@ -74,9 +71,7 @@ void prepareServiceWorker()
 
     createRoot(document.getElementById("root")!).render(
       <RouteErrorBoundary onReset={() => window.location.reload()}>
-        <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-          <App />
-        </GoogleOAuthProvider>
+        <App />
       </RouteErrorBoundary>,
     );
   });

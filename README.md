@@ -36,6 +36,14 @@ npm i
 npm run dev
 ```
 
+## Web environment
+
+Web push requires `VITE_FIREBASE_VAPID_KEY`, generated under Firebase Console > Project settings > Cloud Messaging > Web Push certificates. The app intentionally does not provide a default for this value.
+
+The Firebase web app and its service worker are fixed to the `exegesis-bd116` project so foreground and background messaging cannot drift onto different projects.
+
+`VITE_API_URL` optionally overrides the backend origin.
+
 **Edit a file directly in GitHub**
 
 - Navigate to the desired file(s).

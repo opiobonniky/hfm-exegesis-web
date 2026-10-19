@@ -31,7 +31,6 @@ export default defineConfig(({ mode }) => ({
       "react",
       "react-dom",
       "react-router-dom",
-      "@react-oauth/google",
       "cookie",
       "set-cookie-parser",
     ],
@@ -88,9 +87,9 @@ export default defineConfig(({ mode }) => ({
             return "vendor-forms";
           }
 
-          // Supabase + OAuth + Axios
+          // Supabase + Axios
           if (
-            /[/]node_modules[/](@supabase|@react-oauth|axios)[/]/.test(id)
+            /[/]node_modules[/](@supabase|axios)[/]/.test(id)
           ) {
             return "vendor-api";
           }

@@ -17,13 +17,20 @@
  */
 
 import { getMessaging, getToken, deleteToken, isSupported, onMessage, type MessagePayload } from "firebase/messaging";
-import { app } from "@/firebaseConfiguration/config";
+import { app, firebaseConfig } from "@/firebaseConfiguration/config";
 import { sendPostRequest } from "./api";
 
 export type PushPermissionState = NotificationPermission | "unsupported";
 
-const TOKEN_CACHE_KEY = "push_token_last";
+const LEGACY_TOKEN_CACHE_KEY = "push_token_last";
+const TOKEN_CACHE_KEY = `${LEGACY_TOKEN_CACHE_KEY}:${firebaseConfig.projectId}`;
 const VAPID_KEY = import.meta.env.VITE_FIREBASE_VAPID_KEY as string | undefined;
+let legacyCachedToken: string | null = null;
+
+if (typeof localStorage !== "undefined") {
+  legacyCachedToken = localStorage.getItem(LEGACY_TOKEN_CACHE_KEY);
+  localStorage.removeItem(LEGACY_TOKEN_CACHE_KEY);
+}
 
 let messagingInstance: ReturnType<typeof getMessaging> | null = null;
 
@@ -63,10 +70,21 @@ const ensureMessagingSw = async (): Promise<ServiceWorkerRegistration | null> =>
   if (!("serviceWorker" in navigator)) return null;
   try {
     // register() resolves with the existing registration if already registered.
-    return await navigator.serviceWorker.register("/firebase-messaging-sw.js");
+    return await navigator.serviceWorker.register("/sw.js");
   } catch (error) {
     console.warn("[push] messaging SW registration failed:", error);
     return null;
+  }
+};
+
+const unregisterLegacyToken = async () => {
+  if (!legacyCachedToken) return;
+  const token = legacyCachedToken;
+  legacyCachedToken = null;
+  try {
+    await sendPostRequest("push", "unregister-token", { token });
+  } catch {
+    // The old project token may already have expired or been removed.
   }
 };
 
@@ -102,6 +120,7 @@ export const enableWebPush = async (): Promise<{ enabled: boolean; reason?: stri
     });
     if (!token) return { enabled: false, reason: "Could not generate a push token" };
 
+    await unregisterLegacyToken();
     await sendPostRequest("push", "register-token", { token, platform: "web" });
     localStorage.setItem(TOKEN_CACHE_KEY, token);
     return { enabled: true };
@@ -113,6 +132,7 @@ export const enableWebPush = async (): Promise<{ enabled: boolean; reason?: stri
 
 /** Unregister the token from the backend and delete it locally. */
 export const disableWebPush = async (): Promise<void> => {
+  await unregisterLegacyToken();
   const token = localStorage.getItem(TOKEN_CACHE_KEY);
   if (token) {
     try {
@@ -182,6 +202,7 @@ export const syncPushTokenIfPermitted = async (): Promise<void> => {
       serviceWorkerRegistration: registration,
     });
     if (!token) return;
+    await unregisterLegacyToken();
     await sendPostRequest("push", "register-token", { token, platform: "web" });
     localStorage.setItem(TOKEN_CACHE_KEY, token);
   } catch {

@@ -41,12 +41,10 @@ export function useLoginPage() {
       const credential = GoogleAuthProvider.credentialFromResult(result);
       const idToken = credential?.idToken;
       if (!idToken) throw new Error(t.auth?.googleLoginFailed || "Could not get Google ID token");
-      const { user } = result;
       const deviceInfo = getDeviceInfo();
       const clientIP = await getClientIP();
       const responseBackend = await sendPostRequest("auth", "google-login", {
-        idToken, email: user.email || "", firstName: user.displayName?.split(" ")[0] || "",
-        lastName: user.displayName?.split(" ").slice(1).join(" ") || "", photoUrl: user.photoURL || "",
+        idToken,
         deviceInfo: { ...deviceInfo, ip: clientIP },
       });
       const { returnCode, returnData, returnMessage } = responseBackend;
@@ -55,7 +53,7 @@ export function useLoginPage() {
         setUserInfo(ui);
         navigate(routes.landing.path);
       } else if (returnCode === 201 && returnData?.needsRegistration) {
-        navigate(routes.googleRegister.path, { state: { googleId: returnData.googleId, email: returnData.email, firstName: returnData.firstName, lastName: returnData.lastName, photoUrl: returnData.photoUrl } });
+        navigate(routes.googleRegister.path, { state: { registrationProof: returnData.registrationProof, email: returnData.email, firstName: returnData.firstName, lastName: returnData.lastName, photoUrl: returnData.photoUrl } });
       } else {
         toast({ title: t.auth?.googleLoginFailed || "Google Login Failed", description: returnMessage || t.auth?.unableToSignInGoogle || "Unable to sign in with Google.", variant: "destructive" });
       }
@@ -102,14 +100,17 @@ export function useLoginPage() {
   // ─── Google Popup Login ────────────────────────────────────────────────────
   const handleGoogleLogin = useCallback(async () => {
     setIsGoogleLoading(true);
-    try { await signInWithPopup(auth, googleProvider); }
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      await processGoogleResult(result);
+    }
     catch (error: any) {
       setIsGoogleLoading(false);
       if (error.code !== "auth/popup-closed-by-user") {
         toast({ title: t.auth?.googleLoginFailed || "Google Login Failed", description: error.message || t.auth?.unableToSignInGoogle || "Unable to sign in with Google.", variant: "destructive" });
       }
     }
-  }, [toast, t]);
+  }, [processGoogleResult, toast, t]);
 
   const handleEmailChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
     setEmail(event.target.value);

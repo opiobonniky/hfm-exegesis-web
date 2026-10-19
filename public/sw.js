@@ -2,12 +2,70 @@
 // Cache-first for static assets, network-first for API calls, offline fallback.
 // In development (?dev=true), bypasses all caching to avoid stale HMR bundles.
 
-const CACHE_NAME = "exegesis-v5";
-const STATIC_CACHE = "exegesis-static-v5";
-const API_CACHE = "exegesis-api-v5";
+importScripts("https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js");
+importScripts("https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging-compat.js");
+
+const CACHE_NAME = "exegesis-v6";
+const STATIC_CACHE = "exegesis-static-v6";
+const API_CACHE = "exegesis-api-v6";
 
 // Detect development mode: localhost or 127.0.0.1 → no caching.
 const IS_DEV = self.location.hostname === "localhost" || self.location.hostname === "127.0.0.1";
+
+firebase.initializeApp({
+  apiKey: "AIzaSyDb7YnYD4e-yGpUr8yXrR4ayIswk-A0QCQ",
+  authDomain: "exegesis-bd116.firebaseapp.com",
+  projectId: "exegesis-bd116",
+  storageBucket: "exegesis-bd116.firebasestorage.app",
+  messagingSenderId: "683836491679",
+  appId: "1:683836491679:web:709b41503c6e2a8ef11faa",
+});
+
+// Register before Firebase messaging so app navigation wins for all payload shapes.
+self.addEventListener("notificationclick", (event) => {
+  event.stopImmediatePropagation();
+  event.notification.close();
+  const notificationData = event.notification.data || {};
+  const fcmMessage = notificationData.FCM_MSG || {};
+  const link =
+    notificationData.link ||
+    (fcmMessage.data && fcmMessage.data.link) ||
+    (fcmMessage.fcmOptions && fcmMessage.fcmOptions.link) ||
+    "/";
+  const url = new URL(link, self.location.origin).href;
+
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clientList) => {
+      for (const client of clientList) {
+        if (client.url.startsWith(self.location.origin) && "focus" in client) {
+          client.navigate(url).catch(() => {});
+          return client.focus();
+        }
+      }
+      return self.clients.openWindow(url);
+    }),
+  );
+});
+
+try {
+  const messaging = firebase.messaging();
+  messaging.onBackgroundMessage((payload) => {
+    const notification = payload.notification || {};
+    const data = payload.data || {};
+    const title = notification.title || data.title || "Exegesis";
+    const body = notification.body || data.body || "";
+
+    self.registration.showNotification(title, {
+      body,
+      icon: "/exegesis-icon-192x192.png",
+      badge: "/exegesis-icon-96x96.png",
+      tag: data.kind || "exegesis-push",
+      data: { ...data, link: data.link || (payload.fcmOptions && payload.fcmOptions.link) },
+    });
+  });
+} catch (error) {
+  console.warn("[FCM SW] messaging init failed:", error);
+}
 
 // Assets to pre-cache on install
 const PRECACHE_URLS = [

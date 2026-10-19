@@ -6,8 +6,8 @@ export const authApi = {
     sendPostRequest("auth", "login", { username: email, password }),
   register: (data: any) =>
     sendPostRequest("auth", "register", data),
-  googleLogin: (credential: string, clientId: string) =>
-    sendPostRequest("auth", "google-login", { credential, clientId }),
+  googleLogin: (idToken: string) =>
+    sendPostRequest("auth", "google-login", { idToken }),
   forgotPassword: (email: string) =>
     sendPostRequest("auth", "forgot-password", { email }),
   verifyAccount: (code: string, email: string) =>
