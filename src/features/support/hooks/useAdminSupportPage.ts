@@ -313,7 +313,17 @@ export function useAdminSupportPage() {
         setActiveTicket(current => mergeThreadSnapshot(current, snapshot));
         setReply("");
         clearAttachment();
-        toast({ title: tt("Reply sent") });
+        const delivery = res.returnData.pushDelivery;
+        if (delivery && delivery.status !== 'accepted') {
+          toast({ title: tt('Reply saved — phone notification not sent'),
+            description: delivery.status === 'no_devices'
+              ? tt('The reader has no registered device. Open the signed-in phone app and enable notifications.')
+              : tt('Check Firebase credentials and push delivery errors on the backend shown above.') });
+        } else {
+          toast({ title: tt('Reply sent'), description: delivery
+            ? tt('Phone notification accepted by Firebase.')
+            : tt('This backend did not report phone notification delivery status.') });
+        }
         load().catch(() => {});
       } else {
         toast({ title: tt("Could not send reply"), description: res.returnMessage });

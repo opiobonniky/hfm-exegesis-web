@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, renderHook, waitFor } from '@testing-library/react';
+import { act, cleanup, renderHook, waitFor } from '@testing-library/react';
 import { useAdminSupportPage } from './useAdminSupportPage';
 
 const mocks = vi.hoisted(() => ({
@@ -10,6 +10,7 @@ const mocks = vi.hoisted(() => ({
   subscribe: vi.fn(() => () => {}),
   refreshUnread: vi.fn(),
   syncThread: vi.fn(),
+  adminReply: vi.fn(),
   connected: false,
 }));
 
@@ -35,7 +36,7 @@ vi.mock('../services/support-service', () => ({
   getAdminSupportTickets: mocks.getTickets,
   getSupportStats: mocks.getStats,
   getAdminSupportTicket: vi.fn(),
-  adminReplyToTicket: vi.fn(),
+  adminReplyToTicket: mocks.adminReply,
   updateSupportTicketStatus: vi.fn(),
 }));
 
@@ -49,6 +50,17 @@ beforeEach(() => {
 afterEach(cleanup);
 
 describe('useAdminSupportPage initialization', () => {
+  it.each(['unavailable', 'no_devices', 'failed'])('warns when the message saves but push status is %s', async status => {
+    const ticket = { id: 7, userId: 'reader', messages: [], adminUnread: false } as any;
+    mocks.syncThread.mockResolvedValue({ ticket, presence: { userOnline: false } });
+    mocks.adminReply.mockResolvedValue({ returnCode: 200, returnData: { ...ticket, pushDelivery: { sent: 0, status } } });
+    const { result } = renderHook(() => useAdminSupportPage());
+    await waitFor(() => expect(result.current.data.loading).toBe(false));
+    await act(async () => { await result.current.actions.openThread(ticket); });
+    act(() => result.current.actions.setReply('Test reply'));
+    await act(async () => { await result.current.actions.sendReply(); });
+    expect(mocks.toast).toHaveBeenCalledWith(expect.objectContaining({ title: 'Reply saved — phone notification not sent' }));
+  });
   it('renders and loads the inbox without referencing an uninitialized callback', async () => {
     const { result } = renderHook(() => useAdminSupportPage());
     await waitFor(() => expect(result.current.data.loading).toBe(false));

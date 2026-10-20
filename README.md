@@ -52,6 +52,14 @@ The Firebase web app and its service worker are fixed to the `exegesis-bd116` pr
 
 `VITE_API_URL` optionally overrides the backend origin.
 
+When testing the Android app against a local backend, create the ignored
+`web/.env.development.local` with `VITE_API_URL=http://localhost:5001` and restart
+Vite. Otherwise a production URL in `.env` can send admin replies through Railway
+while the phone uses the local server. Shared database messages may still appear,
+but the local server's Firebase credentials cannot send pushes for production.
+The Support Inbox displays its backend URL and reports push acceptance separately
+from saving the message. Configure production credentials separately on Railway.
+
 **Edit a file directly in GitHub**
 
 - Navigate to the desired file(s).

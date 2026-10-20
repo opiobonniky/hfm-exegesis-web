@@ -72,6 +72,7 @@ export interface SupportTicketSummary {
 }
 
 export interface SupportTicketDetail extends SupportTicketSummary {
+  pushDelivery?: { sent: number; status: 'accepted' | 'unavailable' | 'no_devices' | 'failed' };
   deviceInfo: string | null;
   userId?: string;
   messages: SupportMessage[];

@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { tt } from "@/components/languages/hardcodedTranslate";
+import { API_BASE_URL } from '@/services/api';
 import { useAdminSupportPage } from "../hooks/useAdminSupportPage";
 import { SupportThread, SupportTicketList } from "../components";
 import {
@@ -55,6 +56,9 @@ export default function AdminSupport() {
               </div>
               <p className="mt-1 text-sm text-muted-foreground">
                 {h.totalCount} {tt("conversations")} · {tt("Reader questions and issue reports")}
+              </p>
+              <p className="mt-1 break-all text-xs text-muted-foreground" title={API_BASE_URL}>
+                Backend: {API_BASE_URL}
               </p>
             </div>
             <button
