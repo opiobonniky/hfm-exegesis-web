@@ -45,7 +45,7 @@ export function PushNotificationCard({
               : permissionCopy[permission] ?? permissionCopy.default
         }
         checked={checked}
-        onToggle={() => (enabled ? onDisable() : onEnable())}
+        onToggle={() => { if (!busy) enabled ? onDisable() : onEnable(); }}
       />
       {supported && enabled && (
         <button
@@ -53,7 +53,7 @@ export function PushNotificationCard({
           disabled={busy}
           className="text-xs text-primary underline-offset-2 hover:underline disabled:opacity-50"
         >
-          {busy ? tt("Working…") : tt("Send test notification")}
+          {busy ? tt("Working…") : tt("Send backend test notification")}
         </button>
       )}
     </div>

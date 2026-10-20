@@ -44,6 +44,6 @@ describe("Firebase web migration", () => {
     expect(registrationHook).toContain('"complete-google-registration"');
     expect(registrationHook).toContain("registrationProof: state?.registrationProof");
     expect(registrationHook).not.toContain("googleId");
-    expect(authContext).toContain("Promise.allSettled([disableWebPush(), signOut(auth)])");
+    expect(authContext).toContain("Promise.allSettled([disableWebPush(false), signOut(auth)])");
   });
 });

@@ -13,6 +13,7 @@ import {
   showLocalNotification,
   getPushPermission,
 } from "@/services/pushService";
+import { isSupportNotificationPath, PENDING_SUPPORT_LINK } from '@/services/notificationRouting';
 import { routes } from "@/components/Routes/routes";
 
 export interface UserInfo {
@@ -90,7 +91,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         if (token && userStr) {
           const parsed = JSON.parse(userStr);
           setUserInfoState({ ...parsed, token });
-          void syncPushTokenIfPermitted();
         }
       } catch (err) {
         console.error("Failed to parse auth data", err);
@@ -108,25 +108,47 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   // FCM onMessage only fires while a tab is focused, so the service worker
   // never runs its own notification handler. We render it ourselves.
   useEffect(() => {
+    if (!userInfo?.token) return;
     const unsubscribe = onForegroundMessage(payload => {
       const { notification, data } = payload;
-      const title = notification?.title || "Exegesis";
-      const body = notification?.body || String(data?.body || "");
-      void showLocalNotification(title, body);
+      const title = notification?.title || String(data?.notificationTitle || 'Exegesis');
+      const body = notification?.body || String(data?.notificationBody || data?.body || '');
+      void showLocalNotification(title, body, data).catch(error => console.warn('[push] Foreground display failed:', error));
     });
     return () => unsubscribe();
-  }, []);
+  }, [userInfo?.token]);
+
+  useEffect(() => {
+    if (!userInfo?.token) return;
+    const retry = () => { void syncPushTokenIfPermitted(); };
+    const visible = () => { if (document.visibilityState === 'visible') retry(); };
+    retry();
+    window.addEventListener('online', retry);
+    document.addEventListener('visibilitychange', visible);
+    return () => { window.removeEventListener('online', retry); document.removeEventListener('visibilitychange', visible); };
+  }, [userInfo?.token]);
+
+  useEffect(() => {
+    if (!userInfo?.token || userInfo.mustChangePassword) return;
+    const pending = sessionStorage.getItem(PENDING_SUPPORT_LINK);
+    if (!pending) return;
+    sessionStorage.removeItem(PENDING_SUPPORT_LINK);
+    if (!isSupportNotificationPath(pending)) return;
+    if (pending.startsWith('/admin/') && Number(userInfo.userRole) !== 1) return;
+    navigate(pending, { replace: true });
+  }, [userInfo?.token, userInfo?.mustChangePassword, userInfo?.userRole, navigate]);
 
   // ── Support-message notifications after a Socket.IO reminder ──
   useEffect(() => {
     const handleSupportMessage = (event: Event) => {
       if (getPushPermission() !== "granted") return;
-      if (document.visibilityState === "visible") return;
-      const detail = (event as CustomEvent<{ title?: string; body?: string }>).detail;
+      if (!localStorage.getItem(TOKEN_KEY)) return;
+      const detail = (event as CustomEvent<{ title?: string; body?: string; data?: Record<string, unknown> }>).detail;
       void showLocalNotification(
         detail?.title || "Exegesis Support replied",
         detail?.body || "You have a new support message.",
-      );
+        detail?.data,
+      ).catch(error => console.warn('[push] Socket display failed:', error));
     };
     window.addEventListener("support:notify", handleSupportMessage);
     return () => window.removeEventListener("support:notify", handleSupportMessage);
@@ -161,7 +183,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       fetchSubscriptionStatus();
       // Re-point any existing push token at the just-logged-in user.
       // Only if permission was already granted — never prompts from here.
-      void syncPushTokenIfPermitted();
     } else {
       localStorage.removeItem(TOKEN_KEY);
       localStorage.removeItem(USER_KEY);
@@ -171,7 +192,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       setAccessExpiresAt(null);
       // Best-effort: remove this device's push token from the backend so the
       // previous user stops receiving pushes on shared computers.
-      void disableWebPush();
+      void disableWebPush(false);
     }
   }, [fetchSubscriptionStatus]);
 
@@ -181,7 +202,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
     try {
       // Keep the backend token available while unregistering this device's push token.
-      await Promise.allSettled([disableWebPush(), signOut(auth)]);
+      await Promise.allSettled([disableWebPush(false), signOut(auth)]);
     } finally {
       localStorage.removeItem(TOKEN_KEY);
       localStorage.removeItem(USER_KEY);

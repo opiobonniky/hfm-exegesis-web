@@ -10,13 +10,15 @@ import { installDomStabilityGuards } from "@/lib/domStability";
 installDomStabilityGuards();
 
 // ── Service worker management ────────────────────────────────────────────────
-// In development: unregister any previously-installed SW and clear all caches.
-// Old SWs cache stale Vite chunks which break HMR and cause duplicate React
-// instances (→ "Invalid hook call" errors).
+// Migrate legacy caching workers once in development. Do not unregister the
+// messaging worker on every navigation: that breaks background subscriptions.
+// The current /sw.js bypasses fetch caching on localhost.
+const DEV_WORKER_MIGRATION_KEY = 'exegesis:dev-push-worker:v1';
 async function prepareServiceWorker() {
   if (!("serviceWorker" in navigator)) return true;
 
   if (import.meta.env.DEV) {
+    if (localStorage.getItem(DEV_WORKER_MIGRATION_KEY)) return true;
     const isAppWorker = (worker?: ServiceWorker | null) =>
       Boolean(worker && new URL(worker.scriptURL).pathname === "/sw.js");
     const wasControlled = isAppWorker(navigator.serviceWorker.controller);
@@ -36,8 +38,9 @@ async function prepareServiceWorker() {
 
     if ("caches" in window) {
       const keys = await caches.keys();
-      await Promise.all(keys.map((key) => caches.delete(key)));
+      await Promise.all(keys.filter(key => key.startsWith('exegesis-')).map((key) => caches.delete(key)));
     }
+    localStorage.setItem(DEV_WORKER_MIGRATION_KEY, 'done');
 
     // A removed worker controls this document until the next navigation. Do not
     // mount against its stale module graph; reload once after unregistering it.

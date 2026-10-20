@@ -288,10 +288,40 @@ site settings.
 Notification settings on `/settings/notifications` read and write the backend
 `/push/get-settings` and `/push/update-settings` endpoints (daily-verse toggle,
 reminder time and timezone). While a tab is focused, foreground FCM messages are
-rendered as local notifications by the auth provider. As a fallback when push is
-unavailable, the support realtime socket raises a local notification for replies
-from the other party while the tab is hidden. The backend sends high-priority
+rendered as local notifications by the auth provider, preserving ticket data and
+click links. As a fallback when push is unavailable, the support realtime socket
+raises a local notification for relevant messages from the other party. The
+backend sends high-priority
 payloads and rewrites any external link back to the deployed origin.
+
+### Support browser alerts for readers and administrators
+
+Both `/support` and `/admin/support` expose an **Enable browser alerts** control.
+Readers receive admin replies; administrators receive new reader messages. Enable
+alerts while signed in to each intended account/browser, grant site permission,
+then use **Send backend test**. The test calls `/push/test` with `platform: "web"`;
+it cannot succeed merely because a phone token accepted a notification. The
+Notification Settings test uses this backend path too, not a local popup.
+
+Token registration is checked for backend acceptance and associated with the
+current account/backend. Already-permitted browsers retry on login, network
+return and foreground return without prompting. Explicitly disabling browser
+alerts is remembered and is separate from the daily-verse reminder setting;
+logout unregisters without making that explicit opt-out choice for future users.
+
+Notifications carry a per-message tag. Foreground socket/FCM display checks for an
+existing tagged notification, and the worker does not manually duplicate a
+notification payload already displayed by Firebase. Data-only background messages
+are displayed by the worker. Reader clicks open `/support?ticketId=...`; admin
+clicks open `/admin/support?ticketId=...`. The destination uses the current app
+origin, never an external payload URL, and opens the requested conversation even
+if it is outside the currently loaded ticket list. A pending support target can
+be restored after sign-in; normal role and ticket-ownership checks still apply.
+
+Use HTTPS or localhost and configure the project's public
+`VITE_FIREBASE_VAPID_KEY` before building. Browsers/OSes can block background
+delivery; closing a tab is not the same as force-quitting or disabling background
+execution for the entire browser. Some mobile browsers require an installed PWA.
 
 ## Service worker and offline boundaries
 
@@ -310,6 +340,8 @@ or clearing site data removes retained assets/preferences. A first offline visit
 is not a supported substitute for installing/downloading a mobile Bible.
 
 Localhost/127.0.0.1 development bypasses caching to avoid stale Vite bundles.
+Legacy development workers are migrated once; subsequent navigation keeps the
+messaging worker rather than unregistering active push subscriptions repeatedly.
 The manifest and worker support an installable browser experience where the
 browser permits it; installation/push capability differs across operating systems.
 
@@ -325,6 +357,25 @@ The admin inbox adds filters, status updates, replies and aggregate statistics.
 Delivered and read timestamps are distinct; a receipt update is not a new reply.
 Permission and ticket ownership remain backend-enforced even with a live socket.
 FAQ/support information and ticket conversations are separate experiences.
+
+Ticket and message payloads update the visible inbox/thread directly. Attachment
+paths received over Socket.IO are resolved against the API host, rather than
+depending on the HTTP response-media middleware. The admin thread can fetch an
+authorized durable snapshot with `support:sync`, falling back to HTTP when the
+socket or server implementation is unavailable. Reconnect/visible-tab recovery
+and a 10-second admin recovery interval reconcile missed messages and inbox data.
+Newer socket messages/read receipts are preserved when a slower snapshot arrives.
+
+The admin inbox shows **Chat connected/Reconnecting**, the reader's online state
+for the selected conversation, and its actual backend URL. Reader presence comes
+from the authenticated app-wide socket; the phone user does not need to open
+Support to be online. Offline detection can lag on interrupted networks, and a
+connected socket does not prove the reader is viewing a message.
+
+Single checks mean saved/sent, double checks mean backend-recorded delivery, and
+green double checks mean recorded read state. The admin thread acknowledges read
+when its message-end visibility callback runs while the document is visible.
+Neither these checks nor an unread counter prove that a phone push was displayed.
 
 ## R2 media
 
@@ -630,8 +681,31 @@ before declaring a change synchronized.
 Open `/admin/support`, filter/search tickets and inspect a conversation. Reply
 with the available attachment workflow, update its status and review unread/
 delivery/read receipts. Messages and status changes persist through the support
-API; Socket.IO invalidates/updates the live inbox state. An unread badge is not
-the same as an email or a push delivery receipt.
+API; Socket.IO updates the live inbox and periodic snapshots recover missed
+events. An unread badge is not the same as an email or a push delivery receipt.
+
+After sending a reply, check the push feedback independently of chat persistence:
+
+| Reply feedback | Operator action |
+| --- | --- |
+| Phone notification accepted by Firebase | Continue the conversation; this is acceptance, not proof of display/read |
+| Reply saved — phone notification not sent | Do not resend the same text; inspect the failure reason |
+| No registered device | Ask the reader to open the intended signed-in phone account with internet and notification permission |
+| Backend credential/send failure | Check Firebase Admin configuration and delivery logs on the backend shown in the inbox |
+| Backend did not report delivery status | The connected server may predate push-status reporting; verify its deployment and `/push/test` result |
+
+A support reply is saved before notification sending. Socket success therefore
+does not imply that background push succeeded. The actual phone notification
+carries the conversation identity and opens `SupportThread` through the mobile
+`exegesis://support/<ticketId>?messageId=<messageId>` link/data route. Browser
+clicks use the support web URL; native APNs/Android configuration is separate
+from the browser VAPID certificate.
+
+For a full operator check, leave the reader on Home/Profile and send a reply;
+check unread badges without reopening, then repeat with the app backgrounded and
+normally closed. Tap the actual support notification rather than relying only
+on a generic `/push/test` notification. The
+[backend runbook](../../backend/docs/support-push.md) describes the setup.
 
 Native provides general Activity and translation-site-setting controls that were
 not found as equivalent standalone web administration surfaces in this audit.
@@ -669,6 +743,28 @@ deep routes, HTTPS, root-served `sw.js` and manifest/icons. Configure the correc
 API URL before building: Vite variables are embedded into build output.
 Authorize the deployed domain in Firebase. Preserve Socket.IO connectivity to
 the backend and its expected socket path for live support events.
+
+### Local admin versus deployed admin
+
+For the local backend/USB-connected Android development workflow, create the
+ignored `web/.env.development.local` with:
+
+```dotenv
+VITE_API_URL=http://localhost:5001
+```
+
+Restart Vite and confirm the backend address shown in the Support Inbox. This
+overrides a production URL in `.env` for `npm run dev` only. `npm run build` uses
+production-mode configuration and ignores `.env.development.local`; deployment
+environment variables can override file values. Never bundle Firebase Admin
+credentials in the browser or place them in a `VITE_*` variable.
+
+If local test pushes work but admin replies do not, check this address first.
+The development phone and the admin may be using different backend processes
+against the same database: chat can appear through fetches while pushes fail on
+the server that actually handles the reply. A locally configured Admin key does
+not configure Railway. Supply production credentials as deployment secrets and
+deploy the updated backend/web before claiming production notification support.
 
 # Validation and troubleshooting
 

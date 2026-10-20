@@ -18,6 +18,7 @@ import {
   SUPPORT_PAGE_SIZE,
 } from "../constants";
 import { useSupportAttachment } from "./useSupportAttachment";
+import { useSupportNotificationTarget } from './useSupportNotificationTarget';
 import {
   appendThreadMessage,
   mergeTicketSummary,
@@ -113,7 +114,7 @@ export function useSupportPage() {
     [load],
   );
 
-  const openThread = useCallback(async (ticket: SupportTicketSummary) => {
+  const openThread = useCallback(async (ticket: Pick<SupportTicketSummary, 'id'>) => {
     const sequence = ++threadRequestSequence.current;
     setLoadingThread(true);
     setActiveTicket(null);
@@ -132,6 +133,8 @@ export function useSupportPage() {
       if (sequence === threadRequestSequence.current) setLoadingThread(false);
     }
   }, [toast]);
+
+  useSupportNotificationTarget(openThread);
 
   const markThreadRead = useCallback(async () => {
     const ticket = activeTicket;

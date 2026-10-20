@@ -59,6 +59,16 @@ while the phone uses the local server. Shared database messages may still appear
 but the local server's Firebase credentials cannot send pushes for production.
 The Support Inbox displays its backend URL and reports push acceptance separately
 from saving the message. Configure production credentials separately on Railway.
+See the [Support Inbox workflow](docs/APPLICATION_GUIDE.md#support-inbox-and-operational-parity)
+and [support push runbook](../backend/docs/support-push.md) for message checks,
+app-wide presence, phone deep links and foreground/background acceptance tests.
+
+Both reader and admin support pages include browser alert controls. Set the
+public `VITE_FIREBASE_VAPID_KEY`, enable alerts once per browser/account, and use
+**Send backend test** to verify web-token delivery. Foreground/background clicks
+open the appropriate reader/admin conversation. Disabling browser alerts does
+not change the daily-verse schedule. HTTPS/localhost, site permission and browser
+background execution are required; Admin private credentials stay on the backend.
 
 **Edit a file directly in GitHub**
 

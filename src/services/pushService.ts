@@ -18,13 +18,20 @@
 
 import { getMessaging, getToken, deleteToken, isSupported, onMessage, type MessagePayload } from "firebase/messaging";
 import { app, firebaseConfig } from "@/firebaseConfiguration/config";
-import { sendPostRequest } from "./api";
+import { API_BASE_URL, sendPostRequest } from "./api";
+import { notificationLink, notificationTag, type WebNotificationData } from './notificationRouting';
 
 export type PushPermissionState = NotificationPermission | "unsupported";
 
 const LEGACY_TOKEN_CACHE_KEY = "push_token_last";
 const TOKEN_CACHE_KEY = `${LEGACY_TOKEN_CACHE_KEY}:${firebaseConfig.projectId}`;
 const VAPID_KEY = import.meta.env.VITE_FIREBASE_VAPID_KEY as string | undefined;
+const OPT_OUT_KEY = `${TOKEN_CACHE_KEY}:disabled`;
+const REGISTRATION_KEY = `${TOKEN_CACHE_KEY}:registration`;
+const registrationOwner = () => {
+  try { const user = JSON.parse(localStorage.getItem('user_data') || '{}'); return `${API_BASE_URL}|${user.id || user.username || 'signed-in'}`; }
+  catch { return `${API_BASE_URL}|signed-in`; }
+};
 let legacyCachedToken: string | null = null;
 
 if (typeof localStorage !== "undefined") {
@@ -33,6 +40,7 @@ if (typeof localStorage !== "undefined") {
 }
 
 let messagingInstance: ReturnType<typeof getMessaging> | null = null;
+let tokenSync: Promise<void> | null = null;
 
 const getMessagingInstance = async () => {
   if (!(await isSupported())) return null;
@@ -70,7 +78,13 @@ const ensureMessagingSw = async (): Promise<ServiceWorkerRegistration | null> =>
   if (!("serviceWorker" in navigator)) return null;
   try {
     // register() resolves with the existing registration if already registered.
-    return await navigator.serviceWorker.register("/sw.js");
+    const registration = await navigator.serviceWorker.register("/sw.js");
+    if (registration.active) return registration;
+    let timer: ReturnType<typeof setTimeout>;
+    try {
+      return await Promise.race([navigator.serviceWorker.ready,
+        new Promise<never>((_, reject) => { timer = setTimeout(() => reject(new Error('Push worker activation timed out')), 10000); })]);
+    } finally { clearTimeout(timer!); }
   } catch (error) {
     console.warn("[push] messaging SW registration failed:", error);
     return null;
@@ -87,8 +101,14 @@ const browserTimeZone = (): string => {
 
 /** Register a token with the backend, tagging the browser's time zone so the
  *  daily-verse sweep can match the user's wall-clock reminder time. */
-const registerWebToken = (token: string) =>
-  sendPostRequest("push", "register-token", { token, platform: "web", timezone: browserTimeZone() });
+const registerWebToken = async (token: string) => {
+  const session = localStorage.getItem('auth_token');
+  if (!session) throw new Error('Sign in before enabling browser notifications');
+  const response = await sendPostRequest('push', 'register-token', { token, platform: 'web', timezone: browserTimeZone() });
+  if (response.returnCode !== 200 && response.returnCode !== 201) throw new Error(response.returnMessage || 'Push token registration failed');
+  if (localStorage.getItem('auth_token') !== session) throw new Error('Account changed during push registration');
+  localStorage.setItem(REGISTRATION_KEY, registrationOwner());
+};
 
 const unregisterLegacyToken = async () => {
   if (!legacyCachedToken) return;
@@ -106,6 +126,7 @@ const unregisterLegacyToken = async () => {
  * register it with the backend. Returns a user-facing result.
  */
 export const enableWebPush = async (): Promise<{ enabled: boolean; reason?: string }> => {
+  if (!localStorage.getItem('auth_token')) return { enabled: false, reason: 'Sign in before enabling browser notifications' };
   if (!(await isPushSupported())) {
     return { enabled: false, reason: "This browser does not support push notifications" };
   }
@@ -136,6 +157,8 @@ export const enableWebPush = async (): Promise<{ enabled: boolean; reason?: stri
     await unregisterLegacyToken();
     await registerWebToken(token);
     localStorage.setItem(TOKEN_CACHE_KEY, token);
+    localStorage.removeItem(OPT_OUT_KEY);
+    window.dispatchEvent(new Event('web-push-state-changed'));
     return { enabled: true };
   } catch (error) {
     console.error("[push] enable failed:", error);
@@ -144,7 +167,11 @@ export const enableWebPush = async (): Promise<{ enabled: boolean; reason?: stri
 };
 
 /** Unregister the token from the backend and delete it locally. */
-export const disableWebPush = async (): Promise<void> => {
+export const disableWebPush = async (optOut = true): Promise<void> => {
+  if (optOut) localStorage.setItem(OPT_OUT_KEY, 'true');
+  // Let an in-flight registration finish before removing it, so logout/disable
+  // cannot be undone by a late foreground/network retry.
+  if (tokenSync) await tokenSync;
   await unregisterLegacyToken();
   const token = localStorage.getItem(TOKEN_CACHE_KEY);
   if (token) {
@@ -161,22 +188,33 @@ export const disableWebPush = async (): Promise<void> => {
     // Token may already be gone.
   }
   localStorage.removeItem(TOKEN_CACHE_KEY);
+  localStorage.removeItem(REGISTRATION_KEY);
+  window.dispatchEvent(new Event('web-push-state-changed'));
 };
 
 /** True when the browser has granted permission and we hold a cached token. */
 export const isWebPushEnabled = (): boolean =>
-  getPushPermission() === "granted" && !!localStorage.getItem(TOKEN_CACHE_KEY);
+  getPushPermission() === "granted" && !!localStorage.getItem(TOKEN_CACHE_KEY)
+  && localStorage.getItem(OPT_OUT_KEY) !== 'true'
+  && !!localStorage.getItem('auth_token') && localStorage.getItem(REGISTRATION_KEY) === registrationOwner();
 
 // ── Local / foreground notifications ────────────────────────────────────────
 
 /** Show a notification immediately through the service worker (test button). */
-export const showLocalNotification = async (title: string, body: string) => {
+export const showLocalNotification = async (title: string, body: string, data: WebNotificationData = {}) => {
   if (getPushPermission() !== "granted") return false;
-  const registration = await navigator.serviceWorker.getRegistration();
+  if (localStorage.getItem(OPT_OUT_KEY) === 'true') return false;
+  const registration = await ensureMessagingSw();
   if (!registration) return false;
+  const tag = notificationTag(data);
+  if ((await registration.getNotifications({ tag })).length) return true;
   await registration.showNotification(title, {
     body,
     icon: "/exegesis-icon-192x192.png",
+    badge: '/exegesis-icon-96x96.png',
+    tag,
+    data: { ...data, link: notificationLink(data) },
+    ...(typeof data.imageUrl === 'string' && { image: data.imageUrl }),
   });
   return true;
 };
@@ -190,7 +228,7 @@ export const onForegroundMessage = (callback: (payload: MessagePayload) => void)
     const messaging = await getMessagingInstance();
     if (!messaging || unsubscribed) return;
     internalUnsub = onMessage(messaging, callback);
-  })();
+  })().catch(error => console.warn('[push] Foreground listener unavailable:', error));
 
   return () => {
     unsubscribed = true;
@@ -203,9 +241,9 @@ export const onForegroundMessage = (callback: (payload: MessagePayload) => void)
  * already granted, (re-)registers the FCM token with the backend so the
  * token points at the just-logged-in user. Fire-and-forget by design.
  */
-export const syncPushTokenIfPermitted = async (): Promise<void> => {
+const syncPermittedToken = async (): Promise<void> => {
   try {
-    if (getPushPermission() !== "granted" || !VAPID_KEY) return;
+    if (getPushPermission() !== "granted" || !VAPID_KEY || !localStorage.getItem('auth_token') || localStorage.getItem(OPT_OUT_KEY) === 'true') return;
     const messaging = await getMessagingInstance();
     const registration = await ensureMessagingSw();
     if (!messaging || !registration) return;
@@ -215,10 +253,25 @@ export const syncPushTokenIfPermitted = async (): Promise<void> => {
       serviceWorkerRegistration: registration,
     });
     if (!token) return;
+    if (localStorage.getItem(OPT_OUT_KEY) === 'true') return;
     await unregisterLegacyToken();
     await registerWebToken(token);
     localStorage.setItem(TOKEN_CACHE_KEY, token);
-  } catch {
+    window.dispatchEvent(new Event('web-push-state-changed'));
+  } catch (error) {
     // Push sync must never break login.
+    console.warn('[push] Token registration needs retry:', error instanceof Error ? error.message : 'Unknown error');
   }
 };
+
+export const syncPushTokenIfPermitted = (): Promise<void> => {
+  if (!tokenSync) tokenSync = syncPermittedToken().finally(() => { tokenSync = null; });
+  return tokenSync;
+};
+
+/** Unlike local display, this proves the selected backend can send browser FCM. */
+export async function sendWebPushTest(): Promise<number> {
+  const response = await sendPostRequest<{ sent?: number }>('push', 'test', { platform: 'web' });
+  if (response.returnCode !== 200 || !response.returnData?.sent) throw new Error(response.returnMessage || 'No browser push was accepted');
+  return response.returnData.sent;
+}

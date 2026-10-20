@@ -27,39 +27,51 @@ self.addEventListener("notificationclick", (event) => {
   event.notification.close();
   const notificationData = event.notification.data || {};
   const fcmMessage = notificationData.FCM_MSG || {};
-  const link =
-    notificationData.link ||
-    (fcmMessage.data && fcmMessage.data.link) ||
-    (fcmMessage.fcmOptions && fcmMessage.fcmOptions.link) ||
-    "/";
-  const url = new URL(link, self.location.origin).href;
+  const data = { ...(fcmMessage.data || {}), ...notificationData };
+  let url = new URL('/', self.location.origin);
+  if (data.kind === 'support-message' && /^[1-9]\d*$/.test(String(data.ticketId || ''))) {
+    url = new URL(data.audience === 'admin' || data.screen === 'AdminSupport' ? '/admin/support' : '/support', self.location.origin);
+    url.searchParams.set('ticketId', String(data.ticketId));
+    if (/^[1-9]\d*$/.test(String(data.messageId || ''))) url.searchParams.set('messageId', String(data.messageId));
+  } else {
+    try {
+      const candidate = new URL(data.link || (fcmMessage.fcmOptions && fcmMessage.fcmOptions.link) || '/', self.location.origin);
+      if (candidate.origin === self.location.origin) url = candidate;
+    } catch { /* Malformed/external payloads open the app origin only. */ }
+  }
 
   event.waitUntil(
-    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clientList) => {
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then(async (clientList) => {
       for (const client of clientList) {
-        if (client.url.startsWith(self.location.origin) && "focus" in client) {
-          client.navigate(url).catch(() => {});
-          return client.focus();
+        if (new URL(client.url).origin === self.location.origin && 'focus' in client) {
+          try { await client.navigate(url.href); return await client.focus(); }
+          catch { /* Try another app window, then open a new one. */ }
         }
       }
-      return self.clients.openWindow(url);
+      return self.clients.openWindow(url.href);
     }),
   );
 });
 
 try {
   const messaging = firebase.messaging();
-  messaging.onBackgroundMessage((payload) => {
+  messaging.onBackgroundMessage(async (payload) => {
+    // Firebase already displays notification payloads before invoking this
+    // callback. Display only data-only messages ourselves, never duplicates.
+    if (payload.notification) return;
     const notification = payload.notification || {};
     const data = payload.data || {};
-    const title = notification.title || data.title || "Exegesis";
-    const body = notification.body || data.body || "";
+    const title = notification.title || data.notificationTitle || data.title || "Exegesis";
+    const body = notification.body || data.notificationBody || data.body || "";
+    const tag = data.notificationId || (data.kind === 'support-message' && data.messageId ? `support-message-${data.messageId}` : data.kind || 'exegesis-push');
+    if ((await self.registration.getNotifications({ tag })).length) return;
 
-    self.registration.showNotification(title, {
+    return self.registration.showNotification(title, {
       body,
       icon: "/exegesis-icon-192x192.png",
       badge: "/exegesis-icon-96x96.png",
-      tag: data.kind || "exegesis-push",
+      tag,
+      ...(data.imageUrl && { image: data.imageUrl }),
       data: { ...data, link: data.link || (payload.fcmOptions && payload.fcmOptions.link) },
     });
   });

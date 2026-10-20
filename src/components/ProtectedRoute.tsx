@@ -1,6 +1,7 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { routes } from "./Routes/routes";
+import { isSupportNotificationPath, PENDING_SUPPORT_LINK } from '@/services/notificationRouting';
 
 const adminOnlyRoutes = [
   { path: routes.addDailyVerse.path, pattern: /^\/add-daily-verse/ },
@@ -38,6 +39,8 @@ export function ProtectedRoute() {
   }
 
   if (!isAuthenticated) {
+    const target = `${location.pathname}${location.search}`;
+    if (isSupportNotificationPath(target)) sessionStorage.setItem(PENDING_SUPPORT_LINK, target);
     return <Navigate to={routes.landing.path} replace />;
   }
 

@@ -158,21 +158,25 @@ export function SupportRealtimeProvider({ children }: { children: ReactNode }) {
     // Socket.IO is the fallback channel when browser push (FCM/VAPID) cannot
     // deliver a support reply. Only surface messages from the other party.
     const handleSupportMessage = (payload?: {
-      message?: { senderId?: string; senderRole?: string };
-      ticket?: { subject?: string };
+      message?: { id?: number | string; senderId?: string; senderRole?: string; body?: string };
+      ticket?: { id?: number | string; userId?: string; subject?: string };
     }) => {
       const fromOtherParty =
         !payload?.message?.senderId || payload.message.senderId !== userInfo?.id;
-      if (fromOtherParty) {
-        const isAdmin = userInfo?.userRole === 1;
-        const fromUser = payload?.message?.senderRole === "user";
+      const fromUser = payload?.message?.senderRole === 'user';
+      const audience = Number(userInfo?.userRole) === 1 && fromUser ? 'admin' : 'user';
+      const isRecipient = audience === 'admin' || (payload?.message?.senderRole === 'admin'
+        && (Number(userInfo?.userRole) !== 1 || payload?.ticket?.userId === userInfo?.id));
+      if (fromOtherParty && isRecipient && payload?.message?.id && payload?.ticket?.id) {
         window.dispatchEvent(
           new CustomEvent("support:notify", {
             detail: {
-              title: isAdmin && fromUser
+              title: audience === 'admin'
                 ? `Support: ${payload?.ticket?.subject || "New message"}`
                 : "Exegesis Support replied",
-              body: "You have a new support message. Open support to read it.",
+              body: payload?.message?.body || 'New support attachment. Open the conversation to view it.',
+              data: { kind: 'support-message', audience, ticketId: payload?.ticket?.id,
+                messageId: payload?.message?.id, notificationId: `support-message-${payload?.message?.id}` },
             },
           }),
         );

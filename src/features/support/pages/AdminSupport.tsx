@@ -12,6 +12,7 @@ import {
 import { cn } from "@/lib/utils";
 import { tt } from "@/components/languages/hardcodedTranslate";
 import { API_BASE_URL } from '@/services/api';
+import { SupportPushBanner } from '../components/SupportPushBanner';
 import { useAdminSupportPage } from "../hooks/useAdminSupportPage";
 import { SupportThread, SupportTicketList } from "../components";
 import {
@@ -72,6 +73,8 @@ export default function AdminSupport() {
             </button>
           </div>
         </section>
+
+        <SupportPushBanner audience="admin" />
 
         {h.stats && (
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4">

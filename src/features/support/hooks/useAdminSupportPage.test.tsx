@@ -14,7 +14,7 @@ const mocks = vi.hoisted(() => ({
   connected: false,
 }));
 
-vi.mock('react-router-dom', () => ({ useNavigate: () => mocks.navigate }));
+vi.mock('react-router-dom', () => ({ useNavigate: () => mocks.navigate, useLocation: () => ({ search: '' }) }));
 vi.mock('@/hooks/use-toast', () => ({ useToast: () => ({ toast: mocks.toast }) }));
 vi.mock('@/components/Routes/routes', () => ({ routes: { landing: { path: '/' } } }));
 vi.mock('@/components/languages/hardcodedTranslate', () => ({ tt: (text: string) => text }));

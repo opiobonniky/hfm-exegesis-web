@@ -12,6 +12,7 @@ import {
   SupportTicketList,
 } from "../components";
 import { SUPPORT_EXPECTED_REPLY_WINDOW, SUPPORT_FILTERS } from "../constants";
+import { SupportPushBanner } from '../components/SupportPushBanner';
 
 export default function Support() {
   const { data, actions } = useSupportPage();
@@ -49,6 +50,8 @@ export default function Support() {
             {tt("New message")}
           </button>
         </div>
+
+        <SupportPushBanner audience="user" />
 
         {h.composerOpen && (
           <div className="rounded-2xl border border-border bg-card p-4">

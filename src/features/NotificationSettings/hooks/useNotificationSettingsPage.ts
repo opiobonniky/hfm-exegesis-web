@@ -7,9 +7,7 @@ import {
   getPushState,
   enablePush,
   disablePush,
-  sendTestPush as sendTestPushLocal,
-  savePushPreference,
-  loadPushPreference,
+  sendTestPush as sendBackendTest,
   type PushSettingsState,
 } from "../services/pushService";
 import { tt } from '@/components/languages/hardcodedTranslate';
@@ -39,7 +37,9 @@ export function useNotificationSettingsPage() {
   const [pushBusy, setPushBusy] = useState(false);
 
   const refreshPushState = useCallback(async () => {
-    setPush(await getPushState());
+    const state = await getPushState();
+    setPush(state);
+    setSettings(previous => ({ ...previous, pushNotifications: state.enabled }));
   }, []);
 
   const handleEnablePush = useCallback(async () => {
@@ -48,7 +48,6 @@ export function useNotificationSettingsPage() {
       const result = await enablePush();
       if (result.enabled) {
         toast({ title: tt("Push enabled"), description: tt("You'll now receive notifications on this device.") });
-        await savePushPreference(true);
       } else if (result.reason) {
         toast({ title: tt("Push not enabled"), description: result.reason, variant: "destructive" });
       }
@@ -63,7 +62,6 @@ export function useNotificationSettingsPage() {
     setPushBusy(true);
     try {
       await disablePush();
-      await savePushPreference(false);
       toast({ title: tt("Push disabled"), description: tt("Notifications are off for this device.") });
       await refreshPushState();
     } finally {
@@ -72,13 +70,15 @@ export function useNotificationSettingsPage() {
   }, [toast, refreshPushState]);
 
   const handleTestPush = useCallback(async () => {
-    const sent = await sendTestPushLocal();
-    if (!sent) {
-      // No SW/permission yet — running the enable flow first covers both.
-      const enabled = await handleEnablePush();
-      if (enabled) await sendTestPushLocal();
-    }
-  }, [handleEnablePush]);
+    if (!push.enabled && !(await handleEnablePush())) return;
+    setPushBusy(true);
+    try {
+      await sendBackendTest();
+      toast({ title: tt('Browser test sent'), description: tt('Firebase accepted the push. Check your notification panel.') });
+    } catch (error) {
+      toast({ title: tt('Browser test failed'), description: error instanceof Error ? error.message : tt('Check backend Firebase configuration.'), variant: 'destructive' });
+    } finally { setPushBusy(false); }
+  }, [push.enabled, handleEnablePush, toast]);
 
   const loadSettings = useCallback(async () => {
     setLoading(true);
@@ -97,11 +97,11 @@ export function useNotificationSettingsPage() {
 
     // Merge web-push state (device capability + server preference).
     try {
-      const [state, pref] = await Promise.all([getPushState(), loadPushPreference()]);
+      const state = await getPushState();
       setPush(state);
       setSettings((prev) => ({
         ...prev,
-        pushNotifications: pref ?? state.enabled,
+        pushNotifications: state.enabled,
         timezone: prev.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
       }));
     } catch { /* ignore */ } finally { setLoading(false); }
