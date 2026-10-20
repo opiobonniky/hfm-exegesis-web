@@ -279,9 +279,19 @@ Enable notifications -> request browser permission -> register /sw.js
 
 The push service stores tokens with a Firebase-project-scoped cache key. It
 unregisters old registrations and deletes the local Firebase token on disable/
-logout. Missing `VITE_FIREBASE_VAPID_KEY` returns a disabled reason instead of a
-working push subscription. A denied browser permission must be changed through
-the browser's site settings.
+logout. Registration also reports the browser's IANA timezone so the backend
+daily-verse sweep can fire at the user's wall-clock reminder time. Missing
+`VITE_FIREBASE_VAPID_KEY` returns a disabled reason instead of a working push
+subscription. A denied browser permission must be changed through the browser's
+site settings.
+
+Notification settings on `/settings/notifications` read and write the backend
+`/push/get-settings` and `/push/update-settings` endpoints (daily-verse toggle,
+reminder time and timezone). While a tab is focused, foreground FCM messages are
+rendered as local notifications by the auth provider. As a fallback when push is
+unavailable, the support realtime socket raises a local notification for replies
+from the other party while the tab is hidden. The backend sends high-priority
+payloads and rewrites any external link back to the deployed origin.
 
 ## Service worker and offline boundaries
 

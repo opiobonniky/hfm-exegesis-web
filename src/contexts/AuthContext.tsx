@@ -6,7 +6,13 @@ import { signOut } from "firebase/auth";
 import { toast } from "@/hooks/use-toast";
 import { auth } from "@/firebaseConfiguration/config";
 import { sendPostRequest } from "@/services/api";
-import { disableWebPush, syncPushTokenIfPermitted } from "@/services/pushService";
+import {
+  disableWebPush,
+  syncPushTokenIfPermitted,
+  onForegroundMessage,
+  showLocalNotification,
+  getPushPermission,
+} from "@/services/pushService";
 import { routes } from "@/components/Routes/routes";
 
 export interface UserInfo {
@@ -96,6 +102,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     };
 
     loadAuth();
+  }, []);
+
+  // ── Surface focused-tab push payloads as notifications ──
+  // FCM onMessage only fires while a tab is focused, so the service worker
+  // never runs its own notification handler. We render it ourselves.
+  useEffect(() => {
+    const unsubscribe = onForegroundMessage(payload => {
+      const { notification, data } = payload;
+      const title = notification?.title || "Exegesis";
+      const body = notification?.body || String(data?.body || "");
+      void showLocalNotification(title, body);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // ── Support-message notifications after a Socket.IO reminder ──
+  useEffect(() => {
+    const handleSupportMessage = (event: Event) => {
+      if (getPushPermission() !== "granted") return;
+      if (document.visibilityState === "visible") return;
+      const detail = (event as CustomEvent<{ title?: string; body?: string }>).detail;
+      void showLocalNotification(
+        detail?.title || "Exegesis Support replied",
+        detail?.body || "You have a new support message.",
+      );
+    };
+    window.addEventListener("support:notify", handleSupportMessage);
+    return () => window.removeEventListener("support:notify", handleSupportMessage);
   }, []);
 
   // ── On mount, restore cached subscription or fetch fresh ──

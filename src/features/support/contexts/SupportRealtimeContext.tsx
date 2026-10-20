@@ -71,13 +71,38 @@ export function SupportRealtimeProvider({ children }: { children: ReactNode }) {
     };
 
     const handleConnect = () => refreshUnread().catch(() => {});
+
+    // Socket.IO is the fallback channel when browser push (FCM/VAPID) cannot
+    // deliver a support reply. Only surface messages from the other party.
+    const handleSupportMessage = (payload?: {
+      message?: { senderId?: string; senderRole?: string };
+      ticket?: { subject?: string };
+    }) => {
+      if (payload?.message?.senderId && payload.message.senderId === userInfo?.id) {
+        invalidateSupport();
+        return;
+      }
+      const isAdmin = userInfo?.userRole === 1;
+      const fromUser = payload?.message?.senderRole === "user";
+      window.dispatchEvent(
+        new CustomEvent("support:notify", {
+          detail: {
+            title: isAdmin && fromUser
+              ? `Support: ${payload?.ticket?.subject || "New message"}`
+              : "Exegesis Support replied",
+            body: "You have a new support message. Open support to read it.",
+          },
+        }),
+      );
+      invalidateSupport();
+    };
     const handleVisibility = () => {
       if (document.visibilityState !== "visible") return;
       setSupportRevision(current => current + 1);
       refreshUnread().catch(() => {});
     };
     socket.on("connect", handleConnect);
-    socket.on("support:message", invalidateSupport);
+    socket.on("support:message", handleSupportMessage);
     socket.on("support:receipt", invalidateSupport);
     socket.on("support:ticket:updated", invalidateSupport);
     socket.on("support:unread", invalidateSupport);
@@ -90,7 +115,7 @@ export function SupportRealtimeProvider({ children }: { children: ReactNode }) {
         refreshTimer.current = null;
       }
       socket?.off("connect", handleConnect);
-      socket?.off("support:message", invalidateSupport);
+      socket?.off("support:message", handleSupportMessage);
       socket?.off("support:receipt", invalidateSupport);
       socket?.off("support:ticket:updated", invalidateSupport);
       socket?.off("support:unread", invalidateSupport);
@@ -98,7 +123,7 @@ export function SupportRealtimeProvider({ children }: { children: ReactNode }) {
       socket?.disconnect();
       socket = null;
     };
-  }, [isAuthenticated, userInfo?.token, refreshUnread]);
+  }, [isAuthenticated, userInfo?.token, userInfo?.id, userInfo?.userRole, refreshUnread]);
 
   return (
     <SupportRealtimeContext.Provider

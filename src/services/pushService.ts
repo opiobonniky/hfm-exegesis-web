@@ -77,6 +77,19 @@ const ensureMessagingSw = async (): Promise<ServiceWorkerRegistration | null> =>
   }
 };
 
+const browserTimeZone = (): string => {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+  } catch {
+    return "UTC";
+  }
+};
+
+/** Register a token with the backend, tagging the browser's time zone so the
+ *  daily-verse sweep can match the user's wall-clock reminder time. */
+const registerWebToken = (token: string) =>
+  sendPostRequest("push", "register-token", { token, platform: "web", timezone: browserTimeZone() });
+
 const unregisterLegacyToken = async () => {
   if (!legacyCachedToken) return;
   const token = legacyCachedToken;
@@ -121,7 +134,7 @@ export const enableWebPush = async (): Promise<{ enabled: boolean; reason?: stri
     if (!token) return { enabled: false, reason: "Could not generate a push token" };
 
     await unregisterLegacyToken();
-    await sendPostRequest("push", "register-token", { token, platform: "web" });
+    await registerWebToken(token);
     localStorage.setItem(TOKEN_CACHE_KEY, token);
     return { enabled: true };
   } catch (error) {
@@ -203,7 +216,7 @@ export const syncPushTokenIfPermitted = async (): Promise<void> => {
     });
     if (!token) return;
     await unregisterLegacyToken();
-    await sendPostRequest("push", "register-token", { token, platform: "web" });
+    await registerWebToken(token);
     localStorage.setItem(TOKEN_CACHE_KEY, token);
   } catch {
     // Push sync must never break login.

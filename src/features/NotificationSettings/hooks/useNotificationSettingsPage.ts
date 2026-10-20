@@ -83,8 +83,16 @@ export function useNotificationSettingsPage() {
   const loadSettings = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await sendPostRequest("user", "get-notification-settings", {});
-      if (res.returnCode === 200 && res.returnData) setSettings((prev) => ({ ...prev, ...res.returnData }));
+      const res = await sendPostRequest("push", "get-settings", {});
+      if (res.returnCode === 200 && res.returnData) {
+        const { dailyVerseReminder, reminderTime, timezone } = res.returnData;
+        setSettings((prev) => ({
+          ...prev,
+          ...(typeof dailyVerseReminder === "boolean" && { dailyVerseReminder }),
+          ...(typeof reminderTime === "string" && { reminderTime }),
+          ...(typeof timezone === "string" && timezone && { timezone }),
+        }));
+      }
     } catch { /* ignore */ }
 
     // Merge web-push state (device capability + server preference).
@@ -111,7 +119,13 @@ export function useNotificationSettingsPage() {
   const handleSave = useCallback(async () => {
     setSaving(true);
     try {
-      const res = await sendPostRequest("user", "update-notification-settings", settings);
+      // Only the daily-verse reminder is persisted server-side; the other
+      // toggles are device-local preferences.
+      const res = await sendPostRequest("push", "update-settings", {
+        dailyVerseReminder: settings.dailyVerseReminder,
+        reminderTime: settings.reminderTime,
+        timezone: settings.timezone,
+      });
       if (res.returnCode === 200) {
         toast({ title: tt("Saved"), description: tt("Notification settings updated") });
         navigate(routes.settings.path);
