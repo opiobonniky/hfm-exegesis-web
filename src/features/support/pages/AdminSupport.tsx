@@ -44,6 +44,9 @@ export default function AdminSupport() {
                 <h1 className="text-xl font-bold tracking-tight text-foreground md:text-2xl">
                   {tt("Support Inbox")}
                 </h1>
+                <span className={cn('rounded-full px-2 py-1 text-xs font-semibold', h.connected ? 'bg-emerald-500/10 text-emerald-600' : 'bg-amber-500/10 text-amber-600')}>
+                  {h.connected ? 'Chat connected' : 'Reconnecting · automatic sync enabled'}
+                </span>
                 {!!h.stats?.unreadCount && (
                   <span className="rounded-full bg-destructive px-2.5 py-1 text-xs font-bold text-destructive-foreground">
                     {h.stats.unreadCount} {tt("unread")}
@@ -182,6 +185,9 @@ export default function AdminSupport() {
               </div>
             ) : h.activeTicket ? (
               <div className="h-full overflow-hidden rounded-2xl border border-border/80 bg-card p-4 shadow-sm">
+                <p className="mb-2 text-xs text-muted-foreground" role="status">
+                  {h.connected && h.peerOnline ? 'Reader online' : 'Reader offline'}
+                </p>
                 <SupportThread
                   ticket={h.activeTicket}
                   viewerRole="admin"

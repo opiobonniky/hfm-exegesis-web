@@ -59,6 +59,7 @@ export interface SupportTicketSummary {
   resolvedAt: string | null;
   messageCount: number;
   lastMessage: {
+    id?: number;
     body: string;
     senderRole: SupportSenderRole;
     createdOn: string;

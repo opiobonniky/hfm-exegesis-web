@@ -1,8 +1,11 @@
 // ─── Support utils ────────────────────────────────────────────────────────────
 import type {
+  SupportFilter,
   SupportHelpItem,
   SupportHelpTopic,
   SupportHelpTopicId,
+  SupportMessage,
+  SupportTicketSummary,
 } from "./types";
 
 /** Image attachments preview inline; anything else shows as a file chip. */
@@ -63,6 +66,97 @@ export const formatSupportTime = (
 
 export const formatSupportDate = formatSupportTime;
 export const formatSupportDateTime = formatSupportTime;
+
+// ─── Realtime merge helpers ──────────────────────────────────────────────────
+export function mergeThreadSnapshot<T extends SupportTicketSummary & { messages: SupportMessage[] }>(current: T | null, incoming: T): T {
+  if (!current || String(current.id) !== String(incoming.id)) return incoming;
+  const messages = new Map(current.messages.filter(message => message.id > 0).map(message => [String(message.id), message]));
+  for (const message of incoming.messages) {
+    const previous = messages.get(String(message.id));
+    messages.set(String(message.id), { ...message,
+      deliveredAt: message.deliveredAt ?? previous?.deliveredAt,
+      readAt: message.readAt ?? previous?.readAt,
+    });
+  }
+  return { ...incoming, messages: [...messages.values()].sort((a, b) => Number(a.id) - Number(b.id)) };
+}
+// Pure functions for applying socket-pushed support updates to in-memory state
+// so the inbox/thread update without refetching the list.
+
+/**
+ * Merge a socket-pushed ticket summary into a list. Respects the active status
+ * filter, keeps the most recently active conversation first, and returns the
+ * same array reference when nothing changed. `allowInsert` guards the admin
+ * inbox from injecting tickets that fall outside a search/category narrowing.
+ */
+export function mergeTicketSummary(
+  tickets: SupportTicketSummary[],
+  incoming: SupportTicketSummary,
+  options: { filter?: SupportFilter; allowInsert?: boolean } = {},
+): SupportTicketSummary[] {
+  const { filter = "all", allowInsert = true } = options;
+  const matches = filter === "all" || incoming.status === filter;
+  const index = tickets.findIndex(item => String(item.id) === String(incoming.id));
+
+  if (index === -1) {
+    return matches && allowInsert ? [incoming, ...tickets] : tickets;
+  }
+  if (!matches) {
+    return tickets.filter(item => String(item.id) !== String(incoming.id));
+  }
+
+  const merged = { ...tickets[index], ...incoming };
+  const rest = tickets.filter(item => String(item.id) !== String(incoming.id));
+  return [merged, ...rest];
+}
+
+/** Append a socket-pushed message, ignoring an id we already hold. */
+export function appendThreadMessage(
+  messages: SupportMessage[],
+  incoming: SupportMessage,
+): SupportMessage[] {
+  if (messages.some(item => String(item.id) === String(incoming.id))) {
+    return messages;
+  }
+  return [...messages, incoming];
+}
+
+/**
+ * Overlay a ticket summary (which never carries `messages`) onto the open
+ * conversation without dropping the already-loaded messages.
+ */
+export function mergeTicketSummaryIntoDetail<T extends SupportTicketSummary>(
+  detail: T,
+  incoming: SupportTicketSummary,
+): T {
+  if (String(detail.id) !== String(incoming.id)) return detail;
+  const summary: Record<string, unknown> = {
+    ...(incoming as unknown as Record<string, unknown>),
+  };
+  delete summary.messages;
+  const merged = { ...detail, ...(summary as Partial<T>) };
+
+  // Mirror the latest receipt onto the open bubble so check marks update even
+  // when only a ticket summary arrives.
+  const messages = (detail as unknown as { messages?: SupportMessage[] }).messages;
+  const last = incoming.lastMessage;
+  if (Array.isArray(messages) && last?.id != null) {
+    return {
+      ...merged,
+      messages: messages.map(message =>
+        String(message.id) === String(last.id)
+          ? {
+              ...message,
+              deliveredAt: last.deliveredAt ?? message.deliveredAt,
+              readAt: last.readAt ?? message.readAt,
+            }
+          : message,
+      ),
+    } as T;
+  }
+
+  return merged;
+}
 
 // ─── Help centre (FAQ) helpers ───────────────────────────────────────────────
 

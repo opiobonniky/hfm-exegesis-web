@@ -13,20 +13,31 @@ import {
 } from "../services/support-service";
 import { SUPPORT_PAGE_SIZE } from "../constants";
 import { useSupportAttachment } from "./useSupportAttachment";
+import {
+  appendThreadMessage,
+  mergeTicketSummary,
+  mergeTicketSummaryIntoDetail,
+  mergeThreadSnapshot,
+} from "../utils";
 import type {
   SupportCategory,
   SupportFilter,
+  SupportMessage,
   SupportStats,
   SupportStatus,
   SupportTicketDetail,
   SupportTicketSummary,
 } from "../types";
-import { useSupportRealtime } from "../contexts/SupportRealtimeContext";
+import {
+  useSupportRealtime,
+  type SupportRealtimePayload,
+} from "../contexts/SupportRealtimeContext";
 
 export function useAdminSupportPage() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { supportRevision, refreshUnread } = useSupportRealtime();
+  const { refreshUnread, subscribe, connected, syncThread } = useSupportRealtime();
+  const [peerOnline, setPeerOnline] = useState(false);
   const attachmentPicker = useSupportAttachment();
   const pickedAttachment = attachmentPicker.data.attachment;
   const uploadingAttachment = attachmentPicker.data.uploading;
@@ -49,6 +60,12 @@ export function useAdminSupportPage() {
   const [updatingStatus, setUpdatingStatus] = useState(false);
   const listRequestSequence = useRef(0);
   const threadRequestSequence = useRef(0);
+  const activeId = useRef<number | undefined>();
+  activeId.current = activeTicket?.id;
+  const activeUserId = useRef<string | undefined>();
+  activeUserId.current = activeTicket?.userId;
+  const sendingRef = useRef(sending);
+  sendingRef.current = sending;
 
   const load = useCallback(
     async (
@@ -96,6 +113,41 @@ export function useAdminSupportPage() {
     [filter, category, search],
   );
 
+  // Socket.IO does not replay missed events. Reconcile on reconnect/foreground
+  // and periodically; use REST only when the socket/older server is unavailable.
+  useEffect(() => {
+    let disposed = false;
+    let busy = false;
+    const recover = async () => {
+      if (busy || document.visibilityState !== 'visible') return;
+      busy = true;
+      const id = activeId.current;
+      try {
+        if (id && !sendingRef.current) {
+          let ticket: SupportTicketDetail | undefined;
+          try {
+            const snapshot = await syncThread(id, false);
+            ticket = snapshot.ticket;
+            if (!disposed) setPeerOnline(snapshot.presence?.userOnline === true);
+          } catch {
+            const response = await getAdminSupportTicket(id, false);
+            if (response.returnCode === 200) ticket = response.returnData;
+            if (!disposed) setPeerOnline(false);
+          }
+          if (!disposed && activeId.current === id && ticket) {
+            const snapshot = ticket;
+            setActiveTicket(current => mergeThreadSnapshot(current, snapshot));
+          }
+        }
+        if (!disposed) await load();
+      } finally { busy = false; }
+    };
+    void recover();
+    const timer = setInterval(() => { void recover(); }, 10000);
+    document.addEventListener('visibilitychange', recover);
+    return () => { disposed = true; clearInterval(timer); document.removeEventListener('visibilitychange', recover); };
+  }, [connected, activeTicket?.id, syncThread, load]);
+
   useEffect(() => {
     load(undefined, true).catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -127,7 +179,14 @@ export function useAdminSupportPage() {
       setLoadingThread(true);
       setActiveTicket(null);
       try {
-        const res = await getAdminSupportTicket(ticket.id, false);
+        let res;
+        try {
+          const snapshot = await syncThread(ticket.id, false);
+          res = { returnCode: 200, returnData: snapshot.ticket, returnMessage: '' };
+          if (sequence === threadRequestSequence.current) setPeerOnline(snapshot.presence?.userOnline === true);
+        } catch {
+          res = await getAdminSupportTicket(ticket.id, false);
+        }
         if (sequence !== threadRequestSequence.current) return;
         if (res.returnCode === 200 && res.returnData) {
           setActiveTicket(res.returnData);
@@ -141,21 +200,28 @@ export function useAdminSupportPage() {
         if (sequence === threadRequestSequence.current) setLoadingThread(false);
       }
     },
-    [toast],
+    [toast, syncThread],
   );
 
   const markThreadRead = useCallback(async () => {
     const ticket = activeTicket;
-    if (!ticket?.adminUnread || document.visibilityState !== "visible") return;
+    if (!ticket || document.visibilityState !== "visible") return;
+    if (!ticket.adminUnread && !ticket.messages.some(message => message.senderRole === 'user' && !message.readAt)) return;
     const sequence = ++threadRequestSequence.current;
     try {
-      const response = await getAdminSupportTicket(ticket.id, true);
+      let response;
+      try {
+        const snapshot = await syncThread(ticket.id, true);
+        response = { returnCode: 200, returnData: snapshot.ticket };
+      } catch {
+        response = await getAdminSupportTicket(ticket.id, true);
+      }
       if (
         sequence !== threadRequestSequence.current ||
         response.returnCode !== 200 ||
         !response.returnData
       ) return;
-      setActiveTicket(current => current?.id === ticket.id ? response.returnData! : current);
+      setActiveTicket(current => current?.id === ticket.id ? mergeThreadSnapshot(current, response.returnData!) : current);
       setTickets(current =>
         current.map(item => item.id === ticket.id ? { ...item, adminUnread: false } : item),
       );
@@ -164,28 +230,71 @@ export function useAdminSupportPage() {
     } catch {
       // A later realtime refresh retries the read acknowledgement.
     }
-  }, [activeTicket, load, refreshUnread]);
+  }, [activeTicket, load, refreshUnread, syncThread]);
 
-  useEffect(() => {
-    if (supportRevision === 0) return;
-    load().catch(() => {});
-    if (activeTicket?.id) {
-      const activeId = activeTicket.id;
-      const sequence = ++threadRequestSequence.current;
-      getAdminSupportTicket(activeId, false).then(response => {
-        if (
-          sequence === threadRequestSequence.current &&
-          response.returnCode === 200 &&
-          response.returnData
-        ) {
-          setActiveTicket(current =>
-            current?.id === activeId ? response.returnData! : current,
-          );
+  const applyTicketDelta = useCallback(
+    (incoming: SupportTicketSummary) => {
+      // Only inject brand-new tickets when no narrowing filter is active.
+      const allowInsert = filter === "all" && category === "all" && !search.trim();
+      setTickets(current => mergeTicketSummary(current, incoming, { filter, allowInsert }));
+      setActiveTicket(current =>
+        current ? mergeTicketSummaryIntoDetail(current, incoming) : current,
+      );
+    },
+    [filter, category, search],
+  );
+
+  const applyMessageDelta = useCallback((incoming: SupportMessage) => {
+    setActiveTicket(current => {
+      if (!current || String(current.id) !== String(incoming.ticketId)) return current;
+      return { ...current, messages: appendThreadMessage(current.messages, incoming) };
+    });
+  }, []);
+
+  // Apply socket payloads directly; only the small stats aggregate is refreshed.
+  useEffect(
+    () =>
+      subscribe(payload => {
+        const event = payload as SupportRealtimePayload;
+        if (event.userId === activeUserId.current && typeof event.userOnline === 'boolean') {
+          setPeerOnline(event.userOnline);
+          return;
         }
-      }).catch(() => {});
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [supportRevision]);
+        if (Array.isArray(event.messageIds)) {
+          const ids = new Set(event.messageIds.map(String));
+          const deliveredAt = event.deliveredAt ?? event.at;
+          const readAt = event.readAt;
+          setActiveTicket(current =>
+            current
+              ? {
+                  ...current,
+                  messages: current.messages.map(message => {
+                    if (!ids.has(String(message.id))) return message;
+                    return {
+                      ...message,
+                      ...(deliveredAt && !message.deliveredAt
+                        ? { deliveredAt }
+                        : {}),
+                      ...(readAt && !message.readAt ? { readAt } : {}),
+                    };
+                  }),
+                }
+              : current,
+          );
+          return;
+        }
+        if (event.ticket) {
+          applyTicketDelta(event.ticket as SupportTicketSummary);
+          if (event.message) applyMessageDelta(event.message as SupportMessage);
+          getSupportStats()
+            .then(res => {
+              if (res.returnCode === 200 && res.returnData) setStats(res.returnData);
+            })
+            .catch(() => {});
+        }
+      }),
+    [subscribe, applyTicketDelta, applyMessageDelta],
+  );
 
   const closeThread = useCallback(() => {
     threadRequestSequence.current += 1;
@@ -200,7 +309,8 @@ export function useAdminSupportPage() {
     try {
       const res = await adminReplyToTicket(activeTicket.id, body, pickedAttachment);
       if (res.returnCode === 200 && res.returnData) {
-        setActiveTicket(res.returnData);
+        const snapshot = res.returnData;
+        setActiveTicket(current => mergeThreadSnapshot(current, snapshot));
         setReply("");
         clearAttachment();
         toast({ title: tt("Reply sent") });
@@ -256,6 +366,8 @@ export function useAdminSupportPage() {
       updatingStatus,
       attachment: pickedAttachment,
       uploadingAttachment,
+      connected,
+      peerOnline,
     },
     actions: {
       selectAttachment,

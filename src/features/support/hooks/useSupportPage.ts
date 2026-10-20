@@ -18,14 +18,23 @@ import {
   SUPPORT_PAGE_SIZE,
 } from "../constants";
 import { useSupportAttachment } from "./useSupportAttachment";
+import {
+  appendThreadMessage,
+  mergeTicketSummary,
+  mergeTicketSummaryIntoDetail,
+} from "../utils";
 import type {
   SupportCategory,
   SupportFilter,
+  SupportMessage,
   SupportPriority,
   SupportTicketDetail,
   SupportTicketSummary,
 } from "../types";
-import { useSupportRealtime } from "../contexts/SupportRealtimeContext";
+import {
+  useSupportRealtime,
+  type SupportRealtimePayload,
+} from "../contexts/SupportRealtimeContext";
 
 const deviceInfo = () =>
   typeof navigator === "undefined" ? "web" : `web · ${navigator.userAgent.slice(0, 120)}`;
@@ -33,7 +42,7 @@ const deviceInfo = () =>
 export function useSupportPage() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { supportRevision, refreshUnread } = useSupportRealtime();
+  const { refreshUnread, subscribe } = useSupportRealtime();
   const attachmentPicker = useSupportAttachment();
   const pickedAttachment = attachmentPicker.data.attachment;
   const uploadingAttachment = attachmentPicker.data.uploading;
@@ -146,28 +155,58 @@ export function useSupportPage() {
     }
   }, [activeTicket, filter, load, refreshUnread]);
 
-  useEffect(() => {
-    if (supportRevision === 0) return;
-    load(filter).catch(() => {});
-    if (activeTicket?.id) {
-      const activeId = activeTicket.id;
-      const sequence = ++threadRequestSequence.current;
-      getSupportTicket(activeId, false).then(response => {
-        if (
-          sequence === threadRequestSequence.current &&
-          response.returnCode === 200 &&
-          response.returnData
-        ) {
+  const applyTicketDelta = useCallback(
+    (incoming: SupportTicketSummary) => {
+      setTickets(current => mergeTicketSummary(current, incoming, { filter }));
+      setActiveTicket(current =>
+        current ? mergeTicketSummaryIntoDetail(current, incoming) : current,
+      );
+    },
+    [filter],
+  );
+
+  const applyMessageDelta = useCallback((incoming: SupportMessage) => {
+    setActiveTicket(current => {
+      if (!current || String(current.id) !== String(incoming.ticketId)) return current;
+      return { ...current, messages: appendThreadMessage(current.messages, incoming) };
+    });
+  }, []);
+
+  // Apply socket payloads directly so replies appear without a refetch.
+  useEffect(
+    () =>
+      subscribe(payload => {
+        const event = payload as SupportRealtimePayload;
+        if (Array.isArray(event.messageIds)) {
+          const ids = new Set(event.messageIds.map(String));
+          const deliveredAt = event.deliveredAt ?? event.at;
+          const readAt = event.readAt;
           setActiveTicket(current =>
-            current?.id === activeId ? response.returnData! : current,
+            current
+              ? {
+                  ...current,
+                  messages: current.messages.map(message => {
+                    if (!ids.has(String(message.id))) return message;
+                    return {
+                      ...message,
+                      ...(deliveredAt && !message.deliveredAt
+                        ? { deliveredAt }
+                        : {}),
+                      ...(readAt && !message.readAt ? { readAt } : {}),
+                    };
+                  }),
+                }
+              : current,
           );
+          return;
         }
-      }).catch(() => {});
-    }
-    // Realtime revision is the trigger; `load` and the active id represent the
-    // latest render and intentionally do not trigger this effect themselves.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [supportRevision]);
+        if (event.ticket) {
+          applyTicketDelta(event.ticket as SupportTicketSummary);
+          if (event.message) applyMessageDelta(event.message as SupportMessage);
+        }
+      }),
+    [subscribe, applyTicketDelta, applyMessageDelta],
+  );
 
   const closeThread = useCallback(() => {
     threadRequestSequence.current += 1;
