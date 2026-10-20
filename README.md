@@ -1,4 +1,12 @@
-# Welcome to your Lovable project
+# Exegesis Web
+
+## Project documentation
+
+- [Complete web manual](docs/APPLICATION_GUIDE.md): browser features, reading and
+  study workflows, localization, push, caching, media, billing and deployment.
+- [Cross-platform documentation and PDF export instructions](../PROJECT_DOCUMENTATION.md).
+
+The original project tooling/setup notes follow.
 
 ## Project info
 
