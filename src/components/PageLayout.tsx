@@ -6,6 +6,7 @@ interface Props {
   isRtl?: boolean;
   accentColor?: "teal" | "blue" | "emerald" | "primary";
   className?: string;
+  contentClassName?: string;
 }
 
 const GRADIENT = {
@@ -15,11 +16,11 @@ const GRADIENT = {
   primary: "from-primary/80 via-primary to-primary/60",
 };
 
-export function PageLayout({ children, isRtl = false, accentColor = "primary", className }: Props) {
+export function PageLayout({ children, isRtl = false, accentColor = "primary", className, contentClassName }: Props) {
   return (
     <div className={cn("min-h-screen bg-background", className)} dir={isRtl ? "rtl" : "ltr"}>
       <div className={cn("h-1", isRtl ? "bg-gradient-to-l" : "bg-gradient-to-r", GRADIENT[accentColor] || GRADIENT.primary)} />
-      <div className="max-w-7xl mx-auto px-5 sm:px-8 py-8 space-y-7">
+      <div className={cn("max-w-7xl mx-auto px-5 sm:px-8 py-8 space-y-7", contentClassName)}>
         {children}
       </div>
     </div>

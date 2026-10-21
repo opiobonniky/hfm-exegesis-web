@@ -19,7 +19,8 @@ export default function BibleReadingPlan() {
 
   return (
     <Gate tier="legacy_sower" featureName="Reading Plans" featureDescription="Track your daily Bible reading progress with personalized reading plans.">
-      <PageLayout isRtl={data.isRtl} accentColor="teal">
+      {/* AppLayout already reserves space for the fixed mobile bottom tabs. */}
+      <PageLayout isRtl={data.isRtl} accentColor="teal" className="min-h-0" contentClassName="pb-3 md:pb-8">
         <PageHeader
           icon={<Shield className="h-5 w-5 text-teal-700" />}
           iconBg="bg-teal-100"
