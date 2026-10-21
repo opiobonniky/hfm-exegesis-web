@@ -156,6 +156,10 @@ export interface TranslationComparisonEntry {
   abbreviation: string;
   id?: string;
   text: string;
+  /** The language code of the translation, e.g. "en" or "sw". */
+  language?: string;
+  /** The display name of the language, e.g. "English" or "Swahili". */
+  languageName?: string;
 }
 
 /**
