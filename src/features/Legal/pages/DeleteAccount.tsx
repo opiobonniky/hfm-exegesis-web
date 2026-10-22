@@ -30,7 +30,10 @@ export default function DeleteAccount() {
         password,
         confirmation: CONFIRMATION_WORD,
       });
-      if (response?.success === false) {
+      if (
+        response?.success === false ||
+        (typeof response?.returnCode === "number" && response.returnCode >= 400)
+      ) {
         setError(
           response?.message ||
             "We could not delete your account. Please try again.",
