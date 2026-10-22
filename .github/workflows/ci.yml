@@ -28,3 +28,6 @@ jobs:
 
       - name: Dark-mode audit
         run: npm run lint:dark
+
+      - name: Tests
+        run: npm test
