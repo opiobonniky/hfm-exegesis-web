@@ -409,10 +409,24 @@ const PublicLayout = () => {
           <div className="w-full h-px bg-white/10 my-12 sm:my-16" />
         </div>
         <div className="bg-black/40 border-t border-white/5 py-5 sm:py-6 px-4">
-          <div className="w-full max-w-5xl mx-auto flex flex-row justify-between items-center gap-3 text-center sm:text-left px-4 sm:px-6">
+          <div className="w-full max-w-5xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-3 text-center sm:text-left px-4 sm:px-6">
             <p className="text-muted-foreground text-[10px] sm:text-xs font-black uppercase tracking-widest">
               {(t.landing?.footerCopyright || "© {year} Exegesis. Built for Kingdom Impact.").replace("{year}", String(new Date().getFullYear()))}
             </p>
+            <div className="flex items-center gap-4">
+              <Link
+                to="/terms"
+                className="text-muted-foreground text-[10px] sm:text-xs font-black uppercase tracking-widest hover:text-white transition-colors"
+              >
+                {tt("Terms of Service")}
+              </Link>
+              <Link
+                to="/privacy"
+                className="text-muted-foreground text-[10px] sm:text-xs font-black uppercase tracking-widest hover:text-white transition-colors"
+              >
+                {tt("Privacy Policy")}
+              </Link>
+            </div>
             <p className="text-muted-foreground text-[10px] sm:text-xs font-black uppercase tracking-widest">
               {t.landing?.footerPoweredBy || tt("Powered by Him First Media Group.")}
             </p>

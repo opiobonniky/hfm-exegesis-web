@@ -10,6 +10,18 @@ export interface Translation {
   description: string | null;
   copyright: string | null;
   link: string | null;
+  isFree?: boolean;
+  /**
+   * Licence of the text: 'public-domain', 'attribution' or 'permission'.
+   * `attribution` and `permission` texts must show `attribution` to the user.
+   */
+  license?: string | null;
+  /** The credit line that must be displayed for this translation. */
+  attribution?: string | null;
+  /** Where the text came from. */
+  source?: string | null;
+  /** Whether the text may be redistributed by the platform. */
+  redistributable?: boolean;
 }
 
 export interface BibleBook {
@@ -299,7 +311,12 @@ export const mapTranslationId = (frontendId: string): string => {
     AMPClassic: "AmplifiedClassic",
     EASY: "EASY",
     Passion: "Passion",
-    TL: "TL",
+    // The Living Bible and New King James Version were withdrawn for licence
+    // reasons. Saved links still resolve to the public-domain Tyndale text.
+    TL: "Tyndale",
+    NKJ: "Tyndale",
+    NKJV: "Tyndale",
+    LIVING: "Tyndale",
     Tyndale: "Tyndale",
     ERV: "ERV",
   };
@@ -333,7 +350,7 @@ export const mapFrontendId = (backendId: string): string => {
     NASU: "NASU",
     AmplifiedClassic: "AMPClassic",
     Passion: "Passion",
-    TL: "TL",
+    TL: "Tyndale",
     Tyndale: "Tyndale",
     ERV: "ERV",
   };

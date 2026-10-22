@@ -91,6 +91,9 @@ const PlansPage = lazy(() => import("@/features/Subscription/pages/PlansPage"));
 const VerseResources = lazy(() => import("@/features/Bible/pages/VerseResources"));
 const Onboarding = lazy(() => import("@/features/Auth/pages/Onboarding"));
 const WhoWeAre = lazy(() => import("@/features/HimFirstMedia/pages/WhoWeAre"));
+const LegalTerms = lazy(() => import("@/features/Legal/pages/Terms"));
+const LegalPrivacy = lazy(() => import("@/features/Legal/pages/Privacy"));
+const DeleteAccount = lazy(() => import("@/features/Legal/pages/DeleteAccount"));
 const OurVision = lazy(() => import("@/features/HimFirstMedia/pages/OurVision"));
 const OurMission = lazy(() => import("@/features/HimFirstMedia/pages/OurMission"));
 const OurGoals = lazy(() => import("@/features/HimFirstMedia/pages/OurGoals"));
@@ -384,6 +387,13 @@ const routeConfigs = {
     isProtected: true,
     requiresLayout: true,
     title: tt("Settings"),
+  },
+  deleteAccount: {
+    path: "/delete-account",
+    component: DeleteAccount,
+    isProtected: true,
+    requiresLayout: true,
+    title: tt("Delete account"),
   },
   journal: {
     path: "/journal",
@@ -784,6 +794,22 @@ const routeConfigs = {
     requiresPublicLayout: true,
     requiresLayout: false,
     title: tt("Who We Are"),
+  },
+  terms: {
+    path: "/terms",
+    component: LegalTerms,
+    isProtected: false,
+    requiresPublicLayout: true,
+    requiresLayout: false,
+    title: tt("Terms of Service"),
+  },
+  privacy: {
+    path: "/privacy",
+    component: LegalPrivacy,
+    isProtected: false,
+    requiresPublicLayout: true,
+    requiresLayout: false,
+    title: tt("Privacy Policy"),
   },
   ourVision: {
     path: "/our-vision",

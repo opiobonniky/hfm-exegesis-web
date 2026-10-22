@@ -120,6 +120,10 @@ export interface TranslationOption {
   language?: string;
   copyright?: string;
   isFree?: boolean;
+  license?: string | null;
+  attribution?: string | null;
+  source?: string | null;
+  redistributable?: boolean;
 }
 
 export interface ChapterData {

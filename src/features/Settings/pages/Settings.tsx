@@ -1,6 +1,7 @@
 "use client";
 
 import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { useSettingsPage } from "../hooks/useSettingsPage";
 import { ProfileTab } from "../components/ProfileTab";
@@ -68,6 +69,20 @@ export default function Settings() {
             </Card>
           </TabsContent>
         </Tabs>
+        <div className="mt-10 flex flex-col gap-3 rounded-xl border border-border p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-sm font-semibold text-foreground">Account</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Permanently delete your account and study content.
+            </p>
+          </div>
+          <Link
+            to="/delete-account"
+            className="text-sm font-medium text-destructive hover:underline"
+          >
+            Delete account
+          </Link>
+        </div>
         <SettingsBottomSpacer />
       </SettingsContentArea>
     </SettingsContentWrapper>

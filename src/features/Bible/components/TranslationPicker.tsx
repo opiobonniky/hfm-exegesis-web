@@ -11,7 +11,13 @@ import { cn } from "@/lib/utils";
 import { useLanguage } from "@/components/languages/languageProvider";
 
 interface TranslationPickerProps {
-  translations: { id: string; name: string; language?: string }[];
+  translations: {
+    id: string;
+    name: string;
+    language?: string;
+    attribution?: string | null;
+    license?: string | null;
+  }[];
   selectedId: string;
   onSelect: (id: string) => void;
   open: boolean;
@@ -84,7 +90,12 @@ export default function TranslationPicker({
               )}
               aria-current={selectedId === tr.id ? "true" : undefined}
             >
-              {tr.name}
+              <span className="block">{tr.name}</span>
+              {tr.attribution ? (
+                <span className="mt-0.5 block text-[10px] font-normal leading-snug text-muted-foreground">
+                  {tr.attribution}
+                </span>
+              ) : null}
             </button>
           ))}
           {filtered.length === 0 && (

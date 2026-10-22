@@ -6,7 +6,7 @@
  */
 
 export const FREE_BIBLE_IDS_BY_LANGUAGE: Record<string, string[]> = {
-  en: ["Berean", "KJV", "NKJ", "ASV", "YLT", "Darby", "GW", "EASY", "TL"],
+  en: ["Berean", "KJV", "ASV", "YLT", "Darby", "Tyndale", "GW", "EASY"],
   es: ["Spanish"],
   fr: ["French"],
   ar: ["Arabic"],
