@@ -46,7 +46,7 @@ export default function AdminSupport() {
                 <h1 className="text-xl font-bold tracking-tight text-foreground md:text-2xl">
                   {tt("Support Inbox")}
                 </h1>
-                <span className={cn('rounded-full px-2 py-1 text-xs font-semibold', h.connected ? 'bg-emerald-500/10 text-emerald-600' : 'bg-amber-500/10 text-amber-600')}>
+                <span className={cn('rounded-full px-2 py-1 text-xs font-semibold', h.connected ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-amber-500/10 text-amber-600 dark:text-amber-400')}>
                   {h.connected ? 'Chat connected' : 'Reconnecting · automatic sync enabled'}
                 </span>
                 {!!h.stats?.unreadCount && (

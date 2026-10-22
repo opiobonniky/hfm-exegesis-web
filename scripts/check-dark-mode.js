@@ -104,6 +104,9 @@ function* walk(dir) {
     if (st.isDirectory()) {
       if (!SKIP_DIRS.has(entry)) yield* walk(full);
     } else if (EXTENSIONS.includes(extnameSafe(entry))) {
+      // Test files assert on class names; those literals are not render
+      // decisions and would otherwise be reported as new violations.
+      if (/\.(test|spec)\.[cm]?[jt]sx?$/.test(entry)) continue;
       yield full;
     }
   }
