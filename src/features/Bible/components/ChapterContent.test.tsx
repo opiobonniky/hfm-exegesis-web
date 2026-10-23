@@ -49,6 +49,15 @@ function renderChapterContent(toolbarHidden: boolean) {
 // ── Tests ──
 
 describe("ChapterContent verse toolbar visibility", () => {
+  it('protects XML scripture from Google while leaving headings and controls translatable', () => {
+    const { container } = renderChapterContent(true);
+    const verses = container.querySelectorAll('[data-scripture-text]');
+    expect(verses).toHaveLength(2);
+    expect(verses[0]).toHaveAttribute('translate', 'no');
+    expect(verses[0]).toHaveClass('notranslate');
+    expect(verses[0].textContent).toBe(chapters[0].verses[0].text);
+    expect(container.querySelector('header')?.closest('[translate="no"]')).toBeNull();
+  });
   it("constrains chapter text to the reader width", () => {
     const { container } = renderChapterContent(false);
     expect(container.firstElementChild).toHaveClass("max-w-5xl");

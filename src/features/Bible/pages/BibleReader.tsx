@@ -11,6 +11,7 @@ import ApiBaseUrlIndicator from "../components/ApiBaseUrlIndicator";
 
 export default function BibleReader() {
   const { data, actions } = useBibleReaderPage();
+  const edition = data.availableTranslations.find(translation => translation.id === data.versionId);
 
   // The toolbar is positioned at z-[70], above every overlay, so it would float
   // in front of any panel that covers the verse it belongs to. Hide it whenever
@@ -56,6 +57,11 @@ export default function BibleReader() {
         onFontSizeChange={actions.updateFontSize}
         onSearch={actions.openSearch}
       />
+      {edition?.attribution && (
+        <p className="notranslate border-b border-border px-4 py-2 text-center text-xs text-muted-foreground" translate="no">
+          {edition.attribution}
+        </p>
+      )}
       <BibleReaderBody
         scrollRef={data.scrollRef}
         fontSize={data.fontSize}

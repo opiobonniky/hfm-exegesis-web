@@ -198,7 +198,9 @@ export default function ChapterContent({
                                 )}
                               </sup>
                               {"\u00a0"}
-                              {verse.text}
+                              <span className="notranslate" translate="no" lang={ch.language} dir="auto" data-scripture-text="true">
+                                {verse.text}
+                              </span>
                             </span>
                             {!toolbarHidden && (
                               <span

@@ -4,6 +4,7 @@ import React, {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from 'react';
@@ -32,6 +33,8 @@ interface LanguageContextType {
   t: Translations;
   isRtl: boolean;
   isLoading: boolean;
+  translationError: string | null;
+  retryTranslation: () => void;
   setLanguage: (lang: Language) => Promise<void>;
   supportedLanguages: Language[];
   tt: (text: string) => string;
@@ -64,18 +67,30 @@ export const LanguageProvider: React.FC<Props> = ({ children }) => {
   const location = useLocation();
   const [lang, setLang] = useState<Language>(getInitialLanguage);
   const [isLoading, setIsLoading] = useState(lang !== 'en');
+  const [translationError, setTranslationError] = useState<string | null>(null);
+  const [attempt, setAttempt] = useState(0);
+  const timers = useRef<number[]>([]);
   const isRtl = isRtlLanguage(lang);
 
   const syncGoogleLanguage = useCallback((target: Language) => {
     // Google creates its selector asynchronously; retry briefly for route and
     // Suspense-rendered content without exposing its default UI.
-    [0, 150, 500, 1200].forEach((delay) => {
-      window.setTimeout(() => applyGoogleLanguage(target), delay);
-    });
+    timers.current.forEach(window.clearTimeout);
+    timers.current = [0, 150, 500, 1200].map((delay) =>
+      window.setTimeout(() => applyGoogleLanguage(target), delay));
   }, []);
+
+  useEffect(() => () => { timers.current.forEach(window.clearTimeout); }, []);
 
   useEffect(() => {
     let active = true;
+    setTranslationError(null);
+    if (lang === 'en') {
+      applyGoogleLanguage('en');
+      setIsLoading(false);
+      return;
+    }
+    setIsLoading(true);
     loadGoogleTranslate(lang)
       .then(() => {
         if (!active) return;
@@ -84,10 +99,13 @@ export const LanguageProvider: React.FC<Props> = ({ children }) => {
       })
       .catch((error) => {
         console.error('[Google Translate]', error);
-        if (active) setIsLoading(false);
+        if (active) {
+          setIsLoading(false);
+          setTranslationError('Translation is temporarily unavailable.');
+        }
       });
     return () => { active = false; };
-  }, [lang, syncGoogleLanguage]);
+  }, [lang, attempt, syncGoogleLanguage]);
 
   useEffect(() => {
     document.documentElement.lang = lang;
@@ -111,24 +129,31 @@ export const LanguageProvider: React.FC<Props> = ({ children }) => {
       return;
     }
 
-    await loadGoogleTranslate(newLang).catch(() => undefined);
-    syncGoogleLanguage(newLang);
-    window.setTimeout(() => setIsLoading(false), 500);
-  }, [lang, syncGoogleLanguage]);
+  }, [lang]);
+
+  const retryTranslation = useCallback(() => setAttempt(value => value + 1), []);
 
   const value = useMemo<LanguageContextType>(() => ({
     lang,
     t: ENGLISH_TRANSLATIONS,
     isRtl,
     isLoading,
+    translationError,
+    retryTranslation,
     setLanguage,
     supportedLanguages: SUPPORTED_LANGUAGES,
     tt,
-  }), [lang, isRtl, isLoading, setLanguage]);
+  }), [lang, isRtl, isLoading, translationError, retryTranslation, setLanguage]);
 
   return (
     <LanguageContext.Provider value={value}>
       <div id={GOOGLE_TRANSLATE_ELEMENT_ID} aria-hidden="true" />
+      {translationError && (
+        <div role="status" className="border-b border-border bg-background px-4 py-2 text-center text-sm text-foreground">
+          <span>{translationError}</span>{' '}
+          <button type="button" onClick={retryTranslation} className="font-semibold underline">Retry translation</button>
+        </div>
+      )}
       {children}
     </LanguageContext.Provider>
   );

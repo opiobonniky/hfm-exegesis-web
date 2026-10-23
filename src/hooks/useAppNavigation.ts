@@ -18,7 +18,9 @@ export const useAppNavigation = () => {
     params?: Record<string, string | number>,
     options?: { replace?: boolean; state?: any },
   ) => {
-    const path = generatePath(routeKey, params);
+    const path = generatePath(routes[routeKey].path, params && Object.fromEntries(
+      Object.entries(params).map(([key, value]) => [key, String(value)]),
+    ));
     navigate(path, options);
   };
 

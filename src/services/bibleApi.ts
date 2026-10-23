@@ -190,7 +190,9 @@ export const bibleApi = {
   ): Promise<ChapterHeading[]> => {
     const response = await api.post(
       `${BASE_URL}/${translationId}/chapter-headings`,
-      { bookName, chapter, lang },
+      // Decorative headings are English source for Google's web translation.
+      // Scripture itself is always returned from the selected edition's XML.
+      { bookName, chapter, lang: "en" },
     );
     if (response.data.success) {
       return response.data.data?.headings || [];
@@ -287,16 +289,15 @@ export const mapTranslationId = (frontendId: string): string => {
     Berean: "Berean",
     BSB: "Berean",
     KJV: "KJV",
-    WEB: "GW",
+    WEB: "WEB",
     ASV: "ASV",
     YLT: "YLT",
     DARBY: "Darby",
-    WEBSTER: "Amplified",
-    BBE: "EASY",
+    WEBSTER: "WEBSTER",
+    BBE: "BBE",
     NIV: "NIV",
     ESV: "ESV",
     NASB: "NASB",
-    NKJ: "NKJ",
     NLT: "NLT",
     CSB: "CSB",
     HCSB: "HCSB",
@@ -327,12 +328,12 @@ export const mapFrontendId = (backendId: string): string => {
   const mapping: Record<string, string> = {
     Berean: "BSB",
     KJV: "KJV",
-    GW: "WEB",
+    GW: "GW",
     ASV: "ASV",
     YLT: "YLT",
     Darby: "DARBY",
-    Amplified: "WEBSTER",
-    EASY: "BBE",
+    Amplified: "Amplified",
+    EASY: "EASY",
     NIV: "NIV",
     ESV: "ESV",
     NASB: "NASB",

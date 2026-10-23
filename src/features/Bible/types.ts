@@ -128,6 +128,7 @@ export interface TranslationOption {
 
 export interface ChapterData {
   book: string;
+  language?: string;
   chapter: number;
   verses: { verse: number; text: string }[];
   testament: string;

@@ -59,7 +59,7 @@ export default function TranslationPicker({
           className="h-9 px-2.5 text-xs gap-1"
           aria-label={t.bibleReader.selectVersion}
         >
-          <span className="truncate max-w-[80px]">{selectedId}</span>
+          <span className="notranslate truncate max-w-[80px]" translate="no">{selectedId}</span>
           <ChevronDown className="w-3 h-3 opacity-50" />
         </Button>
       </PopoverTrigger>

@@ -62,7 +62,7 @@ function primeGoogleCookie(lang: Language): void {
   writeTranslationCookie(`/en/${googleLanguageCode(lang)}`);
 }
 
-function waitForSelector(resolve: () => void, reject: (error: Error) => void): void {
+function waitForSelector(resolve: () => void, reject: (error: Error) => void): () => void {
   let attempt = 0;
   const timer = window.setInterval(() => {
     attempt += 1;
@@ -74,6 +74,7 @@ function waitForSelector(resolve: () => void, reject: (error: Error) => void): v
       reject(new Error('Google Translate selector did not initialize'));
     }
   }, 100);
+  return () => window.clearInterval(timer);
 }
 
 export function loadGoogleTranslate(initialLanguage: Language): Promise<void> {
@@ -81,21 +82,35 @@ export function loadGoogleTranslate(initialLanguage: Language): Promise<void> {
   if (readyPromise) return readyPromise;
 
   readyPromise = new Promise<void>((resolve, reject) => {
+    let settled = false;
+    let stopWaiting: (() => void) | undefined;
+    const finish = (error?: Error) => {
+      if (settled) return;
+      settled = true;
+      window.clearTimeout(deadline);
+      stopWaiting?.();
+      if (error) reject(error);
+      else resolve();
+    };
+    // Includes script download and callback initialization, not just selector
+    // polling. Ad blockers/offline connections must not leave loading stuck.
+    const deadline = window.setTimeout(() => finish(new Error('Google Translate timed out')), 15_000);
     const initialize = () => {
+      if (settled) return;
       const TranslateElement = window.google?.translate?.TranslateElement;
       if (!TranslateElement) {
-        reject(new Error('Google Translate Element is unavailable'));
+        finish(new Error('Google Translate Element is unavailable'));
         return;
       }
 
       const container = document.getElementById(GOOGLE_TRANSLATE_ELEMENT_ID);
       if (!container) {
-        reject(new Error('Google Translate container is missing'));
+        finish(new Error('Google Translate container is missing'));
         return;
       }
 
-      if (!container.hasChildNodes()) {
-        new TranslateElement({
+      try {
+        if (!container.hasChildNodes()) new TranslateElement({
           pageLanguage: 'en',
           includedLanguages: SUPPORTED_LANGUAGES
             .filter((lang) => lang !== 'en')
@@ -104,8 +119,10 @@ export function loadGoogleTranslate(initialLanguage: Language): Promise<void> {
           autoDisplay: false,
           multilanguagePage: true,
         }, GOOGLE_TRANSLATE_ELEMENT_ID);
+        stopWaiting = waitForSelector(() => finish(), finish);
+      } catch {
+        finish(new Error('Google Translate initialization failed'));
       }
-      waitForSelector(resolve, reject);
     };
 
     window.googleTranslateElementInit = initialize;
@@ -116,7 +133,7 @@ export function loadGoogleTranslate(initialLanguage: Language): Promise<void> {
 
     const existing = document.getElementById(SCRIPT_ID) as HTMLScriptElement | null;
     if (existing) {
-      existing.addEventListener('error', () => reject(new Error('Google Translate script failed to load')), { once: true });
+      existing.addEventListener('error', () => finish(new Error('Google Translate script failed to load')), { once: true });
       return;
     }
 
@@ -124,8 +141,14 @@ export function loadGoogleTranslate(initialLanguage: Language): Promise<void> {
     script.id = SCRIPT_ID;
     script.src = `https://translate.google.com/translate_a/element.js?cb=${CALLBACK_NAME}`;
     script.async = true;
-    script.onerror = () => reject(new Error('Google Translate script failed to load'));
+    script.onerror = () => finish(new Error('Google Translate script failed to load'));
     document.head.appendChild(script);
+  }).catch((error) => {
+    // A failed script must not poison every later navigation/language switch.
+    readyPromise = null;
+    document.getElementById(SCRIPT_ID)?.remove();
+    document.getElementById(GOOGLE_TRANSLATE_ELEMENT_ID)?.replaceChildren();
+    throw error;
   });
 
   return readyPromise;

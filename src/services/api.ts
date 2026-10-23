@@ -160,7 +160,10 @@ export const sendPostRequest = async <T = any>(
   options: PostRequestOptions = {},
 ): Promise<GenericResponse<T>> => {
   try {
-    const lang = localStorage.getItem("exegesis-language") || "en";
+    // Google Translate owns web prose localization. Always request source
+    // English here so backend translation cannot be translated a second time.
+    // XML scripture uses the separate /translations/{version} endpoints.
+    const lang = "en";
     const response = await api.post<GenericResponse<T>>(
       `/${controller}/${request}`,
       options.includeLanguage === false ? data : { ...data, lang },
@@ -193,7 +196,7 @@ export const sendGetRequest = async <T = any>(
   try {
     const response = await api.get<GenericResponse<T>>(
       `/${controller}/${request}`,
-      { params },
+      { params: { ...params, lang: "en" } },
     );
     return response.data;
   } catch (error: any) {

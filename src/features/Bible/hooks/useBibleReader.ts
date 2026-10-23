@@ -18,7 +18,6 @@ import {
   type BibleBookName,
 } from "../constants";
 import {
-  getBibleCatalogLanguage,
   getPreferredBibleId,
 } from "../services/freeBibleTranslations";
 
@@ -78,10 +77,14 @@ export function useBibleReader() {
   const chapterRefs = useRef<Record<string, HTMLDivElement>>({});
   const verseRefs = useRef<Record<string, HTMLSpanElement | null>>({});
   const chapterRequestRef = useRef(0);
+  const catalogueLanguageRef = useRef(language);
+  const loadingMoreRequestRef = useRef<number | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     const preferred = getPreferredBibleId(language);
+    const languageChanged = catalogueLanguageRef.current !== language;
+    catalogueLanguageRef.current = language;
 
     chapterRequestRef.current += 1;
     setResolvedLanguage(null);
@@ -90,7 +93,9 @@ export function useBibleReader() {
     setChapters([]);
 
     bibleApi
-      .getTranslations(getBibleCatalogLanguage(language))
+      // The UI language is not the Bible edition. Keep the full authoritative
+      // catalog so an explicit version link is honored even in another UI locale.
+      .getTranslations()
       .then((data) => {
         if (cancelled) return;
 
@@ -101,7 +106,12 @@ export function useBibleReader() {
         } catch {
           // Storage can be unavailable in restricted browser contexts.
         }
-        const candidates = [requestedTranslationRef.current, stored, preferred]
+        const requested = !languageChanged ? mapTranslationId(requestedTranslationRef.current) : '';
+        if (requested && !list.some(translation => translation.id === requested)) {
+          throw new Error('The requested Bible edition is unavailable. Please select an available edition.');
+        }
+        const storedEdition = list.find(translation => translation.id === mapTranslationId(stored));
+        const candidates = [requested, storedEdition?.language === language ? stored : '', preferred]
           .filter(Boolean)
           .map(mapTranslationId);
         const nextVersion =
@@ -133,14 +143,14 @@ export function useBibleReader() {
         if (cancelled) return;
         console.error("Failed to load Bible translations:", error);
         setAvailableTranslations([]);
-        setVersionId(preferred);
-        setResolvedLanguage(language);
+        setLoadError('Unable to load the selected Bible edition. Please try again or choose an available edition.');
+        setLoading(false);
       });
 
     return () => {
       cancelled = true;
     };
-  }, [language]);
+  }, [language, reloadToken]);
 
   const fetchChapters = useCallback(
     async (
@@ -163,17 +173,23 @@ export function useBibleReader() {
       const data = await bibleApi.getVersesBatch(translation, book, numbers);
       if (requestId !== chapterRequestRef.current) return;
       const loaded = numbers.map((chapter): ChapterData => {
-        const item = data.find((entry) => entry.chapterNumber === chapter);
+        const item = Array.isArray(data) ? data.find((entry) => entry.chapterNumber === chapter) : null;
+        if (!item || !Array.isArray(item.verses) || !item.verses.length ||
+          item.verses.some(verse => !Number.isInteger(verse.verseNumber) || verse.verseNumber < 1 ||
+            typeof verse.text !== 'string' || !verse.text.trim())) {
+          throw new Error('The selected Bible edition returned an incomplete chapter.');
+        }
         return {
           book,
+          language: availableTranslations.find(edition => edition.id === translation)?.language,
           chapter,
           testament:
             BIBLE_BOOKS.findIndex((entry) => entry.bookName === book) < 39
               ? "OT"
               : "NT",
-          verses: (item?.verses || []).map((v) => ({
+          verses: item.verses.map((v) => ({
             verse: v.verseNumber,
-            text: v.text || "",
+            text: v.text,
           })),
         };
       });
@@ -183,8 +199,8 @@ export function useBibleReader() {
       // Fetch section headings for the freshly loaded chapters via the
       // shared cache — back-navigation to a previously read chapter renders
       // them instantly from cache, and language changes fetch fresh data.
-      const lang = language || "en";
-      await Promise.all(
+      const lang = 'en';
+      void Promise.all(
         numbers.map((chapter) =>
           getChapterHeadingsCached(translation, book, chapter, lang).then(
             (headings) => ({ chapter, headings }),
@@ -201,7 +217,7 @@ export function useBibleReader() {
         });
       });
     },
-    [language],
+    [availableTranslations],
   );
   useEffect(() => {
     if (resolvedLanguage !== language) return;
@@ -210,6 +226,9 @@ export function useBibleReader() {
     setLoading(true);
     setLoadError(null);
     setChapters([]);
+    setHeadingsByChapter({});
+    setSelectedVerses([]);
+    setLoadingMore(false);
     fetchChapters(
       selectedBook,
       loadStartChapter,
@@ -221,13 +240,14 @@ export function useBibleReader() {
       .catch((error) => {
         if (requestId !== chapterRequestRef.current) return;
         console.error(error);
-        setLoadError(
-          `Unable to load this passage. ${error?.message || "Network error"}. Backend: ${API_BASE_URL}`,
-        );
+        setLoadError('Unable to load this passage from the selected Bible edition. Please try again.');
       })
       .finally(() => {
         if (requestId === chapterRequestRef.current) setLoading(false);
       });
+    return () => {
+      if (chapterRequestRef.current === requestId) chapterRequestRef.current += 1;
+    };
   }, [
     fetchChapters,
     language,
@@ -322,6 +342,15 @@ export function useBibleReader() {
   const selectTranslation = useCallback(
     (translation: string) => {
       const nextVersion = mapTranslationId(translation);
+      if (nextVersion === versionId) return;
+      if (!availableTranslations.some(edition => edition.id === nextVersion)) {
+        setLoadError('This Bible edition is unavailable. Please select an available edition.');
+        return;
+      }
+      chapterRequestRef.current += 1;
+      setChapters([]);
+      setSelectedVerses([]);
+      setHeadingsByChapter({});
       setVersionId(nextVersion);
       setLoadStartChapter(selectedChapter);
       try {
@@ -335,11 +364,14 @@ export function useBibleReader() {
         return next;
       });
     },
-    [selectedChapter, setSearchParams],
+    [availableTranslations, selectedChapter, setSearchParams, versionId],
   );
   const loadMore = useCallback(async () => {
-    if (loading || loadingMore || !hasMore || !chapters.length) return;
+    const requestId = chapterRequestRef.current;
+    if (loading || loadingMore || loadingMoreRequestRef.current === requestId || !hasMore || !chapters.length) return;
+    loadingMoreRequestRef.current = requestId;
     setLoadingMore(true);
+    setLoadError(null);
     try {
       await fetchChapters(
         selectedBook,
@@ -347,10 +379,15 @@ export function useBibleReader() {
         INITIAL_CHAPTER_COUNT,
         versionId,
         true,
-        chapterRequestRef.current,
+        requestId,
       );
+    } catch {
+      if (requestId === chapterRequestRef.current) {
+        setLoadError('Unable to load more chapters. Please try again.');
+      }
     } finally {
-      setLoadingMore(false);
+      if (loadingMoreRequestRef.current === requestId) loadingMoreRequestRef.current = null;
+      if (requestId === chapterRequestRef.current) setLoadingMore(false);
     }
   }, [
     chapters,

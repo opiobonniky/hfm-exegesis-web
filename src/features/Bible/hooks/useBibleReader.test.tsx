@@ -81,7 +81,7 @@ describe("useBibleReader translation selection", () => {
       expect(result.current.data.chapters).toHaveLength(3);
     });
 
-    expect(mocks.getTranslations).toHaveBeenCalledWith("fr");
+    expect(mocks.getTranslations).toHaveBeenCalledWith();
     expect(mocks.getVersesBatch).toHaveBeenCalledWith(
       "French",
       "Genesis",
@@ -124,9 +124,9 @@ describe("useBibleReader translation selection", () => {
       },
     );
 
-    mocks.getTranslations.mockImplementation((language: string) =>
+    mocks.getTranslations.mockImplementation(() =>
       Promise.resolve(
-        language === "fr"
+        mocks.language === "fr"
           ? [{ id: "French", name: "French", language: "fr" }]
           : [{ id: "Berean", name: "Berean", language: "en" }],
       ),
@@ -212,5 +212,54 @@ describe("useBibleReader translation selection", () => {
       1, 2, 3, 4, 5, 6,
     ]);
     expect(mocks.getTranslations).toHaveBeenCalledTimes(1);
+  });
+
+  it('honors an explicit XML edition independently of the UI language', async () => {
+    mocks.language = 'fr';
+    mocks.getTranslations.mockResolvedValue([
+      { id: 'French', language: 'fr' }, { id: 'KJV', language: 'en' },
+    ]);
+    mocks.getVersesBatch.mockResolvedValue(chapterResponse('KJV source wording'));
+    const { result } = renderHook(() => useBibleReader(), {
+      wrapper: wrapper('/bible?book=Genesis&chapter=1&translation=KJV'),
+    });
+    await waitFor(() => expect(result.current.data.chapters).toHaveLength(3));
+    expect(result.current.data.versionId).toBe('KJV');
+    expect(result.current.data.chapters[0].language).toBe('en');
+    expect(result.current.data.chapters[0].verses[0].text).toBe('KJV source wording 1');
+  });
+
+  it('does not silently substitute another version for an unavailable edition link', async () => {
+    mocks.getTranslations.mockResolvedValue([{ id: 'Berean', language: 'en' }]);
+    const { result } = renderHook(() => useBibleReader(), {
+      wrapper: wrapper('/bible?book=Genesis&chapter=1&translation=Unavailable'),
+    });
+    await waitFor(() => expect(result.current.data.loadError).toBeTruthy());
+    expect(result.current.data.chapters).toEqual([]);
+    expect(mocks.getVersesBatch).not.toHaveBeenCalled();
+    expect(result.current.data.loading).toBe(false);
+  });
+
+  it('shows a retryable error instead of certifying missing chapter data', async () => {
+    mocks.getTranslations.mockResolvedValue([{ id: 'Berean', language: 'en' }]);
+    mocks.getVersesBatch.mockResolvedValue([{ chapterNumber: 1, verses: [] }]);
+    const { result } = renderHook(() => useBibleReader(), { wrapper: wrapper() });
+    await waitFor(() => expect(result.current.data.loadError).toBeTruthy());
+    expect(result.current.data.chapters).toEqual([]);
+    expect(result.current.data.loadError).not.toContain('Backend:');
+    mocks.getVersesBatch.mockResolvedValue(chapterResponse('Recovered'));
+    act(() => result.current.actions.retryLoad());
+    await waitFor(() => expect(result.current.data.chapters).toHaveLength(3));
+    expect(result.current.data.loadError).toBeNull();
+  });
+
+  it('retains the current verses when the current edition is selected again', async () => {
+    mocks.getTranslations.mockResolvedValue([{ id: 'Berean', language: 'en' }]);
+    mocks.getVersesBatch.mockResolvedValue(chapterResponse('Original'));
+    const { result } = renderHook(() => useBibleReader(), { wrapper: wrapper() });
+    await waitFor(() => expect(result.current.data.chapters).toHaveLength(3));
+    act(() => result.current.actions.selectTranslation('Berean'));
+    expect(result.current.data.chapters).toHaveLength(3);
+    expect(mocks.getVersesBatch).toHaveBeenCalledTimes(1);
   });
 });
