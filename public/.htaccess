@@ -1,0 +1,14 @@
+# SPA fallback for Apache / SiteGround hosting.
+# Vite copies this file from public/ into dist/.
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # Serve real files and directories as-is: assets, /sw.js, /manifest.json.
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # Everything else is a client-side route; let React Router resolve it.
+  RewriteRule ^ index.html [L]
+</IfModule>

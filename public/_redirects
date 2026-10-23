@@ -1,0 +1,4 @@
+# SPA fallback for Netlify / Cloudflare Pages.
+# The app uses BrowserRouter, so /bible/john/3 must serve index.html.
+# Existing files (assets, /sw.js, /manifest.json) are served by the host first.
+/*    /index.html   200

@@ -744,6 +744,12 @@ API URL before building: Vite variables are embedded into build output.
 Authorize the deployed domain in Firebase. Preserve Socket.IO connectivity to
 the backend and its expected socket path for live support events.
 
+SPA fallback is committed for the supported hosts and copied into `dist/`:
+`vercel.json` (Vercel), `public/_redirects` (Netlify, Cloudflare Pages) and
+`public/.htaccess` (Apache/SiteGround). Pick the file matching the host; the
+others are inert. Verify a deep URL such as `/bible/john/3` after every deploy —
+without the rewrite it returns the host's 404 before the service worker exists.
+
 ### Local admin versus deployed admin
 
 For the local backend/USB-connected Android development workflow, create the
