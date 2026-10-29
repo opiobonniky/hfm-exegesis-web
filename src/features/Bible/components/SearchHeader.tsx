@@ -1,76 +1,66 @@
-/**
- * SearchHeader — sticky header for Search page with scope selector and input.
- */
-import { Search as SearchIcon, X, Globe } from "lucide-react";
+import type { RefObject } from "react";
+import { ArrowLeft, Search as SearchIcon, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { tt } from "@/components/languages/hardcodedTranslate";
+import type { Translation } from "@/services/bibleApi";
+import type { Covenant } from "@/hooks/useSearch";
 import SearchFilters from "./SearchFilters";
-import type { SearchScope } from "@/services/searchApi";
-import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface SearchHeaderProps {
   isRtl: boolean;
-  scope: SearchScope;
-  handleScopeChange: (s: SearchScope) => void;
-  handleBookFilter: (b: string) => void;
-  bookName: string;
-  BOOK_NAMES: string[];
-  covenant: "all" | "ot" | "nt";
-  handleCovenantChange: (c: "all" | "ot" | "nt") => void;
-  scopeLocked: boolean;
-  inputRef: React.RefObject<HTMLInputElement | null>;
+  inputRef: RefObject<HTMLInputElement>;
   query: string;
-  setQuery: (q: string, scope?: SearchScope) => void;
-  clearQuery: () => void;
-  translation: string;
-  setTranslation: (t: string) => void;
-  CROSS_TRANSLATION_OPTIONS: Array<{ id: string; abbr: string; name: string }>;
+  onChange: (query: string) => void;
+  onSubmit: () => void;
+  onClear: () => void;
+  onBack: () => void;
+  translation: string | null;
+  translations: Translation[];
+  versionLabel: string;
+  onTranslationChange: (id: string) => void;
+  versionLoading: boolean;
+  bookName?: string;
+  books: string[];
+  onBookChange: (book?: string) => void;
+  covenant: Covenant;
+  onCovenantChange: (covenant: Covenant) => void;
 }
 
-export function SearchHeader({
-  isRtl, scope, handleScopeChange, handleBookFilter, bookName, BOOK_NAMES,
-  covenant, handleCovenantChange, scopeLocked, inputRef, query, setQuery, clearQuery,
-  translation, setTranslation, CROSS_TRANSLATION_OPTIONS,
-}: SearchHeaderProps) {
+export function SearchHeader(props: SearchHeaderProps) {
   return (
     <header className="flex-shrink-0 border-b bg-background/80 backdrop-blur-md sticky top-0 z-30">
-      <div className="flex items-center justify-between px-4 sm:px-6 py-3">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center"><SearchIcon className="w-4 h-4 text-accent" /></div>
-          <h1 className="text-base font-bold tracking-tight text-foreground">{tt("Search")}</h1>
-        </div>
+      <div className="flex items-center gap-3 px-4 sm:px-6 py-3">
+        <button type="button" onClick={props.onBack} aria-label={tt("Back")} className="rounded-lg p-2 hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring">
+          <ArrowLeft className={cn("h-5 w-5", props.isRtl && "rotate-180")} />
+        </button>
+        <h1 className="text-base font-bold text-foreground">{tt("Search the Bible")}</h1>
       </div>
       <div className="px-4 sm:px-6 pb-3 space-y-3">
-        <SearchFilters scope={scope} onScopeChange={handleScopeChange}
-          bookFilter={bookName || ""} onBookFilterChange={handleBookFilter} books={BOOK_NAMES}
-          covenant={covenant} onCovenantChange={handleCovenantChange} locked={scopeLocked} />
-        <div className="relative">
-          <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50 pointer-events-none" />
-          <input ref={inputRef} value={query} onChange={(e) => setQuery(e.target.value, scope)}
-            placeholder={scope === "bible" ? tt("Search verses, words, phrases...") : scope === "journal" ? tt("Search journal entries...") : scope === "topics" ? tt("Search topics...") : tt("Search by Greek/Hebrew word...")}
-            className="w-full h-11 pl-10 pr-10 rounded-xl border border-border/60 bg-background/80 text-sm placeholder:text-muted-foreground/40 focus:ring-2 focus:ring-primary/30 focus:border-primary/40 transition-all"
+        <form className="relative" role="search" onSubmit={event => { event.preventDefault(); props.onSubmit(); }}>
+          <SearchIcon className={cn("absolute top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none", props.isRtl ? "right-3" : "left-3")} />
+          <input ref={props.inputRef} value={props.query} onChange={event => props.onChange(event.target.value)}
+            aria-label={tt("Search the Bible")} placeholder={tt("Search the Bible...")}
+            dir={props.isRtl ? "rtl" : "ltr"}
+            className="notranslate w-full h-11 px-10 rounded-xl border border-border bg-background text-sm focus:ring-2 focus:ring-primary/30" translate="no"
             autoCapitalize="none" autoCorrect="off" autoComplete="off" />
-          {query.length > 0 && (
-            <button onClick={clearQuery} className={cn("absolute top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground rounded-md hover:bg-muted/50", isRtl ? "left-2.5" : "right-2.5")}>
-              <X className="w-4 h-4" />
+          {props.query.length > 0 && (
+            <button type="button" onClick={props.onClear} aria-label={tt("Clear search")}
+              className={cn("absolute top-1/2 -translate-y-1/2 p-1 rounded-md hover:bg-muted", props.isRtl ? "left-2.5" : "right-2.5")}>
+              <X className="h-4 w-4" />
             </button>
           )}
+        </form>
+        <div className="flex flex-wrap items-center gap-2">
+          <label className="sr-only" htmlFor="search-bible-edition">{tt("Select Bible version")}</label>
+          <select id="search-bible-edition" value={props.translation || ""} onChange={event => props.onTranslationChange(event.target.value)}
+            disabled={props.versionLoading} title={props.versionLabel}
+            className="notranslate h-9 max-w-full rounded-lg border border-border bg-background px-2 text-xs" translate="no">
+            {!props.translation && <option value="">{props.versionLoading ? tt("Loading...") : tt("Select Bible version")}</option>}
+            {props.translations.map(item => <option key={item.id} value={item.id}>{item.languageName ? `${item.languageName} · ` : ""}{item.name}</option>)}
+          </select>
+          <SearchFilters bookFilter={props.bookName || ""} onBookFilterChange={book => props.onBookChange(book || undefined)}
+            books={props.books} covenant={props.covenant} onCovenantChange={props.onCovenantChange} />
         </div>
-        {scope === "bible" && (
-          <div className="flex items-center gap-2">
-            <Globe className="w-3.5 h-3.5 text-muted-foreground/50" />
-            <Select value={translation} onValueChange={setTranslation}>
-              <SelectTrigger className="h-8 text-xs w-[160px] rounded-lg"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {CROSS_TRANSLATION_OPTIONS.map((tr) => (
-                  <SelectItem key={tr.id} value={tr.id} className="text-xs py-1.5">
-                    <span className="font-semibold">{tr.abbr}</span> <span className="text-muted-foreground/60 text-[10px]">{tr.name}</span>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        )}
       </div>
     </header>
   );

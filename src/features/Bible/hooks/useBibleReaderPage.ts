@@ -18,6 +18,7 @@ import {
   VERSE_HIGHLIGHT_COLORS,
 } from "../constants";
 import { useBibleReader } from "./useBibleReader";
+import { useSearchReaderAction } from "./useSearchReaderAction";
 import { hasSeenBookOverview } from "../services/bookOverviewSeen";
 import { getVerseExplanation } from "../services/verseExplanation";
 import type {
@@ -108,6 +109,26 @@ export function useBibleReaderPage() {
   const [verseActionTarget, setVerseActionTarget] =
     useState<VerseActionTarget | null>(null);
   const [fontSize, setFontSize] = useState(getInitialFontSize);
+
+  useSearchReaderAction({
+    params: searchParams, chapters: reader.chapters,
+    loading: reader.loading || reader.annotationsLoading, versionId: reader.versionId,
+    onAction: (action, book, chapter, verse) => {
+      const key = `${book}-${chapter}-${verse}`;
+      reader.clearSelectedVerses();
+      reader.toggleVerse(key);
+      if (action === "highlight") {
+        setMultiHighlightDialogOpen(true);
+      } else {
+        const existingNote = reader.verseNotes[key] || "";
+        setNoteText(existingNote);
+        setNoteDialogMode(existingNote ? "edit" : "create");
+        setNoteDialogVerseRef(`${book} ${chapter}:${verse}`);
+        setNoteTargetKey(key);
+        setNoteDialogOpen(true);
+      }
+    },
+  });
 
   // ── Audio “now reading” tracking ─────────────────────────────────────────
   // The audio player reports an index into the playlist it was given; map it

@@ -71,6 +71,7 @@ export function useBibleReader() {
   const [highlights, setHighlights] = useState<Record<string, ReaderHighlight>>({});
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [verseNotes, setVerseNotes] = useState<Record<string, string>>({});
+  const [annotationsLoading, setAnnotationsLoading] = useState(true);
   // Section headings per "Book-Chapter", matching the mobile app's reader.
   const [headingsByChapter, setHeadingsByChapter] = useState<HeadingsByChapter>({});
   const loadMoreRef = useRef<HTMLDivElement>(null);
@@ -294,6 +295,8 @@ export function useBibleReader() {
         setVerseNotes(noteMap);
       } catch (error) {
         console.error("Failed to load reader highlights/favorites/notes:", error);
+      } finally {
+        if (!cancelled) setAnnotationsLoading(false);
       }
     })();
     return () => {
@@ -501,6 +504,7 @@ export function useBibleReader() {
     highlights,
     favorites,
     verseNotes,
+    annotationsLoading,
     loadMoreRef,
     chapterRefs,
     verseRefs,

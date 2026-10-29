@@ -1,169 +1,70 @@
-// useSearchPage — all state and callbacks for Search page
-import { useCallback, useEffect, useRef, useMemo } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useLanguage } from "@/components/languages/languageProvider";
-import { useSearch, CROSS_TRANSLATION_OPTIONS } from "@/hooks/useSearch";
+import { useSearch, MIN_QUERY_LENGTH } from "@/hooks/useSearch";
 import { routes } from "@/components/Routes/routes";
 import { useSubscription } from "@/hooks/useSubscription";
+import { tt } from "@/components/languages/hardcodedTranslate";
+import { BIBLE_BOOKS } from "../constants";
 import { useSearchSectionHeadings } from "./useSearchSectionHeadings";
-import type {
-  PopularSearchItem,
-  SearchResult,
-  SearchScope,
-} from "@/services/searchApi";
+import { useSearchTranslation } from "./useSearchTranslation";
+import type { SearchResult } from "@/services/searchApi";
 
 export function useSearchPage() {
-  const { t, isRtl } = useLanguage();
+  const { lang, isRtl } = useLanguage();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [params] = useSearchParams();
+  const { hasAccess } = useSubscription();
+  const version = useSearchTranslation(lang, params.get("translation"));
+  const search = useSearch(version.translation);
+  const { searchImmediate, setQuery } = search;
   const inputRef = useRef<HTMLInputElement>(null);
-  const initialQueryRef = useRef(searchParams.get("query")?.trim() || "");
-  const { isFree } = useSubscription();
-  const search = useSearch();
-  const {
-    query,
-    setQuery,
-    searchImmediate,
-    scope,
-    switchScope,
-    bookName,
-    setBookFilter,
-    covenant,
-    setCovenant,
-    translation,
-    setTranslation,
-    results,
-    loading,
-    total,
-    error: searchError,
-    loadMore,
-    clearQuery,
-    searchedOnce,
-    searchHistory,
-    clearHistory,
-    removeHistoryItem,
-    popularSearches,
-    filteredBooks,
-    BOOK_NAMES,
-  } = search;
-  const bibleResults = useMemo(
-    () => results.filter((r): r is SearchResult => !!(r as SearchResult)?.book_name),
-    [results],
-  );
-   const sectionHeadings = useSearchSectionHeadings(
-      bibleResults,
-      translation,
-      (t as any)?.lang || "en",
-    );
-  const scopeLocked = isFree && (scope === "topics" || scope === "lemma");
-  const hasQuery = query.trim().length >= 3;
-  const showSkeleton = loading && hasQuery && results.length === 0;
+  const lastRouteQuery = useRef<string | null>(null);
+  const [searchContext, setSearchContext] = useState<string | null>(null);
+  const incoming = params.get("query") || params.get("word") || params.get("strongsId") || "";
+  const fromWord = !params.get("query") && !!params.get("word");
   useEffect(() => {
-    setTimeout(() => inputRef.current?.focus(), 100);
-  }, []);
+    const text = incoming.trim();
+    if (!version.translation || !text || lastRouteQuery.current === text) return;
+    lastRouteQuery.current = text;
+    setSearchContext(fromWord ? `${tt("All uses of")} “${text}”` : null);
+    searchImmediate(text);
+    inputRef.current?.blur();
+  }, [incoming, fromWord, version.translation, searchImmediate]);
   useEffect(() => {
-    const initialQuery = initialQueryRef.current;
-    if (initialQuery.length >= 3) searchImmediate(initialQuery, "bible");
-  }, [searchImmediate]);
-  const handleSelect = useCallback(
-    (item: SearchResult) => {
-      navigate(
-        `${routes.bibleReader.path}?book=${encodeURIComponent(item.book_name)}&chapter=${item.chapter}&verse=${item.verse}&translation=${encodeURIComponent(translation)}`,
-      );
+    if (incoming) return;
+    const timer = setTimeout(() => inputRef.current?.focus(), 150);
+    return () => clearTimeout(timer);
+  }, [incoming]);
+  const sectionHeadings = useSearchSectionHeadings(search.results, version.translation || "", lang);
+  const passageUrl = useCallback((item: SearchResult, extra: Record<string, string> = {}) => {
+    const query = new URLSearchParams({ book: item.book_name, chapter: String(item.chapter), verse: String(item.verse), translation: version.translation || "", ...extra });
+    return `${routes.bibleReader.path}?${query}`;
+  }, [version.translation]);
+  const handleSelect = useCallback((item: SearchResult) => navigate(passageUrl(item)), [navigate, passageUrl]);
+  const handleSave = useCallback((item: SearchResult) => navigate(passageUrl(item, { action: "highlight" })), [navigate, passageUrl]);
+  const handleAddNote = useCallback((item: SearchResult) => navigate(passageUrl(item, { action: "note" })), [navigate, passageUrl]);
+  const handleStudy = useCallback((item: SearchResult) => {
+    if (!hasAccess("legacy_sower")) { navigate(routes.sower.path); return; }
+    const query = new URLSearchParams({ book: item.book_name, chapter: String(item.chapter), verseStart: String(item.verse), verseEnd: String(item.verse), requestedStage: "look", translation: version.translation || "" });
+    navigate(`${routes.labFlow.path}?${query}`);
+  }, [navigate, hasAccess, version.translation]);
+  const handleInputChange = useCallback((text: string) => { setSearchContext(null); setQuery(text); }, [setQuery]);
+  const handleHistoryTap = useCallback((text: string) => { setSearchContext(null); searchImmediate(text); }, [searchImmediate]);
+  return {
+    data: {
+      ...search, ...version, isRtl, inputRef, searchContext, sectionHeadings,
+      searchError: search.error || version.error, versionLoading: version.loading,
+      loading: search.loading, hasQuery: search.query.trim().length > 0,
+      canSearch: search.query.trim().length >= MIN_QUERY_LENGTH,
+      showSkeleton: search.loading && search.query.trim().length >= MIN_QUERY_LENGTH && search.results.length === 0,
+      books: BIBLE_BOOKS.filter(book => search.covenant === "all" || (search.covenant === "ot" ? book.bookNumber <= 39 : book.bookNumber > 39)).map(book => book.bookName),
     },
-    [navigate, translation],
-  );
-  const handleStudy = useCallback(
-    (item: SearchResult) => {
-      navigate(
-        `${routes.labFlow.path}?book=${encodeURIComponent(item.book_name)}&chapter=${item.chapter}&verseStart=${item.verse}`,
-      );
+    actions: {
+      handleInputChange, handleHistoryTap, handleSuggestion: handleHistoryTap,
+      handlePopularTap: (item: { query: string }) => handleHistoryTap(item.query),
+      handleSelect, handleSave, handleAddNote, handleStudy,
+      handleBack: () => window.history.state?.idx > 0 ? navigate(-1) : navigate(routes.bibleReader.path),
     },
-    [navigate],
-  );
-  const handleSave = useCallback(
-    (item: SearchResult) => {
-      navigate(
-        `${routes.journal.path}?book=${encodeURIComponent(item.book_name)}&chapter=${item.chapter}&verse=${item.verse}`,
-      );
-    },
-    [navigate],
-  );
-  const handleScopeChange = useCallback(
-    (s: SearchScope) => {
-      switchScope(s);
-      setCovenant("all");
-      inputRef.current?.focus();
-    },
-    [switchScope, setCovenant],
-  );
-  const handleBookFilter = useCallback(
-    (b: string | undefined) => setBookFilter(b || undefined),
-    [setBookFilter],
-  );
-  const handleCovenantChange = useCallback(
-    (c: "all" | "ot" | "nt") => {
-      setCovenant(c);
-      setBookFilter(undefined);
-    },
-    [setCovenant, setBookFilter],
-  );
-  const handleHistoryTap = useCallback(
-    (item: string) => searchImmediate(item, scope),
-    [searchImmediate, scope],
-  );
-  const handlePopularTap = useCallback(
-    (item: PopularSearchItem) => {
-      searchImmediate(item.query, item.scope);
-      if (item.scope !== scope) switchScope(item.scope);
-    },
-    [searchImmediate, scope, switchScope],
-  );
-  const handleSuggestion = useCallback(
-    (s: string) => {
-      setQuery(s, scope);
-      inputRef.current?.focus();
-    },
-    [setQuery, scope],
-  );
-  return { data: {
-    t,
-    isRtl,
-    inputRef,
-    query,
-    setQuery,
-    scope,
-    hasQuery,
-    showSkeleton,
-    total,
-    loading,
-    results,
-    searchError,
-    searchedOnce,
-    scopeLocked,
-    bookName,
-    covenant,
-    translation,
-    sectionHeadings,
-    setTranslation,
-    searchHistory,
-    popularSearches,
-    filteredBooks,
-    BOOK_NAMES,
-  }, actions: {
-    handleSelect,
-    handleStudy,
-    handleSave,
-    handleScopeChange,
-    handleBookFilter,
-    handleCovenantChange,
-    handleHistoryTap,
-    handlePopularTap,
-    handleSuggestion,
-    clearQuery,
-    clearHistory,
-    removeHistoryItem,
-    loadMore,
-    CROSS_TRANSLATION_OPTIONS,
-  } };
+  };
 }

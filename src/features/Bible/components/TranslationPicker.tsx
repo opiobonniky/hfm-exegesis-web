@@ -9,6 +9,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/components/languages/languageProvider";
+import { filterBibleTranslationsByLanguage } from "../services/freeBibleTranslations";
 
 interface TranslationPickerProps {
   translations: {
@@ -35,7 +36,7 @@ export default function TranslationPicker({
   onSearchChange,
 }: TranslationPickerProps) {
   const { t, isRtl, lang } = useLanguage();
-  const filtered = translations
+  const filtered = filterBibleTranslationsByLanguage(translations, lang)
     .filter(
       (tr) => !search || tr.name.toLowerCase().includes(search.toLowerCase()),
     )
@@ -44,10 +45,6 @@ export default function TranslationPicker({
       const aActive = a.id === selectedId ? 0 : 1;
       const bActive = b.id === selectedId ? 0 : 1;
       if (aActive !== bActive) return aActive - bActive;
-      // Current-language translations before others
-      const aLang = (a.language || '').toLowerCase() === String(lang).toLowerCase() ? 0 : 1;
-      const bLang = (b.language || '').toLowerCase() === String(lang).toLowerCase() ? 0 : 1;
-      if (aLang !== bLang) return aLang - bLang;
       return a.name.localeCompare(b.name);
     });
   return (

@@ -57,6 +57,20 @@ export function getBibleCatalogLanguage(langCode: string): string {
   return langCode === "fil" ? "tl" : langCode;
 }
 
+/** Restrict picker options to the UI language, using catalog metadata first. */
+export function filterBibleTranslationsByLanguage<T extends { id: string; language?: string }>(
+  translations: T[],
+  langCode: string,
+): T[] {
+  const language = getBibleCatalogLanguage(langCode.toLowerCase());
+  const legacyIds = FREE_BIBLE_IDS_BY_LANGUAGE[langCode.toLowerCase()] || [];
+  return translations.filter((translation) =>
+    translation.language
+      ? getBibleCatalogLanguage(translation.language.toLowerCase()) === language
+      : legacyIds.includes(translation.id),
+  );
+}
+
 /**
  * Get free Bible IDs for a specific language code.
  * Falls back to English if the language has no mapped translations.

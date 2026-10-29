@@ -1,93 +1,30 @@
-// Search filters — scope tabs, book picker, covenant filter
-import { BookOpen, FileText, BookmarkCheck, Search, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { SearchScope } from "@/services/searchApi";
-import { tt } from '@/components/languages/hardcodedTranslate';
+import { tt } from "@/components/languages/hardcodedTranslate";
+import type { Covenant } from "@/hooks/useSearch";
 
-const SCOPES: SearchScope[] = ["bible", "strongs", "journal", "topics", "lemma"];
-const SCOPE_LABELS: Record<SearchScope, string> = {
-  bible: "Bible",
-  strongs: "Strong's",
-  journal: "Journal",
-  topics: "Topics",
-  lemma: "Lemma",
-};
-function ScopeIcon({ scope }: { scope: SearchScope }) {
-  switch (scope) {
-    case "bible": return <BookOpen className="w-3.5 h-3.5" />;
-    case "strongs": return <Search className="w-3.5 h-3.5" />;
-    case "journal": return <FileText className="w-3.5 h-3.5" />;
-    case "topics": return <BookmarkCheck className="w-3.5 h-3.5" />;
-    case "lemma": return <Search className="w-3.5 h-3.5" />;
-  }
-}
 interface SearchFiltersProps {
-  scope: SearchScope;
-  onScopeChange: (scope: SearchScope) => void;
   bookFilter: string;
   onBookFilterChange: (book: string) => void;
   books: string[];
-  covenant: string;
-  onCovenantChange: (covenant: string) => void;
-  locked?: boolean;
+  covenant: Covenant;
+  onCovenantChange: (covenant: Covenant) => void;
 }
-export default function SearchFilters({
-  scope, onScopeChange, bookFilter, onBookFilterChange, books, covenant, onCovenantChange, locked,
-}: SearchFiltersProps) {
-  const filteredBooks = covenant === "ot" ? books.slice(0, 39)
-    : covenant === "nt" ? books.slice(39)
-    : books;
+export default function SearchFilters({ bookFilter, onBookFilterChange, books, covenant, onCovenantChange }: SearchFiltersProps) {
   return (
-    <div className="space-y-3">
-      {/* Scope tabs */}
-      <div className="flex gap-1 p-1 bg-muted rounded-xl">
-        {SCOPES.map((s) => (
-          <button
-            key={s}
-            onClick={() => onScopeChange(s)}
-            disabled={locked && (s === "topics" || s === "lemma")}
-            className={cn(
-              "flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all flex-1 justify-center",
-              scope === s ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground",
-              locked && (s === "topics" || s === "lemma") && "opacity-40 cursor-not-allowed",
-            )}
-          >
-            <ScopeIcon scope={s} />
-            <span className="hidden sm:inline">{SCOPE_LABELS[s]}</span>
+    <>
+      <div className="flex gap-1 rounded-lg bg-muted p-0.5" role="group" aria-label={tt("Testament")}>
+        {([['all', 'All'], ['ot', 'Old Testament'], ['nt', 'New Testament']] as const).map(([value, label]) => (
+          <button key={value} type="button" aria-pressed={covenant === value} onClick={() => onCovenantChange(value)}
+            className={cn("rounded-md px-2.5 py-1.5 text-xs font-semibold", covenant === value ? "bg-card text-foreground shadow-sm" : "text-muted-foreground")}>
+            {tt(label)}
           </button>
         ))}
       </div>
-      {/* Book filter (bible scope only) */}
-      {scope === "bible" && (
-        <div className="flex items-center gap-2">
-          {/* Covenant filter */}
-          <div className="flex gap-1 p-0.5 bg-muted rounded-lg">
-            {["all", "ot", "nt"].map((c) => (
-              <button
-                key={c}
-                onClick={() => onCovenantChange(c)}
-                className={cn(
-                  "px-2.5 py-1 rounded-md text-[10px] font-bold transition-all uppercase",
-                  covenant === c ? "bg-card text-foreground shadow-sm" : "text-muted-foreground",
-                )}
-              >
-                {c === "all" ? tt("All") : c === "ot" ? "OT" : "NT"}
-              </button>
-            ))}
-          </div>
-          {/* Book select */}
-          <select
-            value={bookFilter}
-            onChange={(e) => onBookFilterChange(e.target.value)}
-            className="flex-1 h-8 px-2 rounded-lg border border-border bg-background text-xs text-foreground focus:ring-2 focus:ring-primary"
-          >
-            <option value="">{tt("All Books")}</option>
-            {filteredBooks.map((b) => (
-              <option key={b} value={b}>{tt(b)}</option>
-            ))}
-          </select>
-        </div>
-      )}
-    </div>
+      <select aria-label={tt("Filter books")} value={bookFilter} onChange={event => onBookFilterChange(event.target.value)}
+        className="h-9 min-w-32 flex-1 rounded-lg border border-border bg-background px-2 text-xs text-foreground">
+        <option value="">{tt("All Books")}</option>
+        {books.map(book => <option key={book} value={book}>{tt(book)}</option>)}
+      </select>
+    </>
   );
 }

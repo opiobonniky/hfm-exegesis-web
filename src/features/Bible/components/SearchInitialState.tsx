@@ -1,87 +1,58 @@
-// Search initial state — history, popular searches, suggestions
-import { Clock, Trash2, TrendingUp, Search, X } from "lucide-react";
+import { BookOpen, Clock, Trash2, TrendingUp, X } from "lucide-react";
 import { SUGGESTIONS } from "@/hooks/useSearch";
-import type { SearchScope } from "@/services/searchApi";
-import { tt } from '@/components/languages/hardcodedTranslate';
+import { tt } from "@/components/languages/hardcodedTranslate";
 
 interface SearchInitialStateProps {
-  scope: SearchScope;
   searchHistory: string[];
-  popularSearches: { query: string; scope: SearchScope }[];
+  popularSearches: { query: string }[];
+  versionName: string;
+  showSuggestions: boolean;
   onHistoryTap: (item: string) => void;
   onRemoveHistory: (item: string) => void;
   onClearHistory: () => void;
-  onPopularTap: (item: { query: string; scope: SearchScope }) => void;
+  onClearPopular: () => void;
+  onPopularTap: (item: { query: string }) => void;
   onSuggestion: (suggestion: string) => void;
 }
-
-export default function SearchInitialState({
-  scope, searchHistory, popularSearches,
-  onHistoryTap, onRemoveHistory, onClearHistory, onPopularTap, onSuggestion,
-}: SearchInitialStateProps) {
+export default function SearchInitialState(props: SearchInitialStateProps) {
   return (
     <div className="pb-8">
-      {/* History */}
-      {searchHistory.length > 0 && (
-        <div className="mb-6">
-          <div className="flex items-center justify-between px-4 sm:px-6 py-2">
-            <div className="flex items-center gap-2">
-              <Clock className="w-3.5 h-3.5 text-muted-foreground" />
-              <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">{tt("Recent Searches")}</p>
-            </div>
-            <button onClick={onClearHistory} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors">
-              <Trash2 className="w-3 h-3" />{tt("Clear")}</button>
+      {props.searchHistory.length > 0 && (
+        <section className="mb-6 px-4 sm:px-6" aria-label={tt("Recent Searches")}>
+          <div className="flex items-center justify-between py-2">
+            <h2 className="text-xs font-bold text-muted-foreground">{tt("Recent Searches")}</h2>
+            <button type="button" onClick={props.onClearHistory} className="flex items-center gap-1 text-xs"><Trash2 className="h-3 w-3" />{tt("Clear history")}</button>
           </div>
-          {searchHistory.map((item) => (
-            <div key={item} className="flex items-center gap-3 px-4 sm:px-6 py-2.5 hover:bg-muted/30 cursor-pointer transition-colors rounded-lg mx-2"
-              onClick={() => onHistoryTap(item)}>
-              <Clock className="w-3.5 h-3.5 text-muted-foreground/50 shrink-0" />
-              <span className="text-sm text-foreground/80 flex-1 truncate">{item}</span>
-              <button onClick={(e) => { e.stopPropagation(); onRemoveHistory(item); }}
-                className="p-1 text-muted-foreground hover:text-foreground opacity-0 hover:opacity-100 transition-opacity">
-                <X className="w-3 h-3" />
-              </button>
+          {props.searchHistory.map(item => (
+            <div key={item} className="flex items-center gap-3 py-2">
+              <Clock className="h-4 w-4 shrink-0 text-muted-foreground" />
+              <button type="button" onClick={() => props.onHistoryTap(item)} className="flex-1 truncate text-start text-sm">{item}</button>
+              <button type="button" onClick={() => props.onRemoveHistory(item)} aria-label={`${tt("Remove search")}: ${item}`} className="rounded p-2 hover:bg-muted"><X className="h-3 w-3" /></button>
             </div>
           ))}
-          <div className="h-px bg-border/30 mx-4 sm:mx-6 my-3" />
-        </div>
+        </section>
       )}
-      {/* Popular */}
-      {popularSearches.filter((p) => p.scope === scope).length > 0 && (
-        <div className="mb-6 px-4 sm:px-6">
-          <div className="flex items-center gap-2 py-2">
-            <TrendingUp className="w-3.5 h-3.5 text-muted-foreground" />
-            <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">{tt("Popular")}</p>
+      {props.popularSearches.length > 0 && (
+        <section className="mb-6 px-4 sm:px-6" aria-label={tt("Popular")}>
+          <div className="flex items-center justify-between py-2">
+            <h2 className="flex items-center gap-2 text-xs font-bold text-muted-foreground"><TrendingUp className="h-3.5 w-3.5" />{tt("Popular")}</h2>
+            <button type="button" onClick={props.onClearPopular} className="flex items-center gap-1 text-xs"><Trash2 className="h-3 w-3" />{tt("Clear popular searches")}</button>
           </div>
           <div className="flex flex-wrap gap-2">
-            {popularSearches.filter((p) => p.scope === scope).slice(0, 8).map((p) => (
-              <button key={p.query} onClick={() => onPopularTap(p)}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-muted/50 border border-primary/20 hover:bg-primary/10 text-foreground transition-colors">
-                <TrendingUp className="w-3 h-3 text-primary" />{p.query}
-              </button>
-            ))}
+            {props.popularSearches.slice(0, 8).map(item => <button type="button" key={item.query} onClick={() => props.onPopularTap(item)}
+              className="rounded-full border border-primary/20 bg-muted/50 px-3 py-1.5 text-xs hover:bg-primary/10">{item.query}</button>)}
           </div>
-        </div>
+        </section>
       )}
-      {/* Suggestions */}
-      <div className="flex flex-col items-center py-10 px-6 text-center">
-        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center mb-5 ring-1 ring-primary/5">
-          <Search className="w-7 h-7 text-primary/60" />
-        </div>
-        <p className="text-base font-bold text-foreground mb-1">
-          {scope === "bible" ? tt("Search the Bible") : scope === "journal" ? tt("Search Your Journal") : scope === "topics" ? tt("Explore Bible topics") : tt("Search Greek/Hebrew lemmas")}
-        </p>
-        <p className="text-sm text-muted-foreground mb-5 max-w-xs">
-          {scope === "bible" ? tt("Find verses across all books and chapters") : scope === "journal" ? tt("Find reflections, prayers, and notes") : tt("Explore topics and themes")}
-        </p>
-        <div className="flex flex-wrap gap-2 justify-center max-w-md">
-          {SUGGESTIONS[scope].map((s) => (
-            <button key={s} onClick={() => onSuggestion(s)}
-              className="px-3 py-1.5 rounded-full text-xs font-semibold bg-muted/50 border border-border hover:bg-muted transition-colors">
-              {s}
-            </button>
-          ))}
-        </div>
+      <div className="flex flex-col items-center px-6 py-10 text-center">
+        <BookOpen className="mb-5 h-12 w-12 text-primary/60" />
+        <h2 className="mb-1 text-base font-bold">{tt("Search the Bible")}</h2>
+        <p className="mb-3 text-sm text-muted-foreground">{tt("Find verses across all books and chapters")}</p>
+        {props.versionName && <p className="notranslate mb-5 text-xs text-muted-foreground" translate="no">{tt("Searching in:")} {props.versionName}</p>}
+        {props.showSuggestions && <div className="flex max-w-md flex-wrap justify-center gap-2">
+          {SUGGESTIONS.map(suggestion => <button type="button" key={suggestion} onClick={() => props.onSuggestion(suggestion)}
+            className="rounded-full border border-border bg-muted/50 px-3 py-1.5 text-xs hover:bg-muted">{suggestion}</button>)}
+        </div>}
       </div>
     </div>
   );

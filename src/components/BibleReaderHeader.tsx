@@ -20,6 +20,7 @@ import { useLanguage } from "@/components/languages/languageProvider";
 import { type TranslationOption } from "@/lib/bibleHelpers";
 import MobileNavDrawer from "@/components/MobileNavDrawer";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { filterBibleTranslationsByLanguage } from '@/features/Bible/services/freeBibleTranslations';
 
 // ── Props ──────────────────────────────────────────────────────────────────────
 
@@ -88,7 +89,9 @@ export default function BibleReaderHeader({
   showBackToQuiz,
   onBackToQuiz,
 }: BibleReaderHeaderProps) {
-  const { t, isRtl } = useLanguage();
+  const { t, isRtl, lang } = useLanguage();
+  const languageTranslations = filterBibleTranslationsByLanguage(effectiveTranslations, lang);
+  const visibleTranslations = filterBibleTranslationsByLanguage(filteredTranslations, lang);
 
   const bookNames = backendBooks.map((b) => b.bookName);
   const isAtVeryStart =
@@ -205,12 +208,12 @@ export default function BibleReaderHeader({
               </div>
               <ScrollArea className="max-h-[500px]">
                 <div className="py-1">
-                  {filteredTranslations.length === 0 ? (
+                  {visibleTranslations.length === 0 ? (
                     <div className="p-2 text-xs text-muted-foreground text-center">
                       {t.bibleReader.noTranslations}
                     </div>
                   ) : (
-                    filteredTranslations.map((v) => (
+                    visibleTranslations.map((v) => (
                       <button
                         key={v.id}
                         onClick={() => {
@@ -355,7 +358,7 @@ export default function BibleReaderHeader({
             onVerseChange={onVerseChange}
             onVersionChange={onVersionChange}
             books={backendBooks.map((b) => b.bookName)}
-            availableTranslations={effectiveTranslations}
+            availableTranslations={languageTranslations}
             verseCount={currentChapterVerseCount}
             onOpenStudyTools={onOpenStudyTools}
           />

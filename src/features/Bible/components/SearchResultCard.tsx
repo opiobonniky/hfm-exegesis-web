@@ -1,7 +1,6 @@
 // Search result card — displays a bible verse search result with actions
-import { BookOpen, BookmarkCheck, BookMarked } from "lucide-react";
+import { BookOpen, BookmarkCheck, BookMarked, StickyNote } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface SearchResultCardProps {
@@ -14,6 +13,7 @@ interface SearchResultCardProps {
   onOpen: () => void;
   onStudy: () => void;
   onSave: () => void;
+  onAddNote: () => void;
 }
 
 /** Parse <mark> tags in headline into text + highlight segments */
@@ -32,31 +32,32 @@ function parseHighlight(html: string): { text: string; highlight: boolean }[] {
 }
 
 export default function SearchResultCard({
-  ref_, headline, verseText, translationAbbr, sectionHeading, onOpen, onStudy, onSave,
+  ref_, headline, verseText, translationAbbr, sectionHeading, onOpen, onStudy, onSave, onAddNote,
 }: SearchResultCardProps) {
   const parts = headline ? parseHighlight(headline) : null;
 
   return (
     <div className="group rounded-xl border border-border/40 bg-card p-4 hover:border-primary/20 hover:shadow-sm transition-all duration-200 cursor-pointer active:scale-[0.99]">
+      <button type="button" onClick={onOpen} className="block w-full rounded text-start focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label={`${tt("Open")} ${ref_}`}>
       {/* Reference */}
-      <div className="flex items-center gap-2 mb-2">
-        <div className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
+       <span className="flex items-center gap-2 mb-2">
+        <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
         <span className="text-xs font-bold text-accent tracking-wide">{ref_}</span>
         {translationAbbr && (
-          <Badge variant="outline" className="text-[10px] font-bold bg-primary/10 border-primary/20 text-primary px-1.5 py-0">
+          <span className="notranslate rounded border text-[10px] font-bold bg-primary/10 border-primary/20 text-primary px-1.5 py-0" translate="no">
             {translationAbbr}
-          </Badge>
+          </span>
         )}
-      </div>
+      </span>
       {/* Section context from the reader's heading dataset */}
       {sectionHeading && (
-        <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/70">
+        <span className="block mb-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/70">
           {sectionHeading}
-        </p>
+        </span>
       )}
       {/* Text */}
       {parts ? (
-        <p className="text-sm leading-relaxed text-foreground/80 font-serif">
+        <span className="notranslate block text-sm leading-relaxed text-foreground/80 font-serif" translate="no" dir="auto">
           {parts.map((p, i) =>
             p.highlight ? (
               <span key={i} className="text-accent font-semibold bg-accent/10 px-0.5 rounded">{p.text}</span>
@@ -64,16 +65,19 @@ export default function SearchResultCard({
               <span key={i}>{p.text}</span>
             ),
           )}
-        </p>
+        </span>
       ) : (
-        <p className="text-sm leading-relaxed text-foreground/80 font-serif line-clamp-3">{verseText}</p>
+        <span className="notranslate block text-sm leading-relaxed text-foreground/80 font-serif line-clamp-3" translate="no" dir="auto">{verseText}</span>
       )}
+      </button>
       {/* Actions */}
       <div className="flex items-center gap-1 mt-3 pt-3 border-t border-border/20 opacity-75 group-hover:opacity-100 transition-opacity">
         <Button variant="ghost" size="sm" className="h-7 text-[11px] px-2.5 gap-1 hover:bg-accent/10 hover:text-accent" onClick={(e) => { e.stopPropagation(); onOpen(); }}>
           <BookOpen className="w-3 h-3" />{tt("Open")}</Button>
         <Button variant="ghost" size="sm" className="h-7 text-[11px] px-2.5 gap-1 hover:bg-primary/10 hover:text-primary" onClick={(e) => { e.stopPropagation(); onStudy(); }}>
           <BookMarked className="w-3 h-3" />{tt("Study")}</Button>
+        <Button variant="ghost" size="sm" className="h-7 text-[11px] px-2.5 gap-1" onClick={onAddNote}>
+          <StickyNote className="w-3 h-3" />{tt("Add Note")}</Button>
         <Button variant="ghost" size="sm" className="h-7 text-[11px] px-2.5 gap-1 hover:bg-emerald-500/10 hover:text-emerald-600 dark:hover:text-emerald-400" onClick={(e) => { e.stopPropagation(); onSave(); }}>
           <BookmarkCheck className="w-3 h-3" />{tt("Save")}</Button>
       </div>
