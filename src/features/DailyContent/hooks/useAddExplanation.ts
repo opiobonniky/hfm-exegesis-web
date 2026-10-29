@@ -14,6 +14,7 @@ import type {
   WordStudyItem,
 } from "../types";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { routePaths, routes } from "@/components/Routes/routes";
 
 const parseTakeaways = (value: unknown): string[] => {
   if (Array.isArray(value)) {
@@ -689,7 +690,12 @@ export function useAddExplanation() {
           title: existingFound ? "Updated" : "Created",
           description: `${form.bookName} ${form.chapter}:${form.verseNumber} saved`,
         });
-        navigate("/admin/verse-explanations");
+       
+
+        setTimeout(() => {
+          navigate(routePaths.adminDailyContent);
+        }, 500);
+
       } else {
         toast({
           title: tt("Error"),
