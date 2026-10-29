@@ -34,6 +34,7 @@ export default function SowerPage() {
         setBillingInterval={setBillingInterval}
       />
       <SowerTiersGrid
+        plans={h.plans}
         billingInterval={billingInterval}
         isPaying={isPayingUser}
         isLegacySower={isLegacySower}
@@ -43,7 +44,7 @@ export default function SowerPage() {
         onSubscribe={handleSubscribe}
         onManage={handleManageSubscription}
       />
-      <SowerFeatureComparison />
+      <SowerFeatureComparison plans={h.plans} />
       <SowerBanner />
       <SowerFAQ />
       <SowerFooter />

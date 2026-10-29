@@ -25,6 +25,7 @@ const ReadingPlans = lazy(() => import("@/features/ReadingPlan/pages/ReadingPlan
 const EditReadingPlan = lazy(() => import("@/features/ReadingPlan/pages/EditReadingPlan"));
 
 const BibleReader = lazy(() => import("@/features/Bible/pages/BibleReader"));
+const Downloads = lazy(() => import('@/features/Bible/pages/Downloads'));
 const BibleBookSelection = lazy(() => import("@/features/Bible/pages/BibleBookSelection"));
 const BibleChapterSelection = lazy(() => import("@/features/Bible/pages/BibleChapterSelection"));
 const TestSessionSetup = lazy(() => import("@/features/Bible/pages/TestSessionSetup"));
@@ -105,6 +106,8 @@ export interface RouteConfig {
   path: string;
   component: ComponentType;
   isProtected: boolean;
+  adminOnly?: boolean;
+  allowGuest?: boolean;
   requiresLayout?: boolean; // Whether to use AppLayout
   requiresPublicLayout?: boolean; // Whether to use PublicLayout
   title?: string;
@@ -184,6 +187,7 @@ const routeConfigs = {
     title: tt("Home"),
   },
   dashboard: {
+    adminOnly: true,
     path: "/dashboard",
     component: Dashboard,
     isProtected: true,
@@ -191,6 +195,7 @@ const routeConfigs = {
     title: tt("Dashboard"),
   },
   dailyVerse: {
+    adminOnly: true,
     path: "/daily-verse",
     component: DailyVerse,
     isProtected: true,
@@ -198,6 +203,7 @@ const routeConfigs = {
     title: tt("Daily Verse"),
   },
   dailyDevotions: {
+    adminOnly: true,
     path: "/daily-devotions",
     component: DailyDevotions,
     isProtected: true,
@@ -205,6 +211,7 @@ const routeConfigs = {
     title: tt("Daily Devotions"),
   },
   addDailyDevotion: {
+    adminOnly: true,
     path: "/add-daily-devotion",
     component: AddDailyDevotion,
     isProtected: true,
@@ -212,6 +219,7 @@ const routeConfigs = {
     title: tt("Add Daily Devotion"),
   },
   addDailyExegesis: {
+    adminOnly: true,
     path: "/add-daily-exegesis",
     component: AddDailyExegesis,
     isProtected: true,
@@ -226,6 +234,7 @@ const routeConfigs = {
     title: tt("Verse Explanations"),
   },
   addDailyVerse: {
+    adminOnly: true,
     path: "/add-daily-verse",
     component: AddDailyVerse,
     isProtected: true,
@@ -233,6 +242,7 @@ const routeConfigs = {
     title: tt("Add Daily Verse"),
   },
   addExplanation: {
+    adminOnly: true,
     path: "/add-explanation",
     component: AddExplanation,
     isProtected: true,
@@ -247,6 +257,7 @@ const routeConfigs = {
     title: tt("Reading Plans"),
   },
   addReadingPlan: {
+    adminOnly: true,
     path: "/add-reading-plan",
     component: AddReadingPlan,
     isProtected: true,
@@ -254,6 +265,7 @@ const routeConfigs = {
     title: tt("Add Reading Plan"),
   },
   editReadingPlan: {
+    adminOnly: true,
     path: "/edit-reading-plan/:planId",
     component: EditReadingPlan,
     isProtected: true,
@@ -277,6 +289,7 @@ const routeConfigs = {
 
 
   readingPlanDetail: {
+    adminOnly: true,
     path: "/reading-plan-detail/:planId",
     component: PlanDetail,
     isProtected: true,
@@ -284,13 +297,19 @@ const routeConfigs = {
     title: tt("Reading Plan Detail"),
   },
   bibleReader: {
+    allowGuest: true,
     path: "/bible-reader",
     component: BibleReader,
     isProtected: true,
     requiresLayout: true,
     title: tt("Bible Reader"),
   },
+  downloads: {
+    path: '/downloads', component: Downloads, isProtected: true,
+    requiresLayout: true, allowGuest: true, title: tt('Offline downloads'),
+  },
   bibleBookSelection: {
+    allowGuest: true,
     path: "/bible-books",
     component: BibleBookSelection,
     isProtected: true,
@@ -298,6 +317,7 @@ const routeConfigs = {
     title: tt("Select Book"),
   },
   bibleChapterSelection: {
+    allowGuest: true,
     path: "/bible-chapters",
     component: BibleChapterSelection,
     isProtected: true,
@@ -312,6 +332,7 @@ const routeConfigs = {
     title: tt("Test Session"),
   },
   bookOverview: {
+    allowGuest: true,
     path: "/book-overview",
     component: BookOverview,
     isProtected: true,
@@ -424,6 +445,7 @@ const routeConfigs = {
     title: tt("New Journal Entry"),
   },
   search: {
+    allowGuest: true,
     path: "/search",
     component: Search,
     isProtected: true,
@@ -772,6 +794,7 @@ const routeConfigs = {
   },
 
   bibleBookSelectionLegacyLibrary: {
+    allowGuest: true,
     path: "/bible-library",
     component: BibleBookSelection,
     isProtected: true,
@@ -779,6 +802,7 @@ const routeConfigs = {
     title: tt("Select Book"),
   },
   bibleBookSelectionLegacy: {
+    allowGuest: true,
     path: "/bible",
     component: BibleBookSelection,
     isProtected: true,
@@ -869,7 +893,10 @@ const routeConfigs = {
  * fails unless every single entry happens to declare it. The literal keys are
  * preserved so `keyof typeof routes` still narrows to the route names.
  */
-export const routes: { [K in keyof typeof routeConfigs]: RouteConfig } = routeConfigs;
+export const routes = Object.fromEntries(Object.entries(routeConfigs).map(([key, config]) => [key, {
+  ...config,
+  adminOnly: config.path.startsWith('/admin') || ('adminOnly' in config && config.adminOnly === true),
+}])) as unknown as { [K in keyof typeof routeConfigs]: RouteConfig };
 
 // Helper function to get route by key
 export const getRoute = (key: keyof typeof routes) => routes[key];

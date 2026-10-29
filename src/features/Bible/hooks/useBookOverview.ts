@@ -1,5 +1,7 @@
 // useBookOverview — fetches prologue data and reading position for a book
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useSyncExternalStore } from "react";
+import { useLanguage } from '@/components/languages/languageProvider';
+import { getPublicPackState, subscribePublicPacks, hydratePublicPack, getPackedOverview } from '@/services/publicReadingPacks';
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { getBookPrologue } from "@/services/bookProloguesApi";
 import type { BookPrologue } from "@/services/bookProloguesApi";
@@ -14,10 +16,11 @@ const ORDINALS = [
   "Twenty-Seventh","Twenty-Eighth","Twenty-Ninth","Thirtieth","Thirty-First",
   "Thirty-Second","Thirty-Third","Thirty-Fourth","Thirty-Fifth","Thirty-Sixth",
   "Thirty-Seventh","Thirty-Eighth","Thirty-Ninth","Fortieth","Forty-First",
-  "Forty-Second","Forty-Third","Forty-Fourth","Forty-Fifth","Forty-Seventh",
+  "Forty-Second","Forty-Third","Forty-Fourth","Forty-Fifth","Forty-Sixth","Forty-Seventh",
   "Forty-Eighth","Forty-Ninth","Fiftieth","Fifty-First","Fifty-Second",
   "Fifty-Third","Fifty-Fourth","Fifty-Fifth","Fifty-Sixth","Fifty-Seventh",
   "Fifty-Eighth","Fifty-Ninth","Sixtieth","Sixty-First","Sixty-Second",
+  "Sixty-Third","Sixty-Fourth","Sixty-Fifth","Sixty-Sixth",
 ];
 
 function getOTBooks(): string[] {
@@ -66,6 +69,8 @@ export const getBookTestament = (bookName: string): "Old" | "New" => {
 };
 
 export function useBookOverview() {
+  const { lang } = useLanguage();
+  const packState = useSyncExternalStore(subscribePublicPacks, () => getPublicPackState('overview', lang));
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const bookName = searchParams.get("book") || "Genesis";
@@ -80,6 +85,12 @@ export function useBookOverview() {
     setLoading(true);
     (async () => {
       try {
+        await hydratePublicPack('overview', lang);
+        const packed = getPackedOverview(bookName, lang);
+        if (packed !== undefined) {
+          if (!ignore) setPrologue(packed);
+          return;
+        }
         const p = await getBookPrologue(bookName);
         if (!ignore) setPrologue(p);
       } catch {
@@ -89,11 +100,13 @@ export function useBookOverview() {
       }
     })();
     return () => { ignore = true; };
-  }, [bookName]);
+  }, [bookName, lang, packState.pack]);
 
   // Load saved reader position
   useEffect(() => {
     let ignore = false;
+    setResumeChapter(null);
+    setResumeVerse(null);
     (async () => {
       try {
         const res = await bibleApi.getLastReadPosition(bookName);
@@ -111,7 +124,7 @@ export function useBookOverview() {
 
   const isOt = getBookTestament(bookName) === "Old";
   const testamentLabel = isOt ? "Old Testament" : "New Testament";
-  const designation = getBookDesignation(bookName);
+  const designation = getPackedOverview(bookName, lang)?.designation || getBookDesignation(bookName);
 
   // Check for return URL (from auto-redirect)
   const returnUrl = searchParams.get("return");

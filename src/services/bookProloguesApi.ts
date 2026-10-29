@@ -16,11 +16,20 @@ export interface BookPrologue {
   chapters?: number | null;
   structure?: Array<{ range: string; title: string }> | null;
   applications?: string[] | null;
-  keyScripture?: Array<{ reference: string; text: string }> | null;
+  keyScripture?: Array<{ reference: string; text: string; bookName?: string; chapter?: number; verse?: number; translation?: string }> | null;
   mainThemes?: string[] | null;
   keyPeople?: string[] | null;
   keyVerses?: string[] | null;
   christConnection?: string | null;
+}
+
+/** Display legacy reference/text and structured source entries without changing quoted Scripture. */
+export function normalizeBookPrologue(prologue: BookPrologue): BookPrologue {
+  return { ...prologue, keyScripture: prologue.keyScripture?.map(item => {
+    let reference = item.reference || (item.bookName ? `${item.bookName}${item.chapter ? ` ${item.chapter}${item.verse ? `:${item.verse}` : ''}` : ''}` : '');
+    if (item.translation && !reference.includes(item.translation)) reference += ` (${item.translation})`;
+    return { ...item, reference, text: item.text || '' };
+  }) };
 }
 
 /** Fetch a single book prologue */
@@ -32,11 +41,10 @@ export const getBookPrologue = async (
       "book-prologues",
       "get",
       { bookName },
-      { includeLanguage: false },
     );
     if (res.returnCode !== 200)
       throw new Error(res.returnMessage || "Failed to fetch book prologue");
-    return res.returnData ?? null;
+    return res.returnData ? normalizeBookPrologue(res.returnData) : null;
   } catch (error: any) {
     if (error?.returnCode === 404) return null;
     throw error;

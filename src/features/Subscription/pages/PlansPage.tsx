@@ -42,6 +42,7 @@ export default function PlansPage() {
           "Every plan includes the free Bible reader. Paid plans add study tools, journaling, and insights that grow your understanding."
         )}
         tierOverrides={plans.data.tierOverrides}
+        plans={plans.data.plans}
       />
       <PlansFeatureMatrix
         eyebrow={tt("FEATURE BY FEATURE")}

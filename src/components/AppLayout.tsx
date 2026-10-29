@@ -1,5 +1,5 @@
 import { useEffect, useMemo, type ReactNode } from 'react';
-import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Link, Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/components/languages/languageProvider';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
@@ -39,7 +39,7 @@ function matchRouteTitle(pathname: string): string | null {
 }
 
 export function AppLayout({ children }: { children?: ReactNode }) {
-  const { isAuthenticated, userInfo } = useAuth();
+  const { isAuthenticated, isGuest, userInfo } = useAuth();
   const { isRtl } = useLanguage();
   const { themeMode, setThemeMode } = useTheme();
   const location = useLocation();
@@ -70,6 +70,18 @@ export function AppLayout({ children }: { children?: ReactNode }) {
     document.title = pageTitle ? `${pageTitle} | Exegesis` : 'Exegesis';
   }, [pageTitle]);
 
+  if (!isAuthenticated && isGuest) {
+    return <div className="h-dvh flex flex-col bg-background" dir={isRtl ? 'rtl' : 'ltr'}>
+      <nav aria-label={tt('Guest navigation')} className="flex flex-wrap gap-4 p-4 border-b">
+        <Link to={routes.bibleReader.path}>{tt('Bible')}</Link>
+        <Link to={routes.bibleBookSelection.path}>{tt('Books')}</Link>
+        <Link to={routes.search.path}>{tt('Search')}</Link>
+        <Link to={routes.downloads.path}>{tt('Downloads')}</Link>
+        <Link to={routes.login.path} className="ms-auto">{tt('Sign In')}</Link>
+      </nav>
+      <main data-scroll-root className="flex-1 min-h-0 overflow-auto">{children ?? <Outlet />}</main>
+    </div>;
+  }
   if (!isAuthenticated) {
     return <Navigate to={routes.landing.path} replace />;
   }
@@ -89,6 +101,7 @@ export function AppLayout({ children }: { children?: ReactNode }) {
               {pageTitle}
             </h1>
             <div className="ms-auto flex items-center gap-1">
+              <Link to={routes.downloads.path} className="px-2 text-sm underline">{tt('Downloads')}</Link>
               <button
                 onClick={() => navigate(userInfo?.userRole === 1 ? routes.adminSupport.path : routes.support.path)}
                 className="relative flex items-center justify-center w-8 h-8 rounded-lg hover:bg-muted transition-all active:scale-95"

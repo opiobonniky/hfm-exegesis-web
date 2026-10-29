@@ -1,8 +1,7 @@
-/**
- * English source marker for literal UI strings.
- * Google Translate Element translates the rendered DOM, so this intentionally
- * returns source text without consulting generated locale dictionaries.
- */
+import { translateUiCopy } from './uiCopy';
+
+/** Authored UI copy only; missing entries remain honest source-language text. */
 export function tt(text: string): string {
-  return text;
+  try { return translateUiCopy(text, localStorage.getItem('exegesis-language') || 'en'); }
+  catch { return text; }
 }

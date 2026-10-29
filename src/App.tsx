@@ -15,6 +15,7 @@ import { PageSkeleton } from "@/components/ui/skeletons";
 import SplashScreen from "@/components/SplashScreen";
 import { Loader2 } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
+import { PublicReadingPackCoordinator } from '@/components/PublicReadingPackCoordinator';
 import { preloadVersion } from "@/assets/bibleVersion/json/bibleVersions";
 import {
   getLayoutRoutes,
@@ -51,10 +52,11 @@ const dashboardAliasPaths = [
 ];
 
 const RoleAwareRoot = () => {
-  const { isAuthenticated, userInfo } = useAuth();
+  const { isAuthenticated, isGuest, userInfo } = useAuth();
   const Landing = routes.landing.component;
 
   if (!isAuthenticated) {
+    if (isGuest) return <Navigate to={routes.bibleReader.path} replace />;
     return <Landing />;
   }
 
@@ -90,16 +92,19 @@ function ThemeInitializer() {
  * the brief shimmer/loading delay.
  */
 function BibleDataPreloader() {
+  const { isAuthenticated, isGuest, loading } = useAuth();
   useEffect(() => {
+    if (loading || (!isAuthenticated && !isGuest)) return;
     preloadVersion('BSB').catch(() => {
       // Preload failed — pages will fall back to ensureDataLoaded()
       // on their first getVerseTextAsync() call, which retries.
     });
-  }, []);
+  }, [isAuthenticated, isGuest, loading]);
   return null;
 }
 
 const AppRoutes = () => {
+  const { userInfo, isGuest } = useAuth();
   const publicRoutes = getPublicRoutes().filter(
     (route) => route.path !== routes.landing.path,
   );
@@ -118,7 +123,7 @@ const AppRoutes = () => {
     // <SplashScreen>
       <AuthLoader>
         <Suspense fallback={<RouteLoader />}>
-          <Routes>
+          <Routes key={userInfo?.token || (isGuest ? 'guest' : 'anonymous')}>
             <Route path={routes.landing.path} element={<RoleAwareRoot />} />
             {publicRoutes.map((route) => (
               <Route
@@ -199,10 +204,11 @@ const App = () => {
   return (
     <BrowserRouter>
       <ThemeInitializer />
-      <BibleDataPreloader />
       <AuthProvider>
+        <BibleDataPreloader />
         <SupportRealtimeProvider>
           <LanguageProvider>
+            <PublicReadingPackCoordinator />
             <TooltipProvider>
               <Toaster />
               <Sonner />

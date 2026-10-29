@@ -1,9 +1,10 @@
 import { Check, X } from "lucide-react";
 import { TIERS } from "./SowerTierCards";
-import { PUBLIC_PLAN_MATRIX } from "../constants";
+import { planMatrixFromPlans } from '../utils/planCards';
+import type { Plan } from '../hooks/useSowerPage';
 import { tt } from '@/components/languages/hardcodedTranslate';
 
-export function SowerFeatureComparison() {
+export function SowerFeatureComparison({ plans }: { plans: Plan[] }) {
   return (
     <section className="bg-card border-t border-border/50 py-14">
       <div className="max-w-4xl mx-auto px-5 sm:px-6">
@@ -19,8 +20,7 @@ export function SowerFeatureComparison() {
                 {TIERS.map((t) => <th key={t.id} className="py-3 px-2 sm:px-4 text-center text-[10px] sm:text-xs font-bold uppercase tracking-wider">{t.name}</th>)}
               </tr>
             </thead>
-            <tbody>
-              {PUBLIC_PLAN_MATRIX.map((section) => (
+              {planMatrixFromPlans(plans).map((section) => (
                 <tbody key={section.category}>
                   <tr className="border-t border-border/30">
                     <td colSpan={4} className="py-2.5 text-[10px] font-black text-primary uppercase tracking-wider">{section.category}</td>
@@ -37,7 +37,6 @@ export function SowerFeatureComparison() {
                   ))}
                 </tbody>
               ))}
-            </tbody>
           </table>
         </div>
       </div>

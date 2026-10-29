@@ -1,13 +1,12 @@
 // ── Exegesis Bible — Service Worker ──────────────────────────────────────────
-// Cache-first for static assets, network-first for API calls, offline fallback.
+// Public static assets and SPA-shell fallback only. API/private data is never cached.
 // In development (?dev=true), bypasses all caching to avoid stale HMR bundles.
 
 importScripts("https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js");
 importScripts("https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging-compat.js");
 
-const CACHE_NAME = "exegesis-v6";
-const STATIC_CACHE = "exegesis-static-v6";
-const API_CACHE = "exegesis-api-v6";
+const CACHE_NAME = "exegesis-v7";
+const STATIC_CACHE = "exegesis-static-v7";
 
 // Detect development mode: localhost or 127.0.0.1 → no caching.
 const IS_DEV = self.location.hostname === "localhost" || self.location.hostname === "127.0.0.1";
@@ -97,18 +96,8 @@ const PRECACHE_URLS = [
   "/placeholder.svg",
 ];
 
-// API patterns to cache (network-first, cache fallback)
-const API_PATTERNS = [
-  /\/translations\//,
-  /\/bible\//,
-  /\/journal\//,
-  /\/auth\//,
-  /\/reading-plans\//,
-  /\/subscriptions\//,
-  /\/daily\//,
-  /\/strongs\//,
-  /\/exegesis\//,
-];
+// Never store API responses here. Public, checksum-validated reading packs are
+// installed by the application, not by a generic URL-only response cache.
 
 // ── Install ──────────────────────────────────────────────────────────────────
 self.addEventListener("install", (event) => {
@@ -147,9 +136,10 @@ self.addEventListener("activate", (event) => {
         keys
           .filter(
             (key) =>
+              key.startsWith('exegesis-') &&
+              key !== 'exegesis-public-packs-v1' &&
               key !== CACHE_NAME &&
-              key !== STATIC_CACHE &&
-              key !== API_CACHE,
+              key !== STATIC_CACHE,
           )
           .map((key) => caches.delete(key)),
       );
@@ -176,6 +166,12 @@ self.addEventListener("fetch", (event) => {
     return; // Don't intercept — let the browser handle all requests normally
   }
 
+  // Authenticated requests and signed/private media are network-only, including
+  // same-origin images. Do not fall back to a previous account's cached result.
+  if (url.origin !== self.location.origin || request.headers.has('Authorization') ||
+      /^\/(auth|admin|journal|subscriptions|support|push|media|uploads)(\/|$)/.test(url.pathname) ||
+      url.searchParams.has('sig')) return;
+
   // ── Executable assets (network-first) ──
   // Never let an old application chunk create a second React/context graph.
   if (
@@ -187,7 +183,7 @@ self.addEventListener("fetch", (event) => {
     event.respondWith(
       fetch(request)
         .then((response) => {
-          if (response.ok) {
+          if (response.ok && !/private|no-store/i.test(response.headers.get('Cache-Control') || '')) {
             const cloned = response.clone();
             caches.open(STATIC_CACHE).then((cache) => cache.put(request, cloned));
           }
@@ -205,6 +201,7 @@ self.addEventListener("fetch", (event) => {
   // ── Static media (cache-first) ──
   if (
     url.origin === self.location.origin &&
+    (url.pathname.startsWith('/assets/') || PRECACHE_URLS.includes(url.pathname)) &&
     (request.destination === "font" ||
       request.destination === "image" ||
       url.pathname.match(/\.(woff2?|ttf|png|jpg|jpeg|svg|ico|json)$/))
@@ -213,42 +210,13 @@ self.addEventListener("fetch", (event) => {
       caches.match(request).then((cached) => {
         return cached || fetch(request).then((response) => {
           // Cache the fetched response for next time
-          const cloned = response.clone();
-          caches.open(STATIC_CACHE).then((cache) => {
-            cache.put(request, cloned);
-          });
+          if (response.ok && !/private|no-store/i.test(response.headers.get('Cache-Control') || '')) {
+            const cloned = response.clone();
+            caches.open(STATIC_CACHE).then((cache) => cache.put(request, cloned));
+          }
           return response;
         });
       }),
-    );
-    return;
-  }
-
-  // ── API requests (network-first, cache fallback) ──
-  if (url.origin === self.location.origin || API_PATTERNS.some((p) => p.test(url.pathname))) {
-    event.respondWith(
-      fetch(request)
-        .then((response) => {
-          // Cache successful GET responses
-          if (response.ok || response.type === "opaque") {
-            const cloned = response.clone();
-            caches.open(API_CACHE).then((cache) => {
-              cache.put(request, cloned);
-            });
-          }
-          return response;
-        })
-        .catch(() => {
-          // Offline: serve from cache
-          return caches.match(request).then((cached) => {
-            if (cached) return cached;
-            // Return offline fallback for HTML navigation
-            if (request.destination === "document") {
-              return caches.match("/");
-            }
-            return new Response("Offline", { status: 503 });
-          });
-        }),
     );
     return;
   }

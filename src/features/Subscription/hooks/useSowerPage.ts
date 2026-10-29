@@ -15,6 +15,9 @@ export interface Plan {
   currency: string;
   interval: string;
   features: string[];
+  isActive?: boolean;
+  checkoutAvailable?: boolean;
+  source?: string;
 }
 export const FAQ_ITEMS = [
   {
@@ -52,7 +55,7 @@ export function useSowerPage() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await sendPostRequest("subscriptions", "get-plans", {});
+        const res = await sendPostRequest("subscriptions", "tiers", {});
         if (res.returnCode === 200) {
           const tiers = Array.isArray(res.returnData)
             ? res.returnData
@@ -68,6 +71,11 @@ export function useSowerPage() {
   }, []);
   const handleSubscribe = useCallback(
     async (planId: string) => {
+      const plan = plans.find(p => p.id.replace(/_monthly$/, '') === planId && p.interval === billingInterval);
+      if (!plan || plan.isActive === false || plan.checkoutAvailable === false || plan.source === 'fallback') {
+        toast({ title: tt('Plan unavailable'), description: tt('Please reload plans and try again.'), variant: 'destructive' });
+        return;
+      }
       const isCurrentPlan =
         (planId === "legacy_sower" && isLegacySower) ||
         (planId === "covenant_sower" && isCovenantSower);
@@ -102,7 +110,7 @@ export function useSowerPage() {
         setCheckoutLoading(null);
       }
     },
-    [billingInterval, isCovenantSower, isLegacySower, tierLabel, toast],
+    [plans, billingInterval, isCovenantSower, isLegacySower, tierLabel, toast],
   );
 
   useEffect(() => {

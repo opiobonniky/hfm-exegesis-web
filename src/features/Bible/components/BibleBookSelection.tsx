@@ -112,7 +112,7 @@ export default function BibleBookSelection({
                       isCurrent && "border-primary/60 bg-primary/[0.06] ring-1 ring-primary/20",
                     )}
                   >
-                    <span className="block truncate font-[family-name:var(--font-heading)] text-sm font-bold text-foreground sm:text-base">{book.bookName}</span>
+                    <span className="block truncate font-[family-name:var(--font-heading)] text-sm font-bold text-foreground sm:text-base">{book.displayName || book.bookName}</span>
                     <span className={cn("mt-2 block text-[11px] font-semibold text-muted-foreground", isCurrent && "text-primary")}>
                       {isCurrent && <span className="me-1" aria-label={currentBookLabel}>●</span>}
                       {book.maxChapter} {chaptersLabel}

@@ -78,6 +78,7 @@ export interface PlansFeatureMatrixProps {
 }
 
 export interface PlansTierStripProps {
+  plans?: import('./hooks/useSowerPage').Plan[];
   eyebrow: string;
   title: string;
   lead: string;

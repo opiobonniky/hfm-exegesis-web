@@ -3,6 +3,8 @@ import axios, {
   InternalAxiosRequestConfig,
   AxiosResponse,
 } from "axios";
+import { guestRequestResult } from './guestSession';
+import { hasUiDictionary } from '@/components/languages/uiCopy';
 
 interface GenericResponse<T = any> {
   success: boolean;
@@ -159,11 +161,14 @@ export const sendPostRequest = async <T = any>(
   data: object = {},
   options: PostRequestOptions = {},
 ): Promise<GenericResponse<T>> => {
+  const guestResult = guestRequestResult(controller, request);
+  if (guestResult) return guestResult as GenericResponse<T>;
   try {
-    // Google Translate owns web prose localization. Always request source
-    // English here so backend translation cannot be translated a second time.
-    // XML scripture uses the separate /translations/{version} endpoints.
-    const lang = "en";
+    // Installed UI copy disables Google DOM translation. Request localized
+    // commentary in that mode; otherwise retain English for the online fallback.
+    // Scripture remains in its selected edition, independent of UI language.
+    const selectedLanguage = localStorage.getItem('exegesis-language') || 'en';
+    const lang = hasUiDictionary(selectedLanguage) ? selectedLanguage : 'en';
     const response = await api.post<GenericResponse<T>>(
       `/${controller}/${request}`,
       options.includeLanguage === false ? data : { ...data, lang },
@@ -194,9 +199,10 @@ export const sendGetRequest = async <T = any>(
   params?: object,
 ): Promise<GenericResponse<T>> => {
   try {
+    const language = localStorage.getItem('exegesis-language') || 'en';
     const response = await api.get<GenericResponse<T>>(
       `/${controller}/${request}`,
-      { params: { ...params, lang: "en" } },
+      { params: { ...params, lang: hasUiDictionary(language) ? language : 'en' } },
     );
     return response.data;
   } catch (error: any) {

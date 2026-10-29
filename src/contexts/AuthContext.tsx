@@ -15,6 +15,8 @@ import {
 } from "@/services/pushService";
 import { isSupportNotificationPath, PENDING_SUPPORT_LINK } from '@/services/notificationRouting';
 import { routes } from "@/components/Routes/routes";
+import { clearLegacyPrivateCaches } from '@/services/privateCache';
+import { GUEST_SESSION_KEY, hasGuestSession } from '@/services/guestSession';
 
 export interface UserInfo {
   id?: string;
@@ -34,6 +36,8 @@ type AuthContextType = {
   userInfo: UserInfo | null;
   setUserInfo: (user: UserInfo | null) => void;
   isAuthenticated: boolean;
+  isGuest: boolean;
+  startGuest: () => void;
   loading: boolean;
   authLoading: boolean;
   logout: () => Promise<void>;
@@ -48,12 +52,19 @@ export const AuthContext = createContext<AuthContextType | null>(null);
 const USER_KEY = "user_data";
 const TOKEN_KEY = "auth_token";
 const SUBSCRIPTION_KEY = "subscription_data";
+const storedAccount = () => {
+  try {
+    const user = JSON.parse(localStorage.getItem(USER_KEY) || 'null');
+    return String(user?.id || user?.username || user?.email || '');
+  } catch { return ''; }
+};
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [userInfo, setUserInfoState] = useState<UserInfo | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isGuest, setIsGuest] = useState(hasGuestSession);
   const [subscriptionTier, setSubscriptionTier] = useState<string>("free");
   const [accessExpiresAt, setAccessExpiresAt] = useState<string | null>(null);
   const logoutInProgress = useRef(false);
@@ -62,16 +73,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   // ── Fetch subscription status from backend ──
   const [subscriptionLoading, setSubscriptionLoading] = useState(false);
   const fetchSubscriptionStatus = useCallback(async () => {
+    const token = localStorage.getItem(TOKEN_KEY);
+    if (!token) return;
     try {
       setSubscriptionLoading(true);
       const res = await sendPostRequest("subscriptions", "status", {});
+      if (localStorage.getItem(TOKEN_KEY) !== token) return;
       if (res.returnCode === 200 && res.returnData) {
         const tier = res.returnData.subscriptionTier || "free";
         const expires = res.returnData.accessExpiresAt || null;
         setSubscriptionTier(tier);
         setAccessExpiresAt(expires);
         // Persist to localStorage
-        localStorage.setItem(SUBSCRIPTION_KEY, JSON.stringify({ tier, expires }));
+        localStorage.setItem(SUBSCRIPTION_KEY, JSON.stringify({ tier, expires, owner: storedAccount() }));
       }
     } catch {
       // Non-critical — fall back to cached or default
@@ -102,6 +116,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     };
 
     loadAuth();
+    void clearLegacyPrivateCaches();
   }, []);
 
   // ── Surface focused-tab push payloads as notifications ──
@@ -164,8 +179,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       const cached = localStorage.getItem(SUBSCRIPTION_KEY);
       if (cached) {
         const parsed = JSON.parse(cached);
-        setSubscriptionTier(parsed.tier || "free");
-        setAccessExpiresAt(parsed.expires || null);
+        if (parsed.owner && parsed.owner === storedAccount()) {
+          setSubscriptionTier(parsed.tier || 'free');
+          setAccessExpiresAt(parsed.expires || null);
+        }
       }
     } catch { /* ignore */ }
 
@@ -173,7 +190,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     fetchSubscriptionStatus();
   }, [fetchSubscriptionStatus]);
 
+  // Other tabs must not keep a previous account's mounted private pages or
+  // entitlements after login/logout changes shared localStorage.
+  useEffect(() => {
+    const changed = (event: StorageEvent) => {
+      if (event.key !== null && event.key !== TOKEN_KEY && event.key !== USER_KEY) return;
+      setSubscriptionTier('free'); setAccessExpiresAt(null);
+      void clearLegacyPrivateCaches();
+      try {
+        const token = localStorage.getItem(TOKEN_KEY);
+        const user = JSON.parse(localStorage.getItem(USER_KEY) || 'null');
+        setUserInfoState(token && user ? { ...user, token } : null);
+        if (token && user) void fetchSubscriptionStatus();
+      } catch { setUserInfoState(null); }
+    };
+    window.addEventListener('storage', changed);
+    return () => window.removeEventListener('storage', changed);
+  }, [fetchSubscriptionStatus]);
+
   const setUserInfo = useCallback((user: UserInfo | null) => {
+    sessionStorage.removeItem(GUEST_SESSION_KEY);
+    setIsGuest(false);
+    void clearLegacyPrivateCaches();
+    localStorage.removeItem(SUBSCRIPTION_KEY);
+    setSubscriptionTier('free');
+    setAccessExpiresAt(null);
     if (user) {
       const { token, ...userData } = user;
       localStorage.setItem(TOKEN_KEY, token);
@@ -204,6 +245,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       // Keep the backend token available while unregistering this device's push token.
       await Promise.allSettled([disableWebPush(false), signOut(auth)]);
     } finally {
+      await clearLegacyPrivateCaches();
+      sessionStorage.removeItem(GUEST_SESSION_KEY);
+      setIsGuest(false);
       localStorage.removeItem(TOKEN_KEY);
       localStorage.removeItem(USER_KEY);
       localStorage.removeItem(SUBSCRIPTION_KEY);
@@ -234,10 +278,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       window.removeEventListener("session-expired", handleSessionExpired);
   }, [logout, toast]);
 
+  const startGuest = useCallback(() => {
+    if (localStorage.getItem(TOKEN_KEY)) {
+      navigate(routes.bibleReader.path);
+      return;
+    }
+    sessionStorage.setItem(GUEST_SESSION_KEY, '1');
+    setIsGuest(true);
+    navigate(routes.bibleReader.path);
+  }, [navigate]);
+
   const value = useMemo(() => ({
     userInfo,
     setUserInfo,
     isAuthenticated: !!userInfo?.token,
+    isGuest: isGuest && !userInfo?.token,
+    startGuest,
     loading,
     authLoading: loading,
     logout,
@@ -247,6 +303,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     fetchSubscriptionStatus,
   }), [
     userInfo,
+    isGuest,
+    startGuest,
     setUserInfo,
     loading,
     logout,

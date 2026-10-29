@@ -50,16 +50,16 @@ function ScriptureList({ label, items }: { label: string; items?: Array<{ refere
   return (
     <section className="space-y-2">
       <SectionLabel>{label}</SectionLabel>
-      <ul className="space-y-3">
+      <ul className="space-y-3 notranslate" translate="no">
         {items.map((item, i) => (
           <li key={i} className="flex items-start gap-2">
             <div className="space-y-0.5">
               <p className="text-sm font-semibold text-foreground">
                 {item.reference}
               </p>
-              <p className="text-sm text-muted-foreground italic leading-relaxed">
+              {item.text && <p className="text-sm text-muted-foreground italic leading-relaxed">
                 &ldquo;{item.text}&rdquo;
-              </p>
+              </p>}
             </div>
           </li>
         ))}

@@ -259,6 +259,7 @@ export type HeadingsByChapter = Record<string, ChapterHeading[]>;
 export type BibleTestament = "Old" | "New";
 
 export interface BibleSelectionBook {
+  displayName?: string;
   bookNumber: number;
   bookName: string;
   maxChapter: number;

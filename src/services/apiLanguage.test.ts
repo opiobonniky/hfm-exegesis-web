@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import api, { sendGetRequest, sendPostRequest } from './api';
+import { installUiDictionary } from '@/components/languages/uiCopy';
 
 describe('web prose translation boundary', () => {
   const adapter = vi.fn(async config => ({
@@ -23,5 +24,12 @@ describe('web prose translation boundary', () => {
   it('preserves mutation payloads that explicitly opt out of language handling', async () => {
     await sendPostRequest('journal', 'save', { notes: 'मेरे नोट्स' }, { includeLanguage: false });
     expect(JSON.parse(adapter.mock.calls[0][0].data)).toEqual({ notes: 'मेरे नोट्स' });
+  });
+
+  it('requests target-language commentary after an offline UI pack takes over', async () => {
+    localStorage.setItem('exegesis-language', 'de');
+    installUiDictionary('de', new Map([['Save', 'Speichern']]));
+    await sendPostRequest('bible', 'get-verse-explanation', { bookName: 'Genesis' });
+    expect(JSON.parse(adapter.mock.calls[0][0].data).lang).toBe('de');
   });
 });

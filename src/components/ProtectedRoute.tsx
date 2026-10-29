@@ -1,34 +1,12 @@
-import { Navigate, Outlet, useLocation } from "react-router-dom";
+import { Navigate, Outlet, useLocation, matchPath } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { routes } from "./Routes/routes";
 import { isSupportNotificationPath, PENDING_SUPPORT_LINK } from '@/services/notificationRouting';
 
-const adminOnlyRoutes = [
-  { path: routes.addDailyVerse.path, pattern: /^\/add-daily-verse/ },
-  { path: routes.addDailyDevotion.path, pattern: /^\/add-daily-devotion/ },
-  { path: routes.addExplanation.path, pattern: /^\/add-explanation/ },
-  { path: routes.addReadingPlan.path, pattern: /^\/add-reading-plan/ },
-  { path: routes.editReadingPlan.path, pattern: /^\/edit-reading-plan/ },
-  { path: routes.readingPlanDetail.path, pattern: /^\/reading-plan-detail/ },
-  { path: routes.addVerseExplanation.path, pattern: /^\/add-verse-explanation/ },
-  { path: routes.editVerseExplanation.path, pattern: /^\/edit-verse-explanation/ },
-  { path: routes.dailyVerse.path, pattern: /^\/daily-verse$/ },
-  { path: routes.dailyDevotions.path, pattern: /^\/daily-devotions$/ },
-  { path: routes.dashboard.path, pattern: /^\/dashboard$/ },
-  { path: routes.adminDashboard.path, pattern: /^\/admin/ },
-];
-
-const userReadOnlyRoutes = [
-  routes.verseExplanations.path,
-  routes.readingPlans.path,
-  routes.dailyVerse.path,
-  routes.dailyDevotions.path,
-  routes.bibleReader.path,
-];
-
 export function ProtectedRoute() {
-  const { isAuthenticated, loading, userInfo } = useAuth();
+  const { isAuthenticated, isGuest, loading, userInfo } = useAuth();
   const location = useLocation();
+  const config = Object.values(routes).find(route => route.path !== '*' && matchPath(route.path, location.pathname));
 
   if (loading) {
     return (
@@ -39,6 +17,7 @@ export function ProtectedRoute() {
   }
 
   if (!isAuthenticated) {
+    if (isGuest && config?.allowGuest && !config.adminOnly) return <Outlet />;
     const target = `${location.pathname}${location.search}`;
     if (isSupportNotificationPath(target)) sessionStorage.setItem(PENDING_SUPPORT_LINK, target);
     return <Navigate to={routes.landing.path} replace />;
@@ -52,11 +31,7 @@ export function ProtectedRoute() {
   }
 
   const isAdmin = userInfo?.userRole === 1;
-  const currentPath = location.pathname;
-
-  const isAdminOnlyRoute = adminOnlyRoutes.some(route => 
-    route.pattern.test(currentPath)
-  );
+  const isAdminOnlyRoute = config?.adminOnly;
 
   if (isAdminOnlyRoute && !isAdmin) {
     return <Navigate to={routes.landing.path} replace />;

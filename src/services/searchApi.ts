@@ -1,4 +1,5 @@
 import { sendPostRequest, sendGetRequest } from "./api";
+import { loadOfflineBible } from './offlineBibles';
 
 export interface SearchResult {
   book_number: number;
@@ -96,7 +97,19 @@ export const searchApi = {
     },
   ): Promise<SearchResponse> => {
     const translationId = options?.translation || "Berean";
-    const response = await sendPostRequest("translations", "search-fts", {
+    const offline = await loadOfflineBible(translationId);
+    if (offline) {
+      const limit = Math.max(1, Math.min(50, options?.limit ?? 5));
+      const offset = Math.max(0, options?.offset ?? 0);
+      const term = query.trim().toLocaleLowerCase();
+      const matches = offline.filter(row => (!options?.bookName || row.bookName === options.bookName) &&
+        (!options?.covenant || options.covenant === 'all' || (options.covenant === 'ot' ? row.bookNumber <= 39 : row.bookNumber > 39)))
+        .flatMap(row => row.verses.filter(verse => verse.text.toLocaleLowerCase().includes(term)).map(verse => ({
+          book_number: row.bookNumber, book_name: row.bookName, chapter: row.chapterNumber, verse: verse.verseNumber, verse_text: verse.text,
+        })));
+      return { success: true, query, total: matches.length, page: Math.floor(offset / limit) + 1, limit, data: matches.slice(offset, offset + limit) };
+    }
+    const response = await sendPostRequest("translations", "basic-search", {
       query,
       translationId,
       bookName: options?.bookName || undefined,

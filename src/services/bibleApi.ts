@@ -1,4 +1,6 @@
 import api from "./api";
+import { getPackedBooks, hydratePublicPack } from './publicReadingPacks';
+import { loadOfflineBible, loadBibleCatalog, storeBibleCatalog } from './offlineBibles';
 
 export interface Translation {
   id: string;
@@ -99,11 +101,18 @@ const BASE_URL = "/translations";
 export const bibleApi = {
   getTranslations: async (language?: string): Promise<Translation[]> => {
     const langParam = language ? `?language=${encodeURIComponent(language)}` : '';
-    const response = await api.get(`${BASE_URL}/catalog${langParam}`);
-    if (response.data.success) {
-      return response.data.data;
+    try {
+      const response = await api.get(`${BASE_URL}/catalog${langParam}`);
+      if (response.data.success && Array.isArray(response.data.data)) {
+        if (!language) void storeBibleCatalog(response.data.data);
+        return response.data.data;
+      }
+      throw new Error(response.data.message || 'Failed to fetch translations');
+    } catch (error) {
+      const catalog = await loadBibleCatalog();
+      if (catalog.length) return language ? catalog.filter(item => item.language === language) : catalog;
+      throw error;
     }
-    throw new Error(response.data.message || "Failed to fetch translations");
   },
 
   getTranslation: async (translationId: string): Promise<Translation> => {
@@ -115,6 +124,9 @@ export const bibleApi = {
   },
 
   getBooks: async (translationId: string): Promise<BookInfo[]> => {
+    await hydratePublicPack('books', 'en');
+    const packed = getPackedBooks(translationId);
+    if (packed) return packed;
     const response = await api.post(`${BASE_URL}/${translationId}/books`);
     if (response.data.success) {
       return response.data.data;
@@ -123,6 +135,9 @@ export const bibleApi = {
   },
 
   getBooksWithMaxChapters: async (translationId: string): Promise<BookWithMaxChapter[]> => {
+    await hydratePublicPack('books', 'en');
+    const packed = getPackedBooks(translationId);
+    if (packed) return packed;
     const response = await api.post(`${BASE_URL}/${translationId}/books-with-max`);
     if (response.data.success) {
       return response.data.data;
@@ -142,6 +157,12 @@ export const bibleApi = {
     translationId: string,
     bookName: string
   ): Promise<BookChapterData> => {
+    const offline = await loadOfflineBible(translationId);
+    if (offline) {
+      const rows = offline.filter(row => row.bookName === bookName);
+      if (!rows.length) throw new Error('Book is not included in the downloaded edition');
+      return { bookNumber: rows[0].bookNumber, bookName, chapters: rows.map(row => ({ chapterNumber: row.chapterNumber, versesCount: row.verses.length })) };
+    }
     const response = await api.post(`${BASE_URL}/${translationId}/chapters`, {
       bookName,
     });
@@ -156,6 +177,12 @@ export const bibleApi = {
     bookName: string,
     chapters: number[]
   ): Promise<ChapterVerseData[]> => {
+    const offline = await loadOfflineBible(translationId);
+    if (offline) {
+      const rows = chapters.map(chapter => offline.find(row => row.bookName === bookName && row.chapterNumber === chapter));
+      if (rows.some(row => !row)) throw new Error('Chapter is not included in the downloaded edition');
+      return rows as ChapterVerseData[];
+    }
     const response = await api.post(`${BASE_URL}/${translationId}/verses-batch`, {
       bookName,
       chapters,
@@ -171,6 +198,12 @@ export const bibleApi = {
     bookName: string,
     chapter: number
   ): Promise<VerseData> => {
+    const offline = await loadOfflineBible(translationId);
+    if (offline) {
+      const row = offline.find(item => item.bookName === bookName && item.chapterNumber === chapter);
+      if (!row) throw new Error('Chapter is not included in the downloaded edition');
+      return row;
+    }
     const response = await api.post(`${BASE_URL}/${translationId}/verses`, {
       bookName,
       chapter,
@@ -206,6 +239,12 @@ export const bibleApi = {
     chapter: number,
     verseNumber: number
   ): Promise<Verse> => {
+    const offline = await loadOfflineBible(translationId);
+    if (offline) {
+      const verse = offline.find(row => row.bookName === bookName && row.chapterNumber === chapter)?.verses.find(item => item.verseNumber === verseNumber);
+      if (!verse) throw new Error('Verse is not included in the downloaded edition');
+      return verse;
+    }
     const response = await api.post(`${BASE_URL}/${translationId}/verse`, {
       bookName,
       chapter,

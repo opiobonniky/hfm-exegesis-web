@@ -1,5 +1,7 @@
 // SowerTiersGrid — renders tier cards in a grid, moves .map() out of page
-import { TierCard, TIERS, type TierId } from "./SowerTierCards";
+import { TierCard, type TierId } from "./SowerTierCards";
+import { buildPlanCards } from '../utils/planCards';
+import type { Plan } from '../hooks/useSowerPage';
 
 interface TierInfo {
   id: string;
@@ -7,6 +9,7 @@ interface TierInfo {
 }
 
 interface SowerTiersGridProps {
+  plans: Plan[];
   billingInterval: "month" | "year";
   isPaying: boolean;
   isLegacySower: boolean;
@@ -18,6 +21,7 @@ interface SowerTiersGridProps {
 }
 
 export function SowerTiersGrid({
+  plans,
   billingInterval,
   isPaying,
   isLegacySower,
@@ -30,7 +34,7 @@ export function SowerTiersGrid({
   return (
     <section className="max-w-6xl mx-auto px-5 sm:px-6 -mt-8 sm:-mt-10 pb-10 sm:pb-12 relative z-10">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {TIERS.map((tier) => {
+        {buildPlanCards(plans, billingInterval).map((tier) => {
           const isCurrentTier =
             (tier.id === "free" && !isPaying) ||
             (tier.id === "legacy_sower" && isLegacySower) ||

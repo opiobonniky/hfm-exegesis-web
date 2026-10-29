@@ -6,6 +6,7 @@ import React, {
   useMemo,
   useRef,
   useState,
+  useSyncExternalStore,
   type ReactNode,
 } from 'react';
 import { useLocation } from 'react-router-dom';
@@ -17,6 +18,7 @@ import {
 import { isRtlLanguage } from './localeUtils';
 import en from './en.json';
 import { tt } from './hardcodedTranslate';
+import { getPublicPackState, subscribePublicPacks, syncPublicPack, getPackedUiDictionary } from '@/services/publicReadingPacks';
 import {
   applyGoogleLanguage,
   GOOGLE_TRANSLATE_ELEMENT_ID,
@@ -29,7 +31,7 @@ const SUPPORTED_LANGUAGES = [...SUPPORTED_LANGUAGE_CODES];
 
 interface LanguageContextType {
   lang: Language;
-  /** English source strings; Google Translate Element translates the rendered DOM. */
+  /** Installed authored copy, with English fallback for uncovered strings. */
   t: Translations;
   isRtl: boolean;
   isLoading: boolean;
@@ -70,7 +72,29 @@ export const LanguageProvider: React.FC<Props> = ({ children }) => {
   const [translationError, setTranslationError] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
   const timers = useRef<number[]>([]);
+  const googleStarted = useRef(false);
   const isRtl = isRtlLanguage(lang);
+  const uiState = useSyncExternalStore(subscribePublicPacks, () => getPublicPackState('ui', lang));
+  const installed = !!uiState.pack;
+  const translations = useMemo(() => {
+    const dictionary = getPackedUiDictionary(lang);
+    const localize = (value: unknown): unknown => {
+      if (typeof value === 'string') return dictionary.get(value) ?? value;
+      if (Array.isArray(value)) return value.map(localize);
+      if (value && typeof value === 'object') return Object.fromEntries(Object.entries(value).map(([key, text]) => [key, localize(text)]));
+      return value;
+    };
+    return localize(ENGLISH_TRANSLATIONS) as Translations;
+  }, [lang, uiState]);
+
+  useEffect(() => {
+    // UI copy is intentionally downloadable before login/guest entry.
+    try { localStorage.setItem(STORAGE_KEY, lang); } catch { /* storage disabled */ }
+    void syncPublicPack('ui', lang, attempt > 0);
+    const retry = () => { void syncPublicPack('ui', lang, true); };
+    window.addEventListener('online', retry);
+    return () => window.removeEventListener('online', retry);
+  }, [lang, attempt]);
 
   const syncGoogleLanguage = useCallback((target: Language) => {
     // Google creates its selector asynchronously; retry briefly for route and
@@ -85,15 +109,26 @@ export const LanguageProvider: React.FC<Props> = ({ children }) => {
   useEffect(() => {
     let active = true;
     setTranslationError(null);
+    if (installed) {
+      timers.current.forEach(window.clearTimeout);
+      applyGoogleLanguage('en');
+      // Google mutates text nodes outside React. Recover a clean tree once when
+      // an online fallback session upgrades to installed, React-owned copy.
+      if (googleStarted.current) window.location.reload();
+      setIsLoading(false);
+      return;
+    }
     if (lang === 'en') {
       applyGoogleLanguage('en');
       setIsLoading(false);
       return;
     }
+    if (uiState.stage !== 'failed') return;
     setIsLoading(true);
     loadGoogleTranslate(lang)
       .then(() => {
         if (!active) return;
+        googleStarted.current = true;
         syncGoogleLanguage(lang);
         setIsLoading(false);
       })
@@ -105,13 +140,13 @@ export const LanguageProvider: React.FC<Props> = ({ children }) => {
         }
       });
     return () => { active = false; };
-  }, [lang, attempt, syncGoogleLanguage]);
+  }, [lang, attempt, syncGoogleLanguage, installed, uiState.stage]);
 
   useEffect(() => {
     document.documentElement.lang = lang;
     document.documentElement.dir = isRtl ? 'rtl' : 'ltr';
-    syncGoogleLanguage(lang);
-  }, [lang, isRtl, location.pathname, syncGoogleLanguage]);
+    if (!installed && uiState.stage === 'failed') syncGoogleLanguage(lang);
+  }, [lang, isRtl, location.pathname, syncGoogleLanguage, installed, uiState.stage]);
 
   const setLanguage = useCallback(async (newLang: Language) => {
     if (newLang === lang) return;
@@ -123,19 +158,19 @@ export const LanguageProvider: React.FC<Props> = ({ children }) => {
 
     // The widget has no selectable English option. Clear its cookie, then
     // reload once so Google-mutated DOM is replaced by React's English source.
-    if (newLang === 'en') {
+    if (newLang === 'en' || installed) {
       applyGoogleLanguage('en');
       window.location.reload();
       return;
     }
 
-  }, [lang]);
+  }, [lang, installed]);
 
   const retryTranslation = useCallback(() => setAttempt(value => value + 1), []);
 
   const value = useMemo<LanguageContextType>(() => ({
     lang,
-    t: ENGLISH_TRANSLATIONS,
+    t: translations,
     isRtl,
     isLoading,
     translationError,
@@ -143,7 +178,7 @@ export const LanguageProvider: React.FC<Props> = ({ children }) => {
     setLanguage,
     supportedLanguages: SUPPORTED_LANGUAGES,
     tt,
-  }), [lang, isRtl, isLoading, translationError, retryTranslation, setLanguage]);
+  }), [lang, translations, isRtl, isLoading, translationError, retryTranslation, setLanguage]);
 
   return (
     <LanguageContext.Provider value={value}>

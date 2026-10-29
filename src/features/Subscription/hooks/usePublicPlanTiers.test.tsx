@@ -3,11 +3,11 @@ import { renderHook, waitFor, cleanup } from "@testing-library/react";
 import { usePublicPlanTiers } from "./usePublicPlanTiers";
 import { PLAN_TIER_NAMES } from "../constants";
 
-const { fetchLandingTiers } = vi.hoisted(() => ({
-  fetchLandingTiers: vi.fn(),
+const { sendPostRequest } = vi.hoisted(() => ({
+  sendPostRequest: vi.fn(),
 }));
 
-vi.mock("@/features/Auth/services/landingService", () => ({ fetchLandingTiers }));
+vi.mock('@/services/api', () => ({ sendPostRequest }));
 
 const tier = (overrides: Record<string, unknown> = {}) => ({
   id: "legacy_sower",
@@ -23,7 +23,7 @@ const tier = (overrides: Record<string, unknown> = {}) => ({
 });
 
 beforeEach(() => {
-  fetchLandingTiers.mockReset();
+  sendPostRequest.mockReset();
 });
 
 afterEach(() => {
@@ -32,17 +32,17 @@ afterEach(() => {
 
 describe("usePublicPlanTiers", () => {
   it("keeps static names until tiers arrive", () => {
-    fetchLandingTiers.mockReturnValue(new Promise(() => {}));
+    sendPostRequest.mockReturnValue(new Promise(() => {}));
     const { result } = renderHook(() => usePublicPlanTiers());
     expect(result.current.data.tierNames).toEqual(PLAN_TIER_NAMES);
     expect(result.current.data.hasLiveTiers).toBe(false);
   });
 
   it("overrides names and pricing from the backend", async () => {
-    fetchLandingTiers.mockResolvedValue([
+    sendPostRequest.mockResolvedValue({ returnCode: 200, returnData: { tiers: [
       tier({ id: "free", name: "Free Reader", description: null, price: 0, interval: "none", maxSlots: null }),
       tier(),
-    ]);
+    ] } });
 
     const { result } = renderHook(() => usePublicPlanTiers());
 
@@ -60,11 +60,12 @@ describe("usePublicPlanTiers", () => {
   });
 
   it("stays on static values when the request fails", async () => {
-    fetchLandingTiers.mockResolvedValue([]);
+    sendPostRequest.mockResolvedValue({ returnCode: 503 });
     const { result } = renderHook(() => usePublicPlanTiers());
 
-    await waitFor(() => expect(fetchLandingTiers).toHaveBeenCalled());
+    await waitFor(() => expect(sendPostRequest).toHaveBeenCalledWith('subscriptions', 'tiers', {}));
     expect(result.current.data.tierNames).toEqual(PLAN_TIER_NAMES);
     expect(result.current.data.tierOverrides).toEqual({});
+    expect(result.current.data.categories).toEqual([]);
   });
 });

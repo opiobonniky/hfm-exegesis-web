@@ -1,11 +1,11 @@
 import { BookOpen, Gem, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
-import { formatPrice, TIERS } from "./SowerTierCards";
+import { buildPlanCards } from '../utils/planCards';
 import { tt } from "@/components/languages/hardcodedTranslate";
 import type { TierOverride } from "@/features/Auth/utils";
 import type { PlansTierStripProps } from "../types";
 
-export function PlansTierStrip({ eyebrow, title, lead, tierOverrides }: PlansTierStripProps) {
+export function PlansTierStrip({ eyebrow, title, lead, plans = [], tierOverrides }: PlansTierStripProps) {
   return (
     <section className="px-4 sm:px-6 lg:px-12 pt-4 pb-8 sm:pt-8 sm:pb-12 bg-background">
       <div className="w-full max-w-5xl mx-auto">
@@ -18,7 +18,7 @@ export function PlansTierStrip({ eyebrow, title, lead, tierOverrides }: PlansTie
         </div>
 
         <div className="grid gap-5 sm:gap-6 sm:grid-cols-3 items-start">
-          {TIERS.map((tier, index) => {
+          {buildPlanCards(plans, 'month').map((tier, index) => {
             const Icon = tier.icon ?? BookOpen;
             const isFeatured = tier.id === "legacy_sower";
             // Backend-supplied pricing/name/limits override the curated copy
@@ -27,7 +27,7 @@ export function PlansTierStrip({ eyebrow, title, lead, tierOverrides }: PlansTie
             const live: TierOverride = tierOverrides?.[tier.id] ?? {};
             const tierName = live.name ?? tier.name;
             const tierDescription = live.description ?? tier.description;
-            const monthlyPrice = live.monthlyPrice ?? tier.monthlyPrice;
+            const monthlyPrice = tier.monthlyPrice;
             const slotLimit = live.slotLimit === undefined ? tier.slotLimit : live.slotLimit;
             return (
               <motion.article
@@ -68,9 +68,9 @@ export function PlansTierStrip({ eyebrow, title, lead, tierOverrides }: PlansTie
 
                 <div className="mt-6 flex items-baseline gap-1.5">
                   <span className="text-3xl sm:text-4xl font-black tracking-tighter text-foreground">
-                    {monthlyPrice === 0 ? tt("Free") : formatPrice(monthlyPrice)}
+                    {tier.id === 'free' ? tt('Free') : !tier.available ? tt('Unavailable') : new Intl.NumberFormat(undefined, { style: 'currency', currency: tier.currency || 'USD' }).format(monthlyPrice / 100)}
                   </span>
-                  {monthlyPrice === 0 ? null : (
+                  {tier.id === 'free' || !tier.available ? null : (
                     <span className="text-xs font-semibold text-muted-foreground">{tt("/month")}</span>
                   )}
                 </div>
@@ -103,7 +103,7 @@ export function PlansTierStrip({ eyebrow, title, lead, tierOverrides }: PlansTie
                 </ul>
 
                 <p className="mt-auto pt-6 text-[11px] font-semibold text-muted-foreground/80">
-                  {monthlyPrice === 0
+                  {tier.id === 'free'
                     ? tt("No account required to start reading.")
                     : slotLimit
                       ? tt("Limited to the first {count} supporters.").replace("{count}", String(slotLimit))

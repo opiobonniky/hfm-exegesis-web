@@ -1,4 +1,5 @@
-import { useCallback, useState } from "react";
+import { useCallback, useState, useSyncExternalStore } from "react";
+import { getPackedBookName, getPublicPackState, subscribePublicPacks } from '@/services/publicReadingPacks';
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { tt } from "@/components/languages/hardcodedTranslate";
@@ -8,7 +9,8 @@ import type { BibleTestament } from "../types";
 export function useBibleBookSelectionPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { isRtl, t } = useLanguage();
+  const { lang, isRtl, t } = useLanguage();
+  useSyncExternalStore(subscribePublicPacks, () => getPublicPackState('books', 'en'));
   const selectedBook = searchParams.get("book");
   const selectedBookData = BIBLE_SELECTION_BOOKS.find(
     (book) => book.bookName === selectedBook,
@@ -20,9 +22,9 @@ export function useBibleBookSelectionPage() {
   const normalizedQuery = searchQuery.trim().toLowerCase();
   const isFiltering = normalizedQuery.length > 0;
 
-  const books = BIBLE_SELECTION_BOOKS.filter((book) =>
+  const books = BIBLE_SELECTION_BOOKS.map(book => ({ ...book, displayName: getPackedBookName(book.bookName, lang) || book.bookName })).filter((book) =>
     isFiltering
-      ? book.bookName.toLowerCase().includes(normalizedQuery)
+      ? book.bookName.toLowerCase().includes(normalizedQuery) || book.displayName.toLowerCase().includes(normalizedQuery)
       : book.testament === activeTestament,
   );
 
