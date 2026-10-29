@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Layers, GraduationCap, Sparkles, ScrollText, ListChecks, BookMarked } from "lucide-react";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { displayDigits } from '@/services/numberLocale/format';
 
 export const parseDate = (d: unknown): string => {
   if (!d) return new Date().toISOString();
@@ -48,13 +49,13 @@ export const parseWordStudies = (raw?: string | null): WordStudy[] => {
 };
 interface SectionProps { label: string; icon: React.ElementType; accent?: string; count?: number; children: ReactNode; }
 export function VerseSection({ label, icon: Icon, accent = "hsl(var(--primary))", count, children }: SectionProps) {
-  return <div className="space-y-3"><div className="flex items-center gap-2"><Icon className="w-4 h-4" style={{ color: accent }} /><h3 className="text-xs font-extrabold tracking-wider uppercase" style={{ color: accent }}>{label}{count ? ` (${count})` : ""}</h3></div><div className="pl-6 space-y-2">{children}</div></div>;
+  return <div className="space-y-3"><div className="flex items-center gap-2"><Icon className="w-4 h-4" style={{ color: accent }} /><h3 className="text-xs font-extrabold tracking-wider uppercase" style={{ color: accent }}>{label}{count ? ` (${displayDigits(count)})` : ""}</h3></div><div className="pl-6 space-y-2">{children}</div></div>;
 }
 export function SubLabel({ label, accent = "hsl(var(--primary))" }: { label: string; accent?: string }) {
   return <p className="text-[11px] font-extrabold tracking-wide uppercase mb-1" style={{ color: accent }}>{label}</p>;
 }
 export function NumberedList({ items, accent = "hsl(var(--primary))" }: { items: string[]; accent?: string }) {
-  return <ol className="space-y-2">{items.map((item, i) => <li key={i} className="flex items-start gap-2.5"><span className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-extrabold" style={{ backgroundColor: accent + "18", color: accent }}>{i + 1}</span><span className="text-sm text-muted-foreground leading-relaxed">{item}</span></li>)}</ol>;
+  return <ol className="space-y-2">{items.map((item, i) => <li key={i} className="flex items-start gap-2.5"><span className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-extrabold" style={{ backgroundColor: accent + "18", color: accent }}>{displayDigits(i + 1)}</span><span className="text-sm text-muted-foreground leading-relaxed">{item}</span></li>)}</ol>;
 }
 export function BulletList({ items, accent = "hsl(var(--primary))" }: { items: string[]; accent?: string }) {
   return <ul className="space-y-2">{items.map((item, i) => <li key={i} className="flex items-start gap-2.5"><span className="mt-2 shrink-0 w-1.5 h-1.5 rounded-full" style={{ backgroundColor: accent }} /><span className="text-sm text-muted-foreground leading-relaxed">{item}</span></li>)}</ul>;

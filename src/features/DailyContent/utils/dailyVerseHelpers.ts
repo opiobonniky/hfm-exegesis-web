@@ -1,4 +1,5 @@
 // ─── Date helpers for DailyVerse ───────────────────────────────────────────────
+import { displayDate } from '@/services/numberLocale/format';
 
 export const safeDate = (value: unknown): Date => {
   if (!value || typeof value === "object") return new Date();
@@ -19,10 +20,10 @@ export const isFuture = (utcDateString: unknown): boolean =>
   getLocalDateString(utcDateString) > toYMD(new Date());
 
 export const formatDisplayDate = (utcDateString: unknown): string =>
-  safeDate(utcDateString).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  displayDate(safeDate(utcDateString), undefined, { month: "short", day: "numeric", year: "numeric" });
 
 export const formatShortDate = (utcDateString: unknown): string =>
-  safeDate(utcDateString).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  displayDate(safeDate(utcDateString), undefined, { month: "short", day: "numeric" });
 
 const addDays = (d: Date, days: number): Date => {
   const result = new Date(d);

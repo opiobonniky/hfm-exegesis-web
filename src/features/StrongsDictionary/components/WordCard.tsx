@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import type { StrongsWord } from "../hooks/useStrongsDictionaryPage";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { displayDigits } from '@/services/numberLocale/format';
 
 interface WordCardProps {
   word: StrongsWord;
@@ -55,7 +56,7 @@ export function WordCard({ word, isSelected, isFavorited, onSelect, onToggleFavo
               <div className="mt-3 space-y-1.5 text-xs font-semibold text-primary">
                 <div className="flex items-center gap-1.5">
                 <BookOpen className="h-3.5 w-3.5" />
-                {word.contextualStudies.length}{tt("verse")}{word.contextualStudies.length === 1 ? tt("study") : tt("studies")}{tt("available")}</div>
+                {displayDigits(word.contextualStudies.length)}{tt("verse")}{word.contextualStudies.length === 1 ? tt("study") : tt("studies")}{tt("available")}</div>
                 <p className="line-clamp-2 font-normal text-muted-foreground">
                   {word.contextualStudies[0].customDefinition || word.contextualStudies[0].surfaceText}
                 </p>

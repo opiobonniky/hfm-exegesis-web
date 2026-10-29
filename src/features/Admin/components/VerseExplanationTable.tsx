@@ -4,6 +4,7 @@ import { Trash2, Edit2, Eye, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { displayDate } from '@/services/numberLocale/format';
 
 interface VerseExplanationItem {
   id: number;
@@ -122,7 +123,7 @@ export function VerseExplanationTable({
                 <p className="text-xs text-muted-foreground mt-2">
                   {item.bibleVersion || tt("BSB")} •{" "}
                   {item.createdOn
-                    ? new Date(item.createdOn).toLocaleDateString()
+                    ? displayDate(item.createdOn)
                     : ""}
                 </p>
               </div>

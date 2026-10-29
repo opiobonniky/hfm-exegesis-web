@@ -2,6 +2,7 @@ import { Brain, CheckCircle, XCircle, RotateCcw, PenLine, Star } from "lucide-re
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { displayDigits } from '@/services/numberLocale/format';
 
 interface QuizQuestion { id: number; question: string; options: string[]; correctAnswer: number; }
 
@@ -40,8 +41,8 @@ export default function DailyReadingQuiz({
           <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">{tt("Understanding check")}</p>
           <h2 className="mt-1 text-xl font-bold">{tt("Quiz complete")}</h2>
         </div>
-        <p className="text-4xl font-black tracking-tight text-primary">{correctCount}<span className="text-xl text-muted-foreground">/{questions.length}</span></p>
-        <p className="text-sm text-muted-foreground">{tt("You answered")}{pct}{tt("% correctly.")}</p>
+        <p className="text-4xl font-black tracking-tight text-primary">{displayDigits(correctCount)}<span className="text-xl text-muted-foreground">/{displayDigits(questions.length)}</span></p>
+        <p className="text-sm text-muted-foreground">{tt("You answered")}{displayDigits(pct)}{tt("% correctly.")}</p>
         <div className="flex items-center justify-center gap-2">
           <Button variant="outline" size="sm" onClick={onReview} className="gap-1.5"><PenLine className="w-3.5 h-3.5" />{tt("Review")}</Button>
           <Button variant="outline" size="sm" onClick={onRetry} className="gap-1.5"><RotateCcw className="w-3.5 h-3.5" />{tt("Retry")}</Button>
@@ -58,9 +59,9 @@ export default function DailyReadingQuiz({
         </div>
         <div className="min-w-0 flex-1">
           <h2 className="text-sm font-bold">{tt("Check your understanding")}</h2>
-          <p className="text-xs text-muted-foreground">{tt("Question")}{currentQ + 1} of {questions.length}</p>
+          <p className="text-xs text-muted-foreground">{tt("Question")}{displayDigits(currentQ + 1)} of {displayDigits(questions.length)}</p>
         </div>
-        <span className="rounded-full bg-muted px-2.5 py-1 text-xs font-bold text-muted-foreground">{Math.round(((currentQ + 1) / questions.length) * 100)}%</span>
+        <span className="rounded-full bg-muted px-2.5 py-1 text-xs font-bold text-muted-foreground">{displayDigits(Math.round(((currentQ + 1) / questions.length) * 100))}%</span>
       </div>
       <div className="h-1 overflow-hidden rounded-full bg-muted">
         <div className="h-full rounded-full bg-violet-500 transition-all" style={{ width: `${((currentQ + 1) / questions.length) * 100}%` }} />

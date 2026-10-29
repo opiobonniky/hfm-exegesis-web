@@ -1,6 +1,8 @@
 import type { NoteItem } from "../hooks/useNotesPage";
 import { BibleGroupSection, BibleSubGroup } from "./BibleGroupSection";
 import { NoteCard } from "./NoteCard";
+import { useLanguage } from "@/components/languages/languageProvider";
+import { displayDigits } from "@/services/numberLocale/format";
 
 interface Props {
   grouped: Record<string, Record<number, NoteItem[]>>;
@@ -13,12 +15,13 @@ interface Props {
 }
 
 export function NotesList({ grouped, verseTextMap, deleting, onGoToReader, onEdit, onDelete, formatDate }: Props) {
+  const { lang } = useLanguage();
   return (
     <>
       {Object.entries(grouped).map(([book, chapters]) => (
         <BibleGroupSection key={book} label={book}>
           {Object.entries(chapters).map(([chapter, notes]) => (
-            <BibleSubGroup key={chapter} label={`Chapter ${chapter}`}>
+            <BibleSubGroup key={chapter} label={`Chapter ${displayDigits(chapter, lang)}`}>
               {notes.map((note) => (
                 <NoteCard
                   key={note.id}

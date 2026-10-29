@@ -4,11 +4,17 @@ import { BIBLE_BOOKS } from '@/features/Bible/constants';
 import { normalizeBookPrologue, type BookPrologue } from './bookProloguesApi';
 import type { BookWithMaxChapter } from './bibleApi';
 import { installUiDictionary } from '@/components/languages/uiCopy';
+import { installNumberLocale, validNumberLocale } from './numberLocale/format';
+import type { NumberLocale } from './numberLocale/format';
 
 const revision = z.string().regex(/^[a-f0-9]{12}$/);
 const digest = z.string().regex(/^[a-f0-9]{64}$/);
 const sourceSchema = z.object({ schemaVersion: z.literal(1), revision, texts: z.array(z.string().min(1)).min(1) });
 const uiSchema = z.object({ schemaVersion: z.literal(1), revision, language: z.string(), translations: z.array(z.string().trim().min(1)) });
+const numberSchema = z.object({
+  schemaVersion: z.literal(1), revision, language: z.string(),
+  locale: z.string().min(2), numberingSystem: z.string().min(2), digits: z.string(),
+});
 const overviewBook = z.object({
   bookName: z.string(), designation: z.string().min(1),
   ...Object.fromEntries(['author', 'authorDetail', 'audience', 'dateWritten', 'locationWritten', 'purpose', 'keyTheme', 'summary', 'background', 'lessons', 'christConnection'].map(key => [key, z.string().nullish()])),
@@ -38,8 +44,9 @@ type Source = z.infer<typeof sourceSchema>;
 type Ui = z.infer<typeof uiSchema>;
 type Overview = z.infer<typeof overviewSchema>;
 type Books = z.infer<typeof bookSchema>;
-type Kind = 'ui' | 'overview' | 'books';
-type Pack = Ui | Overview | Books;
+type Numbers = z.infer<typeof numberSchema>;
+type Kind = 'ui' | 'overview' | 'books' | 'numbers';
+type Pack = Ui | Overview | Books | Numbers;
 export interface PublicPackState {
   stage: 'idle' | 'checking' | 'downloading' | 'ready' | 'failed';
   pack?: Pack; source?: Source; error?: string;
@@ -62,6 +69,9 @@ export function getPublicPackState(kind: Kind, language: string): PublicPackStat
 function update(kind: Kind, language: string, patch: Partial<PublicPackState>) {
   states.set(key(kind, language), { ...getPublicPackState(kind, language), ...patch });
   if (kind === 'ui' && getPublicPackState(kind, language).pack) installUiDictionary(language, getPackedUiDictionary(language));
+  if (kind === 'numbers' && getPublicPackState(kind, language).pack) {
+    installNumberLocale(getPublicPackState(kind, language).pack as NumberLocale);
+  }
   listeners.forEach(listener => listener());
 }
 export async function sha256(text: string) {
@@ -71,6 +81,11 @@ export async function sha256(text: string) {
 const tokens = (text: string) => JSON.stringify((text.match(/\{\{?\w+\}?\}|%\d*\$?[sd]|<\/?\w+>/g) || []).sort());
 
 export function validatePublicPack(kind: Kind, language: string, value: unknown, source?: Source): Pack {
+  if (kind === 'numbers') {
+    const pack = numberSchema.parse(value);
+    if (pack.language !== language || !validNumberLocale(pack, language)) throw new Error('Invalid number pack');
+    return pack;
+  }
   if (kind === 'ui') {
     const pack = uiSchema.parse(value);
     if (!source || pack.language !== language || pack.revision !== source.revision ||
@@ -143,7 +158,7 @@ export function syncPublicPack(kind: Kind, language: string, force = false): Pro
         source = sourceSchema.parse(JSON.parse(await fetchText('/translation/ui-packs/source')));
         if ((await sha256(`ui-v1:${JSON.stringify(source.texts)}`)).slice(0, 12) !== source.revision) throw new Error('UI source checksum mismatch');
       }
-      const base = kind === 'ui' ? `/translation/ui-packs/${language}` : kind === 'overview' ? `/book-prologues/packs/${language}` : '/translations/book-packs';
+      const base = kind === 'ui' ? `/translation/ui-packs/${language}` : kind === 'overview' ? `/book-prologues/packs/${language}` : kind === 'numbers' ? `/translation/number-packs/${language}` : '/translations/book-packs';
       const query = source ? `?sourceRevision=${source.revision}` : '';
       const manifest = JSON.parse(await fetchText(`${base}/manifest${query}`));
       if (manifest.status !== 'ready' || !revision.safeParse(manifest.revision).success ||

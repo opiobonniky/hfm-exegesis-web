@@ -4,6 +4,7 @@ import { GlassCard, Ring, StatusBadge } from "./PlanDetailUI";
 import { DIFFICULTY_CONFIG, CATEGORY_LABELS, normalizeDifficulty, normalizeCategory, formatDate } from "../constants";
 import { routes } from "@/components/Routes/routes";
 import type { Dispatch, SetStateAction } from "react";
+import { displayDigits } from "@/services/numberLocale/format";
 
 type Tab = "overview" | "schedule" | "quiz" | "admin";
 
@@ -110,16 +111,16 @@ export function PlanDetailHeader({
           {[
             { icon: Calendar, label: t.readingPlan.days, value: plan.total_days, accent: "bg-sky-50", iconColor: "text-sky-600" },
             { icon: BookOpen, label: t.readingPlan.assignments, value: plan.total_assignments, accent: "bg-emerald-50", iconColor: "text-emerald-600" },
-            { icon: CheckCircle2, label: t.readingPlan.completedLabel, value: `${pct}%`, accent: "bg-violet-50", iconColor: "text-violet-600" },
-            { icon: Flame, label: t.readingPlan.streak, value: `${plan.user_streak ?? 0}d`, accent: "bg-orange-50", iconColor: "text-orange-600" },
+            { icon: CheckCircle2, label: t.readingPlan.completedLabel, value: `${displayDigits(pct)}%`, accent: "bg-violet-50", iconColor: "text-violet-600" },
+            { icon: Flame, label: t.readingPlan.streak, value: `${displayDigits(plan.user_streak ?? 0)}d`, accent: "bg-orange-50", iconColor: "text-orange-600" },
             { icon: Clock, label: t.readingPlan.startedLabel, value: plan.started ? formatDate(plan.start_date, lang) : "—", accent: "bg-amber-50", iconColor: "text-amber-600" },
-            { icon: Zap, label: t.readingPlan.configPct, value: `${configuredPct}%`, accent: "bg-indigo-50", iconColor: "text-indigo-600" },
+            { icon: Zap, label: t.readingPlan.configPct, value: `${displayDigits(configuredPct)}%`, accent: "bg-indigo-50", iconColor: "text-indigo-600" },
           ].map(({ icon: Icon, label, value, accent, iconColor }) => (
             <GlassCard key={label} className="p-3 text-center">
               <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center mx-auto mb-2", accent)}>
                 <Icon className={cn("w-4 h-4", iconColor)} />
               </div>
-              <p className="text-lg font-bold text-foreground">{value}</p>
+              <p className="text-lg font-bold text-foreground">{displayDigits(String(value))}</p>
               <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">{label}</p>
             </GlassCard>
           ))}
@@ -130,7 +131,7 @@ export function PlanDetailHeader({
             <div className="relative shrink-0">
               <Ring pct={pct} size={100} stroke={7} />
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-lg font-bold text-foreground">{pct}%</span>
+                <span className="text-lg font-bold text-foreground">{displayDigits(pct)}%</span>
                 <span className="text-[8px] text-muted-foreground uppercase">{t.readingPlan.overallProgress}</span>
               </div>
             </div>

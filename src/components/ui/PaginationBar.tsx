@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { displayDigits } from '@/services/numberLocale/format';
 
 interface PaginationBarProps {
   page: number;
@@ -29,7 +30,7 @@ export function PaginationBar({ page, totalPages, hasNext, hasPrevious, onPageCh
         <span className="hidden sm:inline">{tt("Previous")}</span>
       </Button>
       <span className="text-xs text-muted-foreground">
-        {label || `Page ${page + 1} of ${Math.max(totalPages, 1)}`}
+        {label || `Page ${displayDigits(page + 1)} of ${displayDigits(Math.max(totalPages, 1))}`}
       </span>
       <Button variant="outline" size="sm" disabled={!hasNext} onClick={() => onPageChange(page + 1)} className="gap-1">
         <span className="hidden sm:inline">Next</span>

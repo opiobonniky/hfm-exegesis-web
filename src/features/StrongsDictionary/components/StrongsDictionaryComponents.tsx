@@ -10,6 +10,7 @@ import type { StrongsWord } from "../hooks/useStrongsDictionaryPage";
 import { WordCard } from "./WordCard";
 import { tt } from '@/components/languages/hardcodedTranslate';
 import { StableLoadingContent } from "@/components/ui/StableLoadingContent";
+import { displayDigits } from "@/services/numberLocale/format";
 
 interface StrongsHeaderProps {
   onBack: () => void;
@@ -153,7 +154,7 @@ export function StrongsBrowseTab({
       {browseLoading && <LoadingState message="Loading words..." />}
       {!browseLoading && browseWords.length > 0 && (
         <>
-          <p>{browseWords.length}{tt("word")}{browseWords.length !== 1 ? "s" : ""} in {selectedBook}</p>
+          <p>{displayDigits(browseWords.length)}{tt("word")}{browseWords.length !== 1 ? "s" : ""} in {selectedBook}</p>
           <div className="grid gap-3">
             {browseWords.map((w) => (
               <WordCard key={w.strongsNumber} word={w} isSelected={selectedWord?.strongsNumber === w.strongsNumber}

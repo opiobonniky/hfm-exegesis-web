@@ -5,6 +5,8 @@
 // CSS, escaping, and look-note formatting stay in sync.
 // ─────────────────────────────────────────────────────────────────────────────
 
+import { displayDate } from "@/services/numberLocale/format";
+
 /** HTML-escape user content to prevent XSS in the print window. */
 export function esc(s: string): string {
   return s
@@ -135,7 +137,7 @@ export function buildStudyPdfHtml(opts: {
 }): string {
   const date =
     opts.dateStr ||
-    new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+    displayDate(new Date(), undefined, { year: "numeric", month: "long", day: "numeric" });
   const dateEsc = esc(date);
   const titleEsc = esc(opts.title);
   return `<!DOCTYPE html>

@@ -2,6 +2,7 @@ import { X, ChevronLeft, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ONBOARDING_STEPS } from "../constants";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { displayDigits } from '@/services/numberLocale/format';
 
 interface Props {
   onDismiss: () => void;
@@ -20,7 +21,7 @@ export function LabHomeOnboarding({ onDismiss, step, onStepChange }: Props) {
             {ONBOARDING_STEPS.map((_, idx) => (
               <div key={idx} className={cn("h-1.5 rounded-full transition-all duration-300", idx === step ? "w-8 bg-primary" : idx < step ? "w-2 bg-primary/40" : "w-2 bg-muted-foreground/20")} />
             ))}
-            <span className="ml-auto text-[9px] font-bold text-muted-foreground/40 tabular-nums">{step + 1} / {ONBOARDING_STEPS.length}</span>
+            <span className="ml-auto text-[9px] font-bold text-muted-foreground/40 tabular-nums">{displayDigits(step + 1)} / {displayDigits(ONBOARDING_STEPS.length)}</span>
           </div>
           <div className="flex flex-col items-center text-center">
             <div className={cn("w-16 h-16 rounded-2xl flex items-center justify-center mb-4 shadow-lg transition-all", ONBOARDING_STEPS[step].bg)}>

@@ -19,6 +19,7 @@ import { isRtlLanguage } from './localeUtils';
 import en from './en.json';
 import { tt } from './hardcodedTranslate';
 import { getPublicPackState, subscribePublicPacks, syncPublicPack, getPackedUiDictionary } from '@/services/publicReadingPacks';
+import { setDisplayLanguage } from '@/services/numberLocale/format';
 import {
   applyGoogleLanguage,
   GOOGLE_TRANSLATE_ELEMENT_ID,
@@ -74,6 +75,9 @@ export const LanguageProvider: React.FC<Props> = ({ children }) => {
   const timers = useRef<number[]>([]);
   const googleStarted = useRef(false);
   const isRtl = isRtlLanguage(lang);
+  // Display-only digit selection; module state is synchronous so the first
+  // render already uses the persisted language rather than an English frame.
+  setDisplayLanguage(lang);
   const uiState = useSyncExternalStore(subscribePublicPacks, () => getPublicPackState('ui', lang));
   const installed = !!uiState.pack;
   const translations = useMemo(() => {
@@ -91,6 +95,8 @@ export const LanguageProvider: React.FC<Props> = ({ children }) => {
     // UI copy is intentionally downloadable before login/guest entry.
     try { localStorage.setItem(STORAGE_KEY, lang); } catch { /* storage disabled */ }
     void syncPublicPack('ui', lang, attempt > 0);
+    // Number mappings are tiny public display metadata and start before login.
+    void syncPublicPack('numbers', lang, attempt > 0);
     const retry = () => { void syncPublicPack('ui', lang, true); };
     window.addEventListener('online', retry);
     return () => window.removeEventListener('online', retry);

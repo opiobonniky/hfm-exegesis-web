@@ -2,6 +2,7 @@
 
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { displayDigits } from "@/services/numberLocale/format";
 
 interface SectionHeaderProps {
   title: string;
@@ -44,7 +45,7 @@ export function CompactSectionHeader({ title, count, action, className }: { titl
     <div className={cn("flex items-center justify-between gap-2", className)}>
       <div className="flex items-center gap-2">
         <span className="text-xs font-bold text-muted-foreground/50 uppercase tracking-[0.12em]">{title}</span>
-        {count !== undefined && <span className="text-[10px] font-bold text-muted-foreground/40 bg-muted/50 px-1.5 py-0.5 rounded-full">{count}</span>}
+        {count !== undefined && <span className="text-[10px] font-bold text-muted-foreground/40 bg-muted/50 px-1.5 py-0.5 rounded-full">{displayDigits(count)}</span>}
       </div>
       {action}
     </div>

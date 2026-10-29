@@ -21,6 +21,7 @@ import {
   X,
 } from "lucide-react";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { displayDigits } from '@/services/numberLocale/format';
 
 // ── Types ──
 
@@ -249,7 +250,7 @@ export default function HowToStudySheet({
             <Badge
               variant="outline"
               className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5"
-            >{tt("Step")}{step.number} of {steps.length}
+            >{tt("Step")}{displayDigits(step.number)} of {displayDigits(steps.length)}
             </Badge>
             {isStepCompleted && (
               <Badge

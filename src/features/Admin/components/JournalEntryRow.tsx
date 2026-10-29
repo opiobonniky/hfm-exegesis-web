@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import type { JournalModerationEntry } from "../hooks/useAdminJournalModeration";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { displayDate } from '@/services/numberLocale/format';
 
 interface Props {
   entry: JournalModerationEntry;
@@ -23,11 +24,11 @@ export function JournalEntryRow({
   const isLoading = actionLoading === entry.id;
   const createdDate = entry.createdOn ? new Date(entry.createdOn) : null;
   const formattedDate = createdDate && !Number.isNaN(createdDate.getTime())
-    ? new Intl.DateTimeFormat("en-US", {
+    ? displayDate(createdDate, undefined, {
       month: "short",
       day: "numeric",
       year: "numeric",
-    }).format(createdDate)
+    })
     : "—";
 
   return (

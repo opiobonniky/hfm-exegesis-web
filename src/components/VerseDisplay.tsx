@@ -11,6 +11,7 @@ import {
   renderVerseWithStrongs,
 } from "@/lib/bibleHelpers";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { displayDigits } from '@/services/numberLocale/format';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -194,10 +195,10 @@ export default function VerseDisplay({
                   className="text-lg sm:text-xl font-semibold text-foreground"
                   style={{ fontFamily: "'Cinzel', serif" }}
                 >
-                  {cd.book} {cd.chapter}
+                  {cd.book} {displayDigits(cd.chapter)}
                 </h2>
                 <span className="text-xs text-muted-foreground ml-auto">
-                  {cd.verses.length} {t.bibleReader?.verses || tt("verses")}
+                  {displayDigits(cd.verses.length)} {t.bibleReader?.verses || tt("verses")}
                 </span>
               </div>
 

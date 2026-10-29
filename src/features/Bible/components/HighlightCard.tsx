@@ -5,6 +5,8 @@ import { Highlighter, BookOpen, Trash2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { useLanguage } from '@/components/languages/languageProvider';
+import { displayDate, displayUiText } from '@/services/numberLocale/format';
 
 interface HighlightCardProps {
   bookName: string;
@@ -31,10 +33,11 @@ export function HighlightCard({
   onGoToReader,
   onDelete,
 }: HighlightCardProps) {
+  const { lang } = useLanguage();
   const date = new Date(createdOn);
   const dateStr = isNaN(date.getTime())
     ? ""
-    : date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    : displayDate(date, lang, { month: "short", day: "numeric" });
 
   return (
     <div
@@ -51,7 +54,7 @@ export function HighlightCard({
           />
           <div className="min-w-0">
             <p className="font-semibold text-sm text-foreground truncate">
-              {bookName} {chapter}:{verseNumber}
+              {bookName} {displayUiText(`${chapter}:${verseNumber}`, lang)}
             </p>
             {dateStr && (
               <p className="text-[11px] text-muted-foreground/50">{dateStr}</p>

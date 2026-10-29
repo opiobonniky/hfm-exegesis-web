@@ -6,6 +6,7 @@ import {
 } from "@/components/ui/dialog";
 import type { ContentType } from "../constants";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { displayDate } from '@/services/numberLocale/format';
 
 interface Props {
   open: boolean;
@@ -33,7 +34,7 @@ export function ConflictDialog({ open, onOpenChange, contentType, data, saving, 
                 ? `${existing.bookName} ${existing.chapter}:${existing.verseNumber}`
                 : existing.passageReference || existing.title || "";
               const date = existing.displayDate
-                ? new Date(existing.displayDate).toLocaleDateString()
+                ? displayDate(existing.displayDate)
                 : "";
               if (conflict?.type === "date") {
                 return `Another entry already exists for ${date}. Would you like to update it with your new content?`;

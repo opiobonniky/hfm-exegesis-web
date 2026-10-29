@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { useLanguage } from "@/components/languages/languageProvider";
 import type { DailyDevotionItem } from "../types";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { displayDate } from '@/services/numberLocale/format';
 
 interface Props {
   item: DailyDevotionItem;
@@ -15,9 +16,9 @@ interface Props {
 }
 
 export function DevotionListItem({ item, isSelected, onSelect, onEdit, onDelete, isAdmin }: Props) {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const dateStr = item.displayDate && typeof item.displayDate === "string"
-    ? new Date(item.displayDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+    ? displayDate(item.displayDate, lang, { month: "short", day: "numeric", year: "numeric" })
     : "—";
 
   return (

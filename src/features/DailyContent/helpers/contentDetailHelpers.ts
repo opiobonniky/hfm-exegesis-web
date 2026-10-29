@@ -1,4 +1,5 @@
 // Shared parse/format helpers for content detail pages
+import { displayDate } from '@/services/numberLocale/format';
 
 /** Parse a value into a list of strings (handles JSON arrays, newline-separated, plain strings) */
 export const parseList = (val: any): string[] => {
@@ -73,9 +74,9 @@ export const fmtDate = (d: string | null, style: "long" | "short" = "long") => {
   try {
     const date = new Date(d);
     if (style === "long") {
-      return date.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+      return displayDate(date, undefined, { month: "long", day: "numeric", year: "numeric" });
     }
-    return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+    return displayDate(date, undefined, { month: "short", day: "numeric", year: "numeric" });
   } catch { return d; }
 };
 

@@ -1,6 +1,7 @@
 import { BarChart3, HelpCircle, Clock, Sparkles, Flame, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { GlassCard, SectionLabel, StatCard } from "./PlanDetailUI";
+import { displayDate } from "@/services/numberLocale/format";
 
 interface PlanAdminTabProps {
   adminStats: any;
@@ -95,7 +96,7 @@ export function PlanAdminTab({
                     </td>
                     <td className="py-3 px-4 text-center">
                       <span className="text-[10px] text-muted-foreground whitespace-nowrap">
-                        {u.lastActivity ? new Date(u.lastActivity).toLocaleDateString(lang) : t.readingPlan.dateNotSet}
+                        {u.lastActivity ? displayDate(u.lastActivity, lang) : t.readingPlan.dateNotSet}
                       </span>
                     </td>
                     <td className="py-3 pl-4 text-right">

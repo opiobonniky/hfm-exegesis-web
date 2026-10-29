@@ -2,6 +2,7 @@
 
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { displayDigits } from "@/services/numberLocale/format";
 
 interface Tab {
   value: string;
@@ -45,7 +46,7 @@ export function TabBar({ tabs, value, onChange, className, size = "default" }: T
               <span className={cn("rounded-full px-1.5 py-0.5 text-[9px] font-bold",
                 value === tab.value ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
               )}>
-                {tab.count}
+                {displayDigits(tab.count)}
               </span>
             )}
           </button>

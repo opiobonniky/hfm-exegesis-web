@@ -6,6 +6,7 @@ import { WordResultItem } from "./WordResultItem";
 import { LanguageStatsBar } from "./LanguageStatsBar";
 import type { StrongsWordEntry } from "@/data/staticData";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { displayDigits } from '@/services/numberLocale/format';
 
 interface Props {
   searchQuery: string;
@@ -43,7 +44,7 @@ export function LabSearchPanel({ searchQuery, onSearchQueryChange, results, load
       )}
       {!loading && results.length > 0 && (
         <div className="space-y-3 mt-4">
-          <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">{resultTotal}{tt("word")}{resultTotal !== 1 ? "s" : ""}{tt("found")}</p>
+          <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">{displayDigits(resultTotal)}{tt("word")}{resultTotal !== 1 ? "s" : ""}{tt("found")}</p>
           <LanguageStatsBar counts={searchLangCounts} label={tt("Language Breakdown")} />
           <ScrollArea className="max-h-[55vh] pr-1">
             <div className="space-y-1.5">{results.map((w) => <WordResultItem key={w.strongsId} word={w} onClick={() => onWordClick(w.strongsId)} />)}</div>

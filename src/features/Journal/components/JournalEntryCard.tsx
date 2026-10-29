@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { JournalPageEntry } from "../hooks/useJournalPageFull";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { displayDate, displayDigits } from '@/services/numberLocale/format';
 
 const CATEGORY_COLORS: Record<string, { bg: string; text: string; dot: string }> = {
   reflection: { bg: "bg-amber-50 dark:bg-amber-950/30", text: "text-amber-700 dark:text-amber-300", dot: "bg-amber-500" },
@@ -23,8 +24,8 @@ function formatDate(dateStr?: string): string {
   const days = Math.floor(diffMs / 86400000);
   if (days === 0) return "Today";
   if (days === 1) return "Yesterday";
-  if (days < 7) return `${days}d ago`;
-  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  if (days < 7) return `${displayDigits(days)}d ago`;
+  return displayDate(d, undefined, { month: "short", day: "numeric" });
 }
 
 interface JournalEntryCardProps {

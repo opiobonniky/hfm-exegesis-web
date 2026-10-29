@@ -8,6 +8,7 @@ import {
 import type { ReactNode } from "react";
 import type { AddDailyVersePageViewModel } from "../hooks/useAddDailyVerse";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { displayDate } from '@/services/numberLocale/format';
 
 interface Props {
   model: AddDailyVersePageViewModel;
@@ -39,7 +40,7 @@ export function AddDailyVerseWorkspace({ model: h, children }: Props) {
 
           <div className="space-y-4 p-5 text-sm">
             <SnapshotRow icon={CalendarDays} label={tt("Publish date")}>
-              {h.selectedDate.toLocaleDateString(undefined, {
+              {displayDate(h.selectedDate, undefined, {
                 month: "short",
                 day: "numeric",
               })}

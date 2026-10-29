@@ -6,6 +6,7 @@ import { useLanguage } from "@/components/languages/languageProvider";
 import { sendPostRequest } from "@/services/api";
 import { ensureDataLoaded, getVerseText } from "@/utilities/bibleUtils";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { displayDate, displayDigits } from "@/services/numberLocale/format";
 
 export interface FavoriteItem {
   id: number;
@@ -88,8 +89,8 @@ export function useFavoritesPage() {
     const days = Math.floor(diffMs / 86400000);
     if (days === 0) return "Today";
     if (days === 1) return "Yesterday";
-    if (days < 7) return `${days} days ago`;
-    return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    if (days < 7) return `${displayDigits(days)} days ago`;
+    return displayDate(date, undefined, { month: "short", day: "numeric" });
   }, []);
 
   return {

@@ -2,10 +2,13 @@ import { BookOpen, Gem, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
 import { buildPlanCards } from '../utils/planCards';
 import { tt } from "@/components/languages/hardcodedTranslate";
+import { useLanguage } from "@/components/languages/languageProvider";
+import { displayNumber } from "@/services/numberLocale/format";
 import type { TierOverride } from "@/features/Auth/utils";
 import type { PlansTierStripProps } from "../types";
 
 export function PlansTierStrip({ eyebrow, title, lead, plans = [], tierOverrides }: PlansTierStripProps) {
+  const { lang } = useLanguage();
   return (
     <section className="px-4 sm:px-6 lg:px-12 pt-4 pb-8 sm:pt-8 sm:pb-12 bg-background">
       <div className="w-full max-w-5xl mx-auto">
@@ -68,7 +71,7 @@ export function PlansTierStrip({ eyebrow, title, lead, plans = [], tierOverrides
 
                 <div className="mt-6 flex items-baseline gap-1.5">
                   <span className="text-3xl sm:text-4xl font-black tracking-tighter text-foreground">
-                    {tier.id === 'free' ? tt('Free') : !tier.available ? tt('Unavailable') : new Intl.NumberFormat(undefined, { style: 'currency', currency: tier.currency || 'USD' }).format(monthlyPrice / 100)}
+                    {tier.id === 'free' ? tt('Free') : !tier.available ? tt('Unavailable') : displayNumber(monthlyPrice / 100, lang, { style: 'currency', currency: tier.currency || 'USD' })}
                   </span>
                   {tier.id === 'free' || !tier.available ? null : (
                     <span className="text-xs font-semibold text-muted-foreground">{tt("/month")}</span>

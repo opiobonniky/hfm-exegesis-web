@@ -7,6 +7,7 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { displayDate, displayDigits } from '@/services/numberLocale/format';
 
 interface ComparisonData {
   current: {
@@ -153,7 +154,7 @@ export default function SessionLeaderboard({
       >
         <p className="text-[9px] font-semibold text-muted-foreground/50">
           {best.total > 0
-            ? `Best session: ${best.percentage}% on ${new Date(best.date).toLocaleDateString()}`
+            ? `Best session: ${displayDigits(best.percentage)}% on ${displayDate(best.date)}`
             : tt("Complete a quiz to set your first record!")}
         </p>
         {onReset && (

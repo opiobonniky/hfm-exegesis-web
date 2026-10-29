@@ -1,6 +1,8 @@
 import type { HighlightItem } from "../hooks/useHighlightsPage";
 import { BibleGroupSection, BibleSubGroup } from "./BibleGroupSection";
 import { HighlightCard } from "./HighlightCard";
+import { useLanguage } from "@/components/languages/languageProvider";
+import { displayDigits } from "@/services/numberLocale/format";
 
 interface Props {
   grouped: Record<string, Record<number, HighlightItem[]>>;
@@ -12,12 +14,13 @@ interface Props {
 }
 
 export function HighlightsList({ grouped, verseTextMap, deleting, getColor, onGoToReader, onDelete }: Props) {
+  const { lang } = useLanguage();
   return (
     <>
       {Object.entries(grouped).map(([book, chapters]) => (
         <BibleGroupSection key={book} label={book}>
           {Object.entries(chapters).map(([chapter, verses]) => (
-            <BibleSubGroup key={chapter} label={`Chapter ${chapter}`}>
+            <BibleSubGroup key={chapter} label={`Chapter ${displayDigits(chapter, lang)}`}>
               {verses.map((verse) => (
                 <HighlightCard
                   key={verse.id}

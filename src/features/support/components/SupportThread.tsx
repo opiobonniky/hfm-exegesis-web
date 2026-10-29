@@ -9,6 +9,7 @@ import {
 } from "../constants";
 import type { SupportThreadProps } from "../types";
 import { formatSupportDateTime, formatSupportFileSize, isImageAttachment } from "../utils";
+import { displayDateTime } from "@/services/numberLocale/format";
 import { SupportCategoryBadge, SupportStatusBadge } from "./SupportStatusBadge";
 
 export function SupportThread({
@@ -131,7 +132,7 @@ export function SupportThread({
                 <div className="mt-1.5 flex items-center justify-end gap-1 text-[11px] text-muted-foreground">
                   <time
                     dateTime={message.createdOn}
-                    title={new Date(message.createdOn).toLocaleString()}
+                    title={displayDateTime(message.createdOn)}
                   >
                     {formatSupportDateTime(message.createdOn)}
                   </time>

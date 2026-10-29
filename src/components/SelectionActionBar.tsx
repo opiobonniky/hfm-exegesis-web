@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { ToolbarBtn } from "@/lib/bibleHelpers";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { displayDigits } from '@/services/numberLocale/format';
 
 export interface SelectionActionBarProps {
   onExplainLocal: (selectedVerses: string[]) => void;
@@ -65,7 +66,7 @@ export default function SelectionActionBar({
           className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground min-h-[44px] px-2 py-1 rounded-full hover:bg-muted/50 active:scale-[0.97] transition-all shrink-0 [touch-action:manipulation]"
         >
           <X className="w-3 h-3" />
-          <span>{selectedVerses.length}</span>
+          <span>{displayDigits(selectedVerses.length)}</span>
         </button>
 
         <div className="w-px h-4 bg-border/60 mx-0.5 sm:mx-1 shrink-0" />

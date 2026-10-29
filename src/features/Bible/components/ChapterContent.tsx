@@ -8,6 +8,7 @@ import type { ChapterData, ReaderHighlight } from "../types";
 import type { ChapterHeading } from "@/services/bibleApi";
 import { getVerseHighlightStyle } from "../constants";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { displayDigits } from '@/services/numberLocale/format';
 
 interface ChapterContentProps {
   chapters: ChapterData[];
@@ -56,6 +57,7 @@ export default function ChapterContent({
   chapterRefs,
   verseRefs,
 }: ChapterContentProps) {
+  const digits = (value: string | number) => displayDigits(value);
   const selectedVerseSet = new Set(selectedVerses);
 
   /**
@@ -113,7 +115,7 @@ export default function ChapterContent({
                 >
                   /
                 </span>
-                <span className="tabular-nums text-primary">{ch.chapter}</span>
+                <span className="tabular-nums text-primary">{digits(ch.chapter)}</span>
               </h2>
             </header>
             <div className="font-serif leading-[2.05] tracking-[0.012em] text-foreground/90 sm:leading-[2.15]">
@@ -170,7 +172,7 @@ export default function ChapterContent({
                               role="button"
                               tabIndex={0}
                               aria-pressed={isSelected}
-                              aria-label={`${ch.book} ${ch.chapter}:${verse.verse}. ${verse.text}`}
+                              aria-label={`${ch.book} ${digits(ch.chapter)}:${digits(verse.verse)}. ${verse.text}`}
                               style={hc ?? undefined}
                               data-highlight={highlight ? "true" : undefined}
                               className={cn(
@@ -188,7 +190,7 @@ export default function ChapterContent({
                                   isNowReading && "text-primary",
                                 )}
                               >
-                                {verse.verse}
+                                {digits(verse.verse)}
                                 {isNowReading && (
                                   <span className="verse-eq" aria-hidden="true">
                                     <span />

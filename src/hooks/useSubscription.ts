@@ -7,6 +7,7 @@
 // Monthly variants are treated the same as their base tier.
 
 import { useAuth } from "@/contexts/AuthContext";
+import { displayDate } from "@/services/numberLocale/format";
 
 export type SubscriptionTier = "free" | "legacy_sower" | "covenant_sower";
 
@@ -89,7 +90,7 @@ export function useSubscription() {
 
   /** Formatted expiry date string, or null if no expiry. */
   const expiresLabel = accessExpiresAt
-    ? new Date(accessExpiresAt).toLocaleDateString()
+    ? displayDate(accessExpiresAt)
     : null;
 
   return {

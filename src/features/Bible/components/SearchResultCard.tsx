@@ -2,6 +2,7 @@
 import { BookOpen, BookmarkCheck, BookMarked, StickyNote } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { displayUiText } from '@/services/numberLocale/format';
 
 interface SearchResultCardProps {
   ref_: string;
@@ -38,11 +39,11 @@ export default function SearchResultCard({
 
   return (
     <div className="group rounded-xl border border-border/40 bg-card p-4 hover:border-primary/20 hover:shadow-sm transition-all duration-200 cursor-pointer active:scale-[0.99]">
-      <button type="button" onClick={onOpen} className="block w-full rounded text-start focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label={`${tt("Open")} ${ref_}`}>
+      <button type="button" onClick={onOpen} className="block w-full rounded text-start focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label={`${tt("Open")} ${displayUiText(ref_)}`}>
       {/* Reference */}
        <span className="flex items-center gap-2 mb-2">
         <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
-        <span className="text-xs font-bold text-accent tracking-wide">{ref_}</span>
+        <span className="text-xs font-bold text-accent tracking-wide">{displayUiText(ref_)}</span>
         {translationAbbr && (
           <span className="notranslate rounded border text-[10px] font-bold bg-primary/10 border-primary/20 text-primary px-1.5 py-0" translate="no">
             {translationAbbr}

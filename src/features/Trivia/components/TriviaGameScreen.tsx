@@ -7,6 +7,7 @@ import AnimatedNumber from "@/components/trivia/AnimatedNumber";
 import SessionLeaderboard from "@/components/trivia/SessionLeaderboard";
 import type { DifficultyFilter } from "@/hooks/useTrivia";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { displayDigits } from '@/services/numberLocale/format';
 
 interface Props {
   phase: string;
@@ -61,11 +62,11 @@ export default function TriviaGameScreen({
         <div className="mb-4">
           <div className={cn("flex items-center justify-between mb-1.5", isRtl && "flex-row-reverse")}>
             <div className="flex items-center gap-2">
-              <p className="text-[10px] font-bold text-muted-foreground/70">{tt("Question")}{score.total + 1} of {totalCount}</p>
+              <p className="text-[10px] font-bold text-muted-foreground/70">{tt("Question")}{displayDigits(score.total + 1)} of {displayDigits(totalCount)}</p>
               <span className="w-1 h-1 rounded-full bg-primary/30" />
               <p className="text-[10px] font-medium text-muted-foreground/50">{difficulty ? difficulty.charAt(0).toUpperCase() + difficulty.slice(1) : tt("All")}</p>
             </div>
-            <p className="text-[10px] font-extrabold text-primary">{Math.round((score.total / totalCount) * 100)}%</p>
+            <p className="text-[10px] font-extrabold text-primary">{displayDigits(Math.round((score.total / totalCount) * 100))}%</p>
           </div>
           <div className="w-full h-2 overflow-hidden rounded-full border border-primary/15 bg-primary/10">
             <div className="h-full rounded-full transition-all duration-500 ease-out bg-gradient-to-r from-primary to-primary/80" style={{ width: `${(score.total / totalCount) * 100}%`, boxShadow: "0 0 8px hsl(var(--primary)/0.3)" }} />
@@ -110,7 +111,7 @@ export default function TriviaGameScreen({
             {streak >= 2 && (
               <div className={cn("mt-3 flex items-center justify-center gap-1.5 py-2 px-4 rounded-xl self-center mx-auto w-fit border", isRtl && "flex-row-reverse")} style={{ backgroundColor: streak >= 3 ? "hsl(var(--primary)/0.08)" : "hsl(var(--primary)/0.04)", borderColor: streak >= 3 ? "hsl(var(--primary)/0.3)" : "hsl(var(--primary)/0.15)", boxShadow: streak >= 3 ? "0 0 15px hsl(var(--primary)/0.15)" : "none" }}>
                 <Star className="w-4 h-4" style={{ color: streak >= 3 ? "hsl(var(--primary))" : "hsl(var(--primary)/0.6)" }} fill={streak >= 3 ? "hsl(var(--primary))" : "transparent"} />
-                <p className="text-xs font-extrabold" style={{ color: streak >= 3 ? "hsl(var(--primary))" : "hsl(var(--primary)/0.7)" }}>{streak}{tt("in a row")}{streak >= 3 ? " \u2726" : ""}</p>
+                <p className="text-xs font-extrabold" style={{ color: streak >= 3 ? "hsl(var(--primary))" : "hsl(var(--primary)/0.7)" }}>{displayDigits(streak)}{tt("in a row")}{streak >= 3 ? " \u2726" : ""}</p>
               </div>
             )}
           </div>
@@ -143,7 +144,7 @@ export default function TriviaGameScreen({
               <span className="text-primary/40">/</span>
               <AnimatedNumber value={score.total} springConfig={{ stiffness: 60, damping: 15 }} />
             </p>
-            <p className="text-xs font-semibold text-muted-foreground/60">{score.total > 0 ? Math.round((score.correct / score.total) * 100) : 0}%</p>
+            <p className="text-xs font-semibold text-muted-foreground/60">{score.total > 0 ? displayDigits(Math.round((score.correct / score.total) * 100)) : displayDigits(0)}%</p>
           </div>
           {leaderboardComparison && leaderboardState.bestSession.total > 0 && (
             <div className="w-full max-w-xs"><SessionLeaderboard comparison={leaderboardComparison} /></div>
@@ -151,7 +152,7 @@ export default function TriviaGameScreen({
           {stats && stats.totalAnswered > score.total && (
             <div className="flex items-center gap-2 px-4 py-2 rounded-full" style={{ backgroundColor: "hsl(var(--foreground)/0.03)", border: "1px solid hsl(var(--foreground)/0.06)" }}>
               <BookOpen className="w-3.5 h-3.5 text-primary/40" />
-              <p className="text-[10px] font-semibold text-muted-foreground/60">{tt("Lifetime:")}{stats.correct}/{stats.totalAnswered} ({stats.percentage}%)</p>
+              <p className="text-[10px] font-semibold text-muted-foreground/60">{tt("Lifetime:")}{displayDigits(stats.correct)}/{displayDigits(stats.totalAnswered)} ({displayDigits(stats.percentage)}%)</p>
             </div>
           )}
           <button onClick={onReset} className="group inline-flex items-center gap-2.5 px-8 py-3 rounded-2xl text-sm font-bold text-card transition-all hover:brightness-110 active:scale-[0.98] mt-2 overflow-hidden relative uppercase tracking-wider bg-gradient-to-br from-primary to-primary/80" style={{ boxShadow: "0 0 20px hsl(var(--primary)/0.3), 0 4px 15px hsl(var(--primary)/0.2)" }}>

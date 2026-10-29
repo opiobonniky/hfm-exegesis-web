@@ -6,6 +6,7 @@ import { useLanguage } from "@/components/languages/languageProvider";
 import { sendPostRequest } from "@/services/api";
 import { ensureDataLoaded, getVerseText } from "@/utilities/bibleUtils";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { displayDate } from "@/services/numberLocale/format";
 
 export interface NoteItem {
   id: number;
@@ -125,7 +126,7 @@ export function useNotesPage() {
     if (!dateString) return "";
     const date = new Date(dateString);
     if (isNaN(date.getTime())) return "";
-    return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+    return displayDate(date, undefined, { month: "short", day: "numeric", year: "numeric" });
   }, []);
 
   return {

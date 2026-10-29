@@ -2,6 +2,8 @@ import { ArrowLeft, BookOpen, ChevronDown, ChevronRight, Layers3 } from "lucide-
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { BibleChapterSelectionProps } from "../types";
+import { useLanguage } from "@/components/languages/languageProvider";
+import { displayDigits, displayUiText } from "@/services/numberLocale/format";
 
 export default function BibleChapterSelection({
   chapters,
@@ -18,6 +20,8 @@ export default function BibleChapterSelection({
   onSelectBook,
   onSelectChapter,
 }: BibleChapterSelectionProps) {
+  const { lang } = useLanguage();
+  const digits = (value: string | number) => displayDigits(value, lang);
   return (
     <section className="flex h-full min-h-0 flex-col bg-background" dir={isRtl ? "rtl" : "ltr"}>
       <header className="shrink-0 border-b border-primary-foreground/20 bg-primary text-primary-foreground shadow-sm">
@@ -41,7 +45,7 @@ export default function BibleChapterSelection({
               <span className="truncate font-[family-name:var(--font-heading)] text-lg font-bold tracking-tight sm:text-xl">{title}</span>
               <ChevronDown className="h-4 w-4 transition-transform group-hover:translate-y-0.5" />
             </span>
-            <span className="mt-0.5 block text-[11px] font-medium text-primary-foreground/70">{subtitle}</span>
+            <span className="mt-0.5 block text-[11px] font-medium text-primary-foreground/70">{displayUiText(subtitle, lang)}</span>
           </button>
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-foreground/10">
             <BookOpen className="h-5 w-5" />
@@ -57,14 +61,14 @@ export default function BibleChapterSelection({
             </span>
             <span className="min-w-0">
               <span className="block text-sm font-bold text-foreground">{summaryLabel}</span>
-              <span className="mt-0.5 block text-xs font-medium text-muted-foreground">{totalLabel}</span>
+              <span className="mt-0.5 block text-xs font-medium text-muted-foreground">{displayUiText(totalLabel, lang)}</span>
             </span>
           </div>
 
           <div className="space-y-2">
             {chapters.map((chapter) => {
               const isCurrent = chapter === currentChapter;
-              const label = chapterLabel.replace("{n}", String(chapter));
+              const label = chapterLabel.replace("{n}", digits(chapter));
               return (
                 <button
                   type="button"
@@ -80,7 +84,7 @@ export default function BibleChapterSelection({
                     "flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-sm font-extrabold text-primary",
                     isCurrent && "bg-primary text-primary-foreground",
                   )}>
-                    {chapter}
+                    {digits(chapter)}
                   </span>
                   <span className={cn("min-w-0 flex-1 text-sm font-bold text-foreground", isCurrent && "text-primary")}>{label}</span>
                   <ChevronRight className={cn("h-4 w-4 text-muted-foreground", isRtl && "rotate-180")} />

@@ -4,6 +4,7 @@ import { DayCardEdit } from "./DayCardEdit";
 import type { DayAssignment } from "../types";
 import { tt } from '@/components/languages/hardcodedTranslate';
 import { StableLoadingContent } from "@/components/ui/StableLoadingContent";
+import { displayDigits } from "@/services/numberLocale/format";
 
 interface EditPlanDaysSectionProps {
   days: DayAssignment[];
@@ -32,7 +33,7 @@ export function EditPlanDaysSection({
           <p className="text-sm text-muted-foreground">{tt("Edit chapters, reflections, and quiz questions for each day.")}</p>
         </div>
         <span className="rounded-full bg-teal-50 px-2.5 py-1 text-xs font-semibold text-teal-700">
-          {days.length}{tt("days")}</span>
+          {displayDigits(days.length)}{tt("days")}</span>
       </div>
 
       {days.map((day, dayIndex) => (

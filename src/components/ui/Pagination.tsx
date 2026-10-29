@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { displayDigits } from '@/services/numberLocale/format';
 
 interface PaginationProps {
   page: number;
@@ -35,7 +36,7 @@ export function Pagination({
       >
         <ChevronLeft className="w-3.5 h-3.5" />
       </Button>
-      <span className="text-sm text-muted-foreground">{tt("Page")}{page + 1} of {totalPages}
+      <span className="text-sm text-muted-foreground">{tt("Page")}{displayDigits(page + 1)} of {displayDigits(totalPages)}
       </span>
       <Button
         variant="outline"

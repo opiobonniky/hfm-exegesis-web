@@ -13,6 +13,8 @@ import type {
 } from "../types";
 import { parseJsonList } from "../utils/readerPresentation";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { useLanguage } from '@/components/languages/languageProvider';
+import { displayDigits } from '@/services/numberLocale/format';
 
 /** Section header with icon + label */
 function Section({ icon: Icon, label, children }: { icon: LucideIcon; label: string; children: React.ReactNode }) {
@@ -34,11 +36,12 @@ function SubLabel({ label }: { label: string }) {
 
 /** Numbered list */
 function NumberedList({ items }: { items: string[] }) {
+  const { lang } = useLanguage();
   return (
     <div className="space-y-2">
       {items.map((item, i) => (
         <div key={i} className="flex gap-2.5 items-start">
-          <span className="w-5 h-5 rounded-md bg-primary/10 flex items-center justify-center text-[10px] font-bold text-primary shrink-0 mt-0.5">{i + 1}</span>
+          <span className="w-5 h-5 rounded-md bg-primary/10 flex items-center justify-center text-[10px] font-bold text-primary shrink-0 mt-0.5">{displayDigits(i + 1, lang)}</span>
           <span className="text-sm text-foreground/80 leading-relaxed">{item}</span>
         </div>
       ))}
@@ -73,6 +76,7 @@ export default function VerseExplanationDrawer({
   loading,
   explanation,
 }: VerseExplanationDrawerProps) {
+  const { lang } = useLanguage();
   // Parse structured fields
   const wordStudies = parseJsonList<ExplanationWordStudy>(explanation?.wordStudies);
   const practicalApps = parseJsonList(explanation?.practicalApplications);
@@ -91,7 +95,7 @@ export default function VerseExplanationDrawer({
             </div>
             <div>
               <SheetTitle className="text-sm font-bold text-foreground">{title}</SheetTitle>
-              <SheetDescription className="text-[11px] text-muted-foreground">{bookName} {chapter}:{verse}</SheetDescription>
+              <SheetDescription className="text-[11px] text-muted-foreground">{bookName} {displayDigits(`${chapter}:${verse}`, lang)}</SheetDescription>
             </div>
           </div>
         </SheetHeader>

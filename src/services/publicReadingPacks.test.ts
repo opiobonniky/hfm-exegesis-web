@@ -2,6 +2,7 @@ import { beforeEach, expect, it, vi } from 'vitest';
 import { webcrypto } from 'node:crypto';
 import { TextEncoder } from 'node:util';
 import { getPublicPackState, getPackedUiDictionary, sha256, syncPublicPack, validatePublicPack } from './publicReadingPacks';
+import { getNumberLocale } from './numberLocale/format';
 import { BIBLE_BOOKS } from '@/features/Bible/constants';
 import { normalizeBookPrologue } from './bookProloguesApi';
 
@@ -46,6 +47,29 @@ it('installs public UI copy atomically and keeps it after a failed update', asyn
   expect(getPublicPackState('ui', 'es')).toMatchObject({ stage: 'ready', error: 'offline' });
   expect(getPackedUiDictionary('es').get('Hello {name}')).toBe('Hola {name}');
   expect(put).toHaveBeenCalledTimes(1);
+});
+it('accepts and installs only the reviewed number mapping for a language', async () => {
+  const pack = {
+    schemaVersion: 1 as const, revision: 'a'.repeat(12), language: 'ar',
+    locale: 'ar-SA', numberingSystem: 'arab', digits: '٠١٢٣٤٥٦٧٨٩',
+  };
+  expect(validatePublicPack('numbers', 'ar', pack)).toBeTruthy();
+  expect(() => validatePublicPack('numbers', 'ar', { ...pack, digits: '0123456789' })).toThrow();
+  expect(() => validatePublicPack('numbers', 'ar', { ...pack, digits: '٠١٢٣٤٥٦٧٨' })).toThrow();
+  expect(() => validatePublicPack('numbers', 'hi', pack)).toThrow();
+
+  const put = vi.fn();
+  vi.stubGlobal('caches', { open: async () => ({ match: async () => undefined, put }) });
+  const text = JSON.stringify(pack);
+  const fetcher = vi.fn()
+    .mockResolvedValueOnce({ ok: true, text: async () => JSON.stringify({ status: 'ready', language: 'ar', revision: pack.revision, sha256: await sha256(text) }) })
+    .mockResolvedValueOnce({ ok: true, text: async () => text });
+  vi.stubGlobal('fetch', fetcher);
+  await syncPublicPack('numbers', 'ar', true);
+  expect(getPublicPackState('numbers', 'ar').stage).toBe('ready');
+  expect(getNumberLocale('ar')).toMatchObject({ locale: 'ar-SA', numberingSystem: 'arab', digits: '٠١٢٣٤٥٦٧٨٩' });
+  expect(put).toHaveBeenCalledTimes(1);
+  expect(fetcher.mock.calls.every(call => call[1].credentials === 'omit')).toBe(true);
 });
 it('a failed first installation never advertises offline availability', async () => {
   const put = vi.fn();

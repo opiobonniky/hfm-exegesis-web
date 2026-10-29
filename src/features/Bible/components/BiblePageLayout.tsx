@@ -6,6 +6,8 @@ import { Loader2, RefreshCw, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BIBLE_BOOKS } from "../constants";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { useLanguage } from '@/components/languages/languageProvider';
+import { displayDigits } from '@/services/numberLocale/format';
 
 interface BiblePageLayoutProps {
   children: ReactNode;
@@ -34,6 +36,7 @@ export function BiblePageLayout({
   emptyTitle = "Nothing here yet", emptyMessage = "Items will appear here.",
   emptyIcon, actions,
 }: BiblePageLayoutProps) {
+  const { lang } = useLanguage();
   const collectionMode = title !== undefined;
 
   return (
@@ -44,7 +47,7 @@ export function BiblePageLayout({
             <div className="mx-auto flex max-w-4xl items-center justify-between gap-3 px-4 py-4 sm:px-6">
               <div>
                 <h1 className="font-[family-name:var(--font-heading)] text-xl font-bold text-foreground">{title}</h1>
-                <p className="text-xs text-muted-foreground">{count}{tt("items")}</p>
+                <p className="text-xs text-muted-foreground">{displayDigits(count, lang)}{tt("items")}</p>
               </div>
               <div className="flex items-center gap-2">
                 {actions}

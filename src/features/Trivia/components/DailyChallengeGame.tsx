@@ -6,6 +6,7 @@ import StreakCalendar from "@/components/trivia/StreakCalendar";
 import { DAILY_QUESTIONS_COUNT } from "@/hooks/useDailyChallenge";
 import type { DailyChallengeSession } from "@/hooks/useDailyChallenge";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { displayDigits } from '@/services/numberLocale/format';
 
 interface Props {
   session: DailyChallengeSession;
@@ -34,7 +35,7 @@ export default function DailyChallengeGame({
             <p className="text-[10px] font-extrabold uppercase tracking-[0.15em] text-amber-500">{tt("Daily Challenge")}</p>
           </div>
           <p className="text-[10px] font-bold text-muted-foreground/70">
-            {session.currentQuestion ? `${session.currentIndex + 1} of ${session.questions.length}` : ""}
+            {session.currentQuestion ? `${displayDigits(session.currentIndex + 1)} of ${displayDigits(session.questions.length)}` : ""}
           </p>
         </div>
         <div className="flex items-center gap-1.5">
@@ -45,7 +46,7 @@ export default function DailyChallengeGame({
         {consecutiveDays > 0 && (
           <div className="flex items-center gap-1 mt-2">
             <Flame className="w-3 h-3 text-amber-500" />
-            <span className="text-[10px] font-bold text-amber-500">{consecutiveDays}{tt("-day streak")}</span>
+            <span className="text-[10px] font-bold text-amber-500">{displayDigits(consecutiveDays)}{tt("-day streak")}</span>
           </div>
         )}
       </div>
@@ -75,7 +76,7 @@ export default function DailyChallengeGame({
         <div className="flex flex-col items-center pt-4 gap-4">
           <PartyPopper className="w-12 h-12 text-amber-500" />
           <h2 className="text-xl sm:text-2xl font-black text-center">{tt("Daily Challenge Complete!")}</h2>
-          <p className="text-2xl font-black text-amber-500">{session.score.correct}/{session.score.total}</p>
+          <p className="text-2xl font-black text-amber-500">{displayDigits(session.score.correct)}/{displayDigits(session.score.total)}</p>
            <StreakCalendar weekHistory={{}} todayKey={todayKey} isTodayCompleted={true} consecutiveDays={consecutiveDays} />
           <button onClick={onBack} className="inline-flex items-center gap-2.5 px-8 py-3 rounded-2xl text-sm font-bold text-card bg-gradient-to-br from-primary to-primary/80">
             <RotateCcw className="w-4 h-4" />{tt("Back to Menu")}</button>

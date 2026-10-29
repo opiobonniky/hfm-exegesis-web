@@ -4,6 +4,8 @@
 import { Star, BookOpen, Trash2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { useLanguage } from '@/components/languages/languageProvider';
+import { displayUiText } from '@/services/numberLocale/format';
 
 interface FavoriteCardProps {
   bookName: string;
@@ -28,6 +30,7 @@ export function FavoriteCard({
   onDelete,
   formatDate,
 }: FavoriteCardProps) {
+  const { lang } = useLanguage();
   const dateStr = formatDate(createdOn);
 
   return (
@@ -40,7 +43,7 @@ export function FavoriteCard({
           </div>
           <div className="min-w-0">
             <p className="font-semibold text-sm text-foreground truncate">
-              {bookName} {chapter}:{verseNumber}
+              {bookName} {displayUiText(`${chapter}:${verseNumber}`, lang)}
             </p>
             {dateStr && (
               <p className="text-[11px] text-muted-foreground/50">{dateStr}</p>

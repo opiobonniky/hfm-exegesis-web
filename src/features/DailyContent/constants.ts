@@ -1,4 +1,5 @@
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { displayDate } from '@/services/numberLocale/format';
 // ─── DailyContent Constants ────────────────────────────────────────────────────
 
 export const SMART_PAGE_SIZE = 6;
@@ -86,15 +87,11 @@ export const isToday = (utcDateString: unknown): boolean =>
 export const isFuture = (utcDateString: unknown): boolean =>
   getLocalDateString(utcDateString) > getLocalDateString(new Date());
 
-export const formatDisplayDate = (utcDateString: unknown): string => {
-  const d = safeDate(utcDateString);
-  return d.toLocaleDateString(undefined, { weekday: "short", year: "numeric", month: "short", day: "numeric" });
-};
+export const formatDisplayDate = (utcDateString: unknown): string =>
+  displayDate(safeDate(utcDateString), undefined, { weekday: "short", year: "numeric", month: "short", day: "numeric" });
 
-export const formatShortDate = (utcDateString: unknown): string => {
-  const d = safeDate(utcDateString);
-  return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
-};
+export const formatShortDate = (utcDateString: unknown): string =>
+  displayDate(safeDate(utcDateString), undefined, { month: "short", day: "numeric" });
 
 export const getConflictMessage = (conflict: any, t?: any): string => {
   if (!conflict) return "";

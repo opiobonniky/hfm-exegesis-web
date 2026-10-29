@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import { tt } from "@/components/languages/hardcodedTranslate";
 import type { SupportTicketListProps } from "../types";
 import { formatSupportDate } from "../utils";
+import { displayDateTime } from "@/services/numberLocale/format";
 import { SupportCategoryBadge, SupportPriorityDot, SupportStatusBadge } from "./SupportStatusBadge";
 
 export function SupportTicketList({
@@ -67,7 +68,7 @@ export function SupportTicketList({
                 <span>· {ticket.messageCount} {tt("messages")}</span>
                 <time
                   dateTime={ticket.lastMessageAt || ticket.createdOn}
-                  title={new Date(ticket.lastMessageAt || ticket.createdOn).toLocaleString()}
+                  title={displayDateTime(ticket.lastMessageAt || ticket.createdOn)}
                 >
                   · {formatSupportDate(ticket.lastMessageAt || ticket.createdOn)}
                 </time>

@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { JournalEntryRow } from "./JournalEntryRow";
 import type { JournalModerationEntry } from "../hooks/useAdminJournalModeration";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { displayDate } from '@/services/numberLocale/format';
 
 interface JournalTableProps {
   entries: JournalModerationEntry[];
@@ -32,11 +33,11 @@ export function JournalTable({
     if (!value) return "—";
     const date = new Date(value);
     if (Number.isNaN(date.getTime())) return "—";
-    return new Intl.DateTimeFormat("en-US", {
+    return displayDate(date, undefined, {
       month: "short",
       day: "numeric",
       year: "numeric",
-    }).format(date);
+    });
   };
 
   return (

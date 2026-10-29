@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { displayDate as formatDisplayDate } from "@/services/numberLocale/format";
 
 interface Props {
   id: number;
@@ -34,7 +35,7 @@ export function ExegesisCard({ title, passageReference, displayDate, teachingBod
       <CardContent>
         {displayDate && (
           <p className="text-xs text-muted-foreground mb-2 flex items-center gap-1">
-            <CalendarDays className="w-3 h-3" /> {new Date(displayDate).toLocaleDateString()}
+            <CalendarDays className="w-3 h-3" /> {formatDisplayDate(displayDate)}
           </p>
         )}
         <p className="text-sm text-muted-foreground line-clamp-3 mb-4">{teachingBody}</p>

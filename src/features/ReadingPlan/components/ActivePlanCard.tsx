@@ -4,6 +4,7 @@ import { useLanguage } from "@/components/languages/languageProvider";
 import { ProgressCircle } from "./ProgressCircle";
 import type { ReadingPlan } from "../types";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { displayDigits } from '@/services/numberLocale/format';
 
 interface Props {
   plan: ReadingPlan;
@@ -39,7 +40,7 @@ export function ActivePlanCard({ plan, pct, done, streak, nextDay, lastDay, isCo
                 )}
               </div>
               <p className="text-sm text-muted-foreground">
-                {(t.readingPlan?.daysDone || "{completed} of {total} days done").replace("{completed}", String(done)).replace("{total}", String(total))}
+                {(t.readingPlan?.daysDone || "{completed} of {total} days done").replace("{completed}", displayDigits(done)).replace("{total}", displayDigits(total))}
               </p>
               <button onClick={onRemove} className="mt-3 text-xs text-muted-foreground/70 hover:text-red-500 transition-colors">
                 {t.readingPlan?.removePlanLink || tt("Remove plan")}
@@ -50,20 +51,20 @@ export function ActivePlanCard({ plan, pct, done, streak, nextDay, lastDay, isCo
           <div className="h-1.5 bg-muted rounded-full overflow-hidden mb-2">
             <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: accent }} />
           </div>
-          <p className="text-xs text-muted-foreground/70 mb-4">{(t.readingPlan?.pctComplete || "{pct}% complete").replace("{pct}", String(pct))}</p>
+          <p className="text-xs text-muted-foreground/70 mb-4">{(t.readingPlan?.pctComplete || "{pct}% complete").replace("{pct}", displayDigits(pct))}</p>
           <div className="grid grid-cols-3 gap-4 bg-muted rounded-xl p-3 mb-4">
             <div className="text-center">
-              <div className="flex items-center justify-center gap-1 text-amber-500 mb-1"><Flame className="w-4 h-4" /><span className="font-bold text-foreground">{streak}d</span></div>
+              <div className="flex items-center justify-center gap-1 text-amber-500 mb-1"><Flame className="w-4 h-4" /><span className="font-bold text-foreground">{displayDigits(streak)}d</span></div>
               <p className="text-xs text-muted-foreground">{t.readingPlan?.streak || tt("Streak")}</p>
             </div>
             <div className={cn("text-center", isRtl ? "border-r border-border" : "border-l border-border")}>
-              <div className="flex items-center justify-center gap-1 text-emerald-500 mb-1"><CheckCircle className="w-4 h-4" /><span className="font-bold text-foreground">{done}</span></div>
+              <div className="flex items-center justify-center gap-1 text-emerald-500 mb-1"><CheckCircle className="w-4 h-4" /><span className="font-bold text-foreground">{displayDigits(done)}</span></div>
               <p className="text-xs text-muted-foreground">{t.readingPlan?.done || tt("Done")}</p>
             </div>
             <div className="text-center">
               <div className="flex items-center justify-center gap-1 text-muted-foreground mb-1">
                 <BookOpen className="w-4 h-4" />
-                <span className="font-bold text-foreground">{lastDay ? (t.readingPlan?.dayLabel || "Day {day}").replace("{day}", String(lastDay)) : "—"}</span>
+                <span className="font-bold text-foreground">{lastDay ? (t.readingPlan?.dayLabel || "Day {day}").replace("{day}", displayDigits(lastDay)) : "—"}</span>
               </div>
               <p className="text-xs text-muted-foreground">{t.readingPlan?.lastRead || tt("Last read")}</p>
             </div>
@@ -81,8 +82,8 @@ export function ActivePlanCard({ plan, pct, done, streak, nextDay, lastDay, isCo
             <button onClick={onRead} className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-muted text-foreground/80 font-semibold hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors">
               <Play className="w-4 h-4" />
               {done === 0
-                ? (t.readingPlan?.beginDay || "Begin Day {day}").replace("{day}", "1")
-                : (t.readingPlan?.continueDay || "Continue · Day {day}").replace("{day}", String(nextDay))}
+                ? (t.readingPlan?.beginDay || "Begin Day {day}").replace("{day}", displayDigits(1))
+                : (t.readingPlan?.continueDay || "Continue · Day {day}").replace("{day}", displayDigits(nextDay))}
             </button>
           )}
         </div>

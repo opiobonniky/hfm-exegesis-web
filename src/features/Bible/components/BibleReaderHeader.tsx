@@ -13,6 +13,8 @@ import FontSizeControls from "./FontSizeControls";
 import TranslationPicker from "./TranslationPicker";
 import type { BibleReaderHeaderProps } from "../types";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { useLanguage } from '@/components/languages/languageProvider';
+import { displayDigits } from '@/services/numberLocale/format';
 
 export default function BibleReaderHeader({
   bookName,
@@ -41,6 +43,7 @@ export default function BibleReaderHeader({
   onFontSizeChange,
   onSearch,
 }: BibleReaderHeaderProps) {
+  const { lang } = useLanguage();
   return (
     <header className="z-30 shrink-0 border-b border-border/70 bg-background/90 backdrop-blur-xl">
       <div className="mx-auto flex min-h-16 w-full items-center gap-1.5 px-2 sm:gap-2 sm:px-5">
@@ -80,7 +83,7 @@ export default function BibleReaderHeader({
         >
           <Layers3 className="h-4 w-4 text-primary" />
           <span className="text-xs font-bold text-foreground sm:text-sm">
-            <span className="hidden sm:inline">{tt("Chapter")} </span>{chapter}
+            <span className="hidden sm:inline">{tt("Chapter")} </span>{displayDigits(chapter, lang)}
           </span>
           <ChevronDown className="h-3.5 w-3.5 text-muted-foreground transition-transform group-hover:translate-y-0.5" />
         </button>

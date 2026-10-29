@@ -2,6 +2,7 @@
 
 import { BookOpen, Calendar, CheckCircle2 } from "lucide-react";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { displayDate } from '@/services/numberLocale/format';
 
 export const DIFFICULTY_CONFIG: Record<string, { color: string; bg: string }> = {
   easy: { color: "text-emerald-700", bg: "bg-emerald-50 border-emerald-200" },
@@ -39,7 +40,7 @@ export const normalizeCategory = (cat: string): string => {
 
 export const formatDate = (iso: string | null, locale = "en-US"): string => {
   if (!iso) return "—";
-  return new Date(iso).toLocaleDateString(locale, { year: "numeric", month: "long", day: "numeric" });
+  return displayDate(iso, locale, { year: "numeric", month: "long", day: "numeric" });
 };
 
 export const PLAN_STEPS = [

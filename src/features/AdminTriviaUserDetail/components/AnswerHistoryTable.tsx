@@ -14,6 +14,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { displayDate } from "@/services/numberLocale/format";
 import type { TriviaUserDetail } from "../hooks/useAdminTriviaUserDetailPage";
 import { tt } from '@/components/languages/hardcodedTranslate';
 
@@ -60,7 +61,7 @@ export function AnswerHistoryTable({ answers }: AnswerHistoryTableProps) {
                       )}
                     </TableCell>
                     <TableCell className="text-muted-foreground">
-                      {new Date(answer.answeredAt).toLocaleDateString()}
+                      {displayDate(answer.answeredAt)}
                     </TableCell>
                   </TableRow>
                 ))}

@@ -7,6 +7,7 @@ import { LabBookSearchField } from "./LabBookSearchField";
 import type { StrongsWordEntry } from "@/data/staticData";
 import type { LabChartItem, LabChartMode } from "../types";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { displayDigits } from '@/services/numberLocale/format';
 
 interface Props {
   selectedBook: string;
@@ -46,8 +47,8 @@ export function LabBrowsePanel({
       {!browseLoading && browseLoaded && browseWords.length > 0 && (
         <div className="space-y-4 mt-2">
           {chartData.length > 0 && <WordFrequencyChart data={chartData} onWordClick={onWordClick} mode={chartMode} onModeChange={onChartModeChange} langFilter={langFilter} onLangFilterChange={onLangFilterChange} langCounts={langCounts} />}
-          <LanguageStatsBar counts={langCounts} label={`${selectedBook} — ${browseTotal} unique book words`} icon={<LibraryBig className="w-3.5 h-3.5 text-primary" />} />
-          <div className="flex items-center justify-between"><p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">{tt("All Words (")}{browseWords.length} of {browseTotal})</p></div>
+          <LanguageStatsBar counts={langCounts} label={`${selectedBook} — ${displayDigits(browseTotal)} unique book words`} icon={<LibraryBig className="w-3.5 h-3.5 text-primary" />} />
+          <div className="flex items-center justify-between"><p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">{tt("All Words (")}{displayDigits(browseWords.length)} of {displayDigits(browseTotal)})</p></div>
           <div
             className="max-h-[45vh] overflow-y-auto pr-1"
             onScroll={(event) => {
@@ -73,7 +74,7 @@ export function LabBrowsePanel({
             <div className="flex items-center justify-center pt-1 pb-2">
               <Button variant="outline" size="sm" onClick={onLoadMore} disabled={browseLoading} className="gap-1.5 text-xs h-8">
                 {browseLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <BookOpen className="w-3 h-3" />}
-                {browseLoading ? tt("Loading...") : `Show more (${browseWords.length} of ${browseTotal} words)`}
+                {browseLoading ? tt("Loading...") : `Show more (${displayDigits(browseWords.length)} of ${displayDigits(browseTotal)} words)`}
               </Button>
             </div>
           )}

@@ -1,4 +1,5 @@
 /** ProgressCircle — SVG ring showing percent completion */
+import { displayDigits } from "@/services/numberLocale/format";
 export function ProgressCircle({
   percent, color = "#14b8a6", backgroundColor = "#e5e7eb", size = 68, isRtl,
 }: {
@@ -18,7 +19,7 @@ export function ProgressCircle({
           style={{ transition: "stroke-dashoffset 0.5s ease" }} />
       </svg>
       <div className="absolute inset-0 flex items-center justify-center">
-        <span className="text-sm font-bold" style={{ color }}>{percent}%</span>
+        <span className="text-sm font-bold" style={{ color }}>{displayDigits(percent)}%</span>
       </div>
     </div>
   );

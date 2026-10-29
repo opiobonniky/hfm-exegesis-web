@@ -5,6 +5,7 @@ import { MAX_CHAPTERS, SUGGESTED_PASSAGES } from "@/features/Lab/constants";
 import { BOOK_NAMES } from "../constants";
 import { tt } from '@/components/languages/hardcodedTranslate';
 import { StableLoadingContent } from "@/components/ui/StableLoadingContent";
+import { displayDigits } from "@/services/numberLocale/format";
 
 interface Props {
   bookName: string;

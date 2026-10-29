@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import type { ActionButtonProps } from "../types";
 import { VERSE_ACTION_TONE_CLASSES } from "../constants";
+import { displayDigits } from "@/services/numberLocale/format";
 
 export function ActionButton({
   icon: Icon,
@@ -31,10 +32,10 @@ export function ActionButton({
       </span>
       {hasCount && (
         <span
-          aria-label={`${count} entries`}
+          aria-label={`${displayDigits(count)} entries`}
           className="shrink-0 rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-extrabold tabular-nums text-primary"
         >
-          {count}
+          {displayDigits(count)}
         </span>
       )}
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="size-4 shrink-0 text-muted-foreground/60 rtl:rotate-180" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>

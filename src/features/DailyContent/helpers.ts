@@ -1,4 +1,5 @@
 // ─── Daily Content Helpers ────────────────────────────────────────────────────
+import { displayDate } from '@/services/numberLocale/format';
 
 const parseDate = (v: unknown): string => {
   if (!v) return "";
@@ -9,7 +10,7 @@ const parseDate = (v: unknown): string => {
 
 export const fmtDate = (v: any, format: "short" | "long" = "short"): string => {
   try {
-    return new Date(parseDate(v)).toLocaleDateString("en-US", {
+    return displayDate(parseDate(v), undefined, {
       weekday: format === "long" ? "short" : undefined,
       month: format, day: "numeric", year: "numeric",
     });

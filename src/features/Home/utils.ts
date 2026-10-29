@@ -1,6 +1,7 @@
 // ─── Home Feature Helpers ──────────────────────────────────────────────────────
 
 import type { Translations } from "@/components/languages/type";
+import { displayDate, displayDigits } from "@/services/numberLocale/format";
 
 /** Time-of-day greeting */
 export function getGreeting(t: Translations): string {
@@ -19,8 +20,8 @@ export function timeAgo(ds: string): string {
   const hr = Math.floor(diff / 3600000);
   const d = Math.floor(diff / 86400000);
   if (m < 1) return "just now";
-  if (m < 60) return `${m}m ago`;
-  if (hr < 24) return `${hr}h ago`;
-  if (d < 7) return `${d}d ago`;
-  return new Date(ds).toLocaleDateString();
+  if (m < 60) return `${displayDigits(m)}m ago`;
+  if (hr < 24) return `${displayDigits(hr)}h ago`;
+  if (d < 7) return `${displayDigits(d)}d ago`;
+  return displayDate(ds);
 }

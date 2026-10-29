@@ -1,5 +1,6 @@
 import type { Language } from './type';
 import { LANGUAGE_NAMES, RTL_LANGUAGES } from './type';
+import { displayDate, displayDateTime, displayDigits, displayNumber } from '@/services/numberLocale/format';
 
 
 /** Returns true if the language uses a right-to-left writing system. */
@@ -57,20 +58,21 @@ export const formatDate = (
   date: Date | string | number,
   lang: Language,
   options?: Intl.DateTimeFormatOptions,
-): string => {
-  const d = typeof date === 'string' || typeof date === 'number' ? new Date(date) : date;
-  if (isNaN(d.getTime())) return '';
-  return new Intl.DateTimeFormat(getLocale(lang), options).format(d);
-};
+): string => displayDate(date, lang, options);
 
-/** Format a number according to the active language's locale */
+/** Format a date and time according to the active language's locale. */
+export const formatDateTime = (
+  date: Date | string | number,
+  lang: Language,
+  options?: Intl.DateTimeFormatOptions,
+): string => displayDateTime(date, lang, options);
+
+/** Format a number according to the active language's locale and digits. */
 export const formatNumber = (
   num: number,
   lang: Language,
   options?: Intl.NumberFormatOptions,
-): string => {
-  return new Intl.NumberFormat(getLocale(lang), options).format(num);
-};
+): string => displayNumber(num, lang, options);
 
 /** Format a date as a relative string (e.g. "3 days ago") */
 export const formatRelativeTime = (
@@ -89,14 +91,16 @@ export const formatRelativeTime = (
   const diffYears = Math.floor(diffDays / 365);
 
   const rtf = new Intl.RelativeTimeFormat(getLocale(lang), { numeric: 'auto' });
+  const relative = (value: number, unit: Intl.RelativeTimeFormatUnit) =>
+    displayDigits(rtf.format(value, unit), lang);
 
-  if (diffSeconds < 60) return rtf.format(-diffSeconds, 'second');
-  if (diffMinutes < 60) return rtf.format(-diffMinutes, 'minute');
-  if (diffHours < 24) return rtf.format(-diffHours, 'hour');
-  if (diffDays < 7) return rtf.format(-diffDays, 'day');
-  if (diffWeeks < 5) return rtf.format(-diffWeeks, 'week');
-  if (diffMonths < 12) return rtf.format(-diffMonths, 'month');
-  return rtf.format(-diffYears, 'year');
+  if (diffSeconds < 60) return relative(-diffSeconds, 'second');
+  if (diffMinutes < 60) return relative(-diffMinutes, 'minute');
+  if (diffHours < 24) return relative(-diffHours, 'hour');
+  if (diffDays < 7) return relative(-diffDays, 'day');
+  if (diffWeeks < 5) return relative(-diffWeeks, 'week');
+  if (diffMonths < 12) return relative(-diffMonths, 'month');
+  return relative(-diffYears, 'year');
 };
 
 /** Human-readable language name (translated into the active language where applicable) */

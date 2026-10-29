@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { useLanguage } from '@/components/languages/languageProvider';
+import { displayNumber } from '@/services/numberLocale/format';
 
 export type TierId = "free" | "legacy_sower" | "covenant_sower";
 export interface TierConfig {
@@ -25,7 +27,7 @@ export const FAQ_ITEMS = [
   { q: "Can I switch between monthly and yearly billing?", a: "Yes, you can switch billing intervals through the customer portal." },
   { q: "What happens if I cancel?", a: "You retain paid access until the end of your billing period." },
 ];
-export const formatPrice = (cents: number): string => `$${(cents / 100).toFixed(2)}`;
+export const formatPrice = (cents: number, lang: string = 'en'): string => displayNumber(cents / 100, lang, { style: 'currency', currency: 'USD' });
 export const formatTierLabel = (tierId: string): string => tierId === "free" ? "Free Reader" : tierId === "legacy_sower" ? "Legacy Sower" : "Covenant Sower";
 
 interface TierCardProps {
@@ -34,6 +36,7 @@ interface TierCardProps {
   portalLoading: boolean; isLegacySower: boolean; isCovenantSower: boolean;
 }
 export function TierCard({ tier, billingInterval, isCurrentTier, isPaying, onSubscribe, onManage, checkoutLoading, portalLoading }: TierCardProps) {
+  const { lang } = useLanguage();
   const Icon = tier.icon;
   const isFree = tier.id === "free";
   const price = billingInterval === "year" ? tier.yearlyPrice : tier.monthlyPrice;
@@ -44,7 +47,7 @@ export function TierCard({ tier, billingInterval, isCurrentTier, isPaying, onSub
       <Icon className="w-8 h-8 mb-3" style={{ color: tier.color }} />
       <h3 className="text-lg font-bold">{tier.name}</h3>
       <p className="text-xs text-muted-foreground mb-4">{tier.subtitle}</p>
-      <p className="text-3xl font-black mb-2">{isFree ? tt("Free") : tier.available === false ? tt('Unavailable') : new Intl.NumberFormat(undefined, { style: 'currency', currency: tier.currency || 'USD' }).format(price / 100)}</p>
+      <p className="text-3xl font-black mb-2">{isFree ? tt("Free") : tier.available === false ? tt('Unavailable') : displayNumber(price / 100, lang, { style: 'currency', currency: tier.currency || 'USD' })}</p>
       {!isFree && tier.available !== false && <p className="text-xs text-muted-foreground">/{billingInterval === 'year' ? tt('year') : tt('month')}</p>}
       <p className="text-sm text-muted-foreground mb-5">{tier.description}</p>
       <div className="space-y-2 flex-1">

@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import type { StrongsWord } from "../hooks/useStrongsDictionaryPage";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { displayDigits } from '@/services/numberLocale/format';
 
 interface WordDetailProps {
   word: StrongsWord;
@@ -55,7 +56,7 @@ export function WordDetail({ word, isFavorited, onToggleFavorite }: WordDetailPr
           </div>
           <div className="rounded-2xl bg-muted/60 p-3">
             <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{tt("Verse studies")}</p>
-            <p className="mt-1 text-xl font-black">{studies.length}</p>
+            <p className="mt-1 text-xl font-black">{displayDigits(studies.length)}</p>
           </div>
         </div>
 
@@ -81,7 +82,7 @@ export function WordDetail({ word, isFavorited, onToggleFavorite }: WordDetailPr
                 <p className="text-xs font-bold uppercase tracking-widest text-primary">{tt("From the study library")}</p>
                 <h3 className="mt-1 text-lg font-black">{tt("Verse word studies")}</h3>
               </div>
-              <Badge variant="outline">{studies.length}{tt("found")}</Badge>
+              <Badge variant="outline">{displayDigits(studies.length)}{tt("found")}</Badge>
             </div>
             <div className="space-y-3">
               {studies.map((study, index) => (

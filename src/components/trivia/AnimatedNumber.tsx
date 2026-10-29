@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useSpring, useMotionValue, useMotionValueEvent } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { displayDigits } from "@/services/numberLocale/format";
 
 /**
  * AnimatedNumber — Smoothly animates between numeric values using a spring physics model.
@@ -29,5 +30,5 @@ export default function AnimatedNumber({
     motionValue.set(value);
   }, [value, motionValue]);
 
-  return <span className={cn("tabular-nums", className)}>{displayValue}</span>;
+  return <span className={cn("tabular-nums", className)}>{displayDigits(displayValue)}</span>;
 }

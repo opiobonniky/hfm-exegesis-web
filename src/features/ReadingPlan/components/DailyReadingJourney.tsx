@@ -2,6 +2,7 @@ import { BookOpen, Brain, MessageSquareText } from "lucide-react";
 import { DailyCompletionButton } from "./DailyReadingCompletion";
 import { DailyReadingJourneyItem } from "./DailyReadingJourneyItem";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { displayDigits } from '@/services/numberLocale/format';
 interface Props {
   chapters: Array<{ id: number; bookName: string; chapter: number }>;
   reflections: Array<{ id: number; question: string; reflectionText: string }>;
@@ -42,19 +43,19 @@ export function DailyReadingJourney({
           <DailyReadingJourneyItem
             icon={BookOpen}
             label={tt("Read Scripture")}
-            detail={`${chapters.length} ${chapters.length === 1 ? "passage" : "passages"} assigned`}
+            detail={`${displayDigits(chapters.length)} ${chapters.length === 1 ? "passage" : "passages"} assigned`}
           />
           <DailyReadingJourneyItem
             icon={MessageSquareText}
             label={tt("Reflect")}
-            detail={`${answeredReflections} of ${reflections.length} responses written`}
+            detail={`${displayDigits(answeredReflections)} of ${displayDigits(reflections.length)} responses written`}
             complete={allReflectionsAnswered}
           />
           {quizQuestions.length > 0 && (
             <DailyReadingJourneyItem
               icon={Brain}
               label={tt("Check understanding")}
-              detail={`${quizQuestions.length} ${quizQuestions.length === 1 ? "question" : "questions"}`}
+              detail={`${displayDigits(quizQuestions.length)} ${quizQuestions.length === 1 ? "question" : "questions"}`}
               complete={quizDone}
             />
           )}

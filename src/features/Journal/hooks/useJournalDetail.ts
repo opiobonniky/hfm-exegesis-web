@@ -5,6 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { useAuth } from "@/contexts/AuthContext";
 import { CATEGORY_META, MOOD_EMOJI_MAP, formatDate } from "../constants";
+import { displayDate } from "@/services/numberLocale/format";
 import {
   deleteJournalEntry,
   exportJournalEntry,
@@ -160,7 +161,7 @@ export function useJournalDetail(): JournalDetailPageModel {
     setStudiedWordSheetOpen(true);
   }, []);
   const formatDateShort = useCallback(
-    (date: string) => new Date(date).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+    (date: string) => displayDate(date, undefined, { month: "short", day: "numeric" }),
     [],
   );
 

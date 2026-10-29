@@ -3,6 +3,7 @@ import { Eye, BookOpen, MessageSquareQuote, ChevronLeft, ChevronRight, Copy, Che
 import { cn } from "@/lib/utils";
 import { LOOK_PROMPTS } from "../constants";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { displayDigits } from '@/services/numberLocale/format';
 
 interface Verse { verseNumber: number; text: string; }
 
@@ -101,7 +102,7 @@ export default function LabLookStage({
           <div className="p-4 space-y-1">
             {passageVerses.map((v) => (
               <div key={v.verseNumber} className="flex gap-2">
-                <sup className="text-[10px] font-bold text-primary mt-1 shrink-0">{v.verseNumber}</sup>
+                <sup className="text-[10px] font-bold text-primary mt-1 shrink-0">{displayDigits(v.verseNumber)}</sup>
                 <p translate="no" className="notranslate text-sm leading-7 text-foreground/90">{v.text}</p>
               </div>
             ))}
@@ -129,7 +130,7 @@ export default function LabLookStage({
               currentPrompt === 0 ? "opacity-30 cursor-not-allowed" : "bg-primary text-white hover:opacity-90")}>
             <ChevronLeft className="w-3.5 h-3.5" /> Prev
           </button>
-          <span className="text-[10px] font-bold text-muted-foreground">{currentPrompt + 1} / {LOOK_PROMPTS.length}</span>
+          <span className="text-[10px] font-bold text-muted-foreground">{displayDigits(currentPrompt + 1)} / {displayDigits(LOOK_PROMPTS.length)}</span>
           <button onClick={() => switchPrompt(currentPrompt + 1)} disabled={currentPrompt === LOOK_PROMPTS.length - 1}
             className={cn("flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors",
               currentPrompt === LOOK_PROMPTS.length - 1 ? "opacity-30 cursor-not-allowed" : "bg-primary text-white hover:opacity-90")}>

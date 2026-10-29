@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import { LISTEN_OPTIONS } from "../constants";
 import type { AudioPlayerState, AudioPlayerActions } from "@/hooks/useAudioPlayer";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { displayDigits } from '@/services/numberLocale/format';
 
 interface Verse { verseNumber: number; text: string; }
 
@@ -54,7 +55,7 @@ export default function LabListenStage({
         <div className="rounded-xl border border-purple-500/20 bg-card p-4">
           <div className="flex items-center gap-2 mb-3">
             <Volume2 className="w-4 h-4 text-purple-600" />
-            <span className="text-sm font-semibold text-purple-600">{passageRef || `${bookName} ${chapter}`}</span>
+            <span className="text-sm font-semibold text-purple-600">{displayDigits(passageRef || `${bookName} ${chapter}`)}</span>
           </div>
           <div className="space-y-1 max-h-32 overflow-y-auto">
             {passageVerses.map((v, idx) => (
@@ -62,7 +63,7 @@ export default function LabListenStage({
                 "flex gap-2 px-2 py-0.5 rounded transition-colors",
                 isPlaying && audio.currentVerseIdx === idx && "bg-purple-500/10"
               )}>
-                <sup className="text-[10px] font-bold text-purple-500 mt-1 shrink-0">{v.verseNumber}</sup>
+                <sup className="text-[10px] font-bold text-purple-500 mt-1 shrink-0">{displayDigits(v.verseNumber)}</sup>
                 <p translate="no" className={cn(
                   "notranslate text-sm leading-6 transition-colors",
                   isPlaying && audio.currentVerseIdx === idx ? "text-foreground font-medium" : "text-foreground/80"
@@ -92,7 +93,7 @@ export default function LabListenStage({
                       {isPaused ? tt("Paused") : tt("Reading")}
                     </span>
                     <span className="text-[10px] font-medium text-muted-foreground tabular-nums">
-                      {audio.currentVerseIdx + 1} / {audio.totalVerses}
+                      {displayDigits(audio.currentVerseIdx + 1)} / {displayDigits(audio.totalVerses)}
                     </span>
                   </div>
                   <span className="text-[10px] text-muted-foreground">{tt("Repeat")}{repeatCount + (isPlaying ? 1 : 0)} of {selectedRepeats}

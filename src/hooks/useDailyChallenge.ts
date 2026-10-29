@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef } from "react";
+import { displayDate } from "@/services/numberLocale/format";
 import {
   getRandomQuestion,
   submitTriviaAnswer,
@@ -56,7 +57,7 @@ export function getLast7Days(): string[] {
 
 export function getDayLabel(dateKey: string): string {
   const d = new Date(dateKey + "T12:00:00");
-  return d.toLocaleDateString("en-US", { weekday: "short" }).charAt(0);
+  return displayDate(d, undefined, { weekday: "short" }).charAt(0);
 }
 
 function loadState(): DailyChallengeState {

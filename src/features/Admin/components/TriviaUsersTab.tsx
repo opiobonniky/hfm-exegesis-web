@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { cn } from "@/lib/utils";
 import { TRIVIA_PAGE_SIZE } from "../constants";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { displayDate } from '@/services/numberLocale/format';
 
 interface Props {
   h: {
@@ -75,7 +76,7 @@ export function TriviaUsersTab({ h }: Props) {
                       <span className="text-xs font-medium">{u.percentage}%</span>
                     </div>
                   </TableCell>
-                  <TableCell className="text-xs text-muted-foreground">{u.lastAnsweredDate ? new Date(u.lastAnsweredDate).toLocaleDateString() : "—"}</TableCell>
+                  <TableCell className="text-xs text-muted-foreground">{u.lastAnsweredDate ? displayDate(u.lastAnsweredDate) : "—"}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

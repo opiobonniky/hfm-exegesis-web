@@ -9,6 +9,7 @@ import type { AdminUser } from "../types";
 import { SUBSCRIPTION_TIER_COLORS } from "../constants";
 import { RoleSelector } from "./RoleSelector";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { displayDate } from '@/services/numberLocale/format';
 
 interface Props {
   user: AdminUser;
@@ -110,10 +111,10 @@ export function UserRowCard({
       {/* Last login / Joined */}
       <td className="p-3 hidden lg:table-cell">
         <div className="text-xs text-muted-foreground">
-          <div>{user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : tt("Never")}</div>
+          <div>{user.lastLogin ? displayDate(user.lastLogin) : tt("Never")}</div>
           <div className="text-[10px] opacity-60">
             {user.loginCount ?? 0}{tt("login")}{(user.loginCount ?? 0) !== 1 ? "s" : ""}{tt("· joined")}{" "}
-            {new Date(user.createdOn).toLocaleDateString()}
+            {displayDate(user.createdOn)}
           </div>
         </div>
       </td>

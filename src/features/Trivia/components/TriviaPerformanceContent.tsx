@@ -5,6 +5,7 @@ import { DIFFICULTY_LABELS } from "../constants";
 import { triviaPerformanceTheme as theme } from "../theme/theme";
 import type { TriviaAnswerHistory, TriviaPerformanceStats } from "../types";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { displayDate, displayDigits } from '@/services/numberLocale/format';
 import { StableLoadingContent } from "@/components/ui/StableLoadingContent";
 
 const statsConfig = [
@@ -21,7 +22,7 @@ export function TriviaPerformanceContent({ stats, answers, hasNext, loadingMore,
 
   return <div className="space-y-6">
     <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-      {statsConfig.map(([label, key, Icon]) => <div key={label} className={cn(theme.card, "flex items-center gap-3 p-4")}><Icon className="h-5 w-5 text-primary" /><div><p className="text-2xl font-black">{key === "percentage" ? `${stats[key]}%` : stats[key]}</p><p className="text-xs text-muted-foreground">{label}</p></div></div>)}
+      {statsConfig.map(([label, key, Icon]) => <div key={label} className={cn(theme.card, "flex items-center gap-3 p-4")}><Icon className="h-5 w-5 text-primary" /><div><p className="text-2xl font-black">{key === "percentage" ? `${displayDigits(stats[key])}%` : displayDigits(stats[key])}</p><p className="text-xs text-muted-foreground">{label}</p></div></div>)}
     </div>
     <section className={cn(theme.card, "p-4 sm:p-6")}>
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><div><h2 className="text-lg font-bold">{tt("Answered questions")}</h2><p className="text-xs text-muted-foreground">{tt("Review your recent trivia activity.")}</p></div><Clock3 className="hidden h-5 w-5 text-primary/60 sm:block" /></div>
@@ -36,7 +37,7 @@ export function TriviaPerformanceContent({ stats, answers, hasNext, loadingMore,
         return <div key={answer.id} className="rounded-xl border border-primary/10 bg-primary/[0.04]">
           <button type="button" onClick={() => setExpandedId(expanded ? null : answer.id)} className="flex w-full items-start gap-3 p-3 text-left">
             <div className={cn("mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg", answer.isCorrect ? "bg-emerald-500/15 text-emerald-600" : "bg-rose-500/15 text-rose-600")}>{answer.isCorrect ? <CheckCircle2 className="h-4 w-4" /> : <CircleX className="h-4 w-4" />}</div>
-            <div className="min-w-0 flex-1"><p className="text-sm font-semibold">{answer.question}</p><div className="mt-1 flex flex-wrap gap-2 text-[11px] text-muted-foreground">{answer.category && <span>{answer.category}</span>}{answer.difficulty && <span>{DIFFICULTY_LABELS[answer.difficulty] || answer.difficulty}</span>}<span>{new Date(answer.answeredOn).toLocaleDateString()}</span></div></div>
+            <div className="min-w-0 flex-1"><p className="text-sm font-semibold">{answer.question}</p><div className="mt-1 flex flex-wrap gap-2 text-[11px] text-muted-foreground">{answer.category && <span>{answer.category}</span>}{answer.difficulty && <span>{DIFFICULTY_LABELS[answer.difficulty] || answer.difficulty}</span>}<span>{displayDate(answer.answeredOn)}</span></div></div>
             <span className={cn("text-xs font-bold", answer.isCorrect ? "text-emerald-600" : "text-rose-600")}>{answer.isCorrect ? tt("Correct") : tt("Incorrect")}</span><ChevronDown className={cn("mt-0.5 h-4 w-4 text-muted-foreground transition-transform", expanded && "rotate-180")} />
           </button>
           {expanded && <div className="border-t border-primary/10 px-3 pb-3 pt-3 sm:pl-14">

@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { displayDigits } from "@/services/numberLocale/format";
 
 interface Tab {
   key: string;
@@ -41,7 +42,7 @@ export function Tabs({ tabs, activeTab, onTabChange, className }: TabsProps) {
             {tab.label}
             {tab.count !== undefined && (
               <span className="px-1.5 py-0.5 rounded-md bg-muted text-[10px] font-bold">
-                {tab.count}
+                {displayDigits(tab.count)}
               </span>
             )}
           </button>

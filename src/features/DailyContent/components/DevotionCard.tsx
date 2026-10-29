@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, BookOpen, ChevronRight } from "lucide-react";
+import { displayDate } from '@/services/numberLocale/format';
 
 interface DevotionCardProps {
   id: string;
@@ -29,7 +30,7 @@ export function DevotionCard({ title, content, reference, date, status, onClick 
               </span>
             )}
             <span className="flex items-center gap-1">
-              <Calendar className="w-3 h-3" /> {new Date(date).toLocaleDateString()}
+              <Calendar className="w-3 h-3" /> {displayDate(date)}
             </span>
           </div>
           <ChevronRight className="w-4 h-4" />

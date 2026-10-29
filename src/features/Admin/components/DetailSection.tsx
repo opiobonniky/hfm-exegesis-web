@@ -3,6 +3,7 @@
 
 import type { ReactNode } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { displayDate, displayDateTime } from "@/services/numberLocale/format";
 
 export function DetailSection({
   icon,
@@ -47,9 +48,9 @@ export function DetailMetadataGrid({ fields }: { fields: MetaField[] }) {
               <p className="font-semibold mb-1">{f.label}</p>
               <p>
                 {f.format === "datetime" && f.value
-                  ? new Date(f.value).toLocaleString()
+                  ? displayDateTime(f.value)
                   : f.format === "date" && f.value
-                    ? new Date(f.value).toLocaleDateString()
+                    ? displayDate(f.value)
                     : f.value}
               </p>
             </div>

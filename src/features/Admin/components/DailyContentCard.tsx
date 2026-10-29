@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import type { DailyItem } from "../types";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { displayDate } from '@/services/numberLocale/format';
 
 interface Props {
   item: DailyItem;
@@ -38,7 +39,7 @@ export function DailyContentCard({ item, onView, onEdit, onDelete }: Props) {
         <div className="flex-1 min-w-0 cursor-pointer" onClick={() => onView(item)}>
           <div className="flex items-center gap-2 flex-wrap mb-1">
             <Badge variant="outline" className="text-[10px] bg-muted/50">
-              {item.displayDate ? new Date(item.displayDate).toLocaleDateString() : "—"}
+              {item.displayDate ? displayDate(item.displayDate) : "—"}
             </Badge>
             {item.isPublished ? (
               <Badge variant="outline" className="text-[10px] bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-800/40">

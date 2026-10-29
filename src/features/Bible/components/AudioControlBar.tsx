@@ -12,6 +12,7 @@ import { PlaybackControls } from "./AudioControls/PlaybackControls";
 import { VerseTickBar } from "./AudioControls/VerseTickBar";
 import ReaderDock from "./ReaderDock";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { displayDigits } from "@/services/numberLocale/format";
 
 export default function AudioControlBar({
   audioState,
@@ -19,7 +20,7 @@ export default function AudioControlBar({
   bookName,
   chapter,
 }: AudioControlBarProps) {
-  const { t, isRtl } = useLanguage();
+  const { t, isRtl, lang } = useLanguage();
   const [expanded, setExpanded] = useState(false);
   const currentPosition = Math.min(
     audioState.currentVerseIdx + 1,
@@ -108,10 +109,10 @@ export default function AudioControlBar({
             )}
           </span>
           <p className="min-w-0 truncate font-[family-name:var(--font-heading)] text-xs font-bold text-foreground sm:text-sm">
-            {bookName} {chapter}:{currentPosition}
+            {bookName} {displayDigits(`${chapter}:${currentPosition}`, lang)}
           </p>
           <span className="shrink-0 text-[9px] font-medium tabular-nums text-muted-foreground sm:text-[10px]">
-            {currentPosition}/{audioState.totalVerses}
+            {displayDigits(currentPosition, lang)}/{displayDigits(audioState.totalVerses, lang)}
           </span>
         </div>
 

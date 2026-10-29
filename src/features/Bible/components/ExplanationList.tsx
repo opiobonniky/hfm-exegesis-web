@@ -8,6 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 import type { VerseExplanation } from "../types";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { useLanguage } from '@/components/languages/languageProvider';
+import { displayDate, displayUiText } from '@/services/numberLocale/format';
 
 const BIBLE_BOOKS = [
   "All Books","Genesis","Exodus","Leviticus","Numbers","Deuteronomy","Joshua","Judges","Ruth",
@@ -38,6 +40,7 @@ export default function ExplanationList({
   explanations, filtered, loading, search, bookFilter, isAdmin,
   onSearchChange, onBookFilterChange, onEdit, onDelete, onAddFirst,
 }: ExplanationListProps) {
+  const { lang } = useLanguage();
   return (
     <div className="space-y-4">
       {/* Search + filter */}
@@ -73,15 +76,15 @@ export default function ExplanationList({
                 <div className="flex items-start gap-4 p-4 sm:p-5">
                   <div className="w-12 h-12 rounded-xl bg-primary/10 flex flex-col items-center justify-center shrink-0 border border-primary/20">
                     <span className="text-[10px] font-bold text-primary/70 leading-none uppercase">{item.bookName.split(" ").pop()?.slice(0, 3)}</span>
-                    <span className="text-sm font-extrabold text-primary leading-tight">{item.chapter}:{item.verseNumber}</span>
+                    <span className="text-sm font-extrabold text-primary leading-tight">{displayUiText(`${item.chapter}:${item.verseNumber}`, lang)}</span>
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2 mb-1">
-                      <h3 className="font-bold text-base">{item.bookName} {item.chapter}:{item.verseNumber}</h3>
+                      <h3 className="font-bold text-base">{item.bookName} {displayUiText(`${item.chapter}:${item.verseNumber}`, lang)}</h3>
                       {item.bibleVersion && <Badge variant="outline" className="text-xs font-mono">{item.bibleVersion}</Badge>}
                       {item.learnMore && <Badge variant="outline" className="text-xs gap-1 border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-500/30 dark:bg-amber-500/15 dark:text-amber-400"><Sparkles className="w-3 h-3" />{tt("Learn More")}</Badge>}
                     </div>
-                    {item.updatedOn && <p className="text-xs text-muted-foreground/60 mb-2">{tt("Updated")}{new Date(item.updatedOn).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</p>}
+                    {item.updatedOn && <p className="text-xs text-muted-foreground/60 mb-2">{tt("Updated")}{displayDate(item.updatedOn, lang, { month: "short", day: "numeric", year: "numeric" })}</p>}
                   </div>
                   {isAdmin && (
                     <div className="flex items-center gap-1 shrink-0">

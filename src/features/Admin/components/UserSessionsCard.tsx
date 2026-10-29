@@ -3,6 +3,7 @@ import { Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { displayDateTime } from '@/services/numberLocale/format';
 
 interface Session {
   id: string;
@@ -23,7 +24,7 @@ interface UserSessionsCardProps {
 
 function formatDateTime(dateStr: string | null | undefined) {
   if (!dateStr) return "\u2014";
-  return new Date(dateStr).toLocaleString();
+  return displayDateTime(dateStr);
 }
 
 export function UserSessionsCard({ sessions, loading }: UserSessionsCardProps) {

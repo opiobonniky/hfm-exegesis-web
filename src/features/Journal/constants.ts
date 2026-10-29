@@ -1,4 +1,5 @@
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { displayDate, displayDigits } from '@/services/numberLocale/format';
 // ─── Journal Constants ────────────────────────────────────────────────────────
 
 export const CATEGORIES = [
@@ -66,15 +67,15 @@ export function getRelativeTime(dateStr: string): string {
   const diffHours = Math.floor(diffMs / 3600000);
   const diffDays = Math.floor(diffMs / 86400000);
   if (diffMins < 1) return "Just now";
-  if (diffMins < 60) return `${diffMins}m ago`;
-  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffMins < 60) return `${displayDigits(diffMins)}m ago`;
+  if (diffHours < 24) return `${displayDigits(diffHours)}h ago`;
   if (diffDays === 1) return "Yesterday";
-  if (diffDays < 7) return `${diffDays}d ago`;
-  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  if (diffDays < 7) return `${displayDigits(diffDays)}d ago`;
+  return displayDate(date, undefined, { month: "short", day: "numeric" });
 }
 
 export function formatDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  return displayDate(dateStr, undefined, { month: "short", day: "numeric", year: "numeric" });
 }
 
 export const CATEGORY_META: Record<string, { labelKey: string; label: string; color: string }> = {

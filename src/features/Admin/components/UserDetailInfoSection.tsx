@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { UserInfoCard } from "./UserInfoCard";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { displayDate, displayDateTime } from '@/services/numberLocale/format';
 
 interface UserDetail {
   email: string;
@@ -28,11 +29,11 @@ interface UserDetail {
 
 function formatDate(dateStr: string | null | undefined) {
   if (!dateStr) return "\u2014";
-  return new Date(dateStr).toLocaleDateString();
+  return displayDate(dateStr);
 }
 function formatDateTime(dateStr: string | null | undefined) {
   if (!dateStr) return "\u2014";
-  return new Date(dateStr).toLocaleString();
+  return displayDateTime(dateStr);
 }
 
 export function UserDetailInfoSection({ user }: { user: UserDetail }) {

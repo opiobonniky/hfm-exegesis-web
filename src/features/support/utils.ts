@@ -7,6 +7,7 @@ import type {
   SupportMessage,
   SupportTicketSummary,
 } from "./types";
+import { displayDate, displayDigits } from "@/services/numberLocale/format";
 
 /** Image attachments preview inline; anything else shows as a file chip. */
 export const isImageAttachment = (url?: string | null): boolean =>
@@ -46,18 +47,18 @@ export const formatSupportTime = (
   const elapsedMs = Math.max(0, now.getTime() - date.getTime());
   const elapsedMinutes = Math.floor(elapsedMs / 60_000);
   if (elapsedMinutes < 1) return "now";
-  if (elapsedMinutes < 60) return `${elapsedMinutes}min`;
-  if (sameCalendarDay(date, now)) return `${Math.floor(elapsedMinutes / 60)}h`;
+  if (elapsedMinutes < 60) return `${displayDigits(elapsedMinutes, locale || undefined)}min`;
+  if (sameCalendarDay(date, now)) return `${displayDigits(Math.floor(elapsedMinutes / 60), locale || undefined)}h`;
 
   const yesterday = new Date(now);
   yesterday.setDate(now.getDate() - 1);
   if (sameCalendarDay(date, yesterday)) return "Yesterday";
 
   if (elapsedMs < 7 * 86_400_000) {
-    return date.toLocaleDateString(locale, { weekday: "short" });
+    return displayDate(date, locale || undefined, { weekday: "short" });
   }
 
-  return date.toLocaleDateString(locale, {
+  return displayDate(date, locale || undefined, {
     month: "short",
     day: "numeric",
     ...(date.getFullYear() === now.getFullYear() ? {} : { year: "numeric" }),

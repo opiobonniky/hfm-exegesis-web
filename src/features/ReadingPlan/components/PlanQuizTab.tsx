@@ -2,6 +2,7 @@ import { HelpCircle, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { GlassCard } from "./PlanDetailUI";
 import type { DayAssignment } from "../types";
+import { displayDigits } from "@/services/numberLocale/format";
 
 interface PlanQuizTabProps {
   questionsEnabled: boolean;
@@ -47,17 +48,17 @@ export function PlanQuizTab({ questionsEnabled, loadingPlan, allQuizDays, t }: P
         <GlassCard key={day.dayNumber} className="p-4">
           <div className="flex items-center gap-2 mb-3 pb-3 border-b border-border">
             <div className="w-6 h-6 rounded-full bg-violet-100 border border-violet-200 flex items-center justify-center text-[10px] font-bold text-violet-700 shrink-0">
-              {day.dayNumber}
+              {displayDigits(day.dayNumber)}
             </div>
             <p className="text-xs font-semibold text-foreground/80 flex-1">
-              {day.title || `Day ${day.dayNumber}`}
+              {day.title || `Day ${displayDigits(day.dayNumber)}`}
             </p>
             {day.chapters.filter((c) => c.book).length > 0 && (
               <span className="text-[10px] text-muted-foreground hidden sm:block">
-                {day.chapters.filter((c) => c.book).map((c) => `${c.book} ${c.chapter}`).join(" · ")}
+                {day.chapters.filter((c) => c.book).map((c) => `${c.book} ${displayDigits(c.chapter)}`).join(" · ")}
               </span>
             )}
-            <span className="text-[10px] text-muted-foreground">{day.quizQuestions.length}Q</span>
+            <span className="text-[10px] text-muted-foreground">{displayDigits(day.quizQuestions.length)}Q</span>
           </div>
 
           <div className="space-y-3">
@@ -67,7 +68,7 @@ export function PlanQuizTab({ questionsEnabled, loadingPlan, allQuizDays, t }: P
                 <div key={qi} className="rounded-xl border border-border bg-background p-3 space-y-2.5">
                   <div className="flex gap-2.5 items-start">
                     <span className="w-5 h-5 rounded-full border border-amber-200 bg-amber-50 text-[10px] font-bold text-amber-700 flex items-center justify-center shrink-0 mt-0.5">
-                      {idx}
+                      {displayDigits(idx)}
                     </span>
                     <p className="text-sm text-foreground/80 leading-snug">{q.question}</p>
                   </div>

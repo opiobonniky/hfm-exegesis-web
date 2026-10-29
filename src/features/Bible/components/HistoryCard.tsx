@@ -4,6 +4,8 @@
 import { BookOpen, Trash2, Loader2, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { useLanguage } from '@/components/languages/languageProvider';
+import { displayUiText } from '@/services/numberLocale/format';
 
 interface HistoryCardProps {
   bookName: string;
@@ -28,6 +30,7 @@ export function HistoryCard({
   onDelete,
   formatTimeAgo,
 }: HistoryCardProps) {
+  const { lang } = useLanguage();
   const dateStr = formatTimeAgo(createdOn || lastRead || "");
 
   return (
@@ -40,8 +43,7 @@ export function HistoryCard({
           </div>
           <div className="min-w-0">
             <p className="font-semibold text-sm text-foreground truncate">
-              {bookName} {chapter}
-              {lastVerse && lastVerse > 1 ? `:${lastVerse}` : ""}
+              {bookName} {displayUiText(`${chapter}${lastVerse && lastVerse > 1 ? `:${lastVerse}` : ""}`, lang)}
             </p>
             {dateStr && (
               <p className="text-[11px] text-muted-foreground/50 flex items-center gap-1">

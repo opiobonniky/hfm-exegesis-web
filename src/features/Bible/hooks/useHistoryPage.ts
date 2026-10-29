@@ -5,6 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { sendPostRequest } from "@/services/api";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { displayDate, displayDigits } from "@/services/numberLocale/format";
 
 export interface HistoryItem {
   id: number;
@@ -145,7 +146,7 @@ export function useHistoryPage() {
       } else if (date.toDateString() === yesterday.toDateString()) {
         key = "Yesterday";
       } else {
-        key = date.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+        key = displayDate(date, undefined, { month: "long", day: "numeric", year: "numeric" });
       }
       if (!groups[key]) groups[key] = [];
       groups[key].push(item);
@@ -162,11 +163,11 @@ export function useHistoryPage() {
     const hours = Math.floor(mins / 60);
     const days = Math.floor(hours / 24);
     if (mins < 1) return "Just now";
-    if (mins < 60) return `${mins}m ago`;
-    if (hours < 24) return `${hours}h ago`;
+    if (mins < 60) return `${displayDigits(mins)}m ago`;
+    if (hours < 24) return `${displayDigits(hours)}h ago`;
     if (days === 1) return "Yesterday";
-    if (days < 7) return `${days}d ago`;
-    return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    if (days < 7) return `${displayDigits(days)}d ago`;
+    return displayDate(date, undefined, { month: "short", day: "numeric" });
   }, []);
 
   return {

@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { useLanguage } from "@/components/languages/languageProvider";
 import ReaderDock from "./ReaderDock";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { displayDigits } from '@/services/numberLocale/format';
 
 interface VerseMultiSelectBarProps {
   count: number;
@@ -36,7 +37,7 @@ export default function VerseMultiSelectBar({
   onClear,
   onMore,
 }: VerseMultiSelectBarProps) {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const handlers: Record<string, () => void> = {
     highlight: onHighlight,
     note: onNote,
@@ -95,7 +96,7 @@ export default function VerseMultiSelectBar({
     >
         {/* Count badge */}
         <div className="me-1 flex shrink-0 items-center gap-1.5 px-2 py-1">
-          <span className="text-xs font-bold text-primary">{count}</span>
+          <span className="text-xs font-bold text-primary">{displayDigits(count, lang)}</span>
           <span className="text-[10px] text-muted-foreground">
             {count === 1 ? tt("verse") : tt("verses")}
           </span>

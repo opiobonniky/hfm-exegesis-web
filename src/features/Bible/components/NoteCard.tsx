@@ -4,6 +4,8 @@
 import { FileText, BookOpen, Edit2, Trash2, Loader2, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { useLanguage } from '@/components/languages/languageProvider';
+import { displayUiText } from '@/services/numberLocale/format';
 
 interface NoteCardProps {
   bookName: string;
@@ -34,6 +36,7 @@ export function NoteCard({
   onDelete,
   formatDate,
 }: NoteCardProps) {
+  const { lang } = useLanguage();
   const dateStr = formatDate(updatedOn || createdOn);
 
   return (
@@ -46,7 +49,7 @@ export function NoteCard({
           </div>
           <div className="min-w-0">
             <p className="font-semibold text-sm text-foreground truncate">
-              {bookName} {chapter}:{verseNumber}
+              {bookName} {displayUiText(`${chapter}:${verseNumber}`, lang)}
             </p>
             {dateStr && (
               <p className="text-[11px] text-muted-foreground/50 flex items-center gap-1">
