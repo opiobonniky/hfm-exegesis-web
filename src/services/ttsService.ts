@@ -1,4 +1,4 @@
-import api from "./api";
+import api, { getRequestLanguage } from "./api";
 
 export interface TTSVoice {
   name: string;
@@ -40,7 +40,12 @@ export const ttsService = {
   ): Promise<ArrayBuffer> => {
     const response = await api.post(
       "/tts/speak",
-      { text, voiceId: voiceId || DEFAULT_VOICE_ID, speed: speed || 1.0 },
+      {
+        text,
+        voiceId: voiceId || DEFAULT_VOICE_ID,
+        speed: speed || 1.0,
+        lang: getRequestLanguage(),
+      },
       { responseType: "arraybuffer" },
     );
     console.log("ttsService.speak response:", JSON.stringify(response));

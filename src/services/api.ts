@@ -149,6 +149,21 @@ api.interceptors.response.use(
 }
 
 /**
+ * Active UI language sent to the backend.
+ *
+ * Installed UI copy disables Google DOM translation, so localized commentary is
+ * requested in that mode; otherwise English is retained for the online
+ * fallback. Scripture stays in its selected edition, independent of UI
+ * language. Exported so bespoke callers (e.g. the TTS player, which posts audio
+ * directly) send the same language as the rest of the API layer instead of
+ * omitting it.
+ */
+export const getRequestLanguage = (): string => {
+  const selectedLanguage = localStorage.getItem('exegesis-language') || 'en';
+  return hasUiDictionary(selectedLanguage) ? selectedLanguage : 'en';
+};
+
+/**
  * Generic POST request function
  * @param controller Controller name (e.g., 'auth')
  * @param request Request name (e.g., 'login')
@@ -164,11 +179,7 @@ export const sendPostRequest = async <T = any>(
   const guestResult = guestRequestResult(controller, request);
   if (guestResult) return guestResult as GenericResponse<T>;
   try {
-    // Installed UI copy disables Google DOM translation. Request localized
-    // commentary in that mode; otherwise retain English for the online fallback.
-    // Scripture remains in its selected edition, independent of UI language.
-    const selectedLanguage = localStorage.getItem('exegesis-language') || 'en';
-    const lang = hasUiDictionary(selectedLanguage) ? selectedLanguage : 'en';
+    const lang = getRequestLanguage();
     const response = await api.post<GenericResponse<T>>(
       `/${controller}/${request}`,
       options.includeLanguage === false ? data : { ...data, lang },
@@ -199,10 +210,9 @@ export const sendGetRequest = async <T = any>(
   params?: object,
 ): Promise<GenericResponse<T>> => {
   try {
-    const language = localStorage.getItem('exegesis-language') || 'en';
     const response = await api.get<GenericResponse<T>>(
       `/${controller}/${request}`,
-      { params: { ...params, lang: hasUiDictionary(language) ? language : 'en' } },
+      { params: { ...params, lang: getRequestLanguage() } },
     );
     return response.data;
   } catch (error: any) {
