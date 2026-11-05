@@ -2,6 +2,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ChangeEventHandler,
 } from "react";
@@ -18,6 +19,7 @@ import {
 } from "@/utilities/bibleUtils";
 import type { JournalEntryFormData } from "../types";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { useAuth } from '@/contexts/AuthContext';
 
 export interface JournalEntryData extends Omit<JournalEntryFormData, "id"> {
   isPrivate: boolean;
@@ -55,6 +57,7 @@ export interface JournalEntryPageModel {
   handleApplyTemplate: (template: JournalEntryTemplate) => void;
   handleTitleChange: ChangeEventHandler<HTMLInputElement>;
   handleContentChange: ChangeEventHandler<HTMLTextAreaElement>;
+  handleObservationsChange: ChangeEventHandler<HTMLTextAreaElement>;
   handleCategoryChange: (category: string) => void;
   handleMoodChange: (mood: string) => void;
   handleLearningsChange: ChangeEventHandler<HTMLTextAreaElement>;
@@ -84,7 +87,8 @@ interface DailyExegesisData {
 const DEFAULT_ENTRY: JournalEntryData = {
   title: "",
   content: "",
-  mood: "neutral",
+  observations: "",
+  mood: "",
   tags: "",
   bookName: "",
   chapter: "",
@@ -96,7 +100,7 @@ const DEFAULT_ENTRY: JournalEntryData = {
   category: "general",
   gratitude: "",
   isFavorite: false,
-  isPublished: true,
+  isPublished: false,
 };
 
 function getTestamentForBook(book: string): "Old" | "New" {
@@ -122,6 +126,7 @@ function getInitialEntry(
     chapter: searchParams.get("chapter") || "",
     verseNumber: searchParams.get("verse") || "",
     content,
+    observations: searchParams.get("observations") || "",
     prayers: searchParams.get("prayer") || "",
     application: searchParams.get("application") || "",
     tags: searchParams.get("tags") || "",
@@ -134,12 +139,22 @@ export function useJournalEntryPage() {
   const [searchParams] = useSearchParams();
   const { t, isRtl } = useLanguage();
   const { toast } = useToast();
+  const { userInfo } = useAuth();
+  const draftKey = `journal-draft:${userInfo?.id || userInfo?.username || "anonymous"}:new`;
+  const saved = useRef(false);
   const isEditing = Boolean(entryId && entryId !== "new");
   const isNewEntry = entryId === "new" || !entryId;
   const [testament, setTestament] = useState<JournalTestament>("");
-  const [entry, setEntry] = useState<JournalEntryData>(() =>
-    getInitialEntry(isNewEntry, searchParams),
-  );
+  const [entry, setEntry] = useState<JournalEntryData>(() => {
+    const initial = getInitialEntry(isNewEntry, searchParams);
+    if (!isNewEntry || searchParams.size) return initial;
+    try {
+      const draft = JSON.parse(sessionStorage.getItem(draftKey) || "null");
+      if (!draft || typeof draft !== "object") return initial;
+      const fields = Object.fromEntries(Object.entries(initial).map(([key, value]) => [key, typeof draft[key] === typeof value ? draft[key] : value]));
+      return { ...initial, ...fields };
+    } catch { return initial; }
+  });
   const [loading, setLoading] = useState(isEditing);
   const [saving, setSaving] = useState(false);
   const [showTemplates, setShowTemplates] = useState(false);
@@ -161,14 +176,27 @@ export function useJournalEntryPage() {
     try {
       const response = await sendPostRequest<JournalEntryData>("journal", "get", {
         id: entryId,
+        raw: true,
       });
       if (response.returnCode === 200 && response.returnData) {
-        setEntry(response.returnData);
+        const data = response.returnData;
+        setEntry({ ...DEFAULT_ENTRY, ...data, title: data.title || "", content: data.content || "", observations: data.observations || "", chapter: String(data.chapter ?? ""), verseNumber: String(data.verseNumber ?? ""), tags: data.tags || "", isPublished: data.isPublished === true, isPrivate: data.isPublished !== true });
       }
+    } catch {
+      toast({ title: tt("Failed to load entry"), variant: "destructive" });
     } finally {
       setLoading(false);
     }
-  }, [entryId]);
+  }, [entryId, toast]);
+
+  useEffect(() => {
+    if (!isNewEntry || saved.current || !userInfo) return;
+    const timer = window.setTimeout(() => {
+      if (saved.current) return;
+      try { sessionStorage.setItem(draftKey, JSON.stringify(entry)); } catch { /* A full store must not block authoring. */ }
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [draftKey, entry, isNewEntry, userInfo]);
 
   const fetchTemplates = useCallback(async () => {
     try {
@@ -269,8 +297,9 @@ export function useJournalEntryPage() {
   }, [fetchTemplates, isNewEntry]);
 
   const handleSave = useCallback(async () => {
-    if (!entry.title.trim() && !entry.content.trim()) {
-      toast({ title: tt("Title or content required"), variant: "destructive" });
+    if (saving || loading) return;
+    if (!entry.content.trim()) {
+      toast({ title: tt("Write your reflection before saving"), variant: "destructive" });
       return;
     }
 
@@ -282,6 +311,8 @@ export function useJournalEntryPage() {
         { ...entry, id: isEditing ? entryId : undefined },
       );
       if (response.returnCode === 200) {
+        saved.current = true;
+        if (isNewEntry) sessionStorage.removeItem(draftKey);
         toast({ title: isEditing ? "Updated" : "Created" });
         navigate("/journal");
       } else {
@@ -295,7 +326,7 @@ export function useJournalEntryPage() {
     } finally {
       setSaving(false);
     }
-  }, [entry, entryId, isEditing, navigate, toast]);
+  }, [entry, entryId, isEditing, isNewEntry, draftKey, navigate, toast, saving, loading]);
 
   const handleApplyTemplate = useCallback((template: JournalEntryTemplate) => {
     if (template.prompts.length) {
@@ -318,6 +349,9 @@ export function useJournalEntryPage() {
   const handleContentChange: ChangeEventHandler<HTMLTextAreaElement> = useCallback(
     (event) => setEntry((previous) => ({ ...previous, content: event.target.value })),
     [],
+  );
+  const handleObservationsChange: ChangeEventHandler<HTMLTextAreaElement> = useCallback(
+    event => setEntry(previous => ({ ...previous, observations: event.target.value })), [],
   );
   const handleCategoryChange = useCallback(
     (category: string) => setEntry((previous) => ({ ...previous, category })),
@@ -352,7 +386,7 @@ export function useJournalEntryPage() {
     [],
   );
   const handlePublishedChange = useCallback(
-    (isPublished: boolean) => setEntry((previous) => ({ ...previous, isPublished })),
+    (isPublished: boolean) => setEntry((previous) => ({ ...previous, isPublished, isPrivate: !isPublished })),
     [],
   );
   const handleTestamentChange = useCallback((value: string) => {
@@ -393,7 +427,7 @@ export function useJournalEntryPage() {
     },
     actions: {
       goBack, handleSave, setShowTemplates, handleApplyTemplate,
-      handleTitleChange, handleContentChange, handleCategoryChange,
+      handleTitleChange, handleContentChange, handleObservationsChange, handleCategoryChange,
       handleMoodChange, handleLearningsChange, handleApplicationChange,
       handleGratitudeChange, handlePrayersChange, handleTagsChange,
       handleFavoriteChange, handlePublishedChange, handleTestamentChange,

@@ -31,6 +31,7 @@ export function JournalEntryTitleField({ t, title, onChange }: JournalEntryTitle
     <div className="space-y-1.5">
       <div className={LABEL_CLASS_NAME}>{t.journal.titleOptional || tt("Title (optional)")}</div>
       <Input
+        aria-label={t.journal.titleOptional || tt("Title (optional)")}
         placeholder={t.journal.titlePlaceholder || tt("Give your entry a title...")}
         value={title}
         onChange={onChange}
@@ -63,6 +64,7 @@ export function JournalEntryContentField({
         </div>
       </div>
       <Textarea
+        aria-label={t.journal.whatOnMind || tt("What's on your mind?")}
         placeholder={t.journal.contentPlaceholder || tt("Write your thoughts, feelings, or reflections...")}
         value={content}
         onChange={onChange}

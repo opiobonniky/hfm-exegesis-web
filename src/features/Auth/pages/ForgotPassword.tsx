@@ -1,82 +1,33 @@
-import { ArrowRight, CheckCircle2 } from "lucide-react";
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { ArrowRight, Mail, KeyRound, Lock, Loader2 } from "lucide-react";
 import { useForgotPasswordPage } from "../hooks/useForgotPasswordPage";
 import FloatingInput from "../components/FloatingInput";
-import {
-  AuthAnimatedEntrance, AuthFormCard,
-  AuthBrandedPanelDesktop, AuthLoadingSpinner,
-  ForgotPasswordSubmitButton, ForgotPasswordFormContent,
-  ForgotPasswordFooter, ForgotPasswordContentWrapper,
-} from "../components";
-import { Mail, KeyRound, Lock } from "lucide-react";
-import logoImage from "@/assets/logos/exegesis_bg_rm.webp";
-import { tt } from '@/components/languages/hardcodedTranslate';
+import { AuthPageLayout, AuthProgress } from "../components/AuthPageLayout";
+import { RegistrationPasswordChecklist } from "../components/RegistrationPasswordChecklist";
+import { GuestReadingLink } from "../components/GuestReadingLink";
+import { Button } from "@/components/ui/button";
+import { tt } from "@/components/languages/hardcodedTranslate";
 
 export default function ForgotPassword() {
-  const { data, actions } = useForgotPasswordPage();
-  const h = { ...data, ...actions };
-  return (
-    <div className="min-h-screen flex bg-muted overflow-hidden relative" dir={h.isRtl ? "rtl" : "ltr"}>
-      <AuthAnimatedEntrance />
-
-      <ForgotPasswordContentWrapper>
-        <AuthFormCard>
-          <ForgotPasswordFormContent
-            badgeLabel={h.step === "email" ? (h.t.auth?.accountRecovery || "Account Recovery") : (h.t.auth?.securityUpdate || "Security Update")}
-            heading={h.step === "email" ? (h.t.auth?.forgotPassword || "Forgot Password?") : (h.t.auth?.resetPassword || "Reset Password")}
-            description={h.step === "email" ? (h.t.auth?.enterEmailForRecovery || tt("Enter your email to receive a recovery code.")) : (h.t.auth?.enterCodeAndPassword || tt("Enter the 6-digit code and your new password."))}
-            logoSrc={logoImage}
-          >
-            {h.step === "email" ? (
-              <form key="email" onSubmit={h.handleRequestReset} className="space-y-6">
-                <FloatingInput id="email" label={h.t.common?.email || tt("Email Address")} icon={Mail}
-                  type="email" value={h.email} onChange={(e) => h.setEmail(e.target.value)}
-                  focused={h.focusedField === "email"} setFocused={h.setFocusedField}
-                  handleBlur={() => h.handleBlur("email")} error={h.getFieldError("email")} touched={!!h.touchedFields.email} />
-                <ForgotPasswordSubmitButton isLoading={h.isLoading}>
-                  {h.t.auth?.sendResetCode || tt("Send Reset Code")} <ArrowRight className="w-5 h-5" />
-                </ForgotPasswordSubmitButton>
-              </form>
-            ) : (
-              <form key="reset" onSubmit={h.handleResetPassword} className="space-y-6">
-                  <FloatingInput id="code" label={h.t.auth?.resetCode || tt("Reset Code")} icon={KeyRound}
-                    value={h.code} onChange={(e) => h.setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                    focused={h.focusedField === "code"} setFocused={h.setFocusedField}
-                    handleBlur={() => h.handleBlur("code")} error={h.getFieldError("code")} touched={!!h.touchedFields.code}
-                    autoComplete="one-time-code" />
-                  <FloatingInput id="newPassword" label={h.t.common?.password || tt("New Password")} icon={Lock}
-                    type={h.showPassword ? "text" : "password"} value={h.newPassword}
-                    onChange={(e) => h.setNewPassword(e.target.value)}
-                    focused={h.focusedField === "newPassword"} setFocused={h.setFocusedField}
-                    handleBlur={() => h.handleBlur("newPassword")} error={h.getFieldError("newPassword")}
-                    touched={!!h.touchedFields.newPassword} isPassword showPassword={h.showPassword}
-                    setShowPassword={h.setShowPassword} autoComplete="new-password" />
-                  <FloatingInput id="confirmPassword" label={h.t.common?.confirmPassword || tt("Confirm Password")} icon={Lock}
-                    type={h.showPassword ? "text" : "password"} value={h.confirmPassword}
-                    onChange={(e) => h.setConfirmPassword(e.target.value)}
-                    focused={h.focusedField === "confirmPassword"} setFocused={h.setFocusedField}
-                    handleBlur={() => h.handleBlur("confirmPassword")} error={h.getFieldError("confirmPassword")}
-                    touched={!!h.touchedFields.confirmPassword} autoComplete="new-password" />
-                  <ForgotPasswordSubmitButton isLoading={h.isLoading}>
-                    {h.t.auth?.resetPassword || tt("Reset Password")} <CheckCircle2 className="w-5 h-5" />
-                  </ForgotPasswordSubmitButton>
-              </form>
-            )}
-
-            <ForgotPasswordFooter
-              rememberLabel={h.t.auth?.rememberPassword || "Remember your password?"}
-              signInLabel={h.t.auth?.signIn || "Sign in"}
-              backToLoginLabel={h.t.auth?.backToLogin || "Back to Login"}
-            />
-          </ForgotPasswordFormContent>
-        </AuthFormCard>
-      </ForgotPasswordContentWrapper>
-
-      <AuthBrandedPanelDesktop
-        logoSrc={logoImage}
-        heading={h.t.auth?.resetYourPath || "Reset your Path."}
-        quote={h.t.auth?.lampToMyFeet || "Your word is a lamp for my feet, a light on my path."}
-        attribution={h.t.auth?.psalmReference || "Psalm 119:105"}
-      />
-    </div>
-  );
+  const { data: h, actions: a } = useForgotPasswordPage();
+  const [showConfirm, setShowConfirm] = useState(false);
+  const reset = h.step === "reset";
+  return <AuthPageLayout isRtl={h.isRtl} eyebrow="Account recovery" title={tt(reset ? "Choose a new password" : "Let's get you back in")} description={tt(reset ? "Enter the code from your email, then choose a strong password for your account." : "Forgot your password? We'll send you a code to help you securely reset it.")} asideTitle="Your next chapter is waiting.">
+    <AuthProgress steps={["Your email", "Reset password"]} current={reset ? 2 : 1} />
+    {reset && <div className="mb-5 flex flex-wrap items-center justify-between gap-2 rounded-xl border bg-muted/30 px-4 py-3"><span className="min-w-0 break-all text-sm text-muted-foreground">{h.email}</span><button type="button" disabled={h.isLoading} onClick={() => a.setStep("email")} className="text-xs font-semibold text-primary">{tt("Change email")}</button></div>}
+    <form onSubmit={reset ? a.handleResetPassword : a.handleRequestReset} noValidate className="space-y-5">
+      <fieldset disabled={h.isLoading} className="space-y-4">
+        {!reset ? <FloatingInput id="email" label={tt("Email address")} icon={Mail} type="email" autoComplete="email" value={h.email} onChange={e => a.setEmail(e.target.value)} focused={h.focusedField === "email"} setFocused={a.setFocusedField} handleBlur={() => a.handleBlur("email")} error={a.getFieldError("email")} touched={!!h.touchedFields.email} /> : <>
+          <FloatingInput id="code" label={tt("6-digit recovery code")} icon={KeyRound} value={h.code} onChange={e => a.setCode(e.target.value.replace(/\D/g, "").slice(0, 6))} autoComplete="one-time-code" inputMode="numeric" focused={h.focusedField === "code"} setFocused={a.setFocusedField} handleBlur={() => a.handleBlur("code")} error={a.getFieldError("code")} touched={!!h.touchedFields.code} />
+          <FloatingInput id="newPassword" label={tt("New password")} icon={Lock} type="password" isPassword showPassword={h.showPassword} setShowPassword={a.setShowPassword} autoComplete="new-password" value={h.newPassword} onChange={e => a.setNewPassword(e.target.value)} focused={h.focusedField === "newPassword"} setFocused={a.setFocusedField} handleBlur={() => a.handleBlur("newPassword")} error={a.getFieldError("newPassword")} touched={!!h.touchedFields.newPassword} />
+          <RegistrationPasswordChecklist password={h.newPassword} />
+          <FloatingInput id="confirmPassword" label={tt("Confirm password")} icon={Lock} type="password" isPassword showPassword={showConfirm} setShowPassword={setShowConfirm} autoComplete="new-password" value={h.confirmPassword} onChange={e => a.setConfirmPassword(e.target.value)} focused={h.focusedField === "confirmPassword"} setFocused={a.setFocusedField} handleBlur={() => a.handleBlur("confirmPassword")} error={a.getFieldError("confirmPassword")} touched={!!h.touchedFields.confirmPassword} />
+        </>}
+      </fieldset>
+      <Button type="submit" disabled={h.isLoading} className="h-12 w-full gap-2 rounded-xl">{h.isLoading ? <Loader2 className="size-4 animate-spin" /> : <ArrowRight className="size-4 rtl:rotate-180" />}{tt(reset ? "Reset password" : "Send recovery code")}</Button>
+    </form>
+    <p className="mt-6 border-t pt-5 text-center text-sm text-muted-foreground">{tt("Remember your password?")} <Link to="/login" className="font-semibold text-primary">{tt("Sign in")}</Link></p>
+    <div className="mt-4"><GuestReadingLink disabled={h.isLoading} /></div>
+  </AuthPageLayout>;
 }

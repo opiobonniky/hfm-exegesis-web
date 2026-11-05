@@ -8,6 +8,7 @@ import VerseActionSheet from "../components/VerseActionSheet";
 import { EditNoteDialog } from "../components/EditNoteDialog";
 import { MultiSelectHighlightDialog } from "../components";
 import ApiBaseUrlIndicator from "../components/ApiBaseUrlIndicator";
+import { GuestReadingDialog } from "../components/GuestReadingDialog";
 
 export default function BibleReader() {
   const { data, actions } = useBibleReaderPage();
@@ -173,6 +174,7 @@ export default function BibleReader() {
         apiBaseUrl={data.apiBaseUrl}
         visible={import.meta.env.DEV}
       />
+      <GuestReadingDialog message={data.guestGateMessage} onClose={actions.closeGuestGate} />
     </div>
   );
 }

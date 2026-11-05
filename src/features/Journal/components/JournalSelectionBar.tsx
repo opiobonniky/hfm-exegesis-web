@@ -1,36 +1,16 @@
-import { CheckSquare, Download, Square } from "lucide-react";
-import { tt } from '@/components/languages/hardcodedTranslate';
+import { Download, Share2, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { tt } from "@/components/languages/hardcodedTranslate";
 
-interface JournalSelectionBarProps {
-  selectedCount: number;
-  entryCount: number;
-  onToggleAll: () => void;
-  onClear: () => void;
-  onExport: () => void;
-}
-
-export function JournalSelectionBar({ selectedCount, entryCount, onToggleAll, onClear, onExport }: JournalSelectionBarProps) {
-  const allSelected = selectedCount === entryCount;
-
-  return (
-    <div className="sticky top-14 z-10 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-2 mb-4 bg-background/80 backdrop-blur-md border-b border-border">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <button onClick={onToggleAll} className="flex items-center gap-1.5 text-xs font-bold text-amber-300 hover:text-amber-200 transition-colors">
-            {allSelected ? <CheckSquare className="w-4 h-4" /> : <Square className="w-4 h-4" />}
-            {allSelected ? tt("Deselect All") : tt("Select All")}
-          </button>
-          <div className="text-xs text-muted-foreground/70">{selectedCount} of {entryCount}{tt("selected")}</div>
-        </div>
-        {selectedCount > 0 && (
-          <div className="flex items-center gap-2">
-            <button onClick={onClear} className="text-xs text-muted-foreground/70 hover:text-foreground transition-colors px-3 py-1.5 rounded-xl border border-border hover:border-foreground/30">{tt("Clear")}</button>
-            <button onClick={onExport} className="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-xl bg-amber-500 text-foreground hover:bg-amber-400 transition-all">
-              <Download className="w-3.5 h-3.5" />{tt("Export Selected (")}{selectedCount})
-            </button>
-          </div>
-        )}
-      </div>
-    </div>
-  );
+interface Props { selectedCount: number; entryCount: number; onToggleAll: () => void; onClear: () => void; onExport: () => void; onShare: () => void; onCancel: () => void }
+export function JournalSelectionBar(p: Props) {
+  return <div className="sticky top-0 z-10 mb-5 rounded-2xl border bg-card/95 p-4 shadow-sm backdrop-blur" role="toolbar" aria-label={tt("Selected journals")}>
+    <div className="flex flex-wrap items-center justify-between gap-3"><p aria-live="polite" className="text-sm font-semibold">{p.selectedCount} {tt("selected")}</p><div className="flex flex-wrap items-center gap-2">
+      <Button size="sm" variant="ghost" onClick={p.onToggleAll}>{p.selectedCount === p.entryCount ? tt("Deselect all") : tt("Select all on this page")}</Button>
+      <Button size="sm" variant="ghost" onClick={p.onClear} disabled={!p.selectedCount}>{tt("Clear")}</Button>
+      <Button size="sm" variant="outline" disabled={!p.selectedCount} onClick={p.onExport} className="gap-2 border-red-500/30 bg-red-500/10 text-red-700 hover:bg-red-500/20 dark:text-red-400"><Download className="size-4" />PDF</Button>
+      <Button size="sm" variant="outline" disabled={!p.selectedCount} onClick={p.onShare} className="gap-2 border-primary/30 bg-primary/10 text-primary"><Share2 className="size-4" />{tt("Share")}</Button>
+      <Button size="sm" variant="ghost" onClick={p.onCancel}><X className="me-1 size-4" />{tt("Cancel")}</Button>
+    </div></div>
+  </div>;
 }

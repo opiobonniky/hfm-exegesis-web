@@ -34,6 +34,7 @@ export function JournalEntryAdditionalSection({
             {t.journal.tags || tt("Tags")}
           </Label>
           <Input
+            aria-label={t.journal.tags || tt("Tags")}
             placeholder={t.journal.tagsPlaceholder || tt("comma, separated, tags")}
             value={tags}
             onChange={onTagsChange}
@@ -45,6 +46,7 @@ export function JournalEntryAdditionalSection({
             {t.journal.addToFavorites || tt("Add to favorites")}
           </Label>
           <Switch
+            aria-label={t.journal.addToFavorites || tt("Add to favorites")}
             checked={isFavorite}
             onCheckedChange={onFavoriteChange}
             className="data-[state=checked]:bg-stone-800 dark:data-[state=checked]:bg-stone-200"
@@ -62,6 +64,7 @@ export function JournalEntryAdditionalSection({
             </p>
           </div>
           <Switch
+            aria-label={tt("Make entry public")}
             checked={isPublished}
             onCheckedChange={onPublishedChange}
             className="data-[state=checked]:bg-emerald-600 dark:data-[state=checked]:bg-emerald-500"

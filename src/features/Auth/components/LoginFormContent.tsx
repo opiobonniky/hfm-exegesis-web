@@ -11,6 +11,7 @@ import { RegisterGoogleButton } from "./RegisterGoogleButton";
 import { AuthLogo } from "./AuthLogo";
 import FloatingInput from "./FloatingInput";
 import { LoginPageModel } from "../types";
+import { GuestReadingLink } from "./GuestReadingLink";
 
 interface LoginFormContentProps {
   p: LoginPageModel;
@@ -84,6 +85,7 @@ export function LoginFormContent({ p, logoSrc }: LoginFormContentProps) {
         </p>
       </div>
 
+      <GuestReadingLink disabled={p.isLoading || p.isGoogleLoading} />
       <AuthFooter
         termsLabel={p.termsLabel}
         termsLinkLabel={p.termsLinkLabel}

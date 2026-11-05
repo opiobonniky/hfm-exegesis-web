@@ -7,6 +7,7 @@ import heroBgJpeg from "@/assets/logos/hero-bg.jpeg";
 import logoImage from "@/assets/logos/exegesis_bg_rm.webp";
 import { tt } from "@/components/languages/hardcodedTranslate";
 import type { HeroSectionProps } from "../../types";
+import { useAuth } from "@/contexts/AuthContext";
 
 export function HeroSection({
   eyebrow,
@@ -21,6 +22,7 @@ export function HeroSection({
   previewReference,
   previewTranslation,
 }: HeroSectionProps) {
+  const { startGuest } = useAuth();
   return (
     <section id="home" className="relative overflow-hidden bg-brand-dark">
       <div className="absolute inset-0">
@@ -67,6 +69,7 @@ export function HeroSection({
               </Button>
             </div>
 
+            <button type="button" onClick={startGuest} className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-lg px-2 text-sm font-medium text-white/85 underline decoration-white/30 underline-offset-4 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"><BookOpen className="size-4" />{tt("Continue as guest")}</button>
             <p className="mt-6 text-xs sm:text-sm text-white/65 font-medium max-w-xl mx-auto lg:mx-0">
               {support}
             </p>

@@ -76,7 +76,11 @@ export function useLabFlowPage() {
       setWordsLoading(true);
       try {
         const words = await getVerseWords(lab.data.bookName, chapterNumber, verseStartNumber, "BSB");
-        if (!cancelled) setVerseWords(words);
+        if (!cancelled) {
+          setVerseWords(words);
+          const studied = words.filter(w => w.strongsId).map(w => ({ strongsId: w.strongsId, surfaceText: w.surfaceText, lemma: w.lemma }));
+          lab.actions.update({ strongsWords: studied.length ? JSON.stringify(studied) : undefined, strongsIds: studied.length ? [...new Set(studied.map(w => w.strongsId))].join(',') : undefined });
+        }
       } catch { if (!cancelled) setVerseWords([]); }
       finally { if (!cancelled) setWordsLoading(false); }
     };

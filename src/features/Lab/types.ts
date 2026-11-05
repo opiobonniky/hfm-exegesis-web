@@ -99,6 +99,8 @@ export interface LabFlowState {
   tags: string;
   isPublic: boolean;
   journalEntryId: string | null;
+  strongsWords?: string;
+  strongsIds?: string;
   challengeText: string;
   resultsText: string;
 }

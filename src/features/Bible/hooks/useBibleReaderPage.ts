@@ -29,6 +29,7 @@ import type {
 } from "../types";
 import { getContiguousVerseRange } from "../utils/selectedVerseRange";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { useGuestReadingGate } from './useGuestReadingGate';
 
 const parseRequestedChapter = (value: string | null) => {
   const chapter = Number.parseInt(value || "", 10);
@@ -59,6 +60,8 @@ function getInitialFontSize(): number {
 
 export function useBibleReaderPage() {
   const navigate = useNavigate();
+  const guestGate = useGuestReadingGate();
+  const protect = guestGate.protect;
   const [searchParams] = useSearchParams();
   const { isRtl, t } = useLanguage();
   const { data: readerData, actions: readerActions } = useBibleReader();
@@ -114,6 +117,7 @@ export function useBibleReaderPage() {
     params: searchParams, chapters: reader.chapters,
     loading: reader.loading || reader.annotationsLoading, versionId: reader.versionId,
     onAction: (action, book, chapter, verse) => {
+      if (guestGate.requestAccount("Notes and highlights require an account.")) return;
       const key = `${book}-${chapter}-${verse}`;
       reader.clearSelectedVerses();
       reader.toggleVerse(key);
@@ -890,6 +894,8 @@ export function useBibleReaderPage() {
 
   return {
     data: {
+      isGuest: guestGate.isGuest,
+      guestGateMessage: guestGate.message,
       apiBaseUrl: API_BASE_URL,
       dir: isRtl ? ("rtl" as const) : ("ltr" as const),
       isRtl,
@@ -962,6 +968,7 @@ export function useBibleReaderPage() {
       multiHighlightSaving,
     },
     actions: {
+      closeGuestGate: guestGate.close,
       goBack: () => navigate(-1),
       openBookSelection: () =>
         navigate(`/bible-books?book=${encodeURIComponent(reader.selectedBook)}`),
@@ -973,35 +980,35 @@ export function useBibleReaderPage() {
         navigate(
           `/book-overview?book=${encodeURIComponent(reader.selectedBook)}`,
         ),
-      handleReadChapter,
+      handleReadChapter: protect(handleReadChapter, "Audio narration requires an account."),
       selectTranslation: reader.selectTranslation,
       setTranslationOpen,
       setTranslationSearch,
       updateFontSize,
       openSearch: () => navigate("/search"),
       toggleVerse: reader.toggleVerse,
-      handleToggleHighlight,
-      handleToggleFavorite,
-      handleExplainVerse,
+      handleToggleHighlight: protect(handleToggleHighlight, "Highlights require an account."),
+      handleToggleFavorite: protect(handleToggleFavorite, "Favorites require an account."),
+      handleExplainVerse: protect(handleExplainVerse, "Sign in to see verse explanations."),
       handleOpenVerseActions,
       retryLoad: reader.retryLoad,
       loadMore: reader.loadMore,
-      openMultiHighlightDialog,
+      openMultiHighlightDialog: protect(openMultiHighlightDialog, "Highlights require an account."),
       closeMultiHighlightDialog,
-      confirmMultiHighlight,
-      clearMultiHighlights,
-      handleOpenNote,
-      handleMultiFavorite,
-      handleCopySelected,
-      handleShareSelected,
-      handleListenSelectedAudio,
+      confirmMultiHighlight: protect(confirmMultiHighlight),
+      clearMultiHighlights: protect(clearMultiHighlights),
+      handleOpenNote: protect(handleOpenNote, "Notes require an account."),
+      handleMultiFavorite: protect(handleMultiFavorite, "Favorites require an account."),
+      handleCopySelected: protect(handleCopySelected, "Copying verses requires an account."),
+      handleShareSelected: protect(handleShareSelected, "Sharing verses requires an account."),
+      handleListenSelectedAudio: protect(handleListenSelectedAudio, "Audio narration requires an account."),
       handleOpenSelectedVerseActions,
       clearSelection,
       handlePrevChapter,
       handleNextChapter,
       scrollToTop,
       scrollToBottom,
-      handleBookmark,
+      handleBookmark: protect(handleBookmark, "Bookmarks require an account."),
       audioActions: {
         startPlayback: audio.startPlayback,
         stopPlayback: audio.stopPlayback,
@@ -1020,28 +1027,28 @@ export function useBibleReaderPage() {
       },
       closeDrawer: () => setDrawerOpen(false),
       setVerseActionsOpen,
-      handleActionExplain,
-      handleActionLab,
-      handleActionResources,
-      openDevotional: () => navigate(actionUrl("/daily-devotions")),
-      openStudyTools: () => navigate(actionUrl("/verse-resources", { tab: "studyTools" })),
-      openStrongs: () => navigate(actionUrl("/strongs-dictionary")),
-      openTrivia: () => navigate(actionUrl("/trivia")),
-      handleActionListen,
-      handleActionHighlight,
-      handleActionNote,
-      openJournal: () => navigate(actionUrl("/journal/new")),
-      handleActionFavorite,
+      handleActionExplain: protect(handleActionExplain, "Sign in to see verse explanations."),
+      handleActionLab: protect(handleActionLab, "Sign in to start an Exegesis Lab study."),
+      handleActionResources: protect(handleActionResources),
+      openDevotional: protect(() => navigate(actionUrl("/daily-devotions"))),
+      openStudyTools: protect(() => navigate(actionUrl("/verse-resources", { tab: "studyTools" }))),
+      openStrongs: protect(() => navigate(actionUrl("/strongs-dictionary"))),
+      openTrivia: protect(() => navigate(actionUrl("/trivia"))),
+      handleActionListen: protect(handleActionListen, "Audio narration requires an account."),
+      handleActionHighlight: protect(handleActionHighlight, "Highlights require an account."),
+      handleActionNote: protect(handleActionNote, "Notes require an account."),
+      openJournal: protect(() => navigate(actionUrl("/journal/new")), "Sign in to write in your Journal."),
+      handleActionFavorite: protect(handleActionFavorite, "Favorites require an account."),
       searchVerse: () =>
         navigate(
           `/search?query=${encodeURIComponent(verseActionTarget?.text.slice(0, 100) ?? "")}`,
         ),
-      handleActionShare,
-      handleActionCopy,
+      handleActionShare: protect(handleActionShare, "Sharing verses requires an account."),
+      handleActionCopy: protect(handleActionCopy, "Copying verses requires an account."),
       closeNoteDialog: () => setNoteDialogOpen(false),
       setNoteText,
-      handleSaveNote,
-      handleDeleteNote,
+      handleSaveNote: protect(handleSaveNote, "Notes require an account."),
+      handleDeleteNote: protect(handleDeleteNote, "Notes require an account."),
     },
   };
 }

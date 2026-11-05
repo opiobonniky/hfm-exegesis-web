@@ -13,7 +13,7 @@ interface GoogleRegisterHeaderProps {
 export function GoogleRegisterHeader({ photoUrl, firstName, lastName, welcomeText, description }: GoogleRegisterHeaderProps) {
   return (
     <div className="text-center">
-      <div className="w-20 h-20 rounded-full overflow-hidden mx-auto mb-4">
+      <div className="size-16 rounded-2xl border border-primary/20 ring-4 ring-primary/5 overflow-hidden mx-auto mb-5">
         {photoUrl ? (
           <img src={photoUrl} alt={`${firstName} ${lastName}`} className="w-full h-full object-cover" />
         ) : (
@@ -24,8 +24,8 @@ export function GoogleRegisterHeader({ photoUrl, firstName, lastName, welcomeTex
           </div>
         )}
       </div>
-      <h1 className="text-2xl font-bold">{welcomeText}</h1>
-      <p className="text-muted-foreground mt-1">{description}</p>
+      <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">{welcomeText}</h1>
+      <p className="text-sm leading-6 text-muted-foreground mt-3">{description}</p>
     </div>
   );
 }

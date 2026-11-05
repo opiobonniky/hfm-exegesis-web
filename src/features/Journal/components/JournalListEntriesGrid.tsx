@@ -8,9 +8,12 @@ interface JournalListEntriesGridProps {
   onSelect: (id: number) => void;
   onView: (id: number) => void;
   onDelete: (entry: JournalPageEntry) => void;
+  onBeginSelection?: (id: number) => void;
+  onFavorite?: (id: number) => void;
+  onAction?: (kind: "pdf" | "share", entry: JournalPageEntry) => void;
 }
 
-export function JournalListEntriesGrid({ entries, selectionMode, selectedIds, onSelect, onView, onDelete }: JournalListEntriesGridProps) {
+export function JournalListEntriesGrid({ entries, selectionMode, selectedIds, onSelect, onView, onDelete, onBeginSelection, onFavorite, onAction }: JournalListEntriesGridProps) {
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       {entries.map((entry) => (
@@ -22,6 +25,9 @@ export function JournalListEntriesGrid({ entries, selectionMode, selectedIds, on
           onSelect={onSelect}
           onView={onView}
           onDelete={onDelete}
+          onBeginSelection={onBeginSelection}
+          onFavorite={onFavorite}
+          onAction={onAction}
         />
       ))}
     </div>

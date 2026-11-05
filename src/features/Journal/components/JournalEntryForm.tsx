@@ -3,6 +3,9 @@ import { JournalEntryAdditionalSection } from "./JournalEntryAdditionalSection";
 import { JournalEntryCoreForm } from "./JournalEntryCoreForm";
 import { JournalEntryReflectionFields } from "./JournalEntryReflectionFields";
 import { ScriptureLink } from "./ScriptureLink";
+import { JournalFormReflectionField } from "./JournalEntryReflectionFields";
+import { Eye } from "lucide-react";
+import { tt } from "@/components/languages/hardcodedTranslate";
 
 interface JournalEntryFormProps {
   model: JournalEntryPageModel;
@@ -25,6 +28,7 @@ export function JournalEntryForm({ model }: JournalEntryFormProps) {
             onCategoryChange={model.handleCategoryChange}
             onMoodChange={model.handleMoodChange}
           />
+          <JournalFormReflectionField title={tt("Observations")} subtitle={tt("What do you notice in the text?")} placeholder={tt("What do you notice in the text?")} icon={Eye} value={model.entry.observations} onChange={model.handleObservationsChange} />
           <JournalEntryReflectionFields
             t={model.t}
             learnings={model.entry.learnings}

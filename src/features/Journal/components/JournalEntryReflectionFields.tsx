@@ -30,6 +30,7 @@ export function JournalFormReflectionField({
   return (
     <FormCard title={title} icon={icon} subtitle={subtitle}>
       <Textarea
+        aria-label={title}
         placeholder={placeholder}
         value={value}
         onChange={onChange}

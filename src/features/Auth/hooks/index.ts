@@ -7,4 +7,3 @@ export { useForgotPasswordPage } from "./useForgotPasswordPage";
 export { useLoginPage } from "./useLoginPage";
 export { useVerifyAccountPage } from "./useVerifyAccountPage";
 export { useGoogleRegisterPage } from "./useGoogleRegisterPage";
-export { useOnboardingPage } from "./useOnboardingPage";

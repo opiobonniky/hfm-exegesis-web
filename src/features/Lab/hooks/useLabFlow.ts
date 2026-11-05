@@ -293,13 +293,18 @@ export function useLabFlow() {
 
   const saveAbide = useCallback(async () => {
     const st = stateRef.current;
+    if (st.saving) return;
     if (!st.sessionId) {
-      update({ stage: "apply" });
+      update({ error: "Save your study session before completing Abide" });
       return;
     }
 
-    update({ saving: true });
+    update({ saving: true, error: null });
     try {
+      const result = await saveAbideProgress(st.sessionId, {
+        reflection: st.reflection, prayer: st.prayer, application: st.appText, tags: st.tags, isPublic: st.isPublic,
+        observations: st.lookNotes, strongsWords: st.strongsWords, strongsIds: st.strongsIds,
+      });
       await saveProgress(st.sessionId, {
         abideReflection: st.reflection,
         abidePrayer: st.prayer,
@@ -307,16 +312,9 @@ export function useLabFlow() {
         abideTags: st.tags,
         isPublic: st.isPublic,
       });
-      await saveAbideProgress(st.sessionId, {
-        reflection: st.reflection,
-        prayer: st.prayer,
-        application: st.appText,
-        tags: st.tags,
-        isPublic: st.isPublic,
-      });
-      update({ stage: "apply", saving: false });
+      update({ stage: "apply", saving: false, journalEntryId: result?.journalEntryId != null ? String(result.journalEntryId) : result?.journalEntry?.id != null ? String(result.journalEntry.id) : st.journalEntryId });
     } catch {
-      update({ stage: "apply", saving: false });
+      update({ saving: false, error: "Could not save to Journal. Please try again." });
     }
   }, [update]);
 

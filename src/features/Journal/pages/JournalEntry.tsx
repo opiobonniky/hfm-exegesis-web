@@ -15,7 +15,7 @@ export default function JournalEntryPage() {
       <JournalEntryHeader
         navigate={p.goBack}
         t={p.t}
-        saving={p.saving}
+        saving={p.saving || p.loading}
         handleSave={p.handleSave}
         setShowTemplates={p.setShowTemplates}
       />

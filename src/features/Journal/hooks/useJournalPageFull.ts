@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useSubscription } from "@/hooks/useSubscription";
 import { sendPostRequest } from "@/services/api";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import type { JournalAction } from '../components/JournalActionDialog';
 
 export type JournalViewMode = "my" | "discover";
 
@@ -14,6 +15,7 @@ export interface JournalPageEntry {
   userId: string;
   title: string;
   content: string;
+  observations?: string | null;
   bookName?: string;
   chapter?: number;
   verseNumber?: number | null;
@@ -70,6 +72,8 @@ export function useJournalPageFull() {
   const [showFilters, setShowFilters] = useState(false);
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [entryAction, setEntryAction] = useState<JournalAction | null>(null);
+  const requestId = useRef(0);
   const searchTimerRef = useRef<ReturnType<typeof setTimeout>>();
 
   const handleTierBadgeClick = useCallback(async () => {
@@ -95,11 +99,12 @@ export function useJournalPageFull() {
   }, [isPayingUser, navigate, toast]);
 
   const loadEntries = useCallback(async (requestedPage: number) => {
+    const request = ++requestId.current;
     setLoading(true);
     try {
-      const res = await sendPostRequest("journal", "get-all", {
+      const res = await sendPostRequest("ledger", viewMode === "discover" ? "discover" : "list", {
         page: requestedPage,
-        size: 12,
+        pageSize: 12,
         search: searchDebounced || undefined,
         category: category !== "all" ? category : undefined,
         bookName: bookName || undefined,
@@ -109,6 +114,7 @@ export function useJournalPageFull() {
         endDate: endDate || undefined,
         viewMode,
       }, { includeLanguage: true });
+      if (request !== requestId.current) return;
       if (res?.returnCode === 200 && res?.returnData) {
         const data = res.returnData;
         const items = data.entries || data.content || data || [];
@@ -120,18 +126,9 @@ export function useJournalPageFull() {
     } catch {
       toast({ title: tt("Failed to load"), variant: "destructive" });
     } finally {
-      setLoading(false);
+      if (request === requestId.current) setLoading(false);
     }
   }, [bookName, category, endDate, searchDebounced, source, startDate, strongsId, toast, viewMode]);
-
-  const loadStats = useCallback(async () => {
-    try {
-      const res = await sendPostRequest("journal", "stats", {});
-      if (res?.returnCode === 200 && res?.returnData) setStats(res.returnData);
-    } catch {
-      // Stats are supplementary; entries remain usable if this request fails.
-    }
-  }, []);
 
   useEffect(() => {
     if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
@@ -146,8 +143,14 @@ export function useJournalPageFull() {
   }, [loadEntries, page]);
 
   useEffect(() => {
-    loadStats();
-  }, [loadStats]);
+    setSelectionMode(false); setSelectedIds(new Set());
+  }, [page, searchDebounced, category, bookName, source, strongsId, startDate, endDate]);
+
+  useEffect(() => {
+    if (!selectionMode) return;
+    const cancel = (event: KeyboardEvent) => { if (event.key === "Escape") { setSelectionMode(false); setSelectedIds(new Set()); } };
+    window.addEventListener("keydown", cancel); return () => window.removeEventListener("keydown", cancel);
+  }, [selectionMode]);
 
   const handleDelete = useCallback(async () => {
     if (!deleteDialog) return;
@@ -168,7 +171,7 @@ export function useJournalPageFull() {
     }
   }, [deleteDialog, loadEntries, page, toast]);
 
-  const handleSearchChange = useCallback((value: string) => setSearch(value), []);
+  const handleSearchChange = useCallback((value: string) => { setSearch(value); setPage(1); }, []);
   const handlePreviousPage = useCallback(() => setPage((current) => Math.max(current - 1, 1)), []);
   const handleNextPage = useCallback(() => setPage((current) => current + 1), []);
   const openDeleteDialog = useCallback((entry: JournalPageEntry) => setDeleteDialog(entry), []);
@@ -197,6 +200,20 @@ export function useJournalPageFull() {
       return next;
     });
   }, []);
+  const beginSelection = useCallback((id: number) => {
+    setSelectionMode(true);
+    setSelectedIds(previous => { const next = new Set(previous); next.add(id); return next; });
+    navigator.vibrate?.(35);
+  }, []);
+  const toggleFavorite = useCallback(async (id: number) => {
+    const response = await sendPostRequest("journal", "toggle-favorite", { id });
+    if (response.returnCode === 200) setEntries(previous => previous.map(e => e.id === id ? { ...e, isFavorite: !e.isFavorite } : e));
+    else toast({ title: tt("Failed to update favorite"), variant: "destructive" });
+  }, [toast]);
+  const openEntryAction = useCallback((kind: "pdf" | "share", entry?: JournalPageEntry) => {
+    const chosen = entry ? [entry] : entries.filter(e => selectedIds.has(e.id));
+    if (chosen.length) setEntryAction({ kind, entries: chosen });
+  }, [entries, selectedIds]);
   const toggleSelectAll = useCallback(() => {
     setSelectedIds((current) => current.size === entries.length ? new Set() : new Set(entries.map((entry) => entry.id)));
   }, [entries]);
@@ -229,7 +246,7 @@ export function useJournalPageFull() {
       t, isRtl, sowerPortalLoading, entries, stats, loading, page, totalPages,
       hasNext, hasPrevious, search, category, bookName, source, strongsId,
       startDate, endDate, viewMode, showFilters, deleteDialog, deleting,
-      showExportModal, selectionMode, selectedIds, hasActiveFilters,
+      showExportModal, selectionMode, selectedIds, hasActiveFilters, entryAction,
     },
     actions: {
       handleTierBadgeClick, handleSearchChange, setCategory, setBookName,
@@ -239,7 +256,7 @@ export function useJournalPageFull() {
       handleExportDialogOpenChange, toggleSelectionMode, exitSelectionMode,
       toggleEntrySelection, toggleSelectAll, clearSelection,
       handlePreviousPage, handleNextPage, viewEntry, createEntry,
-      clearAllFilters, refresh,
+      clearAllFilters, refresh, beginSelection, toggleFavorite, openEntryAction, closeEntryAction: () => setEntryAction(null),
     },
   };
 }

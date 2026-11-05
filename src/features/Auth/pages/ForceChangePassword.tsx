@@ -5,48 +5,30 @@ import { useState } from "react";
 import { Eye, EyeOff, Lock, ShieldAlert } from "lucide-react";
 import { useForceChangePasswordPage } from "../hooks/useForceChangePasswordPage";
 import FloatingInput from "../components/FloatingInput";
-import {
-  AuthAnimatedEntrance,
-  AuthFormCard,
-  AuthBrandedPanelDesktop,
-  ForgotPasswordContentWrapper,
-} from "../components";
-import { AuthLogoImage } from "../components/AuthLogoImage";
+import { AuthPageLayout } from "../components/AuthPageLayout";
+import { RegistrationPasswordChecklist } from "../components/RegistrationPasswordChecklist";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import logoImage from "@/assets/logos/exegesis_bg_rm.webp";
 import { tt } from '@/components/languages/hardcodedTranslate';
 import { StableLoadingContent } from "@/components/ui/StableLoadingContent";
 
 export default function ForceChangePassword() {
   const { data, actions } = useForceChangePasswordPage();
   const [showCurrent, setShowCurrent] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   return (
-    <div className="min-h-screen flex bg-muted overflow-hidden relative">
-      <AuthAnimatedEntrance />
-
-      <ForgotPasswordContentWrapper>
-        <AuthFormCard>
+    <AuthPageLayout backToLogin={false} eyebrow="Account security" title={tt("Make your account yours")} description={tt("Replace your temporary password with one only you know before continuing.")} asideTitle="A fresh start. A secure account.">
           <div className="space-y-6">
-            <div className="flex justify-center">
-              <AuthLogoImage src={logoImage} size="md" />
-            </div>
-
-            <div className="space-y-2 text-center">
-              <div className="mx-auto w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center">
-                <ShieldAlert className="w-6 h-6 text-amber-600" />
-              </div>
-              <h1 className="text-2xl font-bold text-foreground">{tt("Set a New Password")}</h1>
-              <p className="text-sm text-muted-foreground leading-relaxed">{tt("Your account was created with a temporary password. For your security, please create your own password before continuing.")}</p>
-            </div>
+            <div className="flex gap-3 rounded-xl border border-primary/15 bg-primary/5 p-4 text-sm text-muted-foreground"><ShieldAlert className="size-5 shrink-0 text-primary" /><p>{tt("You can find your temporary password in your welcome email.")}</p></div>
 
             <form onSubmit={actions.handleSubmit} className="space-y-5" noValidate>
+              <fieldset disabled={data.isLoading} className="space-y-5">
               {/* Temporary password */}
               <div className="space-y-1.5">
                 <Label htmlFor="currentPassword" className="text-xs font-medium">{tt("Temporary Password")}</Label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+                   <Lock className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
                   <input
                     id="currentPassword"
                     type={showCurrent ? "text" : "password"}
@@ -56,13 +38,14 @@ export default function ForceChangePassword() {
                     onBlur={() => actions.handleBlur("currentPassword")}
                     autoComplete="current-password"
                     placeholder={tt("From your welcome email")}
-                    className="w-full h-11 pl-9 pr-10 rounded-lg border bg-background text-sm outline-none transition-colors focus:border-primary"
+                    className="w-full h-12 ps-9 pe-12 rounded-xl border bg-background text-sm outline-none transition-colors focus:ring-2 focus:ring-primary"
                   />
                   <button
                     type="button"
                     onClick={() => setShowCurrent((v) => !v)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                    tabIndex={-1}
+                    className="absolute end-1 top-1/2 grid size-10 -translate-y-1/2 place-items-center text-muted-foreground hover:text-foreground"
+                    aria-label={tt(showCurrent ? "Hide temporary password" : "Show temporary password")}
+                    aria-pressed={showCurrent}
                   >
                     {showCurrent ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -91,12 +74,16 @@ export default function ForceChangePassword() {
                 autoComplete="new-password"
               />
 
+              <RegistrationPasswordChecklist password={data.newPassword} />
               {/* Confirm password */}
               <FloatingInput
                 id="confirmPassword"
                 label={tt("Confirm Password")}
                 icon={Lock}
-                type={data.showPassword ? "text" : "password"}
+                type="password"
+                isPassword
+                showPassword={showConfirm}
+                setShowPassword={setShowConfirm}
                 value={data.confirmPassword}
                 onChange={(e) => actions.setConfirmPassword(e.target.value)}
                 focused={data.focusedField === "confirmPassword"}
@@ -106,8 +93,9 @@ export default function ForceChangePassword() {
                 touched={!!data.touchedFields.confirmPassword}
                 autoComplete="new-password"
               />
+              </fieldset>
 
-              <Button type="submit" disabled={data.isLoading} className="w-full h-11 gap-2">
+              <Button type="submit" disabled={data.isLoading} className="w-full h-12 gap-2 rounded-xl">
                 <StableLoadingContent
                   loading={data.isLoading}
                   idle={tt("Update Password & Continue")}
@@ -116,17 +104,7 @@ export default function ForceChangePassword() {
               </Button>
             </form>
 
-            <p className="text-xs text-muted-foreground text-center">{tt("Tip: use at least 8 characters with uppercase, lowercase, a number, and a special character.")}</p>
           </div>
-        </AuthFormCard>
-      </ForgotPasswordContentWrapper>
-
-      <AuthBrandedPanelDesktop
-        logoSrc={logoImage}
-        heading="Make it yours."
-        quote="Your word is a lamp for my feet, a light on my path."
-        attribution="Psalm 119:105"
-      />
-    </div>
+    </AuthPageLayout>
   );
 }

@@ -8,6 +8,9 @@ export async function saveAbideProgress(
     application: string;
     tags: string;
     isPublic: boolean;
+    observations?: string;
+    strongsWords?: string;
+    strongsIds?: string;
   },
 ) {
   const response = await sendPostRequest("exegesis", `${sessionId}/abide`, payload);

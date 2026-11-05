@@ -14,5 +14,4 @@ export const exportJournalEntry = (id: number) =>
   sendPostRequest("journal", "export-one", {
     id,
     format: "pdf",
-    includeLanguage: true,
-  });
+  }, { includeLanguage: true });

@@ -1,13 +1,10 @@
 // ── SplashScreen ────────────────────────────────────────────────────────────
 // First visual impression of the app. Matches Spec Screen 1.
 // Shows the Exegesis logo, app name, and loading text while checking auth state.
-// After auth resolves, routes to Home (if logged in) or Onboarding/Welcome.
+// After auth resolves, it simply dismisses; ProtectedRoute guards the route.
 
 import { useEffect, useState, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { isOnboardingCompleted } from "@/features/Auth/constants";
-import { routes } from "@/components/Routes/routes";
 import { BookOpen } from "lucide-react";
 
 // ── Props ──────────────────────────────────────────────────────────────────
@@ -49,23 +46,15 @@ export default function SplashScreen({
   children,
   minDisplayMs = 2000,
 }: SplashScreenProps) {
-  const navigate = useNavigate();
   const { isAuthenticated, loading: authLoading } = useAuth();
   const [dismissed, setDismissed] = useState(false);
 
   const handleComplete = useCallback(() => {
     setDismissed(true);
-    // if (!isAuthenticated) {
-    //   const onboardingDone = isOnboardingCompleted();
-    //   navigate(
-    //     onboardingDone ? routes.login.path : routes.landing.path,
-    //     { replace: true },
-    //   );
-    // }
     // Authenticated users: just dismiss the splash.
     // ProtectedRoute already guards the route underneath; no redirect needed.
     // This prevents every page navigation from being hijacked to /user-dashboard.
-  }, [isAuthenticated, navigate]);
+  }, []);
 
   useEffect(() => {
     if (authLoading) return; // keep showing splash while auth loads

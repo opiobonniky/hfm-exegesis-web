@@ -90,7 +90,6 @@ const Support = lazy(() => import("@/features/support/pages/Support"));
 const AdminSupport = lazy(() => import("@/features/support/pages/AdminSupport"));
 const PlansPage = lazy(() => import("@/features/Subscription/pages/PlansPage"));
 const VerseResources = lazy(() => import("@/features/Bible/pages/VerseResources"));
-const Onboarding = lazy(() => import("@/features/Auth/pages/Onboarding"));
 const WhoWeAre = lazy(() => import("@/features/HimFirstMedia/pages/WhoWeAre"));
 const LegalTerms = lazy(() => import("@/features/Legal/pages/Terms"));
 const LegalPrivacy = lazy(() => import("@/features/Legal/pages/Privacy"));
@@ -117,14 +116,6 @@ export interface RouteConfig {
 // Define all routes in a centralized configuration
 const routeConfigs = {
   // ==================== PUBLIC ROUTES ====================
-  onboarding: {
-    path: "/onboarding",
-    component: Onboarding,
-    isProtected: false,
-    requiresLayout: false,
-    title: tt("Welcome"),
-  },
-
   landing: {
     path: "/",
     component: Landing,

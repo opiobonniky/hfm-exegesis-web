@@ -1,50 +1,14 @@
-// GoogleRegister — thin compositor using shared Auth components
 import { useNavigate } from "react-router-dom";
 import { useGoogleRegisterPage } from "../hooks/useGoogleRegisterPage";
-import {
-  GoogleRegisterWrapper,
-  GoogleRegisterForm, GoogleRegisterHeader, GoogleRegisterEmailCard, GoogleRegisterFooter,
-} from "../components";
-import { tt } from '@/components/languages/hardcodedTranslate';
+import { GoogleRegisterWrapper, GoogleRegisterForm, GoogleRegisterHeader, GoogleRegisterEmailCard, GoogleRegisterFooter } from "../components";
+import { tt } from "@/components/languages/hardcodedTranslate";
 
-const GoogleRegister = () => {
-  const { data, actions } = useGoogleRegisterPage();
-  const p = { ...data, ...actions };
-  const {
-    t, isRtl, state, phoneNumber, setPhoneNumber,
-    username, setUsername, password, setPassword,
-    confirmPassword, setConfirmPassword, showPassword, setShowPassword,
-    passwordMismatch, loading, error, handleRegister,
-  } = p;
-  const navigate = useNavigate();
-
-  const firstName = state?.firstName || "";
-  const lastName = state?.lastName || "";
-  const email = state?.email || "";
-  const photoUrl = state?.photoUrl || "";
-
-  return (
-    <GoogleRegisterWrapper isRtl={isRtl}>
-      <GoogleRegisterHeader
-        photoUrl={photoUrl} firstName={firstName} lastName={lastName}
-        welcomeText={(t.auth?.welcomeUser || "Welcome, {name}!").replace("{name}", firstName)}
-        description={t.auth?.completeRegistrationDesc || tt("Complete your registration to get started")}
-      />
-
-      <GoogleRegisterEmailCard email={email} firstName={firstName} lastName={lastName} />
-
-      <GoogleRegisterForm
-        t={t} email={email} firstName={firstName} lastName={lastName}
-        username={username} setUsername={setUsername} password={password} setPassword={setPassword}
-        confirmPassword={confirmPassword} setConfirmPassword={setConfirmPassword}
-        showPassword={showPassword} setShowPassword={setShowPassword}
-        passwordMismatch={passwordMismatch} loading={loading} error={error}
-        handleRegister={handleRegister}
-      />
-
-      <GoogleRegisterFooter label={t.auth?.useDifferentAccount || tt("Use different account")} onClick={() => navigate("/login")} />
-    </GoogleRegisterWrapper>
-  );
-};
-
-export default GoogleRegister;
+export default function GoogleRegister() {
+  const model = useGoogleRegisterPage(); const { data: p } = model; const navigate = useNavigate();
+  return <GoogleRegisterWrapper isRtl={p.isRtl}>
+    <GoogleRegisterHeader photoUrl={p.profilePhoto || p.state?.photoUrl || ""} firstName={p.state?.firstName || ""} lastName={p.state?.lastName || ""} welcomeText={tt("Complete your Google account")} description={tt(p.state?.registrationProof ? "Your Google identity is verified. Add your profile and secure your account." : "Sign in with Google to continue creating your account.")} />
+    {p.state?.email && <GoogleRegisterEmailCard email={p.state.email} firstName={p.state.firstName || ""} lastName={p.state.lastName || ""} />}
+    <GoogleRegisterForm model={model} />
+    <GoogleRegisterFooter label={tt("Use different account")} onClick={() => navigate("/login")} />
+  </GoogleRegisterWrapper>;
+}

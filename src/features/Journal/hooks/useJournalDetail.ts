@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Heart, Lightbulb, Pencil, Star } from "lucide-react";
+import { Eye, Heart, Lightbulb, Pencil, Star } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/components/languages/languageProvider";
@@ -19,6 +19,8 @@ import type {
   JournalDetailSelectedWord,
 } from "../types";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { sendPostRequest } from '@/services/api';
+import { journalShareText, shareJournalEntries } from '../journalActions';
 
 export function useJournalDetail(): JournalDetailPageModel {
   const navigate = useNavigate();
@@ -33,6 +35,7 @@ export function useJournalDetail(): JournalDetailPageModel {
   const [copied, setCopied] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [updatingFavorite, setUpdatingFavorite] = useState(false);
+  const [updatingPublished, setUpdatingPublished] = useState(false);
   const [studiedWordSheetOpen, setStudiedWordSheetOpen] = useState(false);
   const [selectedStudiedWord, setSelectedStudiedWord] = useState<JournalDetailSelectedWord | null>(null);
 
@@ -60,7 +63,7 @@ export function useJournalDetail(): JournalDetailPageModel {
   const handleCopy = useCallback(async () => {
     if (!entry) return;
     try {
-      await navigator.clipboard.writeText(`${entry.title || ""}\n\n${entry.content || ""}`);
+      await navigator.clipboard.writeText(journalShareText([entry]));
       setCopied(true);
       window.setTimeout(() => setCopied(false), 2000);
     } catch {
@@ -70,17 +73,27 @@ export function useJournalDetail(): JournalDetailPageModel {
 
   const handleShare = useCallback(async () => {
     if (!entry) return;
-    if (!navigator.share) {
-      await handleCopy();
-      return;
-    }
     try {
-      await navigator.share({ title: entry.title || undefined, text: entry.content || undefined });
+      const result = await shareJournalEntries([entry]);
+      if (result === 'copied') toast({ title: tt('Journal copied to clipboard') });
     } catch (error) {
       if (error instanceof DOMException && error.name === "AbortError") return;
       toast({ title: tt("Failed to share"), variant: "destructive" });
     }
   }, [entry, handleCopy, toast]);
+
+  const handleTogglePublished = useCallback(async () => {
+    if (!entry || updatingPublished || String(userInfo?.id) !== String(entry.userId)) return;
+    setUpdatingPublished(true);
+    try {
+      const isPublished = !entry.isPublished;
+      const response = await sendPostRequest('journal', 'update', { id: entry.id, isPublished });
+      if (response.returnCode !== 200) throw new Error(response.returnMessage || 'Could not update visibility');
+      setEntry(current => current ? { ...current, isPublished } : current);
+      toast({ title: tt(isPublished ? 'Entry is now public' : 'Entry is now private') });
+    } catch (err) { toast({ title: tt('Could not update visibility'), variant: 'destructive' }); }
+    finally { setUpdatingPublished(false); }
+  }, [entry, updatingPublished, userInfo?.id, toast]);
 
   const handleToggleFavorite = useCallback(async () => {
     if (!entry || updatingFavorite) return;
@@ -174,6 +187,7 @@ export function useJournalDetail(): JournalDetailPageModel {
   const reflectionSections = useMemo<JournalDetailReflectionSection[]>(() => {
     if (!entry) return [];
     return [
+      { key: "observations", icon: Eye, label: tt("Observations"), subtitle: tt("What do you notice in the text?"), content: entry.observations || "", iconColor: "text-cyan-600" },
       { key: "learnings", icon: Lightbulb, label: t.journal.whatILearned || "What I Learned", subtitle: t.journal.learnSubtitle || "Insights & revelations", content: entry.learnings || "", iconColor: "text-amber-500" },
       { key: "application", icon: Pencil, label: t.journal.howIllApply || "How I'll Apply", subtitle: t.journal.applySubtitle || "Practical steps", content: entry.application || "", iconColor: "text-blue-500" },
       { key: "gratitude", icon: Heart, label: t.journal.gratitude || "Gratitude", subtitle: t.journal.gratitudeSubtitle || "Counting blessings", content: entry.gratitude || "", iconColor: "text-rose-500" },
@@ -185,12 +199,12 @@ export function useJournalDetail(): JournalDetailPageModel {
   return {
     data: {
       t, isRtl, entry, loading, deleting, showDeleteDialog, copied, exporting,
-      updatingFavorite, studiedWordSheetOpen, selectedStudiedWord, isOwner,
+      updatingFavorite, updatingPublished, studiedWordSheetOpen, selectedStudiedWord, isOwner,
       catMeta, moodInfo, tagsArray, reflectionSections,
     },
     actions: {
       goBack, handleEdit, handleShare, handleCopy, handleDelete,
-      handleExportPdf, handleToggleFavorite, openDeleteDialog, closeDeleteDialog,
+      handleExportPdf, handleToggleFavorite, handleTogglePublished, openDeleteDialog, closeDeleteDialog,
       handleDeleteDialogChange, handleStudiedWordSheetChange, openWordStudy,
       formatDate, formatDateShort,
     },

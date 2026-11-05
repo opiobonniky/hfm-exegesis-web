@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { tt } from '@/components/languages/hardcodedTranslate';
 
 export interface JournalDetailTopBarProps {
+  disabled?: boolean;
   isOwner: boolean;
   isFavorite: boolean;
   copied: boolean;
@@ -24,13 +25,13 @@ export default function JournalDetailTopBar(props: JournalDetailTopBarProps) {
       <div className="max-w-2xl mx-auto px-4 flex items-center justify-between h-12">
         <button onClick={props.onBack} className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors">
           <ArrowLeft className="w-3.5 h-3.5" />{tt("Journal")}</button>
-        <div className="flex items-center gap-0.5">
+        <fieldset disabled={props.disabled} className={cn("flex items-center gap-0.5 border-0 p-0", props.disabled && "opacity-40")}>
           <button onClick={props.onToggleFavorite} disabled={props.updatingFavorite} aria-label={tt("Toggle favorite")} aria-pressed={props.isFavorite} className="p-1.5 rounded-lg hover:bg-stone-200/60 dark:hover:bg-stone-800/60 transition-colors disabled:opacity-50">
             {props.updatingFavorite ? <Loader2 className="w-3.5 h-3.5 animate-spin text-muted-foreground/70" /> : <Star className={cn("w-3.5 h-3.5", props.isFavorite ? "text-amber-500 fill-amber-500" : "text-muted-foreground/70")} />}
           </button>
           <button onClick={props.onShare} aria-label={tt("Share entry")} className="p-1.5 rounded-lg hover:bg-stone-200/60 dark:hover:bg-stone-800/60 transition-colors"><Share2 className="w-3.5 h-3.5 text-muted-foreground/70" /></button>
-          <button onClick={props.onExportPdf} disabled={props.exporting} aria-label={tt("Export PDF")} className="p-1.5 rounded-lg hover:bg-stone-200/60 dark:hover:bg-stone-800/60 transition-colors">
-            {props.exporting ? <Loader2 className="w-3.5 h-3.5 animate-spin text-muted-foreground/70" /> : <Download className="w-3.5 h-3.5 text-muted-foreground/70" />}
+          <button onClick={props.onExportPdf} disabled={props.exporting} aria-label={tt("Download PDF")} className="inline-flex items-center gap-1 p-2 text-xs font-semibold text-red-600 dark:text-red-400 rounded-lg hover:bg-red-500/10 transition-colors">
+            {props.exporting ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />} PDF
           </button>
           <button onClick={props.onCopy} aria-label={tt("Copy entry")} className="p-1.5 rounded-lg hover:bg-stone-200/60 dark:hover:bg-stone-800/60 transition-colors">
             {props.copied ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5 text-muted-foreground/70" />}
@@ -44,7 +45,7 @@ export default function JournalDetailTopBar(props: JournalDetailTopBarProps) {
               </DropdownMenuContent>
             </DropdownMenu>
           )}
-        </div>
+        </fieldset>
       </div>
     </div>
   );

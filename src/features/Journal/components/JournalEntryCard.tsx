@@ -1,118 +1,43 @@
-// JournalEntryCard — renders a single journal entry in the grid
-"use client";
-
-import { Clock, Star, Trash2 } from "lucide-react";
+import { useEffect, useRef } from "react";
+import { CheckCircle2, Clock, Download, Globe, Lock, Share2, Star, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { JournalPageEntry } from "../hooks/useJournalPageFull";
-import { tt } from '@/components/languages/hardcodedTranslate';
-import { displayDate, displayDigits } from '@/services/numberLocale/format';
+import { tt } from "@/components/languages/hardcodedTranslate";
+import { displayDate } from "@/services/numberLocale/format";
 
-const CATEGORY_COLORS: Record<string, { bg: string; text: string; dot: string }> = {
-  reflection: { bg: "bg-amber-50 dark:bg-amber-950/30", text: "text-amber-700 dark:text-amber-300", dot: "bg-amber-500" },
-  prayer: { bg: "bg-blue-50 dark:bg-blue-950/30", text: "text-blue-700 dark:text-blue-300", dot: "bg-blue-500" },
-  gratitude: { bg: "bg-green-50 dark:bg-green-950/30", text: "text-green-700 dark:text-green-300", dot: "bg-green-500" },
-  study: { bg: "bg-purple-50 dark:bg-purple-950/30", text: "text-purple-700 dark:text-purple-300", dot: "bg-purple-500" },
-  notes: { bg: "bg-slate-50 dark:bg-slate-900/30", text: "text-slate-700 dark:text-slate-300", dot: "bg-slate-500" },
-};
-
-function formatDate(dateStr?: string): string {
-  if (!dateStr) return "";
-  const d = new Date(dateStr);
-  if (isNaN(d.getTime())) return "";
-  const diffMs = Date.now() - d.getTime();
-  const days = Math.floor(diffMs / 86400000);
-  if (days === 0) return "Today";
-  if (days === 1) return "Yesterday";
-  if (days < 7) return `${displayDigits(days)}d ago`;
-  return displayDate(d, undefined, { month: "short", day: "numeric" });
-}
-
-interface JournalEntryCardProps {
-  entry: JournalPageEntry;
-  selectionMode?: boolean;
-  selected?: boolean;
-  onSelect?: (id: number) => void;
-  onView: (id: number) => void;
-  onDelete?: (entry: JournalPageEntry) => void;
-}
-
-export function JournalEntryCard({
-  entry,
-  selectionMode = false,
-  selected = false,
-  onSelect,
-  onView,
-  onDelete,
-}: JournalEntryCardProps) {
-  const cat = CATEGORY_COLORS[entry.category || "notes"] || CATEGORY_COLORS.notes;
-  const verseRef = entry.bookName
-    ? `${entry.bookName}${entry.chapter ? ` ${entry.chapter}` : ""}${entry.verseNumber ? `:${entry.verseNumber}` : ""}`
-    : null;
-
-  return (
-    <div
-      className={cn(
-        "group relative rounded-xl border bg-card p-4 transition-all hover:shadow-md cursor-pointer",
-        selected ? "border-primary ring-2 ring-primary/20" : "border-border/40",
-      )}
-      onClick={() => (selectionMode && onSelect ? onSelect(entry.id) : onView(entry.id))}
-    >
-      {/* Selection checkbox */}
-      {selectionMode && (
-        <div className="absolute top-3 left-3">
-          <div
-            className={cn(
-              "w-5 h-5 rounded-md border-2 flex items-center justify-center transition-colors",
-              selected ? "bg-primary border-primary text-primary-foreground" : "border-border bg-background",
-            )}
-          >
-            {selected && <span className="text-xs font-bold">✓</span>}
-          </div>
-        </div>
-      )}
-
-      {/* Category + favorite */}
-      <div className={cn("flex items-center gap-2 mb-2", selectionMode && "ml-7")}>
-        <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold", cat.bg, cat.text)}>
-          <span className={cn("w-1.5 h-1.5 rounded-full", cat.dot)} />
-          {entry.category || tt("note")}
-        </span>
-        {entry.isFavorite && <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />}
-      </div>
-
-      {/* Title */}
-      <h3 className={cn("font-semibold text-sm text-foreground line-clamp-2 mb-1", selectionMode && "ml-7")}>
-        {entry.title || tt("Untitled Entry")}
-      </h3>
-
-      {/* Verse reference */}
-      {verseRef && (
-        <p className="text-[11px] text-muted-foreground/60 font-mono mb-1.5">{verseRef}</p>
-      )}
-
-      {/* Content preview */}
-      {entry.content && (
-        <p className="text-xs text-muted-foreground/70 line-clamp-3 leading-relaxed">{entry.content}</p>
-      )}
-
-      {/* Footer */}
-      <div className="flex items-center justify-between mt-3 pt-2 border-t border-border/30">
-        <span className="text-[10px] text-muted-foreground/50 flex items-center gap-1">
-          <Clock className="w-2.5 h-2.5" />
-          {formatDate(entry.createdOn || entry.updatedOn)}
-        </span>
-        {!selectionMode && onDelete && (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive"
-            onClick={(e) => { e.stopPropagation(); onDelete(entry); }}
-          >
-            <Trash2 className="w-3 h-3" />
-          </Button>
-        )}
-      </div>
+const moods: Record<string, string> = { happy: "😊", grateful: "🙏", peaceful: "🕊️", thoughtful: "🤔", motivated: "💪", hopeful: "🌟", challenged: "🧗", blessed: "✨" };
+interface Props { entry: JournalPageEntry; selectionMode?: boolean; selected?: boolean; onSelect?: (id: number) => void; onBeginSelection?: (id: number) => void; onView: (id: number) => void; onDelete?: (entry: JournalPageEntry) => void; onFavorite?: (id: number) => void; onAction?: (kind: "pdf" | "share", entry: JournalPageEntry) => void }
+export function JournalEntryCard({ entry, selectionMode = false, selected = false, onSelect, onBeginSelection, onView, onDelete, onFavorite, onAction }: Props) {
+  const timer = useRef<ReturnType<typeof setTimeout>>(); const held = useRef(false); const origin = useRef({ x: 0, y: 0 });
+  const cancelHold = () => { if (timer.current) clearTimeout(timer.current); timer.current = undefined; };
+  useEffect(() => () => { if (timer.current) clearTimeout(timer.current); }, []);
+  const begin = () => { held.current = true; onBeginSelection?.(entry.id); };
+  const date = entry.createdOn || entry.updatedOn;
+  return <article role="button" tabIndex={0} aria-label={`${entry.title || tt("Untitled Entry")}${selectionMode ? `, ${selected ? tt("selected") : tt("not selected")}` : ""}`} aria-pressed={selectionMode ? selected : undefined}
+    className={cn("group rounded-2xl border bg-card p-5 text-start shadow-sm transition hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary", selected ? "border-primary bg-primary/5 ring-2 ring-primary/20" : "border-border")}
+    onPointerDown={e => { if (e.button !== 0 || (e.target as HTMLElement).closest("button,a,input")) return; cancelHold(); held.current = false; origin.current = { x: e.clientX, y: e.clientY }; timer.current = setTimeout(begin, 450); }}
+    onPointerMove={e => { if (Math.hypot(e.clientX - origin.current.x, e.clientY - origin.current.y) > 10) cancelHold(); }}
+    onPointerUp={cancelHold} onPointerCancel={cancelHold} onPointerLeave={cancelHold}
+    onContextMenu={e => { if (!(e.target as HTMLElement).closest("button,a")) { e.preventDefault(); cancelHold(); begin(); } }}
+    onClick={e => { if ((e.target as HTMLElement).closest("button,a")) return; if (held.current) { held.current = false; return; } selectionMode ? onSelect?.(entry.id) : onView(entry.id); }}
+    onKeyDown={e => { if (e.target !== e.currentTarget) return; if (e.key === " ") { e.preventDefault(); selectionMode ? onSelect?.(entry.id) : onBeginSelection?.(entry.id); } else if (e.key === "Enter") { e.preventDefault(); selectionMode ? onSelect?.(entry.id) : onView(entry.id); } }}>
+    <div className="mb-3 flex flex-wrap items-center gap-2">
+      {selected && <CheckCircle2 className="size-4 text-primary" />}
+      <span className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold capitalize text-primary">{tt(entry.category || "General")}</span>
+      {entry.mood && <span>{moods[entry.mood] || entry.mood}</span>}
+      <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-1 text-[11px] text-muted-foreground">{entry.isPublished ? <Globe className="size-3" /> : <Lock className="size-3" />}{tt(entry.isPublished ? "Public" : "Private")}</span>
     </div>
-  );
+    <h2 className="mb-2 line-clamp-2 text-base font-semibold">{entry.title || tt("Untitled Entry")}</h2>
+    <p className="line-clamp-3 text-sm leading-relaxed text-muted-foreground">{entry.content}</p>
+    {entry.bookName && <p className="mt-3 text-xs font-medium text-primary">{entry.bookName} {entry.chapter}{entry.verseNumber != null ? `:${entry.verseNumber}` : ""}</p>}
+    <footer className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t pt-3">
+      <span className="flex items-center gap-1 text-xs text-muted-foreground"><Clock className="size-3" />{date && !Number.isNaN(Date.parse(date)) ? displayDate(date, undefined, { month: "short", day: "numeric" }) : ""}</span>
+      {!selectionMode && <div className="flex items-center gap-1">
+        {onAction && <><Button size="sm" variant="ghost" className="gap-1 text-red-600 dark:text-red-400" aria-label={tt("Download PDF")} onClick={() => onAction("pdf", entry)}><Download className="size-4" />PDF</Button><Button size="icon" variant="ghost" className="size-9 text-primary" aria-label={tt("Share entry")} onClick={() => onAction("share", entry)}><Share2 className="size-4" /></Button></>}
+        {onFavorite && <Button size="icon" variant="ghost" className="size-9" aria-label={tt("Toggle favorite")} aria-pressed={!!entry.isFavorite} onClick={() => onFavorite(entry.id)}><Star className={cn("size-4", entry.isFavorite && "fill-amber-500 text-amber-500")} /></Button>}
+        {onDelete && <Button size="icon" variant="ghost" className="size-9 text-destructive" aria-label={tt("Delete entry")} onClick={() => onDelete(entry)}><Trash2 className="size-4" /></Button>}
+      </div>}
+    </footer>
+  </article>;
 }

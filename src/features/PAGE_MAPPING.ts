@@ -1,5 +1,5 @@
 // Page-to-Feature mapping (all migrations complete). See feature folders.
-// Auth: Login, Register, ForgotPassword, VerifyAccount, GoogleRegister, Onboarding, Landing
+// Auth: Login, Register, ForgotPassword, VerifyAccount, GoogleRegister, Landing
 // Bible: BibleBookSelection, BibleChapterSelection, BibleReader, VerseExplanations, VerseResources, Search, Highlights, Notes, Favorites
 // DailyContent: DailyVerse, UserDailyVerse, DailyDevotions, UserDevotions, DailyExegesis, Add*
 // ReadingPlan: ReadingPlans, PlanDetail, AddReadingPlan, EditReadingPlan, BibleReadingPlan, DailyReading, UserPlans

@@ -1,8 +1,9 @@
 import type { PropsWithChildren } from "react";
-import { renderHook, waitFor } from "@testing-library/react";
+import { act, renderHook, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { useLabFlow } from "./useLabFlow";
+import { saveAbideProgress } from "../services/save-flow-progress";
 
 const mocks = vi.hoisted(() => ({
   startSession: vi.fn(),
@@ -72,5 +73,26 @@ describe("useLabFlow entry stage", () => {
     await waitFor(() => expect(result.current.data.stage).toBe("abide"));
     expect(result.current.data.requestedStage).toBeNull();
     expect(mocks.startSession).not.toHaveBeenCalled();
+  });
+
+  it("stays at Abide when the linked Journal save fails", async () => {
+    const { result } = renderHook(useLabFlow, { wrapper: wrapper("/lab") });
+    act(() => result.current.actions.update({ sessionId: "study", stage: "abide", reflection: "Hope" }));
+    vi.mocked(saveAbideProgress).mockRejectedValueOnce(new Error("Offline"));
+    await act(async () => result.current.actions.saveAbide());
+    expect(result.current.data.stage).toBe("abide");
+    expect(result.current.data.error).toContain("Could not save");
+    expect(mocks.saveProgress).not.toHaveBeenCalled();
+  });
+
+  it("carries observations and studied words into Journal and retains the linked ID", async () => {
+    const { result } = renderHook(useLabFlow, { wrapper: wrapper("/lab") });
+    act(() => result.current.actions.update({ sessionId: "study", stage: "abide", reflection: "Hope", lookNotes: "Observe", strongsWords: "[]", strongsIds: "G26" }));
+    vi.mocked(saveAbideProgress).mockResolvedValueOnce({ journalEntryId: 42 });
+    mocks.saveProgress.mockResolvedValueOnce({});
+    await act(async () => result.current.actions.saveAbide());
+    expect(saveAbideProgress).toHaveBeenLastCalledWith("study", expect.objectContaining({ observations: "Observe", strongsWords: "[]", strongsIds: "G26", isPublic: false }));
+    expect(result.current.data.journalEntryId).toBe("42");
+    expect(result.current.data.stage).toBe("apply");
   });
 });

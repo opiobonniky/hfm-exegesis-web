@@ -79,6 +79,7 @@ export interface JournalDetailEntry {
   userId: string;
   title: string | null;
   content: string | null;
+  observations?: string | null;
   bookName: string | null;
   chapter: number | null;
   verseNumber: number | null;
@@ -134,6 +135,7 @@ export interface JournalDetailPageData {
   studiedWordSheetOpen: boolean;
   selectedStudiedWord: JournalDetailSelectedWord | null;
   isOwner: boolean;
+  updatingPublished: boolean;
   catMeta: JournalDetailCategoryMeta;
   moodInfo: JournalDetailMoodInfo | null;
   tagsArray: string[];
@@ -148,6 +150,7 @@ export interface JournalDetailPageActions {
   handleDelete: () => Promise<void>;
   handleExportPdf: () => Promise<void>;
   handleToggleFavorite: () => Promise<void>;
+  handleTogglePublished: () => Promise<void>;
   openDeleteDialog: () => void;
   closeDeleteDialog: () => void;
   handleDeleteDialogChange: (open: boolean) => void;
@@ -166,6 +169,7 @@ export interface JournalEntryFormData {
   id?: number;
   title: string;
   content: string;
+  observations: string;
   bookName: string;
   chapter: string;
   verseNumber: string;
@@ -181,7 +185,7 @@ export interface JournalEntryFormData {
 }
 
 export const DEFAULT_ENTRY_FORM: JournalEntryFormData = {
-  title: "", content: "", bookName: "", chapter: "", verseNumber: "",
+  title: "", content: "", observations: "", bookName: "", chapter: "", verseNumber: "",
   category: "general", mood: "", prayers: "", gratitude: "",
   learnings: "", application: "", isFavorite: false, isPublished: false, tags: "",
 };
