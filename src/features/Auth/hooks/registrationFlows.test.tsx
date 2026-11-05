@@ -26,11 +26,11 @@ describe("web registration parity", () => {
     mocks.post.mockResolvedValueOnce({ returnCode: 200 }).mockResolvedValueOnce({ returnCode: 200, returnData: { token: "session", userRole: 2 } });
     const { result } = renderHook(useRegisterPage);
     act(() => {
-      for (const [name, value] of Object.entries({ firstName: "Maya", lastName: "Reader", email: "MAYA@example.com", username: "maya", phoneNumber: "+12025550123", gender: "Female", dateOfBirth: "1990-04-02", password: "Secure123!", confirmPassword: "Secure123!" })) result.current.actions.handleChange({ target: { name, value } } as React.ChangeEvent<HTMLInputElement>);
+      for (const [name, value] of Object.entries({ firstName: "Maya", lastName: "Reader", email: "MAYA@example.com", username: "maya", phoneNumber: "+12025550123", gender: "Female", password: "Secure123!", confirmPassword: "Secure123!" })) result.current.actions.handleChange({ target: { name, value } } as React.ChangeEvent<HTMLInputElement>);
       result.current.actions.setStep(3);
     });
     await act(async () => result.current.actions.handleSubmit(event()));
-    expect(mocks.post).toHaveBeenCalledWith("auth", "register", expect.objectContaining({ firstName: "Maya", lastName: "Reader", email: "maya@example.com", phoneNumber: "+12025550123", gender: "Female", dateOfBirth: "1990-04-02" }));
+    expect(mocks.post).toHaveBeenCalledWith("auth", "register", expect.objectContaining({ firstName: "Maya", lastName: "Reader", email: "maya@example.com", phoneNumber: "+12025550123", gender: "Female" }));
     expect(result.current.data.step).toBe(4); expect(mocks.setUser).not.toHaveBeenCalled();
     act(() => result.current.actions.setCode("123456"));
     await act(async () => result.current.actions.handleSubmit(event()));

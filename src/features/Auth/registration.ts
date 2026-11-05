@@ -17,7 +17,6 @@ export function registrationFieldError(name: string, value: string, password = "
   if (name === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(text)) return "Enter a valid email address";
   if (name === "username" && !/^[a-zA-Z0-9_.]{3,}$/.test(text)) return "Use at least 3 letters, numbers, underscores or dots";
   if (name === "phoneNumber" && text && !/^\+?[\d\s()-]{7,20}$/.test(text)) return "Enter a valid phone number";
-  if (name === "dateOfBirth" && text && (!Number.isFinite(Date.parse(text)) || text > new Date().toISOString().slice(0, 10))) return "Enter a valid birth date in the past";
   if (name === "password") return getPasswordError(value);
   if (name === "confirmPassword" && (!value || value !== password)) return "Passwords do not match";
   return "";

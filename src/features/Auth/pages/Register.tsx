@@ -4,7 +4,7 @@ import { RegisterBrandedPanel, RegisterFormPanel, RegisterGoogleButton } from ".
 import FloatingInput from "../components/FloatingInput";
 import { RegistrationPhotoPicker } from "../components/RegistrationPhotoPicker";
 import { RegistrationPasswordChecklist } from "../components/RegistrationPasswordChecklist";
-import { AtSign, Mail, Lock, User, Phone, Calendar, ArrowLeft, ArrowRight, Loader2, ShieldCheck } from "lucide-react";
+import { AtSign, Mail, Lock, User, Phone, ArrowLeft, ArrowRight, Loader2, ShieldCheck } from "lucide-react";
 import { tt } from "@/components/languages/hardcodedTranslate";
 import { Button } from "@/components/ui/button";
 
@@ -26,10 +26,7 @@ export default function Register() {
           {p.step === 1 && <>
             <RegistrationPhotoPicker value={p.profilePhoto} onChange={a.setProfilePhoto} disabled={busy} />
             <div className="grid gap-3 sm:grid-cols-2">{field("firstName", "First Name", User, "text", "given-name")}{field("lastName", "Last Name", User, "text", "family-name")}</div>
-            <div className="grid gap-3 sm:grid-cols-2">
-              {field("dateOfBirth", "Date of birth (optional)", Calendar, "date", "bday")}
-              <label className="block text-sm font-medium">{tt("Gender (optional)")}<select name="gender" value={p.formData.gender} onChange={a.handleChange} className="mt-2 h-12 w-full rounded-xl border bg-card px-3">{["Not Specified", "Male", "Female", "Other"].map(v => <option key={v} value={v}>{tt(v)}</option>)}</select></label>
-            </div>
+            <label className="block text-sm font-medium">{tt("Gender (optional)")}<select name="gender" value={p.formData.gender} onChange={a.handleChange} className="mt-2 h-12 w-full rounded-xl border bg-card px-3">{["Not Specified", "Male", "Female", "Other"].map(v => <option key={v} value={v}>{tt(v)}</option>)}</select></label>
           </>}
           {p.step === 2 && <>
             {field("email", "Email", Mail, "email", "email")}

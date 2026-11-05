@@ -11,11 +11,11 @@ import { auth, googleProvider } from "@/firebaseConfiguration/config";
 import { tt } from "@/components/languages/hardcodedTranslate";
 import { finishRegistration, registrationFieldError } from "../registration";
 
-const stepFields = [["firstName", "lastName", "dateOfBirth"], ["email", "username", "phoneNumber"], ["password", "confirmPassword"]];
+const stepFields = [["firstName", "lastName"], ["email", "username", "phoneNumber"], ["password", "confirmPassword"]];
 export function useRegisterPage() {
   const navigate = useNavigate(); const { t, isRtl } = useLanguage(); const { toast } = useToast(); const { setUserInfo } = useAuth();
   const [step, setStep] = useState(1);
-  const [formData, setFormData] = useState({ firstName: "", lastName: "", email: "", username: "", phoneNumber: "", password: "", confirmPassword: "", gender: "Not Specified", dateOfBirth: "" });
+  const [formData, setFormData] = useState({ firstName: "", lastName: "", email: "", username: "", phoneNumber: "", password: "", confirmPassword: "", gender: "Not Specified" });
   const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -51,7 +51,7 @@ export function useRegisterPage() {
       } else {
         const clientIP = await getClientIP();
         const { confirmPassword: _confirm, ...fields } = formData;
-        const res = await sendPostRequest("auth", "register", { ...fields, firstName: fields.firstName.trim(), lastName: fields.lastName.trim(), email, username: fields.username.trim().toLowerCase(), dateOfBirth: fields.dateOfBirth || undefined, userRole: 2, deviceInfo: { ...getDeviceInfo(), ip: clientIP } });
+        const res = await sendPostRequest("auth", "register", { ...fields, firstName: fields.firstName.trim(), lastName: fields.lastName.trim(), email, username: fields.username.trim().toLowerCase(), userRole: 2, deviceInfo: { ...getDeviceInfo(), ip: clientIP } });
         if (res.returnCode !== 200) throw new Error(res.returnMessage || "Registration failed");
         setStep(4); setResendSeconds(60); toast({ title: tt("Check your email for the verification code") });
       }

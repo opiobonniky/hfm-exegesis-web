@@ -34,7 +34,6 @@ export interface RegisterData {
   password: string;
   confirmPassword: string;
   gender: string;
-  dateOfBirth: string;
 }
 
 export interface GoogleAuthData {

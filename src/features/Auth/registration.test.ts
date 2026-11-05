@@ -15,7 +15,6 @@ describe("registration validation and photo lifecycle", () => {
   it("checks optional contact fields only when supplied", () => {
     expect(registrationFieldError("phoneNumber", "")).toBe("");
     expect(registrationFieldError("phoneNumber", "bad phone")).not.toBe("");
-    expect(registrationFieldError("dateOfBirth", "2999-01-01")).not.toBe("");
   });
   it("rejects unsupported and oversized photos", async () => {
     await expect(readProfilePhoto(new File(["text"], "note.txt", { type: "text/plain" }))).rejects.toThrow("JPEG");
