@@ -5,6 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { sendPostRequest, ApiError } from "@/services/api";
 import { getPasswordError } from "@/lib/passwordPolicy";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 export function useForgotPasswordPage() {
   const navigate = useNavigate();
@@ -61,8 +62,8 @@ export function useForgotPasswordPage() {
       if (returnCode === 200) {
         setStep("reset");
         toast({
-          title: t.auth?.codeSent || "Code Sent",
-          description: t.auth?.codeSentDesc || "Please check your email for the reset code.",
+          title: tt("Check your email"),
+          description: tt("If an eligible account exists, a reset code will be sent to its email address."),
         });
       } else if (returnCode === 404) {
         toast({

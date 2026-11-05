@@ -1,6 +1,6 @@
 // src/contexts/AuthContext.tsx
 
-import React, { createContext, useContext, useEffect, useState, useCallback, useMemo, useRef } from "react";
+import React, { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { signOut } from "firebase/auth";
 import { toast } from "@/hooks/use-toast";
@@ -17,37 +17,9 @@ import { isSupportNotificationPath, PENDING_SUPPORT_LINK } from '@/services/noti
 import { routes } from "@/components/Routes/routes";
 import { clearLegacyPrivateCaches } from '@/services/privateCache';
 import { GUEST_SESSION_KEY, hasGuestSession } from '@/services/guestSession';
-
-export interface UserInfo {
-  id?: string;
-  username?: string;
-  email?: string;
-  firstName?: string;
-  lastName?: string;
-  profilePhotoUrl?: string;
-  token: string;
-  userRole?: number;
-  roleName?: string;
-  /** True while the user still signs in with the admin-issued temporary password */
-  mustChangePassword?: boolean;
-}
-
-type AuthContextType = {
-  userInfo: UserInfo | null;
-  setUserInfo: (user: UserInfo | null) => void;
-  isAuthenticated: boolean;
-  isGuest: boolean;
-  startGuest: () => void;
-  loading: boolean;
-  authLoading: boolean;
-  logout: () => Promise<void>;
-  subscriptionTier: string;
-  accessExpiresAt: string | null;
-  subscriptionLoading: boolean;
-  fetchSubscriptionStatus: () => Promise<void>;
-};
-
-export const AuthContext = createContext<AuthContextType | null>(null);
+import { AuthContext, type UserInfo } from './authContextStore';
+export { AuthContext, useAuth } from './authContextStore';
+export type { UserInfo } from './authContextStore';
 
 const USER_KEY = "user_data";
 const TOKEN_KEY = "auth_token";
@@ -315,10 +287,4 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   ]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-};
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) throw new Error("useAuth must be used inside AuthProvider");
-  return context;
 };

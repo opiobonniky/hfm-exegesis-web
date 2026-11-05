@@ -81,6 +81,9 @@ export const LanguageProvider: React.FC<Props> = ({ children }) => {
   const uiState = useSyncExternalStore(subscribePublicPacks, () => getPublicPackState('ui', lang));
   const installed = !!uiState.pack;
   const translations = useMemo(() => {
+    // Google owns its mutated text until the user explicitly reloads. Do not
+    // replace that tree with installed translations during form entry.
+    if (googleStarted.current) return ENGLISH_TRANSLATIONS;
     const dictionary = getPackedUiDictionary(lang);
     const localize = (value: unknown): unknown => {
       if (typeof value === 'string') return dictionary.get(value) ?? value;
@@ -117,10 +120,13 @@ export const LanguageProvider: React.FC<Props> = ({ children }) => {
     setTranslationError(null);
     if (installed) {
       timers.current.forEach(window.clearTimeout);
+      // Installing a pack must not silently reload an unfinished form.
+      if (googleStarted.current) {
+        setTranslationError(tt('Translations are ready. Save your work, then reload to use them.'));
+        setIsLoading(false);
+        return;
+      }
       applyGoogleLanguage('en');
-      // Google mutates text nodes outside React. Recover a clean tree once when
-      // an online fallback session upgrades to installed, React-owned copy.
-      if (googleStarted.current) window.location.reload();
       setIsLoading(false);
       return;
     }
@@ -156,23 +162,30 @@ export const LanguageProvider: React.FC<Props> = ({ children }) => {
 
   const setLanguage = useCallback(async (newLang: Language) => {
     if (newLang === lang) return;
+    if (googleStarted.current && !window.confirm(tt('Changing language will reload this page and clear unsaved form data. Continue?'))) return;
     setIsLoading(true);
     try {
       localStorage.setItem(STORAGE_KEY, newLang);
     } catch { /* localStorage unavailable */ }
     setLang(newLang);
 
-    // The widget has no selectable English option. Clear its cookie, then
-    // reload once so Google-mutated DOM is replaced by React's English source.
-    if (newLang === 'en' || installed) {
+    // React-owned installed copy can switch in place without losing forms.
+    // A reload is only needed after the external widget has mutated the DOM.
+    if (googleStarted.current) {
       applyGoogleLanguage('en');
       window.location.reload();
       return;
     }
 
-  }, [lang, installed]);
+  }, [lang]);
 
-  const retryTranslation = useCallback(() => setAttempt(value => value + 1), []);
+  const retryTranslation = useCallback(() => {
+    if (googleStarted.current && installed) {
+      if (window.confirm(tt('Reload this page? Unsaved form data will be cleared.'))) window.location.reload();
+      return;
+    }
+    setAttempt(value => value + 1);
+  }, [installed]);
 
   const value = useMemo<LanguageContextType>(() => ({
     lang,

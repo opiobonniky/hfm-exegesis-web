@@ -1,6 +1,7 @@
 import { ChevronDown } from "lucide-react";
 import { tt } from "@/components/languages/hardcodedTranslate";
 import type { NavMenuItemProps } from "../types";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 export function NavMenuItem({ item, scrolled, onMenuClick, active }: NavMenuItemProps) {
   const sizeClass = scrolled ? "text-[10px] 2xl:text-xs" : "text-xs 2xl:text-sm";
@@ -9,7 +10,8 @@ export function NavMenuItem({ item, scrolled, onMenuClick, active }: NavMenuItem
 
   if (item.subItems) {
     return (
-      <div className="relative group">
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
         <button
           type="button"
           aria-current={active ? "true" : undefined}
@@ -18,23 +20,21 @@ export function NavMenuItem({ item, scrolled, onMenuClick, active }: NavMenuItem
           }`}
         >
           {item.label}
-          <ChevronDown className="w-2.5 h-2.5 transition-transform group-hover:rotate-180" />
+          <ChevronDown className="w-2.5 h-2.5" />
         </button>
-        <div className="absolute top-full left-1/2 -translate-x-1/2 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none group-hover:pointer-events-auto">
-          <div className="bg-card rounded-2xl shadow-2xl border border-border py-2 min-w-[180px] overflow-hidden">
+        </DropdownMenuTrigger>
+          <DropdownMenuContent align="center" sideOffset={8} className="min-w-[180px] rounded-2xl py-2">
             {item.subItems.map((sub) => (
-              <button
+              <DropdownMenuItem
                 key={sub.href}
-                type="button"
-                onClick={() => onMenuClick(sub.href)}
-                className="w-full text-left px-5 py-2.5 font-bold uppercase tracking-wider text-[11px] text-muted-foreground hover:text-primary hover:bg-muted transition-colors"
+                onSelect={() => onMenuClick(sub.href)}
+                className="cursor-pointer px-5 py-2.5 font-bold uppercase tracking-wider text-[11px] text-muted-foreground focus:text-primary"
               >
                 {sub.label}
-              </button>
+              </DropdownMenuItem>
             ))}
-          </div>
-        </div>
-      </div>
+          </DropdownMenuContent>
+      </DropdownMenu>
     );
   }
 
