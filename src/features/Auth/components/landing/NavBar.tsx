@@ -27,7 +27,7 @@ export function NavBar({
   return (
     <>
       <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? "bg-background/95 backdrop-blur-md border-b border-border shadow-sm" : "bg-transparent nav-hero"}`}>
-        <div className="w-full px-4 sm:px-6 lg:px-12">
+        <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-8 2xl:px-12">
           <div className={`flex items-center justify-between transition-[height] duration-300 ${scrolled ? "h-12 sm:h-14 lg:h-16" : "h-14 sm:h-16 lg:h-20"}`}>
             <Link to="/" className="flex items-center transition-all duration-300">
               <div className={`rounded-xl flex items-center justify-center shrink-0 overflow-hidden transition-all duration-300 ${scrolled ? "w-8 h-8 sm:w-10 sm:h-10" : "w-14 h-14 sm:w-16 sm:h-16 lg:w-20 lg:h-20"}`}>
@@ -38,7 +38,7 @@ export function NavBar({
               </span>
             </Link>
 
-            <div className="hidden xl:flex items-center gap-1 absolute left-1/2 -translate-x-1/2">
+            <div className="hidden xl:flex items-center gap-0.5 2xl:gap-1 absolute left-1/2 -translate-x-1/2">
               {menuItems.map((item) => (
                 <NavMenuItem
                   key={item.href ?? item.label}
@@ -50,7 +50,7 @@ export function NavBar({
               ))}
             </div>
 
-            <div className="hidden xl:flex items-center gap-4">
+            <div className="hidden xl:flex items-center gap-2 2xl:gap-4">
               <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-muted border border-border nav-lang-selector">
                 <Globe className="w-3 h-3 text-muted-foreground globe-icon" />
                 <LanguageSelector
@@ -61,7 +61,7 @@ export function NavBar({
                 />
               </div>
               <Link to="/login">
-                <Button variant="ghost" className="bg-brand-primary text-white hover:bg-brand-primary-dark font-black px-6 py-5 rounded-2xl shadow-xl shadow-brand-primary/20 uppercase tracking-widest text-xs nav-signin">
+                <Button variant="ghost" className="bg-brand-primary text-white hover:bg-brand-primary-dark font-black px-4 py-4 2xl:px-6 2xl:py-5 rounded-2xl shadow-xl shadow-brand-primary/20 uppercase tracking-wider 2xl:tracking-widest text-[10px] 2xl:text-xs nav-signin">
                   {landingCopy(t, "signIn", tt("Sign In"))}
                 </Button>
               </Link>

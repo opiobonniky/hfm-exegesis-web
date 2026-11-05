@@ -3,7 +3,7 @@ import { tt } from "@/components/languages/hardcodedTranslate";
 import type { NavMenuItemProps } from "../types";
 
 export function NavMenuItem({ item, scrolled, onMenuClick, active }: NavMenuItemProps) {
-  const sizeClass = scrolled ? "text-[10px]" : "text-xs sm:text-sm";
+  const sizeClass = scrolled ? "text-[10px] 2xl:text-xs" : "text-xs 2xl:text-sm";
   const idleColor = scrolled ? "text-muted-foreground hover:text-primary" : "text-white/90 hover:text-white";
   const activeColor = scrolled ? "text-primary" : "text-white";
 
@@ -13,7 +13,7 @@ export function NavMenuItem({ item, scrolled, onMenuClick, active }: NavMenuItem
         <button
           type="button"
           aria-current={active ? "true" : undefined}
-          className={`px-3 py-2 font-black rounded-xl transition-all whitespace-nowrap uppercase tracking-widest active:scale-95 nav-menu-item flex items-center gap-1 ${sizeClass} ${
+          className={`px-2 2xl:px-3 py-2 font-black rounded-xl transition-all whitespace-nowrap uppercase tracking-wider 2xl:tracking-widest active:scale-95 nav-menu-item flex items-center gap-1 ${sizeClass} ${
             active ? `${activeColor} bg-brand-primary/10` : `${idleColor} hover:bg-brand-bg`
           }`}
         >
@@ -43,7 +43,7 @@ export function NavMenuItem({ item, scrolled, onMenuClick, active }: NavMenuItem
       type="button"
       onClick={() => onMenuClick(item.href)}
       aria-current={active ? "true" : undefined}
-      className={`relative px-3 py-2 font-black rounded-xl transition-all whitespace-nowrap uppercase tracking-widest active:scale-95 nav-menu-item after:absolute after:left-3 after:right-3 after:-bottom-0.5 after:h-0.5 after:rounded-full after:transition-colors ${sizeClass} ${
+      className={`relative px-2 2xl:px-3 py-2 font-black rounded-xl transition-all whitespace-nowrap uppercase tracking-wider 2xl:tracking-widest active:scale-95 nav-menu-item after:absolute after:left-3 after:right-3 after:-bottom-0.5 after:h-0.5 after:rounded-full after:transition-colors ${sizeClass} ${
         active ? `${activeColor} after:bg-brand-accent` : `${idleColor} after:bg-transparent`
       }`}
     >
