@@ -35,6 +35,8 @@ export interface JournalPageEntry {
   updatedOn?: string;
   createdBy?: string;
   updatedBy?: string | null;
+  /** Server-computed ownership. Mutating controls are owner-only. */
+  isOwner?: boolean;
 }
 
 export interface JournalPageStats {
@@ -174,7 +176,11 @@ export function useJournalPageFull() {
   const handleSearchChange = useCallback((value: string) => { setSearch(value); setPage(1); }, []);
   const handlePreviousPage = useCallback(() => setPage((current) => Math.max(current - 1, 1)), []);
   const handleNextPage = useCallback(() => setPage((current) => current + 1), []);
-  const openDeleteDialog = useCallback((entry: JournalPageEntry) => setDeleteDialog(entry), []);
+  const openDeleteDialog = useCallback((entry: JournalPageEntry) => {
+    // Never open a delete confirmation for another reader's entry.
+    if (entry.isOwner !== true) return;
+    setDeleteDialog(entry);
+  }, []);
   const closeDeleteDialog = useCallback(() => setDeleteDialog(null), []);
   const handleDeleteDialogOpenChange = useCallback((open: boolean) => {
     if (!open) setDeleteDialog(null);

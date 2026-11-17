@@ -9,6 +9,9 @@ import { displayDate } from "@/services/numberLocale/format";
 const moods: Record<string, string> = { happy: "😊", grateful: "🙏", peaceful: "🕊️", thoughtful: "🤔", motivated: "💪", hopeful: "🌟", challenged: "🧗", blessed: "✨" };
 interface Props { entry: JournalPageEntry; selectionMode?: boolean; selected?: boolean; onSelect?: (id: number) => void; onBeginSelection?: (id: number) => void; onView: (id: number) => void; onDelete?: (entry: JournalPageEntry) => void; onFavorite?: (id: number) => void; onAction?: (kind: "pdf" | "share", entry: JournalPageEntry) => void }
 export function JournalEntryCard({ entry, selectionMode = false, selected = false, onSelect, onBeginSelection, onView, onDelete, onFavorite, onAction }: Props) {
+  // Delete and favorite are owner-only. Discovery cards contain entries from
+  // other readers, so fail closed unless the backend explicitly says owned.
+  const isOwner = entry.isOwner === true;
   const timer = useRef<ReturnType<typeof setTimeout>>(); const held = useRef(false); const origin = useRef({ x: 0, y: 0 });
   const cancelHold = () => { if (timer.current) clearTimeout(timer.current); timer.current = undefined; };
   useEffect(() => () => { if (timer.current) clearTimeout(timer.current); }, []);
@@ -35,8 +38,8 @@ export function JournalEntryCard({ entry, selectionMode = false, selected = fals
       <span className="flex items-center gap-1 text-xs text-muted-foreground"><Clock className="size-3" />{date && !Number.isNaN(Date.parse(date)) ? displayDate(date, undefined, { month: "short", day: "numeric" }) : ""}</span>
       {!selectionMode && <div className="flex items-center gap-1">
         {onAction && <><Button size="sm" variant="ghost" className="gap-1 text-red-600 dark:text-red-400" aria-label={tt("Download PDF")} onClick={() => onAction("pdf", entry)}><Download className="size-4" />PDF</Button><Button size="icon" variant="ghost" className="size-9 text-primary" aria-label={tt("Share entry")} onClick={() => onAction("share", entry)}><Share2 className="size-4" /></Button></>}
-        {onFavorite && <Button size="icon" variant="ghost" className="size-9" aria-label={tt("Toggle favorite")} aria-pressed={!!entry.isFavorite} onClick={() => onFavorite(entry.id)}><Star className={cn("size-4", entry.isFavorite && "fill-amber-500 text-amber-500")} /></Button>}
-        {onDelete && <Button size="icon" variant="ghost" className="size-9 text-destructive" aria-label={tt("Delete entry")} onClick={() => onDelete(entry)}><Trash2 className="size-4" /></Button>}
+        {onFavorite && isOwner && <Button size="icon" variant="ghost" className="size-9" aria-label={tt("Toggle favorite")} aria-pressed={!!entry.isFavorite} onClick={() => onFavorite(entry.id)}><Star className={cn("size-4", entry.isFavorite && "fill-amber-500 text-amber-500")} /></Button>}
+        {onDelete && isOwner && <Button size="icon" variant="ghost" className="size-9 text-destructive" aria-label={tt("Delete entry")} onClick={() => onDelete(entry)}><Trash2 className="size-4" /></Button>}
       </div>}
     </footer>
   </article>;

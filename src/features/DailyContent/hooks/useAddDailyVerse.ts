@@ -14,7 +14,7 @@ import {
 import { BIBLE_VERSIONS } from "@/assets/bibleVersion/json/bibleVersions";
 import type { DailyVersePayload } from "../types";
 import { parseStructuredField } from "../helpers/contentDetailHelpers";
-import { tt } from '@/components/languages/hardcodedTranslate';
+import { tt } from "@/components/languages/hardcodedTranslate";
 
 /** All form fields in one object */
 export interface VerseFormFields {
@@ -328,7 +328,9 @@ export function useAddDailyVerse() {
         })
         .filter(Boolean)
         .join("\n");
-      const takeaways = parseStructuredField(d?.studyMetadata?.takeaways ?? study.takeaways);
+      const takeaways = parseStructuredField(
+        d?.studyMetadata?.takeaways ?? study.takeaways,
+      );
 
       return {
         explanation: exegesis.explanationText || "",
@@ -544,7 +546,7 @@ export function useAddDailyVerse() {
           title: t.dailyVerse.toastSuccess,
           description: res.returnMessage || t.dailyVerse.verseAdded,
         });
-        setTimeout(() => navigate(routes.dailyVerse.path), 2000);
+        setTimeout(() => navigate(routes.adminDailyContent.path), 2000);
       } else if (res.returnCode === 409) {
         setConflictDialog({
           open: true,
@@ -655,92 +657,117 @@ export function useAddDailyVerse() {
 
   return {
     data: {
-    testament,
-    setTestament,
-    book,
-    setBook,
-    chapter,
-    setChapter,
-    verseNumber,
-    setVerseNumber,
-    bibleVersion,
-    setBibleVersion,
-    published,
-    setPublished,
-    selectedDate,
-    setSelectedDate,
-    selectedTime,
-    handleTimeChange,
-    verseText,
-    setVerseText,
-    isVerseEditing,
-    setIsVerseEditing,
-    isVerseLoading,
-    explanation,
-    setExplanation,
-    learnMore,
-    setLearnMore,
-    application,
-    setApplication,
-    verseIntroduction,
-    setVerseIntroduction,
-    backgroundAuthor,
-    setBackgroundAuthor,
-    backgroundBook,
-    setBackgroundBook,
-    backgroundContext,
-    setBackgroundContext,
-    wordStudies,
-    setWordStudies,
-    practicalApplications,
-    setPracticalApplications,
-    keyThemes,
-    setKeyThemes,
-    crossReferences,
-    setCrossReferences,
-    finalThoughts,
-    setFinalThoughts,
-    takeaways,
-    setTakeaways,
-    // Derived
-    books,
-    chapters,
-    maxVerses,
-    TESTAMENTS,
-    saveDisabled,
-    validateStep,
-    isEditing,
-    // Explanation auto-populate
-    explanationSource,
-    explanationLoading,
-    explanationApplied,
-    explanationError,
-    applyExplanation,
-    // Actions
-    handleSave,
-    handleConflictUpdate,
-    // Conflict dialog
-    conflictDialog,
-    closeConflict,
-    handleConflictOpenChange,
-    viewExisting,
-    conflictMessage,
-    // Helpers
-    t,
-    isRtl,
+      testament,
+      setTestament,
+      book,
+      setBook,
+      chapter,
+      setChapter,
+      verseNumber,
+      setVerseNumber,
+      bibleVersion,
+      setBibleVersion,
+      published,
+      setPublished,
+      selectedDate,
+      setSelectedDate,
+      selectedTime,
+      handleTimeChange,
+      verseText,
+      setVerseText,
+      isVerseEditing,
+      setIsVerseEditing,
+      isVerseLoading,
+      explanation,
+      setExplanation,
+      learnMore,
+      setLearnMore,
+      application,
+      setApplication,
+      verseIntroduction,
+      setVerseIntroduction,
+      backgroundAuthor,
+      setBackgroundAuthor,
+      backgroundBook,
+      setBackgroundBook,
+      backgroundContext,
+      setBackgroundContext,
+      wordStudies,
+      setWordStudies,
+      practicalApplications,
+      setPracticalApplications,
+      keyThemes,
+      setKeyThemes,
+      crossReferences,
+      setCrossReferences,
+      finalThoughts,
+      setFinalThoughts,
+      takeaways,
+      setTakeaways,
+      // Derived
+      books,
+      chapters,
+      maxVerses,
+      TESTAMENTS,
+      saveDisabled,
+      validateStep,
+      isEditing,
+      // Explanation auto-populate
+      explanationSource,
+      explanationLoading,
+      explanationApplied,
+      explanationError,
+      applyExplanation,
+      // Actions
+      handleSave,
+      handleConflictUpdate,
+      // Conflict dialog
+      conflictDialog,
+      closeConflict,
+      handleConflictOpenChange,
+      viewExisting,
+      conflictMessage,
+      // Helpers
+      t,
+      isRtl,
     },
     actions: {
-    setTestament, setBook, setChapter, setVerseNumber, setBibleVersion, setPublished,
-    setSelectedDate, handleTimeChange, setVerseText, setIsVerseEditing, setExplanation,
-    setLearnMore, setApplication, setVerseIntroduction, setBackgroundAuthor, setBackgroundBook,
-    setBackgroundContext, setWordStudies, setPracticalApplications, setKeyThemes,
-    setCrossReferences, setFinalThoughts, setTakeaways, validateStep, applyExplanation,
-    handleSave, handleConflictUpdate, closeConflict, handleConflictOpenChange, viewExisting,
+      setTestament,
+      setBook,
+      setChapter,
+      setVerseNumber,
+      setBibleVersion,
+      setPublished,
+      setSelectedDate,
+      handleTimeChange,
+      setVerseText,
+      setIsVerseEditing,
+      setExplanation,
+      setLearnMore,
+      setApplication,
+      setVerseIntroduction,
+      setBackgroundAuthor,
+      setBackgroundBook,
+      setBackgroundContext,
+      setWordStudies,
+      setPracticalApplications,
+      setKeyThemes,
+      setCrossReferences,
+      setFinalThoughts,
+      setTakeaways,
+      validateStep,
+      applyExplanation,
+      handleSave,
+      handleConflictUpdate,
+      closeConflict,
+      handleConflictOpenChange,
+      viewExisting,
     },
   };
 }
 
 export type AddDailyVersePageModel = ReturnType<typeof useAddDailyVerse>;
-export type AddDailyVersePageViewModel = AddDailyVersePageModel["data"] & AddDailyVersePageModel["actions"];
+export type AddDailyVersePageViewModel = AddDailyVersePageModel["data"] &
+  AddDailyVersePageModel["actions"];
 
 export default useAddDailyVerse;

@@ -25,4 +25,21 @@ describe("Journal card gestures and actions", () => {
     fireEvent.click(screen.getByRole("button", { name: "Download PDF" })); fireEvent.click(screen.getByRole("button", { name: "Share entry" }));
     expect(action.mock.calls.map(c => c[0])).toEqual(["pdf", "share"]); expect(view).not.toHaveBeenCalled(); expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
   });
+  it("shows delete and favorite only for the entry owner", () => {
+    const onDelete = vi.fn(), onFavorite = vi.fn();
+    render(<JournalEntryCard entry={{ ...entry, isOwner: true }} onDelete={onDelete} onFavorite={onFavorite} onView={vi.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: "Delete entry" })); fireEvent.click(screen.getByRole("button", { name: "Toggle favorite" }));
+    expect(onDelete).toHaveBeenCalledWith(expect.objectContaining({ id: 7 }));
+    expect(onFavorite).toHaveBeenCalledWith(7);
+  });
+  it("hides delete and favorite for another reader's entry", () => {
+    render(<JournalEntryCard entry={{ ...entry, userId: "someone-else", isOwner: false }} onDelete={vi.fn()} onFavorite={vi.fn()} onView={vi.fn()} />);
+    expect(screen.queryByRole("button", { name: "Delete entry" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Toggle favorite" })).not.toBeInTheDocument();
+  });
+  it("fails closed when ownership is missing", () => {
+    render(<JournalEntryCard entry={entry} onDelete={vi.fn()} onFavorite={vi.fn()} onView={vi.fn()} />);
+    expect(screen.queryByRole("button", { name: "Delete entry" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Toggle favorite" })).not.toBeInTheDocument();
+  });
 });
