@@ -1,7 +1,7 @@
 import { beforeEach, expect, it, vi } from 'vitest';
 import { webcrypto } from 'node:crypto';
 import { TextEncoder } from 'node:util';
-import { getPublicPackState, getPackedUiDictionary, sha256, syncPublicPack, validatePublicPack } from './publicReadingPacks';
+import { getPublicPackState, getPackedOverview, getPackedUiDictionary, sha256, syncPublicPack, validatePublicPack } from './publicReadingPacks';
 import { getNumberLocale } from './numberLocale/format';
 import { BIBLE_BOOKS } from '@/features/Bible/constants';
 import { normalizeBookPrologue } from './bookProloguesApi';
@@ -25,8 +25,32 @@ it('accepts existing structured Scripture entries and preserves edition attribut
   const books = { Genesis: { bookName: 'Genesis', designation: 'First', keyScripture: [{ bookName: 'Genesis', chapter: 1, verse: 1, translation: 'KJV', text: 'In the beginning' }] } };
   const pack = { schemaVersion: 1, complete: true, revision: 'a'.repeat(12), language: 'fr', scripturePolicy: 'original-edition', books, bookRevisions: { Genesis: 'b'.repeat(12) }, missingBooks: BIBLE_BOOKS.slice(1).map(book => book.bookName) };
   expect(validatePublicPack('overview', 'fr', pack)).toBeTruthy();
-  const display = normalizeBookPrologue(books.Genesis as any);
+  const display = normalizeBookPrologue({ ...books.Genesis, keyScripture: books.Genesis.keyScripture.map(item => ({ ...item, reference: '' })) });
   expect(display.keyScripture?.[0]).toMatchObject({ reference: 'Genesis 1:1 (KJV)', text: 'In the beginning', translation: 'KJV' });
+});
+it('preserves translated titles, accepts older title-less packs and rejects malformed titles', () => {
+  const book = { bookName: 'Genesis', designation: 'Le premier livre', title: 'Genèse : Création et alliance' };
+  const pack = { schemaVersion: 1, complete: true, revision: 'a'.repeat(12), language: 'fr', scripturePolicy: 'original-edition',
+    books: { Genesis: book }, bookRevisions: { Genesis: 'b'.repeat(12) }, missingBooks: BIBLE_BOOKS.slice(1).map(item => item.bookName) };
+  expect(validatePublicPack('overview', 'fr', pack)).toMatchObject({ books: { Genesis: { title: book.title } } });
+  expect(() => validatePublicPack('overview', 'fr', { ...pack, books: { Genesis: { ...book, title: 123 } } })).toThrow();
+  const { title: _title, ...legacy } = book;
+  expect(validatePublicPack('overview', 'fr', { ...pack, books: { Genesis: legacy } })).toBeTruthy();
+});
+it('installs a titled overview update without inventing absent books', async () => {
+  const pack = { schemaVersion: 1, complete: true, revision: 'c'.repeat(12), language: 'fr', scripturePolicy: 'original-edition',
+    books: { Genesis: { bookName: 'Genesis', designation: 'Le premier livre', title: 'Genèse : Création et alliance' } },
+    bookRevisions: { Genesis: 'b'.repeat(12) }, missingBooks: BIBLE_BOOKS.slice(1).map(book => book.bookName) };
+  const text = JSON.stringify(pack);
+  const put = vi.fn();
+  vi.stubGlobal('caches', { open: async () => ({ match: async () => undefined, put }) });
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValueOnce({ ok: true, text: async () => JSON.stringify({
+    status: 'ready', language: 'fr', revision: pack.revision, sha256: await sha256(text), bookCount: 1, missingBooks: pack.missingBooks,
+  }) }).mockResolvedValueOnce({ ok: true, text: async () => text }));
+  await syncPublicPack('overview', 'fr', true);
+  expect(getPackedOverview('Genesis', 'fr')?.title).toBe(pack.books.Genesis.title);
+  expect(getPackedOverview('Exodus', 'fr')).toBeNull();
+  expect(put).toHaveBeenCalledOnce();
 });
 it('installs public UI copy atomically and keeps it after a failed update', async () => {
   const source = { schemaVersion: 1, revision: (await sha256('ui-v1:["Hello {name}"]')).slice(0, 12), texts: ['Hello {name}'] };

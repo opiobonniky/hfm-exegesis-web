@@ -68,7 +68,9 @@ export function useUserDailyVerse() {
     if (navigator.share) {
       try {
         await navigator.share({ text });
-      } catch {}
+      } catch {
+        // Dismissing the native share sheet is not a reader-facing error.
+      }
     } else {
       navigator.clipboard
         .writeText(text)

@@ -16,6 +16,7 @@ const numberSchema = z.object({
   locale: z.string().min(2), numberingSystem: z.string().min(2), digits: z.string(),
 });
 const overviewBook = z.object({
+  title: z.string().nullish(),
   bookName: z.string(), designation: z.string().min(1),
   ...Object.fromEntries(['author', 'authorDetail', 'audience', 'dateWritten', 'locationWritten', 'purpose', 'keyTheme', 'summary', 'background', 'lessons', 'christConnection'].map(key => [key, z.string().nullish()])),
   applications: z.array(z.string()).nullish(), mainThemes: z.array(z.string()).nullish(),

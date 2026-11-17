@@ -1,0 +1,12 @@
+@import './userDevotions.css';
+
+.daily-verse-quotation {
+  font-family: 'Spectral', Georgia, serif;
+  font-size: clamp(23px, 2.5vw, 30px);
+  font-weight: 400;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.daily-verse-reflection { margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--prologue-line); }
+.daily-verse-reflection h2 { margin-bottom: 8px; font-family: 'Spectral', Georgia, serif; font-size: 19px; }

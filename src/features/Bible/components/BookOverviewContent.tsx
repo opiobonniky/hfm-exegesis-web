@@ -40,7 +40,7 @@ export default function BookOverviewContent({ bookName, prologue, designation, t
   return <article className="prologue-page-shell">
     <header className="prologue-hero">
       <div className="prologue-heading-meta"><span>{tt('Book overview')} / {bookName}</span><span>{tt(testamentLabel)}</span></div>
-      <h1>{prologue.title || bookName}</h1>
+      <h1>{prologue.title?.trim() || bookName}</h1>
       {designation && <p className="prologue-deck">{designation}</p>}
       {!!facts.length && <dl className="prologue-facts">{facts.map(fact => <div key={fact.label} className={fact.label === 'Audience' ? 'prologue-fact-audience' : undefined}>
         <dt>{tt(fact.label)}</dt><dd>{fact.value}</dd>
