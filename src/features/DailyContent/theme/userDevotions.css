@@ -1,0 +1,33 @@
+@import '../../../styles/bookPrologue.css';
+
+.user-devotions .prologue-page-shell { max-width: 920px; padding-block: 28px 24px; }
+.user-devotions .devotion-toolbar { background: var(--prologue-paper); border-bottom: 1px solid var(--prologue-line); }
+.user-devotions .devotion-toolbar-scrolled { box-shadow: 0 2px 12px #172a2208; }
+.devotion-toolbar-inner { max-width: 920px; margin-inline: auto; padding: 8px 24px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.devotion-toolbar-inner > p { min-width: 0; }
+.user-devotions .devotion-toolbar button { color: var(--prologue-ink); flex-shrink: 0; }
+.user-devotions[dir='rtl'] .devotion-back-icon { transform: rotate(180deg); }
+.devotion-date { display: inline-flex; align-items: center; gap: 6px; letter-spacing: .06em; }
+.devotion-date svg { width: 12px; height: 12px; }
+.devotion-reference { margin-top: 12px; font-size: 13px; color: var(--prologue-muted); }
+.user-devotions .devotion-reading { padding: 28px; }
+.devotion-body { font-size: 16px; line-height: 1.7; overflow-wrap: anywhere; }
+.devotion-body p + p { margin-top: 14px; }
+.devotion-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--prologue-line); }
+.user-devotions .devotion-actions button { border-color: var(--prologue-line); background: transparent; color: var(--prologue-muted); border-radius: 999px; gap: 6px; }
+.devotion-actions svg { width: 14px; height: 14px; }
+.user-devotions .devotion-actions .devotion-liked { color: #ae4559; }
+.dark .user-devotions .devotion-actions .devotion-liked { color: #ee9dab; }
+.devotion-notes { margin-top: 24px; }
+.devotion-background, .devotion-word-studies { display: grid; gap: 14px; }
+.devotion-background dt { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--prologue-muted); margin-bottom: 4px; }
+.devotion-word-studies dt { font-size: 14px; font-weight: 600; margin-bottom: 4px; overflow-wrap: anywhere; }
+.devotion-strongs { margin-inline-start: 10px; color: var(--prologue-muted); font-size: 11px; font-weight: 400; }
+.devotion-closing { padding: 24px 12px max(16px, env(safe-area-inset-bottom)); text-align: center; font-family: 'Spectral', Georgia, serif; font-style: italic; font-size: 17px; line-height: 1.5; color: var(--prologue-muted); }
+.devotion-empty { text-align: center; display: grid; justify-items: center; gap: 20px; }
+.devotion-empty h1 { font-family: 'Spectral', Georgia, serif; font-size: 26px; }
+@media (max-width: 639px) {
+  .user-devotions .prologue-page-shell { padding-top: 22px; }
+  .devotion-toolbar-inner { padding-inline: 14px; }
+  .user-devotions .devotion-reading { padding: 20px; }
+}

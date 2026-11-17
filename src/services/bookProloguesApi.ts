@@ -3,6 +3,7 @@ import { sendPostRequest } from "./api";
 /** Full book prologue — matches the app's BookPrologue type */
 export interface BookPrologue {
   bookName: string;
+  title?: string | null;
   author?: string | null;
   authorDetail?: string | null;
   audience?: string | null;

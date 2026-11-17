@@ -104,7 +104,7 @@ export const LAB_MODE_TABS: Array<{ id: LabMode; icon: any; label: string }> = [
   { id: "verse", icon: BookText, label: tt("By Verse") },
 ];
 export const SEARCH_HINTS = ["love", "faith", "grace", "word", "light", "logos", "agape"];
-export const LAB_BROWSE_PAGE_SIZE = 100;
+export const LAB_BROWSE_PAGE_SIZE = 4;
 
 // LabHome constants
 export const STAGE_META = [

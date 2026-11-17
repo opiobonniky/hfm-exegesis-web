@@ -19,8 +19,8 @@ interface WordsTabProps {
 
 export function WordsTab({ state }: WordsTabProps) {
   const {
-    words, wordsLoading, wordSearch, setWordSearch, searchWords,
-    loadVerseWords,
+    words, wordsLoading, wordSearch, setWordSearch, searchWords, navigate,
+    loadVerseWords, loadVerseText,
     loadMoreWords, wordsLoadingMore, wordsHasMore,
     verseBook, handleBookChange, verseChapter, handleChapterChange,
     verseNum, setVerseNum, verseChapList, verseNumList, verseText, verseTextLoading,
@@ -30,7 +30,7 @@ export function WordsTab({ state }: WordsTabProps) {
   useEffect(() => {
     const query = wordSearch.trim();
     const timer = window.setTimeout(() => {
-      if (!verseBook || !verseChapter || !verseNum) void searchWords(query);
+      if (!verseBook || !verseChapter) void searchWords(query);
     }, 350);
     return () => window.clearTimeout(timer);
   }, [searchWords, verseBook, verseChapter, verseNum, wordSearch]);
@@ -41,12 +41,16 @@ export function WordsTab({ state }: WordsTabProps) {
     }
   }, [loadVerseWords, verseBook, verseChapter, verseNum]);
 
+  useEffect(() => {
+    void loadVerseText(verseBook, verseChapter, verseNum);
+  }, [loadVerseText, verseBook, verseChapter, verseNum]);
+
   const loadMoreRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const target = loadMoreRef.current;
     if (!target) return;
     const observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting && (!verseBook || !verseChapter || !verseNum)) void loadMoreWords();
+      if (entry.isIntersecting) void loadMoreWords();
     }, { rootMargin: "240px" });
     observer.observe(target);
     return () => observer.disconnect();
@@ -54,6 +58,10 @@ export function WordsTab({ state }: WordsTabProps) {
 
   return (
     <div className="space-y-5">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-card p-4">
+        <p className="text-sm text-muted-foreground">{tt('Start with a dictionary word. Then add a verse and explain how the word is used there.')}</p>
+        <Button onClick={() => navigate('/admin/study-tools/add')}>{tt('Add study word')}</Button>
+      </div>
       {/* Verse Selector */}
       <div className="rounded-lg border border-border/50 bg-card p-4 space-y-3">
         <div className="flex items-center gap-2">
@@ -125,15 +133,17 @@ export function WordsTab({ state }: WordsTabProps) {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
             placeholder={tt("Search all Strong's words...")}
+            disabled={Boolean(verseBook && verseChapter)}
             value={wordSearch}
             onChange={(e) => setWordSearch(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && searchWords(wordSearch)}
             className="pl-9 h-9 text-sm"
           />
         </div>
-        <Button size="sm" onClick={() => searchWords(wordSearch)} className="h-9 gap-1 text-xs">
+        <Button size="sm" disabled={Boolean(verseBook && verseChapter)} onClick={() => searchWords(wordSearch)} className="h-9 gap-1 text-xs">
           {wordsLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Search className="w-3 h-3" />}{tt("Search")}</Button>
       </div>
+      {verseBook && <Button variant="ghost" size="sm" onClick={() => handleBookChange('')}>{tt('Clear passage filter')}</Button>}
       {/* Results */}
       {wordsLoading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -152,6 +162,8 @@ export function WordsTab({ state }: WordsTabProps) {
               key={w.strongsId}
               word={w}
               onClick={() => { setDetailWord(w); setDetailSheetOpen(true); }}
+              onEdit={() => navigate(`/admin/study-tools/words/${encodeURIComponent(w.strongsId)}/edit`)}
+              editLabel={tt('Edit word / attachments')}
             />
           ))}
           </div>

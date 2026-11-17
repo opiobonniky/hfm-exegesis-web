@@ -1,8 +1,5 @@
 // Admin components barrel export
 export { default as WordsTab } from "./WordsTab";
-export { default as ResourcesTab } from "./ResourcesTab";
-export { default as StudiesTab } from "./StudiesTab";
-export { default as ProloguesTab } from "./ProloguesTab";
 export { AdminPageHeader } from "./AdminPageHeader";
 export { AdminPageContent } from "./AdminPageContent";
 export { AdminEmptyState, AdminLoadingGrid, AdminSearchBar } from "./AdminStates";

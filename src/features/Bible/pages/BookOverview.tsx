@@ -5,6 +5,7 @@ import BookOverviewContent from "../components/BookOverviewContent";
 import BookOverviewLoading from "../components/BookOverviewLoading";
 import BookOverviewEmpty from "../components/BookOverviewEmpty";
 import BookOverviewStartCTA from "../components/BookOverviewStartCTA";
+import '../theme/bookOverview.css';
 
 export default function BookOverview() {
   const { data, actions } = useBookOverview();
@@ -13,7 +14,6 @@ export default function BookOverview() {
     prologue,
     loading,
     resumeChapter,
-    isOt,
     designation,
     testamentLabel,
     hasReturnUrl,
@@ -22,7 +22,7 @@ export default function BookOverview() {
   } = { ...data, ...actions };
 
   return (
-    <div className="h-full flex flex-col bg-background">
+    <div className="book-prologue-view consumer-book-overview h-full flex flex-col">
       <BookOverviewHeader bookName={bookName} onBack={onBack} />
 
       <main className="flex-1 min-h-0 overflow-y-auto">

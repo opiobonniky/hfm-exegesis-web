@@ -1,72 +1,96 @@
-import { BookOpen, Calendar, Heart, Copy, Share2, Lightbulb, GraduationCap, BookMarked, Sparkles, ScrollText, ListChecks } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { VerseSection, SubLabel, NumberedList, BulletList, WordStudyList, BackgroundSection, parseList, parseWordStudies } from "./DailyVerseSections";
-import { fmtDate } from "../helpers";
+import type { ReactNode } from 'react';
+import { Calendar, Heart, Copy, Share2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { parseList, parseWordStudies } from './DailyVerseSections';
+import type { DailyDevotionDetailData } from '../types';
+import { fmtDate } from '../helpers';
 import { tt } from '@/components/languages/hardcodedTranslate';
-
-interface DevotionData {
-  title: string; displayDate: any; bookName?: string; chapter?: number; verseNumber?: number;
-  bibleVersion?: string; content: string; explanation?: string; application?: string;
-  verseIntroduction?: string; backgroundAuthor?: string; backgroundBook?: string; backgroundContext?: string;
-  wordStudies?: string; practicalApplications?: string; keyThemes?: string; crossReferences?: string;
-  finalThoughts?: string; takeaways?: string; learnMore?: string;
-}
+import { displayDigits } from '@/services/numberLocale/format';
 
 interface Props {
-  devotion: DevotionData; accent?: string; liked: boolean;
-  onCopy: () => void; onShare: () => void; onLike: () => void;
+  devotion: DailyDevotionDetailData;
+  liked: boolean;
+  onCopy: () => void;
+  onShare: () => void;
+  onLike: () => void;
 }
 
-export function DevotionContent({ devotion, accent = "hsl(var(--primary))", liked, onCopy, onShare, onLike }: Props) {
-  const verseRef = devotion.bookName ? `${devotion.bookName} ${devotion.chapter}:${devotion.verseNumber}` : null;
+function Note({ title, wide = false, children }: { title: string; wide?: boolean; children: ReactNode }) {
+  return <section className={`prologue-note${wide ? ' prologue-note-wide' : ''}`}>
+    <div className="prologue-note-heading"><h2>{title}</h2></div>{children}
+  </section>;
+}
+
+function TextNote({ title, text }: { title: string; text?: string | null }) {
+  if (!text?.trim()) return null;
+  return <Note title={title} wide={text.length > 280}><p className="prologue-prose">{text}</p></Note>;
+}
+
+function ListNote({ title, items, numbered = false }: { title: string; items: string[]; numbered?: boolean }) {
+  if (!items.length) return null;
+  return <Note title={title} wide={items.join(' ').length > 280}>
+    {numbered ? <ol className="prologue-numbered-list">{items.map((item, index) => <li key={index}>
+      <span className="prologue-list-number" aria-hidden="true">{displayDigits(index + 1)}</span><p className="prologue-prose">{item}</p>
+    </li>)}</ol> : <ul className="prologue-text-list">{items.map((item, index) => <li key={index}>{item}</li>)}</ul>}
+  </Note>;
+}
+
+export function DevotionContent({ devotion, liked, onCopy, onShare, onLike }: Props) {
+  const verseRef = devotion.bookName ? `${devotion.bookName}${devotion.chapter ? ` ${devotion.chapter}${devotion.verseNumber ? `:${devotion.verseNumber}` : ''}` : ''}` : null;
   const wordStudies = parseWordStudies(devotion.wordStudies);
   const practicalApps = parseList(devotion.practicalApplications);
   const keyThemes = parseList(devotion.keyThemes);
   const crossRefs = parseList(devotion.crossReferences);
   const takeaways = parseList(devotion.takeaways);
+  const hasNotes = [devotion.explanation, devotion.application, devotion.verseIntroduction, devotion.backgroundAuthor, devotion.backgroundBook,
+    devotion.backgroundContext, devotion.finalThoughts, devotion.learnMore].some(text => text?.trim()) ||
+    [wordStudies, practicalApps, keyThemes, crossRefs, takeaways].some(items => items.length);
 
-  return (
-    <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
-      <div className="space-y-2">
-        <h2 className="text-2xl font-bold">{devotion.title}</h2>
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Calendar className="w-4 h-4" /> {fmtDate(devotion.displayDate, "long")}
+  return <main className="prologue-page-shell">
+    <article>
+      <header className="prologue-hero devotion-hero">
+        <div className="prologue-heading-meta"><span>{tt('Daily devotion')}</span><span className="devotion-date"><Calendar aria-hidden="true" />{fmtDate(devotion.displayDate, 'long')}</span></div>
+        <h1>{devotion.title}</h1>
+        {verseRef && <p className="devotion-reference notranslate" translate="no">{verseRef}{devotion.bibleVersion && <span> · {devotion.bibleVersion}</span>}</p>}
+      </header>
+
+      <section className="devotion-reading prologue-paper" aria-label={tt('Today’s devotion')}>
+        <div className="devotion-body">{devotion.content.split('\n').filter(paragraph => paragraph.trim()).map((paragraph, index) => <p key={index}>{paragraph}</p>)}</div>
+        <div className="devotion-actions" role="group" aria-label={tt('Devotion actions')}>
+          <Button variant="outline" size="sm" onClick={onCopy}><Copy aria-hidden="true" />{tt('Copy')}</Button>
+          <Button variant="outline" size="sm" onClick={onShare}><Share2 aria-hidden="true" />{tt('Share')}</Button>
+          <Button variant="outline" size="sm" onClick={onLike} aria-pressed={liked} className={liked ? 'devotion-liked' : undefined}>
+            <Heart aria-hidden="true" className={liked ? 'fill-current' : undefined} />{tt(liked ? 'Liked' : 'Like')}
+          </Button>
         </div>
-      </div>
-      {verseRef && (
-        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-primary/5 border border-primary/10 text-sm">
-          <BookOpen className="w-4 h-4 text-primary shrink-0" />
-          <span className="font-medium">{verseRef}</span>
-          {devotion.bibleVersion && <span className="text-muted-foreground">&middot; {devotion.bibleVersion}</span>}
-        </div>
-      )}
-      <div className="space-y-3 text-sm text-muted-foreground leading-relaxed">
-        {devotion.content.split("\n").map((p, i) => <p key={i}>{p}</p>)}
-      </div>
-      <div className="flex items-center justify-center gap-2 pt-2">
-        <Button variant="outline" size="sm" onClick={onCopy} className="h-8 gap-1.5 text-xs"><Copy className="w-3.5 h-3.5" />{tt("Copy")}</Button>
-        <Button variant="outline" size="sm" onClick={onShare} className="h-8 gap-1.5 text-xs"><Share2 className="w-3.5 h-3.5" />{tt("Share")}</Button>
-        <Button variant={liked ? "default" : "outline"} size="sm" onClick={onLike} className={`h-8 gap-1.5 text-xs ${liked ? "text-rose-500" : ""}`}>
-          <Heart className={`w-3.5 h-3.5 ${liked ? "fill-current" : ""}`} /> {liked ? tt("Liked") : tt("Like")}
-        </Button>
-      </div>
-      <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
-      {devotion.explanation && <VerseSection label={tt("Explanation")} icon={Lightbulb} accent={accent}><p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">{devotion.explanation}</p></VerseSection>}
-      {devotion.application && <VerseSection label={tt("Application")} icon={ListChecks} accent={accent}><p className="text-sm text-muted-foreground leading-relaxed">{devotion.application}</p></VerseSection>}
-      {devotion.verseIntroduction && <VerseSection label={tt("Verse Introduction")} icon={ScrollText} accent={accent}><p className="text-sm text-muted-foreground leading-relaxed">{devotion.verseIntroduction}</p></VerseSection>}
-      <BackgroundSection author={devotion.backgroundAuthor} book={devotion.backgroundBook} context={devotion.backgroundContext} accent={accent} />
-      {wordStudies.length > 0 && <VerseSection label={tt("Strong Concordance Word Study")} icon={GraduationCap} accent={accent}><WordStudyList items={wordStudies} accent={accent} /></VerseSection>}
-      {practicalApps.length > 0 && <VerseSection label={tt("Practical Applications")} icon={ListChecks} accent={accent} count={practicalApps.length}><NumberedList items={practicalApps} accent={accent} /></VerseSection>}
-      {(keyThemes.length > 0 || crossRefs.length > 0) && (
-        <VerseSection label={tt("Insights and Cross References")} icon={Sparkles} accent={accent}>
-          {keyThemes.length > 0 && <div className="space-y-2"><SubLabel label={tt("Key Themes")} accent={accent} /><BulletList items={keyThemes} accent={accent} /></div>}
-          {crossRefs.length > 0 && <div className="space-y-2"><SubLabel label={tt("Cross References")} accent={accent} /><BulletList items={crossRefs} accent={accent} /></div>}
-        </VerseSection>
-      )}
-      {devotion.finalThoughts && <VerseSection label={tt("Final Thoughts")} icon={BookMarked} accent={accent}><p className="text-sm text-muted-foreground leading-relaxed">{devotion.finalThoughts}</p></VerseSection>}
-      {takeaways.length > 0 && <VerseSection label={tt("Takeaways")} icon={Sparkles} accent={accent} count={takeaways.length}><NumberedList items={takeaways} accent={accent} /></VerseSection>}
-      {devotion.learnMore && <VerseSection label={tt("Learn More")} icon={BookMarked} accent={accent}><p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">{devotion.learnMore}</p></VerseSection>}
-      <div className="text-center py-8"><p className="text-sm text-muted-foreground italic">{tt("Meditate on this word today. Let it guide your thoughts and actions.")}</p></div>
-    </div>
-  );
+      </section>
+
+      {hasNotes && <section className="devotion-notes" aria-label={tt('Reflect and explore')}>
+        <div className="prologue-section-label"><span>{tt('Reflect and explore')}</span></div>
+        <div className="prologue-paper"><div className="prologue-card-grid">
+          <TextNote title={tt('Explanation')} text={devotion.explanation} />
+          <TextNote title={tt('Application')} text={devotion.application} />
+          <TextNote title={tt('Verse Introduction')} text={devotion.verseIntroduction} />
+          {(devotion.backgroundAuthor || devotion.backgroundBook || devotion.backgroundContext) && <Note title={tt('Background')} wide>
+            <dl className="devotion-background">{[
+              { label: 'Author', value: devotion.backgroundAuthor }, { label: 'Book', value: devotion.backgroundBook }, { label: 'Context', value: devotion.backgroundContext },
+            ].filter(fact => fact.value).map(fact => <div key={fact.label}><dt>{tt(fact.label)}</dt><dd className="prologue-prose">{fact.value}</dd></div>)}</dl>
+          </Note>}
+          {!!wordStudies.length && <Note title={tt('Strong Concordance Word Study')} wide>
+            <dl className="devotion-word-studies">{wordStudies.map((word, index) => <div key={index}>
+              <dt>{word.word}{word.strongs && <span className="devotion-strongs">{word.strongs}</span>}</dt>
+              {word.definition && <dd className="prologue-prose">{word.definition}</dd>}
+            </div>)}</dl>
+          </Note>}
+          <ListNote title={tt('Practical Applications')} items={practicalApps} numbered />
+          <ListNote title={tt('Key Themes')} items={keyThemes} />
+          <ListNote title={tt('Cross References')} items={crossRefs} />
+          <TextNote title={tt('Final Thoughts')} text={devotion.finalThoughts} />
+          <ListNote title={tt('Takeaways')} items={takeaways} numbered />
+          <TextNote title={tt('Learn More')} text={devotion.learnMore} />
+        </div></div>
+      </section>}
+      <footer className="devotion-closing">{tt('Meditate on this word today. Let it guide your thoughts and actions.')}</footer>
+    </article>
+  </main>;
 }

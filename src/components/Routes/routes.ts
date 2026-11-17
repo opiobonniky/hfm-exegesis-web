@@ -54,7 +54,7 @@ const LabHome = lazy(() => import("@/features/Lab/pages/LabHome"));
 const LabReview = lazy(() => import("@/features/Lab/pages/LabReview"));
 const AdminDashboard = lazy(() => import("@/features/Admin/pages/AdminDashboard"));
 const AdminStudyTools = lazy(() => import("@/features/Admin/pages/AdminStudyTools"));
-const AddStudyResource = lazy(() => import("@/features/Admin/pages/AddStudyResource"));
+const AddStudyWord = lazy(() => import("@/features/Admin/pages/AddStudyWord"));
 const AdminTrivia = lazy(() => import("@/features/Admin/pages/AdminTrivia"));
 const AdminDailyContent = lazy(() => import("@/features/Admin/pages/AdminDailyContent"));
 const AdminSubscriptions = lazy(() => import("@/features/Admin/pages/AdminSubscriptions"));
@@ -516,18 +516,28 @@ const routeConfigs = {
     title: tt("Admin Console"),
   },
   adminStudyTools: {
+    adminOnly: true,
     path: "/admin/study-tools",
     component: AdminStudyTools,
     isProtected: true,
     requiresLayout: true,
-    title: tt("Study Tools Admin"),
+    title: tt("Strong’s Word Studies"),
   },
-  addStudyResource: {
+  addStudyWord: {
+    adminOnly: true,
     path: "/admin/study-tools/add",
-    component: AddStudyResource,
+    component: AddStudyWord,
     isProtected: true,
     requiresLayout: true,
-    title: tt("Add Study Resource"),
+    title: tt("Add Study Word"),
+  },
+  editStudyWord: {
+    adminOnly: true,
+    path: "/admin/study-tools/words/:strongsId/edit",
+    component: AddStudyWord,
+    isProtected: true,
+    requiresLayout: true,
+    title: tt("Edit Study Word"),
   },
   adminTrivia: {
     path: "/admin/trivia",

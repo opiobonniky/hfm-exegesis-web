@@ -9,6 +9,7 @@ import { BookPrologueHero } from "../components/BookPrologueHero";
 import { BookProloguePageShell } from "../components/BookProloguePageShell";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import '../theme/bookPrologueDetail.css';
 
 export default function BookPrologueDetail() {
   const { data, actions } = useBookPrologueDetail();
@@ -24,7 +25,7 @@ export default function BookPrologueDetail() {
   );
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="book-prologue-view min-h-screen">
       <BookProloguePageShell>
         <BookPrologueHero
           item={data}
@@ -34,10 +35,10 @@ export default function BookPrologueDetail() {
           }
         />
 
-        <DetailContent className="max-w-5xl mx-auto px-0 py-0 space-y-4 sm:space-y-5">
+        <DetailContent className="mx-auto w-full px-0 py-0 space-y-8">
           <PrologueDetailContent item={data} />
 
-          <DetailMetadataGrid
+          <div className="prologue-metadata"><DetailMetadataGrid
             fields={[
               { label: tt("Date Written"), value: data.dateWritten },
               { label: tt("Location"), value: data.locationWritten },
@@ -45,7 +46,7 @@ export default function BookPrologueDetail() {
               { label: tt("Created"), value: data.createdOn, format: "datetime" },
               { label: tt("Updated"), value: data.updatedOn, format: "datetime" },
             ]}
-          />
+          /></div>
 
           <DetailBackButton
             label={tt("Back to Prologues")}

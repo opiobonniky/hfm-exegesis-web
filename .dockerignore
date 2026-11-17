@@ -1,0 +1,13 @@
+node_modules
+dist
+dist-ssr
+.git
+.github
+.yarn
+storybook-static
+test-results
+playwright-report
+e2e
+docs
+*.log
+.DS_Store

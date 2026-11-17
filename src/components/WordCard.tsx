@@ -15,6 +15,7 @@ export interface WordCardProps {
   word: StrongsWordEntry;
   onClick: () => void;
   onEdit?: () => void;
+  editLabel?: string;
   onOpenDialog?: () => void;
   showChevron?: boolean;
   showEditButton?: boolean;
@@ -29,6 +30,7 @@ export default function WordCard({
   word,
   onClick,
   onEdit,
+  editLabel,
   onOpenDialog,
   showChevron = true,
   showEditButton = false,
@@ -39,9 +41,8 @@ export default function WordCard({
   const langColor = getLangColor(word.language);
 
   return (
-    <button
-      onClick={onClick}
-      className="w-full text-left group relative flex items-start gap-3 px-3 py-2.5 rounded-lg border border-border/60 bg-card hover:shadow-sm hover:border-primary/30 hover:bg-muted/10 transition-all active:scale-[0.99] overflow-hidden"
+    <div
+      className="w-full text-left group relative flex flex-wrap items-start gap-3 px-3 py-2.5 rounded-lg border border-border/60 bg-card hover:shadow-sm hover:border-primary/30 hover:bg-muted/10 transition-all overflow-hidden"
     >
       {/* Language accent bar */}
       <div
@@ -49,6 +50,7 @@ export default function WordCard({
         style={{ backgroundColor: langColor }}
       />
 
+      <button type="button" onClick={onClick} className="flex min-w-0 flex-1 items-start gap-3 rounded text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
       {/* Language avatar */}
       <div
         className="shrink-0 w-9 h-9 rounded-lg flex items-center justify-center text-xs font-bold"
@@ -144,6 +146,7 @@ export default function WordCard({
         </div>
       </div>
 
+      </button>
       {/* Right-side actions */}
       <div
         className={`flex items-center gap-0.5 shrink-0 mt-0.5 ${
@@ -164,7 +167,7 @@ export default function WordCard({
             <ExternalLink className="w-3.5 h-3.5" />
           </button>
         )}
-        {showEditButton && onEdit && (
+        {showEditButton && onEdit && !editLabel && (
           <Button
             variant="ghost"
             size="icon"
@@ -181,6 +184,11 @@ export default function WordCard({
           <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/20 group-hover:text-muted-foreground/50 transition-colors" />
         )}
       </div>
-    </button>
+      {editLabel && onEdit && <div className="w-full border-t border-border/50 pt-2">
+        <Button type="button" variant="outline" size="sm" onClick={onEdit} className="w-full gap-2" aria-label={`${editLabel} ${word.strongsId}`}>
+          <Edit2 className="h-3.5 w-3.5" />{editLabel}
+        </Button>
+      </div>}
+    </div>
   );
 }

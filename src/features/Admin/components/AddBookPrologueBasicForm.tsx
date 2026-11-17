@@ -8,6 +8,7 @@ import type { AddBookPrologueModel } from "../types";
 import { PROLOGUE_CONTENT_MAX } from "../constants";
 import { CharCount } from "@/features/DailyContent/components/CharCount";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { Combobox } from '@/components/ui/combobox';
 
 interface Props {
   state: AddBookPrologueModel;
@@ -23,36 +24,18 @@ export function AddBookPrologueBasicForm({ state: h }: Props) {
 
       <div className="space-y-2">
         <Label className="text-sm font-medium text-foreground">{tt("Book name *")}</Label>
-        <div className="relative">
-          <Input
-            placeholder={tt("Search for a book...")}
-            value={h.form.bookName}
-            onChange={(e) => h.updateField("bookName", e.target.value)}
-            className="border-border bg-background text-foreground placeholder:text-muted-foreground"
-          />
-          {h.filteredBooks.length > 0 &&
-            !h.filteredBooks.some(
-              (book) => book.toLowerCase() === h.form.bookName.trim().toLowerCase(),
-            ) && (
-              <div className="absolute z-10 mt-2 max-h-64 w-full overflow-y-auto rounded-xl border border-border bg-background shadow-lg">
-                {h.filteredBooks.slice(0, 20).map((book) => (
-                  <button
-                    key={book}
-                    type="button"
-                    className="block w-full px-3 py-2 text-left text-sm text-foreground transition hover:bg-accent"
-                    onClick={() => h.updateField("bookName", book)}
-                  >
-                    {book}
-                  </button>
-                ))}
-              </div>
-            )}
-        </div>
+        <Combobox options={h.bookOptions.map(option => ({ ...option, label: tt(option.label) }))}
+          value={h.form.bookName} onChange={book => book && h.updateField('bookName', book)}
+          placeholder={tt('Select a Bible book')} searchPlaceholder={tt('Search Bible books...')}
+          width="w-full" disabled={h.isEditMode || h.saving || h.loadingExisting} />
+        <p className="text-xs text-muted-foreground">{tt(h.isEditMode ? 'The book stays fixed when editing this prologue.' : 'Choose the standard book name. Use the title below for your own heading.')}</p>
       </div>
 
       <div className="space-y-2">
-        <Label className="text-sm font-medium text-foreground">{tt("Title *")}</Label>
+        <Label htmlFor="prologue-title" className="text-sm font-medium text-foreground">{tt("Title *")}</Label>
         <Input
+          id="prologue-title"
+          maxLength={300}
           placeholder={tt("e.g. The Gospel of John")}
           value={h.form.title}
           onChange={(e) => h.updateField("title", e.target.value)}

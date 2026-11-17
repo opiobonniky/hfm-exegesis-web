@@ -23,6 +23,7 @@ const cloneEmpty = (): PrologueEditorForm => ({
   keyPeople: [],
   keyVerses: [],
 });
+const validBook = (bookName: string) => BIBLE_BOOKS.some(book => book === bookName);
 
 const toDisplayReference = (entry: Pick<KeyScriptureEntry, "bookName" | "chapter" | "verse" | "translation">): string => {
   if (!entry.bookName || entry.chapter == null || entry.verse == null) return "";
@@ -54,7 +55,7 @@ export function useAddBookPrologue() {
 
   // Completion checks per step
   const basicComplete = useMemo(
-    () => form.bookName.trim() !== "" && form.title.trim() !== "" && form.summary.trim() !== "",
+    () => validBook(form.bookName) && form.title.trim() !== "" && form.title.trim().length <= 300 && form.summary.trim() !== "",
     [form.bookName, form.title, form.summary],
   );
   const contextComplete = useMemo(
@@ -85,7 +86,7 @@ export function useAddBookPrologue() {
   );
 
   const isValid =
-    form.bookName.trim() !== "" && form.title.trim() !== "" && form.summary.trim() !== "";
+    validBook(form.bookName) && form.title.trim() !== "" && form.title.trim().length <= 300 && form.summary.trim() !== "";
 
   const canAdvanceFromCurrent = useMemo(
     () =>
@@ -228,7 +229,7 @@ export function useAddBookPrologue() {
     () =>
       form.bookName
         ? BIBLE_BOOKS.filter((b) => b.toLowerCase().includes(form.bookName.toLowerCase()))
-        : BIBLE_BOOKS,
+        : [...BIBLE_BOOKS],
     [form.bookName],
   );
 

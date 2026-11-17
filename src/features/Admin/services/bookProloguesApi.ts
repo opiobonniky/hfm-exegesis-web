@@ -80,7 +80,7 @@ export const prologueToForm = (d: PrologueReadModel | null): PrologueEditorForm 
   if (!d) return null;
   return {
     bookName: d.bookName || "",
-    title: d.title || "",
+    title: d.title || d.bookName || "",
     content: (d as PrologueReadModel).content || d.summary || "",
     author: d.author || "",
     authorDetail: d.authorDetail || "",
@@ -110,7 +110,7 @@ export const fetchBookPrologue = async (
   const res = await sendPostRequest<PrologueReadModel>(
     "book-prologues",
     "get",
-    { bookName },
+    { bookName, lang: 'en' },
   );
   if (res.returnCode !== 200 || !res.returnData) return null;
   return prologueToForm(res.returnData);
@@ -131,8 +131,8 @@ export const buildProloguePayload = (
     }))
     .filter((s) => s.bookName && s.text);
   return {
-    bookName: form.bookName,
-    title: form.title,
+    bookName: form.bookName.trim(),
+    title: form.title.trim(),
     content: form.content,
     author: form.author,
     authorDetail: form.authorDetail,
@@ -165,6 +165,6 @@ export const upsertBookPrologue = async (
     "admin/upsert",
     payload,
   );
-  if (res.returnCode === 200 || res.status === 200) return { ok: true };
+  if (res.returnCode === 200) return { ok: true };
   return { ok: false, message: res.returnMessage || "Failed to save" };
 };

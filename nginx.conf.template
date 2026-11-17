@@ -1,0 +1,25 @@
+# Rendered by the nginx image entrypoint (envsubst) so the listener tracks
+# Railway's $PORT. Unknown paths fall back to index.html for client routing.
+server {
+    listen ${PORT};
+    server_name _;
+
+    root /usr/share/nginx/html;
+    index index.html;
+
+    # Hashed build assets are immutable; cache them aggressively.
+    location /assets/ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+        try_files $uri =404;
+    }
+
+    # index.html must always be revalidated so new deploys are picked up.
+    location = /index.html {
+        add_header Cache-Control "no-cache";
+    }
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}

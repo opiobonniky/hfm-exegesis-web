@@ -15,8 +15,8 @@ export default function BookOverviewStartCTA({
   hasReturnUrl = false,
 }: BookOverviewStartCTAProps) {
   return (
-    <div className="sticky bottom-0 z-20 border-t border-border/70 bg-background/90 px-4 py-2.5 backdrop-blur-md sm:px-6">
-      <div className="mx-auto flex w-full max-w-3xl justify-end">
+    <div className="book-overview-reading-bar sticky bottom-0 z-20 shrink-0 py-2.5">
+      <div className="book-overview-bar flex w-full justify-end">
         <Button
           onClick={onStart}
           size="sm"

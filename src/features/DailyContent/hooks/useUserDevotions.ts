@@ -4,14 +4,14 @@ import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { sendPostRequest } from "@/services/api";
-import type { DailyDevotionItem } from "../types";
+import type { DailyDevotionDetailData } from "../types";
 import { tt } from '@/components/languages/hardcodedTranslate';
 
 export function useUserDevotions() {
   const { t, isRtl } = useLanguage();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const [devotion, setDevotion] = useState<DailyDevotionItem | null>(null);
+  const [devotion, setDevotion] = useState<DailyDevotionDetailData | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [liked, setLiked] = useState(false);
@@ -48,7 +48,9 @@ export function useUserDevotions() {
     if (!devotion) return;
     const text = `${devotion.title}\n\n${devotion.content}\n\nvia Exegesis Bible App`;
     if (navigator.share) {
-      try { await navigator.share({ title: devotion.title, text }); } catch {}
+      try { await navigator.share({ title: devotion.title, text }); } catch {
+        // Dismissing the native share sheet is not a reader-facing error.
+      }
     } else {
       navigator.clipboard.writeText(text).then(() =>
         toast({ title: tt("Copied to clipboard") })

@@ -1,0 +1,20 @@
+@import '../../../styles/bookPrologue.css';
+
+.consumer-book-overview .book-overview-toolbar,
+.consumer-book-overview .book-overview-reading-bar {
+  background: var(--prologue-paper);
+  border-color: var(--prologue-line);
+}
+.consumer-book-overview .book-overview-toolbar { border-bottom: 1px solid var(--prologue-line); }
+.consumer-book-overview .book-overview-reading-bar {
+  border-top: 1px solid var(--prologue-line);
+  padding-bottom: max(10px, env(safe-area-inset-bottom));
+}
+.consumer-book-overview .book-overview-bar { max-width: 1040px; margin-inline: auto; padding-inline: 24px; }
+.consumer-book-overview .prologue-page-shell { padding-top: 28px; padding-bottom: 28px; }
+.consumer-book-overview .book-overview-toolbar button { color: var(--prologue-ink); }
+@media (max-width: 639px) {
+  .consumer-book-overview .book-overview-bar { padding-inline: 14px; }
+  .consumer-book-overview .prologue-page-shell { padding-top: 22px; }
+  .consumer-book-overview .book-overview-reading-bar button { width: 100%; }
+}

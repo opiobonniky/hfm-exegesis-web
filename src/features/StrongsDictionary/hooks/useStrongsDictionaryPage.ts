@@ -32,7 +32,8 @@ export interface StrongsWord {
   contextualStudies?: ContextualStudy[];
 }
 
-const PAGE_SIZE = 20;
+const SEARCH_PAGE_SIZE = 2;
+const BROWSE_PAGE_SIZE = 4;
 
 export function useStrongsDictionaryPage() {
   const { toast } = useToast();
@@ -56,6 +57,8 @@ export function useStrongsDictionaryPage() {
   const searchFilterRef = useRef("all");
   const submittedQueryRef = useRef("");
   const completedSearchKeyRef = useRef("");
+  const browseRequestRef = useRef(0);
+  const browseBusyRef = useRef(false);
 
   searchPageRef.current = searchPage;
   searchFilterRef.current = langFilter;
@@ -78,8 +81,8 @@ export function useStrongsDictionaryPage() {
         const res = await searchStrongs({
           query,
           language: language || undefined,
-          limit: PAGE_SIZE,
-          offset: page * PAGE_SIZE,
+          limit: SEARCH_PAGE_SIZE,
+          offset: page * SEARCH_PAGE_SIZE,
         });
         if (requestId !== searchRequestRef.current) return;
         if (res.returnCode === 200) {
@@ -121,16 +124,20 @@ export function useStrongsDictionaryPage() {
   const browseByBook = useCallback(
     async (reset = true, bookOverride?: string) => {
       const book = bookOverride || selectedBook;
-      if (!book) return;
+      if (!book || (!reset && browseBusyRef.current)) return;
+      const requestId = ++browseRequestRef.current;
+      browseBusyRef.current = true;
       const page = reset ? 0 : browsePage + 1;
       setBrowseLoading(true);
       if (reset) setBrowseWords([]);
       try {
         const res = await sendGetRequest("strongs", `book-words/${encodeURIComponent(book)}`, {
-          lang: langFilter === "all" ? undefined : langFilter,
-          limit: PAGE_SIZE,
-          offset: page * PAGE_SIZE,
+          language: langFilter,
+          limit: BROWSE_PAGE_SIZE,
+          offset: page * BROWSE_PAGE_SIZE,
         });
+        if (requestId !== browseRequestRef.current) return;
+        if (res.returnCode !== 200) throw new Error(res.returnMessage || 'Browse failed');
         if (res.returnCode === 200) {
           const data = res.returnData;
           const words = (data?.data || []).map((word: any) => ({
@@ -152,11 +159,14 @@ export function useStrongsDictionaryPage() {
       } catch {
         toast({
           title: tt("Error"),
-          description: tt("Browse failed"),
+            description: tt("Browse failed"),
           variant: "destructive",
         });
       } finally {
-        setBrowseLoading(false);
+        if (requestId === browseRequestRef.current) {
+          browseBusyRef.current = false;
+          setBrowseLoading(false);
+        }
       }
     },
     [selectedBook, langFilter, browsePage, toast],
@@ -166,6 +176,15 @@ export function useStrongsDictionaryPage() {
     (book: string) => browseByBook(true, book),
     [browseByBook],
   );
+
+  const refreshBrowse = useRef<() => void>(() => {});
+  refreshBrowse.current = () => { if (mode === 'browse' && selectedBook) void browseByBook(true); };
+  useEffect(() => { refreshBrowse.current(); }, [langFilter]);
+  useEffect(() => {
+    const refresh = () => refreshBrowse.current();
+    window.addEventListener('focus', refresh);
+    return () => { window.removeEventListener('focus', refresh); ++browseRequestRef.current; };
+  }, []);
 
   const loadFavorites = useCallback(async () => {
     setFavLoading(true);

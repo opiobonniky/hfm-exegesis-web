@@ -16,8 +16,8 @@ export default function BookOverviewHeader({
   const { isRtl } = useLanguage();
 
   return (
-    <header className="shrink-0 z-30 bg-background/95 backdrop-blur-sm border-b border-border">
-      <div className="flex items-center gap-2 px-3 sm:px-5 py-2.5">
+    <header className="book-overview-toolbar shrink-0 z-30">
+      <div className="book-overview-bar flex items-center gap-2 py-2.5">
         <Button
           variant="ghost"
           size="icon"
@@ -28,7 +28,7 @@ export default function BookOverviewHeader({
           <ArrowLeft className={`h-4 w-4 ${isRtl ? "rotate-180" : ""}`} />
         </Button>
         <div className="min-w-0 flex-1">
-          <h1 className="text-sm font-semibold truncate">{bookName}{tt("Overview")}</h1>
+          <p className="text-sm font-medium truncate">{bookName} · {tt("Overview")}</p>
         </div>
       </div>
     </header>
