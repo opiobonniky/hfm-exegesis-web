@@ -5,7 +5,8 @@ import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { sendPostRequest } from "@/services/api";
-import { bibleApi } from "@/services/bibleApi";
+import { usePassagePreview } from './usePassagePreview';
+import { canonicalBook, parseReferences, serializeReferences, parseStudies, serializeStudies, validPassage, collectionError, parseTakeaways, nonEmptyReferences } from '../helpers/editorContent';
 import { routes } from "@/components/Routes/routes";
 import {
   getBooksByTestament,
@@ -14,7 +15,7 @@ import {
 import { BIBLE_VERSIONS } from "@/assets/bibleVersion/json/bibleVersions";
 import type { DailyVersePayload } from "../types";
 import { parseStructuredField } from "../helpers/contentDetailHelpers";
-import { tt } from "@/components/languages/hardcodedTranslate";
+import { tt } from '@/components/languages/hardcodedTranslate';
 
 /** All form fields in one object */
 export interface VerseFormFields {
@@ -26,7 +27,6 @@ export interface VerseFormFields {
   verseText: string;
   isVerseEditing: boolean;
   explanation: string;
-  learnMore: string;
   application: string;
   verseIntroduction: string;
   backgroundAuthor: string;
@@ -50,7 +50,6 @@ const EDITING_FIELDS: (keyof VerseFormFields)[] = [
   "verseNumber",
   "bibleVersion",
   "explanation",
-  "learnMore",
   "application",
   "verseIntroduction",
   "backgroundAuthor",
@@ -69,7 +68,6 @@ export interface MappedExplanationFields {
   explanation: string;
   application: string;
   verseIntroduction: string;
-  learnMore: string;
   backgroundAuthor: string;
   backgroundBook: string;
   backgroundContext: string;
@@ -119,7 +117,7 @@ export function useAddDailyVerse() {
   const isEditing = !!editingVerse;
 
   const initialBook =
-    editingVerse?.bookName || sourceExplanation?.bookName || "";
+    canonicalBook(editingVerse?.bookName || sourceExplanation?.bookName || "");
   const initialChapter = editingVerse?.chapter ?? sourceExplanation?.chapter;
   const initialVerseNumber =
     editingVerse?.verseNumber ?? sourceExplanation?.verseNumber;
@@ -138,10 +136,11 @@ export function useAddDailyVerse() {
   const [verseNumber, setVerseNumber] = useState(
     initialVerseNumber?.toString() || "",
   );
+  const [verseEnd, setVerseEnd] = useState(String(editingVerse?.verseEnd || sourceExplanation?.verseEnd || ''));
   const [bibleVersion, setBibleVersion] = useState(
     editingVerse?.bibleVersion || sourceExplanation?.bibleVersion || "BSB",
   );
-  const [published, setPublished] = useState(editingVerse?.published ?? true);
+  const [published, setPublished] = useState(editingVerse?.isPublished ?? editingVerse?.published ?? true);
   const [selectedDate, setSelectedDate] = useState<Date>(() => {
     const d = editingVerse?.displayDate
       ? new Date(editingVerse.displayDate)
@@ -160,11 +159,9 @@ export function useAddDailyVerse() {
   // Content fields
   const [verseText, setVerseText] = useState(editingVerse?.verseText || "");
   const [isVerseEditing, setIsVerseEditing] = useState(false);
-  const [isVerseLoading, setIsVerseLoading] = useState(false);
   const [explanation, setExplanation] = useState(
     editingVerse?.explanation || "",
   );
-  const [learnMore, setLearnMore] = useState(editingVerse?.learnMore || "");
   const [application, setApplication] = useState(
     editingVerse?.application || "",
   );
@@ -185,7 +182,7 @@ export function useAddDailyVerse() {
 
   // Structured fields (parse JSON arrays to newline-separated text)
   const [wordStudies, setWordStudies] = useState(() =>
-    parseStructuredField(editingVerse?.wordStudies),
+    serializeStudies(parseStudies(editingVerse?.wordStudies)),
   );
   const [practicalApplications, setPracticalApplications] = useState(() =>
     parseStructuredField(editingVerse?.practicalApplications),
@@ -194,13 +191,13 @@ export function useAddDailyVerse() {
     parseStructuredField(editingVerse?.keyThemes),
   );
   const [crossReferences, setCrossReferences] = useState(() =>
-    parseStructuredField(editingVerse?.crossReferences),
+    serializeReferences(parseReferences(editingVerse?.crossReferences)),
   );
   const [finalThoughts, setFinalThoughts] = useState(
     editingVerse?.finalThoughts || "",
   );
   const [takeaways, setTakeaways] = useState(() =>
-    parseStructuredField(editingVerse?.takeaways),
+    JSON.stringify(parseTakeaways(editingVerse?.takeaways)),
   );
 
   // Conflict dialog
@@ -223,45 +220,9 @@ export function useAddDailyVerse() {
   );
   const chapters = useMemo(() => getChaptersForBook(book), [book]);
 
-  // Fetch the chapter's verse list from the backend (reliable for every book,
-  // including BSB's "Psalm" vs "Psalms" naming) to populate the verse count.
-  const [verseCount, setVerseCount] = useState(0);
-  const [chapterVerses, setChapterVerses] = useState<Record<number, string>>(
-    {},
-  );
-  useEffect(() => {
-    let active = true;
-    if (!book || !chapter) {
-      setVerseCount(0);
-      setChapterVerses({});
-      return;
-    }
-    setIsVerseLoading(true);
-    bibleApi
-      .getVerses(bibleVersion || "BSB", book, Number(chapter))
-      .then((vd) => {
-        if (!active) return;
-        const verses = vd?.verses || [];
-        const map: Record<number, string> = {};
-        verses.forEach((v) => {
-          map[v.verseNumber] = v.text;
-        });
-        setChapterVerses(map);
-        setVerseCount(verses.length);
-      })
-      .catch(() => {
-        if (!active) return;
-        setVerseCount(0);
-        setChapterVerses({});
-      })
-      .finally(() => {
-        if (active) setIsVerseLoading(false);
-      });
-    return () => {
-      active = false;
-    };
-  }, [book, chapter, bibleVersion]);
-  const maxVerses = verseCount;
+  const preview = usePassagePreview(book, chapter, verseNumber, verseEnd, bibleVersion);
+  const isVerseLoading = preview.loading;
+  const maxVerses = Math.max(0, ...preview.verseNumbers);
 
   const TESTAMENTS = useMemo(
     () => [
@@ -271,46 +232,23 @@ export function useAddDailyVerse() {
     [t],
   );
 
-  // Set verse text reliably once a verse is selected (from the cached chapter).
-  useEffect(() => {
-    if (!book || !chapter || !verseNumber || isVerseEditing) {
-      if (!isVerseEditing) setVerseText("");
-      return;
-    }
-    const text = chapterVerses[Number(verseNumber)];
-    if (typeof text === "string") {
-      setVerseText(text);
-      return;
-    }
-    setIsVerseLoading(true);
-    bibleApi
-      .getVerse(
-        bibleVersion || "BSB",
-        book,
-        Number(chapter),
-        Number(verseNumber),
-      )
-      .then((v) => {
-        if (v?.text) setVerseText(v.text);
-        else setVerseText("Verse not found.");
-      })
-      .catch(() => setVerseText("Verse not found."))
-      .finally(() => setIsVerseLoading(false));
-  }, [book, chapter, verseNumber, bibleVersion, isVerseEditing, chapterVerses]);
+  useEffect(() => { if (!isVerseEditing) setVerseText(preview.text); }, [preview.text, isVerseEditing]);
+
+  // Reset descendants atomically. Never carry an old chapter, range, or edited
+  // quotation into a different passage/translation.
+  const changeTestament = (value: string) => { setTestament(value); setBook(''); setChapter(''); setVerseNumber(''); setVerseEnd(''); setIsVerseEditing(false); setVerseText(''); };
+  const changeBook = (value: string) => { setBook(canonicalBook(value)); if (value) setTestament(getBooksByTestament('Old').includes(canonicalBook(value)) ? 'Old' : 'New'); setChapter(''); setVerseNumber(''); setVerseEnd(''); setIsVerseEditing(false); setVerseText(''); };
+  const changeChapter = (value: string) => { setChapter(value); setVerseNumber(''); setVerseEnd(''); setIsVerseEditing(false); setVerseText(''); };
+  const changeVerse = (value: string) => { setVerseNumber(value); setVerseEnd(''); setIsVerseEditing(false); setVerseText(''); };
+  const changeEnd = (value: string) => { setVerseEnd(value); setIsVerseEditing(false); setVerseText(''); };
+  const changeVersion = (value: string) => { setBibleVersion(value); setIsVerseEditing(false); setVerseText(''); };
 
   // Map an existing verse explanation record onto the daily-verse fields.
   const mapExplanationToFields = useCallback(
     (d: VerseExplanationRecord | null | undefined): MappedExplanationFields => {
       const exegesis = d?.exegesis || {};
       const study = d?.studyMetadata || {};
-      const wordStudies = (d?.wordStudies || [])
-        .map((ws) =>
-          [ws.surfaceText, ws.strongsId, ws.customDefinition]
-            .filter(Boolean)
-            .join(" | "),
-        )
-        .filter(Boolean)
-        .join("\n");
+      const wordStudies = serializeStudies(parseStudies(d?.wordStudies));
       const practicalApplications = (d?.practicalApps || [])
         .map((pa) => (pa.applicationText || "").trim())
         .filter(Boolean)
@@ -319,24 +257,13 @@ export function useAddDailyVerse() {
         .map((th) => (th.themeName || "").trim())
         .filter(Boolean)
         .join("\n");
-      const crossReferences = (d?.crossReferences || [])
-        .map((cr) => {
-          const base = [cr.bookName, cr.chapter, cr.verseNumber]
-            .filter(Boolean)
-            .join(" ");
-          return [base, cr.referenceText].filter(Boolean).join(" — ");
-        })
-        .filter(Boolean)
-        .join("\n");
-      const takeaways = parseStructuredField(
-        d?.studyMetadata?.takeaways ?? study.takeaways,
-      );
+      const crossReferences = serializeReferences(parseReferences(d?.crossReferences));
+      const takeaways = JSON.stringify(parseTakeaways(d?.studyMetadata?.takeaways ?? study.takeaways));
 
       return {
         explanation: exegesis.explanationText || "",
         application: exegesis.applicationText || "",
         verseIntroduction: study.introduction || "",
-        learnMore: "",
         backgroundAuthor: study.backgroundAuthor || "",
         backgroundBook: study.backgroundBook || "",
         backgroundContext: study.backgroundContext || "",
@@ -425,7 +352,6 @@ export function useAddDailyVerse() {
     setExplanation(fields.explanation || "");
     setApplication(fields.application || "");
     setVerseIntroduction(fields.verseIntroduction || "");
-    setLearnMore(fields.learnMore || "");
     setBackgroundAuthor(fields.backgroundAuthor || "");
     setBackgroundBook(fields.backgroundBook || "");
     setBackgroundContext(fields.backgroundContext || "");
@@ -459,7 +385,9 @@ export function useAddDailyVerse() {
     [selectedDate],
   );
 
-  const saveDisabled =
+  const richContentError = collectionError(parseStudies(wordStudies), parseReferences(crossReferences));
+  const saveDisabled = !!richContentError ||
+    !validPassage(book, chapter, verseNumber, verseEnd) || !!preview.error ||
     isVerseLoading ||
     !verseText.trim() ||
     !explanation.trim() ||
@@ -476,12 +404,14 @@ export function useAddDailyVerse() {
         if (!chapter) missing.push("chapter");
         if (!verseNumber) missing.push("verse");
         if (!verseText.trim()) missing.push("verse text");
+        if (!validPassage(book, chapter, verseNumber, verseEnd) || preview.loading || preview.error) missing.push('valid passage');
       }
       if (step === 1) {
         if (!explanation.trim()) missing.push("explanation");
         if (!application.trim()) missing.push("application");
         if (!verseIntroduction.trim()) missing.push("verse introduction");
       }
+      if (step === 3 && richContentError) missing.push(richContentError);
 
       if (missing.length > 0) {
         toast({
@@ -498,6 +428,8 @@ export function useAddDailyVerse() {
       book,
       chapter,
       verseNumber,
+      verseEnd, preview.loading, preview.error,
+      richContentError,
       verseText,
       explanation,
       application,
@@ -507,7 +439,7 @@ export function useAddDailyVerse() {
   );
 
   const handleSave = useCallback(async () => {
-    if (!book || !chapter || !verseNumber) {
+    if (saveDisabled) {
       toast({
         title: tt("Missing fields"),
         description: tt("Please fill all required fields"),
@@ -519,10 +451,10 @@ export function useAddDailyVerse() {
       bookName: book,
       chapter: Number(chapter),
       verseNumber: Number(verseNumber),
+      verseEnd: verseEnd ? Number(verseEnd) : null,
       bibleVersion,
       verseText: verseText || null,
       explanation,
-      learnMore: learnMore || undefined,
       application,
       verseIntroduction,
       backgroundAuthor: backgroundAuthor || undefined,
@@ -531,9 +463,9 @@ export function useAddDailyVerse() {
       wordStudies: wordStudies || undefined,
       practicalApplications: practicalApplications || undefined,
       keyThemes: keyThemes || undefined,
-      crossReferences: crossReferences || undefined,
+      crossReferences: serializeReferences(nonEmptyReferences(parseReferences(crossReferences))),
       finalThoughts: finalThoughts || undefined,
-      takeaways: takeaways || undefined,
+      takeaways: JSON.stringify(parseTakeaways(takeaways).map(item => item.trim()).filter(Boolean)),
       displayDate: format(selectedDate, "yyyy-MM-dd"),
       displayTime: selectedDate.toISOString(),
       published,
@@ -572,10 +504,10 @@ export function useAddDailyVerse() {
     book,
     chapter,
     verseNumber,
+    verseEnd, saveDisabled,
     bibleVersion,
     verseText,
     explanation,
-    learnMore,
     application,
     verseIntroduction,
     backgroundAuthor,
@@ -602,14 +534,15 @@ export function useAddDailyVerse() {
     setConflictDialog({ open: false, conflict: null, payload: null });
     try {
       const res = await sendPostRequest("admin", "add-daily-verse", {
-        id: c.existing.id,
         ...conflictDialog.payload,
+        id: c.existing.id,
       });
       if (res.returnCode === 200) {
         toast({
           title: t.dailyVerse.toastUpdated,
           description: t.dailyVerse.toastUpdateSuccessDesc,
         });
+        setTimeout(() => navigate(routes.adminDailyContent.path), 2000);
       } else {
         toast({
           title: t.dailyVerse.toastUpdateFailedDesc,
@@ -624,7 +557,7 @@ export function useAddDailyVerse() {
         variant: "destructive",
       });
     }
-  }, [conflictDialog, toast, t]);
+  }, [conflictDialog, toast, t, navigate]);
 
   const closeConflict = useCallback(() => {
     setConflictDialog({ open: false, conflict: null, payload: null });
@@ -639,7 +572,7 @@ export function useAddDailyVerse() {
 
   const viewExisting = useCallback(() => {
     closeConflict();
-    navigate(routes.dailyVerse.path);
+    navigate(routes.adminDailyContent.path);
   }, [closeConflict, navigate]);
 
   const conflictReference = conflictDialog.conflict?.existing?.bookName
@@ -657,117 +590,96 @@ export function useAddDailyVerse() {
 
   return {
     data: {
-      testament,
-      setTestament,
-      book,
-      setBook,
-      chapter,
-      setChapter,
-      verseNumber,
-      setVerseNumber,
-      bibleVersion,
-      setBibleVersion,
-      published,
-      setPublished,
-      selectedDate,
-      setSelectedDate,
-      selectedTime,
-      handleTimeChange,
-      verseText,
-      setVerseText,
-      isVerseEditing,
-      setIsVerseEditing,
-      isVerseLoading,
-      explanation,
-      setExplanation,
-      learnMore,
-      setLearnMore,
-      application,
-      setApplication,
-      verseIntroduction,
-      setVerseIntroduction,
-      backgroundAuthor,
-      setBackgroundAuthor,
-      backgroundBook,
-      setBackgroundBook,
-      backgroundContext,
-      setBackgroundContext,
-      wordStudies,
-      setWordStudies,
-      practicalApplications,
-      setPracticalApplications,
-      keyThemes,
-      setKeyThemes,
-      crossReferences,
-      setCrossReferences,
-      finalThoughts,
-      setFinalThoughts,
-      takeaways,
-      setTakeaways,
-      // Derived
-      books,
-      chapters,
-      maxVerses,
-      TESTAMENTS,
-      saveDisabled,
-      validateStep,
-      isEditing,
-      // Explanation auto-populate
-      explanationSource,
-      explanationLoading,
-      explanationApplied,
-      explanationError,
-      applyExplanation,
-      // Actions
-      handleSave,
-      handleConflictUpdate,
-      // Conflict dialog
-      conflictDialog,
-      closeConflict,
-      handleConflictOpenChange,
-      viewExisting,
-      conflictMessage,
-      // Helpers
-      t,
-      isRtl,
+    testament,
+    setTestament,
+    book,
+    setBook,
+    chapter,
+    setChapter,
+    verseNumber,
+    setVerseNumber,
+    verseEnd,
+    setVerseEnd: changeEnd,
+    passageError: preview.error,
+    retryPassage: preview.retry,
+    verseNumbers: preview.verseNumbers,
+    richContentError,
+    bibleVersion,
+    setBibleVersion,
+    published,
+    setPublished,
+    selectedDate,
+    setSelectedDate,
+    selectedTime,
+    handleTimeChange,
+    verseText,
+    setVerseText,
+    isVerseEditing,
+    setIsVerseEditing,
+    isVerseLoading,
+    explanation,
+    setExplanation,
+    application,
+    setApplication,
+    verseIntroduction,
+    setVerseIntroduction,
+    backgroundAuthor,
+    setBackgroundAuthor,
+    backgroundBook,
+    setBackgroundBook,
+    backgroundContext,
+    setBackgroundContext,
+    wordStudies,
+    setWordStudies,
+    practicalApplications,
+    setPracticalApplications,
+    keyThemes,
+    setKeyThemes,
+    crossReferences,
+    setCrossReferences,
+    finalThoughts,
+    setFinalThoughts,
+    takeaways,
+    setTakeaways,
+    // Derived
+    books,
+    chapters,
+    maxVerses,
+    TESTAMENTS,
+    saveDisabled,
+    validateStep,
+    isEditing,
+    // Explanation auto-populate
+    explanationSource,
+    explanationLoading,
+    explanationApplied,
+    explanationError,
+    applyExplanation,
+    // Actions
+    handleSave,
+    handleConflictUpdate,
+    // Conflict dialog
+    conflictDialog,
+    closeConflict,
+    handleConflictOpenChange,
+    viewExisting,
+    conflictMessage,
+    // Helpers
+    t,
+    isRtl,
     },
     actions: {
-      setTestament,
-      setBook,
-      setChapter,
-      setVerseNumber,
-      setBibleVersion,
-      setPublished,
-      setSelectedDate,
-      handleTimeChange,
-      setVerseText,
-      setIsVerseEditing,
-      setExplanation,
-      setLearnMore,
-      setApplication,
-      setVerseIntroduction,
-      setBackgroundAuthor,
-      setBackgroundBook,
-      setBackgroundContext,
-      setWordStudies,
-      setPracticalApplications,
-      setKeyThemes,
-      setCrossReferences,
-      setFinalThoughts,
-      setTakeaways,
-      validateStep,
-      applyExplanation,
-      handleSave,
-      handleConflictUpdate,
-      closeConflict,
-      handleConflictOpenChange,
-      viewExisting,
+    setTestament: changeTestament, setBook: changeBook, setChapter: changeChapter, setVerseNumber: changeVerse, setVerseEnd: changeEnd, setBibleVersion: changeVersion, setPublished,
+    setSelectedDate, handleTimeChange, setVerseText, setIsVerseEditing, setExplanation,
+    setApplication, setVerseIntroduction, setBackgroundAuthor, setBackgroundBook,
+    setBackgroundContext, setWordStudies, setPracticalApplications, setKeyThemes,
+    setCrossReferences, setFinalThoughts, setTakeaways, validateStep, applyExplanation,
+    handleSave, handleConflictUpdate, closeConflict, handleConflictOpenChange, viewExisting,
     },
   };
 }
 
 export type AddDailyVersePageModel = ReturnType<typeof useAddDailyVerse>;
-export type AddDailyVersePageViewModel = AddDailyVersePageModel["data"] &
-  AddDailyVersePageModel["actions"];
+export type AddDailyVersePageViewModel = AddDailyVersePageModel["data"] & AddDailyVersePageModel["actions"];
 
 export default useAddDailyVerse;

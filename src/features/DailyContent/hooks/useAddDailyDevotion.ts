@@ -13,6 +13,7 @@ import {
 import { parseStructuredField } from "../helpers/contentDetailHelpers";
 import { getDailyDevotionVerse, getDailyDevotionVerses, saveDailyDevotion } from "../services/add-daily-content-service";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { canonicalBook, parseStudies, serializeStudies, parseReferences, serializeReferences, parseTakeaways, nonEmptyReferences } from '../helpers/editorContent';
 
 export function useAddDailyDevotion() {
   const { t, isRtl } = useLanguage();
@@ -27,8 +28,8 @@ export function useAddDailyDevotion() {
   const [content, setContent] = useState(editingDevotion?.content || "");
 
   // Bible reference
-  const [testament, setTestament] = useState(editingDevotion?.testament || "");
-  const [book, setBook] = useState(editingDevotion?.bookName || "");
+  const [testament, setTestament] = useState(editingDevotion?.testament || (editingDevotion?.bookName ? getBooksByTestament('Old').includes(canonicalBook(editingDevotion.bookName)) ? 'Old' : 'New' : ''));
+  const [book, setBook] = useState(canonicalBook(editingDevotion?.bookName || ""));
   const [chapter, setChapter] = useState(editingDevotion?.chapter?.toString() || "");
   const [verseNumber, setVerseNumber] = useState(editingDevotion?.verseNumber?.toString() || "");
   const [bibleVersion, setBibleVersion] = useState(editingDevotion?.bibleVersion || "BSB");
@@ -62,12 +63,12 @@ export function useAddDailyDevotion() {
   const [backgroundContext, setBackgroundContext] = useState(editingDevotion?.backgroundContext || "");
 
   // Structured fields
-  const [wordStudies, setWordStudies] = useState(() => parseStructuredField(editingDevotion?.wordStudies));
+  const [wordStudies, setWordStudies] = useState(() => serializeStudies(parseStudies(editingDevotion?.wordStudies)));
   const [practicalApplications, setPracticalApplications] = useState(() => parseStructuredField(editingDevotion?.practicalApplications));
   const [keyThemes, setKeyThemes] = useState(() => parseStructuredField(editingDevotion?.keyThemes));
-  const [crossReferences, setCrossReferences] = useState(() => parseStructuredField(editingDevotion?.crossReferences));
+  const [crossReferences, setCrossReferences] = useState(() => serializeReferences(parseReferences(editingDevotion?.crossReferences)));
   const [finalThoughts, setFinalThoughts] = useState(editingDevotion?.finalThoughts || "");
-  const [takeaways, setTakeaways] = useState(() => parseStructuredField(editingDevotion?.takeaways));
+  const [takeaways, setTakeaways] = useState(() => JSON.stringify(parseTakeaways(editingDevotion?.takeaways)));
 
   // Derived
   const books = useMemo(() => getBooksByTestament(testament as "Old" | "New"), [testament]);
@@ -134,6 +135,7 @@ export function useAddDailyDevotion() {
   // Set verse text reliably once a verse is selected (from the cached chapter).
   useEffect(() => {
     if (!book || !chapter || !verseNumber) { setVerseText(""); return; }
+    let active = true;
     const text = chapterVerses[Number(verseNumber)];
     if (typeof text === "string") {
       setVerseText(text);
@@ -142,11 +144,13 @@ export function useAddDailyDevotion() {
     setIsVerseLoading(true);
     getDailyDevotionVerse(bibleVersion || "BSB", book, Number(chapter), Number(verseNumber))
       .then((v) => {
+        if (!active) return;
         if (v?.text) setVerseText(v.text);
         else setVerseText("Verse not found.");
       })
-      .catch(() => setVerseText("Verse not found."))
-      .finally(() => setIsVerseLoading(false));
+      .catch(() => { if (active) setVerseText(''); })
+      .finally(() => { if (active) setIsVerseLoading(false); });
+    return () => { active = false; };
   }, [book, chapter, verseNumber, bibleVersion, chapterVerses]);
 
   // Sync time with date
@@ -200,9 +204,9 @@ export function useAddDailyDevotion() {
       wordStudies: wordStudies || null,
       practicalApplications: practicalApplications || null,
       keyThemes: keyThemes || null,
-      crossReferences: crossReferences || null,
+      crossReferences: serializeReferences(nonEmptyReferences(parseReferences(crossReferences))) || null,
       finalThoughts: finalThoughts || null,
-      takeaways: takeaways || null,
+      takeaways: JSON.stringify(parseTakeaways(takeaways).map(item => item.trim()).filter(Boolean)),
     };
     try {
       const res = await saveDailyDevotion(payload);
@@ -237,7 +241,10 @@ export function useAddDailyDevotion() {
       t, isRtl,
     },
     actions: {
-      setTitle, setContent, setTestament, setBook, setChapter,
+      setTitle, setContent,
+      setTestament: (value: string) => { setTestament(value); setBook(''); setChapter(''); setVerseNumber(''); setVerseText(''); },
+      setBook: (value: string) => { setBook(value); setChapter(''); setVerseNumber(''); setVerseText(''); },
+      setChapter: (value: string) => { setChapter(value); setVerseNumber(''); setVerseText(''); },
       setVerseNumber, setBibleVersion, setSelectedDate, handleTimeChange,
       setPublished, setExplanation, setApplication, setVerseIntroduction,
       setLearnMore, setBackgroundAuthor, setBackgroundBook,

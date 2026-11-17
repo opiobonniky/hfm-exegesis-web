@@ -7,6 +7,7 @@ export interface DailyVerseItem {
   bookName: string;
   chapter: number;
   verseNumber: number;
+  verseEnd?: number | null;
   bibleVersion?: string;
   verseText?: string | null;
   text?: string | null;
@@ -38,6 +39,7 @@ export interface DailyVersePayload {
   bookName: string;
   chapter: number;
   verseNumber: number;
+  verseEnd?: number | null;
   bibleVersion: string;
   verseText?: string | null;
   displayDate: string;
@@ -424,6 +426,7 @@ export interface CrossRefItem {
   bookName: string;
   chapter: number;
   verseNumber: number;
+  verseEnd?: number;
   referenceText: string;
   commentary: string;
   sortOrder: number;
@@ -433,6 +436,7 @@ export interface ExplanationForm {
   bookName: string;
   chapter: string;
   verseNumber: string;
+  verseEnd: string;
   bibleVersion: string;
   exegesis: {
     explanationText: string;
@@ -464,6 +468,7 @@ export interface AddExplanationProgressCardProps {
   bookName: string;
   chapter: string;
   verseNumber: string;
+  verseEnd?: string;
   completionPercent: number;
 }
 
@@ -480,6 +485,9 @@ export interface AddExplanationReferenceFormProps {
   bookName: string;
   chapter: string;
   verseNumber: string;
+  verseEnd: string;
+  passageError?: string;
+  retryPassage: () => void;
   bibleVersion: string;
   sortedTranslationOptions: Array<{ value: string; label: string; group: string }>;
   verseOptions: number[];
@@ -492,7 +500,7 @@ export interface AddExplanationReferenceFormProps {
   chapterOptions: number[];
   selectedVerse: number | null;
   verseLoadingForTrigger: boolean;
-  updateField: (key: keyof Pick<ExplanationForm, "bookName" | "chapter" | "verseNumber" | "bibleVersion">, value: string) => void;
+  updateField: (key: keyof Pick<ExplanationForm, "bookName" | "chapter" | "verseNumber" | "verseEnd" | "bibleVersion">, value: string) => void;
 }
 
 export interface AddExplanationExegesisFormProps {
@@ -516,23 +524,16 @@ export interface AddExplanationStudyFormProps {
 }
 
 export interface AddExplanationExtrasFormProps {
+  bibleVersion: string;
+  onCrossReferencesChange: (rows: CrossRefItem[]) => void;
   practicalApps: ExplanationForm["practicalApps"];
   crossReferences: CrossRefItem[];
   themes: ExplanationForm["themes"];
   takeaways: string[];
   finalThoughts: string;
-  crossRefVerseOptions: Record<number, { key: string; verses: number[] }>;
-  crossRefVerseLoading: Record<number, boolean>;
-  crossReferenceBookOptions: Array<{ value: string; label: string; group: string }>;
-  crossReferenceChapterOptions: Record<number, number[]>;
-  crossReferenceVerseLoading: Record<number, boolean>;
   updatePracticalApp: (index: number, value: string) => void;
   addPracticalApp: () => void;
   removePracticalApp: (index: number) => void;
-  addCrossRef: () => void;
-  removeCrossRef: (index: number) => void;
-  updateCrossRef: (index: number, field: keyof CrossRefItem, value: string | number) => void;
-  pickCrossRefVerse: (index: number, verse: number) => void;
   addTheme: () => void;
   removeTheme: (index: number) => void;
   updateTheme: (index: number, value: string) => void;

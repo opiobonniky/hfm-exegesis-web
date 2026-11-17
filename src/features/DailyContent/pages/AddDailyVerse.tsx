@@ -56,6 +56,9 @@ const AddDailyVerse = () => {
                 setChapter={h.setChapter}
                 verseNumber={h.verseNumber}
                 setVerseNumber={h.setVerseNumber}
+                verseEnd={h.verseEnd}
+                setVerseEnd={h.setVerseEnd}
+                verseNumbers={h.verseNumbers}
                 bibleVersion={h.bibleVersion}
                 setBibleVersion={h.setBibleVersion}
                 selectedDate={h.selectedDate}
@@ -78,9 +81,11 @@ const AddDailyVerse = () => {
                 book={h.book}
                 chapter={h.chapter}
                 verseNumber={h.verseNumber}
+                verseEnd={h.verseEnd}
                 bibleVersion={h.bibleVersion}
                 t={h.t}
               />
+              {h.passageError && <p role="alert" className="text-sm text-destructive">{tt(h.passageError)} <button type="button" onClick={h.retryPassage}>{tt('Retry')}</button></p>}
             </GuidedTab>
 
             <GuidedTab
@@ -95,9 +100,6 @@ const AddDailyVerse = () => {
                 setApplication={h.setApplication}
                 verseIntroduction={h.verseIntroduction}
                 setVerseIntroduction={h.setVerseIntroduction}
-                learnMore={h.learnMore}
-                setLearnMore={h.setLearnMore}
-                t={h.t}
                 isRtl={h.isRtl}
               />
             </GuidedTab>
@@ -137,6 +139,7 @@ const AddDailyVerse = () => {
                 bibleVersion={h.bibleVersion}
                 isRtl={h.isRtl}
               />
+              {h.richContentError && <p role="alert" className="text-sm text-destructive">{tt(h.richContentError)}</p>}
             </GuidedTab>
 
             <GuidedTab
@@ -150,7 +153,7 @@ const AddDailyVerse = () => {
                 publishedDesc={h.t.dailyVerse.publishedDesc}
               />
               <DailyContentFormActions
-                cancelTo={routes.dailyVerse.path}
+                cancelTo={routes.adminDailyContent.path}
                 cancelLabel={h.t.common.cancel}
                 saveLabel={h.t.dailyVerse.saveDailyVerse}
                 disabled={h.saveDisabled}

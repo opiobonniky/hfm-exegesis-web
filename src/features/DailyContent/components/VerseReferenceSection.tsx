@@ -9,12 +9,15 @@ import { BIBLE_VERSIONS } from "@/assets/bibleVersion/json/bibleVersions";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { PassageFields } from './PassageFields';
 
 interface Props {
   testament: string; setTestament: (v: string) => void;
   book: string; setBook: (v: string) => void;
   chapter: string; setChapter: (v: string) => void;
   verseNumber: string; setVerseNumber: (v: string) => void;
+  verseEnd: string; setVerseEnd: (v: string) => void;
+  verseNumbers: number[];
   bibleVersion: string; setBibleVersion: (v: string) => void;
   selectedDate: Date; setSelectedDate: (d: Date) => void;
   selectedTime: string; handleTimeChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -25,15 +28,15 @@ interface Props {
 
 export function VerseReferenceSection(p: Props) {
   const fields = [
-    [p.t.dailyVerse.book, p.book, p.setBook, p.books.map((b) => ({ value: b, label: tt(b) })), p.t.dailyVerse.selectBook, !p.testament],
-    [p.t.dailyVerse.chapter, p.chapter, p.setChapter, p.chapters.map((c) => ({ value: String(c), label: String(c) })), p.t.dailyVerse.selectChapter, !p.book],
-    [p.t.dailyVerse.verse, p.verseNumber, p.setVerseNumber, Array.from({ length: p.maxVerses }, (_, i) => ({ value: String(i + 1), label: String(i + 1) })), p.t.dailyVerse.selectVerse, !p.chapter || p.maxVerses === 0],
-    [p.t.dailyVerse.version, p.bibleVersion, p.setBibleVersion, BIBLE_VERSIONS.map((v) => ({ value: v.id, label: `${v.name} (${v.abbreviation})` })), p.t.dailyVerse.selectVersion, false],
+    [p.t.dailyVerse.version, p.bibleVersion, p.setBibleVersion, [
+      ...BIBLE_VERSIONS.map((v) => ({ value: v.id, label: `${v.name} (${v.abbreviation})` })),
+      ...(!BIBLE_VERSIONS.some(v => v.id === p.bibleVersion) && p.bibleVersion ? [{ value: p.bibleVersion, label: p.bibleVersion }] : []),
+    ], p.t.dailyVerse.selectVersion, false],
   ] as const;
 
   return (
     <div className="space-y-5" dir={p.isRtl ? "rtl" : "ltr"}>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <Label>{p.t.dailyVerse.testament}</Label>
           <Combobox options={p.TESTAMENTS} value={p.testament} onChange={p.setTestament} placeholder={p.t.dailyVerse.selectTestament} width="w-full" />
@@ -41,10 +44,17 @@ export function VerseReferenceSection(p: Props) {
         {fields.map(([label, value, onChange, options, placeholder, disabled]) => (
           <div className="space-y-2" key={label}>
             <Label>{label}</Label>
-            <Combobox options={options} value={value} onChange={onChange} placeholder={placeholder} disabled={disabled} width="w-full" />
+            <Combobox options={[...options]} value={value} onChange={onChange} placeholder={placeholder} disabled={disabled} width="w-full" />
           </div>
         ))}
       </div>
+      <PassageFields value={{ bookName: p.book, chapter: p.chapter, verseNumber: p.verseNumber, verseEnd: p.verseEnd }} verseNumbers={p.verseNumbers}
+        onChange={next => {
+          if (next.bookName !== p.book) p.setBook(next.bookName);
+          else if (next.chapter !== p.chapter) p.setChapter(next.chapter);
+          else if (next.verseNumber !== p.verseNumber) p.setVerseNumber(next.verseNumber);
+          else p.setVerseEnd(next.verseEnd);
+        }} />
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <Label>{p.t.common.date}</Label>

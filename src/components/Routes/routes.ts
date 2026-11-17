@@ -11,7 +11,6 @@ const ForgotPassword = lazy(() => import("@/features/Auth/pages/ForgotPassword")
 const ForceChangePassword = lazy(() => import("@/features/Auth/pages/ForceChangePassword"));
 const Dashboard = lazy(() => import("@/features/Admin/pages/AdminDashboard"));
 const HomeDashboard = lazy(() => import("@/features/Home/pages/HomeDashboard"));
-const DailyVerse = lazy(() => import("@/features/DailyContent/pages/DailyVerse"));
 const VerseExplanations = lazy(() => import("@/features/Bible/pages/VerseExplanations"));
 const AddDailyVerse = lazy(() => import("@/features/DailyContent/pages/AddDailyVerse"));
 const DailyDevotions = lazy(() => import("@/features/DailyContent/pages/DailyDevotions"));
@@ -184,14 +183,6 @@ const routeConfigs = {
     isProtected: true,
     requiresLayout: true,
     title: tt("Dashboard"),
-  },
-  dailyVerse: {
-    adminOnly: true,
-    path: "/daily-verse",
-    component: DailyVerse,
-    isProtected: true,
-    requiresLayout: true,
-    title: tt("Daily Verse"),
   },
   dailyDevotions: {
     adminOnly: true,

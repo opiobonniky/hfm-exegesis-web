@@ -1,5 +1,6 @@
 // Shared parse/format helpers for content detail pages
 import { displayDate } from '@/services/numberLocale/format';
+import { referenceLabel, parseStudies } from './editorContent';
 
 /** Parse a value into a list of strings (handles JSON arrays, newline-separated, plain strings) */
 export const parseList = (val: any): string[] => {
@@ -7,6 +8,7 @@ export const parseList = (val: any): string[] => {
   if (Array.isArray(val)) {
     if (val.length > 0 && typeof val[0] === "object" && val[0] !== null) {
       return val.map((item: any) => {
+        if (item.bookName && item.chapter && item.verseNumber) return `${referenceLabel(item)}${item.referenceText ? ` — ${item.referenceText}` : ''}${item.commentary ? `\n${item.commentary}` : ''}`;
         if (item.word && item.definition) return `${item.word} — ${item.definition}`;
         return JSON.stringify(item);
       });
@@ -19,6 +21,7 @@ export const parseList = (val: any): string[] => {
     if (Array.isArray(p)) {
       if (p.length > 0 && typeof p[0] === "object" && p[0] !== null) {
         return p.map((item: any) => {
+          if (item.bookName && item.chapter && item.verseNumber) return `${referenceLabel(item)}${item.referenceText ? ` — ${item.referenceText}` : ''}${item.commentary ? `\n${item.commentary}` : ''}`;
           if (item.word && item.definition) return `${item.word} — ${item.definition}`;
           return JSON.stringify(item);
         });
@@ -31,29 +34,7 @@ export const parseList = (val: any): string[] => {
 
 /** Parse word studies from JSON array or newline-separated format */
 export const parseWordStudies = (val: any): Array<{ word: string; strongs?: string; definition?: string }> => {
-  if (!val) return [];
-  if (Array.isArray(val)) {
-    return val.map((item: any) => ({
-      word: item.word || "",
-      strongs: item.strongs || item.Strongs || "",
-      definition: item.definition || "",
-    }));
-  }
-  const str = String(val);
-  try {
-    const p = JSON.parse(str);
-    if (Array.isArray(p)) {
-      return p.map((item: any) => ({
-        word: item.word || "",
-        strongs: item.strongs || item.Strongs || "",
-        definition: item.definition || "",
-      }));
-    }
-  } catch { /* not JSON */ }
-  return str.split("\n").map(s => s.trim()).filter(Boolean).map(line => {
-    const parts = line.split("|").map(p => p.trim());
-    return { word: parts[0] || "", strongs: parts[1] || "", definition: parts[2] || "" };
-  });
+  return parseStudies(val).map(row => ({ word: row.surfaceText, strongs: row.strongsId, definition: row.customDefinition }));
 };
 
 /** Parse tags from comma-separated string or JSON array */

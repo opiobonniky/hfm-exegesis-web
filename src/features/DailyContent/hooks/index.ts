@@ -4,7 +4,6 @@ export { useVerseExplanation } from "./useVerseExplanation";
 export { useAddDailyVerse } from "./useAddDailyVerse";
 export { useAddExplanation } from "./useAddExplanation";
 export { useAddDailyDevotion } from "./useAddDailyDevotion";
-export { useDailyVersePage } from "./useDailyVersePage";
 export { useDailyDevotionsPage } from "./useDailyDevotionsPage";
 export { useUserDailyVerse } from "./useUserDailyVerse";
 export { useUserDevotions } from "./useUserDevotions";

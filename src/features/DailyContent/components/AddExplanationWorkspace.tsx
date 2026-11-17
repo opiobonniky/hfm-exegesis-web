@@ -40,6 +40,9 @@ export function AddExplanationWorkspace({
               bookName={data.form.bookName}
               chapter={data.form.chapter}
               verseNumber={data.form.verseNumber}
+              verseEnd={data.form.verseEnd}
+              passageError={data.passageError}
+              retryPassage={data.retryPassage}
               bibleVersion={data.form.bibleVersion}
               sortedTranslationOptions={data.sortedTranslationOptions}
               bookOptions={data.bookOptions}
@@ -78,23 +81,16 @@ export function AddExplanationWorkspace({
           </TabsContent>
           <TabsContent value="extras">
             <AddExplanationExtrasForm
+              bibleVersion={data.form.bibleVersion}
+              onCrossReferencesChange={rows => actions.updateField('crossReferences', rows)}
               practicalApps={data.form.practicalApps}
               crossReferences={data.form.crossReferences}
               themes={data.form.themes}
               takeaways={data.form.studyMetadata.takeaways}
               finalThoughts={data.form.studyMetadata.finalThoughts}
-              crossRefVerseOptions={data.crossRefVerseOptions}
-              crossRefVerseLoading={data.crossRefVerseLoading}
-              crossReferenceBookOptions={data.crossReferenceBookOptions}
-              crossReferenceChapterOptions={data.crossReferenceChapterOptions}
-              crossReferenceVerseLoading={data.crossReferenceVerseLoading}
               updatePracticalApp={actions.updatePracticalApp}
               addPracticalApp={actions.addPracticalApp}
               removePracticalApp={actions.removePracticalApp}
-              addCrossRef={actions.addCrossRef}
-              removeCrossRef={actions.removeCrossRef}
-              updateCrossRef={actions.updateCrossRef}
-              pickCrossRefVerse={actions.pickCrossRefVerse}
               addTheme={actions.addTheme}
               removeTheme={actions.removeTheme}
               updateTheme={actions.updateTheme}
@@ -114,6 +110,7 @@ export function AddExplanationWorkspace({
           onNext={actions.goNext}
           canAdvance={data.canAdvanceFromCurrent}
         />
+        {data.richContentError && <p role="alert" className="mt-3 text-sm text-destructive">{tt(data.richContentError)}</p>}
       </div>
     </div>
   );

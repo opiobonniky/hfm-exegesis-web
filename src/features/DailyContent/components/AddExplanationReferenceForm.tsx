@@ -1,156 +1,25 @@
-import { BookOpen, Loader2 } from "lucide-react";
-import { Label } from "@/components/ui/label";
-import { Combobox } from "@/components/ui/combobox";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import type { AddExplanationReferenceFormProps } from "../types";
+import { Combobox } from '@/components/ui/combobox';
+import { Button } from '@/components/ui/button';
 import { tt } from '@/components/languages/hardcodedTranslate';
+import type { AddExplanationReferenceFormProps } from '../types';
+import { PassageFields } from './PassageFields';
 
-export function AddExplanationReferenceForm(props: AddExplanationReferenceFormProps) {
-  const { bookName, chapter, verseNumber, bibleVersion, sortedTranslationOptions, bookOptions, chapterOptions, verseOptions, verseOptionsLoading, verseTextLoading, selectedVerseText, maxChapterNumber, maxVerseNumber, selectedVerse, verseLoadingForTrigger, updateField } = props;
-  const h = {
-    form: { bookName, chapter, verseNumber, bibleVersion },
-    verseOptions,
-    verseOptionsLoading,
-    verseTextLoading,
-    selectedVerseText,
-    maxChapterNumber,
-    maxVerseNumber,
-    updateField,
-  };
-
-  return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-2 text-sky-600">
-        <BookOpen className="h-4 w-4" />
-        <span className="text-sm font-medium">{tt("Verse reference")}</span>
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <div className="space-y-2 md:col-span-2">
-          <Label className="text-sm font-medium text-foreground">{tt("Book name")}</Label>
-          <Combobox
-            options={bookOptions}
-            value={h.form.bookName || undefined}
-            onChange={(value) =>
-              h.updateField("bookName", value)
-            }
-            placeholder={tt("Select book...")}
-            width="w-full"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label className="text-sm font-medium text-foreground">{tt("Bible version")}</Label>
-          <Select
-            value={h.form.bibleVersion}
-            onValueChange={(v) => h.updateField("bibleVersion", v)}
-          >
-            <SelectTrigger className="border-border bg-background text-foreground">
-              <SelectValue placeholder={tt("Select a Bible version")} />
-            </SelectTrigger>
-            <SelectContent>
-              {sortedTranslationOptions.map((t) => (
-                <SelectItem key={t.value} value={t.value}>
-                  {t.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-2">
-          <Label className="text-sm font-medium text-foreground">{tt("Chapter")}</Label>
-          <Select
-            value={h.form.chapter || ""}
-            onValueChange={(v) => {
-              h.updateField("chapter", v);
-              h.updateField("verseNumber", "");
-            }}
-            disabled={!h.form.bookName}
-          >
-            <SelectTrigger className="border-border bg-background text-foreground">
-              <SelectValue placeholder={h.form.bookName ? tt("Select") : tt("Pick book")} />
-            </SelectTrigger>
-            <SelectContent>
-              {chapterOptions.map((c) => (
-                <SelectItem key={c} value={String(c)}>
-                  {c}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <p className="text-xs text-muted-foreground">
-            {h.form.bookName
-              ? `Total chapters: ${h.maxChapterNumber}`
-              : tt("Select a book to view chapter options")}
-          </p>
-        </div>
-
-        <div className="space-y-2">
-          <Label className="text-sm font-medium text-foreground">{tt("Verse number")}</Label>
-          <Select
-            value={selectedVerse != null ? String(selectedVerse) : ""}
-            onValueChange={(v) => h.updateField("verseNumber", v)}
-            disabled={
-              !h.form.bookName ||
-              !h.form.chapter ||
-              verseLoadingForTrigger
-            }
-          >
-            <SelectTrigger className="border-border bg-background text-foreground">
-              {verseLoadingForTrigger ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <SelectValue
-                  placeholder={
-                    !h.form.bookName
-                      ? tt("Pick book")
-                      : !h.form.chapter
-                        ? tt("Pick chapter")
-                        : tt("Select")
-                  }
-                />
-              )}
-            </SelectTrigger>
-            <SelectContent>
-              {h.verseOptions.map((v) => (
-                <SelectItem key={v} value={String(v)}>
-                  {v}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <p className="text-xs text-muted-foreground">
-            {h.form.bookName && h.form.chapter
-              ? `Verses in chapter: ${h.maxVerseNumber}`
-              : tt("Select a book and chapter to view verse options")}
-          </p>
-        </div>
-      </div>
-
-      <div className="rounded-2xl border border-border bg-muted/30 p-4">
-        <div className="mb-2 flex items-center justify-between gap-2">
-          <Label className="text-sm font-semibold text-foreground">{tt("Selected verse text")}</Label>
-          {h.verseTextLoading && <span className="inline-flex h-4 w-4 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent" />}
-        </div>
-        <div className="min-h-[80px] rounded-xl border border-border bg-background p-3 text-sm leading-relaxed text-foreground/90">
-          {h.selectedVerseText ? (
-            <p className="font-serif">{h.selectedVerseText}</p>
-          ) : (
-            <p className="text-muted-foreground italic">
-              {h.form.bookName && h.form.chapter && h.form.verseNumber && h.form.bibleVersion
-                ? tt("Verse text is loading...")
-                : tt("Choose a book, chapter, verse, and version to preview the verse text.")}
-            </p>
-          )}
-        </div>
-      </div>
+export function AddExplanationReferenceForm(p: AddExplanationReferenceFormProps) {
+  return <div className="space-y-5">
+    <label className="block space-y-2 text-sm font-medium">{tt('Bible version')}
+      <Combobox options={p.sortedTranslationOptions} value={p.bibleVersion} onChange={v => p.updateField('bibleVersion', v)} placeholder={tt('Select a Bible version')} width="w-full" />
+    </label>
+    <PassageFields value={{ bookName: p.bookName, chapter: p.chapter, verseNumber: p.verseNumber, verseEnd: p.verseEnd }}
+      verseNumbers={p.verseOptions} loading={p.verseOptionsLoading} onChange={next => {
+        if (next.bookName !== p.bookName) p.updateField('bookName', next.bookName);
+        else if (next.chapter !== p.chapter) p.updateField('chapter', next.chapter);
+        else if (next.verseNumber !== p.verseNumber) p.updateField('verseNumber', next.verseNumber);
+        else p.updateField('verseEnd', next.verseEnd);
+      }} />
+    <div className="space-y-2 rounded-xl border border-border bg-muted/20 p-4">
+      <h3 className="text-sm font-semibold">{tt('Selected passage text')}</h3>
+      {p.passageError ? <p role="alert" className="text-sm text-destructive">{tt(p.passageError)} <Button type="button" variant="link" onClick={p.retryPassage}>{tt('Retry')}</Button></p> :
+        <p className="whitespace-pre-wrap font-serif text-sm leading-7">{p.selectedVerseText || tt(p.verseTextLoading ? 'Loading…' : 'Select a book, chapter and verse or range to preview the passage.')}</p>}
     </div>
-  );
+  </div>;
 }

@@ -16,6 +16,8 @@ import {
 } from "../components";
 import { parseList } from "../helpers/contentDetailHelpers";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { referenceLabel } from '../helpers/editorContent';
+import { usePassagePreview } from '../hooks/usePassagePreview';
 
 export default function DailyVerseDetail() {
   const navigate = useNavigate();
@@ -24,6 +26,7 @@ export default function DailyVerseDetail() {
   const verseParam = params.get("verse");
   let verse: any = null;
   try { verse = verseParam ? JSON.parse(verseParam) : null; } catch { /* invalid */ }
+  const preview = usePassagePreview(verse?.bookName || '', verse?.chapter || '', verse?.verseNumber || '', verse?.verseEnd, verse?.bibleVersion || 'BSB');
 
   if (!verse) {
     return (
@@ -36,7 +39,7 @@ export default function DailyVerseDetail() {
     );
   }
 
-  const reference = `${verse.bookName || ""} ${verse.chapter || ""}:${verse.verseNumber || ""}`;
+   const reference = referenceLabel(verse);
 
   return (
     <DetailPageLayout>
@@ -58,7 +61,7 @@ export default function DailyVerseDetail() {
           />
         </DetailTitleBlock>
 
-        {verse.verseText && <VerseTextDisplay text={verse.verseText} />}
+        {(preview.text || verse.verseText) && <VerseTextDisplay text={preview.text || verse.verseText} />}
 
         <DetailSection>
           <TextBlock label={tt("Explanation")} value={verse.explanation} icon={Lightbulb} />

@@ -6,6 +6,7 @@ import { useLanguage } from "@/components/languages/languageProvider";
 import { sendPostRequest } from "@/services/api";
 import type { DailyVerseItem } from "../types";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { referenceLabel } from '../helpers/editorContent';
 
 export function useUserDailyVerse() {
   const { t, isRtl } = useLanguage();
@@ -53,7 +54,7 @@ export function useUserDailyVerse() {
   }, []);
   const handleCopy = useCallback(() => {
     if (!verse) return;
-    const ref = `${verse.bookName} ${verse.chapter}:${verse.verseNumber}`;
+    const ref = referenceLabel(verse);
     const text = verse.verseText
       ? `\u201C${verse.verseText}\u201D \u2014 ${ref}`
       : ref;
@@ -63,7 +64,7 @@ export function useUserDailyVerse() {
   }, [verse, toast]);
   const handleShare = useCallback(async () => {
     if (!verse) return;
-    const ref = `${verse.bookName} ${verse.chapter}:${verse.verseNumber}`;
+    const ref = referenceLabel(verse);
     const text = `\u201C${verse.verseText || ""}\u201D \u2014 ${ref}\n\nvia Exegesis Bible App`;
     if (navigator.share) {
       try {

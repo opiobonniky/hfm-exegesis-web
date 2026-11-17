@@ -21,7 +21,7 @@ export function VerseContent({ verse, liked, onCopy, onShare, onLike }: Props) {
         <div className="prologue-heading-meta"><span>{tt(isToday(verse.displayDate) ? 'Today’s Verse' : 'Daily verse')}</span>
           <span className="devotion-date"><Calendar aria-hidden="true" />{fmtDate(verse.displayDate, 'long')}</span>
         </div>
-        <h1 className="notranslate" translate="no">{verse.bookName} {verse.chapter}:{verse.verseNumber}</h1>
+        <h1 className="notranslate" translate="no">{verse.bookName} {verse.chapter}:{verse.verseNumber}{verse.verseEnd && verse.verseEnd > verse.verseNumber ? `-${verse.verseEnd}` : ''}</h1>
         {verse.bibleVersion && <p className="devotion-reference notranslate" translate="no">{verse.bibleVersion}</p>}
       </header>
       <section className="devotion-reading prologue-paper" aria-label={tt('Daily verse')}>

@@ -9,6 +9,7 @@ import type { ReactNode } from "react";
 import type { AddDailyVersePageViewModel } from "../hooks/useAddDailyVerse";
 import { tt } from '@/components/languages/hardcodedTranslate';
 import { displayDate } from '@/services/numberLocale/format';
+import { parseTakeaways } from '../helpers/editorContent';
 
 interface Props {
   model: AddDailyVersePageViewModel;
@@ -18,9 +19,9 @@ interface Props {
 export function AddDailyVerseWorkspace({ model: h, children }: Props) {
   const reference =
     h.book && h.chapter && h.verseNumber
-      ? `${h.book} ${h.chapter}:${h.verseNumber}`
+      ? `${h.book} ${h.chapter}:${h.verseNumber}${h.verseEnd ? `-${h.verseEnd}` : ''}`
       : "Select a verse";
-  const takeawayCount = h.takeaways.split("\n").filter(Boolean).length;
+  const takeawayCount = parseTakeaways(h.takeaways).filter(item => item.trim()).length;
 
   return (
     <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_280px]">

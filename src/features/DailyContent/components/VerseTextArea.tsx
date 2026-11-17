@@ -15,6 +15,7 @@ interface Props {
   book: string;
   chapter: string;
   verseNumber: string;
+  verseEnd?: string;
   bibleVersion: string;
   t: any;
 }
@@ -37,6 +38,7 @@ export function VerseTextArea(p: Props) {
           size="sm"
           className="h-6 px-2 text-xs"
           onClick={() => p.setIsVerseEditing(!p.isVerseEditing)}
+          disabled={!p.book || !p.chapter || !p.verseNumber || p.isVerseLoading || !p.verseText}
         >
           <Pencil className="h-3 w-3 mr-1" />
           {p.isVerseEditing ? tt("Done") : tt("Edit")}
@@ -49,16 +51,16 @@ export function VerseTextArea(p: Props) {
           </div>
         ) : (
           <Textarea
-            value={p.verseText}
+            value={p.book && p.chapter && p.verseNumber ? p.verseText : ''}
             onChange={(e) => p.setVerseText(e.target.value)}
-            readOnly={!p.isVerseEditing}
-            className="min-h-[110px] resize-none font-serif leading-relaxed"
+            readOnly={!p.isVerseEditing || !p.book || !p.chapter || !p.verseNumber}
+            className="min-h-[160px] resize-y pb-10 font-serif leading-relaxed"
             placeholder={p.isVerseEditing ? tt("Edit verse text...") : tt("Select a verse to see its text...")}
           />
         )}
         {p.book && p.chapter && p.verseNumber && (
           <div className="absolute bottom-3 right-3 text-xs text-muted-foreground">
-            {p.t.dailyVerse.refPrefix} {p.book} {p.chapter}:{p.verseNumber} ({versionAbbr})
+            {p.t.dailyVerse.refPrefix} {p.book} {p.chapter}:{p.verseNumber}{p.verseEnd && Number(p.verseEnd) > Number(p.verseNumber) ? `-${p.verseEnd}` : ''} ({versionAbbr})
           </div>
         )}
       </div>

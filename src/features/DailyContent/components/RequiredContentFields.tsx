@@ -6,9 +6,6 @@ interface RequiredContentFieldsProps {
   setApplication: (v: string) => void;
   verseIntroduction: string;
   setVerseIntroduction: (v: string) => void;
-  learnMore: string;
-  setLearnMore: (v: string) => void;
-  t: any;
   isRtl: boolean;
 }
 
@@ -19,9 +16,6 @@ export function RequiredContentFields({
   setApplication,
   verseIntroduction,
   setVerseIntroduction,
-  learnMore,
-  setLearnMore,
-  t,
   isRtl,
 }: RequiredContentFieldsProps) {
   return (
@@ -56,17 +50,6 @@ export function RequiredContentFields({
           placeholder={tt("Introduce the verse and its central purpose...")}
           rows={6}
           className="min-h-[140px] w-full resize-y rounded-xl border border-border bg-background px-4 py-3 text-sm leading-7 focus:outline-none focus:ring-2 focus:ring-ring"
-          dir={isRtl ? "rtl" : "ltr"}
-        />
-      </div>
-      <div className="rounded-2xl border border-border bg-muted/20 p-4 sm:p-5">
-        <label className="mb-2 block text-sm font-semibold">{tt("Learn More")}</label>
-        <textarea
-          value={learnMore}
-          onChange={(e) => setLearnMore(e.target.value)}
-          placeholder={tt("Additional resources, related verses, or deeper insights...")}
-          rows={5}
-          className="min-h-[120px] w-full resize-y rounded-xl border border-border bg-background px-4 py-3 text-sm leading-7 focus:outline-none focus:ring-2 focus:ring-ring"
           dir={isRtl ? "rtl" : "ltr"}
         />
       </div>

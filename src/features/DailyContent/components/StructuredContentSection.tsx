@@ -1,15 +1,16 @@
 // StructuredContentSection — word studies, practical applications, key themes,
 // cross references, final thoughts, takeaways
 import {
-  GraduationCap,
   ListChecks,
   Sparkles,
   BookMarked,
-  Lightbulb,
 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { CrossReferencePicker } from "./CrossReferencePicker";
+import { WordStudyEditor } from './WordStudyEditor';
+import { parseStudies, serializeStudies, parseTakeaways } from '../helpers/editorContent';
+import { TakeawayEditor } from './TakeawayEditor';
 import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Field {
@@ -41,16 +42,6 @@ interface Props {
 export function StructuredContentSection(p: Props) {
   const fields: Field[] = [
     {
-      label: tt("Strong's Concordance Word Studies"),
-      icon: <GraduationCap className="h-4 w-4 text-teal-500" />,
-      value: p.wordStudies,
-      onChange: p.setWordStudies,
-      placeholder:
-        tt("Immediately | eutheōs — Strong's G2112 | Means at once or without delay."),
-      hint: tt("One study per line: Word | Strong's ID | Definition"),
-      rows: 8,
-    },
-    {
       label: tt("Practical Applications"),
       icon: <ListChecks className="h-4 w-4 text-green-500" />,
       value: p.practicalApplications,
@@ -76,17 +67,10 @@ export function StructuredContentSection(p: Props) {
       placeholder: tt("Summarize the enduring truth of this verse..."),
       rows: 4,
     },
-    {
-      label: tt("Takeaways"),
-      icon: <Lightbulb className="h-4 w-4 text-violet-500" />,
-      value: p.takeaways,
-      onChange: p.setTakeaways,
-      placeholder: tt("God expects prompt obedience to clear direction."),
-      hint: tt("One takeaway per line"),
-    },
   ];
   return (
     <div className="space-y-5" dir={p.isRtl ? "rtl" : "ltr"}>
+      <WordStudyEditor value={parseStudies(p.wordStudies)} onChange={rows => p.setWordStudies(serializeStudies(rows))} />
       {fields.map((f) => (
         <div key={f.label} className="space-y-2">
           <Label className="flex items-center gap-2">
@@ -104,6 +88,7 @@ export function StructuredContentSection(p: Props) {
           />
         </div>
       ))}
+      <TakeawayEditor value={parseTakeaways(p.takeaways)} onChange={items => p.setTakeaways(JSON.stringify(items))} />
       <CrossReferencePicker
         value={p.crossReferences}
         onChange={p.setCrossReferences}

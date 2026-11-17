@@ -34,6 +34,7 @@ interface ComboboxProps {
   searchPlaceholder?: string;
   disabled?: boolean;
   width?: string;
+  ariaLabel?: string;
 }
 
 export function Combobox({
@@ -44,6 +45,7 @@ export function Combobox({
   searchPlaceholder = "Search...",
   disabled = false,
   width = "w-[180px]",
+  ariaLabel,
 }: ComboboxProps) {
   const [open, setOpen] = React.useState(false);
 
@@ -67,6 +69,7 @@ export function Combobox({
           type="button"
           variant="outline"
           role="combobox"
+          aria-label={ariaLabel}
           aria-expanded={open}
           className={cn("justify-between text-left truncate", width)}
           disabled={disabled}

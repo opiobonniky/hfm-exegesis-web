@@ -15,6 +15,8 @@ import type {
 } from "../types";
 import { tt } from '@/components/languages/hardcodedTranslate';
 import { routePaths, routes } from "@/components/Routes/routes";
+import { usePassagePreview } from './usePassagePreview';
+import { canonicalBook, parseStudies, parseReferences, validPassage, collectionError, nonEmptyReferences } from '../helpers/editorContent';
 
 const parseTakeaways = (value: unknown): string[] => {
   if (Array.isArray(value)) {
@@ -46,6 +48,7 @@ const EMPTY_FORM: ExplanationForm = {
   bookName: "",
   chapter: "",
   verseNumber: "",
+  verseEnd: "",
   bibleVersion: "BSB",
   exegesis: { explanationText: "", applicationText: "" },
   studyMetadata: {
@@ -83,11 +86,12 @@ export function useAddExplanation() {
   const [translationOptions, setTranslationOptions] = useState<Translation[]>(
     [],
   );
-  const [selectedVerseText, setSelectedVerseText] = useState("");
-  const [verseTextLoading, setVerseTextLoading] = useState(false);
-  const [chapterVerseCount, setChapterVerseCount] = useState(0);
-  const [verseOptions, setVerseOptions] = useState<number[]>([]);
-  const [verseOptionsLoading, setVerseOptionsLoading] = useState(false);
+  const preview = usePassagePreview(form.bookName, form.chapter, form.verseNumber, form.verseEnd, form.bibleVersion);
+  const selectedVerseText = preview.text;
+  const verseTextLoading = preview.loading;
+  const chapterVerseCount = preview.verses.length;
+  const verseOptions = preview.verseNumbers;
+  const verseOptionsLoading = preview.loading;
   const [crossRefVerseOptions, setCrossRefVerseOptions] = useState<
     Record<number, { key: string; verses: number[] }>
   >({});
@@ -202,10 +206,8 @@ export function useAddExplanation() {
 
   const referenceComplete = useMemo(
     () =>
-      form.bookName.trim() !== "" &&
-      Number(form.chapter) >= 1 &&
-      Number(form.verseNumber) >= 1,
-    [form.bookName, form.chapter, form.verseNumber],
+      validPassage(form.bookName, form.chapter, form.verseNumber, form.verseEnd) && !!preview.text && !preview.loading && !preview.error,
+    [form.bookName, form.chapter, form.verseNumber, form.verseEnd, preview.text, preview.loading, preview.error],
   );
 
   const exegesisComplete = useMemo(
@@ -285,7 +287,7 @@ export function useAddExplanation() {
         const validCurrent = (translations || []).some(
           (item) => item.id === form.bibleVersion,
         );
-        if (!form.bibleVersion || !validCurrent) {
+        if (!form.bibleVersion || (!validCurrent && !isEditMode)) {
           const fallback =
             (translations || []).find((item) => item.id === "BSB") ??
             translations?.[0];
@@ -303,94 +305,6 @@ export function useAddExplanation() {
       active = false;
     };
   }, [form.bibleVersion]);
-
-  useEffect(() => {
-    const bookName = form.bookName.trim();
-    const chapter = Number(form.chapter);
-    const verseNumber = Number(form.verseNumber);
-    const bibleVersion = form.bibleVersion?.trim();
-
-    if (
-      !bookName ||
-      !bibleVersion ||
-      !Number.isFinite(chapter) ||
-      chapter < 1
-    ) {
-      setSelectedVerseText("");
-      setChapterVerseCount(0);
-      setVerseOptions([]);
-      return;
-    }
-
-    const safeChapter = Math.min(
-      Math.max(Math.trunc(chapter), 1),
-      maxChapterNumber,
-    );
-    if (safeChapter !== chapter) {
-      setForm((prev) => ({ ...prev, chapter: String(safeChapter) }));
-    }
-
-    let active = true;
-    setVerseTextLoading(true);
-    setVerseOptionsLoading(true);
-    bibleApi
-      .getVerses(bibleVersion, bookName, safeChapter)
-      .then((chapterData) => {
-        if (!active) return;
-        const verses = chapterData?.verses ?? [];
-        const totalVerses = verses.length;
-        setChapterVerseCount(totalVerses);
-        setVerseOptions(verses.map((v) => v.verseNumber));
-
-        if (Number.isFinite(verseNumber) && verseNumber > totalVerses) {
-          setForm((prev) => ({
-            ...prev,
-            verseNumber: String(totalVerses || 1),
-          }));
-        }
-
-        if (
-          !Number.isFinite(verseNumber) ||
-          verseNumber < 1 ||
-          verseNumber > totalVerses
-        ) {
-          setSelectedVerseText("");
-          return;
-        }
-
-        return bibleApi.getVerse(
-          bibleVersion,
-          bookName,
-          safeChapter,
-          verseNumber,
-        );
-      })
-      .then((verse) => {
-        if (!active) return;
-        setSelectedVerseText(verse?.text || "");
-      })
-      .catch(() => {
-        if (!active) return;
-        setSelectedVerseText("");
-        setVerseOptions([]);
-      })
-      .finally(() => {
-        if (active) {
-          setVerseTextLoading(false);
-          setVerseOptionsLoading(false);
-        }
-      });
-
-    return () => {
-      active = false;
-    };
-  }, [
-    form.bookName,
-    form.chapter,
-    form.verseNumber,
-    form.bibleVersion,
-    maxChapterNumber,
-  ]);
 
   // Load existing explanation in edit mode
   useEffect(() => {
@@ -411,9 +325,10 @@ export function useAddExplanation() {
         if (res?.returnCode === 200 && res.returnData) {
           const d = res.returnData;
           setForm({
-            bookName: d.bookName || "",
+            bookName: canonicalBook(d.bookName || ''),
             chapter: String(d.chapter || ""),
             verseNumber: String(d.verseNumber || ""),
+            verseEnd: String(d.verseEnd || ''),
             bibleVersion: d.bibleVersion || "BSB",
             exegesis: d.exegesis || {
               explanationText: "",
@@ -427,9 +342,9 @@ export function useAddExplanation() {
               finalThoughts: d.studyMetadata?.finalThoughts || "",
               takeaways: parseTakeaways(d.studyMetadata?.takeaways),
             },
-            wordStudies: d.wordStudies || [],
+            wordStudies: parseStudies(d.wordStudies).map((row, sortOrder) => ({ ...row, sortOrder })),
             practicalApps: d.practicalApps || [],
-            crossReferences: d.crossReferences || [],
+            crossReferences: parseReferences(d.crossReferences).map((row, sortOrder) => ({ ...row, commentary: row.commentary || '', sortOrder })),
             themes: d.themes || [],
           });
           setExistingFound(true);
@@ -448,7 +363,12 @@ export function useAddExplanation() {
 
   const updateField = useCallback(
     <K extends keyof ExplanationForm>(key: K, value: ExplanationForm[K]) => {
-      setForm((prev) => ({ ...prev, [key]: value }));
+      setForm((prev) => {
+        if (key === 'bookName') return { ...prev, bookName: canonicalBook(String(value)), chapter: '', verseNumber: '', verseEnd: '' };
+        if (key === 'chapter') return { ...prev, chapter: String(value), verseNumber: '', verseEnd: '' };
+        if (key === 'verseNumber') return { ...prev, verseNumber: String(value), verseEnd: '' };
+        return { ...prev, [key]: value };
+      });
     },
     [],
   );
@@ -592,45 +512,6 @@ export function useAddExplanation() {
     [updateCrossRef],
   );
 
-  // Load verse options for cross references once book+chapter are set.
-  // Cached by the (book:chapter) key so changing book/chapter refetches.
-  useEffect(() => {
-    let active = true;
-    form.crossReferences.forEach((entry, index) => {
-      if (!entry.bookName || !entry.chapter) return;
-      const key = `${entry.bookName}:${entry.chapter}`;
-      if (crossRefVerseOptions[index]?.key === key) return;
-      const translation = form.bibleVersion?.trim() || "Berean";
-      setCrossRefVerseLoading((cur) => ({ ...cur, [index]: true }));
-      bibleApi
-        .getVerses(translation, entry.bookName, entry.chapter)
-        .then((vd) => {
-          if (!active) return;
-          setCrossRefVerseOptions((cur) => ({
-            ...cur,
-            [index]: {
-              key,
-              verses: (vd?.verses || []).map((v) => v.verseNumber),
-            },
-          }));
-        })
-        .catch(() => {
-          if (!active) return;
-          setCrossRefVerseOptions((cur) => ({
-            ...cur,
-            [index]: { key, verses: [] },
-          }));
-        })
-        .finally(() => {
-          if (active)
-            setCrossRefVerseLoading((cur) => ({ ...cur, [index]: false }));
-        });
-    });
-    return () => {
-      active = false;
-    };
-  }, [form.crossReferences, form.bibleVersion, crossRefVerseOptions]);
-
   // Themes
   const addTheme = useCallback(() => {
     setForm((prev) => ({
@@ -655,10 +536,9 @@ export function useAddExplanation() {
     });
   }, []);
 
-  const isValid =
-    form.bookName.trim() !== "" &&
-    Number(form.chapter) >= 1 &&
-    Number(form.verseNumber) >= 1 &&
+  const richContentError = collectionError(form.wordStudies, form.crossReferences);
+  const isValid = !richContentError &&
+    referenceComplete &&
     form.exegesis.explanationText.trim().length >= 20;
 
   const handleSave = useCallback(async () => {
@@ -669,12 +549,13 @@ export function useAddExplanation() {
         bookName: form.bookName,
         chapter: Number(form.chapter),
         verseNumber: Number(form.verseNumber),
+        verseEnd: form.verseEnd ? Number(form.verseEnd) : null,
         bibleVersion: form.bibleVersion,
         exegesis: form.exegesis,
-        studyMetadata: form.studyMetadata,
+        studyMetadata: { ...form.studyMetadata, takeaways: form.studyMetadata.takeaways.map(item => item.trim()).filter(Boolean) },
         wordStudies: form.wordStudies,
         practicalApps: form.practicalApps,
-        crossReferences: form.crossReferences,
+        crossReferences: nonEmptyReferences(form.crossReferences).map((row, sortOrder) => ({ ...row, sortOrder })),
         themes: form.themes,
       };
       if (existingFound && existingId) {
@@ -712,7 +593,7 @@ export function useAddExplanation() {
     } finally {
       setSaving(false);
     }
-  }, [form, isValid, saving, existingFound, toast, navigate]);
+  }, [form, isValid, saving, existingFound, existingId, toast, navigate]);
 
   const goBack = useCallback(
     () => navigate("/admin/verse-explanations"),
@@ -735,6 +616,7 @@ export function useAddExplanation() {
       completionPercent,
       canAdvanceFromCurrent,
       isValid,
+      richContentError,
       translationOptions,
       sortedTranslationOptions,
       bookOptions,
@@ -745,6 +627,8 @@ export function useAddExplanation() {
       crossReferenceChapterOptions,
       crossReferenceVerseLoading,
       selectedVerseText,
+      passageError: preview.error,
+      retryPassage: preview.retry,
       verseTextLoading,
       maxChapterNumber,
       maxVerseNumber,
