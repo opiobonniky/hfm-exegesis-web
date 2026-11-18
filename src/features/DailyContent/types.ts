@@ -458,10 +458,7 @@ export interface ExplanationForm {
 
 export interface AddExplanationHeaderBarProps {
   isEditMode: boolean;
-  isValid: boolean;
-  saving: boolean;
   goBack: () => void;
-  handleSave: () => void;
 }
 
 export interface AddExplanationProgressCardProps {

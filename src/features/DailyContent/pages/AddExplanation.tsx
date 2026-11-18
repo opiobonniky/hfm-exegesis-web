@@ -12,10 +12,7 @@ export default function AddExplanationPage() {
     <div className="min-h-screen bg-background text-foreground mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:py-8">
       <AddExplanationHeaderBar
         isEditMode={data.isEditMode}
-        isValid={data.isValid}
-        saving={data.saving}
         goBack={actions.goBack}
-        handleSave={actions.handleSave}
       />
       {data.checkingExisting ? <p role="status" className="my-4 rounded-xl border bg-muted/30 p-4 text-sm">{tt('Checking for a saved explanation…')}</p> :
         data.lookupError ? <div role="alert" className="my-4 rounded-xl border border-destructive/30 p-4 text-sm">

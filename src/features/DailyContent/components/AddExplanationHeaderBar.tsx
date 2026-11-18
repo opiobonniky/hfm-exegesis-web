@@ -1,9 +1,9 @@
-import { ArrowLeft, CheckCircle2, Loader2, Save } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { AddExplanationHeaderBarProps } from "../types";
 import { tt } from '@/components/languages/hardcodedTranslate';
 
-export function AddExplanationHeaderBar({ isEditMode, isValid, saving, goBack, handleSave }: AddExplanationHeaderBarProps) {
+export function AddExplanationHeaderBar({ isEditMode, goBack }: AddExplanationHeaderBarProps) {
   return (
     <div className="sticky top-0 z-20 border-b border-border bg-background/80 backdrop-blur-xl">
       <div className="mx-auto max-w-6xl px-4 py-4 sm:px-6">
@@ -22,10 +22,6 @@ export function AddExplanationHeaderBar({ isEditMode, isValid, saving, goBack, h
 
           <div className="flex items-center gap-2 self-start lg:self-auto">
             <Button variant="outline" onClick={goBack}>{tt("Cancel")}</Button>
-            <Button onClick={handleSave} disabled={!isValid || saving} className="gap-2">
-              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-              {isEditMode ? tt("Update") : tt("Create")}
-            </Button>
           </div>
         </div>
       </div>

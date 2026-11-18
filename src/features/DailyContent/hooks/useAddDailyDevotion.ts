@@ -14,7 +14,7 @@ import {
 import { parseStructuredField } from "../helpers/contentDetailHelpers";
 import { getDailyDevotionVerse, getDailyDevotionVerses, saveDailyDevotion } from "../services/add-daily-content-service";
 import { tt } from '@/components/languages/hardcodedTranslate';
-import { canonicalBook, parseStudies, serializeStudies, parseReferences, serializeReferences, parseTakeaways, nonEmptyReferences } from '../helpers/editorContent';
+import { canonicalBook, parseStudies, serializeStudies, parseReferences, serializeReferences, parseTakeaways, nonEmptyReferences, nonEmptyStudies } from '../helpers/editorContent';
 
 export function useAddDailyDevotion() {
   const { t, isRtl, lang } = useLanguage();
@@ -201,7 +201,7 @@ export function useAddDailyDevotion() {
       backgroundAuthor: backgroundAuthor || null,
       backgroundBook: backgroundBook || null,
       backgroundContext: backgroundContext || null,
-      wordStudies: wordStudies || null,
+      wordStudies: serializeStudies(nonEmptyStudies(parseStudies(wordStudies))),
       practicalApplications: practicalApplications || null,
       keyThemes: keyThemes || null,
       crossReferences: serializeReferences(nonEmptyReferences(parseReferences(crossReferences))) || null,

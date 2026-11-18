@@ -6,7 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { sendPostRequest } from "@/services/api";
 import { usePassagePreview } from './usePassagePreview';
-import { canonicalBook, parseReferences, serializeReferences, parseStudies, serializeStudies, validPassage, collectionError, parseTakeaways, nonEmptyReferences } from '../helpers/editorContent';
+import { canonicalBook, parseReferences, serializeReferences, parseStudies, serializeStudies, validPassage, collectionError, parseTakeaways, nonEmptyReferences, nonEmptyStudies } from '../helpers/editorContent';
 import { routes } from "@/components/Routes/routes";
 import {
   getBooksByTestament,
@@ -462,7 +462,7 @@ export function useAddDailyVerse() {
       backgroundAuthor: backgroundAuthor || undefined,
       backgroundBook: backgroundBook || undefined,
       backgroundContext: backgroundContext || undefined,
-      wordStudies: wordStudies || undefined,
+      wordStudies: serializeStudies(nonEmptyStudies(parseStudies(wordStudies))),
       practicalApplications: practicalApplications || undefined,
       keyThemes: keyThemes || undefined,
       crossReferences: serializeReferences(nonEmptyReferences(parseReferences(crossReferences))),

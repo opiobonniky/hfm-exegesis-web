@@ -123,17 +123,16 @@ describe('cross reference editor', () => {
   });
 });
 
-it('looks up Strong’s data without overwriting editorial text', async () => {
-  mocks.strongs.mockResolvedValue({ originalWord: 'רָפָה', transliteration: 'raphah', shortDefinition: 'Let go', fullDefinition: 'Cease striving' });
+it('renders word study fields and accepts Strong’s ID input without a Look up button', () => {
   function Harness() {
     const [value, setValue] = useState<StudyEntry[]>([{ surfaceText: 'Be still', strongsId: 'H7503', customDefinition: 'My contextual definition' }]);
     return <WordStudyEditor value={value} onChange={setValue} />;
   }
   render(<Harness />);
-  fireEvent.click(screen.getByRole('button', { name: 'Look up' }));
-  await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('raphah'));
-  expect(screen.getByDisplayValue('My contextual definition')).toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: /look up/i })).not.toBeInTheDocument();
+  expect(screen.getByDisplayValue('H7503')).toBeInTheDocument();
   expect(screen.getByDisplayValue('Be still')).toBeInTheDocument();
+  expect(screen.getByDisplayValue('My contextual definition')).toBeInTheDocument();
   fireEvent.click(screen.getByRole('button', { name: 'Add word study' }));
   expect(screen.getAllByRole('textbox')).toHaveLength(6);
 });

@@ -18,7 +18,7 @@ import type {
 import { tt } from '@/components/languages/hardcodedTranslate';
 import { routePaths, routes } from "@/components/Routes/routes";
 import { usePassagePreview } from './usePassagePreview';
-import { canonicalBook, parseStudies, parseReferences, validPassage, collectionError, nonEmptyReferences } from '../helpers/editorContent';
+import { canonicalBook, parseStudies, parseReferences, validPassage, collectionError, nonEmptyReferences, nonEmptyStudies } from '../helpers/editorContent';
 
 const parseTakeaways = (value: unknown): string[] => {
   if (Array.isArray(value)) {
@@ -544,7 +544,7 @@ export function useAddExplanation() {
         bibleVersion: form.bibleVersion,
         exegesis: form.exegesis,
         studyMetadata: { ...form.studyMetadata, takeaways: form.studyMetadata.takeaways.map(item => item.trim()).filter(Boolean) },
-        wordStudies: form.wordStudies,
+        wordStudies: nonEmptyStudies(form.wordStudies),
         practicalApps: form.practicalApps,
         crossReferences: nonEmptyReferences(form.crossReferences).map((row, sortOrder) => ({ ...row, sortOrder })),
         themes: form.themes,

@@ -1,8 +1,26 @@
 import { describe, expect, it } from 'vitest';
-import { parseReferences, serializeReferences, parseStudies, serializeStudies, validPassage, collectionError, nonEmptyReferences, parseTakeaways } from './editorContent';
+import { parseReferences, serializeReferences, parseStudies, serializeStudies, validPassage, collectionError, nonEmptyReferences, parseTakeaways, studyFieldErrors, nonEmptyStudies } from './editorContent';
 import { parseList, parseWordStudies } from './contentDetailHelpers';
 
 describe('legacy daily content compatibility', () => {
+  it.each(['G11', ' g11 ', '', 'H589/H430', 'G11, G12', 'H0853', 'H430a', 'H7503 (Hebrew)'])('accepts optional or valid IDs: %s', strongsId => {
+    const row = { surfaceText: 'Word', strongsId, customDefinition: 'Contextual meaning' };
+    expect(collectionError([row], [])).toBe('');
+    expect(studyFieldErrors(row).strongsId).toBe('');
+  });
+  it('ignores blank optional rows and excludes them only from the saved payload', () => {
+    const row = { surfaceText: ' ', strongsId: '', customDefinition: '' };
+    expect(collectionError([row], [])).toBe('');
+    expect(nonEmptyStudies([row])).toEqual([]);
+    expect(parseStudies(serializeStudies([row]))).toEqual([row]);
+  });
+  it('identifies only the actual invalid fields and the row', () => {
+    const row = { surfaceText: 'Word', strongsId: 'G11', customDefinition: '' };
+    expect(studyFieldErrors(row)).toEqual({ surfaceText: '', strongsId: '', customDefinition: 'Enter the definition or contextual meaning.' });
+    expect(collectionError([row], [])).toBe('Word study 1: Enter the definition or contextual meaning.');
+    expect(studyFieldErrors({ ...row, strongsId: 'no id here' }).strongsId).not.toBe('');
+    expect(studyFieldErrors({ ...row, strongsId: 'no id here' }).surfaceText).toBe('');
+  });
   it('ignores truly empty optional cross references, but identifies the exact incomplete row', () => {
     const rows = parseReferences([{ bookName: '', chapter: 0, verseNumber: 0, referenceText: '', commentary: '' }]);
     expect(collectionError([], rows)).toBe('');

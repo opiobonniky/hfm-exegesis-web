@@ -68,6 +68,14 @@ export const referenceLabel = (row: { bookName: string; chapter: string | number
 export const serializeReferences = (rows: ReferenceEntry[]) => rows.length ? JSON.stringify(rows) : '';
 
 export interface StudyEntry { surfaceText: string; strongsId: string; customDefinition: string; sortOrder?: number }
+/** Deliberately permissive: accepts real-world variants such as `G11`, `g11`,
+ *  zero-padded `H0853`, suffix letters `H430a`, multiple IDs split by
+ *  `/ , ; & +` or a dash, and IDs embedded in extra text. Only input with no
+ *  recognizable Strong's token at all is treated as invalid. */
+export const STRONGS_ID_TOKEN = /\b[HG]0*\d+[a-z]?\b/gi;
+export const STRONGS_ID_ANYWHERE = /[HG]\s*0*\d+[a-z]?/i;
+export const isEmptyStudy = (row: StudyEntry) => !row.surfaceText.trim() && !row.strongsId.trim() && !row.customDefinition.trim();
+export const nonEmptyStudies = (rows: StudyEntry[]) => rows.filter(row => !isEmptyStudy(row));
 export function parseStudies(value: unknown): StudyEntry[] {
   const rows = unpack(value).map(entry => {
     if (entry && typeof entry === 'object') {
@@ -79,7 +87,7 @@ export function parseStudies(value: unknown): StudyEntry[] {
     return { surfaceText, strongsId, customDefinition: definition.join(' | ') };
   });
   return rows.flatMap(row => {
-    const ids = [...new Set(row.strongsId.match(/\b[HG]\d+\b/gi)?.map(id => id.toUpperCase()) || [])];
+    const ids = [...new Set(row.strongsId.match(STRONGS_ID_TOKEN)?.map(id => id.toUpperCase()) || [])];
     if (!ids.length) return [row];
     const transliteration = row.strongsId.match(/^(.*?)\s*[-–—]\s*Strong['’]?s\s+/i)?.[1]?.trim();
     return ids.map(strongsId => ({ ...row, strongsId,
@@ -98,9 +106,21 @@ export function validPassage(book: string, chapter: string | number, start: stri
     (!end || (Number.isInteger(Number(end)) && Number(end) >= Number(start)));
 }
 
+export function studyFieldErrors(row: StudyEntry) {
+  const id = row.strongsId.trim().toUpperCase();
+  if (isEmptyStudy(row)) return { surfaceText: '', strongsId: '', customDefinition: '' };
+  return {
+    surfaceText: row.surfaceText.trim() ? '' : 'Enter the word or surface text.',
+    strongsId: id && !STRONGS_ID_ANYWHERE.test(id) ? 'Use a valid Strong’s ID, for example H7503 or G11, or leave this field empty.' : '',
+    customDefinition: row.customDefinition.trim() ? '' : 'Enter the definition or contextual meaning.',
+  };
+}
+
 export function collectionError(studies: StudyEntry[], references: ReferenceEntry[]) {
-  if (studies.some(row => !row.surfaceText.trim() || !row.customDefinition.trim() || (row.strongsId && !/^[HG][1-9]\d*$/.test(row.strongsId))))
-    return 'Complete each word and definition, and use one valid Strong’s ID per row, or remove the empty word.';
+  for (const [index, row] of studies.entries()) {
+    const error = Object.values(studyFieldErrors(row)).find(Boolean);
+    if (error) return `Word study ${index + 1}: ${error}`;
+  }
   const invalid = references.map(referenceError).find(Boolean);
   if (invalid) return invalid;
   return '';
