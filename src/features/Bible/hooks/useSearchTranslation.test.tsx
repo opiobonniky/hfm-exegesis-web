@@ -33,6 +33,7 @@ describe("Search edition catalogue", () => {
     expect(result.current.showSuggestions).toBe(false);
   });
   it("rejects unavailable explicit editions, but allows selection of a real edition", async () => {
+    localStorage.setItem('preferred_translation', 'Berean');
     const { result } = renderHook(() => useSearchTranslation("en", "Missing"));
     await waitFor(() => expect(result.current.error).toContain("unavailable"));
     expect(result.current.translation).toBeNull();
@@ -40,7 +41,16 @@ describe("Search edition catalogue", () => {
     expect(result.current.translation).toBeNull();
     act(() => result.current.setTranslation("KJV"));
     expect(result.current.error).toBeNull();
-    expect(localStorage.getItem("preferred_translation")).toBe("KJV");
+    expect(localStorage.getItem("preferred_translation")).toBe("Berean");
+  });
+  it('leaves the default unchanged for explicit links and manual search choices', async () => {
+    localStorage.setItem('preferred_translation', 'Berean');
+    const { result } = renderHook(() => useSearchTranslation('en', 'Hindi'));
+    await waitFor(() => expect(result.current.translation).toBe('Hindi'));
+    expect(localStorage.getItem('preferred_translation')).toBe('Berean');
+    act(() => result.current.setTranslation('KJV'));
+    expect(result.current.translation).toBe('KJV');
+    expect(localStorage.getItem('preferred_translation')).toBe('Berean');
   });
   it("does not fall back to English if the current language has no Bible", async () => {
     const { result } = renderHook(() => useSearchTranslation("as", null));

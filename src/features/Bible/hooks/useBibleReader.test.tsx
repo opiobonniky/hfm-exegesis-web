@@ -95,6 +95,7 @@ describe("useBibleReader translation selection", () => {
   });
 
   it("keeps a valid translation supplied by the reader link", async () => {
+    localStorage.setItem('preferred_translation', 'Berean');
     mocks.getTranslations.mockResolvedValue([
       { id: "Berean", name: "Berean", language: "en" },
       { id: "KJV", name: "King James Version", language: "en" },
@@ -113,7 +114,38 @@ describe("useBibleReader translation selection", () => {
         [1, 2, 3],
       );
     });
-    expect(localStorage.getItem("preferred_translation")).toBe("KJV");
+    expect(localStorage.getItem("preferred_translation")).toBe("Berean");
+  });
+
+  it('keeps manual reader edition changes local and uses the Settings default on a fresh visit', async () => {
+    localStorage.setItem('preferred_translation', 'Berean');
+    mocks.getTranslations.mockResolvedValue([
+      { id: 'Berean', name: 'Berean', language: 'en' },
+      { id: 'KJV', name: 'King James Version', language: 'en' },
+    ]);
+    mocks.getVersesBatch.mockResolvedValue(chapterResponse('Scripture'));
+    const reader = renderHook(() => useBibleReader(), { wrapper: wrapper() });
+    await waitFor(() => expect(reader.result.current.data.chapters).toHaveLength(3));
+    act(() => reader.result.current.actions.selectTranslation('KJV'));
+    await waitFor(() => expect(reader.result.current.data.versionId).toBe('KJV'));
+    expect(localStorage.getItem('preferred_translation')).toBe('Berean');
+    reader.unmount();
+    const freshReader = renderHook(() => useBibleReader(), { wrapper: wrapper() });
+    await waitFor(() => expect(freshReader.result.current.data.chapters).toHaveLength(3));
+    expect(freshReader.result.current.data.versionId).toBe('Berean');
+  });
+
+  it('does not persist an automatic language fallback as the Settings default', async () => {
+    localStorage.setItem('preferred_translation', 'KJV');
+    mocks.language = 'fr';
+    mocks.getTranslations.mockResolvedValue([
+      { id: 'KJV', language: 'en' }, { id: 'French', language: 'fr' },
+    ]);
+    mocks.getVersesBatch.mockResolvedValue(chapterResponse('Français'));
+    const { result } = renderHook(() => useBibleReader(), { wrapper: wrapper() });
+    await waitFor(() => expect(result.current.data.chapters).toHaveLength(3));
+    expect(result.current.data.versionId).toBe('French');
+    expect(localStorage.getItem('preferred_translation')).toBe('KJV');
   });
 
   it("switches language and ignores the previous translation response", async () => {

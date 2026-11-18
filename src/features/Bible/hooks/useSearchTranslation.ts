@@ -35,7 +35,7 @@ export function useSearchTranslation(language: string, requested: string | null)
   const setTranslation = useCallback((id: string) => {
     if (!catalog.some(item => item.id === id)) return;
     setTranslationState(id); setError(null);
-    try { localStorage.setItem("preferred_translation", id); } catch { /* optional */ }
+    // Search selection is local to this search; only Settings changes the default.
   }, [catalog]);
   const entry = catalog.find(item => item.id === translation);
   const translations = filterBibleTranslationsByLanguage(catalog, language);

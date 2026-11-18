@@ -30,6 +30,21 @@ it('uses the preferred translation from Settings and resolves the BSB alias', as
   expect(result.current.version).toBe('Berean');
 });
 
+it('keeps editor selections local without changing Settings or other normal-user defaults', async () => {
+  localStorage.setItem('preferred_translation', 'Berean');
+  const settings = renderHook(() => useBibleEditions('en'));
+  const editor = renderHook(() => useBibleEditions('en'));
+  await waitFor(() => expect(editor.result.current.loading).toBe(false));
+  await waitFor(() => expect(settings.result.current.loading).toBe(false));
+  act(() => editor.result.current.setVersion('KJV'));
+  expect(editor.result.current.version).toBe('KJV');
+  expect(settings.result.current.version).toBe('Berean');
+  expect(localStorage.getItem('preferred_translation')).toBe('Berean');
+  const freshPage = renderHook(() => useBibleEditions('en'));
+  await waitFor(() => expect(freshPage.result.current.loading).toBe(false));
+  expect(freshPage.result.current.version).toBe('Berean');
+});
+
 it('ignores an incompatible preference and switches defaults when the UI language changes', async () => {
   localStorage.setItem('preferred_translation', 'French');
   const { result, rerender } = renderHook(({ lang }) => useBibleEditions(lang), { initialProps: { lang: 'en' } });

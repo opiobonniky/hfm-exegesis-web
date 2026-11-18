@@ -124,11 +124,7 @@ export function useBibleReader() {
 
         setAvailableTranslations(list);
         setVersionId(nextVersion);
-        try {
-          localStorage.setItem("preferred_translation", nextVersion);
-        } catch {
-          // The reader still works when storage is unavailable.
-        }
+        // Reader links and language fallbacks are page-local, not Settings edits.
         setSearchParamsRef.current(
           (current) => {
             if (current.get("translation") === nextVersion) return current;
@@ -356,11 +352,7 @@ export function useBibleReader() {
       setHeadingsByChapter({});
       setVersionId(nextVersion);
       setLoadStartChapter(selectedChapter);
-      try {
-        localStorage.setItem("preferred_translation", nextVersion);
-      } catch {
-        // The in-memory selection remains usable without storage.
-      }
+      // Remember this page's choice in its URL, never overwrite the Settings default.
       setSearchParams((current) => {
         const next = new URLSearchParams(current);
         next.set("translation", nextVersion);
