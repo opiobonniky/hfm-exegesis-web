@@ -5,6 +5,7 @@ import { CrossReferencePicker } from './CrossReferencePicker';
 import { WordStudyEditor } from './WordStudyEditor';
 import { usePassagePreview } from '../hooks/usePassagePreview';
 import type { StudyEntry } from '../helpers/editorContent';
+import { PassageFields, type PassageSelection } from './PassageFields';
 
 const mocks = vi.hoisted(() => ({ verses: vi.fn(), strongs: vi.fn() }));
 vi.mock('@/services/bibleApi', () => ({ bibleApi: { getVerses: (...args: unknown[]) => mocks.verses(...args) } }));
@@ -15,6 +16,36 @@ vi.mock('@/components/ui/combobox', () => ({ Combobox: (p: { options: { value: s
 }));
 const chapter = { verses: Array.from({ length: 14 }, (_, i) => ({ verseNumber: i + 1, text: `Text ${i + 1}` })) };
 beforeEach(() => { vi.clearAllMocks(); mocks.verses.mockResolvedValue(chapter); });
+
+describe('passage selection controls', () => {
+  function Harness({ allowRange = true }: { allowRange?: boolean }) {
+    const [value, setValue] = useState<PassageSelection>({ bookName: '', chapter: '', verseNumber: '', verseEnd: '' });
+    return <PassageFields value={value} onChange={setValue} verseNumbers={[1, 2, 3]} allowRange={allowRange} />;
+  }
+  it('shows the mode only after chapter, between chapter and verse, and resets on book change', () => {
+    render(<Harness />);
+    expect(screen.queryByRole('group', { name: 'Passage selection mode' })).not.toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText('Book'), { target: { value: 'Genesis' } });
+    expect(screen.queryByRole('button', { name: 'Verse range' })).not.toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText('Chapter'), { target: { value: '1' } });
+    const group = screen.getByRole('group', { name: 'Passage selection mode' });
+    expect(screen.getByLabelText('Chapter').compareDocumentPosition(group) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(group.compareDocumentPosition(screen.getByLabelText('Verse')) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Verse range' }));
+    expect(screen.getByLabelText('Through verse')).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText('Book'), { target: { value: 'Exodus' } });
+    expect(screen.queryByRole('group')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Through verse')).not.toBeInTheDocument();
+  });
+  it('never offers range mode on a single-verse-only reference', () => {
+    render(<Harness allowRange={false} />);
+    fireEvent.change(screen.getByLabelText('Book'), { target: { value: 'Genesis' } });
+    fireEvent.change(screen.getByLabelText('Chapter'), { target: { value: '1' } });
+    expect(screen.queryByRole('button', { name: 'Single verse' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Verse range' })).not.toBeInTheDocument();
+    expect(screen.getByLabelText('Verse')).toBeInTheDocument();
+  });
+});
 
 describe('passage previews', () => {
   it('automatically quotes every verse in Genesis 3:6-10', async () => {

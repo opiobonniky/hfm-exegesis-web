@@ -54,20 +54,22 @@ export function getPreferredBibleId(langCode: string): string {
 }
 
 export function getBibleCatalogLanguage(langCode: string): string {
-  return langCode === "fil" ? "tl" : langCode;
+  const code = langCode.toLowerCase().split(/[-_]/)[0];
+  const names: Record<string, string> = { english: 'en', french: 'fr', spanish: 'es', arabic: 'ar', german: 'de', portuguese: 'pt', hindi: 'hi', tagalog: 'tl' };
+  return code === "fil" ? "tl" : names[code] || code;
 }
 
 /** Restrict picker options to the UI language, using catalog metadata first. */
-export function filterBibleTranslationsByLanguage<T extends { id: string; language?: string }>(
+export function filterBibleTranslationsByLanguage<T extends { id: string; language?: string | null; languageName?: string | null }>(
   translations: T[],
   langCode: string,
 ): T[] {
   const language = getBibleCatalogLanguage(langCode.toLowerCase());
-  const legacyIds = FREE_BIBLE_IDS_BY_LANGUAGE[langCode.toLowerCase()] || [];
+  const legacyIds = FREE_BIBLE_IDS_BY_LANGUAGE[language] || [];
   return translations.filter((translation) =>
-    translation.language
-      ? getBibleCatalogLanguage(translation.language.toLowerCase()) === language
-      : legacyIds.includes(translation.id),
+    translation.language || translation.languageName
+      ? getBibleCatalogLanguage(translation.language || translation.languageName || '') === language
+      : legacyIds.includes(translation.id === 'BSB' ? 'Berean' : translation.id),
   );
 }
 

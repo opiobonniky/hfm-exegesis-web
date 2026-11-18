@@ -56,7 +56,7 @@ export default function Settings() {
             <Card className="border-none shadow-none bg-transparent">
               <CardContent className="p-0">
                 <PreferencesTab fontSize={h.readingFontSize} onFontSizeChange={h.handleFontSizeChange}
-                  translation={h.preferredTranslation} onTranslationChange={h.handleTranslationChange} />
+                   translation={h.preferredTranslation} onTranslationChange={h.handleTranslationChange} translationOptions={h.translationOptions} />
               </CardContent>
             </Card>
           </TabsContent>

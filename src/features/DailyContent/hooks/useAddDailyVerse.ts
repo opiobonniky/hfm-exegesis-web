@@ -12,7 +12,7 @@ import {
   getBooksByTestament,
   getChaptersForBook,
 } from "@/utilities/bibleUtils";
-import { BIBLE_VERSIONS } from "@/assets/bibleVersion/json/bibleVersions";
+import { useBibleEditions } from '@/hooks/useBibleEditions';
 import type { DailyVersePayload } from "../types";
 import { parseStructuredField } from "../helpers/contentDetailHelpers";
 import { tt } from '@/components/languages/hardcodedTranslate';
@@ -107,7 +107,7 @@ interface VerseExplanationRecord {
 
 export function useAddDailyVerse() {
   const { toast } = useToast();
-  const { t, isRtl } = useLanguage();
+  const { t, isRtl, lang } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
   const editingVerse = location.state?.verse as Record<string, any> | undefined;
@@ -137,9 +137,11 @@ export function useAddDailyVerse() {
     initialVerseNumber?.toString() || "",
   );
   const [verseEnd, setVerseEnd] = useState(String(editingVerse?.verseEnd || sourceExplanation?.verseEnd || ''));
-  const [bibleVersion, setBibleVersion] = useState(
-    editingVerse?.bibleVersion || sourceExplanation?.bibleVersion || "BSB",
-  );
+  const editions = useBibleEditions(lang, {
+    initialVersion: editingVerse?.bibleVersion || sourceExplanation?.bibleVersion,
+    preserveVersion: !!(editingVerse || sourceExplanation),
+  });
+  const { version: bibleVersion, setVersion: setBibleVersion } = editions;
   const [published, setPublished] = useState(editingVerse?.isPublished ?? editingVerse?.published ?? true);
   const [selectedDate, setSelectedDate] = useState<Date>(() => {
     const d = editingVerse?.displayDate
@@ -470,6 +472,9 @@ export function useAddDailyVerse() {
       displayTime: selectedDate.toISOString(),
       published,
       ...(isEditing ? { id: editingVerse?.id } : {}),
+      ...(isEditing && typeof editingVerse?.sharedStudyVersion === "number"
+        ? { sharedStudyVersion: editingVerse.sharedStudyVersion }
+        : {}),
     };
     try {
       const res = await sendPostRequest("admin", "add-daily-verse", payload);
@@ -480,11 +485,22 @@ export function useAddDailyVerse() {
         });
         setTimeout(() => navigate(routes.adminDailyContent.path), 2000);
       } else if (res.returnCode === 409) {
-        setConflictDialog({
-          open: true,
-          conflict: res.returnData?.conflicts?.[0],
-          payload,
-        });
+        const conflict = res.returnData?.conflicts?.[0];
+        if (conflict) {
+          setConflictDialog({
+            open: true,
+            conflict,
+            payload,
+          });
+        } else {
+          toast({
+            title: tt("Content changed"),
+            description:
+              res.returnMessage ||
+              tt("This passage was updated elsewhere. Reload before saving."),
+            variant: "destructive",
+          });
+        }
       } else {
         toast({
           title: t.dailyVerse.toastSaveFailedDesc,
@@ -605,6 +621,7 @@ export function useAddDailyVerse() {
     verseNumbers: preview.verseNumbers,
     richContentError,
     bibleVersion,
+    bibleVersionOptions: editions.options,
     setBibleVersion,
     published,
     setPublished,

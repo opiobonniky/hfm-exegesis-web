@@ -7,6 +7,8 @@ import { prologueToForm } from '../services/bookProloguesApi';
 const mocks = vi.hoisted(() => ({ params: {} as { bookName?: string }, save: vi.fn(), fetch: vi.fn(), navigate: vi.fn(), toast: vi.fn() }));
 vi.mock('react-router-dom', () => ({ useNavigate: () => mocks.navigate, useParams: () => mocks.params }));
 vi.mock('@/hooks/use-toast', () => ({ useToast: () => ({ toast: mocks.toast }) }));
+vi.mock('@/components/languages/languageProvider', () => ({ useLanguage: () => ({ lang: 'en' }) }));
+vi.mock('@/services/bibleApi', () => ({ bibleApi: { getTranslations: vi.fn().mockResolvedValue([{ id: 'Berean', language: 'en', name: 'Berean Standard Bible', shortName: 'BSB' }]) } }));
 vi.mock('@/components/languages/hardcodedTranslate', () => ({ tt: (text: string) => text }));
 vi.mock('../services/bookProloguesApi', async importOriginal => ({ ...await importOriginal<typeof import('../services/bookProloguesApi')>(), fetchBookPrologue: mocks.fetch, upsertBookPrologue: mocks.save }));
 vi.mock('@/components/ui/combobox', () => ({ Combobox: ({ options, value, onChange, disabled, searchPlaceholder }: { options: { value: string; label: string }[]; value: string; onChange: (value: string) => void; disabled: boolean; searchPlaceholder: string }) => <select aria-label={searchPlaceholder} value={value} onChange={event => onChange(event.target.value)} disabled={disabled}><option value="">Select a Bible book</option>{options.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}</select> }));

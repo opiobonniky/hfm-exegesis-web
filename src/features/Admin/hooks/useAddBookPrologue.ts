@@ -14,6 +14,8 @@ import {
 import { fetchBookPrologue, upsertBookPrologue } from "../services/bookProloguesApi";
 import type { KeyScriptureEntry, PrologueEditorForm, PrologueStepId, AddBookPrologueModel } from "../types";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { useBibleEditions } from '@/hooks/useBibleEditions';
+import { useLanguage } from '@/components/languages/languageProvider';
 
 const cloneEmpty = (): PrologueEditorForm => ({
   ...PROLOGUE_FORM_EMPTY,
@@ -34,6 +36,8 @@ const toDisplayReference = (entry: Pick<KeyScriptureEntry, "bookName" | "chapter
 };
 
 export function useAddBookPrologue() {
+  const { lang } = useLanguage();
+  const editions = useBibleEditions(lang);
   const { toast } = useToast();
   const navigate = useNavigate();
   const params = useParams<{ bookName?: string }>();
@@ -178,13 +182,13 @@ export function useAddBookPrologue() {
           bookName: "",
           chapter: null,
           verse: null,
-          translation: "Berean",
+          translation: editions.version,
           reference: "",
           text: "",
         },
       ],
     }));
-  }, []);
+  }, [editions.version]);
 
   const updateKeyScripture = useCallback(
     (index: number, patch: Partial<KeyScriptureEntry>) => {

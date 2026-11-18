@@ -6,6 +6,7 @@ import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { routes } from "@/components/Routes/routes";
+import { useBibleEditions } from '@/hooks/useBibleEditions';
 import {
   getBooksByTestament,
   getChaptersForBook,
@@ -16,7 +17,7 @@ import { tt } from '@/components/languages/hardcodedTranslate';
 import { canonicalBook, parseStudies, serializeStudies, parseReferences, serializeReferences, parseTakeaways, nonEmptyReferences } from '../helpers/editorContent';
 
 export function useAddDailyDevotion() {
-  const { t, isRtl } = useLanguage();
+  const { t, isRtl, lang } = useLanguage();
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
@@ -32,7 +33,8 @@ export function useAddDailyDevotion() {
   const [book, setBook] = useState(canonicalBook(editingDevotion?.bookName || ""));
   const [chapter, setChapter] = useState(editingDevotion?.chapter?.toString() || "");
   const [verseNumber, setVerseNumber] = useState(editingDevotion?.verseNumber?.toString() || "");
-  const [bibleVersion, setBibleVersion] = useState(editingDevotion?.bibleVersion || "BSB");
+  const editions = useBibleEditions(lang, { initialVersion: editingDevotion?.bibleVersion, preserveVersion: isEditing });
+  const { version: bibleVersion, setVersion: setBibleVersion } = editions;
   const [verseText, setVerseText] = useState("");
   const [isVerseLoading, setIsVerseLoading] = useState(false);
 
@@ -125,12 +127,7 @@ export function useAddDailyDevotion() {
     })),
     [chapters],
   );
-  const bibleVersionOptions = useMemo(() => [
-    { value: "BSB", label: tt("BSB (Berean Study Bible)") },
-    { value: "KJV", label: tt("KJV (King James)") },
-    { value: "ESV", label: tt("ESV") },
-    { value: "NIV", label: tt("NIV") },
-  ], []);
+  const bibleVersionOptions = editions.options;
 
   // Set verse text reliably once a verse is selected (from the cached chapter).
   useEffect(() => {
@@ -193,6 +190,9 @@ export function useAddDailyDevotion() {
       displayTime: selectedDate.toISOString(),
       published,
       ...(isEditing ? { id: editingDevotion?.id } : {}),
+      ...(isEditing && typeof editingDevotion?.sharedStudyVersion === "number"
+        ? { sharedStudyVersion: editingDevotion.sharedStudyVersion }
+        : {}),
       // Rich content fields
       explanation: explanation || null,
       application: application || null,
@@ -213,6 +213,14 @@ export function useAddDailyDevotion() {
       if (res.returnCode === 200) {
         toast({ title: t.devotions.success, description: t.devotions.devotionSaved });
         navigate(routes.dailyDevotions.path);
+      } else if (res.returnCode === 409) {
+        toast({
+          title: tt("Content changed"),
+          description:
+            res.returnMessage ||
+            tt("This passage was updated elsewhere. Reload before saving."),
+          variant: "destructive",
+        });
       } else {
         toast({ title: t.common.error, description: res.returnMessage || t.devotions.failedToAdd, variant: "destructive" });
       }

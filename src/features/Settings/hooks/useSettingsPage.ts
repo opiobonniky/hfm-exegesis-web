@@ -8,11 +8,13 @@ import { useTheme } from "@/hooks/useTheme";
 import { routes } from "@/components/Routes/routes";
 import { INITIAL_PROFILE, NOTIFICATION_KEYS } from "../constants";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { useBibleEditions } from '@/hooks/useBibleEditions';
 
 export function useSettingsPage() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { t, isRtl } = useLanguage();
+  const { t, isRtl, lang } = useLanguage();
+  const editions = useBibleEditions(lang);
   const { isPayingUser, tierLabel, expiresLabel } = useSubscription();
   const { themeMode, setThemeMode } = useTheme();
   const [loading, setLoading] = useState(true);
@@ -26,7 +28,7 @@ export function useSettingsPage() {
     return n;
   });
   const [readingFontSize, setReadingFontSize] = useState(() => parseInt(localStorage.getItem("reading_font_size") || "18", 10));
-  const [preferredTranslation, setPreferredTranslation] = useState(() => localStorage.getItem("preferred_translation") || "BSB");
+  const preferredTranslation = editions.version;
   useEffect(() => {
     if (!localStorage.getItem(TOKEN_KEY)) { navigate("/login"); return; }
     (async () => {
@@ -83,11 +85,12 @@ export function useSettingsPage() {
   }, [isPayingUser, toast, navigate]);
   const handleProfileChange = (field: string, value: any) => setProfile(p => ({ ...p, [field]: value }));
   const handleFontSizeChange = (v: number) => { setReadingFontSize(v); localStorage.setItem("reading_font_size", String(v)); };
-  const handleTranslationChange = (id: string) => { setPreferredTranslation(id); localStorage.setItem("preferred_translation", id); };
+  const handleTranslationChange = editions.setPreferredVersion;
   return {
     data: {
       loading, isRtl, t, themeMode, isPayingUser, tierLabel, expiresLabel, profile,
       savingProfile, sowerPortalLoading, savingPassword, notifications, readingFontSize, preferredTranslation,
+      translationOptions: editions.options,
     },
     actions: {
       navigate, setThemeMode, handleProfileChange, handleSaveProfile, handleSowerAction,

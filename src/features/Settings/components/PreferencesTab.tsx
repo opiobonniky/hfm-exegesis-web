@@ -6,7 +6,6 @@ import { useTheme } from "@/hooks/useTheme";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { LANGUAGE_NAMES, type Language } from "@/components/languages/type";
 import { getLanguageOptionLabel } from "@/components/languages/localeUtils";
-import { getFreeBibleIdsForLanguage } from "@/features/Bible/services/freeBibleTranslations";
 import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface PreferencesTabProps {
@@ -14,27 +13,12 @@ interface PreferencesTabProps {
   onFontSizeChange: (v: number) => void;
   translation: string;
   onTranslationChange: (v: string) => void;
+  translationOptions: { value: string; label: string }[];
 }
 
-const LEGACY_TRANSLATION_IDS: Record<string, string> = {
-  BSB: "Berean",
-  NKJ: "Tyndale",
-  NKJV: "Tyndale",
-  TL: "Tyndale",
-  LIVING: "Tyndale",
-};
-
-export function PreferencesTab({ fontSize, onFontSizeChange, translation, onTranslationChange }: PreferencesTabProps) {
+export function PreferencesTab({ fontSize, onFontSizeChange, translation, onTranslationChange, translationOptions }: PreferencesTabProps) {
   const { themeMode, setThemeMode } = useTheme();
   const { lang: currentLang, setLanguage, isLoading: languageLoading } = useLanguage();
-  const translationOptions = getFreeBibleIdsForLanguage(currentLang);
-  // Saved values can predate the catalogue clean-up (for example NKJV or the
-  // "BSB" alias). Map them to a free edition so the dropdown never advertises
-  // text that is not available for download.
-  const normalizedTranslation = LEGACY_TRANSLATION_IDS[translation] || translation;
-  const selectedTranslation = translationOptions.includes(normalizedTranslation)
-    ? normalizedTranslation
-    : translationOptions[0];
   return (
     <div className="space-y-4">
       <div className="rounded-2xl bg-card border border-border/50 p-4 sm:p-6 space-y-6">
@@ -83,10 +67,10 @@ export function PreferencesTab({ fontSize, onFontSizeChange, translation, onTran
         <Label>{tt("Font Size:")}{fontSize}px</Label>
         <Slider value={[fontSize]} onValueChange={(v) => onFontSizeChange(v[0])} min={12} max={28} step={1} />
         <Label>{tt("Preferred Translation")}</Label>
-        <Select value={selectedTranslation} onValueChange={onTranslationChange}>
+        <Select value={translation} onValueChange={onTranslationChange} disabled={!translationOptions.length}>
           <SelectTrigger><SelectValue /></SelectTrigger>
           <SelectContent>
-            {translationOptions.map((id) => <SelectItem key={id} value={id}>{id}</SelectItem>)}
+            {translationOptions.map(option => <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>)}
           </SelectContent>
         </Select>
       </div>

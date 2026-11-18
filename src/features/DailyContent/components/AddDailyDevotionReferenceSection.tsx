@@ -56,7 +56,7 @@ export function AddDailyDevotionReferenceSection(props: AddDailyDevotionReferenc
           options={bibleVersionOptions}
           value={bibleVersion}
           onChange={setBibleVersion}
-          placeholder={tt("Select version")}
+          placeholder={bibleVersion || tt("Select version")}
           width="w-full"
         />
       </FormField>

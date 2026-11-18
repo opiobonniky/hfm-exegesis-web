@@ -17,6 +17,7 @@ vi.mock('@/components/languages/languageProvider', async () => {
 vi.mock('@/components/languages/hardcodedTranslate', () => ({ tt: (s: string) => s }));
 vi.mock('@/services/api', () => ({ sendPostRequest: (...args: unknown[]) => mocks.post(...args) }));
 vi.mock('@/services/bibleApi', () => ({ bibleApi: {
+  getTranslations: vi.fn().mockResolvedValue([{ id: 'BSB', shortName: 'BSB', name: 'Berean Standard Bible', language: 'en' }]),
   getVerses: vi.fn().mockResolvedValue({ verses: Array.from({ length: 12 }, (_, i) => ({ verseNumber: i + 1, text: `Text ${i + 1}` })) }),
   getVerse: vi.fn().mockResolvedValue({ text: 'In the beginning.' }),
 } }));
@@ -36,6 +37,7 @@ afterEach(() => { cleanup(); vi.useRealTimers(); });
 async function filledForm(editing = false) {
   if (editing) mocks.state = { verse: {
     id: 9, testament: 'Old', bookName: 'Genesis', chapter: 1, verseNumber: 1,
+    sharedStudyVersion: 3,
     explanation: 'Explanation', application: 'Application', verseIntroduction: 'Introduction',
     learnMore: 'Legacy content must not be submitted by the removed field',
   } };
@@ -94,6 +96,7 @@ describe('daily verse editor', () => {
     expect(payload).toMatchObject({ bookName: 'Genesis', chapter: 1, verseNumber: 1, explanation: 'Explanation' });
     expect(payload).not.toHaveProperty('learnMore');
     if (editing) expect(payload.id).toBe(9);
+    if (editing) expect(payload.sharedStudyVersion).toBe(3);
     act(() => vi.advanceTimersByTime(2000));
     expect(mocks.navigate).toHaveBeenCalledWith('/admin/daily-content');
   });
@@ -127,5 +130,22 @@ describe('daily verse editor', () => {
     expect(mocks.post.mock.calls.at(-1)![2]).not.toHaveProperty('learnMore');
     act(() => vi.advanceTimersByTime(2000));
     expect(mocks.navigate).toHaveBeenCalledWith('/admin/daily-content');
+  });
+
+  it('shows a reload message instead of the date-conflict dialog for a stale shared study', async () => {
+    const { result } = await filledForm();
+    mocks.post.mockResolvedValueOnce({
+      returnCode: 409,
+      returnMessage: 'Shared study changed; reload before saving',
+      returnData: { issues: ['version'] },
+    });
+    await act(async () => { await result.current.actions.handleSave(); });
+    expect(result.current.data.conflictDialog.open).toBe(false);
+    expect(mocks.toast).toHaveBeenCalledWith(expect.objectContaining({
+      title: 'Content changed',
+      description: 'Shared study changed; reload before saving',
+      variant: 'destructive',
+    }));
+    expect(mocks.navigate).not.toHaveBeenCalled();
   });
 });

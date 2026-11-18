@@ -3,7 +3,9 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { sendPostRequest } from "@/services/api";
-import { bibleApi, type Translation } from "@/services/bibleApi";
+import { bibleApi } from "@/services/bibleApi";
+import { useBibleEditions } from '@/hooks/useBibleEditions';
+import { useLanguage } from '@/components/languages/languageProvider';
 import { BIBLE_BOOKS } from "@/data/staticData";
 import { BIBLE_BOOK_CHAPTERS } from "@/features/Bible/constants";
 import { VERSE_EXPLANATION_STEP_ORDER } from "../constants";
@@ -73,19 +75,34 @@ export function useAddExplanation() {
     chapter?: string;
     verseNumber?: string;
   }>();
-  const isEditMode =
+  const routeEditMode =
     !!params.bookName && !!params.chapter && !!params.verseNumber;
 
-  const [form, setForm] = useState<ExplanationForm>(EMPTY_FORM);
+  const { lang } = useLanguage();
+  const [formState, setForm] = useState<ExplanationForm>(() => ({
+    ...EMPTY_FORM,
+    ...(routeEditMode ? {
+      bookName: canonicalBook(decodeURIComponent(params.bookName!)),
+      chapter: params.chapter!, verseNumber: params.verseNumber!,
+    } : {}),
+  }));
   const [loadingExisting, setLoadingExisting] = useState(false);
   const [existingFound, setExistingFound] = useState(false);
+  const editions = useBibleEditions(lang, { preserveVersion: existingFound || routeEditMode });
+  const form = { ...formState, bibleVersion: editions.version };
   const [existingId, setExistingId] = useState<number | null>(null);
+  const [sharedStudyVersion, setSharedStudyVersion] = useState<number | null>(null);
+  const [checkedReference, setCheckedReference] = useState('');
+  const [lookupError, setLookupError] = useState(false);
+  const [lookupAttempt, setLookupAttempt] = useState(0);
+  const referenceKey = form.bookName && form.chapter && form.verseNumber
+    ? `${form.bookName}:${form.chapter}:${form.verseNumber}` : '';
+  const checkingExisting = !!referenceKey && (loadingExisting || checkedReference !== referenceKey);
+  const isEditMode = existingFound;
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] =
     useState<VerseExplanationStepId>("reference");
-  const [translationOptions, setTranslationOptions] = useState<Translation[]>(
-    [],
-  );
+  const translationOptions = editions.translations;
   const preview = usePassagePreview(form.bookName, form.chapter, form.verseNumber, form.verseEnd, form.bibleVersion);
   const selectedVerseText = preview.text;
   const verseTextLoading = preview.loading;
@@ -139,30 +156,7 @@ export function useAddExplanation() {
     [verseOptionsLoading, verseOptions.length],
   );
 
-  const sortedTranslationOptions = useMemo(
-    () =>
-      translationOptions
-        .filter((translation) => translation.languageName || translation.language)
-        .slice()
-        .sort((a, b) => {
-          const aLabel = (a.languageName || a.language || "").toLowerCase();
-          const bLabel = (b.languageName || b.language || "").toLowerCase();
-          if (aLabel === "english") return -1;
-          if (bLabel === "english") return 1;
-          return (
-            aLabel.localeCompare(bLabel) ||
-            (a.name || a.shortName).localeCompare(b.name || b.shortName)
-          );
-        })
-        .map((translation) => ({
-          value: translation.id,
-          label: `${translation.shortName || translation.name} ${
-            translation.year ? `(${translation.year})` : ""
-          }`.trim(),
-          group: translation.languageName || translation.language || "Other",
-        })),
-    [translationOptions],
-  );
+  const sortedTranslationOptions = editions.options;
 
   const crossReferenceBookOptions = bookOptions;
   const crossReferenceChapterOptions = useMemo(
@@ -277,53 +271,31 @@ export function useAddExplanation() {
     [currentStep, referenceComplete, exegesisComplete],
   );
 
+  // Selecting a saved passage edits that record rather than creating a duplicate.
+  // Ignore responses for selections the editor has already moved away from.
   useEffect(() => {
     let active = true;
-    bibleApi
-      .getTranslations()
-      .then((translations) => {
-        if (!active) return;
-        setTranslationOptions(translations || []);
-        const validCurrent = (translations || []).some(
-          (item) => item.id === form.bibleVersion,
-        );
-        if (!form.bibleVersion || (!validCurrent && !isEditMode)) {
-          const fallback =
-            (translations || []).find((item) => item.id === "BSB") ??
-            translations?.[0];
-          if (fallback) {
-            setForm((prev) => ({ ...prev, bibleVersion: fallback.id }));
-          }
-        }
-      })
-      .catch(() => {
-        if (!active) return;
-        setTranslationOptions([]);
-      });
-
-    return () => {
-      active = false;
-    };
-  }, [form.bibleVersion]);
-
-  // Load existing explanation in edit mode
-  useEffect(() => {
-    if (
-      !isEditMode ||
-      !params.bookName ||
-      !params.chapter ||
-      !params.verseNumber
-    )
+    setExistingFound(false);
+    setExistingId(null);
+    setSharedStudyVersion(null);
+    setLookupError(false);
+    if (!referenceKey) {
+      setLoadingExisting(false);
+      setCheckedReference('');
       return;
+    }
     setLoadingExisting(true);
     sendPostRequest("bible", "get-verse-explanation", {
-      bookName: decodeURIComponent(params.bookName),
-      chapter: Number(params.chapter),
-      verseNumber: Number(params.verseNumber),
+      bookName: form.bookName,
+      chapter: Number(form.chapter),
+      verseNumber: Number(form.verseNumber),
+      lang: 'en',
     })
       .then((res) => {
+        if (!active) return;
         if (res?.returnCode === 200 && res.returnData) {
           const d = res.returnData;
+          editions.setVersion(d.bibleVersion || 'BSB');
           setForm({
             bookName: canonicalBook(d.bookName || ''),
             chapter: String(d.chapter || ""),
@@ -348,29 +320,48 @@ export function useAddExplanation() {
             themes: d.themes || [],
           });
           setExistingFound(true);
+          toast({
+            title: tt('Saved explanation loaded'),
+            description: tt('An explanation already exists for this verse. Its saved content and Bible edition are loaded below. Your changes will update the existing explanation, not create a duplicate.'),
+          });
           setExistingId(d.id ?? null);
-        } else {
-          toast({ title: tt("Not found"), variant: "destructive" });
-          navigate("/admin/verse-explanations");
+          setSharedStudyVersion(
+            typeof d.sharedStudyVersion === "number"
+              ? d.sharedStudyVersion
+              : null,
+          );
+        } else if (res?.returnCode !== 404) {
+          setLookupError(true);
         }
       })
       .catch(() => {
-        toast({ title: tt("Failed to load"), variant: "destructive" });
-        navigate("/admin/verse-explanations");
+        if (active) setLookupError(true);
       })
-      .finally(() => setLoadingExisting(false));
-  }, [isEditMode, params.bookName, params.chapter, params.verseNumber]); // eslint-disable-line
+      .finally(() => {
+        if (active) {
+          setLoadingExisting(false);
+          setCheckedReference(referenceKey);
+        }
+      });
+    return () => { active = false; };
+  }, [referenceKey, lookupAttempt]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const updateField = useCallback(
     <K extends keyof ExplanationForm>(key: K, value: ExplanationForm[K]) => {
+      if (key === 'bibleVersion') { editions.setVersion(String(value)); return; }
       setForm((prev) => {
+        // Saved content belongs to its selected passage; never carry its ID or
+        // teaching into the next passage. Preserve manually composed new notes.
+        if (existingFound && ['bookName', 'chapter', 'verseNumber'].includes(key) && value !== prev[key]) {
+          prev = { ...EMPTY_FORM, bookName: prev.bookName, chapter: prev.chapter, verseNumber: prev.verseNumber, bibleVersion: prev.bibleVersion };
+        }
         if (key === 'bookName') return { ...prev, bookName: canonicalBook(String(value)), chapter: '', verseNumber: '', verseEnd: '' };
         if (key === 'chapter') return { ...prev, chapter: String(value), verseNumber: '', verseEnd: '' };
         if (key === 'verseNumber') return { ...prev, verseNumber: String(value), verseEnd: '' };
         return { ...prev, [key]: value };
       });
     },
-    [],
+    [existingFound, editions.setVersion],
   );
 
   const updateNested = useCallback(
@@ -537,7 +528,7 @@ export function useAddExplanation() {
   }, []);
 
   const richContentError = collectionError(form.wordStudies, form.crossReferences);
-  const isValid = !richContentError &&
+  const isValid = !checkingExisting && !lookupError && !richContentError &&
     referenceComplete &&
     form.exegesis.explanationText.trim().length >= 20;
 
@@ -561,12 +552,18 @@ export function useAddExplanation() {
       if (existingFound && existingId) {
         payload.id = existingId;
       }
+      if (sharedStudyVersion != null) {
+        payload.sharedStudyVersion = sharedStudyVersion;
+      }
       const res = await sendPostRequest(
         "bible",
         "add-verse-explanation",
         payload,
       );
       if (res?.returnCode === 200 || res?.status === 200) {
+        if (typeof res?.returnData?.sharedStudyVersion === "number") {
+          setSharedStudyVersion(res.returnData.sharedStudyVersion);
+        }
         toast({
           title: existingFound ? "Updated" : "Created",
           description: `${form.bookName} ${form.chapter}:${form.verseNumber} saved`,
@@ -574,9 +571,17 @@ export function useAddExplanation() {
        
 
         setTimeout(() => {
-          navigate(routePaths.adminDailyContent);
+          navigate(routePaths.adminVerseExplanations);
         }, 500);
 
+      } else if (res?.returnCode === 409 || res?.status === 409) {
+        toast({
+          title: tt("Content changed"),
+          description:
+            res?.returnMessage ||
+            tt("This passage was updated elsewhere. Reload before saving."),
+          variant: "destructive",
+        });
       } else {
         toast({
           title: tt("Error"),
@@ -593,7 +598,7 @@ export function useAddExplanation() {
     } finally {
       setSaving(false);
     }
-  }, [form, isValid, saving, existingFound, existingId, toast, navigate]);
+  }, [form, isValid, saving, existingFound, existingId, sharedStudyVersion, toast, navigate]);
 
   const goBack = useCallback(
     () => navigate("/admin/verse-explanations"),
@@ -604,6 +609,9 @@ export function useAddExplanation() {
     data: {
       form,
       isEditMode,
+      existingFound,
+      checkingExisting,
+      lookupError,
       loadingExisting,
       saving,
       activeTab,
@@ -664,6 +672,7 @@ export function useAddExplanation() {
       updateTheme,
       handleSave,
       goBack,
+      retryExisting: () => setLookupAttempt(attempt => attempt + 1),
     },
   };
 }

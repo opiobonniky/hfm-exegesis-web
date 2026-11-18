@@ -28,9 +28,9 @@ export function ExplanationAutoFillBanner({ model: h }: Props) {
       <div className="flex items-start gap-3">
         <BookOpenCheck className="mt-0.5 h-5 w-5 shrink-0 text-sky-600" />
         <div className="text-sm text-sky-800">
-          <p className="font-medium">{tt("Found an existing explanation for")}{reference}
+          <p className="font-medium">{tt("Saved explanation available")} · {reference}
           </p>
-          <p className="mt-0.5 text-sky-700/80">{tt("Its content was pasted into the matching fields. Review and edit as needed, or overwrite them all with the explanation content.")}</p>
+          <p className="mt-0.5 text-sky-700/80">{tt("Saved teaching has filled empty fields only. Your existing daily content is preserved. Review it below, or choose Overwrite with explanation to replace the matching fields.")}</p>
         </div>
       </div>
       <Button

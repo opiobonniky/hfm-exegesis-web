@@ -5,15 +5,93 @@ import { useAddExplanation } from './useAddExplanation';
 const mocks = vi.hoisted(() => ({ params: {} as Record<string, string>, post: vi.fn(), navigate: vi.fn(), toast: vi.fn() }));
 vi.mock('react-router-dom', () => ({ useParams: () => mocks.params, useNavigate: () => mocks.navigate }));
 vi.mock('@/hooks/use-toast', () => ({ useToast: () => ({ toast: mocks.toast }) }));
+vi.mock('@/components/languages/languageProvider', () => ({ useLanguage: () => ({ lang: 'en' }) }));
 vi.mock('@/components/languages/hardcodedTranslate', () => ({ tt: (s: string) => s }));
-vi.mock('@/components/Routes/routes', () => ({ routePaths: { adminDailyContent: '/admin/daily-content' }, routes: {} }));
+vi.mock('@/components/Routes/routes', () => ({ routePaths: { adminVerseExplanations: '/admin/verse-explanations' }, routes: {} }));
 vi.mock('@/services/api', () => ({ sendPostRequest: (...args: unknown[]) => mocks.post(...args) }));
 vi.mock('@/services/bibleApi', () => ({ bibleApi: {
   getTranslations: vi.fn().mockResolvedValue([{ id: 'BSB', name: 'Berean', shortName: 'BSB', language: 'English' }]),
   getVerses: vi.fn().mockResolvedValue({ verses: Array.from({ length: 14 }, (_, i) => ({ verseNumber: i + 1, text: `Text ${i + 1}` })) }),
 } }));
-beforeEach(() => { vi.clearAllMocks(); mocks.params = {}; mocks.post.mockResolvedValue({ returnCode: 200 }); });
+beforeEach(() => {
+  vi.clearAllMocks(); mocks.params = {};
+  mocks.post.mockImplementation((_module, action) => Promise.resolve({ returnCode: action === 'get-verse-explanation' ? 404 : 200 }));
+});
 afterEach(() => { cleanup(); vi.useRealTimers(); });
+
+const savedExplanation = {
+  id: 44, bookName: 'Genesis', chapter: 3, verseNumber: 6, bibleVersion: 'Berean', sharedStudyVersion: 7,
+  exegesis: { explanationText: 'An existing explanation with enough detail.', applicationText: 'Saved application' },
+  studyMetadata: { introduction: 'Saved introduction', takeaways: '["Saved takeaway"]' },
+  wordStudies: [{ surfaceText: 'Know', strongsId: 'H3045', customDefinition: 'Know intimately' }],
+  practicalApps: [{ applicationText: 'Saved practice', sortOrder: 0 }],
+  crossReferences: [{ bookName: 'Romans', chapter: 5, verseNumber: 1, verseEnd: 3, commentary: 'Saved commentary' }],
+  themes: [{ themeName: 'Trust', sortOrder: 0 }],
+};
+
+it('loads a selected existing verse in create mode and updates its saved ID and version', async () => {
+  mocks.post.mockResolvedValueOnce({ returnCode: 200, returnData: savedExplanation });
+  const { result } = renderHook(() => useAddExplanation());
+  act(() => {
+    result.current.actions.updateField('bookName', 'Genesis');
+    result.current.actions.updateField('chapter', '3');
+    result.current.actions.updateField('verseNumber', '6');
+  });
+  await waitFor(() => expect(result.current.data.isValid).toBe(true));
+  expect(result.current.data.isEditMode).toBe(true);
+  expect(result.current.data.existingFound).toBe(true);
+  expect(mocks.toast).toHaveBeenCalledWith(expect.objectContaining({ title: 'Saved explanation loaded' }));
+  expect(result.current.data.form.bibleVersion).toBe('Berean');
+  expect(result.current.data.form.exegesis.applicationText).toBe('Saved application');
+  expect(result.current.data.form.studyMetadata.takeaways).toEqual(['Saved takeaway']);
+  expect(result.current.data.form.crossReferences[0].commentary).toBe('Saved commentary');
+  expect(result.current.data.form.practicalApps[0].applicationText).toBe('Saved practice');
+  expect(result.current.data.form.themes[0].themeName).toBe('Trust');
+  await act(async () => { await result.current.actions.handleSave(); });
+  expect(mocks.post).toHaveBeenLastCalledWith('bible', 'add-verse-explanation', expect.objectContaining({ id: 44, sharedStudyVersion: 7 }));
+  act(() => result.current.actions.updateField('verseNumber', '7'));
+  await waitFor(() => expect(result.current.data.checkingExisting).toBe(false));
+  expect(result.current.data.existingFound).toBe(false);
+  expect(result.current.data.form.exegesis.explanationText).toBe('');
+  act(() => result.current.actions.updateNested('exegesis', 'explanationText', 'New teaching for a different verse.'));
+  await waitFor(() => expect(result.current.data.isValid).toBe(true));
+  await act(async () => { await result.current.actions.handleSave(); });
+  expect(mocks.post.mock.calls.at(-1)![2]).not.toHaveProperty('id');
+  expect(mocks.post.mock.calls.at(-1)![2]).not.toHaveProperty('sharedStudyVersion');
+});
+
+it('ignores late lookups when the selected verse changes', async () => {
+  let resolve!: (value: unknown) => void;
+  mocks.post.mockImplementationOnce(() => new Promise(r => { resolve = r; }));
+  const { result } = renderHook(() => useAddExplanation());
+  act(() => {
+    result.current.actions.updateField('bookName', 'Genesis');
+    result.current.actions.updateField('chapter', '3');
+    result.current.actions.updateField('verseNumber', '6');
+  });
+  expect(result.current.data.isValid).toBe(false);
+  act(() => result.current.actions.updateField('verseNumber', '7'));
+  await waitFor(() => expect(result.current.data.checkingExisting).toBe(false));
+  await act(async () => resolve({ returnCode: 200, returnData: savedExplanation }));
+  expect(result.current.data.form.verseNumber).toBe('7');
+  expect(result.current.data.existingFound).toBe(false);
+});
+
+it('blocks saving on lookup failure and allows retry without losing new notes', async () => {
+  mocks.post.mockRejectedValueOnce(new Error('offline'));
+  const { result } = renderHook(() => useAddExplanation());
+  act(() => {
+    result.current.actions.updateField('bookName', 'Genesis');
+    result.current.actions.updateField('chapter', '3');
+    result.current.actions.updateField('verseNumber', '6');
+    result.current.actions.updateNested('exegesis', 'explanationText', 'Keep these unsaved editorial notes.');
+  });
+  await waitFor(() => expect(result.current.data.lookupError).toBe(true));
+  expect(result.current.data.isValid).toBe(false);
+  act(() => result.current.actions.retryExisting());
+  await waitFor(() => expect(result.current.data.isValid).toBe(true));
+  expect(result.current.data.form.exegesis.explanationText).toBe('Keep these unsaved editorial notes.');
+});
 
 it('creates a range explanation and validates its required reference and study rows', async () => {
   const { result } = renderHook(() => useAddExplanation());
@@ -40,7 +118,7 @@ it('creates a range explanation and validates its required reference and study r
   expect(mocks.post).toHaveBeenCalledWith('bible', 'add-verse-explanation', expect.objectContaining({ verseNumber: 6, verseEnd: 10 }));
   expect(mocks.post.mock.calls.at(-1)![2].crossReferences).toEqual([]);
   act(() => vi.advanceTimersByTime(500));
-  expect(mocks.navigate).toHaveBeenCalledWith('/admin/daily-content');
+  expect(mocks.navigate).toHaveBeenCalledWith('/admin/verse-explanations');
   act(() => result.current.actions.updateField('bookName', 'Exodus'));
   expect(result.current.data.form.chapter).toBe('');
   expect(result.current.data.form.verseEnd).toBe('');
@@ -51,6 +129,7 @@ it('reopens and saves ranges and structured studies without losing existing IDs 
   mocks.params = { bookName: 'Genesis', chapter: '3', verseNumber: '6' };
   mocks.post.mockResolvedValueOnce({ returnCode: 200, returnData: {
     id: 44, bookName: 'Genesis', chapter: 3, verseNumber: 6, verseEnd: 10, bibleVersion: 'BSB',
+    sharedStudyVersion: 7,
     exegesis: { explanationText: 'An existing explanation with enough detail.', applicationText: '' },
     wordStudies: [{ surfaceText: 'Know', strongsId: 'H3045', customDefinition: 'Know intimately', sortOrder: 0 }],
     crossReferences: [{ bookName: 'Romans', chapter: 5, verseNumber: 1, verseEnd: 3, referenceText: 'Original quote', commentary: 'Editorial commentary' }],
@@ -61,8 +140,27 @@ it('reopens and saves ranges and structured studies without losing existing IDs 
   expect(result.current.data.form.crossReferences[0].commentary).toBe('Editorial commentary');
   vi.useFakeTimers();
   await act(async () => { await result.current.actions.handleSave(); });
-  expect(mocks.post).toHaveBeenLastCalledWith('bible', 'add-verse-explanation', expect.objectContaining({ id: 44, verseEnd: 10,
+  expect(mocks.post).toHaveBeenLastCalledWith('bible', 'add-verse-explanation', expect.objectContaining({ id: 44, sharedStudyVersion: 7, verseEnd: 10,
     crossReferences: [expect.objectContaining({ verseEnd: 3, commentary: 'Editorial commentary' })],
     wordStudies: [expect.objectContaining({ strongsId: 'H3045', customDefinition: 'Know intimately' })],
   }));
+});
+
+it('keeps the editor open with a reload message when the shared study version is stale', async () => {
+  const { result } = renderHook(() => useAddExplanation());
+  act(() => {
+    result.current.actions.updateField('bookName', 'Genesis');
+    result.current.actions.updateField('chapter', '3');
+    result.current.actions.updateField('verseNumber', '6');
+    result.current.actions.updateNested('exegesis', 'explanationText', 'An explanation with enough context and detail.');
+  });
+  await waitFor(() => expect(result.current.data.isValid).toBe(true));
+  mocks.post.mockResolvedValueOnce({ returnCode: 409, returnMessage: 'Shared study changed; reload before saving' });
+  await act(async () => { await result.current.actions.handleSave(); });
+  expect(mocks.toast).toHaveBeenCalledWith(expect.objectContaining({
+    title: 'Content changed',
+    description: 'Shared study changed; reload before saving',
+    variant: 'destructive',
+  }));
+  expect(mocks.navigate).not.toHaveBeenCalled();
 });

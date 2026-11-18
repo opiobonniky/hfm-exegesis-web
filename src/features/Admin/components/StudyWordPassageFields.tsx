@@ -2,7 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Combobox } from '@/components/ui/combobox';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { bibleApi, type Translation, type BookInfo } from '@/services/bibleApi';
+import { bibleApi, type BookInfo } from '@/services/bibleApi';
+import { useBibleEditions, editionKey } from '@/hooks/useBibleEditions';
 import { useLanguage } from '@/components/languages/languageProvider';
 import { tt } from '@/components/languages/hardcodedTranslate';
 
@@ -15,8 +16,7 @@ export function StudyWordPassageFields({ value, onChange, locked, busy, onReady 
   locked: boolean; busy: boolean; onReady: (ready: boolean) => void;
 }) {
   const { lang } = useLanguage();
-  const [catalog, setCatalog] = useState<Translation[]>([]);
-  const [language, setLanguage] = useState<string>(lang || 'en');
+  const editions = useBibleEditions(lang);
   const [books, setBooks] = useState<BookInfo[]>([]);
   const [chapters, setChapters] = useState<{ chapterNumber: number; versesCount: number }[]>([]);
   const [verseText, setVerseText] = useState('');
@@ -26,31 +26,17 @@ export function StudyWordPassageFields({ value, onChange, locked, busy, onReady 
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
   const callbacks = useRef({ onChange, onReady });
-  const initializedLanguage = useRef(false);
   callbacks.current = { onChange, onReady };
   const requestedKey = `${value.translation}:${value.bookName}:${value.chapter}:${value.verse}`;
   const [loadedKey, setLoadedKey] = useState('');
-  const ready = loadedKey === requestedKey && !loading && !error && Boolean(verseText);
+  const ready = loadedKey === requestedKey && !loading && !error && Boolean(verseText)
+    && !editions.loading && !editions.error && (locked || editionKey(value.translation) === editionKey(editions.version));
 
   useEffect(() => {
-    let active = true;
-    void bibleApi.getTranslations().then(rows => {
-      if (!active) return;
-      setCatalog(rows);
-      const selected = rows.find(row => row.id === value.translation || (value.translation === 'BSB' && row.id === 'Berean'));
-      if (locked && selected) setLanguage(selected.language || 'en');
-      if (!locked && !initializedLanguage.current) {
-        initializedLanguage.current = true;
-        const preferred = rows.filter(row => row.language === (lang || 'en'));
-        const edition = preferred.find(row => row.id === value.translation || (value.translation === 'BSB' && row.id === 'Berean')) || preferred[0];
-        if (edition) callbacks.current.onChange({ translation: edition.id, surfaceText: '' });
-        else if (selected) setLanguage(selected.language || 'en');
-      }
-    }).catch(() => { if (active) setError('Could not load Bible editions. Please try again.'); });
-    return () => { active = false; };
-    // Initial edition follows the interface language; user choices stay put.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [retry, locked]);
+    if (!locked && !editions.loading && editionKey(value.translation) !== editionKey(editions.version)) {
+      callbacks.current.onChange({ translation: editions.version, surfaceText: '' });
+    }
+  }, [editions.version, editions.loading, locked]);
 
   useEffect(() => {
     let active = true;
@@ -84,19 +70,18 @@ export function StudyWordPassageFields({ value, onChange, locked, busy, onReady 
     const first = tokens[Number(start)]; const last = tokens[Number(end)];
     if (first && last) callbacks.current.onChange({ surfaceText: verseText.slice(first.start, last.end) });
   };
-  const editions = catalog.filter(row => (row.language || 'en') === language);
-  const languages = [...new Map(catalog.map(row => [row.language || 'en', { value: row.language || 'en', label: row.languageName || row.language || 'English' }])).values()].sort((a, b) => a.label.localeCompare(b.label));
   const maxVerse = chapters.find(chapter => chapter.chapterNumber === value.chapter)?.versesCount || 0;
   const selector = (label: string, node: React.ReactNode) => <label className="block space-y-2"><span className="text-sm font-semibold">{tt(label)}</span>{node}</label>;
   return <div className="space-y-4">
     <div className="grid gap-4 sm:grid-cols-2">
-      {selector('Bible language', <Combobox width="w-full" value={language} options={languages} disabled={busy || locked || !catalog.length} placeholder={tt('Select a language')} searchPlaceholder={tt('Search languages...')} onChange={next => {
+      {selector('Bible language', <Input readOnly value={editions.translations[0]?.languageName || lang || 'en'} />)}
+      {selector('Bible edition', <Combobox width="w-full" value={value.translation === 'BSB' ? 'Berean' : value.translation} options={editions.options} disabled={busy || locked || !editions.options.length} placeholder={value.translation || tt('Select an edition')} searchPlaceholder={tt('Search Bible editions...')} onChange={next => {
         if (!next) return;
-        setLanguage(next); const edition = catalog.find(row => (row.language || 'en') === next);
-        if (edition) onChange({ translation: edition.id, chapter: 1, verse: 1, surfaceText: '' });
+        editions.setVersion(next);
+        onChange({ translation: next, chapter: 1, verse: 1, surfaceText: '' });
       }} />)}
-      {selector('Bible edition', <Combobox width="w-full" value={value.translation === 'BSB' ? 'Berean' : value.translation} options={editions.map(row => ({ value: row.id, label: `${row.shortName || row.name} — ${row.name}${row.year ? ` (${row.year})` : ''}` }))} disabled={busy || locked || !editions.length} placeholder={tt('Select an edition')} searchPlaceholder={tt('Search Bible editions...')} onChange={next => next && onChange({ translation: next, chapter: 1, verse: 1, surfaceText: '' })} />)}
     </div>
+    {editions.error && <p role="alert" className="text-sm text-destructive">{tt(editions.error)} <Button type="button" variant="outline" onClick={editions.retry}>{tt('Try again')}</Button></p>}
     <div className="grid gap-4 sm:grid-cols-3">
       {selector('Book', <Combobox width="w-full" value={value.bookName} options={books.map(book => ({ value: book.bookName, label: tt(book.bookName) }))} disabled={busy || locked || !books.length} placeholder={tt('Select a book')} searchPlaceholder={tt('Search books...')} onChange={next => next && onChange({ bookName: next, chapter: 1, verse: 1, surfaceText: '' })} />)}
       {selector('Chapter', <Combobox width="w-full" value={String(value.chapter)} options={chapters.map(chapter => ({ value: String(chapter.chapterNumber), label: `${tt('Chapter')} ${chapter.chapterNumber}` }))} disabled={busy || locked || !chapters.length} placeholder={tt('Select a chapter')} searchPlaceholder={tt('Search chapters...')} onChange={next => next && onChange({ chapter: Number(next), verse: 1, surfaceText: '' })} />)}

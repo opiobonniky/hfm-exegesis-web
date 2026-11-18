@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Combobox } from "@/components/ui/combobox";
-import { BIBLE_VERSIONS } from "@/assets/bibleVersion/json/bibleVersions";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { tt } from '@/components/languages/hardcodedTranslate';
@@ -19,6 +18,7 @@ interface Props {
   verseEnd: string; setVerseEnd: (v: string) => void;
   verseNumbers: number[];
   bibleVersion: string; setBibleVersion: (v: string) => void;
+  bibleVersionOptions: { value: string; label: string }[];
   selectedDate: Date; setSelectedDate: (d: Date) => void;
   selectedTime: string; handleTimeChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   books: string[]; chapters: number[]; maxVerses: number;
@@ -28,10 +28,7 @@ interface Props {
 
 export function VerseReferenceSection(p: Props) {
   const fields = [
-    [p.t.dailyVerse.version, p.bibleVersion, p.setBibleVersion, [
-      ...BIBLE_VERSIONS.map((v) => ({ value: v.id, label: `${v.name} (${v.abbreviation})` })),
-      ...(!BIBLE_VERSIONS.some(v => v.id === p.bibleVersion) && p.bibleVersion ? [{ value: p.bibleVersion, label: p.bibleVersion }] : []),
-    ], p.t.dailyVerse.selectVersion, false],
+    [p.t.dailyVerse.version, p.bibleVersion, p.setBibleVersion, p.bibleVersionOptions, p.bibleVersion || p.t.dailyVerse.selectVersion, false],
   ] as const;
 
   return (

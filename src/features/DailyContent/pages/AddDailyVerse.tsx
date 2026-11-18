@@ -60,6 +60,7 @@ const AddDailyVerse = () => {
                 setVerseEnd={h.setVerseEnd}
                 verseNumbers={h.verseNumbers}
                 bibleVersion={h.bibleVersion}
+                bibleVersionOptions={h.bibleVersionOptions}
                 setBibleVersion={h.setBibleVersion}
                 selectedDate={h.selectedDate}
                 setSelectedDate={h.setSelectedDate}

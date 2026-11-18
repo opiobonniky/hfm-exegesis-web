@@ -21,7 +21,7 @@ const emptyWord = {
 type WordForm = typeof emptyWord;
 type Attachment = { id: string | number; bookName: string; chapter: number; verse: number;
   translation: string; surfaceText: string | null; adminExplanation: string | null };
-const emptyAttachment = { bookName: 'Genesis', chapter: 1, verse: 1, translation: 'BSB', surfaceText: '', adminExplanation: '' };
+const emptyAttachment = { bookName: 'Genesis', chapter: 1, verse: 1, translation: 'Berean', surfaceText: '', adminExplanation: '' };
 
 export function StudyWordEditor({ word, onClose, onSaved }: {
   word: WordEntry | null; onClose: () => void; onSaved: () => void;

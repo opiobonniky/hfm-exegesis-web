@@ -489,7 +489,7 @@ export interface AddExplanationReferenceFormProps {
   passageError?: string;
   retryPassage: () => void;
   bibleVersion: string;
-  sortedTranslationOptions: Array<{ value: string; label: string; group: string }>;
+  sortedTranslationOptions: Array<{ value: string; label: string; group?: string }>;
   verseOptions: number[];
   verseOptionsLoading: boolean;
   verseTextLoading: boolean;

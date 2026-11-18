@@ -42,14 +42,12 @@ describe('edition-aware verse word selection', () => {
     expect(screen.getByRole('button', { name: 'Save link' })).toBeDisabled();
   });
 
-  it('filters editions by language and fetches the chosen edition', async () => {
+  it('only offers editions in the interface language', async () => {
     render(<Harness />);
     await screen.findByText('In the beginning God created.');
-    await waitFor(() => expect(screen.getByLabelText('Search languages...')).toBeEnabled());
-    fireEvent.change(screen.getByLabelText('Search languages...'), { target: { value: 'fr' } });
-    await waitFor(() => expect(mocks.verses).toHaveBeenCalledWith('French', 'Genesis', 1));
-    expect(screen.getByLabelText('Search Bible editions...')).toHaveTextContent('Louis Segond');
-    expect(screen.getByLabelText('Search Bible editions...')).not.toHaveTextContent('Berean Standard Bible');
+    await waitFor(() => expect(screen.getByLabelText('Search Bible editions...')).toBeEnabled());
+    expect(screen.getByLabelText('Search Bible editions...')).toHaveTextContent('Berean Standard Bible');
+    expect(screen.getByLabelText('Search Bible editions...')).not.toHaveTextContent('Louis Segond');
   });
 
   it('prevents saving a failed verse fetch and allows retry', async () => {

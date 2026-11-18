@@ -16,7 +16,8 @@ import { Combobox } from "@/components/ui/combobox";
 import { Plus, Trash2, Loader2 } from "lucide-react";
 import { adminApi } from "../services/adminApi";
 import type { AddBookPrologueModel } from "../types";
-import { PROLOGUE_TRANSLATIONS } from "../constants";
+import { useBibleEditions, editionKey } from '@/hooks/useBibleEditions';
+import { useLanguage } from '@/components/languages/languageProvider';
 import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
@@ -24,6 +25,8 @@ interface Props {
 }
 
 export function AddBookPrologueExtraForm({ state: h }: Props) {
+  const { lang } = useLanguage();
+  const editions = useBibleEditions(lang);
   const { keyScriptures } = h.form;
   const [verseOptions, setVerseOptions] = useState<Record<number, number[]>>({});
   const [loadingVerses, setLoadingVerses] = useState<Record<number, boolean>>({});
@@ -100,15 +103,15 @@ export function AddBookPrologueExtraForm({ state: h }: Props) {
             <div className="space-y-2">
               <Label className="text-xs font-medium text-foreground">{tt("Translation")}</Label>
               <Select
-                value={entry.translation}
+                value={editionKey(entry.translation)}
                 onValueChange={(v) => h.updateKeyScripture(i, { translation: v })}
               >
                 <SelectTrigger className="border-border bg-background text-foreground">
-                  <SelectValue placeholder={tt("Select translation")} />
+                  <SelectValue placeholder={tt("Select translation")}>{editions.options.find(option => editionKey(option.value) === editionKey(entry.translation))?.label || entry.translation}</SelectValue>
                 </SelectTrigger>
                 <SelectContent>
-                  {PROLOGUE_TRANSLATIONS.map((t) => (
-                    <SelectItem key={t.id} value={t.id}>
+                  {editions.options.map((t) => (
+                    <SelectItem key={t.value} value={editionKey(t.value)}>
                       {t.label}
                     </SelectItem>
                   ))}
