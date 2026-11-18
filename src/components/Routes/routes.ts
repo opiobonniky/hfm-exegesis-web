@@ -670,6 +670,14 @@ const routeConfigs = {
     requiresLayout: true,
     title: tt("Journal Entry Detail"),
   },
+  adminDeletedUsers: {
+    path: '/admin/deleted-users',
+    component: lazy(() => import('@/features/Admin/pages/AdminDeletedUsers')),
+    isProtected: true,
+    adminOnly: true,
+    requiresLayout: true,
+    title: tt('Deleted accounts'),
+  },
   adminUsers: {
     path: "/admin/users",
     component: AdminUsersPage,

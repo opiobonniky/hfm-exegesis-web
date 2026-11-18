@@ -95,7 +95,9 @@ export function displayDate(
   const config = getNumberLocale(language);
   try {
     if (!Intl.DateTimeFormat.supportedLocalesOf([config.locale]).length) throw new Error('Unsupported locale');
-    return displayDigits(new Intl.DateTimeFormat(config.locale, { calendar: 'gregory', ...options, numberingSystem: config.numberingSystem }).format(date), language);
+    const dateOptions = Object.keys(options).length ? { ...options } : { month: 'short' as const, day: 'numeric' as const, year: 'numeric' as const };
+    if (language === 'en' && dateOptions.month && dateOptions.day && dateOptions.year) dateOptions.month = 'short';
+    return displayDigits(new Intl.DateTimeFormat(config.locale, { calendar: 'gregory', ...dateOptions, numberingSystem: config.numberingSystem }).format(date), language);
   } catch {
     if (options.month && !options.day && !options.year && !options.weekday) return displayDigits(date.getMonth() + 1, language);
     if (options.year && !options.day && !options.month && !options.weekday) return displayDigits(date.getFullYear(), language);

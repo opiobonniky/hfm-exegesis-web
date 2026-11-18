@@ -29,12 +29,6 @@ export function SowerHero({ billingInterval, setBillingInterval }: Props) {
             className={cn("px-5 py-2 rounded-full text-sm font-bold transition-all",
               billingInterval === "month" ? "bg-card text-violet-900 shadow-lg" : "bg-card/10 text-violet-200 hover:bg-card/20")}
           >{tt("Monthly")}</button>
-          <button
-            onClick={() => setBillingInterval("year")}
-            className={cn("px-5 py-2 rounded-full text-sm font-bold transition-all",
-              billingInterval === "year" ? "bg-card text-violet-900 shadow-lg" : "bg-card/10 text-violet-200 hover:bg-card/20")}
-          >{tt("Yearly")}<span className="ml-1.5 text-[10px] font-semibold opacity-70">{tt("~20% off")}</span>
-          </button>
         </div>
       </div>
     </section>

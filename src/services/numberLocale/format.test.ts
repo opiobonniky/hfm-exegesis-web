@@ -62,6 +62,13 @@ describe('number locale packs', () => {
     expect(displayDate(date, 'ar', { year: 'numeric' })).toContain('٢٠٢٦');
   });
 
+  it('uses US month-name dates by default and for full English dates', () => {
+    const date = new Date(2026, 10, 17, 12);
+    expect(displayDate(date, 'en')).toBe('Nov 17, 2026');
+    expect(displayDate(date, 'en', { year: 'numeric', month: 'numeric', day: 'numeric' })).toBe('Nov 17, 2026');
+    expect(displayDate(date, 'en', { year: 'numeric' })).toBe('2026');
+  });
+
   it('honours each locale clock convention', () => {
     expect(uses12HourClock('en')).toBe(true);
     expect(uses12HourClock('de')).toBe(false);

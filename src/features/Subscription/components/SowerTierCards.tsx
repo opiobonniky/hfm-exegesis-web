@@ -24,7 +24,7 @@ export const TIERS: TierConfig[] = [
 
 export const FAQ_ITEMS = [
   { q: "Is Bible reading ever locked behind a subscription?", a: "No. Bible reading is always free." },
-  { q: "Can I switch between monthly and yearly billing?", a: "Yes, you can switch billing intervals through the customer portal." },
+  { q: "How are plans billed?", a: "Free Reader is free. Legacy Sower is $3.33/month and Covenant Sower is $7.77/month." },
   { q: "What happens if I cancel?", a: "You retain paid access until the end of your billing period." },
 ];
 export const formatPrice = (cents: number, lang: string = 'en'): string => displayNumber(cents / 100, lang, { style: 'currency', currency: 'USD' });

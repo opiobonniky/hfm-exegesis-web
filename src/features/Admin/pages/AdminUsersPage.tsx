@@ -2,6 +2,7 @@
 "use client";
 
 import { useState } from "react";
+import { Link } from 'react-router-dom';
 import { Users, UserPlus, RefreshCw, ShieldCheck, CircleDot } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAdminUsers } from "../hooks/useAdminUsers";
@@ -43,6 +44,7 @@ export default function AdminUsersPage() {
       />
 
       <AdminPageContent>
+        <Link to="/admin/deleted-users" className="mb-4 inline-block text-sm text-primary underline">{tt('View deleted accounts')}</Link>
         {/* Stat chips */}
         <div className="flex items-center gap-3 mb-4 flex-wrap">
           <StatChip

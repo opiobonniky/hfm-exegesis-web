@@ -7,7 +7,7 @@ import type { AdminUser } from "../types";
 import { USERS_PAGE_SIZE, USER_SEARCH_DEBOUNCE_MS, USER_ROLE_MAP } from "../constants";
 import { tt } from '@/components/languages/hardcodedTranslate';
 
-export function useAdminUsers() {
+export function useAdminUsers(accountView: 'current' | 'deleted' = 'current') {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [users, setUsers] = useState<AdminUser[]>([]);
@@ -31,6 +31,7 @@ export function useAdminUsers() {
           page: pageNum + 1,
           pageSize: USERS_PAGE_SIZE,
           search: q || undefined,
+          accountView,
         });
         const data = res?.returnData;
         const items: AdminUser[] = data?.users || data?.content || data || [];
@@ -46,13 +47,13 @@ export function useAdminUsers() {
         setLoadingMore(false);
       }
     },
-    [toast],
+    [toast, accountView],
   );
 
   // Initial load
   useEffect(() => {
     loadUsers(0, searchDebounced);
-  }, [searchDebounced]);
+  }, [searchDebounced, loadUsers]);
 
   // Debounce search
   useEffect(() => {
