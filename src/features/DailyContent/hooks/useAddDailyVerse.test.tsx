@@ -96,7 +96,8 @@ describe('daily verse editor', () => {
     expect(payload).toMatchObject({ bookName: 'Genesis', chapter: 1, verseNumber: 1, explanation: 'Explanation' });
     expect(payload).not.toHaveProperty('learnMore');
     if (editing) expect(payload.id).toBe(9);
-    if (editing) expect(payload.sharedStudyVersion).toBe(3);
+    // Daily verses are independent from shared PassageStudy records.
+    expect(payload).not.toHaveProperty('sharedStudyVersion');
     act(() => vi.advanceTimersByTime(2000));
     expect(mocks.navigate).toHaveBeenCalledWith('/admin/daily-content');
   });

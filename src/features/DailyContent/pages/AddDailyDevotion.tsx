@@ -6,6 +6,7 @@ import {
   AddDailyDevotionReferenceSection,
   AddDailyDevotionContentFields,
   AddDailyDevotionBackgroundSection,
+  AddDailyDevotionConflictDialog,
   DailyContentFormActions,
   PublishToggle,
   DateTimeFields,
@@ -116,6 +117,7 @@ export default function AddDailyDevotion() {
           onSave={actions.handleSave}
         />
       </DailyContentFormCard>
+      <AddDailyDevotionConflictDialog data={data} actions={actions} />
     </PageContentWrapper>
   );
 }

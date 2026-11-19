@@ -63,6 +63,7 @@ export { DetailPageLayout, DetailPageInner } from "./DetailPageLayout";
 export { ContentBlock } from "./ContentBlock";
 export { AddDailyVerseHeader } from "./AddDailyVerseHeader";
 export { AddDailyVerseConflictDialog } from "./AddDailyVerseConflictDialog";
+export { AddDailyDevotionConflictDialog } from "./AddDailyDevotionConflictDialog";
 export { AddDailyDevotionCoreSections } from "./AddDailyDevotionCoreSections";
 export { AddDailyDevotionReferenceSection } from "./AddDailyDevotionReferenceSection";
 export { AddDailyDevotionContentFields } from "./AddDailyDevotionContentFields";

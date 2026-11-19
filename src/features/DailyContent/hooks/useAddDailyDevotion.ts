@@ -53,6 +53,14 @@ export function useAddDailyDevotion() {
   });
   const [published, setPublished] = useState(editingDevotion?.isPublished ?? true);
 
+  // A 409 from the server means another devotion already occupies the chosen
+  // date. Keep the submitted payload so the user can replace that entry.
+  const [conflictDialog, setConflictDialog] = useState<{
+    open: boolean;
+    conflict: { type?: string; existing?: Record<string, any> } | null;
+    payload: Record<string, any> | null;
+  }>({ open: false, conflict: null, payload: null });
+
   // Content fields
   const [explanation, setExplanation] = useState(editingDevotion?.explanation || "");
   const [application, setApplication] = useState(editingDevotion?.application || "");
@@ -214,13 +222,18 @@ export function useAddDailyDevotion() {
         toast({ title: t.devotions.success, description: t.devotions.devotionSaved });
         navigate(routes.dailyDevotions.path);
       } else if (res.returnCode === 409) {
-        toast({
-          title: tt("Content changed"),
-          description:
-            res.returnMessage ||
-            tt("This passage was updated elsewhere. Reload before saving."),
-          variant: "destructive",
-        });
+        const conflict = res.returnData?.conflicts?.[0];
+        if (conflict) {
+          setConflictDialog({ open: true, conflict, payload });
+        } else {
+          toast({
+            title: tt("Content changed"),
+            description:
+              res.returnMessage ||
+              tt("This passage was updated elsewhere. Reload before saving."),
+            variant: "destructive",
+          });
+        }
       } else {
         toast({ title: t.common.error, description: res.returnMessage || t.devotions.failedToAdd, variant: "destructive" });
       }
@@ -235,6 +248,48 @@ export function useAddDailyDevotion() {
     isEditing, editingDevotion, toast, t, navigate, saveDisabled,
   ]);
 
+  const closeConflict = useCallback(() => {
+    setConflictDialog({ open: false, conflict: null, payload: null });
+  }, []);
+
+  const handleConflictUpdate = useCallback(async () => {
+    const existing = conflictDialog.conflict?.existing;
+    const payload = conflictDialog.payload;
+    if (!existing?.id || !payload) return;
+    setConflictDialog({ open: false, conflict: null, payload: null });
+    try {
+      const res = await saveDailyDevotion({ ...payload, id: existing.id });
+      if (res.returnCode === 200) {
+        toast({ title: t.devotions.success, description: t.devotions.devotionUpdated });
+        navigate(routes.dailyDevotions.path);
+      } else {
+        toast({
+          title: t.common.error,
+          description: res.returnMessage || t.devotions.failedToAdd,
+          variant: "destructive",
+        });
+      }
+    } catch {
+      toast({ title: t.common.error, description: t.common.error, variant: "destructive" });
+    }
+  }, [conflictDialog, navigate, t, toast]);
+
+  const handleConflictOpenChange = useCallback(
+    (open: boolean) => {
+      if (!open) closeConflict();
+    },
+    [closeConflict],
+  );
+
+  const viewExisting = useCallback(() => {
+    closeConflict();
+    navigate(routes.dailyDevotions.path);
+  }, [closeConflict, navigate]);
+
+  const conflictMessage = conflictDialog.conflict?.type === "date"
+    ? tt("A daily devotion already exists for this date.")
+    : tt("This devotion conflicts with existing content.");
+
   return {
     data: {
       title, content, testament, book, chapter, verseNumber, bibleVersion,
@@ -246,6 +301,7 @@ export function useAddDailyDevotion() {
       crossReferences, finalThoughts, takeaways, saveDisabled, isEditing,
       pageTitle: isEditing ? "Edit Devotion" : t.devotions.addDevotion,
       saveLabel: isEditing ? "Update Devotion" : t.devotions.saveDevotion,
+      conflictDialog, conflictMessage,
       t, isRtl,
     },
     actions: {
@@ -258,7 +314,8 @@ export function useAddDailyDevotion() {
       setLearnMore, setBackgroundAuthor, setBackgroundBook,
       setBackgroundContext, setWordStudies, setPracticalApplications,
       setKeyThemes, setCrossReferences, setFinalThoughts, setTakeaways,
-      handleSave,
+      handleSave, handleConflictUpdate, closeConflict, handleConflictOpenChange,
+      viewExisting,
     },
   };
 }
