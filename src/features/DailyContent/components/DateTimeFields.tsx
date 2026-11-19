@@ -3,6 +3,7 @@
  */
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/ui/date-picker";
 import { FormGrid } from "./FormGrid";
 import { tt } from '@/components/languages/hardcodedTranslate';
 
@@ -22,15 +23,13 @@ export function DateTimeFields({
   return (
     <FormGrid columns={2}>
       <div className="space-y-2">
-        <Label>{tt("Date *")}</Label>
-        <Input
-          type="date"
-          value={selectedDate.toISOString().split("T")[0]}
-          onChange={(e) => {
-            const d = new Date(e.target.value);
-            d.setHours(selectedDate.getHours(), selectedDate.getMinutes(), 0, 0);
-            setSelectedDate(d);
-          }}
+        <Label htmlFor="daily-content-date">{tt("Date *")}</Label>
+        <DatePicker
+          id="daily-content-date"
+          value={selectedDate}
+          onChange={setSelectedDate}
+          placeholder={tt("Pick a date")}
+          aria-label={tt("Date *")}
         />
       </div>
       <div className="space-y-2">

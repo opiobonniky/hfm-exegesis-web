@@ -1,13 +1,8 @@
-import { useState } from "react";
-import { CalendarIcon, Clock } from "lucide-react";
+import { Clock } from "lucide-react";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Combobox } from "@/components/ui/combobox";
-import { cn } from "@/lib/utils";
-import { format } from "date-fns";
 import { tt } from '@/components/languages/hardcodedTranslate';
 import { PassageFields } from './PassageFields';
 
@@ -28,7 +23,6 @@ interface Props {
 }
 
 export function VerseReferenceSection(p: Props) {
-  const [dateOpen, setDateOpen] = useState(false);
   const fields = [
     [p.t.dailyVerse.version, p.bibleVersion, p.setBibleVersion, p.bibleVersionOptions, p.bibleVersion || p.t.dailyVerse.selectVersion, false],
   ] as const;
@@ -57,28 +51,12 @@ export function VerseReferenceSection(p: Props) {
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <Label>{p.t.common.date}</Label>
-          <Popover open={dateOpen} onOpenChange={setDateOpen}>
-            <PopoverTrigger asChild>
-              <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !p.selectedDate && "text-muted-foreground")}>
-                <CalendarIcon className="mr-2 h-4 w-4" />{format(p.selectedDate, "PPP")}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0">
-              <Calendar
-                mode="single"
-                selected={p.selectedDate}
-                onSelect={(d) => {
-                  setDateOpen(false);
-                  if (!d) return;
-                  const next = new Date(d);
-                  next.setHours(p.selectedDate.getHours(), p.selectedDate.getMinutes(), 0, 0);
-                  p.setSelectedDate(next);
-                }}
-                required
-                initialFocus
-              />
-            </PopoverContent>
-          </Popover>
+          <DatePicker
+            value={p.selectedDate}
+            onChange={p.setSelectedDate}
+            placeholder={p.t.common.date}
+            aria-label={p.t.common.date}
+          />
         </div>
         <div className="space-y-2">
           <Label>{tt("Time")}</Label>
