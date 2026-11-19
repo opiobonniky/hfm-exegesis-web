@@ -507,6 +507,7 @@ export interface AddExplanationExegesisFormProps {
 }
 
 export interface AddExplanationStudyFormProps {
+  showErrors?: boolean;
   introduction: string;
   backgroundAuthor: string;
   backgroundBook: string;
@@ -521,6 +522,7 @@ export interface AddExplanationStudyFormProps {
 }
 
 export interface AddExplanationExtrasFormProps {
+  showErrors?: boolean;
   bibleVersion: string;
   onCrossReferencesChange: (rows: CrossRefItem[]) => void;
   practicalApps: ExplanationForm["practicalApps"];

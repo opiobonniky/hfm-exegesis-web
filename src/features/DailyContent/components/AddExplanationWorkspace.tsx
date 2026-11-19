@@ -67,6 +67,7 @@ export function AddExplanationWorkspace({
           </TabsContent>
           <TabsContent value="study">
             <AddExplanationStudyForm
+              showErrors={!data.isEditMode || data.richContentTouched}
               introduction={data.form.studyMetadata.introduction}
               backgroundAuthor={data.form.studyMetadata.backgroundAuthor}
               backgroundBook={data.form.studyMetadata.backgroundBook}
@@ -81,6 +82,7 @@ export function AddExplanationWorkspace({
           </TabsContent>
           <TabsContent value="extras">
             <AddExplanationExtrasForm
+              showErrors={!data.isEditMode || data.richContentTouched}
               bibleVersion={data.form.bibleVersion}
               onCrossReferencesChange={rows => actions.updateField('crossReferences', rows)}
               practicalApps={data.form.practicalApps}

@@ -92,6 +92,9 @@ export function useAddExplanation() {
   const form = { ...formState, bibleVersion: editions.version };
   const [existingId, setExistingId] = useState<number | null>(null);
   const [sharedStudyVersion, setSharedStudyVersion] = useState<number | null>(null);
+  // Saved studies are not re-flagged merely because they are incomplete legacy
+  // content. Validation starts once the editor actually changes rich content.
+  const [richContentTouched, setRichContentTouched] = useState(false);
   const [checkedReference, setCheckedReference] = useState('');
   const [lookupError, setLookupError] = useState(false);
   const [lookupAttempt, setLookupAttempt] = useState(0);
@@ -320,10 +323,7 @@ export function useAddExplanation() {
             themes: d.themes || [],
           });
           setExistingFound(true);
-          toast({
-            title: tt('Saved explanation loaded'),
-            description: tt('An explanation already exists for this verse. Its saved content and Bible edition are loaded below. Your changes will update the existing explanation, not create a duplicate.'),
-          });
+          setRichContentTouched(false);
           setExistingId(d.id ?? null);
           setSharedStudyVersion(
             typeof d.sharedStudyVersion === "number"
@@ -349,6 +349,7 @@ export function useAddExplanation() {
   const updateField = useCallback(
     <K extends keyof ExplanationForm>(key: K, value: ExplanationForm[K]) => {
       if (key === 'bibleVersion') { editions.setVersion(String(value)); return; }
+      if (key === 'wordStudies' || key === 'crossReferences') setRichContentTouched(true);
       setForm((prev) => {
         // Saved content belongs to its selected passage; never carry its ID or
         // teaching into the next passage. Preserve manually composed new notes.
@@ -376,6 +377,7 @@ export function useAddExplanation() {
 
   // Word studies
   const addWordStudy = useCallback(() => {
+    setRichContentTouched(true);
     setForm((prev) => ({
       ...prev,
       wordStudies: [
@@ -390,6 +392,7 @@ export function useAddExplanation() {
     }));
   }, []);
   const removeWordStudy = useCallback((i: number) => {
+    setRichContentTouched(true);
     setForm((prev) => ({
       ...prev,
       wordStudies: prev.wordStudies.filter((_, idx) => idx !== i),
@@ -397,6 +400,7 @@ export function useAddExplanation() {
   }, []);
   const updateWordStudy = useCallback(
     (i: number, field: keyof WordStudyItem, value: string | number) => {
+      setRichContentTouched(true);
       setForm((prev) => {
         const next = [...prev.wordStudies];
         next[i] = { ...next[i], [field]: value };
@@ -527,7 +531,8 @@ export function useAddExplanation() {
     });
   }, []);
 
-  const richContentError = collectionError(form.wordStudies, form.crossReferences);
+  const rawRichContentError = collectionError(form.wordStudies, form.crossReferences);
+  const richContentError = existingFound && !richContentTouched ? '' : rawRichContentError;
   const isValid = !checkingExisting && !lookupError && !richContentError &&
     referenceComplete &&
     form.exegesis.explanationText.trim().length >= 20;
@@ -625,6 +630,7 @@ export function useAddExplanation() {
       canAdvanceFromCurrent,
       isValid,
       richContentError,
+      richContentTouched,
       translationOptions,
       sortedTranslationOptions,
       bookOptions,

@@ -18,7 +18,7 @@ export function AddExplanationExtrasForm(p: AddExplanationExtrasFormProps) {
       </div>)}
       <Add label="Add application" onClick={p.addPracticalApp} />
     </section>
-    <CrossReferencePicker value={serializeReferences(p.crossReferences)} bibleVersion={p.bibleVersion} isRtl={false} showCommentary
+    <CrossReferencePicker value={serializeReferences(p.crossReferences)} bibleVersion={p.bibleVersion} isRtl={false} showCommentary showErrors={p.showErrors}
       onChange={value => p.onCrossReferencesChange(parseReferences(value).map((row, sortOrder) => ({ ...row, commentary: row.commentary || '', sortOrder })))} />
     <section className="space-y-3 rounded-xl border border-border p-4">
       <h3 className="text-sm font-semibold">{tt('Key themes')}</h3>

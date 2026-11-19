@@ -29,4 +29,9 @@ describe('word study field errors', () => {
     render(<WordStudyEditor value={[{ surfaceText: '', strongsId: '', customDefinition: '' }]} onChange={() => {}} />);
     expect(screen.getAllByRole('textbox').every(field => field.getAttribute('aria-invalid') === 'false')).toBe(true);
   });
+  it('does not re-flag saved fields when editing has not touched rich content', () => {
+    render(<WordStudyEditor showErrors={false} value={[{ surfaceText: 'Word', strongsId: 'not-an-id', customDefinition: '' }]} onChange={() => {}} />);
+    expect(screen.getAllByRole('textbox').every(field => field.getAttribute('aria-invalid') === 'false')).toBe(true);
+    expect(screen.queryByText(/Enter the definition/)).toBeNull();
+  });
 });

@@ -40,7 +40,7 @@ it('loads a selected existing verse in create mode and updates its saved ID and 
   await waitFor(() => expect(result.current.data.isValid).toBe(true));
   expect(result.current.data.isEditMode).toBe(true);
   expect(result.current.data.existingFound).toBe(true);
-  expect(mocks.toast).toHaveBeenCalledWith(expect.objectContaining({ title: 'Saved explanation loaded' }));
+  expect(mocks.toast).not.toHaveBeenCalledWith(expect.objectContaining({ title: 'Saved explanation loaded' }));
   expect(result.current.data.form.bibleVersion).toBe('Berean');
   expect(result.current.data.form.exegesis.applicationText).toBe('Saved application');
   expect(result.current.data.form.studyMetadata.takeaways).toEqual(['Saved takeaway']);
@@ -58,6 +58,27 @@ it('loads a selected existing verse in create mode and updates its saved ID and 
   await act(async () => { await result.current.actions.handleSave(); });
   expect(mocks.post.mock.calls.at(-1)![2]).not.toHaveProperty('id');
   expect(mocks.post.mock.calls.at(-1)![2]).not.toHaveProperty('sharedStudyVersion');
+});
+
+it('does not re-flag saved rich content while merely editing, but validates it inline after it changes', async () => {
+  const incompleteReference = { bookName: 'Romans', chapter: 5, verseNumber: 0, referenceText: 'Preserved quotation', commentary: '', sortOrder: 0 };
+  mocks.post.mockResolvedValueOnce({ returnCode: 200, returnData: { ...savedExplanation, crossReferences: [incompleteReference] } });
+  const { result } = renderHook(() => useAddExplanation());
+  act(() => {
+    result.current.actions.updateField('bookName', 'Genesis');
+    result.current.actions.updateField('chapter', '3');
+    result.current.actions.updateField('verseNumber', '6');
+  });
+  await waitFor(() => expect(result.current.data.existingFound).toBe(true));
+  expect(result.current.data.richContentTouched).toBe(false);
+  expect(result.current.data.richContentError).toBe('');
+  expect(mocks.toast).not.toHaveBeenCalled();
+
+  act(() => result.current.actions.updateField('crossReferences', [incompleteReference]));
+  expect(result.current.data.richContentTouched).toBe(true);
+  expect(result.current.data.richContentError).toBe('Cross reference 1: select verse. Your existing text is preserved.');
+  expect(result.current.data.isValid).toBe(false);
+  expect(mocks.toast).not.toHaveBeenCalled();
 });
 
 it('ignores late lookups when the selected verse changes', async () => {

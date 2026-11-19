@@ -90,7 +90,7 @@ export function AddExplanationStudyForm(props: AddExplanationStudyFormProps) {
         </div>
       </div>
 
-      <WordStudyEditor value={wordStudies} onChange={rows => updateField('wordStudies', rows.map((row, sortOrder) => ({ ...row, sortOrder })))} />
+      <WordStudyEditor value={wordStudies} showErrors={props.showErrors} onChange={rows => updateField('wordStudies', rows.map((row, sortOrder) => ({ ...row, sortOrder })))} />
     </div>
   );
 }
