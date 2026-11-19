@@ -25,6 +25,7 @@ vi.mock('@/services/bibleApi', () => ({ bibleApi: {
 // Avoid loading the application route registry in a hook unit test.
 vi.mock('@/components/Routes/routes', () => ({ routes: {
   adminDailyContent: { path: '/admin/daily-content' },
+  dailyVerseDetail: { path: '/daily-verse-detail' },
 } }));
 
 beforeEach(() => {
@@ -110,13 +111,28 @@ describe('daily verse editor', () => {
     expect(mocks.toast).toHaveBeenCalledWith(expect.objectContaining({ variant: 'destructive' }));
   });
 
-  it('opens existing conflicts in Daily Content', async () => {
+  it('opens the existing verse detail page for a conflict', async () => {
+    const existing = {
+      id: 7, bookName: 'John', chapter: 3, verseNumber: 16,
+      displayDate: '2026-11-20T00:00:00.000Z',
+    };
     const { result } = await filledForm();
-    mocks.post.mockResolvedValueOnce({ returnCode: 409, returnData: { conflicts: [{ existing: { id: 7 } }] } });
+    mocks.post.mockResolvedValueOnce({ returnCode: 409, returnData: { conflicts: [{ existing }] } });
     await act(async () => { await result.current.actions.handleSave(); });
     expect(result.current.data.conflictDialog.open).toBe(true);
     act(() => result.current.actions.viewExisting());
     expect(result.current.data.conflictDialog.open).toBe(false);
+
+    expect(mocks.navigate).toHaveBeenCalledTimes(1);
+    const target = mocks.navigate.mock.calls[0][0] as string;
+    expect(target.startsWith('/daily-verse-detail?verse=')).toBe(true);
+    const encoded = target.slice('/daily-verse-detail?verse='.length);
+    expect(JSON.parse(decodeURIComponent(encoded))).toEqual(existing);
+  });
+
+  it('falls back to Daily Content when no existing verse is attached', async () => {
+    const { result } = await filledForm();
+    act(() => result.current.actions.viewExisting());
     expect(mocks.navigate).toHaveBeenCalledWith('/admin/daily-content');
   });
 

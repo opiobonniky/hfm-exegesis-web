@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import en from '@/components/languages/en.json';
 import { VerseReferenceSection } from './VerseReferenceSection';
@@ -54,5 +54,18 @@ describe('daily verse date picker', () => {
     expect(picked.getDate()).toBe(20);
     expect(picked.getHours()).toBe(8);
     expect(screen.queryByText('20')).not.toBeInTheDocument();
+  });
+
+  it('closes the calendar when the already-selected day is clicked', () => {
+    render(<VerseReferenceSection {...props} />);
+
+    fireEvent.click(screen.getByText(/November 19/));
+    const grid = screen.getByRole('grid');
+    const selectedDay = within(grid).getByText('19').closest('button');
+    expect(selectedDay).not.toBeNull();
+
+    fireEvent.click(selectedDay!);
+
+    expect(screen.queryByRole('grid')).not.toBeInTheDocument();
   });
 });

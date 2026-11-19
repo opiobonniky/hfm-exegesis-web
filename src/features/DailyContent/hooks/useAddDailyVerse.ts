@@ -644,9 +644,16 @@ export function useAddDailyVerse() {
   );
 
   const viewExisting = useCallback(() => {
+    const existing = conflictDialog.conflict?.existing;
     closeConflict();
+    if (existing) {
+      navigate(
+        `${routes.dailyVerseDetail.path}?verse=${encodeURIComponent(JSON.stringify(existing))}`,
+      );
+      return;
+    }
     navigate(routes.adminDailyContent.path);
-  }, [closeConflict, navigate]);
+  }, [closeConflict, conflictDialog, navigate]);
 
   const conflictReference = conflictDialog.conflict?.existing?.bookName
     ? `${conflictDialog.conflict.existing.bookName} ${conflictDialog.conflict.existing.chapter}:${conflictDialog.conflict.existing.verseNumber}`

@@ -68,12 +68,13 @@ export function VerseReferenceSection(p: Props) {
                 mode="single"
                 selected={p.selectedDate}
                 onSelect={(d) => {
+                  setDateOpen(false);
                   if (!d) return;
                   const next = new Date(d);
                   next.setHours(p.selectedDate.getHours(), p.selectedDate.getMinutes(), 0, 0);
                   p.setSelectedDate(next);
-                  setDateOpen(false);
                 }}
+                required
                 initialFocus
               />
             </PopoverContent>
