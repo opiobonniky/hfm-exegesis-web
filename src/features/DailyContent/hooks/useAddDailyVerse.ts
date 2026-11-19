@@ -526,6 +526,9 @@ export function useAddDailyVerse() {
       } else if (res.returnCode === 409) {
         const conflict = res.returnData?.conflicts?.[0];
         if (conflict) {
+          // A save-time conflict is authoritative; ignore any slower preflight
+          // response that could otherwise replace this dialog's payload.
+          dateCheckToken.current += 1;
           setConflictDialog({
             open: true,
             conflict,
