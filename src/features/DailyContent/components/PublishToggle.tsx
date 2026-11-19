@@ -18,7 +18,7 @@ export function PublishToggle({
   publishedDesc = "Show to all users",
 }: PublishToggleProps) {
   return (
-    <div className="flex items-center justify-between">
+    <div className="relative flex items-center justify-between">
       <div className="space-y-1">
         <Label>{publishedLabel}</Label>
         <p className="text-xs text-muted-foreground">{publishedDesc}</p>
