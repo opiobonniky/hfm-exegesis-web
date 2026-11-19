@@ -35,7 +35,7 @@ const AddDailyVerse = () => {
     <PageContentWrapper isRtl={h.isRtl} maxWidth="max-w-[1440px]">
       <AddDailyVerseHeader model={h} />
 
-      <AddDailyVerseWorkspace model={h}>
+      <AddDailyVerseWorkspace>
         <DailyContentFormCard
           icon={BookOpen}
           title={h.t.dailyVerse.verseDetails}
