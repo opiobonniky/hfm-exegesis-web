@@ -472,9 +472,6 @@ export function useAddDailyVerse() {
       displayTime: selectedDate.toISOString(),
       published,
       ...(isEditing ? { id: editingVerse?.id } : {}),
-      ...(isEditing && typeof editingVerse?.sharedStudyVersion === "number"
-        ? { sharedStudyVersion: editingVerse.sharedStudyVersion }
-        : {}),
     };
     try {
       const res = await sendPostRequest("admin", "add-daily-verse", payload);
