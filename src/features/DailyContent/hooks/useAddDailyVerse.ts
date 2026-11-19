@@ -1,10 +1,11 @@
 // useAddDailyVerse — all state + API logic for AddDailyVerse page
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { sendPostRequest } from "@/services/api";
+import { checkDailyVerseDate } from "../services/add-daily-content-service";
 import { usePassagePreview } from './usePassagePreview';
 import { canonicalBook, parseReferences, serializeReferences, parseStudies, serializeStudies, validPassage, collectionError, parseTakeaways, nonEmptyReferences, nonEmptyStudies } from '../helpers/editorContent';
 import { routes } from "@/components/Routes/routes";
@@ -209,6 +210,10 @@ export function useAddDailyVerse() {
     payload: any;
   }>({ open: false, conflict: null, payload: null });
 
+  // Set when the user chooses "Replace" for a preflight date conflict. The
+  // save then updates this row instead of creating a new one.
+  const [replaceTargetId, setReplaceTargetId] = useState<number | null>(null);
+
   // Auto-populate from an existing verse explanation (loaded when a verse is picked)
   const [explanationSource, setExplanationSource] =
     useState<MappedExplanationFields | null>(null);
@@ -373,6 +378,42 @@ export function useAddDailyVerse() {
     );
   }, [selectedDate]);
 
+  // Preflight the selected date as soon as the user picks it. The save path
+  // still performs the authoritative check, but this surfaces the decision
+  // immediately instead of waiting for a 409.
+  const selectedDateKey = format(selectedDate, "yyyy-MM-dd");
+  const previousDateKey = useRef(selectedDateKey);
+  const dateCheckToken = useRef(0);
+
+  useEffect(() => {
+    if (previousDateKey.current === selectedDateKey) return;
+    previousDateKey.current = selectedDateKey;
+    setReplaceTargetId(null);
+
+    const editingDateKey = editingVerse?.displayDate
+      ? format(new Date(editingVerse.displayDate), "yyyy-MM-dd")
+      : null;
+    // Keeping the current verse on its own date can never conflict with itself.
+    if (isEditing && editingDateKey === selectedDateKey) return;
+
+    const token = ++dateCheckToken.current;
+    checkDailyVerseDate(selectedDateKey, editingVerse?.id)
+      .then((res) => {
+        if (token !== dateCheckToken.current) return;
+        const existing = res?.returnData?.existing;
+        if (res?.returnCode === 200 && existing) {
+          setConflictDialog({
+            open: true,
+            conflict: { type: "date", existing },
+            payload: null,
+          });
+        }
+      })
+      .catch(() => {
+        // Network failures must not block editing; Save still validates.
+      });
+  }, [selectedDateKey, isEditing, editingVerse]);
+
   const handleTimeChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const time = e.target.value;
@@ -449,6 +490,7 @@ export function useAddDailyVerse() {
       });
       return;
     }
+    const targetId = isEditing ? editingVerse?.id : replaceTargetId;
     const payload: DailyVersePayload = {
       bookName: book,
       chapter: Number(chapter),
@@ -471,7 +513,7 @@ export function useAddDailyVerse() {
       displayDate: format(selectedDate, "yyyy-MM-dd"),
       displayTime: selectedDate.toISOString(),
       published,
-      ...(isEditing ? { id: editingVerse?.id } : {}),
+      ...(targetId ? { id: targetId } : {}),
     };
     try {
       const res = await sendPostRequest("admin", "add-daily-verse", payload);
@@ -536,6 +578,7 @@ export function useAddDailyVerse() {
     published,
     isEditing,
     editingVerse,
+    replaceTargetId,
     toast,
     t,
     navigate,
@@ -543,7 +586,21 @@ export function useAddDailyVerse() {
 
   const handleConflictUpdate = useCallback(async () => {
     const c = conflictDialog.conflict;
-    if (!c) return;
+    if (!c?.existing?.id) return;
+
+    // Preflight conflict: the user picked a taken date before finishing the
+    // form. Remember the row and apply the replacement on the next save so we
+    // never overwrite existing content with an incomplete form.
+    if (!conflictDialog.payload) {
+      setReplaceTargetId(Number(c.existing.id));
+      setConflictDialog({ open: false, conflict: null, payload: null });
+      toast({
+        title: tt("Replace scheduled"),
+        description: tt("The existing verse will be replaced when you save."),
+      });
+      return;
+    }
+
     setConflictDialog({ open: false, conflict: null, payload: null });
     try {
       const res = await sendPostRequest("admin", "add-daily-verse", {

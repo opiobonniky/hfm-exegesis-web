@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { CalendarIcon, Clock } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -27,6 +28,7 @@ interface Props {
 }
 
 export function VerseReferenceSection(p: Props) {
+  const [dateOpen, setDateOpen] = useState(false);
   const fields = [
     [p.t.dailyVerse.version, p.bibleVersion, p.setBibleVersion, p.bibleVersionOptions, p.bibleVersion || p.t.dailyVerse.selectVersion, false],
   ] as const;
@@ -55,14 +57,25 @@ export function VerseReferenceSection(p: Props) {
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <Label>{p.t.common.date}</Label>
-          <Popover>
+          <Popover open={dateOpen} onOpenChange={setDateOpen}>
             <PopoverTrigger asChild>
               <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !p.selectedDate && "text-muted-foreground")}>
                 <CalendarIcon className="mr-2 h-4 w-4" />{format(p.selectedDate, "PPP")}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0">
-              <Calendar mode="single" selected={p.selectedDate} onSelect={(d) => d && p.setSelectedDate(new Date(d))} initialFocus />
+              <Calendar
+                mode="single"
+                selected={p.selectedDate}
+                onSelect={(d) => {
+                  if (!d) return;
+                  const next = new Date(d);
+                  next.setHours(p.selectedDate.getHours(), p.selectedDate.getMinutes(), 0, 0);
+                  p.setSelectedDate(next);
+                  setDateOpen(false);
+                }}
+                initialFocus
+              />
             </PopoverContent>
           </Popover>
         </div>

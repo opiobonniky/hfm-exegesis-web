@@ -24,6 +24,13 @@ export async function saveDailyDevotion(payload: Partial<DailyDevotionItem>) {
   return sendPostRequest("admin", "add-daily-devotion", payload);
 }
 
+export async function checkDailyVerseDate(date: string, excludeId?: number | string) {
+  return sendPostRequest("admin", "check-daily-verse-date", {
+    date,
+    ...(excludeId ? { excludeId } : {}),
+  });
+}
+
 export async function saveDailyExegesis(payload: Partial<DailyExegesisFull>) {
   return sendPostRequest("admin", "add-daily-exegesis", payload);
 }

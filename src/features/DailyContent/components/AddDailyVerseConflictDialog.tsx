@@ -33,6 +33,7 @@ export function AddDailyVerseConflictDialog({ model: h }: Props) {
     ? `${existing.bookName} ${existing.chapter}:${existing.verseNumber}`
     : "";
   const existingDate = formatExistingDate(existing?.displayDate);
+  const isPreflight = !h.conflictDialog.payload;
 
   return (
     <Dialog open={h.conflictDialog.open} onOpenChange={h.handleConflictOpenChange}>
@@ -45,7 +46,9 @@ export function AddDailyVerseConflictDialog({ model: h }: Props) {
           <DialogDescription className="space-y-2">
             <span className="block">{h.conflictMessage}</span>
             <span className="block">
-              {tt("Choose whether to open the existing entry, replace it with the details you just entered, or keep editing.")}
+              {isPreflight
+                ? tt("This date is already taken. You can view the existing verse, keep this date and replace that verse when you save, or keep editing.")
+                : tt("Choose whether to open the existing entry, replace it with the details you just entered, or keep editing.")}
             </span>
           </DialogDescription>
         </DialogHeader>
@@ -80,7 +83,7 @@ export function AddDailyVerseConflictDialog({ model: h }: Props) {
             <BookOpen className="h-4 w-4 mr-2" /> {h.t.dailyVerse.viewExisting}
           </Button>
           <Button onClick={h.handleConflictUpdate}>
-            <RefreshCw className="h-4 w-4 mr-2" /> {tt("Replace existing")}
+            <RefreshCw className="h-4 w-4 mr-2" /> {isPreflight ? tt("Replace on save") : tt("Replace existing")}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -149,4 +149,65 @@ describe('daily verse editor', () => {
     }));
     expect(mocks.navigate).not.toHaveBeenCalled();
   });
+
+  it('opens the conflict prompt as soon as a taken date is selected', async () => {
+    const existing = {
+      id: 7, bookName: 'John', chapter: 3, verseNumber: 16,
+      displayDate: '2026-11-20T00:00:00.000Z',
+    };
+    mocks.post.mockImplementation((_area: string, action: string) =>
+      Promise.resolve(action === 'check-daily-verse-date'
+        ? { returnCode: 200, returnData: { existing } }
+        : { returnCode: 404 }));
+    const { result } = await filledForm();
+
+    act(() => result.current.actions.setSelectedDate(new Date(2026, 10, 20, 8, 0, 0)));
+
+    await waitFor(() => expect(result.current.data.conflictDialog.open).toBe(true));
+    expect(result.current.data.conflictDialog).toMatchObject({
+      conflict: { type: 'date', existing },
+      payload: null,
+    });
+    expect(mocks.post).toHaveBeenCalledWith('admin', 'check-daily-verse-date', {
+      date: '2026-11-20',
+    });
+  });
+
+  it('keeps the dialog closed when the picked date is available', async () => {
+    mocks.post.mockImplementation((_area: string, action: string) =>
+      Promise.resolve(action === 'check-daily-verse-date'
+        ? { returnCode: 200, returnData: { existing: null } }
+        : { returnCode: 404 }));
+    const { result } = await filledForm();
+
+    act(() => result.current.actions.setSelectedDate(new Date(2026, 10, 21, 8, 0, 0)));
+    await waitFor(() => expect(mocks.post).toHaveBeenCalledWith(
+      'admin', 'check-daily-verse-date', { date: '2026-11-21' },
+    ));
+    await act(async () => {});
+    expect(result.current.data.conflictDialog.open).toBe(false);
+  });
+
+  it('replaces the confirmed preflight target on the next save', async () => {
+    const existing = {
+      id: 7, bookName: 'John', chapter: 3, verseNumber: 16,
+      displayDate: '2026-11-20T00:00:00.000Z',
+    };
+    mocks.post.mockImplementation((_area: string, action: string) =>
+      Promise.resolve(action === 'check-daily-verse-date'
+        ? { returnCode: 200, returnData: { existing } }
+        : { returnCode: 200 }));
+    const { result } = await filledForm();
+
+    act(() => result.current.actions.setSelectedDate(new Date(2026, 10, 20, 8, 0, 0)));
+    await waitFor(() => expect(result.current.data.conflictDialog.open).toBe(true));
+
+    await act(async () => { await result.current.actions.handleConflictUpdate(); });
+    expect(result.current.data.conflictDialog.open).toBe(false);
+
+    await act(async () => { await result.current.actions.handleSave(); });
+    const [area, action, payload] = mocks.post.mock.calls.at(-1)!;
+    expect([area, action]).toEqual(['admin', 'add-daily-verse']);
+    expect(payload.id).toBe(7);
+  });
 });
