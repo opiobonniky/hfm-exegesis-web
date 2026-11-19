@@ -101,7 +101,6 @@ export function AppLayout({ children }: { children?: ReactNode }) {
               {pageTitle}
             </h1>
             <div className="ms-auto flex items-center gap-1">
-              <Link to={routes.downloads.path} className="px-2 text-sm underline">{tt('Downloads')}</Link>
               <button
                 onClick={() => navigate(userInfo?.userRole === 1 ? routes.adminSupport.path : routes.support.path)}
                 className="relative flex items-center justify-center w-8 h-8 rounded-lg hover:bg-muted transition-all active:scale-95"
