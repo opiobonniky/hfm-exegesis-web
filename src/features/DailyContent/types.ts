@@ -346,21 +346,18 @@ export interface AddDailyDevotionCoreSectionsProps {
 }
 
 export interface AddDailyDevotionReferenceSectionProps {
-  testament: string;
   book: string;
   chapter: string;
   verseNumber: string;
   bibleVersion: string;
-  testamentOptions: Array<{ value: string; label: string }>;
-  bookOptions: Array<{ value: string; label: string }>;
-  chapterOptions: Array<{ value: string; label: string }>;
+  verseNumbers: number[];
+  verseText: string;
+  isVerseLoading: boolean;
   bibleVersionOptions: Array<{ value: string; label: string }>;
-  setTestament: (value: string) => void;
   setBook: (value: string) => void;
   setChapter: (value: string) => void;
   setVerseNumber: (value: string) => void;
   setBibleVersion: (value: string) => void;
-  t: { dailyVerse: { selectBook: string; selectChapter: string }; devotions: { selectTestament: string } };
 }
 
 export interface AddDailyDevotionContentFieldsProps {

@@ -9,8 +9,6 @@ vi.mock('@/components/ui/combobox', () => ({
 }));
 
 const props = {
-  testament: 'New',
-  setTestament: vi.fn(),
   book: 'John',
   setBook: vi.fn(),
   chapter: '3',
@@ -27,10 +25,6 @@ const props = {
   setSelectedDate: vi.fn(),
   selectedTime: '08:00',
   handleTimeChange: vi.fn(),
-  books: ['John'],
-  chapters: [3],
-  maxVerses: 51,
-  TESTAMENTS: [{ value: 'New', label: 'New Testament' }],
   t: en as any,
   isRtl: false,
 };

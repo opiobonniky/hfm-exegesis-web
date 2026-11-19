@@ -1,65 +1,56 @@
+import { Loader2, BookOpen } from "lucide-react";
 import { Combobox } from "@/components/ui/combobox";
-import { Input } from "@/components/ui/input";
 import type { AddDailyDevotionReferenceSectionProps } from "../types";
 import { CollapsibleSection } from "./CollapsibleSection";
 import { FormField } from "./FormField";
-import { FormGrid } from "./FormGrid";
+import { PassageFields } from "./PassageFields";
 import { tt } from '@/components/languages/hardcodedTranslate';
 
 export function AddDailyDevotionReferenceSection(props: AddDailyDevotionReferenceSectionProps) {
-  const { testament, book, chapter, verseNumber, bibleVersion, testamentOptions, bookOptions, chapterOptions, bibleVersionOptions, setTestament, setBook, setChapter, setVerseNumber, setBibleVersion, t } = props;
+  const {
+    book, chapter, verseNumber, bibleVersion, verseNumbers, verseText,
+    isVerseLoading, bibleVersionOptions, setBook, setChapter,
+    setVerseNumber, setBibleVersion,
+  } = props;
+
   return (
-    <CollapsibleSection title={tt("Optional Bible Reference")} defaultOpen={false}>
-      <FormGrid columns={4}>
-        <FormField label={tt("Testament")}>
-          <Combobox
-            options={testamentOptions}
-            value={testament}
-            onChange={setTestament}
-            placeholder={t.devotions.selectTestament}
-            width="w-full"
-          />
-        </FormField>
-        <FormField label={tt("Book")}>
-          <Combobox
-            options={bookOptions}
-            value={book}
-            onChange={setBook}
-            placeholder={t.dailyVerse.selectBook}
-            disabled={!testament}
-            width="w-full"
-          />
-        </FormField>
-        <FormField label={tt("Chapter")}>
-          <Combobox
-            options={chapterOptions}
-            value={chapter}
-            onChange={setChapter}
-            placeholder={t.dailyVerse.selectChapter}
-            disabled={!book}
-            width="w-full"
-          />
-        </FormField>
-        <FormField label={tt("Verse")}>
-          <Input
-            type="number"
-            value={verseNumber}
-            onChange={(event) => setVerseNumber(event.target.value)}
-            placeholder={tt("Verse #")}
-            disabled={!chapter}
-            min={1}
-          />
-        </FormField>
-      </FormGrid>
-      <FormField label={tt("Bible Version")}>
-        <Combobox
-          options={bibleVersionOptions}
-          value={bibleVersion}
-          onChange={setBibleVersion}
-          placeholder={bibleVersion || tt("Select version")}
-          width="w-full"
+    <CollapsibleSection title={tt("Optional Bible Reference")} defaultOpen>
+      <div className="space-y-4">
+        <PassageFields
+          value={{ bookName: book, chapter, verseNumber, verseEnd: "" }}
+          verseNumbers={verseNumbers}
+          loading={isVerseLoading}
+          allowRange={false}
+          onChange={(next) => {
+            if (next.bookName !== book) setBook(next.bookName);
+            else if (next.chapter !== chapter) setChapter(next.chapter);
+            else setVerseNumber(next.verseNumber);
+          }}
         />
-      </FormField>
+
+        <FormField label={tt("Bible Version")}>
+          <Combobox
+            options={bibleVersionOptions}
+            value={bibleVersion}
+            onChange={setBibleVersion}
+            placeholder={bibleVersion || tt("Select version")}
+            searchPlaceholder={tt("Search Bible versions…")}
+            width="w-full"
+          />
+        </FormField>
+
+        {(isVerseLoading || verseText) && (
+          <div className="rounded-xl border border-primary/20 bg-primary/5 p-4" aria-live="polite">
+            <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-primary">
+              {isVerseLoading
+                ? <Loader2 className="h-4 w-4 animate-spin" />
+                : <BookOpen className="h-4 w-4" />}
+              {isVerseLoading ? tt("Loading verse…") : `${book} ${chapter}:${verseNumber} · ${bibleVersion}`}
+            </div>
+            {!isVerseLoading && <p className="text-sm leading-6 text-foreground">{verseText}</p>}
+          </div>
+        )}
+      </div>
     </CollapsibleSection>
   );
 }

@@ -45,7 +45,7 @@ async function filledForm(editing = false) {
   const hook = renderHook(() => useAddDailyVerse());
   if (!editing) act(() => {
     const a = hook.result.current.actions;
-    a.setTestament('Old'); a.setBook('Genesis'); a.setChapter('1'); a.setVerseNumber('1');
+    a.setBook('Genesis'); a.setChapter('1'); a.setVerseNumber('1');
     a.setExplanation('Explanation'); a.setApplication('Application'); a.setVerseIntroduction('Introduction');
   });
   await waitFor(() => expect(hook.result.current.data.saveDisabled).toBe(false));

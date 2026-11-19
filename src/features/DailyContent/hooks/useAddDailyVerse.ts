@@ -1,5 +1,5 @@
 // useAddDailyVerse — all state + API logic for AddDailyVerse page
-import { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
@@ -9,10 +9,6 @@ import { checkDailyVerseDate } from "../services/add-daily-content-service";
 import { usePassagePreview } from './usePassagePreview';
 import { canonicalBook, parseReferences, serializeReferences, parseStudies, serializeStudies, validPassage, collectionError, parseTakeaways, nonEmptyReferences, nonEmptyStudies } from '../helpers/editorContent';
 import { routes } from "@/components/Routes/routes";
-import {
-  getBooksByTestament,
-  getChaptersForBook,
-} from "@/utilities/bibleUtils";
 import { useBibleEditions } from '@/hooks/useBibleEditions';
 import type { DailyVersePayload } from "../types";
 import { parseStructuredField } from "../helpers/contentDetailHelpers";
@@ -20,7 +16,6 @@ import { tt } from '@/components/languages/hardcodedTranslate';
 
 /** All form fields in one object */
 export interface VerseFormFields {
-  testament: string;
   book: string;
   chapter: string;
   verseNumber: string;
@@ -45,7 +40,6 @@ export interface VerseFormFields {
 }
 
 const EDITING_FIELDS: (keyof VerseFormFields)[] = [
-  "testament",
   "book",
   "chapter",
   "verseNumber",
@@ -122,16 +116,6 @@ export function useAddDailyVerse() {
   const initialChapter = editingVerse?.chapter ?? sourceExplanation?.chapter;
   const initialVerseNumber =
     editingVerse?.verseNumber ?? sourceExplanation?.verseNumber;
-  const initialTestament =
-    editingVerse?.testament ||
-    sourceExplanation?.testament ||
-    (getBooksByTestament("Old").includes(initialBook)
-      ? "Old"
-      : initialBook
-        ? "New"
-        : "");
-
-  const [testament, setTestament] = useState(initialTestament);
   const [book, setBook] = useState(initialBook);
   const [chapter, setChapter] = useState(initialChapter?.toString() || "");
   const [verseNumber, setVerseNumber] = useState(
@@ -221,30 +205,14 @@ export function useAddDailyVerse() {
   const [explanationApplied, setExplanationApplied] = useState(false);
   const [explanationError, setExplanationError] = useState(false);
 
-  const books = useMemo(
-    () => getBooksByTestament(testament as "Old" | "New"),
-    [testament],
-  );
-  const chapters = useMemo(() => getChaptersForBook(book), [book]);
-
   const preview = usePassagePreview(book, chapter, verseNumber, verseEnd, bibleVersion);
   const isVerseLoading = preview.loading;
-  const maxVerses = Math.max(0, ...preview.verseNumbers);
-
-  const TESTAMENTS = useMemo(
-    () => [
-      { value: "Old", label: t.dailyVerse.oldTestament },
-      { value: "New", label: t.dailyVerse.newTestament },
-    ],
-    [t],
-  );
 
   useEffect(() => { if (!isVerseEditing) setVerseText(preview.text); }, [preview.text, isVerseEditing]);
 
   // Reset descendants atomically. Never carry an old chapter, range, or edited
   // quotation into a different passage/translation.
-  const changeTestament = (value: string) => { setTestament(value); setBook(''); setChapter(''); setVerseNumber(''); setVerseEnd(''); setIsVerseEditing(false); setVerseText(''); };
-  const changeBook = (value: string) => { setBook(canonicalBook(value)); if (value) setTestament(getBooksByTestament('Old').includes(canonicalBook(value)) ? 'Old' : 'New'); setChapter(''); setVerseNumber(''); setVerseEnd(''); setIsVerseEditing(false); setVerseText(''); };
+  const changeBook = (value: string) => { setBook(canonicalBook(value)); setChapter(''); setVerseNumber(''); setVerseEnd(''); setIsVerseEditing(false); setVerseText(''); };
   const changeChapter = (value: string) => { setChapter(value); setVerseNumber(''); setVerseEnd(''); setIsVerseEditing(false); setVerseText(''); };
   const changeVerse = (value: string) => { setVerseNumber(value); setVerseEnd(''); setIsVerseEditing(false); setVerseText(''); };
   const changeEnd = (value: string) => { setVerseEnd(value); setIsVerseEditing(false); setVerseText(''); };
@@ -442,7 +410,6 @@ export function useAddDailyVerse() {
       const missing: string[] = [];
 
       if (step === 0) {
-        if (!testament) missing.push("testament");
         if (!book) missing.push("book");
         if (!chapter) missing.push("chapter");
         if (!verseNumber) missing.push("verse");
@@ -467,7 +434,6 @@ export function useAddDailyVerse() {
       return true;
     },
     [
-      testament,
       book,
       chapter,
       verseNumber,
@@ -670,8 +636,6 @@ export function useAddDailyVerse() {
 
   return {
     data: {
-    testament,
-    setTestament,
     book,
     setBook,
     chapter,
@@ -723,10 +687,6 @@ export function useAddDailyVerse() {
     takeaways,
     setTakeaways,
     // Derived
-    books,
-    chapters,
-    maxVerses,
-    TESTAMENTS,
     saveDisabled,
     validateStep,
     isEditing,
@@ -750,7 +710,7 @@ export function useAddDailyVerse() {
     isRtl,
     },
     actions: {
-    setTestament: changeTestament, setBook: changeBook, setChapter: changeChapter, setVerseNumber: changeVerse, setVerseEnd: changeEnd, setBibleVersion: changeVersion, setPublished,
+    setBook: changeBook, setChapter: changeChapter, setVerseNumber: changeVerse, setVerseEnd: changeEnd, setBibleVersion: changeVersion, setPublished,
     setSelectedDate, handleTimeChange, setVerseText, setIsVerseEditing, setExplanation,
     setApplication, setVerseIntroduction, setBackgroundAuthor, setBackgroundBook,
     setBackgroundContext, setWordStudies, setPracticalApplications, setKeyThemes,

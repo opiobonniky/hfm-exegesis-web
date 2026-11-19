@@ -42,21 +42,18 @@ export default function AddDailyDevotion() {
           setContent={actions.setContent}
         />
         <AddDailyDevotionReferenceSection
-          testament={data.testament}
           book={data.book}
           chapter={data.chapter}
           verseNumber={data.verseNumber}
           bibleVersion={data.bibleVersion}
-          testamentOptions={data.testamentOptions}
-          bookOptions={data.bookOptions}
-          chapterOptions={data.chapterOptions}
+          verseNumbers={data.verseNumbers}
+          verseText={data.verseText}
+          isVerseLoading={data.isVerseLoading}
           bibleVersionOptions={data.bibleVersionOptions}
-          setTestament={actions.setTestament}
           setBook={actions.setBook}
           setChapter={actions.setChapter}
           setVerseNumber={actions.setVerseNumber}
           setBibleVersion={actions.setBibleVersion}
-          t={data.t}
         />
         <AddDailyDevotionContentFields
           explanation={data.explanation}

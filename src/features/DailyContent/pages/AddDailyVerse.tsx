@@ -48,8 +48,6 @@ const AddDailyVerse = () => {
               description={tt("Choose the passage, text, and schedule")}
             >
               <VerseReferenceSection
-                testament={h.testament}
-                setTestament={h.setTestament}
                 book={h.book}
                 setBook={h.setBook}
                 chapter={h.chapter}
@@ -66,10 +64,6 @@ const AddDailyVerse = () => {
                 setSelectedDate={h.setSelectedDate}
                 selectedTime={h.selectedTime}
                 handleTimeChange={h.handleTimeChange}
-                books={h.books}
-                chapters={h.chapters}
-                maxVerses={h.maxVerses}
-                TESTAMENTS={h.TESTAMENTS}
                 t={h.t}
                 isRtl={h.isRtl}
               />

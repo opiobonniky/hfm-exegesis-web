@@ -7,10 +7,6 @@ import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { routes } from "@/components/Routes/routes";
 import { useBibleEditions } from '@/hooks/useBibleEditions';
-import {
-  getBooksByTestament,
-  getChaptersForBook,
-} from "@/utilities/bibleUtils";
 import { parseStructuredField } from "../helpers/contentDetailHelpers";
 import { getDailyDevotionVerse, getDailyDevotionVerses, saveDailyDevotion } from "../services/add-daily-content-service";
 import { tt } from '@/components/languages/hardcodedTranslate';
@@ -29,7 +25,6 @@ export function useAddDailyDevotion() {
   const [content, setContent] = useState(editingDevotion?.content || "");
 
   // Bible reference
-  const [testament, setTestament] = useState(editingDevotion?.testament || (editingDevotion?.bookName ? getBooksByTestament('Old').includes(canonicalBook(editingDevotion.bookName)) ? 'Old' : 'New' : ''));
   const [book, setBook] = useState(canonicalBook(editingDevotion?.bookName || ""));
   const [chapter, setChapter] = useState(editingDevotion?.chapter?.toString() || "");
   const [verseNumber, setVerseNumber] = useState(editingDevotion?.verseNumber?.toString() || "");
@@ -80,10 +75,6 @@ export function useAddDailyDevotion() {
   const [finalThoughts, setFinalThoughts] = useState(editingDevotion?.finalThoughts || "");
   const [takeaways, setTakeaways] = useState(() => JSON.stringify(parseTakeaways(editingDevotion?.takeaways)));
 
-  // Derived
-  const books = useMemo(() => getBooksByTestament(testament as "Old" | "New"), [testament]);
-  const chapters = useMemo(() => getChaptersForBook(book), [book]);
-
   // Fetch the chapter's verse list from the backend (reliable for every book,
   // including BSB's "Psalm" vs "Psalms" naming) to populate the verse count.
   const [verseCount, setVerseCount] = useState(0);
@@ -105,7 +96,7 @@ export function useAddDailyDevotion() {
           map[v.verseNumber] = v.text;
         });
         setChapterVerses(map);
-        setVerseCount(verses.length);
+        setVerseCount(Math.max(0, ...verses.map((verse) => Number(verse.verseNumber) || 0)));
       })
       .catch(() => {
         if (!active) return;
@@ -120,20 +111,9 @@ export function useAddDailyDevotion() {
     };
   }, [book, chapter, bibleVersion]);
   const maxVerses = verseCount;
-  const testamentOptions = useMemo(() => [
-    { value: "Old", label: t.dailyVerse.oldTestament },
-    { value: "New", label: t.dailyVerse.newTestament },
-  ], [t]);
-  const bookOptions = useMemo(
-    () => books.map((bookName) => ({ value: bookName, label: bookName })),
-    [books],
-  );
-  const chapterOptions = useMemo(
-    () => chapters.map((chapterNumber) => ({
-      value: String(chapterNumber),
-      label: String(chapterNumber),
-    })),
-    [chapters],
+  const verseNumbers = useMemo(
+    () => Array.from({ length: maxVerses }, (_, index) => index + 1),
+    [maxVerses],
   );
   const bibleVersionOptions = editions.options;
 
@@ -179,12 +159,25 @@ export function useAddDailyDevotion() {
     [selectedDate],
   );
 
-  const saveDisabled = !title.trim() || !content.trim();
+  const referenceStarted = Boolean(book || chapter || verseNumber);
+  const referenceComplete = Boolean(book && chapter && verseNumber);
+  const saveDisabled =
+    !title.trim() ||
+    !content.trim() ||
+    (referenceStarted && (!referenceComplete || isVerseLoading || !verseText.trim()));
 
   const handleSave = useCallback(async (e?: React.FormEvent) => {
     e?.preventDefault();
     if (saveDisabled) {
-      toast({ title: tt("Missing fields"), description: tt("Title and content are required"), variant: "destructive" });
+      toast({
+        title: tt("Missing fields"),
+        description: referenceStarted && !referenceComplete
+          ? tt("Choose a book, chapter, and verse together")
+          : referenceStarted
+            ? tt("Wait for the selected verse text to load")
+            : tt("Title and content are required"),
+        variant: "destructive",
+      });
       return;
     }
     const payload: Record<string, any> = {
@@ -246,6 +239,7 @@ export function useAddDailyDevotion() {
     backgroundAuthor, backgroundBook, backgroundContext,
     wordStudies, practicalApplications, keyThemes, crossReferences, finalThoughts, takeaways,
     isEditing, editingDevotion, toast, t, navigate, saveDisabled,
+    referenceStarted, referenceComplete,
   ]);
 
   const closeConflict = useCallback(() => {
@@ -292,9 +286,9 @@ export function useAddDailyDevotion() {
 
   return {
     data: {
-      title, content, testament, book, chapter, verseNumber, bibleVersion,
-      verseText, isVerseLoading, books, chapters, maxVerses,
-      testamentOptions, bookOptions, chapterOptions, bibleVersionOptions,
+      title, content, book, chapter, verseNumber, bibleVersion,
+      verseText, isVerseLoading, verseNumbers, maxVerses,
+      bibleVersionOptions,
       selectedDate, selectedTime, published, explanation, application,
       verseIntroduction, learnMore, backgroundAuthor, backgroundBook,
       backgroundContext, wordStudies, practicalApplications, keyThemes,
@@ -306,7 +300,6 @@ export function useAddDailyDevotion() {
     },
     actions: {
       setTitle, setContent,
-      setTestament: (value: string) => { setTestament(value); setBook(''); setChapter(''); setVerseNumber(''); setVerseText(''); },
       setBook: (value: string) => { setBook(value); setChapter(''); setVerseNumber(''); setVerseText(''); },
       setChapter: (value: string) => { setChapter(value); setVerseNumber(''); setVerseText(''); },
       setVerseNumber, setBibleVersion, setSelectedDate, handleTimeChange,

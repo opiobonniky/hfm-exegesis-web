@@ -4,6 +4,7 @@ import { useAddDailyDevotion } from './useAddDailyDevotion';
 
 const mocks = vi.hoisted(() => ({
   navigate: vi.fn(), toast: vi.fn(), post: vi.fn(),
+  getVerses: vi.fn(), getVerse: vi.fn(),
   state: undefined as Record<string, unknown> | undefined,
 }));
 
@@ -22,8 +23,8 @@ vi.mock('@/hooks/useBibleEditions', () => ({
 }));
 vi.mock('../services/add-daily-content-service', () => ({
   saveDailyDevotion: (...args: unknown[]) => mocks.post(...args),
-  getDailyDevotionVerses: vi.fn().mockResolvedValue({ verses: [] }),
-  getDailyDevotionVerse: vi.fn().mockResolvedValue({ text: 'Verse text' }),
+  getDailyDevotionVerses: (...args: unknown[]) => mocks.getVerses(...args),
+  getDailyDevotionVerse: (...args: unknown[]) => mocks.getVerse(...args),
 }));
 vi.mock('@/components/Routes/routes', () => ({ routes: {
   dailyDevotions: { path: '/daily-devotions' },
@@ -33,6 +34,8 @@ beforeEach(() => {
   vi.clearAllMocks();
   mocks.state = undefined;
   mocks.post.mockResolvedValue({ returnCode: 404 });
+  mocks.getVerses.mockResolvedValue({ verses: [] });
+  mocks.getVerse.mockResolvedValue({ text: 'Verse text' });
 });
 afterEach(() => { cleanup(); vi.useRealTimers(); });
 
@@ -50,6 +53,24 @@ async function filledForm(editing = false) {
 }
 
 describe('daily devotion editor', () => {
+  it('fetches and shows the selected verse text from the chapter response', async () => {
+    mocks.getVerses.mockResolvedValue({
+      verses: [
+        { verseNumber: 15, text: 'Verse fifteen' },
+        { verseNumber: 16, text: 'For God so loved the world.' },
+      ],
+    });
+    const { result } = renderHook(() => useAddDailyDevotion());
+
+    act(() => result.current.actions.setBook('John'));
+    act(() => result.current.actions.setChapter('3'));
+    await waitFor(() => expect(result.current.data.verseNumbers).toHaveLength(16));
+    act(() => result.current.actions.setVerseNumber('16'));
+
+    await waitFor(() => expect(result.current.data.verseText).toBe('For God so loved the world.'));
+    expect(mocks.getVerses).toHaveBeenCalledWith('BSB', 'John', 3);
+  });
+
   it('offers view or replace when the chosen date is already taken', async () => {
     const existing = {
       id: 7, title: 'Existing devotion', displayDate: '2026-11-18T00:00:00.000Z',
