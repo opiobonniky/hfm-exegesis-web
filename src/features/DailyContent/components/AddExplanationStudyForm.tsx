@@ -38,6 +38,7 @@ export function AddExplanationStudyForm(props: AddExplanationStudyFormProps) {
             <CharCount value={h.form.studyMetadata.introduction} max={BACKGROUND_MAX} />
           </div>
           <Textarea
+            data-validation-field="introduction"
             aria-invalid={!!errors.introduction}
             aria-describedby={errors.introduction ? "introduction-error" : undefined}
             placeholder={tt("Brief introduction to the verse...")}
@@ -57,6 +58,7 @@ export function AddExplanationStudyForm(props: AddExplanationStudyFormProps) {
               <CharCount value={h.form.studyMetadata.backgroundAuthor} max={BACKGROUND_MAX} />
             </div>
             <Textarea
+              data-validation-field="backgroundAuthor"
               aria-invalid={!!errors.backgroundAuthor}
               aria-describedby={errors.backgroundAuthor ? "background-author-error" : undefined}
               value={h.form.studyMetadata.backgroundAuthor}
@@ -74,6 +76,7 @@ export function AddExplanationStudyForm(props: AddExplanationStudyFormProps) {
               <CharCount value={h.form.studyMetadata.backgroundBook} max={BACKGROUND_MAX} />
             </div>
             <Textarea
+              data-validation-field="backgroundBook"
               aria-invalid={!!errors.backgroundBook}
               aria-describedby={errors.backgroundBook ? "background-book-error" : undefined}
               value={h.form.studyMetadata.backgroundBook}
@@ -91,6 +94,7 @@ export function AddExplanationStudyForm(props: AddExplanationStudyFormProps) {
               <CharCount value={h.form.studyMetadata.backgroundContext} max={BACKGROUND_MAX} />
             </div>
             <Textarea
+              data-validation-field="backgroundContext"
               aria-invalid={!!errors.backgroundContext}
               aria-describedby={errors.backgroundContext ? "background-context-error" : undefined}
               value={h.form.studyMetadata.backgroundContext}
@@ -105,7 +109,7 @@ export function AddExplanationStudyForm(props: AddExplanationStudyFormProps) {
         </div>
       </div>
 
-      <WordStudyEditor value={wordStudies} showErrors={props.showErrors} requireAll
+      <WordStudyEditor value={wordStudies} showErrors={props.showErrors} revealErrors={props.revealRowErrors} requireAll
         onChange={rows => updateField('wordStudies', rows.map((row, sortOrder) => ({ ...row, sortOrder })))} />
     </div>
   );

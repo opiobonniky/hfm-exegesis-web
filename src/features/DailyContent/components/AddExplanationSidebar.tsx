@@ -61,11 +61,11 @@ export function AddExplanationSidebar({
         <ul className="mt-3 space-y-2 text-sm text-foreground">
           <li className="flex items-center justify-between gap-2">
             <span>{tt("Reference")}</span>
-            <span className={referenceComplete ? "text-emerald-600" : "text-muted-foreground"}>{referenceComplete ? tt("Ready") : tt("Missing")}</span>
+            <span className={referenceComplete ? "text-emerald-600" : "text-muted-foreground"}>{referenceComplete ? tt("Ready") : tt("Pending")}</span>
           </li>
           <li className="flex items-center justify-between gap-2">
             <span>{tt("Explanation")}</span>
-            <span className={exegesisComplete ? "text-emerald-600" : "text-muted-foreground"}>{exegesisComplete ? tt("Ready") : tt("Missing")}</span>
+            <span className={exegesisComplete ? "text-emerald-600" : "text-muted-foreground"}>{exegesisComplete ? tt("Ready") : tt("Pending")}</span>
           </li>
         </ul>
       </div>

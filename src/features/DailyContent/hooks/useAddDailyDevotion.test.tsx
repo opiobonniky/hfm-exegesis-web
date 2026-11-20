@@ -95,7 +95,8 @@ describe('daily devotion editor', () => {
     expect(result.current.data.fieldErrors.explanation).toBeUndefined();
     await act(async () => { await result.current.actions.handleSave(); });
     expect(mocks.post).not.toHaveBeenCalled();
-    expect(mocks.toast).toHaveBeenCalledWith(expect.objectContaining({ description: 'Exactly three non-empty learning points are required.' }));
+    expect(result.current.data.fieldErrors.learningPoints).toBe('Exactly three non-empty learning points are required.');
+    expect(mocks.toast).not.toHaveBeenCalled();
     act(() => result.current.actions.setLearningPoints(['One', 'Two', 'Three']));
     expect(result.current.data.validationErrors).toEqual([]);
     expect(result.current.data.fieldErrors.learningPoints).toBeUndefined();

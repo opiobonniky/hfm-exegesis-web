@@ -2,15 +2,15 @@
  * DevotionList — renders the list of devotion items with selection support.
  */
 import { DevotionListItem } from "./DevotionListItem";
-import type { DailyDevotionItem } from "../types";
+import type { DailyDevotionCardItem } from "../types";
 
 interface Props {
-  devotions: DailyDevotionItem[];
+  devotions: DailyDevotionCardItem[];
   selectedIndex: number;
   isAdmin: boolean;
   onSelect: (index: number) => void;
-  onEdit: (item: DailyDevotionItem) => void;
-  onDelete: (item: DailyDevotionItem) => void;
+  onEdit: (item: DailyDevotionCardItem) => void;
+  onDelete: (item: DailyDevotionCardItem) => void;
 }
 
 export function DevotionList({

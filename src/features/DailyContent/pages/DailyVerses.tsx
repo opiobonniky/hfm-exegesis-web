@@ -21,23 +21,34 @@ export default function DailyVerses() {
     <VerseExplanationFilters
       bookName={data.bookName}
       chapter={data.chapter}
-      creatorName={data.creatorName}
+      creatorName={data.search}
       onBookChange={data.changeBook}
       onChapterChange={data.changeChapter}
-      onCreatorNameChange={data.changeCreatorName}
+      onCreatorNameChange={data.changeSearch}
+      searchLabel={tt('Search daily verses')}
+      searchPlaceholder={tt('Creator, book, Bible version or verse content')}
+      hasAdditionalFilters={Boolean(data.startDate || data.endDate)}
       onClear={data.clearFilters}
-    />
-    <div className="flex flex-wrap items-end justify-between gap-3">
-      <div className="space-y-1 text-xs text-muted-foreground">{tt('Publish date')}
-        <DatePicker valueFormat="string" value={data.searchDate} onChange={data.changeDate}
-          onClear={() => data.changeDate('')} clearable placeholder={tt('Pick a date')} aria-label={tt('Publish date')} />
+    >
+      <div className="grid w-full grid-cols-2 gap-2 sm:w-[22rem]">
+        <div className="min-w-0 space-y-1.5 text-xs text-muted-foreground">
+          <label htmlFor="daily-verse-start">{tt('From (publish date)')}</label>
+          <DatePicker id="daily-verse-start" valueFormat="string" value={data.startDate} max={data.endDate || undefined}
+            onChange={data.changeStartDate} onClear={() => data.changeStartDate('')} clearable
+            className="h-9 text-xs" placeholder={tt('Start date')} aria-label={tt('From (publish date)')} />
+        </div>
+        <div className="min-w-0 space-y-1.5 text-xs text-muted-foreground">
+          <label htmlFor="daily-verse-end">{tt('To (publish date)')}</label>
+          <DatePicker id="daily-verse-end" valueFormat="string" value={data.endDate} min={data.startDate || undefined}
+            onChange={data.changeEndDate} onClear={() => data.changeEndDate('')} clearable
+            className="h-9 text-xs" placeholder={tt('End date')} aria-label={tt('To (publish date)')} />
+        </div>
       </div>
-      <div className="flex items-center gap-3">
-        {data.searchDate && <Button variant="ghost" onClick={() => data.changeDate('')}>{tt('Clear date')}</Button>}
+    </VerseExplanationFilters>
+      <div className="flex items-center justify-between gap-3">
         <span className="text-sm text-muted-foreground">{data.total} {tt('results')}</span>
         <Button onClick={data.add}>{tt('Add Daily Verse')}</Button>
       </div>
-    </div>
       {data.loading ? <ContentLoading /> : !data.content.length
         ? <p className="rounded-xl border border-dashed p-8 text-center text-muted-foreground">{tt('No daily verses found.')}</p>
         : <DailyContentGrid items={data.content} onView={data.view} onEdit={data.edit} onDelete={data.setDeleteTarget} />}

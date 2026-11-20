@@ -10,6 +10,7 @@ export function AddDailyDevotionCoreSections({ title, setTitle, error }: AddDail
       <CollapsibleSection title={tt("Devotion Title")}>
         <FormField label={tt("Title")} required error={error}>
           <Input
+            data-validation-field="title"
             value={title}
             aria-invalid={!!error}
             onChange={(event) => setTitle(event.target.value)}

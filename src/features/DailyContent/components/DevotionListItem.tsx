@@ -1,14 +1,14 @@
-import { Calendar, Edit3, Trash2 } from "lucide-react";
+import { Edit3, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/components/languages/languageProvider";
-import type { DailyDevotionItem } from "../types";
+import type { DailyDevotionCardItem } from "../types";
 import { tt } from '@/components/languages/hardcodedTranslate';
 import { displayDate } from '@/services/numberLocale/format';
 import { DailyContentMetadata } from './DailyContentMetadata';
 
 interface Props {
-  item: DailyDevotionItem;
+  item: DailyDevotionCardItem;
   isSelected: boolean;
   onSelect: () => void;
   onEdit: () => void;
@@ -18,6 +18,8 @@ interface Props {
 
 export function DevotionListItem({ item, isSelected, onSelect, onEdit, onDelete, isAdmin }: Props) {
   const { lang } = useLanguage();
+  const title = item.preview?.title || item.title;
+  const excerpt = item.preview?.explanation || item.explanation;
   const dateStr = item.displayDate && typeof item.displayDate === "string"
     ? displayDate(item.displayDate, lang, { month: "short", day: "numeric", year: "numeric" })
     : "—";
@@ -33,14 +35,14 @@ export function DevotionListItem({ item, isSelected, onSelect, onEdit, onDelete,
     >
       <div className="flex items-start justify-between gap-3">
         <button type="button" className="flex-1 min-w-0 text-start" onClick={onSelect}>
-          <p className="font-semibold text-sm text-foreground truncate">{item.title}</p>
+          <p className="font-semibold text-sm text-foreground truncate">{title}</p>
           {!isAdmin && <p className="mt-1 text-xs text-muted-foreground">{dateStr}</p>}
-          {item.explanation && (
-            <p className="text-xs text-muted-foreground/70 mt-1.5 line-clamp-2">{item.explanation.substring(0, 150)}</p>
+          {excerpt && (
+            <p className="text-xs text-muted-foreground/70 mt-1.5 line-clamp-2">{excerpt}</p>
           )}
           {item.bookName && (
             <p className="text-xs text-primary mt-1">
-              {item.bookName} {item.chapter}:{item.verseNumber}
+              {item.preview?.reference || `${item.bookName} ${item.chapter}:${item.verseNumber}`}
             </p>
           )}
         </button>

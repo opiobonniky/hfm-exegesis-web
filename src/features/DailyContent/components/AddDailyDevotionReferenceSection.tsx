@@ -13,6 +13,7 @@ export function AddDailyDevotionReferenceSection(props: AddDailyDevotionReferenc
     setVerseNumber, setBibleVersion,
   } = props;
 
+  const passageErrorKey = !book ? 'bookName' : !chapter ? 'chapter' : 'verseNumber';
   return (
     <CollapsibleSection title={tt("Optional Bible Reference")} defaultOpen>
       <div className="space-y-4">
@@ -21,15 +22,14 @@ export function AddDailyDevotionReferenceSection(props: AddDailyDevotionReferenc
           verseNumbers={verseNumbers}
           loading={isVerseLoading}
           allowRange={false}
+          errors={{ [passageErrorKey]: props.error || '' }}
           onChange={(next) => {
             if (next.bookName !== book) setBook(next.bookName);
             else if (next.chapter !== chapter) setChapter(next.chapter);
             else setVerseNumber(next.verseNumber);
           }}
         />
-        {props.error && <p role="status" className="text-xs text-destructive">{props.error}</p>}
-
-        <FormField label={tt("Bible Version")}>
+        <div data-validation-field="bibleVersion"><FormField label={tt("Bible Version")} error={props.bibleVersionError}>
           <Combobox
             options={bibleVersionOptions}
             value={bibleVersion}
@@ -37,8 +37,9 @@ export function AddDailyDevotionReferenceSection(props: AddDailyDevotionReferenc
             placeholder={bibleVersion || tt("Select version")}
             searchPlaceholder={tt("Search Bible versions…")}
             width="w-full"
+            invalid={!!props.bibleVersionError}
           />
-        </FormField>
+        </FormField></div>
 
         {(isVerseLoading || verseText) && (
           <div className="rounded-xl border border-primary/20 bg-primary/5 p-4" aria-live="polite">

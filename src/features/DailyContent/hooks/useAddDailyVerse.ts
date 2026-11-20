@@ -7,7 +7,8 @@ import { useLanguage } from "@/components/languages/languageProvider";
 import { sendPostRequest } from "@/services/api";
 import { checkDailyVerseDate } from "../services/add-daily-content-service";
 import { usePassagePreview } from './usePassagePreview';
-import { canonicalBook, parseReferences, serializeReferences, parseStudies, serializeStudies, validPassage, collectionError, parseTakeaways, nonEmptyReferences, nonEmptyStudies } from '../helpers/editorContent';
+import { canonicalBook, parseReferences, serializeReferences, parseStudies, serializeStudies, validPassage, collectionError, parseTakeaways, nonEmptyReferences, nonEmptyStudies, requiredStudyFieldErrors, requiredReferenceError } from '../helpers/editorContent';
+import { scheduleErrors } from '../helpers/scheduleValidation';
 import { routes } from "@/components/Routes/routes";
 import { useBibleEditions } from '@/hooks/useBibleEditions';
 import type { DailyVersePayload } from "../types";
@@ -349,7 +350,7 @@ export function useAddDailyVerse() {
   // Preflight the selected date as soon as the user picks it. The save path
   // still performs the authoritative check, but this surfaces the decision
   // immediately instead of waiting for a 409.
-  const selectedDateKey = format(selectedDate, "yyyy-MM-dd");
+  const selectedDateKey = Number.isFinite(selectedDate.getTime()) ? format(selectedDate, "yyyy-MM-dd") : '';
   const previousDateKey = useRef(selectedDateKey);
   const dateCheckToken = useRef(0);
 
@@ -357,14 +358,15 @@ export function useAddDailyVerse() {
     if (previousDateKey.current === selectedDateKey) return;
     previousDateKey.current = selectedDateKey;
     setReplaceTargetId(null);
+    const token = ++dateCheckToken.current;
+    if (!selectedDateKey) return;
 
-    const editingDateKey = editingVerse?.displayDate
-      ? format(new Date(editingVerse.displayDate), "yyyy-MM-dd")
-      : null;
+    const editingDate = editingVerse?.displayDate ? new Date(editingVerse.displayDate) : null;
+    const editingDateKey = editingDate && Number.isFinite(editingDate.getTime())
+      ? format(editingDate, "yyyy-MM-dd") : null;
     // Keeping the current verse on its own date can never conflict with itself.
     if (isEditing && editingDateKey === selectedDateKey) return;
 
-    const token = ++dateCheckToken.current;
     checkDailyVerseDate(selectedDateKey, editingVerse?.id)
       .then((res) => {
         if (token !== dateCheckToken.current) return;
@@ -396,66 +398,39 @@ export function useAddDailyVerse() {
     [selectedDate],
   );
 
-  const richContentError = collectionError(parseStudies(wordStudies), parseReferences(crossReferences));
-  const saveDisabled = !!richContentError ||
-    !validPassage(book, chapter, verseNumber, verseEnd) || !!preview.error ||
-    isVerseLoading ||
-    !verseText.trim() ||
-    !explanation.trim() ||
-    !application.trim() ||
-    !verseIntroduction.trim();
-
-  const validateStep = useCallback(
-    (step: number) => {
-      const missing: string[] = [];
-
-      if (step === 0) {
-        if (!book) missing.push("book");
-        if (!chapter) missing.push("chapter");
-        if (!verseNumber) missing.push("verse");
-        if (!verseText.trim()) missing.push("verse text");
-        if (!validPassage(book, chapter, verseNumber, verseEnd) || preview.loading || preview.error) missing.push('valid passage');
-      }
-      if (step === 1) {
-        if (!explanation.trim()) missing.push("explanation");
-        if (!application.trim()) missing.push("application");
-        if (!verseIntroduction.trim()) missing.push("verse introduction");
-      }
-      if (step === 3 && richContentError) missing.push(richContentError);
-
-      if (missing.length > 0) {
-        toast({
-          title: tt("Complete this step"),
-          description: `Please provide: ${missing.join(", ")}.`,
-          variant: "destructive",
-        });
-        return false;
-      }
-      return true;
-    },
-    [
-      book,
-      chapter,
-      verseNumber,
-      verseEnd, preview.loading, preview.error,
-      richContentError,
-      verseText,
-      explanation,
-      application,
-      verseIntroduction,
-      toast,
-    ],
-  );
+  const requireRichRows = !isEditing;
+  const studies = parseStudies(wordStudies);
+  const references = parseReferences(crossReferences);
+  const richContentError = requireRichRows
+    ? studies.map(row => Object.values(requiredStudyFieldErrors(row)).find(Boolean)).find(Boolean) ||
+      references.map(requiredReferenceError).find(Boolean) || ''
+    : collectionError(studies, references) ||
+      (studies.length !== nonEmptyStudies(studies).length ? 'Fill or remove the empty word study.' : '') ||
+      (references.length !== nonEmptyReferences(references).length ? 'Fill or remove the empty cross reference.' : '');
+  const takeawayErrors = parseTakeaways(takeaways).map(item => item.trim() ? '' : 'Enter a takeaway or remove the row.');
+  const fieldErrors = {
+    bookName: book ? '' : 'Select a book.',
+    chapter: chapter ? '' : 'Select a chapter.',
+    verseNumber: !verseNumber ? 'Select a verse.' : !validPassage(book, chapter, verseNumber) ? 'Select a valid passage.' : '',
+    verseEnd: verseEnd && !validPassage(book, chapter, verseNumber, verseEnd) ? 'Select a valid end verse.' : '',
+    bibleVersion: bibleVersion.trim() ? '' : 'Select a Bible version.',
+    verseText: !isVerseLoading && !verseText.trim() ? 'Enter the verse text.' : '',
+    ...scheduleErrors(selectedDate, selectedTime),
+    explanation: explanation.trim() ? '' : 'Enter an explanation.',
+    application: application.trim() ? '' : 'Enter an application.',
+    verseIntroduction: verseIntroduction.trim() ? '' : 'Enter a verse introduction.',
+  };
+  const { explanation: requiredExplanationError, application: applicationError, verseIntroduction: introductionError, ...referenceErrors } = fieldErrors;
+  const validateStep = (step: number) => {
+    if (step === 0) return !Object.values(referenceErrors).some(Boolean) && !preview.loading && !preview.error && !isVerseLoading;
+    if (step === 1) return !(requiredExplanationError || applicationError || introductionError);
+    if (step === 3) return !richContentError && !takeawayErrors.some(Boolean);
+    return true;
+  };
+  const saveDisabled = [0, 1, 3].some(step => !validateStep(step));
 
   const handleSave = useCallback(async () => {
-    if (saveDisabled) {
-      toast({
-        title: tt("Missing fields"),
-        description: tt("Please fill all required fields"),
-        variant: "destructive",
-      });
-      return;
-    }
+    if (saveDisabled) return;
     const targetId = isEditing ? editingVerse?.id : replaceTargetId;
     const payload: DailyVersePayload = {
       bookName: book,
@@ -648,6 +623,9 @@ export function useAddDailyVerse() {
     retryPassage: preview.retry,
     verseNumbers: preview.verseNumbers,
     richContentError,
+    fieldErrors,
+    requireRichRows,
+    takeawayErrors,
     bibleVersion,
     bibleVersionOptions: editions.options,
     setBibleVersion,

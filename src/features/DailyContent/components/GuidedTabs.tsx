@@ -33,6 +33,12 @@ export function GuidedTabs({
 
   const selectStep = (step: number) => {
     if (step <= activeStep || completedSteps.includes(step - 1)) {
+      for (let index = activeStep; index < step; index++) {
+        if (!validateStep(index)) {
+          setActiveStep(index);
+          return;
+        }
+      }
       setActiveStep(step);
     }
   };

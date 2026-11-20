@@ -10,7 +10,8 @@ import { useBibleEditions } from '@/hooks/useBibleEditions';
 import { parseList } from "../helpers/contentDetailHelpers";
 import { getDailyDevotionVerse, getDailyDevotionVerses, saveDailyDevotion } from "../services/add-daily-content-service";
 import { tt } from '@/components/languages/hardcodedTranslate';
-import { canonicalBook } from '../helpers/editorContent';
+import { canonicalBook, validPassage } from '../helpers/editorContent';
+import { scheduleErrors } from '../helpers/scheduleValidation';
 
 export function useAddDailyDevotion() {
   const { t, isRtl, lang } = useLanguage();
@@ -147,7 +148,7 @@ export function useAddDailyDevotion() {
   );
 
   const referenceStarted = Boolean(book || chapter || verseNumber);
-  const referenceComplete = Boolean(book && chapter && verseNumber);
+  const referenceComplete = validPassage(book, chapter, verseNumber);
   const list = (value: string[]) => value.map(item => item.trim()).filter(Boolean);
   const invalidList = (value: string[]) => value.length === 0 || value.some(item => !item.trim());
   const invalidLearningPoints = learningPoints.length !== 3 || invalidList(learningPoints);
@@ -159,6 +160,8 @@ export function useAddDailyDevotion() {
     invalidList(practicalApplications) && tt("Practical Application"),
     invalidLearningPoints && tt("Exactly three non-empty learning points are required."),
     referenceStarted && !referenceComplete && tt("Choose a book, chapter, and verse together"),
+    referenceStarted && !bibleVersion.trim() && tt("Select a Bible version."),
+    ...Object.values(scheduleErrors(selectedDate, selectedTime)).map(message => message && tt(message)),
   ].filter((error): error is string => Boolean(error));
   const saveDisabled = validationErrors.length > 0;
   const fieldErrors = {
@@ -169,19 +172,14 @@ export function useAddDailyDevotion() {
     practicalApplications: invalidList(practicalApplications) ? tt("Enter an application in each row or remove empty rows.") : undefined,
     learningPoints: invalidLearningPoints ? tt("Exactly three non-empty learning points are required.") : undefined,
     reference: referenceStarted && !referenceComplete ? tt("Choose a book, chapter, and verse together") : undefined,
+    bibleVersion: referenceStarted && !bibleVersion.trim() ? tt("Select a Bible version.") : undefined,
+    ...scheduleErrors(selectedDate, selectedTime),
   };
   const [saving, setSaving] = useState(false);
 
   const handleSave = useCallback(async (e?: React.FormEvent) => {
     e?.preventDefault();
-    if (saveDisabled) {
-      toast({
-        title: tt("Missing fields"),
-        description: validationErrors.join(" · "),
-        variant: "destructive",
-      });
-      return;
-    }
+    if (saveDisabled) return;
     if (saving) return;
     const payload: Record<string, any> = {
       title,

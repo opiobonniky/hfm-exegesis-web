@@ -27,6 +27,7 @@ export function AddExplanationExegesisForm({ explanationText, applicationText, e
         </div>
         <p className="text-xs text-muted-foreground">{tt("Give the core theological insight, interpretive flow, and supporting detail for the verse.")}</p>
         <Textarea
+          data-validation-field="explanationText"
           aria-invalid={!!errors.explanationText}
           aria-describedby={errors.explanationText ? "explanation-error" : undefined}
           placeholder={tt("Type the heart of the explanation here...")}
@@ -49,6 +50,7 @@ export function AddExplanationExegesisForm({ explanationText, applicationText, e
           <CharCount value={h.form.exegesis.applicationText} max={APPLICATION_MAX} />
         </div>
         <Textarea
+          data-validation-field="applicationText"
           aria-invalid={!!errors.applicationText}
           aria-describedby={errors.applicationText ? "application-error" : undefined}
           placeholder={tt("How should this truth shape daily living?")}

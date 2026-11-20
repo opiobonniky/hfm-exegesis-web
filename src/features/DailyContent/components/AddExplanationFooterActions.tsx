@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import type { AddExplanationFooterActionsProps } from "../types";
 import { tt } from '@/components/languages/hardcodedTranslate';
 
-export function AddExplanationFooterActions({ isValid, saving, isEditMode, handleSave, currentStepIndex, stepCount, onBack, onNext, canAdvance }: AddExplanationFooterActionsProps) {
+export function AddExplanationFooterActions({ isValid, saving, isEditMode, handleSave, currentStepIndex, stepCount, onBack, onNext }: AddExplanationFooterActionsProps) {
   return (
     <div className="mt-6 flex flex-col-reverse gap-3 border-t border-border pt-5 sm:flex-row sm:items-center sm:justify-between">
       <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -17,10 +17,10 @@ export function AddExplanationFooterActions({ isValid, saving, isEditMode, handl
         )}
 
         {currentStepIndex < stepCount - 1 ? (
-          <Button onClick={onNext} disabled={!canAdvance} className="gap-2">{tt("Continue")}<ChevronRight className="h-4 w-4" />
+          <Button type="button" onClick={onNext} className="gap-2">{tt("Continue")}<ChevronRight className="h-4 w-4" />
           </Button>
         ) : (
-          <Button onClick={handleSave} disabled={!isValid || saving} className="gap-2">
+          <Button type="button" onClick={handleSave} disabled={saving} className="gap-2">
             {saving ? <span className="inline-flex h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" /> : <Save className="h-4 w-4" />}
             {isEditMode ? tt("Save changes") : tt("Submit explanation")}
           </Button>

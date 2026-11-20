@@ -1,5 +1,6 @@
 import { Sun, BookOpen } from "lucide-react";
 import { useAddDailyDevotion } from "../hooks/useAddDailyDevotion";
+import { useValidationFeedback } from "../hooks/useValidationFeedback";
 import {
   AddDailyDevotionCoreSections,
   AddDailyDevotionReferenceSection,
@@ -15,6 +16,13 @@ import {
 
 export default function AddDailyDevotion() {
   const { data, actions } = useAddDailyDevotion();
+  const feedback = useValidationFeedback();
+  const error = (key: keyof typeof data.fieldErrors, control: string = key) =>
+    feedback.visible(control, 'devotion') ? data.fieldErrors[key] : undefined;
+  const save = (event?: React.FormEvent) => {
+    feedback.attempt('devotion');
+    void actions.handleSave(event);
+  };
 
   return (
     <PageContentWrapper isRtl={data.isRtl}>
@@ -25,19 +33,20 @@ export default function AddDailyDevotion() {
         title={data.pageTitle}
         subtitle={data.t.devotions.addPageSubtitle}
       />
-      <DailyContentFormCard
+      <div {...feedback.capture('devotion')}><DailyContentFormCard
         icon={BookOpen}
         title={data.t.devotions.devotionDetails}
         description={data.t.devotions.devotionDetailsDesc}
-        onSubmit={actions.handleSave}
+        onSubmit={save}
       >
         <AddDailyDevotionCoreSections
-          error={data.fieldErrors.title}
+          error={error('title')}
           title={data.title}
           setTitle={actions.setTitle}
         />
         <AddDailyDevotionReferenceSection
-          error={data.fieldErrors.reference}
+          error={error('reference', !data.book ? 'bookName' : !data.chapter ? 'chapter' : 'verseNumber')}
+          bibleVersionError={error('bibleVersion')}
           book={data.book}
           chapter={data.chapter}
           verseNumber={data.verseNumber}
@@ -52,7 +61,12 @@ export default function AddDailyDevotion() {
           setBibleVersion={actions.setBibleVersion}
         />
         <AddDailyDevotionContentFields
-          errors={data.fieldErrors}
+          errors={{
+            explanation: error('explanation'), prayer: error('prayer'),
+            reflectionQuestions: error('reflectionQuestions'),
+            practicalApplications: error('practicalApplications'),
+            learningPoints: error('learningPoints'),
+          }}
           explanation={data.explanation}
           reflectionQuestions={data.reflectionQuestions}
           prayer={data.prayer}
@@ -76,6 +90,7 @@ export default function AddDailyDevotion() {
             setSelectedDate={actions.setSelectedDate}
             selectedTime={data.selectedTime}
             handleTimeChange={actions.handleTimeChange}
+            errors={{ date: error('date'), time: error('time') }}
           />
         </div>
         <DailyContentFormActions
@@ -83,9 +98,9 @@ export default function AddDailyDevotion() {
           cancelLabel={data.t.common.cancel}
           saveLabel={data.saveLabel}
           saving={data.saving}
-          onSave={actions.handleSave}
+          onSave={save}
         />
-      </DailyContentFormCard>
+      </DailyContentFormCard></div>
       <AddDailyDevotionConflictDialog data={data} actions={actions} />
     </PageContentWrapper>
   );

@@ -1,10 +1,8 @@
-import { Clock } from "lucide-react";
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { DatePicker } from "@/components/ui/date-picker";
 import { Combobox } from "@/components/ui/combobox";
 import { tt } from '@/components/languages/hardcodedTranslate';
 import { PassageFields } from './PassageFields';
+import { DateTimeFields } from './DateTimeFields';
 
 interface Props {
   book: string; setBook: (v: string) => void;
@@ -17,6 +15,7 @@ interface Props {
   selectedDate: Date; setSelectedDate: (d: Date) => void;
   selectedTime: string; handleTimeChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   t: any; isRtl: boolean;
+  errors?: Partial<Record<'bookName' | 'chapter' | 'verseNumber' | 'verseEnd' | 'bibleVersion' | 'date' | 'time', string>>;
 }
 
 export function VerseReferenceSection(p: Props) {
@@ -26,7 +25,7 @@ export function VerseReferenceSection(p: Props) {
 
   return (
     <div className="space-y-5" dir={p.isRtl ? "rtl" : "ltr"}>
-      <PassageFields value={{ bookName: p.book, chapter: p.chapter, verseNumber: p.verseNumber, verseEnd: p.verseEnd }} verseNumbers={p.verseNumbers}
+      <PassageFields value={{ bookName: p.book, chapter: p.chapter, verseNumber: p.verseNumber, verseEnd: p.verseEnd }} verseNumbers={p.verseNumbers} errors={p.errors}
         onChange={next => {
           if (next.bookName !== p.book) p.setBook(next.bookName);
           else if (next.chapter !== p.chapter) p.setChapter(next.chapter);
@@ -35,30 +34,16 @@ export function VerseReferenceSection(p: Props) {
         }} />
       <div className="grid gap-4 sm:grid-cols-2">
         {fields.map(([label, value, onChange, options, placeholder, disabled]) => (
-          <div className="space-y-2" key={label}>
+          <div className="space-y-2" key={label} data-validation-field="bibleVersion">
             <Label>{label}</Label>
-            <Combobox options={[...options]} value={value} onChange={onChange} placeholder={placeholder} disabled={disabled} width="w-full" />
+            <Combobox ariaLabel={label} options={[...options]} value={value} onChange={onChange} placeholder={placeholder}
+              disabled={disabled} invalid={!!p.errors?.bibleVersion} width="w-full" />
+            {p.errors?.bibleVersion && <p role="status" className="text-xs text-destructive">{tt(p.errors.bibleVersion)}</p>}
           </div>
         ))}
       </div>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="space-y-2">
-          <Label>{p.t.common.date}</Label>
-          <DatePicker
-            value={p.selectedDate}
-            onChange={p.setSelectedDate}
-            placeholder={p.t.common.date}
-            aria-label={p.t.common.date}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label>{tt("Time")}</Label>
-          <div className="flex items-center gap-2">
-            <Clock className="h-4 w-4 text-muted-foreground" />
-            <Input type="time" value={p.selectedTime} onChange={p.handleTimeChange} className="flex-1" />
-          </div>
-        </div>
-      </div>
+      <DateTimeFields selectedDate={p.selectedDate} setSelectedDate={p.setSelectedDate}
+        selectedTime={p.selectedTime} handleTimeChange={p.handleTimeChange} errors={p.errors} />
     </div>
   );
 }

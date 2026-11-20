@@ -19,11 +19,14 @@ it('loads only verses and resets pagination when the publish-date filter changes
   expect(mocks.request).toHaveBeenLastCalledWith('admin', 'get-all-daily-verses', expect.objectContaining({ page: 0, smartDefault: false }));
   act(() => result.current.setPage(2));
   await waitFor(() => expect(mocks.request).toHaveBeenLastCalledWith('admin', 'get-all-daily-verses', expect.objectContaining({ page: 2 })));
-  act(() => result.current.changeDate('2026-11-21'));
-  await waitFor(() => expect(mocks.request).toHaveBeenLastCalledWith('admin', 'get-all-daily-verses', expect.objectContaining({ page: 0, startDate: '2026-11-21', endDate: '2026-11-21' })));
+  act(() => result.current.changeStartDate('2026-11-10'));
+  await waitFor(() => expect(mocks.request).toHaveBeenLastCalledWith('admin', 'get-all-daily-verses', expect.objectContaining({ page: 0, startDate: '2026-11-10', listPreview: true })));
+  expect(mocks.request.mock.lastCall?.[2]).not.toHaveProperty('endDate');
+  act(() => result.current.changeEndDate('2026-11-21'));
+  await waitFor(() => expect(mocks.request).toHaveBeenLastCalledWith('admin', 'get-all-daily-verses', expect.objectContaining({ page: 0, startDate: '2026-11-10', endDate: '2026-11-21' })));
 });
 
-it('filters by book, chapter and creator/updater name like verse explanations', async () => {
+it('combines selected book and chapter with debounced general search', async () => {
   const { result } = renderHook(useDailyVersesPage);
   await waitFor(() => expect(result.current.loading).toBe(false));
   act(() => result.current.changeBook('John'));
@@ -32,21 +35,25 @@ it('filters by book, chapter and creator/updater name like verse explanations', 
   act(() => result.current.changeChapter('3'));
   await waitFor(() => expect(mocks.request).toHaveBeenLastCalledWith('admin', 'get-all-daily-verses',
     expect.objectContaining({ exactBookName: 'John', chapter: 3 })));
-  act(() => result.current.changeCreatorName('Ada'));
+  act(() => result.current.changeSearch(' Ada '));
+  expect(mocks.request.mock.lastCall?.[2]).not.toHaveProperty('search');
   await waitFor(() => expect(mocks.request).toHaveBeenLastCalledWith('admin', 'get-all-daily-verses',
-    expect.objectContaining({ creatorName: 'Ada' })));
-  act(() => result.current.clearFilters());
-  await waitFor(() => expect(mocks.request).toHaveBeenLastCalledWith('admin', 'get-all-daily-verses',
-    expect.not.objectContaining({ exactBookName: expect.anything(), chapter: expect.anything(), creatorName: expect.anything() })));
+    expect.objectContaining({ exactBookName: 'John', chapter: 3, search: 'Ada' })));
+  await act(async () => result.current.clearFilters());
+  expect(mocks.request.mock.lastCall?.[2]).toEqual({ page: 0, size: expect.any(Number), smartDefault: false, listPreview: true });
 });
 
-it('routes add, edit and view directly to the verse pages', () => {
+it('loads the full verse by ID only when opening it', async () => {
   const { result } = renderHook(useDailyVersesPage);
+  await waitFor(() => expect(result.current.loading).toBe(false));
   const verse = { id: 1, displayDate: '2026-11-21', isPublished: true };
   act(() => result.current.add());
   expect(mocks.navigate).toHaveBeenLastCalledWith('/add-daily-verse');
-  act(() => result.current.edit(verse));
-  expect(mocks.navigate).toHaveBeenLastCalledWith('/add-daily-verse', { state: { verse } });
-  act(() => result.current.view(verse));
+  const fullVerse = { ...verse, wordStudies: 'Full content' };
+  mocks.request.mockResolvedValue({ returnCode: 200, returnData: { content: [fullVerse] } });
+  await act(() => result.current.edit(verse));
+  expect(mocks.request).toHaveBeenLastCalledWith('admin', 'get-all-daily-verses', { id: 1, size: 1 }, { includeLanguage: false });
+  expect(mocks.navigate).toHaveBeenLastCalledWith('/add-daily-verse', { state: { verse: fullVerse } });
+  await act(() => result.current.view(verse));
   expect(mocks.navigate.mock.calls.at(-1)?.[0]).toMatch(/^\/daily-verse-detail\?verse=/);
 });

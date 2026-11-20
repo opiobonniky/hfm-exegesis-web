@@ -1,11 +1,11 @@
 // useDailyDevotionsPage — all state, effects, and logic for DailyDevotions page
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { useAuth } from "@/contexts/AuthContext";
 import { sendPostRequest } from "@/services/api";
-import type { DailyDevotionItem } from "../types";
+import type { DailyDevotionCardItem, DailyDevotionItem } from "../types";
 import { tt } from '@/components/languages/hardcodedTranslate';
 
 export function useDailyDevotionsPage() {
@@ -15,7 +15,7 @@ export function useDailyDevotionsPage() {
   const { userInfo } = useAuth();
   const isAdmin = userInfo?.userRole === 1;
   // Listing
-  const [devotions, setDevotions] = useState<DailyDevotionItem[]>([]);
+  const [devotions, setDevotions] = useState<DailyDevotionCardItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
   const [total, setTotal] = useState(0);
@@ -26,33 +26,64 @@ export function useDailyDevotionsPage() {
   // Filters
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
+  const [searchInput, setSearchInput] = useState("");
+  const [search, setSearch] = useState("");
   const [activePreset, setActivePreset] = useState<string | null>(null);
   const [filterError, setFilterError] = useState("");
   // Delete dialog
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [deleteTarget, setDeleteTarget] = useState<DailyDevotionItem | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<DailyDevotionCardItem | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const generation = useRef(0);
   const loadDevotions = useCallback(async (p: number) => {
+    const request = ++generation.current;
     setLoading(true);
     try {
-      const payload: Record<string, any> = { page: p, size: 12 };
+      const payload: Record<string, unknown> = { page: p, size: 12, listPreview: true };
       if (fromDate) payload.startDate = fromDate;
       if (toDate) payload.endDate = toDate;
+      if (search) payload.search = search;
       const res = await sendPostRequest("admin", "get-all-daily-devotions", payload);
+      if (request !== generation.current) return;
       if (res?.returnCode === 200 && res?.returnData) {
         setDevotions(res.returnData.content || []);
         setTotal(res.returnData.totalElements || 0);
         setTotalPages(res.returnData.totalPages || 0);
         setHasNext(res.returnData.hasNext ?? false);
         setHasPrevious(res.returnData.hasPrevious ?? false);
+      } else throw new Error('Devotions unavailable');
+    } catch {
+      if (request === generation.current) {
+        setDevotions([]); setTotal(0); setTotalPages(0); setHasNext(false); setHasPrevious(false);
+        toast({ title: tt("Failed to load"), variant: "destructive" });
       }
-    } catch { toast({ title: tt("Failed to load"), variant: "destructive" }); }
-    finally { setLoading(false); }
-  }, [fromDate, toDate, toast]);
-  useEffect(() => { loadDevotions(page); }, [page, loadDevotions]);
-  const openEdit = useCallback((item?: DailyDevotionItem) => {
-    navigate("/add-daily-devotion", item ? { state: { devotion: item } } : undefined);
-  }, [navigate]);
+    } finally { if (request === generation.current) setLoading(false); }
+  }, [fromDate, toDate, search, toast]);
+
+  // Typing filters as you go, without a request per keystroke.
+  useEffect(() => {
+    if (searchInput.trim() === search) return;
+    const timer = window.setTimeout(() => { setSearch(searchInput.trim()); setPage(0); }, 300);
+    return () => window.clearTimeout(timer);
+  }, [searchInput, search]);
+
+  useEffect(() => { void loadDevotions(page); return () => { generation.current++; }; }, [page, loadDevotions]);
+  const loadDevotion = useCallback(async (id: number) => {
+    try {
+      const res = await sendPostRequest<{ content: DailyDevotionItem[] }>("admin", "get-all-daily-devotions",
+        { id, size: 1 }, { includeLanguage: false });
+      const devotion = res.returnData?.content?.[0];
+      if (res.returnCode !== 200 || !devotion) throw new Error('Devotion unavailable');
+      return devotion;
+    } catch {
+      toast({ title: tt("Failed to load"), variant: "destructive" });
+    }
+  }, [toast]);
+  const openEdit = useCallback(async (item?: DailyDevotionCardItem) => {
+    if (!item) { navigate("/add-daily-devotion"); return; }
+    const devotion = await loadDevotion(item.id);
+    if (devotion) navigate("/add-daily-devotion", { state: { devotion } });
+  }, [navigate, loadDevotion]);
   const handleDelete = useCallback(async () => {
     if (!deleteTarget) return;
     setIsDeleting(true);
@@ -64,13 +95,14 @@ export function useDailyDevotionsPage() {
     finally { setIsDeleting(false); }
   }, [deleteTarget, toast, loadDevotions, page]);
 
-  const openDelete = useCallback((item: DailyDevotionItem) => {
+  const openDelete = useCallback((item: DailyDevotionCardItem) => {
     setDeleteTarget(item);
     setDeleteOpen(true);
   }, []);
-  const openDetail = useCallback((item: DailyDevotionItem) => {
-    navigate(`/daily-devotion-detail?devotion=${encodeURIComponent(JSON.stringify(item))}`);
-  }, [navigate]);
+  const openDetail = useCallback(async (item: DailyDevotionCardItem) => {
+    const devotion = await loadDevotion(item.id);
+    if (devotion) navigate(`/daily-devotion-detail?devotion=${encodeURIComponent(JSON.stringify(devotion))}`);
+  }, [navigate, loadDevotion]);
   // ── Preset date ranges ──
   const toYMD = (d: Date) => d.toISOString().split("T")[0];
   const applyPreset = useCallback((preset: string) => {
@@ -89,21 +121,37 @@ export function useDailyDevotionsPage() {
     setFromDate(from);
     setToDate(to);
     setActivePreset(preset);
+    setPage(0);
+  }, []);
+
+  // Every filter change re-fetches immediately (search is debounced above).
+  const changeFromDate = useCallback((value: string) => {
+    setFromDate(value);
+    setActivePreset(null);
+    setPage(0);
+  }, []);
+
+  const changeToDate = useCallback((value: string) => {
+    setToDate(value);
+    setActivePreset(null);
+    setPage(0);
+  }, []);
+
+  const changeSearch = useCallback((value: string) => {
+    setSearchInput(value);
   }, []);
 
   const clearFilter = useCallback(() => {
     setFromDate("");
     setToDate("");
+    setSearchInput("");
+    setSearch("");
     setActivePreset(null);
     setFilterError("");
+    setPage(0);
   }, []);
 
   const refresh = useCallback(() => loadDevotions(page), [loadDevotions, page]);
-
-  const applyFilter = useCallback(() => {
-    setFilterError("");
-    refresh();
-  }, [refresh]);
 
   const emptyMessage = t.devotions?.noDevotions || "No devotions found";
   const addLabel = t.devotions?.addDevotion || "Add Devotion";
@@ -117,13 +165,14 @@ export function useDailyDevotionsPage() {
     data: {
       t, isRtl, navigate, isAdmin, devotions, loading, page, total, totalPages,
       hasNext, hasPrevious, selectedIndex, fromDate, toDate, activePreset, filterError,
-      isFiltered: fromDate !== "" || toDate !== "",
+      search: searchInput,
+      isFiltered: Boolean(fromDate || toDate || searchInput),
       deleteOpen, deleteTarget, isDeleting, emptyMessage, addLabel, paginationLabels,
       showPagination: totalPages > 1,
     },
     actions: {
-      setPage, setSelectedIndex, setFromDate, setToDate, setActivePreset, setFilterError,
-      applyPreset, clearFilter, applyFilter, openEdit,
+      setPage, setSelectedIndex, setActivePreset, setFilterError,
+      changeFromDate, changeToDate, changeSearch, applyPreset, clearFilter, openEdit,
       setDeleteOpen, handleDelete, openDelete, openDetail, refresh,
     },
   };

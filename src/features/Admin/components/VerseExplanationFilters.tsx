@@ -5,6 +5,7 @@ import { BIBLE_BOOK_CHAPTERS } from "@/features/Bible/constants";
 import { tt } from "@/components/languages/hardcodedTranslate";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import type { ReactNode } from "react";
 
 export function VerseExplanationFilters({
   bookName,
@@ -14,6 +15,10 @@ export function VerseExplanationFilters({
   onChapterChange,
   onCreatorNameChange,
   onClear,
+  searchLabel,
+  searchPlaceholder,
+  hasAdditionalFilters = false,
+  children,
 }: {
   bookName: string;
   chapter: string;
@@ -22,8 +27,12 @@ export function VerseExplanationFilters({
   onChapterChange: (value: string) => void;
   onCreatorNameChange: (value: string) => void;
   onClear: () => void;
+  searchLabel?: string;
+  searchPlaceholder?: string;
+  hasAdditionalFilters?: boolean;
+  children?: ReactNode;
 }) {
-  const hasFilters = Boolean(bookName || chapter || creatorName);
+  const hasFilters = Boolean(bookName || chapter || creatorName || hasAdditionalFilters);
   const chapterCount =
     BIBLE_BOOK_CHAPTERS[bookName as keyof typeof BIBLE_BOOK_CHAPTERS] || 0;
 
@@ -63,20 +72,21 @@ export function VerseExplanationFilters({
       </div>
 
       <label className="min-w-[220px] flex-1 space-y-1 text-xs text-muted-foreground">
-        {tt("Created by / Updated by")}
+        {searchLabel || tt("Created by / Updated by")}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            aria-label={tt("Filter by creator or updater name")}
+            aria-label={searchLabel || tt("Filter by creator or updater name")}
             type="text"
             value={creatorName}
             onChange={(event) => onCreatorNameChange(event.target.value)}
-            placeholder={tt("Search by name, e.g. John")}
+            placeholder={searchPlaceholder || tt("Search by name, e.g. John")}
             className="min-h-11 w-full rounded-xl border border-border bg-background pl-9 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           />
         </div>
       </label>
 
+      {children}
       {hasFilters && (
         <Button variant="ghost" type="button" onClick={onClear}>
           {tt("Clear filters")}

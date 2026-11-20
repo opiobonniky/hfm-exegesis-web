@@ -1,6 +1,7 @@
-import { act, cleanup, renderHook, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, renderHook, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { useAddExplanation } from './useAddExplanation';
+import { AddExplanationWorkspace } from '../components/AddExplanationWorkspace';
 
 const mocks = vi.hoisted(() => ({ params: {} as Record<string, string>, post: vi.fn(), navigate: vi.fn(), toast: vi.fn() }));
 vi.mock('react-router-dom', () => ({ useParams: () => mocks.params, useNavigate: () => mocks.navigate }));
@@ -18,6 +19,25 @@ beforeEach(() => {
   mocks.post.mockImplementation((_module, action) => Promise.resolve({ returnCode: action === 'get-verse-explanation' ? 404 : 200 }));
 });
 afterEach(() => { cleanup(); vi.useRealTimers(); });
+
+it('starts without errors and reveals reference validation after blur or Continue', async () => {
+  function Form() {
+    const { data, actions } = useAddExplanation();
+    return <AddExplanationWorkspace data={data} actions={actions} />;
+  }
+  render(<Form />);
+  const book = screen.getByRole('combobox', { name: 'Book' });
+  const error = 'Select a book, chapter and verse.';
+  expect(screen.queryByText(error)).toBeNull();
+  fireEvent.focus(book);
+  expect(screen.queryByText(error)).toBeNull();
+  fireEvent.blur(book);
+  expect(screen.getByText(error)).toBeTruthy();
+  fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
+  expect(screen.getByText(error)).toBeTruthy();
+  expect(screen.queryByPlaceholderText('Type the heart of the explanation here...')).toBeNull();
+  await act(async () => {});
+});
 
 const savedExplanation = {
   id: 44, bookName: 'Genesis', chapter: 3, verseNumber: 6, bibleVersion: 'Berean', sharedStudyVersion: 7,

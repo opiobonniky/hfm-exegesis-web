@@ -43,7 +43,7 @@ export function PassageFields({ value, onChange, verseNumbers, loading = false, 
 
   function renderField(field: typeof fields[number]) {
     const error = errors?.[field.key];
-    return <div className="space-y-1.5" key={field.label}>
+    return <div className="space-y-1.5" key={field.label} data-validation-field={field.key}>
       <div className="text-xs font-medium text-muted-foreground">{tt(field.label)}</div>
       <Combobox ariaLabel={tt(field.label)} value={field.value} options={field.options.map(option => ({ value: option, label: option }))}
         disabled={field.disabled} invalid={!!error} onChange={field.change} placeholder={loading && field.label.includes('verse') ? tt('Loading…') : tt(`Select ${field.label.toLowerCase()}…`)} width="w-full" />

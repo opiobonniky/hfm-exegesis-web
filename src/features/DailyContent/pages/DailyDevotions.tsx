@@ -20,12 +20,13 @@ export default function DailyDevotions() {
         <DevotionFilterBar
           fromDate={h.fromDate}
           toDate={h.toDate}
+          search={h.search}
           activePreset={h.activePreset}
           filterError={h.filterError}
           isFiltered={h.isFiltered}
-          onFromChange={h.setFromDate}
-          onToChange={h.setToDate}
-          onApply={h.applyFilter}
+          onFromChange={h.changeFromDate}
+          onToChange={h.changeToDate}
+          onSearchChange={h.changeSearch}
           onClear={h.clearFilter}
           onPreset={h.applyPreset}
         />

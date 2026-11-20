@@ -2,19 +2,20 @@ import { Loader2, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { useLanguage } from "@/components/languages/languageProvider";
-import type { DailyDevotionItem } from "../types";
+import type { DailyDevotionCardItem } from "../types";
 import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface Props {
   open: boolean;
   onOpenChange: (v: boolean) => void;
-  target: DailyDevotionItem | null;
+  target: DailyDevotionCardItem | null;
   isDeleting: boolean;
   onConfirm: () => void;
 }
 
 export function DevotionDeleteDialog({ open, onOpenChange, target, isDeleting, onConfirm }: Props) {
   const { t } = useLanguage();
+  const excerpt = target?.preview?.explanation || target?.explanation;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -25,8 +26,8 @@ export function DevotionDeleteDialog({ open, onOpenChange, target, isDeleting, o
         </DialogHeader>
         {target && (
           <div className="py-2">
-            <p className="font-medium">{target.title}</p>
-            {target.explanation && <p className="text-sm text-muted-foreground italic line-clamp-2 pt-1">{target.explanation.substring(0, 100)}...</p>}
+            <p className="font-medium">{target.preview?.title || target.title}</p>
+            {excerpt && <p className="text-sm text-muted-foreground italic line-clamp-2 pt-1">{excerpt}</p>}
           </div>
         )}
         <DialogFooter className="gap-2 sm:gap-0">

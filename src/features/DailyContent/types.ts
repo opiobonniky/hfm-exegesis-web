@@ -126,6 +126,12 @@ export interface DailyDevotionDetailData extends DailyDevotionItem {
   updatedOn?: string | null;
 }
 
+export type DailyDevotionCardItem = Pick<DailyDevotionItem, 'id' | 'title' | 'bookName' | 'chapter' |
+  'verseNumber' | 'displayDate' | 'creatorName' | 'createdOn' | 'isPublished'> & {
+  explanation?: string;
+  preview?: { title?: string; explanation?: string; reference?: string };
+};
+
 export interface DailyDevotionResponse {
   content: DailyDevotionItem[];
   currentPage: number;
@@ -338,6 +344,7 @@ export interface AddDailyDevotionCoreSectionsProps {
 }
 
 export interface AddDailyDevotionReferenceSectionProps {
+  bibleVersionError?: string;
   error?: string;
   book: string;
   chapter: string;
@@ -520,6 +527,7 @@ export interface AddExplanationExegesisFormProps {
 
 export interface AddExplanationStudyFormProps {
   showErrors?: boolean;
+  revealRowErrors?: boolean;
   errors?: Partial<Pick<ExplanationFieldErrors, "introduction" | "backgroundAuthor" | "backgroundBook" | "backgroundContext" | "wordStudies">>;
   introduction: string;
   backgroundAuthor: string;
@@ -536,6 +544,7 @@ export interface AddExplanationStudyFormProps {
 
 export interface AddExplanationExtrasFormProps {
   showErrors?: boolean;
+  revealRowErrors?: boolean;
   errors?: Partial<Pick<ExplanationFieldErrors, "practicalApps" | "crossReferences" | "themes" | "takeaways" | "finalThoughts">>;
   bibleVersion: string;
   onCrossReferencesChange: (rows: CrossRefItem[]) => void;
@@ -568,7 +577,6 @@ export interface AddExplanationFooterActionsProps {
   stepCount: number;
   onBack: () => void;
   onNext: () => void;
-  canAdvance: boolean;
 }
 
 export interface VerseExplanationStep {

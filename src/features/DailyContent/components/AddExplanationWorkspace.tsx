@@ -9,6 +9,7 @@ import { AddExplanationExtrasForm } from "./AddExplanationExtrasForm";
 import { AddExplanationFooterActions } from "./AddExplanationFooterActions";
 import type { AddExplanationWorkspaceProps } from "../types";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { useValidationFeedback } from '../hooks/useValidationFeedback';
 
 export function AddExplanationWorkspace({
   data,
@@ -17,6 +18,29 @@ export function AddExplanationWorkspace({
   data: AddExplanationPageData;
   actions: AddExplanationPageActions;
 }) {
+  const feedback = useValidationFeedback();
+  const scope = data.currentStep;
+  const errors = { ...data.fieldErrors };
+  for (const key of Object.keys(errors) as (keyof typeof errors)[]) {
+    const error = errors[key];
+    if (typeof error === 'string') {
+      if (!feedback.visible(key, scope)) Object.assign(errors, { [key]: '' });
+    } else {
+      Object.assign(errors, { [key]: error.map((message, index) => feedback.visible(`${key}.${index}`, scope) ? message : '') });
+    }
+  }
+  const next = () => {
+    if (!data.canAdvanceFromCurrent) feedback.attempt(scope);
+    else actions.goNext();
+  };
+  const save = () => {
+    const unfinished = VERSE_EXPLANATION_STEP_ORDER.find(step => !data.stepCompletion[step]);
+    if (unfinished) {
+      feedback.attempt(unfinished);
+      actions.setActiveTab(unfinished);
+    } else if (!data.isValid) feedback.attempt(scope);
+    else void actions.handleSave();
+  };
   return (
     <div className="grid gap-6 lg:grid-cols-[290px_minmax(0,1fr)]">
       <AddExplanationSidebar
@@ -25,10 +49,18 @@ export function AddExplanationWorkspace({
         stepCompletion={data.stepCompletion}
         referenceComplete={data.referenceComplete}
         exegesisComplete={data.exegesisComplete}
-        onStepChange={actions.goToStep}
+        onStepChange={step => {
+          const targetIndex = VERSE_EXPLANATION_STEP_ORDER.indexOf(step);
+          const unfinished = VERSE_EXPLANATION_STEP_ORDER.slice(data.currentStepIndex, targetIndex)
+            .find(step => !data.stepCompletion[step]);
+          if (unfinished) {
+            feedback.attempt(unfinished);
+            actions.setActiveTab(unfinished);
+          } else actions.goToStep(step);
+        }}
       />
       <div className="rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-5">
-        <Tabs value={data.activeTab} onValueChange={(value) => actions.setActiveTab(value as typeof data.activeTab)}>
+        <Tabs {...feedback.capture(scope)} value={data.activeTab} onValueChange={(value) => actions.setActiveTab(value as typeof data.activeTab)}>
           <TabsList className="hidden" aria-hidden="true">
             <TabsTrigger value="reference">{tt("Reference")}</TabsTrigger>
             <TabsTrigger value="exegesis">{tt("Exegesis")}</TabsTrigger>
@@ -41,8 +73,9 @@ export function AddExplanationWorkspace({
               chapter={data.form.chapter}
               verseNumber={data.form.verseNumber}
               verseEnd={data.form.verseEnd}
-              referenceError={data.fieldErrors.reference}
-              bibleVersionError={data.fieldErrors.bibleVersion}
+              referenceError={feedback.visible(!data.form.bookName ? 'bookName' : !data.form.chapter ? 'chapter' : 'verseNumber', scope)
+                ? data.fieldErrors.reference : ''}
+              bibleVersionError={errors.bibleVersion}
               passageError={data.passageError}
               retryPassage={data.retryPassage}
               bibleVersion={data.form.bibleVersion}
@@ -64,19 +97,20 @@ export function AddExplanationWorkspace({
             <AddExplanationExegesisForm
               explanationText={data.form.exegesis.explanationText}
               applicationText={data.form.exegesis.applicationText}
-              errors={data.fieldErrors}
+              errors={errors}
               updateNested={actions.updateNested}
             />
           </TabsContent>
           <TabsContent value="study">
             <AddExplanationStudyForm
               showErrors={!data.isEditMode || data.richContentTouched}
+              revealRowErrors={feedback.attempted(scope)}
               introduction={data.form.studyMetadata.introduction}
               backgroundAuthor={data.form.studyMetadata.backgroundAuthor}
               backgroundBook={data.form.studyMetadata.backgroundBook}
               backgroundContext={data.form.studyMetadata.backgroundContext}
               wordStudies={data.form.wordStudies}
-              errors={data.fieldErrors}
+              errors={errors}
               updateNested={actions.updateNested}
               addWordStudy={actions.addWordStudy}
               removeWordStudy={actions.removeWordStudy}
@@ -87,7 +121,8 @@ export function AddExplanationWorkspace({
           <TabsContent value="extras">
             <AddExplanationExtrasForm
               showErrors={!data.isEditMode || data.richContentTouched}
-              errors={data.fieldErrors}
+              revealRowErrors={feedback.attempted(scope)}
+              errors={errors}
               bibleVersion={data.form.bibleVersion}
               onCrossReferencesChange={rows => actions.updateField('crossReferences', rows)}
               practicalApps={data.form.practicalApps}
@@ -110,14 +145,12 @@ export function AddExplanationWorkspace({
           isValid={data.isValid}
           saving={data.saving}
           isEditMode={data.isEditMode}
-          handleSave={actions.handleSave}
+          handleSave={save}
           currentStepIndex={data.currentStepIndex}
           stepCount={VERSE_EXPLANATION_STEP_ORDER.length}
           onBack={actions.goPrevious}
-          onNext={actions.goNext}
-          canAdvance={data.canAdvanceFromCurrent}
+          onNext={next}
         />
-        {data.richContentError && <p role="alert" className="mt-3 text-sm text-destructive">{tt(data.richContentError)}</p>}
       </div>
     </div>
   );

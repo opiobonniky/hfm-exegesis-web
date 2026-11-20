@@ -53,11 +53,18 @@ async function filledForm(editing = false) {
 }
 
 describe('daily verse editor', () => {
-  it('saves each takeaway as one item and omits empty optional cross-reference rows', async () => {
+  it('blocks blank added rows, then preserves takeaway paragraphs after correction', async () => {
     const { result } = await filledForm();
     act(() => {
       result.current.actions.setTakeaways(JSON.stringify(['First\nsecond paragraph', '', 'Another takeaway']));
       result.current.actions.setCrossReferences(JSON.stringify([{ bookName: '', chapter: 0, verseNumber: 0, referenceText: '' }]));
+    });
+    expect(result.current.data.validateStep(3)).toBe(false);
+    expect(result.current.data.takeawayErrors[1]).toBeTruthy();
+    expect(result.current.data.richContentError).toContain('Cross reference');
+    act(() => {
+      result.current.actions.setTakeaways(JSON.stringify(['First\nsecond paragraph', 'Another takeaway']));
+      result.current.actions.setCrossReferences('');
     });
     expect(result.current.data.saveDisabled).toBe(false);
     mocks.post.mockResolvedValueOnce({ returnCode: 200 });
@@ -108,7 +115,19 @@ describe('daily verse editor', () => {
     act(() => result.current.actions.setApplication(''));
     expect(result.current.data.saveDisabled).toBe(true);
     expect(result.current.data.validateStep(1)).toBe(false);
-    expect(mocks.toast).toHaveBeenCalledWith(expect.objectContaining({ variant: 'destructive' }));
+    expect(result.current.data.fieldErrors.application).toBe('Enter an application.');
+    expect(mocks.toast).not.toHaveBeenCalled();
+  });
+
+  it('rejects a cleared publish time and an invalid date without submitting', async () => {
+    const { result } = await filledForm();
+    act(() => result.current.actions.handleTimeChange({ target: { value: '' } } as React.ChangeEvent<HTMLInputElement>));
+    expect(result.current.data.fieldErrors.time).toBe('Choose a valid publish time.');
+    expect(result.current.data.validateStep(0)).toBe(false);
+    act(() => result.current.actions.setSelectedDate(new Date(NaN)));
+    expect(result.current.data.fieldErrors.date).toBe('Choose a valid publish date.');
+    await act(() => result.current.actions.handleSave());
+    expect(mocks.post.mock.calls.some(([, action]) => action === 'add-daily-verse')).toBe(false);
   });
 
   it('opens the existing verse detail page for a conflict', async () => {
@@ -167,6 +186,7 @@ describe('daily verse editor', () => {
   });
 
   it('opens the conflict prompt as soon as a taken date is selected', async () => {
+    vi.setSystemTime(new Date(2026, 10, 19, 8, 0, 0));
     const existing = {
       id: 7, bookName: 'John', chapter: 3, verseNumber: 16,
       displayDate: '2026-11-20T00:00:00.000Z',
@@ -190,6 +210,7 @@ describe('daily verse editor', () => {
   });
 
   it('keeps the dialog closed when the picked date is available', async () => {
+    vi.setSystemTime(new Date(2026, 10, 19, 8, 0, 0));
     mocks.post.mockImplementation((_area: string, action: string) =>
       Promise.resolve(action === 'check-daily-verse-date'
         ? { returnCode: 200, returnData: { existing: null } }
@@ -205,6 +226,7 @@ describe('daily verse editor', () => {
   });
 
   it('replaces the confirmed preflight target on the next save', async () => {
+    vi.setSystemTime(new Date(2026, 10, 19, 8, 0, 0));
     const existing = {
       id: 7, bookName: 'John', chapter: 3, verseNumber: 16,
       displayDate: '2026-11-20T00:00:00.000Z',

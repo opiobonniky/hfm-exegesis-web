@@ -12,14 +12,12 @@ export function AddExplanationExtrasForm(p: AddExplanationExtrasFormProps) {
   const errors: NonNullable<AddExplanationExtrasFormProps["errors"]> = p.errors || {};
   const appMessage = errors.practicalApps?.find(Boolean) || '';
   const themeMessage = errors.themes?.find(Boolean) || '';
-  const referenceMessage = errors.crossReferences?.find(Boolean) || '';
-  const takeawayMessage = errors.takeaways?.find(Boolean) || '';
   return <div className="space-y-6">
     <section className="space-y-3 rounded-xl border border-border p-4">
       <h3 className="text-sm font-semibold">{tt('Practical applications')} {appMessage ? '*' : ''}</h3>
       {p.practicalApps.map((row, index) => <div key={index} className="space-y-1">
         <div className="flex items-start gap-2">
-          <Textarea aria-label={`${tt('Application')} ${index + 1}`} aria-invalid={!!errors.practicalApps?.[index]}
+          <Textarea data-validation-field={`practicalApps.${index}`} aria-label={`${tt('Application')} ${index + 1}`} aria-invalid={!!errors.practicalApps?.[index]}
             className={errors.practicalApps?.[index] ? 'border-destructive focus-visible:ring-destructive' : ''}
             rows={3} maxLength={5000} value={row.applicationText} onChange={e => p.updatePracticalApp(index, e.target.value)} />
           <Remove label="Remove application" onClick={() => p.removePracticalApp(index)} />
@@ -28,14 +26,13 @@ export function AddExplanationExtrasForm(p: AddExplanationExtrasFormProps) {
       </div>)}
       <Add label="Add application" onClick={p.addPracticalApp} />
     </section>
-    <CrossReferencePicker value={serializeReferences(p.crossReferences)} bibleVersion={p.bibleVersion} isRtl={false} showCommentary showErrors={p.showErrors} requireAll
+    <CrossReferencePicker value={serializeReferences(p.crossReferences)} bibleVersion={p.bibleVersion} isRtl={false} showCommentary showErrors={p.showErrors} revealErrors={p.revealRowErrors} requireAll
       onChange={value => p.onCrossReferencesChange(parseReferences(value).map((row, sortOrder) => ({ ...row, commentary: row.commentary || '', sortOrder })))} />
-    {referenceMessage && <p role="status" className="text-xs text-destructive">{tt(referenceMessage)}</p>}
     <section className="space-y-3 rounded-xl border border-border p-4">
       <h3 className="text-sm font-semibold">{tt('Key themes')} {themeMessage ? '*' : ''}</h3>
       {p.themes.map((row, index) => <div key={index} className="space-y-1">
         <div className="flex gap-2">
-          <Input aria-label={`${tt('Theme')} ${index + 1}`} aria-invalid={!!errors.themes?.[index]}
+          <Input data-validation-field={`themes.${index}`} aria-label={`${tt('Theme')} ${index + 1}`} aria-invalid={!!errors.themes?.[index]}
             className={errors.themes?.[index] ? 'border-destructive focus-visible:ring-destructive' : ''}
             value={row.themeName} onChange={e => p.updateTheme(index, e.target.value)} />
           <Remove label="Remove theme" onClick={() => p.removeTheme(index)} />
@@ -44,9 +41,9 @@ export function AddExplanationExtrasForm(p: AddExplanationExtrasFormProps) {
       </div>)}
       <Add label="Add theme" onClick={p.addTheme} />
     </section>
-    <TakeawayEditor value={p.takeaways} onChange={p.updateTakeaways} error={takeawayMessage} />
-    <label className="block space-y-2 text-sm font-semibold">{tt('Final thoughts')} {errors.finalThoughts ? '*' : ''}
-      <Textarea aria-invalid={!!errors.finalThoughts}
+    <TakeawayEditor value={p.takeaways} onChange={p.updateTakeaways} errors={errors.takeaways} />
+    <label className="block space-y-2 text-sm font-semibold">{tt('Final thoughts')} *
+      <Textarea data-validation-field="finalThoughts" aria-invalid={!!errors.finalThoughts}
         aria-describedby={errors.finalThoughts ? 'final-thoughts-error' : undefined}
         className={errors.finalThoughts ? 'border-destructive focus-visible:ring-destructive' : ''}
         rows={5} maxLength={10000} value={p.finalThoughts} onChange={e => p.updateFinalThoughts(e.target.value)} />

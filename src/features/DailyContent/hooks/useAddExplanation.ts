@@ -236,7 +236,7 @@ export function useAddExplanation() {
       study: studyComplete,
       extras: extrasComplete,
     }),
-    [referenceComplete, exegesisComplete, stepErrors.exegesis, studyComplete, extrasComplete],
+    [referenceComplete, exegesisComplete, stepErrors.reference, stepErrors.exegesis, studyComplete, extrasComplete],
   );
 
   const completionPercent = useMemo(

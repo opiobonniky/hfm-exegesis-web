@@ -52,6 +52,7 @@ export interface StudyToolsVerseResource {
 
 export interface DailyItem {
   id: number;
+  preview?: { explanation?: string; application?: string; reflection?: string; reference?: string };
   bookName?: string;
   chapter?: number;
   verseNumber?: number;

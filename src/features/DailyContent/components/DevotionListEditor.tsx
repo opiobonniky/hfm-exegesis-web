@@ -14,15 +14,16 @@ interface Props {
   value: string[];
   onChange: (value: string[]) => void;
   error?: string;
+  validationField?: string;
   rows?: number;
   maxItems?: number;
 }
 
 /** Each row is one item: paragraph breaks must not become extra list items. */
 export function DevotionListEditor({ label, itemLabel, addLabel, removeLabel, emptyLabel,
-  placeholder, value, onChange, error, rows = 3, maxItems }: Props) {
+  placeholder, value, onChange, error, validationField, rows = 3, maxItems }: Props) {
   const id = useId();
-  return <section aria-labelledby={`${id}-label`} className="space-y-3 rounded-xl border border-border p-4">
+  return <section data-validation-field={validationField} aria-labelledby={`${id}-label`} className="space-y-3 rounded-xl border border-border p-4">
     <div className="flex items-center justify-between gap-2">
       <h3 id={`${id}-label`} className="text-sm font-semibold">{label} *</h3>
       <span className="text-xs text-muted-foreground">{value.filter(item => item.trim()).length}{maxItems ? ` / ${maxItems}` : ''} {tt('items')}</span>

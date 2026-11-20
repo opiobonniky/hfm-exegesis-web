@@ -11,7 +11,7 @@ export function AddExplanationReferenceForm(p: AddExplanationReferenceFormProps)
     verseNumber: p.referenceError && p.bookName && p.chapter ? p.referenceError : '',
   };
   return <div className="space-y-5">
-    <label className="block space-y-2 text-sm font-medium">{tt('Bible version')} {p.bibleVersionError ? '*' : ''}
+    <label data-validation-field="bibleVersion" className="block space-y-2 text-sm font-medium">{tt('Bible version')} *
       <Combobox options={p.sortedTranslationOptions} value={p.bibleVersion} onChange={v => p.updateField('bibleVersion', v)}
         invalid={!!p.bibleVersionError} placeholder={p.bibleVersion || tt('Select a Bible version')} width="w-full" />
       {p.bibleVersionError && <p role="status" className="text-xs text-destructive">{tt(p.bibleVersionError)}</p>}

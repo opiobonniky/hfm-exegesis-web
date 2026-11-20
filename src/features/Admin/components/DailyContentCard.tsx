@@ -29,10 +29,13 @@ function ContentPreview({ label, icon: Icon, text, color }: { label: string; ico
 
 export function DailyContentCard({ item, onView, onEdit, onDelete }: Props) {
   // Pick the best content preview based on what's available
-  const previewText = item.explanation || item.application || item.content || item.reflection || item.teachingBody;
-  const previewLabel = item.explanation ? "Explanation" : item.application ? "Application" : item.content ? "Content" : item.reflection ? "Reflection" : item.teachingBody ? "Teaching" : null;
-  const previewIcon = item.explanation ? Lightbulb : item.application ? Heart : BookOpen;
-  const previewColor = item.explanation ? "text-amber-500" : item.application ? "text-rose-500" : "text-blue-500";
+  const explanation = item.preview?.explanation || item.explanation;
+  const application = item.preview?.application || item.application;
+  const reflection = item.preview?.reflection || item.reflection;
+  const previewText = explanation || application || item.content || reflection || item.teachingBody;
+  const previewLabel = explanation ? "Explanation" : application ? "Application" : item.content ? "Content" : reflection ? "Reflection" : "Teaching";
+  const previewIcon = explanation ? Lightbulb : application ? Heart : BookOpen;
+  const previewColor = explanation ? "text-amber-500" : application ? "text-rose-500" : "text-blue-500";
 
   return (
     <div className="p-3 min-w-0 flex flex-col border border-border/40 rounded-xl bg-card hover:bg-muted/10 hover:border-primary/20 transition-all duration-200 gap-2">
@@ -50,7 +53,7 @@ export function DailyContentCard({ item, onView, onEdit, onDelete }: Props) {
             )}
           </div>
           {item.title && <p className="font-medium text-sm truncate">{item.title}</p>}
-          {item.bookName && <p className="text-xs text-muted-foreground">{item.bookName} {item.chapter}:{item.verseNumber}</p>}
+          {item.bookName && <p className="text-xs text-muted-foreground">{item.preview?.reference || `${item.bookName} ${item.chapter}:${item.verseNumber}`}</p>}
           {item.passageReference && <p className="text-xs text-muted-foreground font-mono">{item.passageReference}</p>}
         </div>
         <div className="flex items-center gap-1 shrink-0">
@@ -72,7 +75,7 @@ export function DailyContentCard({ item, onView, onEdit, onDelete }: Props) {
       {/* Content preview */}
       {previewText && (
         <div className="pt-2 border-t border-border/30">
-          <ContentPreview label={previewLabel} icon={previewIcon} text={previewText} color={previewColor} />
+          <ContentPreview label={tt(previewLabel)} icon={previewIcon} text={previewText} color={previewColor} />
         </div>
       )}
       <div className="mt-auto"><DailyContentMetadata creatorName={item.creatorName} createdOn={item.createdOn} displayDate={item.displayDate} /></div>

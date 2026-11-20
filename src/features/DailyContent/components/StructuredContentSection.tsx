@@ -37,6 +37,9 @@ interface Props {
   setTakeaways: (v: string) => void;
   bibleVersion: string;
   isRtl: boolean;
+  requireRichRows?: boolean;
+  revealRowErrors?: boolean;
+  takeawayErrors?: string[];
 }
 
 export function StructuredContentSection(p: Props) {
@@ -70,7 +73,8 @@ export function StructuredContentSection(p: Props) {
   ];
   return (
     <div className="space-y-5" dir={p.isRtl ? "rtl" : "ltr"}>
-      <WordStudyEditor value={parseStudies(p.wordStudies)} onChange={rows => p.setWordStudies(serializeStudies(rows))} />
+      <WordStudyEditor value={parseStudies(p.wordStudies)} requireAll={p.requireRichRows} rejectEmpty
+        revealErrors={p.revealRowErrors} onChange={rows => p.setWordStudies(serializeStudies(rows))} />
       {fields.map((f) => (
         <div key={f.label} className="space-y-2">
           <Label className="flex items-center gap-2">
@@ -88,12 +92,15 @@ export function StructuredContentSection(p: Props) {
           />
         </div>
       ))}
-      <TakeawayEditor value={parseTakeaways(p.takeaways)} onChange={items => p.setTakeaways(JSON.stringify(items))} />
+      <TakeawayEditor value={parseTakeaways(p.takeaways)} errors={p.takeawayErrors} onChange={items => p.setTakeaways(JSON.stringify(items))} />
       <CrossReferencePicker
         value={p.crossReferences}
         onChange={p.setCrossReferences}
         bibleVersion={p.bibleVersion}
         isRtl={p.isRtl}
+        requireAll={p.requireRichRows}
+        rejectEmpty
+        revealErrors={p.revealRowErrors}
       />
     </div>
   );

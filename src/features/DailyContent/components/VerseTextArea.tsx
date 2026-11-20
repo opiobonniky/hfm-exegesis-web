@@ -18,6 +18,7 @@ interface Props {
   verseEnd?: string;
   bibleVersion: string;
   t: any;
+  error?: string;
 }
 export function VerseTextArea(p: Props) {
   const versionAbbr = BIBLE_VERSIONS.find((v) => v.id === p.bibleVersion)?.abbreviation || p.bibleVersion;
@@ -34,11 +35,12 @@ export function VerseTextArea(p: Props) {
           )}
         </span>
         <Button
+          type="button"
           variant="ghost"
           size="sm"
           className="h-6 px-2 text-xs"
           onClick={() => p.setIsVerseEditing(!p.isVerseEditing)}
-          disabled={!p.book || !p.chapter || !p.verseNumber || p.isVerseLoading || !p.verseText}
+          disabled={!p.book || !p.chapter || !p.verseNumber || p.isVerseLoading}
         >
           <Pencil className="h-3 w-3 mr-1" />
           {p.isVerseEditing ? tt("Done") : tt("Edit")}
@@ -51,6 +53,10 @@ export function VerseTextArea(p: Props) {
           </div>
         ) : (
           <Textarea
+            data-validation-field="verseText"
+            aria-label={p.t.dailyVerse.verseText}
+            aria-invalid={!!p.error}
+            aria-describedby={p.error ? 'daily-verse-text-error' : undefined}
             value={p.book && p.chapter && p.verseNumber ? p.verseText : ''}
             onChange={(e) => p.setVerseText(e.target.value)}
             readOnly={!p.isVerseEditing || !p.book || !p.chapter || !p.verseNumber}
@@ -64,6 +70,7 @@ export function VerseTextArea(p: Props) {
           </div>
         )}
       </div>
+      {p.error && <p id="daily-verse-text-error" role="status" className="text-xs text-destructive">{tt(p.error)}</p>}
     </div>
   );
 }
