@@ -20,7 +20,7 @@ export default function AddDailyExegesis() {
   return (
     <PageContentWrapper isRtl={data.isRtl}>
       <DailyContentPageHeader
-        backTo="/daily-exegesis"
+        backTo="/admin/daily-exegesis"
         backLabel={data.t.common.back}
         icon={Sparkles}
         title={data.isEditing ? tt("Edit Exegesis") : tt("Add Daily Exegesis")}
@@ -133,7 +133,7 @@ export default function AddDailyExegesis() {
         </Section>
 
         <DailyContentFormActions
-          cancelTo="/daily-exegesis"
+          cancelTo="/admin/daily-exegesis"
           cancelLabel={data.t.common.cancel}
           saveLabel={data.isEditing ? "Update Exegesis" : "Create Exegesis"}
           disabled={data.saveDisabled}

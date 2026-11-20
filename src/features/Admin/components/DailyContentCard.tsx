@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import type { DailyItem } from "../types";
 import { tt } from '@/components/languages/hardcodedTranslate';
 import { displayDate } from '@/services/numberLocale/format';
+import { DailyContentMetadata } from '@/features/DailyContent/components/DailyContentMetadata';
 
 interface Props {
   item: DailyItem;
@@ -34,7 +35,7 @@ export function DailyContentCard({ item, onView, onEdit, onDelete }: Props) {
   const previewColor = item.explanation ? "text-amber-500" : item.application ? "text-rose-500" : "text-blue-500";
 
   return (
-    <div className="p-4 border border-border/40 rounded-xl bg-card hover:bg-muted/10 hover:border-primary/20 transition-all duration-200 space-y-2">
+    <div className="p-3 min-w-0 flex flex-col border border-border/40 rounded-xl bg-card hover:bg-muted/10 hover:border-primary/20 transition-all duration-200 gap-2">
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0 cursor-pointer" onClick={() => onView(item)}>
           <div className="flex items-center gap-2 flex-wrap mb-1">
@@ -51,18 +52,17 @@ export function DailyContentCard({ item, onView, onEdit, onDelete }: Props) {
           {item.title && <p className="font-medium text-sm truncate">{item.title}</p>}
           {item.bookName && <p className="text-xs text-muted-foreground">{item.bookName} {item.chapter}:{item.verseNumber}</p>}
           {item.passageReference && <p className="text-xs text-muted-foreground font-mono">{item.passageReference}</p>}
-          {item.creatorName && <p className="text-[10px] text-muted-foreground/60 mt-1">by {item.creatorName}</p>}
         </div>
         <div className="flex items-center gap-1 shrink-0">
-          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary"
+          <Button aria-label={tt('View')} variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-primary"
             onClick={() => onView(item)}>
             <Eye className="w-4 h-4 text-foreground/60" />
           </Button>
-          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary"
+          <Button aria-label={tt('Edit')} variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-primary"
             onClick={() => onEdit(item)}>
             <Edit2 className="w-4 h-4 text-foreground/60" />
           </Button>
-          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive"
+          <Button aria-label={tt('Delete')} variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive"
             onClick={() => onDelete(item)}>
             <Trash2 className="w-4 h-4 text-foreground/60" />
           </Button>
@@ -75,6 +75,7 @@ export function DailyContentCard({ item, onView, onEdit, onDelete }: Props) {
           <ContentPreview label={previewLabel} icon={previewIcon} text={previewText} color={previewColor} />
         </div>
       )}
+      <div className="mt-auto"><DailyContentMetadata creatorName={item.creatorName} createdOn={item.createdOn} displayDate={item.displayDate} /></div>
     </div>
   );
 }

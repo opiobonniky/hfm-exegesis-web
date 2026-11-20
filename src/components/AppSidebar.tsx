@@ -63,9 +63,22 @@ const adminNavItems: NavItem[] = [
   { title: "Users", url: routes.adminUsers.path, icon: Users },
   { title: "Bible app", url: routes.bibleReader.path, icon: BookText },
   {
-    title: "Daily Content",
-    url: routes.adminDailyContent.path,
+    title: "Daily Verses",
+    url: routes.adminDailyVerses.path,
     icon: CalendarDays,
+    activePaths: [routes.adminDailyVerses.path, routes.addDailyVerse.path, routes.dailyVerseDetail.path],
+  },
+  {
+    title: "Daily Devotions",
+    url: routes.dailyDevotions.path,
+    icon: Sun,
+    activePaths: [routes.dailyDevotions.path, routes.addDailyDevotion.path, routes.dailyDevotionDetail.path],
+  },
+  {
+    title: "Daily Exegesis",
+    url: routes.adminDailyExegesis.path,
+    icon: Sparkles,
+    activePaths: [routes.adminDailyExegesis.path, routes.addDailyExegesis.path, routes.dailyExegesisDetail.path],
   },
   {
     title: "Journal Moderation",

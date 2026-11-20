@@ -84,7 +84,7 @@ export function useAddDailyExegesis() {
       const res = await saveDailyExegesis(payload);
       if (res.returnCode === 200) {
         toast({ title: isEditing ? "Updated" : "Created", description: `Exegesis ${isEditing ? "updated" : "created"} successfully` });
-        navigate(routes.dailyExegesis.path);
+        navigate(routes.adminDailyExegesis.path);
       } else {
         toast({ title: tt("Error"), description: res.returnMessage || "Failed to save", variant: "destructive" });
       }

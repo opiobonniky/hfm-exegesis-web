@@ -85,7 +85,9 @@ export function VerseExplanationsPageContent() {
           ? (it as any).isPublished
           : true,
       bibleVersion: it.bibleVersion || "BSB",
+      creatorName: it.creatorName || null,
       createdOn: it.createdOn,
+      updatedOn: it.updatedOn,
     };
   });
 

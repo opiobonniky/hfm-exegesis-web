@@ -24,7 +24,7 @@ vi.mock('@/services/bibleApi', () => ({ bibleApi: {
 
 // Avoid loading the application route registry in a hook unit test.
 vi.mock('@/components/Routes/routes', () => ({ routes: {
-  adminDailyContent: { path: '/admin/daily-content' },
+  adminDailyVerses: { path: '/admin/daily-verses' },
   dailyVerseDetail: { path: '/daily-verse-detail' },
 } }));
 
@@ -100,7 +100,7 @@ describe('daily verse editor', () => {
     // Daily verses are independent from shared PassageStudy records.
     expect(payload).not.toHaveProperty('sharedStudyVersion');
     act(() => vi.advanceTimersByTime(2000));
-    expect(mocks.navigate).toHaveBeenCalledWith('/admin/daily-content');
+    expect(mocks.navigate).toHaveBeenCalledWith('/admin/daily-verses');
   });
 
   it('keeps required content validation after removing the optional field', async () => {
@@ -133,7 +133,7 @@ describe('daily verse editor', () => {
   it('falls back to Daily Content when no existing verse is attached', async () => {
     const { result } = await filledForm();
     act(() => result.current.actions.viewExisting());
-    expect(mocks.navigate).toHaveBeenCalledWith('/admin/daily-content');
+    expect(mocks.navigate).toHaveBeenCalledWith('/admin/daily-verses');
   });
 
   it('updates a conflicting verse without Learn More and returns to Daily Content', async () => {
@@ -146,7 +146,7 @@ describe('daily verse editor', () => {
     expect(mocks.post.mock.calls.at(-1)![2]).toMatchObject({ id: 7 });
     expect(mocks.post.mock.calls.at(-1)![2]).not.toHaveProperty('learnMore');
     act(() => vi.advanceTimersByTime(2000));
-    expect(mocks.navigate).toHaveBeenCalledWith('/admin/daily-content');
+    expect(mocks.navigate).toHaveBeenCalledWith('/admin/daily-verses');
   });
 
   it('shows a reload message instead of the date-conflict dialog for a stale shared study', async () => {

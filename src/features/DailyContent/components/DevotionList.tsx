@@ -22,7 +22,7 @@ export function DevotionList({
   onDelete,
 }: Props) {
   return (
-    <div className="space-y-3">
+    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3">
       {devotions.map((item, idx) => (
         <DevotionListItem
           key={item.id}

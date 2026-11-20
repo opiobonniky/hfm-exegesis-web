@@ -20,17 +20,6 @@ export const CONTENT_TYPE_LABELS: Record<
   },
 };
 
-export const TAB_VALUE_MAP: Record<string, ContentType> = {
-  verses: "verse",
-  devotions: "devotion",
-  exegesis: "exegesis",
-};
-
-export const CONTENT_TABS = [
-  { value: "verses", label: tt("Daily Verses"), icon: "Sun" },
-  { value: "devotions", label: tt("Devotions"), icon: "Sprout" },
-  { value: "exegesis", label: tt("Exegesis"), icon: "BookOpen" },
-] as const;
 
 export const API_ACTIONS = {
   getVerseAll: "get-all-daily-verses",
@@ -75,15 +64,3 @@ export const DELETE_ID_KEY: Record<ContentType, string> = {
 export const PAGE_SIZE = 12;
 
 export const EXEGESIS_PAGE_SIZE = 20;
-
-export const DAILY_CONTENT_ADD_ROUTES: Record<string, string> = {
-  verses: "/add-daily-verse",
-  devotions: "/add-daily-devotion",
-  exegesis: "/add-daily-exegesis",
-};
-
-export const DAILY_CONTENT_VIEW_ROUTES: Record<string, string> = {
-  verses: "/daily-verse-detail",
-  devotions: "/daily-devotion-detail",
-  exegesis: "/daily-exegesis-detail",
-};

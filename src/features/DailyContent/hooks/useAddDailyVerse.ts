@@ -488,7 +488,7 @@ export function useAddDailyVerse() {
           title: t.dailyVerse.toastSuccess,
           description: res.returnMessage || t.dailyVerse.verseAdded,
         });
-        setTimeout(() => navigate(routes.adminDailyContent.path), 2000);
+        setTimeout(() => navigate(routes.adminDailyVerses.path), 2000);
       } else if (res.returnCode === 409) {
         const conflict = res.returnData?.conflicts?.[0];
         if (conflict) {
@@ -581,7 +581,7 @@ export function useAddDailyVerse() {
           title: t.dailyVerse.toastUpdated,
           description: t.dailyVerse.toastUpdateSuccessDesc,
         });
-        setTimeout(() => navigate(routes.adminDailyContent.path), 2000);
+        setTimeout(() => navigate(routes.adminDailyVerses.path), 2000);
       } else {
         toast({
           title: t.dailyVerse.toastUpdateFailedDesc,
@@ -618,7 +618,7 @@ export function useAddDailyVerse() {
       );
       return;
     }
-    navigate(routes.adminDailyContent.path);
+    navigate(routes.adminDailyVerses.path);
   }, [closeConflict, conflictDialog, navigate]);
 
   const conflictReference = conflictDialog.conflict?.existing?.bookName

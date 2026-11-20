@@ -55,7 +55,8 @@ const AdminDashboard = lazy(() => import("@/features/Admin/pages/AdminDashboard"
 const AdminStudyTools = lazy(() => import("@/features/Admin/pages/AdminStudyTools"));
 const AddStudyWord = lazy(() => import("@/features/Admin/pages/AddStudyWord"));
 const AdminTrivia = lazy(() => import("@/features/Admin/pages/AdminTrivia"));
-const AdminDailyContent = lazy(() => import("@/features/Admin/pages/AdminDailyContent"));
+const LegacyDailyContentRedirect = lazy(() => import("./LegacyDailyContentRedirect"));
+const DailyVerses = lazy(() => import("@/features/DailyContent/pages/DailyVerses"));
 const AdminSubscriptions = lazy(() => import("@/features/Admin/pages/AdminSubscriptions"));
 
 const AdminBookPrologues = lazy(() => import("@/features/Admin/pages/AdminBookPrologues"));
@@ -539,10 +540,17 @@ const routeConfigs = {
   },
   adminDailyContent: {
     path: "/admin/daily-content",
-    component: AdminDailyContent,
+    component: LegacyDailyContentRedirect,
     isProtected: true,
     requiresLayout: true,
     title: tt("Daily Content Manager"),
+  },
+  adminDailyVerses: {
+    path: "/admin/daily-verses",
+    component: DailyVerses,
+    isProtected: true,
+    requiresLayout: true,
+    title: tt("Daily Verses"),
   },
   adminSubscriptions: {
     path: "/admin/subscriptions",

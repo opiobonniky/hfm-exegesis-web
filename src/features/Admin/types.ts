@@ -70,6 +70,7 @@ export interface DailyItem {
   displayDate: string;
   isPublished: boolean;
   creatorName?: string;
+  createdOn?: string;
 }
 
 export interface DashboardStats {
@@ -654,6 +655,7 @@ export interface VerseExplanationListItem {
   bibleVersion: string;
   sortOrder: number;
   exegesis: { explanationText: string; applicationText: string } | null;
+  creatorName?: string | null;
   createdOn: string;
   updatedOn: string | null;
 }

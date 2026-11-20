@@ -104,6 +104,8 @@ export const EMPTY_EDIT: EditState = {
 };
 
 export interface DailyDevotionItem {
+  creatorName?: string;
+  createdOn?: string | null;
   id: number;
   title: string;
   explanation: string;

@@ -148,7 +148,7 @@ const AddDailyVerse = () => {
                 publishedDesc={h.t.dailyVerse.publishedDesc}
               />
               <DailyContentFormActions
-                cancelTo={routes.adminDailyContent.path}
+                cancelTo={routes.adminDailyVerses.path}
                 cancelLabel={h.t.common.cancel}
                 saveLabel={h.t.dailyVerse.saveDailyVerse}
                 disabled={h.saveDisabled}

@@ -31,17 +31,17 @@ describe('daily verse content editor', () => {
     for (const field of screen.getAllByRole('textbox')) expect(field).toHaveAttribute('dir', 'rtl');
   });
 
-  it('returns from the editor header to Daily Content', () => {
+  it('returns from the editor header to the independent Daily Verses list', () => {
     render(<MemoryRouter><AddDailyVerseHeader model={{ isEditing: false,
       t,
     } as unknown as AddDailyVersePageViewModel} /></MemoryRouter>);
-    expect(screen.getByRole('link', { name: /Back/ })).toHaveAttribute('href', routes.adminDailyContent.path);
+    expect(screen.getByRole('link', { name: /Back/ })).toHaveAttribute('href', routes.adminDailyVerses.path);
   });
 
   it('removes the duplicate admin page while retaining editor and reader routes', () => {
     expect(Object.values(routes).some(route => route.path === '/daily-verse')).toBe(false);
     expect(routes).not.toHaveProperty('dailyVerse');
-    expect(routes.adminDailyContent.path).toBe('/admin/daily-content');
+    expect(routes.adminDailyVerses.path).toBe('/admin/daily-verses');
     expect(routes.addDailyVerse.path).toBe('/add-daily-verse');
     expect(routes.userDailyVerse).toBeDefined();
   });

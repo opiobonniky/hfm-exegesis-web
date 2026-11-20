@@ -4,6 +4,7 @@ import { Trash2, Edit2, Eye, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { useLanguage } from '@/components/languages/languageProvider';
 import { displayDate } from '@/services/numberLocale/format';
 
 interface VerseExplanationItem {
@@ -15,7 +16,9 @@ interface VerseExplanationItem {
   learnMore?: string;
   isPublished: boolean;
   bibleVersion?: string;
+  creatorName?: string | null;
   createdOn?: string | null;
+  updatedOn?: string | null;
 }
 
 interface VerseExplanationTableProps {
@@ -32,6 +35,65 @@ const summarizeText = (value?: string) => {
   if (!value) return "—";
   return value.replace(/\s+/g, " ").trim();
 };
+
+/** Creator name and creation date, shown at the bottom of the card, left of its action icons. */
+function VerseExplanationMetadata({
+  creatorName,
+  createdOn,
+  updatedOn,
+}: {
+  creatorName?: string | null;
+  createdOn?: string | null;
+  updatedOn?: string | null;
+}) {
+  const { lang } = useLanguage();
+  const date = (value?: string | null) =>
+    value && !Number.isNaN(new Date(value).getTime())
+      ? displayDate(value, lang, { month: 'short', day: 'numeric', year: 'numeric' })
+      : "—";
+  return (
+    <div className="min-w-0 text-[11px] text-muted-foreground">
+      <span className="block truncate" title={creatorName || undefined}>
+        {tt("Created by")}:{creatorName ? ` ${creatorName}` : " —"}
+      </span>
+      <span className="block">{tt("Created date")}: {date(createdOn || updatedOn)}</span>
+    </div>
+  );
+}
+
+function VerseExplanationActions({
+  onView,
+  onEdit,
+  onDelete,
+}: {
+  onView: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
+}) {
+  return (
+    <div className="flex items-center gap-1 shrink-0">
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={onView}
+        title={tt("View")}
+      >
+        <Eye className="w-4 h-4" />
+      </Button>
+      <Button variant="ghost" size="icon" onClick={onEdit}>
+        <Edit2 className="w-4 h-4" />
+      </Button>
+      <Button
+        variant="ghost"
+        size="icon"
+        className="text-destructive"
+        onClick={onDelete}
+      >
+        <Trash2 className="w-4 h-4" />
+      </Button>
+    </div>
+  );
+}
 
 export function VerseExplanationTable({
   items,
@@ -52,8 +114,8 @@ export function VerseExplanationTable({
             className="border rounded-xl p-4 bg-card flex flex-col justify-between"
           >
             <div>
-              <div className="flex items-center justify-between gap-2">
-                <div>
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
                   <div className="text-sm font-semibold">
                     {item.bookName} {item.chapter}:{item.verseNumber}
                   </div>
@@ -83,26 +145,17 @@ export function VerseExplanationTable({
               </div>
             </div>
 
-            <div className="mt-4 flex items-center justify-end gap-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => onView(item)}
-                title={tt("View")}
-              >
-                <Eye className="w-4 h-4" />
-              </Button>
-              <Button variant="ghost" size="icon" onClick={() => onEdit(item)}>
-                <Edit2 className="w-4 h-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-destructive"
-                onClick={() => onDelete(item)}
-              >
-                <Trash2 className="w-4 h-4" />
-              </Button>
+            <div className="mt-4 flex items-center gap-3">
+              <VerseExplanationMetadata
+                creatorName={item.creatorName}
+                createdOn={item.createdOn}
+                updatedOn={item.updatedOn}
+              />
+              <VerseExplanationActions
+                onView={() => onView(item)}
+                onEdit={() => onEdit(item)}
+                onDelete={() => onDelete(item)}
+              />
             </div>
           </div>
         ))}
@@ -121,10 +174,7 @@ export function VerseExplanationTable({
                   {item.explanation}
                 </p>
                 <p className="text-xs text-muted-foreground mt-2">
-                  {item.bibleVersion || tt("BSB")} •{" "}
-                  {item.createdOn
-                    ? displayDate(item.createdOn)
-                    : ""}
+                  {item.bibleVersion || tt("BSB")}
                 </p>
               </div>
               <Badge
@@ -135,33 +185,40 @@ export function VerseExplanationTable({
               </Badge>
             </div>
             <div
-              className="flex items-center gap-1 mt-2 pt-2 border-t border-border/50"
+              className="flex items-center gap-3 mt-2 pt-2 border-t border-border/50"
               onClick={(e) => e.stopPropagation()}
             >
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-7 w-7"
-                onClick={() => onView(item)}
-              >
-                <Eye className="w-3.5 h-3.5" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-7 w-7"
-                onClick={() => onEdit(item)}
-              >
-                <Edit2 className="w-3.5 h-3.5" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-7 w-7 text-destructive"
-                onClick={() => onDelete(item)}
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-              </Button>
+              <VerseExplanationMetadata
+                creatorName={item.creatorName}
+                createdOn={item.createdOn}
+                updatedOn={item.updatedOn}
+              />
+              <div className="flex items-center gap-1 shrink-0">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7"
+                  onClick={() => onView(item)}
+                >
+                  <Eye className="w-3.5 h-3.5" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7"
+                  onClick={() => onEdit(item)}
+                >
+                  <Edit2 className="w-3.5 h-3.5" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 text-destructive"
+                  onClick={() => onDelete(item)}
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </Button>
+              </div>
             </div>
           </div>
         ))}
