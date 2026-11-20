@@ -5,13 +5,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { tt } from '@/components/languages/hardcodedTranslate';
 import { PassageFields } from './PassageFields';
 import { usePassagePreview } from '../hooks/usePassagePreview';
-import { parseReferences, serializeReferences, referenceLabel, referenceError, type ReferenceEntry } from '../helpers/editorContent';
+import { parseReferences, serializeReferences, referenceLabel, referenceError, requiredReferenceError, type ReferenceEntry } from '../helpers/editorContent';
 
 let nextId = 0;
 const rowsFrom = (value: string) => parseReferences(value).map(row => ({ ...row, key: ++nextId }));
 
-export function CrossReferencePicker({ value, onChange, bibleVersion, isRtl, showCommentary = false, showErrors = true }: {
-  value: string; onChange: (value: string) => void; bibleVersion: string; isRtl: boolean; showCommentary?: boolean; showErrors?: boolean;
+export function CrossReferencePicker({ value, onChange, bibleVersion, isRtl, showCommentary = false, showErrors = true, requireAll = false }: {
+  value: string; onChange: (value: string) => void; bibleVersion: string; isRtl: boolean; showCommentary?: boolean; showErrors?: boolean; requireAll?: boolean;
 }) {
   const [rows, setRows] = useState(() => rowsFrom(value));
   const emitted = useRef(value);
@@ -26,7 +26,8 @@ export function CrossReferencePicker({ value, onChange, bibleVersion, isRtl, sho
   return <section className="space-y-3" dir={isRtl ? 'rtl' : 'ltr'}>
     <div><h3 className="text-sm font-semibold">{tt('Cross references')}</h3>
       <p className="text-xs text-muted-foreground">{tt('Select a passage or verse range to quote it automatically. Existing quotations are preserved until you change the passage.')}</p></div>
-    {rows.map((row, index) => <ReferenceRow key={row.key} row={row} version={bibleVersion} showCommentary={showCommentary} error={showErrors ? referenceError(row, index) : ''}
+    {rows.map((row, index) => <ReferenceRow key={row.key} row={row} version={bibleVersion} showCommentary={showCommentary}
+      error={showErrors ? (requireAll ? requiredReferenceError(row, index) : referenceError(row, index)) : ''}
       onChange={patch => update(rows.map(item => item.key === row.key ? { ...item, ...patch } : item))}
       onRemove={() => update(rows.filter(item => item.key !== row.key))} />)}
     {!rows.length && <p className="text-sm text-muted-foreground">{tt('No cross references added yet.')}</p>}

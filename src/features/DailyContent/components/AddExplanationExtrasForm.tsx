@@ -9,28 +9,48 @@ import { parseReferences, serializeReferences } from '../helpers/editorContent';
 import { TakeawayEditor } from './TakeawayEditor';
 
 export function AddExplanationExtrasForm(p: AddExplanationExtrasFormProps) {
+  const errors: NonNullable<AddExplanationExtrasFormProps["errors"]> = p.errors || {};
+  const appMessage = errors.practicalApps?.find(Boolean) || '';
+  const themeMessage = errors.themes?.find(Boolean) || '';
+  const referenceMessage = errors.crossReferences?.find(Boolean) || '';
+  const takeawayMessage = errors.takeaways?.find(Boolean) || '';
   return <div className="space-y-6">
     <section className="space-y-3 rounded-xl border border-border p-4">
-      <h3 className="text-sm font-semibold">{tt('Practical applications')}</h3>
-      {p.practicalApps.map((row, index) => <div key={index} className="flex items-start gap-2">
-        <Textarea aria-label={`${tt('Application')} ${index + 1}`} rows={3} maxLength={5000} value={row.applicationText} onChange={e => p.updatePracticalApp(index, e.target.value)} />
-        <Remove label="Remove application" onClick={() => p.removePracticalApp(index)} />
+      <h3 className="text-sm font-semibold">{tt('Practical applications')} {appMessage ? '*' : ''}</h3>
+      {p.practicalApps.map((row, index) => <div key={index} className="space-y-1">
+        <div className="flex items-start gap-2">
+          <Textarea aria-label={`${tt('Application')} ${index + 1}`} aria-invalid={!!errors.practicalApps?.[index]}
+            className={errors.practicalApps?.[index] ? 'border-destructive focus-visible:ring-destructive' : ''}
+            rows={3} maxLength={5000} value={row.applicationText} onChange={e => p.updatePracticalApp(index, e.target.value)} />
+          <Remove label="Remove application" onClick={() => p.removePracticalApp(index)} />
+        </div>
+        {errors.practicalApps?.[index] && <p role="status" className="text-xs text-destructive">{tt(errors.practicalApps[index])}</p>}
       </div>)}
       <Add label="Add application" onClick={p.addPracticalApp} />
     </section>
-    <CrossReferencePicker value={serializeReferences(p.crossReferences)} bibleVersion={p.bibleVersion} isRtl={false} showCommentary showErrors={p.showErrors}
+    <CrossReferencePicker value={serializeReferences(p.crossReferences)} bibleVersion={p.bibleVersion} isRtl={false} showCommentary showErrors={p.showErrors} requireAll
       onChange={value => p.onCrossReferencesChange(parseReferences(value).map((row, sortOrder) => ({ ...row, commentary: row.commentary || '', sortOrder })))} />
+    {referenceMessage && <p role="status" className="text-xs text-destructive">{tt(referenceMessage)}</p>}
     <section className="space-y-3 rounded-xl border border-border p-4">
-      <h3 className="text-sm font-semibold">{tt('Key themes')}</h3>
-      {p.themes.map((row, index) => <div key={index} className="flex gap-2">
-        <Input aria-label={`${tt('Theme')} ${index + 1}`} value={row.themeName} onChange={e => p.updateTheme(index, e.target.value)} />
-        <Remove label="Remove theme" onClick={() => p.removeTheme(index)} />
+      <h3 className="text-sm font-semibold">{tt('Key themes')} {themeMessage ? '*' : ''}</h3>
+      {p.themes.map((row, index) => <div key={index} className="space-y-1">
+        <div className="flex gap-2">
+          <Input aria-label={`${tt('Theme')} ${index + 1}`} aria-invalid={!!errors.themes?.[index]}
+            className={errors.themes?.[index] ? 'border-destructive focus-visible:ring-destructive' : ''}
+            value={row.themeName} onChange={e => p.updateTheme(index, e.target.value)} />
+          <Remove label="Remove theme" onClick={() => p.removeTheme(index)} />
+        </div>
+        {errors.themes?.[index] && <p role="status" className="text-xs text-destructive">{tt(errors.themes[index])}</p>}
       </div>)}
       <Add label="Add theme" onClick={p.addTheme} />
     </section>
-    <TakeawayEditor value={p.takeaways} onChange={p.updateTakeaways} />
-    <label className="block space-y-2 text-sm font-semibold">{tt('Final thoughts')}
-      <Textarea rows={5} maxLength={10000} value={p.finalThoughts} onChange={e => p.updateFinalThoughts(e.target.value)} />
+    <TakeawayEditor value={p.takeaways} onChange={p.updateTakeaways} error={takeawayMessage} />
+    <label className="block space-y-2 text-sm font-semibold">{tt('Final thoughts')} {errors.finalThoughts ? '*' : ''}
+      <Textarea aria-invalid={!!errors.finalThoughts}
+        aria-describedby={errors.finalThoughts ? 'final-thoughts-error' : undefined}
+        className={errors.finalThoughts ? 'border-destructive focus-visible:ring-destructive' : ''}
+        rows={5} maxLength={10000} value={p.finalThoughts} onChange={e => p.updateFinalThoughts(e.target.value)} />
+      {errors.finalThoughts && <p id="final-thoughts-error" role="status" className="text-xs text-destructive">{tt(errors.finalThoughts)}</p>}
     </label>
   </div>;
 }

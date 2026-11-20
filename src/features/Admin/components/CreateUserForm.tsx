@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -126,7 +127,9 @@ export function CreateUserForm({
               </Select>
             </FormField>
             <FormField icon={<Calendar className="w-4 h-4" />} label={tt("Date of Birth")}>
-              <Input type="date" value={form.dateOfBirth} onChange={(e) => updateField("dateOfBirth", e.target.value)} className="h-9 text-sm" />
+              <DatePicker valueFormat="string" value={form.dateOfBirth} onChange={(date) => updateField("dateOfBirth", date)}
+                onClear={() => updateField("dateOfBirth", "")} clearable className="h-9 text-sm"
+                aria-label={tt("Date of Birth")} />
             </FormField>
           </div>
         </CardContent>

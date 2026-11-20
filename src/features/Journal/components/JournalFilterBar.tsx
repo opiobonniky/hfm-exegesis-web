@@ -1,5 +1,6 @@
 import { Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { CATEGORIES, getCategoryLabel, BOOK_NAMES } from "../constants";
@@ -71,11 +72,15 @@ export function JournalFilterBar({
             </div>
             <div>
                 <p className={labelCls}>{tt("Start Date")}</p>
-                <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="h-9 text-xs rounded-xl bg-card dark:bg-stone-900 border-border dark:border-stone-800" />
+                <DatePicker valueFormat="string" value={startDate} onChange={setStartDate}
+                  onClear={() => setStartDate('')} clearable placeholder={tt("Pick a date")} aria-label={tt("Start Date")}
+                  className="h-9 text-xs rounded-xl bg-card dark:bg-stone-900 border-border dark:border-stone-800" />
             </div>
             <div>
                 <p className={labelCls}>{tt("End Date")}</p>
-                <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="h-9 text-xs rounded-xl bg-card dark:bg-stone-900 border-border dark:border-stone-800" />
+                <DatePicker valueFormat="string" value={endDate} onChange={setEndDate}
+                  onClear={() => setEndDate('')} clearable placeholder={tt("Pick a date")} aria-label={tt("End Date")}
+                  className="h-9 text-xs rounded-xl bg-card dark:bg-stone-900 border-border dark:border-stone-800" />
             </div>
           </div>
         </div>

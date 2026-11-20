@@ -65,4 +65,24 @@ describe('DatePicker', () => {
 
     expect(screen.queryByRole('grid')).not.toBeInTheDocument();
   });
+
+  it('emits an ISO string for string-backed form and filter fields', () => {
+    const onChange = vi.fn();
+    render(<DatePicker valueFormat="string" value="2026-11-19" onChange={onChange} />);
+
+    fireEvent.click(screen.getByText(/November 19/));
+    fireEvent.click(within(screen.getByRole('grid')).getByText('20').closest('button')!);
+
+    expect(onChange).toHaveBeenCalledWith('2026-11-20');
+  });
+
+  it('clears a selected date without opening the calendar', () => {
+    const onClear = vi.fn();
+    render(<DatePicker valueFormat="string" value="2026-11-19" onChange={vi.fn()} onClear={onClear} clearable />);
+
+    fireEvent.click(screen.getByLabelText('Clear date'));
+
+    expect(onClear).toHaveBeenCalledTimes(1);
+    expect(screen.queryByRole('grid')).not.toBeInTheDocument();
+  });
 });

@@ -470,11 +470,30 @@ export interface AddExplanationSidebarProps {
   onStepChange: (step: VerseExplanationStepId) => void;
 }
 
+/** Inline validation for the add/edit explanation editor. */
+export interface ExplanationFieldErrors {
+  reference: string;
+  explanationText: string;
+  applicationText: string;
+  introduction: string;
+  backgroundAuthor: string;
+  backgroundBook: string;
+  backgroundContext: string;
+  finalThoughts: string;
+  wordStudies: string[];
+  practicalApps: string[];
+  crossReferences: string[];
+  themes: string[];
+  takeaways: string[];
+}
+
 export interface AddExplanationReferenceFormProps {
   bookName: string;
   chapter: string;
   verseNumber: string;
   verseEnd: string;
+  referenceError?: string;
+  bibleVersionError?: string;
   passageError?: string;
   retryPassage: () => void;
   bibleVersion: string;
@@ -495,11 +514,13 @@ export interface AddExplanationReferenceFormProps {
 export interface AddExplanationExegesisFormProps {
   explanationText: string;
   applicationText: string;
+  errors?: Partial<Pick<ExplanationFieldErrors, "explanationText" | "applicationText">>;
   updateNested: (parent: "exegesis", child: "explanationText" | "applicationText", value: string) => void;
 }
 
 export interface AddExplanationStudyFormProps {
   showErrors?: boolean;
+  errors?: Partial<Pick<ExplanationFieldErrors, "introduction" | "backgroundAuthor" | "backgroundBook" | "backgroundContext" | "wordStudies">>;
   introduction: string;
   backgroundAuthor: string;
   backgroundBook: string;
@@ -515,6 +536,7 @@ export interface AddExplanationStudyFormProps {
 
 export interface AddExplanationExtrasFormProps {
   showErrors?: boolean;
+  errors?: Partial<Pick<ExplanationFieldErrors, "practicalApps" | "crossReferences" | "themes" | "takeaways" | "finalThoughts">>;
   bibleVersion: string;
   onCrossReferencesChange: (rows: CrossRefItem[]) => void;
   practicalApps: ExplanationForm["practicalApps"];

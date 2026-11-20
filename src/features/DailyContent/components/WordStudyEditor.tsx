@@ -4,9 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { tt } from '@/components/languages/hardcodedTranslate';
-import { studyFieldErrors, type StudyEntry } from '../helpers/editorContent';
+import { requiredStudyFieldErrors, studyFieldErrors, type StudyEntry } from '../helpers/editorContent';
 
-export function WordStudyEditor({ value, onChange, showErrors = true }: { value: StudyEntry[]; onChange: (rows: StudyEntry[]) => void; showErrors?: boolean }) {
+export function WordStudyEditor({ value, onChange, showErrors = true, requireAll = false }: { value: StudyEntry[]; onChange: (rows: StudyEntry[]) => void; showErrors?: boolean; requireAll?: boolean }) {
   const update = (index: number, patch: Partial<StudyEntry>) => onChange(value.map((row, i) => i === index ? { ...row, ...patch } : row));
   return <section className="space-y-3 rounded-xl border border-border p-4">
     <div><h3 className="text-sm font-semibold">{tt("Strong's word studies")}</h3>
@@ -18,16 +18,20 @@ export function WordStudyEditor({ value, onChange, showErrors = true }: { value:
           {dir < 0 ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />}</Button>)}
           <Button type="button" size="icon" variant="ghost" aria-label={tt('Remove word')} onClick={() => onChange(value.filter((_, i) => i !== index))}><Trash2 className="h-4 w-4" /></Button></div>
       </div>
-      <StudyFields row={row} showErrors={showErrors} onChange={patch => update(index, patch)} />
+      <StudyFields row={row} showErrors={showErrors} requireAll={requireAll} onChange={patch => update(index, patch)} />
     </div>)}
     {!value.length && <p className="text-sm text-muted-foreground">{tt('No word studies added yet.')}</p>}
     <Button type="button" size="sm" variant="outline" onClick={() => onChange([...value, { surfaceText: '', strongsId: '', customDefinition: '' }])}><Plus className="mr-2 h-4 w-4" />{tt('Add word study')}</Button>
   </section>;
 }
 
-function StudyFields({ row, onChange, showErrors }: { row: StudyEntry; onChange: (patch: Partial<StudyEntry>) => void; showErrors: boolean }) {
+function StudyFields({ row, onChange, showErrors, requireAll }: { row: StudyEntry; onChange: (patch: Partial<StudyEntry>) => void; showErrors: boolean; requireAll?: boolean }) {
   const fieldId = useId();
-  const errors = showErrors ? studyFieldErrors(row) : { surfaceText: '', strongsId: '', customDefinition: '' };
+  const errors = !showErrors
+    ? { surfaceText: '', strongsId: '', customDefinition: '' }
+    : requireAll
+      ? requiredStudyFieldErrors(row)
+      : studyFieldErrors(row);
   const fieldProps = (field: keyof typeof errors) => ({
     id: `${fieldId}-${field}`,
     'aria-invalid': !!errors[field],

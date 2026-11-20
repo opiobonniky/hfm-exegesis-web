@@ -35,6 +35,7 @@ interface ComboboxProps {
   disabled?: boolean;
   width?: string;
   ariaLabel?: string;
+  invalid?: boolean;
 }
 
 export function Combobox({
@@ -46,6 +47,7 @@ export function Combobox({
   disabled = false,
   width = "w-[180px]",
   ariaLabel,
+  invalid = false,
 }: ComboboxProps) {
   const [open, setOpen] = React.useState(false);
 
@@ -71,7 +73,12 @@ export function Combobox({
           role="combobox"
           aria-label={ariaLabel}
           aria-expanded={open}
-          className={cn("justify-between text-left truncate", width)}
+          aria-invalid={invalid || undefined}
+          className={cn(
+            "justify-between text-left truncate",
+            invalid && "border-destructive focus-visible:ring-destructive",
+            width,
+          )}
           disabled={disabled}
         >
           {selectedLabel}

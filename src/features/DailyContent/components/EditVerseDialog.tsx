@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { BookOpen, Lightbulb, Save, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
@@ -135,7 +135,8 @@ export default function EditVerseDialog({
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <Label className="text-xs">{tt("Date")}</Label>
-              <Input type="date" value={localState.displayDate} onChange={(e) => testament("displayDate", e.target.value)} />
+              <DatePicker valueFormat="string" value={localState.displayDate}
+                onChange={(date) => testament("displayDate", date)} aria-label={tt("Date")} />
             </div>
           </div>
           <div className="space-y-1.5">

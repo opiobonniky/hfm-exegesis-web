@@ -2,6 +2,7 @@ import { useState } from "react";
 import { User, Mail, Phone, Calendar, Shield, Sparkles, Sprout, Loader2, Lock } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -56,7 +57,10 @@ export function ProfileTab({ profile, isPayingUser, tierLabel, expiresLabel, sav
             <Label className="text-xs font-medium text-muted-foreground">{t.settings?.phoneLabel}</Label>
             <Input type="tel" value={profile.phoneNumber} onChange={(e) => onProfileChange("phoneNumber", e.target.value)} />
             <Label className="text-xs font-medium text-muted-foreground">{t.settings?.dateOfBirthLabel}</Label>
-            <Input type="date" value={profile.dateOfBirth} onChange={(e) => onProfileChange("dateOfBirth", e.target.value)} />
+            <DatePicker valueFormat="string" value={profile.dateOfBirth}
+              onChange={(date) => onProfileChange("dateOfBirth", date)}
+              onClear={() => onProfileChange("dateOfBirth", "")} clearable
+              aria-label={t.settings?.dateOfBirthLabel || tt("Date of Birth")} />
             <Label className="text-xs font-medium text-muted-foreground">{t.settings?.genderLabel}</Label>
             <Select value={profile.gender || "none"} onValueChange={(v) => onProfileChange("gender", v === "none" ? "" : v)}>
               <SelectTrigger><SelectValue placeholder={t.settings?.genderPlaceholder} /></SelectTrigger>

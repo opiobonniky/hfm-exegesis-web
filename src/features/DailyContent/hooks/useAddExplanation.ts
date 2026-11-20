@@ -19,6 +19,12 @@ import { tt } from '@/components/languages/hardcodedTranslate';
 import { routePaths, routes } from "@/components/Routes/routes";
 import { usePassagePreview } from './usePassagePreview';
 import { canonicalBook, parseStudies, parseReferences, validPassage, collectionError, nonEmptyReferences, nonEmptyStudies } from '../helpers/editorContent';
+import {
+  getExplanationFieldErrors,
+  getExplanationStepErrors,
+  hasExplanationErrors,
+  type ExplanationFieldErrors,
+} from '../helpers/explanationValidation';
 
 const parseTakeaways = (value: unknown): string[] => {
   if (Array.isArray(value)) {
@@ -102,6 +108,14 @@ export function useAddExplanation() {
     ? `${form.bookName}:${form.chapter}:${form.verseNumber}` : '';
   const checkingExisting = !!referenceKey && (loadingExisting || checkedReference !== referenceKey);
   const isEditMode = existingFound;
+  // Empty fields are shown inline. Saved rich content is exempt until edited.
+  const fieldErrors: ExplanationFieldErrors = useMemo(
+    () => getExplanationFieldErrors(form, { hideRichContent: existingFound && !richContentTouched }),
+    // form is a fresh shallow object each render; depend on its content fields.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [formState, form.bibleVersion, existingFound, richContentTouched],
+  );
+  const stepErrors = useMemo(() => getExplanationStepErrors(fieldErrors), [fieldErrors]);
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] =
     useState<VerseExplanationStepId>("reference");
@@ -212,26 +226,17 @@ export function useAddExplanation() {
     [form.exegesis.explanationText],
   );
 
-  const studyComplete = useMemo(
-    () =>
-      form.studyMetadata.introduction.trim().length > 0 ||
-      form.wordStudies.length > 0 ||
-      form.themes.length > 0,
-    [
-      form.studyMetadata.introduction,
-      form.wordStudies.length,
-      form.themes.length,
-    ],
-  );
+  const studyComplete = useMemo(() => !stepErrors.study, [stepErrors.study]);
+  const extrasComplete = useMemo(() => !stepErrors.extras, [stepErrors.extras]);
 
   const stepCompletion: Record<VerseExplanationStepId, boolean> = useMemo(
     () => ({
-      reference: referenceComplete,
-      exegesis: exegesisComplete,
+      reference: referenceComplete && !stepErrors.reference,
+      exegesis: exegesisComplete && !stepErrors.exegesis,
       study: studyComplete,
-      extras: true,
+      extras: extrasComplete,
     }),
-    [referenceComplete, exegesisComplete, studyComplete],
+    [referenceComplete, exegesisComplete, stepErrors.exegesis, studyComplete, extrasComplete],
   );
 
   const completionPercent = useMemo(
@@ -245,8 +250,24 @@ export function useAddExplanation() {
   );
 
   const goToStep = useCallback(
-    (stepId: VerseExplanationStepId) => setActiveTab(stepId),
-    [],
+    (stepId: VerseExplanationStepId) => {
+      const targetIndex = VERSE_EXPLANATION_STEP_ORDER.indexOf(stepId);
+      if (targetIndex > currentStepIndex) {
+        const unfinished = VERSE_EXPLANATION_STEP_ORDER.slice(
+          currentStepIndex,
+          targetIndex,
+        ).find((step) => !stepCompletion[step]);
+        if (unfinished) {
+          const message =
+            stepErrors[unfinished] ||
+            tt("Complete the current step before continuing.");
+          toast({ title: tt("Complete this step first"), description: tt(message), variant: "destructive" });
+          return;
+        }
+      }
+      setActiveTab(stepId);
+    },
+    [currentStepIndex, stepCompletion, stepErrors, toast],
   );
 
   const goNext = useCallback(() => {
@@ -264,15 +285,7 @@ export function useAddExplanation() {
       goToStep(VERSE_EXPLANATION_STEP_ORDER[prevIndex]);
   }, [currentStepIndex, goToStep]);
 
-  const canAdvanceFromCurrent = useMemo(
-    () =>
-      currentStep === "reference"
-        ? referenceComplete
-        : currentStep === "exegesis"
-          ? exegesisComplete
-          : true,
-    [currentStep, referenceComplete, exegesisComplete],
-  );
+  const canAdvanceFromCurrent = stepCompletion[currentStep];
 
   // Selecting a saved passage edits that record rather than creating a duplicate.
   // Ignore responses for selections the editor has already moved away from.
@@ -534,8 +547,7 @@ export function useAddExplanation() {
   const rawRichContentError = collectionError(form.wordStudies, form.crossReferences);
   const richContentError = existingFound && !richContentTouched ? '' : rawRichContentError;
   const isValid = !checkingExisting && !lookupError && !richContentError &&
-    referenceComplete &&
-    form.exegesis.explanationText.trim().length >= 20;
+    !hasExplanationErrors(fieldErrors) && referenceComplete && exegesisComplete;
 
   const handleSave = useCallback(async () => {
     if (!isValid || saving) return;
@@ -629,6 +641,8 @@ export function useAddExplanation() {
       completionPercent,
       canAdvanceFromCurrent,
       isValid,
+      fieldErrors,
+      stepErrors,
       richContentError,
       richContentTouched,
       translationOptions,

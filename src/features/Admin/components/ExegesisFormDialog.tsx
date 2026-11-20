@@ -2,6 +2,7 @@
 import { Loader2, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
@@ -66,7 +67,8 @@ export function ExegesisFormDialog({ open, editItem, form, onFormChange, saving,
             </div>
             <div className="space-y-2">
             <Label>{tt("Display Date")}</Label>
-            <Input type="date" value={form.displayDate} onChange={e => update({ displayDate: e.target.value })} />
+            <DatePicker valueFormat="string" value={form.displayDate} onChange={date => update({ displayDate: date })}
+              onClear={() => update({ displayDate: '' })} clearable aria-label={tt("Display Date")} />
             </div>
           </div>
           <div className="space-y-2"><Label>{tt("Introduction")}</Label><Textarea placeholder={tt("Opening context...")} value={form.introduction} onChange={e => update({ introduction: e.target.value })} rows={3} /></div>

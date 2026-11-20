@@ -5,8 +5,10 @@ import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 
 export interface PassageSelection { bookName: string; chapter: string; verseNumber: string; verseEnd: string }
-export function PassageFields({ value, onChange, verseNumbers, loading = false, allowRange = true }: {
+type PassageFieldKey = keyof PassageSelection;
+export function PassageFields({ value, onChange, verseNumbers, loading = false, allowRange = true, errors }: {
   value: PassageSelection; onChange: (value: PassageSelection) => void; verseNumbers: number[]; loading?: boolean; allowRange?: boolean;
+  errors?: Partial<Record<PassageFieldKey, string>>;
 }) {
   const [rangeMode, setRangeMode] = useState(!!value.verseEnd && Number(value.verseEnd) > Number(value.verseNumber));
   useEffect(() => {
@@ -17,13 +19,13 @@ export function PassageFields({ value, onChange, verseNumbers, loading = false, 
   }, [value.bookName, value.chapter]); // Reset when a different passage is loaded externally.
   const chapterCount = BIBLE_BOOK_CHAPTERS[value.bookName as keyof typeof BIBLE_BOOK_CHAPTERS] || 0;
   const fields = [
-    { label: 'Book', value: value.bookName, options: Object.keys(BIBLE_BOOK_CHAPTERS), disabled: false,
+    { key: 'bookName' as const, label: 'Book', value: value.bookName, options: Object.keys(BIBLE_BOOK_CHAPTERS), disabled: false,
       change: (bookName: string) => { setRangeMode(false); onChange({ bookName, chapter: '', verseNumber: '', verseEnd: '' }); } },
-    { label: 'Chapter', value: value.chapter, options: Array.from({ length: chapterCount }, (_, i) => String(i + 1)), disabled: !value.bookName,
+    { key: 'chapter' as const, label: 'Chapter', value: value.chapter, options: Array.from({ length: chapterCount }, (_, i) => String(i + 1)), disabled: !value.bookName,
       change: (chapter: string) => { setRangeMode(false); onChange({ ...value, chapter, verseNumber: '', verseEnd: '' }); } },
-    { label: rangeMode ? 'From verse' : 'Verse', value: value.verseNumber, options: verseNumbers.map(String), disabled: !value.bookName || !value.chapter || loading,
+    { key: 'verseNumber' as const, label: rangeMode ? 'From verse' : 'Verse', value: value.verseNumber, options: verseNumbers.map(String), disabled: !value.bookName || !value.chapter || loading,
       change: (verseNumber: string) => onChange({ ...value, verseNumber, verseEnd: '' }) },
-    { label: 'Through verse', value: value.verseEnd || value.verseNumber, options: verseNumbers.filter(v => v >= Number(value.verseNumber)).map(String), disabled: !value.bookName || !value.chapter || !value.verseNumber || loading,
+    { key: 'verseEnd' as const, label: 'Through verse', value: value.verseEnd || value.verseNumber, options: verseNumbers.filter(v => v >= Number(value.verseNumber)).map(String), disabled: !value.bookName || !value.chapter || !value.verseNumber || loading,
       change: (verseEnd: string) => onChange({ ...value, verseEnd: verseEnd === value.verseNumber ? '' : verseEnd }) },
   ];
   return <div className="space-y-3">
@@ -40,10 +42,12 @@ export function PassageFields({ value, onChange, verseNumbers, loading = false, 
   </div>;
 
   function renderField(field: typeof fields[number]) {
+    const error = errors?.[field.key];
     return <div className="space-y-1.5" key={field.label}>
       <div className="text-xs font-medium text-muted-foreground">{tt(field.label)}</div>
       <Combobox ariaLabel={tt(field.label)} value={field.value} options={field.options.map(option => ({ value: option, label: option }))}
-        disabled={field.disabled} onChange={field.change} placeholder={loading && field.label.includes('verse') ? tt('Loading…') : tt(`Select ${field.label.toLowerCase()}…`)} width="w-full" />
+        disabled={field.disabled} invalid={!!error} onChange={field.change} placeholder={loading && field.label.includes('verse') ? tt('Loading…') : tt(`Select ${field.label.toLowerCase()}…`)} width="w-full" />
+      {error && <p role="status" className="text-xs text-destructive">{tt(error)}</p>}
     </div>;
   }
 }

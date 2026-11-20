@@ -14,6 +14,9 @@ export function useDailyVersesPage() {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(0);
   const [searchDate, setSearchDate] = useState('');
+  const [bookName, setBookName] = useState('');
+  const [chapter, setChapter] = useState('');
+  const [creatorName, setCreatorName] = useState('');
   const [loading, setLoading] = useState(true);
   const [deleteTarget, setDeleteTarget] = useState<DailyItem | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -25,6 +28,9 @@ export function useDailyVersesPage() {
       const response = await adminApi.request('admin', 'get-all-daily-verses', {
         page, size: PAGE_SIZE, smartDefault: false,
         ...(searchDate ? { startDate: searchDate, endDate: searchDate } : {}),
+        ...(bookName ? { exactBookName: bookName } : {}),
+        ...(bookName && chapter ? { chapter: Number(chapter) } : {}),
+        ...(creatorName ? { creatorName } : {}),
       });
       if (request !== generation.current) return;
       if (response?.returnCode !== 200 || !response.returnData) throw new Error('Unavailable');
@@ -38,9 +44,15 @@ export function useDailyVersesPage() {
     } finally {
       if (request === generation.current) setLoading(false);
     }
-  }, [page, searchDate, toast]);
+  }, [page, searchDate, bookName, chapter, creatorName, toast]);
   useEffect(() => { void load(); return () => { generation.current++; }; }, [load]);
   const changeDate = (date: string) => { setSearchDate(date); setPage(0); };
+  const changeBook = (book: string) => { setBookName(book); setChapter(''); setPage(0); };
+  const changeChapter = (next: string) => { setChapter(next); setPage(0); };
+  const changeCreatorName = (name: string) => { setCreatorName(name); setPage(0); };
+  const clearFilters = () => {
+    setSearchDate(''); setBookName(''); setChapter(''); setCreatorName(''); setPage(0);
+  };
   const confirmDelete = async () => {
     if (!deleteTarget || deleting) return;
     setDeleting(true);
@@ -55,6 +67,7 @@ export function useDailyVersesPage() {
     finally { setDeleting(false); }
   };
   return { content, total, page, setPage, searchDate, changeDate, loading, deleteTarget,
+    bookName, chapter, creatorName, changeBook, changeChapter, changeCreatorName, clearFilters,
     setDeleteTarget, deleting, confirmDelete,
     add: () => navigate(routes.addDailyVerse.path),
     edit: (verse: DailyItem) => navigate(routes.addDailyVerse.path, { state: { verse } }),

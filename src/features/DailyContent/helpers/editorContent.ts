@@ -125,3 +125,25 @@ export function collectionError(studies: StudyEntry[], references: ReferenceEntr
   if (invalid) return invalid;
   return '';
 }
+
+/** Like studyFieldErrors, but a row that was added must be fully filled. */
+export function requiredStudyFieldErrors(row: StudyEntry) {
+  const errors = studyFieldErrors(row);
+  return {
+    surfaceText: row.surfaceText.trim() ? '' : 'Enter the word or surface text.',
+    strongsId: errors.strongsId || (row.strongsId.trim() ? '' : 'Enter the Strong’s ID, for example H7503.'),
+    customDefinition: row.customDefinition.trim() ? '' : 'Enter the definition or contextual meaning.',
+  };
+}
+
+/** Like referenceError, but an added row cannot be left blank. */
+export function requiredReferenceError(row: ReferenceEntry, index: number) {
+  if (isEmptyReference(row)) {
+    return `Cross reference ${index + 1}: select a book, chapter and verse, and include the quoted passage.`;
+  }
+  const error = referenceError(row, index);
+  if (error) return error;
+  return row.referenceText.trim()
+    ? ''
+    : `Cross reference ${index + 1}: include the quoted passage.`;
+}

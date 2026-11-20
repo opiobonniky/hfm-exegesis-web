@@ -41,6 +41,8 @@ export function AddExplanationWorkspace({
               chapter={data.form.chapter}
               verseNumber={data.form.verseNumber}
               verseEnd={data.form.verseEnd}
+              referenceError={data.fieldErrors.reference}
+              bibleVersionError={data.fieldErrors.bibleVersion}
               passageError={data.passageError}
               retryPassage={data.retryPassage}
               bibleVersion={data.form.bibleVersion}
@@ -62,6 +64,7 @@ export function AddExplanationWorkspace({
             <AddExplanationExegesisForm
               explanationText={data.form.exegesis.explanationText}
               applicationText={data.form.exegesis.applicationText}
+              errors={data.fieldErrors}
               updateNested={actions.updateNested}
             />
           </TabsContent>
@@ -73,6 +76,7 @@ export function AddExplanationWorkspace({
               backgroundBook={data.form.studyMetadata.backgroundBook}
               backgroundContext={data.form.studyMetadata.backgroundContext}
               wordStudies={data.form.wordStudies}
+              errors={data.fieldErrors}
               updateNested={actions.updateNested}
               addWordStudy={actions.addWordStudy}
               removeWordStudy={actions.removeWordStudy}
@@ -83,6 +87,7 @@ export function AddExplanationWorkspace({
           <TabsContent value="extras">
             <AddExplanationExtrasForm
               showErrors={!data.isEditMode || data.richContentTouched}
+              errors={data.fieldErrors}
               bibleVersion={data.form.bibleVersion}
               onCrossReferencesChange={rows => actions.updateField('crossReferences', rows)}
               practicalApps={data.form.practicalApps}

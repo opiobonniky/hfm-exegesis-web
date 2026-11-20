@@ -22,12 +22,20 @@ afterEach(() => { cleanup(); vi.useRealTimers(); });
 const savedExplanation = {
   id: 44, bookName: 'Genesis', chapter: 3, verseNumber: 6, bibleVersion: 'Berean', sharedStudyVersion: 7,
   exegesis: { explanationText: 'An existing explanation with enough detail.', applicationText: 'Saved application' },
-  studyMetadata: { introduction: 'Saved introduction', takeaways: '["Saved takeaway"]' },
+  studyMetadata: { introduction: 'Saved introduction', backgroundAuthor: 'Saved author', backgroundBook: 'Saved book',
+    backgroundContext: 'Saved context', finalThoughts: 'Saved final thoughts', takeaways: '["Saved takeaway"]' },
   wordStudies: [{ surfaceText: 'Know', strongsId: 'H3045', customDefinition: 'Know intimately' }],
   practicalApps: [{ applicationText: 'Saved practice', sortOrder: 0 }],
   crossReferences: [{ bookName: 'Romans', chapter: 5, verseNumber: 1, verseEnd: 3, commentary: 'Saved commentary' }],
   themes: [{ themeName: 'Trust', sortOrder: 0 }],
 };
+
+const fillRequiredFields = (result: any) => act(() => {
+  result.current.actions.updateField('bibleVersion', 'BSB');
+  result.current.actions.updateNested('exegesis', 'applicationText', 'Daily application');
+  (['introduction', 'backgroundAuthor', 'backgroundBook', 'backgroundContext', 'finalThoughts'] as const)
+    .forEach(key => result.current.actions.updateNested('studyMetadata', key, `Filled ${key}`));
+});
 
 it('loads a selected existing verse in create mode and updates its saved ID and version', async () => {
   mocks.post.mockResolvedValueOnce({ returnCode: 200, returnData: savedExplanation });
@@ -54,6 +62,7 @@ it('loads a selected existing verse in create mode and updates its saved ID and 
   expect(result.current.data.existingFound).toBe(false);
   expect(result.current.data.form.exegesis.explanationText).toBe('');
   act(() => result.current.actions.updateNested('exegesis', 'explanationText', 'New teaching for a different verse.'));
+  fillRequiredFields(result);
   await waitFor(() => expect(result.current.data.isValid).toBe(true));
   await act(async () => { await result.current.actions.handleSave(); });
   expect(mocks.post.mock.calls.at(-1)![2]).not.toHaveProperty('id');
@@ -107,6 +116,7 @@ it('blocks saving on lookup failure and allows retry without losing new notes', 
     result.current.actions.updateField('verseNumber', '6');
     result.current.actions.updateNested('exegesis', 'explanationText', 'Keep these unsaved editorial notes.');
   });
+  fillRequiredFields(result);
   await waitFor(() => expect(result.current.data.lookupError).toBe(true));
   expect(result.current.data.isValid).toBe(false);
   act(() => result.current.actions.retryExisting());
@@ -124,6 +134,7 @@ it('creates a range explanation and validates its required reference and study r
     result.current.actions.updateField('verseEnd', '10');
     result.current.actions.updateNested('exegesis', 'explanationText', 'An explanation with enough context and detail.');
   });
+  fillRequiredFields(result);
   await waitFor(() => expect(result.current.data.selectedVerseText).toContain('10. Text 10'));
   expect(result.current.data.isValid).toBe(true);
   act(() => result.current.actions.updateField('crossReferences', [{ bookName: 'Genesis', chapter: 3, verseNumber: 0, referenceText: 'Keep quotation', commentary: '', sortOrder: 0 }]));
@@ -132,7 +143,10 @@ it('creates a range explanation and validates its required reference and study r
   act(() => result.current.actions.addWordStudy());
   expect(result.current.data.isValid).toBe(false);
   act(() => result.current.actions.removeWordStudy(0));
+  // An added but empty row must be filled or removed before saving.
   act(() => result.current.actions.updateField('crossReferences', [{ bookName: '', chapter: 0, verseNumber: 0, referenceText: '', commentary: '', sortOrder: 0 }]));
+  expect(result.current.data.isValid).toBe(false);
+  act(() => result.current.actions.updateField('crossReferences', []));
   expect(result.current.data.isValid).toBe(true);
   vi.useFakeTimers();
   await act(async () => { await result.current.actions.handleSave(); });
@@ -151,7 +165,9 @@ it('reopens and saves ranges and structured studies without losing existing IDs 
   mocks.post.mockResolvedValueOnce({ returnCode: 200, returnData: {
     id: 44, bookName: 'Genesis', chapter: 3, verseNumber: 6, verseEnd: 10, bibleVersion: 'BSB',
     sharedStudyVersion: 7,
-    exegesis: { explanationText: 'An existing explanation with enough detail.', applicationText: '' },
+    exegesis: { explanationText: 'An existing explanation with enough detail.', applicationText: 'Saved application' },
+    studyMetadata: { introduction: 'Saved introduction', backgroundAuthor: 'Saved author', backgroundBook: 'Saved book',
+      backgroundContext: 'Saved context', finalThoughts: 'Saved final thoughts' },
     wordStudies: [{ surfaceText: 'Know', strongsId: 'H3045', customDefinition: 'Know intimately', sortOrder: 0 }],
     crossReferences: [{ bookName: 'Romans', chapter: 5, verseNumber: 1, verseEnd: 3, referenceText: 'Original quote', commentary: 'Editorial commentary' }],
   } });
@@ -165,6 +181,37 @@ it('reopens and saves ranges and structured studies without losing existing IDs 
     crossReferences: [expect.objectContaining({ verseEnd: 3, commentary: 'Editorial commentary' })],
     wordStudies: [expect.objectContaining({ strongsId: 'H3045', customDefinition: 'Know intimately' })],
   }));
+  act(() => vi.advanceTimersByTime(500)); // flush the pending redirect before the next test
+});
+
+it('gates Continue until the current step fields and added rows are filled', async () => {
+  const { result } = renderHook(() => useAddExplanation());
+  act(() => {
+    result.current.actions.updateField('bookName', 'Genesis');
+    result.current.actions.updateField('chapter', '3');
+    result.current.actions.updateField('verseNumber', '6');
+  });
+  await waitFor(() => expect(result.current.data.referenceComplete).toBe(true));
+
+  act(() => result.current.actions.setActiveTab('exegesis'));
+  expect(result.current.data.canAdvanceFromCurrent).toBe(false);
+  expect(result.current.data.fieldErrors.applicationText).toBeTruthy();
+  act(() => {
+    result.current.actions.updateNested('exegesis', 'explanationText', 'An explanation with enough context and detail.');
+    result.current.actions.updateNested('exegesis', 'applicationText', 'Daily application');
+  });
+  expect(result.current.data.canAdvanceFromCurrent).toBe(true);
+
+  act(() => result.current.actions.goNext());
+  expect(result.current.data.currentStep).toBe('study');
+  expect(result.current.data.canAdvanceFromCurrent).toBe(false);
+  fillRequiredFields(result);
+  expect(result.current.data.canAdvanceFromCurrent).toBe(true);
+  act(() => result.current.actions.addWordStudy());
+  expect(result.current.data.canAdvanceFromCurrent).toBe(false);
+  expect(result.current.data.fieldErrors.wordStudies[0]).toContain('Word study 1');
+  act(() => result.current.actions.removeWordStudy(0));
+  expect(result.current.data.canAdvanceFromCurrent).toBe(true);
 });
 
 it('keeps the editor open with a reload message when the shared study version is stale', async () => {
@@ -175,8 +222,10 @@ it('keeps the editor open with a reload message when the shared study version is
     result.current.actions.updateField('verseNumber', '6');
     result.current.actions.updateNested('exegesis', 'explanationText', 'An explanation with enough context and detail.');
   });
+  fillRequiredFields(result);
   await waitFor(() => expect(result.current.data.isValid).toBe(true));
   mocks.post.mockResolvedValueOnce({ returnCode: 409, returnMessage: 'Shared study changed; reload before saving' });
+  mocks.navigate.mockClear(); // ignore redirects scheduled by earlier tests
   await act(async () => { await result.current.actions.handleSave(); });
   expect(mocks.toast).toHaveBeenCalledWith(expect.objectContaining({
     title: 'Content changed',

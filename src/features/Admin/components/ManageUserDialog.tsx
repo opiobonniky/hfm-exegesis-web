@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { CalendarClock, Loader2, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -63,11 +63,8 @@ export function ManageUserDialog({ user, tiers, loading, onOpenChange, onSave }:
           </div>
           <div className="space-y-1.5">
             <Label>{tt("Access Expires On")}</Label>
-            <Input
-              type="date"
-              value={expiry}
-              onChange={(e) => setExpiry(e.target.value)}
-            />
+            <DatePicker valueFormat="string" value={expiry} onChange={setExpiry}
+              onClear={() => setExpiry('')} clearable aria-label={tt("Access Expires On")} />
             <p className="text-xs text-muted-foreground">
               {user.accessExpiresAt
                 ? `Current: ${formatReadableDate(user.accessExpiresAt)}`

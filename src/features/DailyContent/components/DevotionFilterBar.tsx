@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/components/languages/languageProvider";
@@ -60,9 +60,13 @@ export function DevotionFilterBar({
         <div className="flex flex-col md:flex-row gap-4 md:items-end">
           <div className="flex-1 space-y-1">
             <Label htmlFor="from-date">{t.common?.from || tt("From")}</Label>
-            <Input id="from-date" type="date" value={fromDate} max={toDate || undefined} onChange={(e) => onFromChange(e.target.value)} />
+            <DatePicker id="from-date" valueFormat="string" value={fromDate} max={toDate || undefined}
+              onChange={onFromChange} onClear={() => onFromChange('')} clearable placeholder={tt("Pick a date")}
+              aria-label={t.common?.from || tt("From")} />
             <Label htmlFor="to-date">{t.common?.to || "To"}</Label>
-            <Input id="to-date" type="date" value={toDate} min={fromDate || undefined} onChange={(e) => onToChange(e.target.value)} />
+            <DatePicker id="to-date" valueFormat="string" value={toDate} min={fromDate || undefined}
+              onChange={onToChange} onClear={() => onToChange('')} clearable placeholder={tt("Pick a date")}
+              aria-label={t.common?.to || tt("To")} />
           </div>
           <div className="flex gap-2">
             <Button onClick={onApply} variant="secondary">{t.devotions?.apply || tt("Apply")}</Button>

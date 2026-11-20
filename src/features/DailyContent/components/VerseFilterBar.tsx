@@ -1,6 +1,6 @@
 import { Search, X, CalendarRange } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/components/languages/languageProvider";
@@ -52,21 +52,13 @@ export default function VerseFilterBar({
         <div className="flex flex-col md:flex-row gap-4 md:items-end">
           <div className="flex-1 space-y-1">
             <Label className="text-xs">{tt("From")}</Label>
-            <Input
-              type="date"
-              value={fromDate}
-              max={toDate || undefined}
-              onChange={(e) => onFromChange(e.target.value)}
-              className="h-9 text-sm"
-            />
+            <DatePicker valueFormat="string" value={fromDate} max={toDate || undefined}
+              onChange={onFromChange} onClear={() => onFromChange('')} clearable
+              className="h-9 text-sm" placeholder={tt("Pick a date")} aria-label={tt("From")} />
             <Label className="text-xs">To</Label>
-            <Input
-              type="date"
-              value={toDate}
-              min={fromDate || undefined}
-              onChange={(e) => onToChange(e.target.value)}
-              className="h-9 text-sm"
-            />
+            <DatePicker valueFormat="string" value={toDate} min={fromDate || undefined}
+              onChange={onToChange} onClear={() => onToChange('')} clearable
+              className="h-9 text-sm" placeholder={tt("Pick a date")} aria-label={tt("To")} />
           </div>
           <div className="flex gap-2 shrink-0">
             <Button size="sm" onClick={onApply} className="gap-1.5">

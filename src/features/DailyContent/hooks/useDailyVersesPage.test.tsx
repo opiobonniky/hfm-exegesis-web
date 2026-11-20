@@ -23,6 +23,23 @@ it('loads only verses and resets pagination when the publish-date filter changes
   await waitFor(() => expect(mocks.request).toHaveBeenLastCalledWith('admin', 'get-all-daily-verses', expect.objectContaining({ page: 0, startDate: '2026-11-21', endDate: '2026-11-21' })));
 });
 
+it('filters by book, chapter and creator/updater name like verse explanations', async () => {
+  const { result } = renderHook(useDailyVersesPage);
+  await waitFor(() => expect(result.current.loading).toBe(false));
+  act(() => result.current.changeBook('John'));
+  await waitFor(() => expect(mocks.request).toHaveBeenLastCalledWith('admin', 'get-all-daily-verses',
+    expect.objectContaining({ page: 0, exactBookName: 'John' })));
+  act(() => result.current.changeChapter('3'));
+  await waitFor(() => expect(mocks.request).toHaveBeenLastCalledWith('admin', 'get-all-daily-verses',
+    expect.objectContaining({ exactBookName: 'John', chapter: 3 })));
+  act(() => result.current.changeCreatorName('Ada'));
+  await waitFor(() => expect(mocks.request).toHaveBeenLastCalledWith('admin', 'get-all-daily-verses',
+    expect.objectContaining({ creatorName: 'Ada' })));
+  act(() => result.current.clearFilters());
+  await waitFor(() => expect(mocks.request).toHaveBeenLastCalledWith('admin', 'get-all-daily-verses',
+    expect.not.objectContaining({ exactBookName: expect.anything(), chapter: expect.anything(), creatorName: expect.anything() })));
+});
+
 it('routes add, edit and view directly to the verse pages', () => {
   const { result } = renderHook(useDailyVersesPage);
   const verse = { id: 1, displayDate: '2026-11-21', isPublished: true };
