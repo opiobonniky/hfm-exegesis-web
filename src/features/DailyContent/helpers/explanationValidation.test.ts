@@ -54,13 +54,13 @@ describe("getExplanationFieldErrors", () => {
     expect(errors.backgroundBook).toBeTruthy();
     expect(errors.backgroundContext).toBeTruthy();
     expect(errors.finalThoughts).toBeTruthy();
-    expect(getExplanationStepErrors(errors).extras).toBeTruthy();
+    expect(getExplanationStepErrors(errors).learnMore).toBeTruthy();
   });
 
   it("accepts a fully filled form with no added rows", () => {
     const errors = getExplanationFieldErrors(completeForm);
     expect(hasExplanationErrors(errors)).toBe(false);
-    expect(getExplanationStepErrors(errors).extras).toBe("");
+    expect(getExplanationStepErrors(errors).learnMore).toBe("");
   });
 
   it("requires each added row to be filled", () => {

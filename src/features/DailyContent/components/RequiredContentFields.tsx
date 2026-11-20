@@ -4,10 +4,8 @@ interface RequiredContentFieldsProps {
   setExplanation: (v: string) => void;
   application: string;
   setApplication: (v: string) => void;
-  verseIntroduction: string;
-  setVerseIntroduction: (v: string) => void;
   isRtl: boolean;
-  errors?: Partial<Record<'explanation' | 'application' | 'verseIntroduction', string>>;
+  errors?: Partial<Record<'explanation' | 'application', string>>;
 }
 
 export function RequiredContentFields({
@@ -15,8 +13,6 @@ export function RequiredContentFields({
   setExplanation,
   application,
   setApplication,
-  verseIntroduction,
-  setVerseIntroduction,
   isRtl,
   errors,
 }: RequiredContentFieldsProps) {
@@ -56,19 +52,29 @@ export function RequiredContentFields({
         />
         {error('application')}
       </div>
-      <div className="rounded-2xl border border-border bg-muted/20 p-4 sm:p-5">
-        <label htmlFor="daily-verse-verseIntroduction" className="mb-2 block text-sm font-semibold">{tt("Verse Introduction *")}</label>
-        <textarea
-          {...field('verseIntroduction')}
-          value={verseIntroduction}
-          onChange={(e) => setVerseIntroduction(e.target.value)}
-          placeholder={tt("Introduce the verse and its central purpose...")}
-          rows={6}
-          className="min-h-[140px] w-full resize-y rounded-xl border border-border bg-background px-4 py-3 text-sm leading-7 focus:outline-none focus:ring-2 focus:ring-ring"
-          dir={isRtl ? "rtl" : "ltr"}
-        />
-        {error('verseIntroduction')}
-      </div>
+    </div>
+  );
+}
+
+export function VerseIntroductionField({ value, onChange, error, isRtl }: {
+  value: string; onChange: (value: string) => void; error?: string; isRtl: boolean;
+}) {
+  return (
+    <div className="space-y-2 rounded-2xl border border-border bg-muted/20 p-4 sm:p-5">
+      <label htmlFor="daily-verse-introduction" className="block text-sm font-semibold">{tt("Verse Introduction *")}</label>
+      <textarea
+        id="daily-verse-introduction"
+        data-validation-field="verseIntroduction"
+        aria-invalid={!!error}
+        aria-describedby={error ? 'daily-verse-introduction-error' : undefined}
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        placeholder={tt("Introduce the verse and its central purpose...")}
+        rows={6}
+        className="min-h-[140px] w-full resize-y rounded-xl border border-border bg-background px-4 py-3 text-sm leading-7 focus:outline-none focus:ring-2 focus:ring-ring"
+        dir={isRtl ? "rtl" : "ltr"}
+      />
+      {error && <p id="daily-verse-introduction-error" role="status" className="text-xs text-destructive">{tt(error)}</p>}
     </div>
   );
 }

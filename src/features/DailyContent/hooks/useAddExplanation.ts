@@ -226,17 +226,13 @@ export function useAddExplanation() {
     [form.exegesis.explanationText],
   );
 
-  const studyComplete = useMemo(() => !stepErrors.study, [stepErrors.study]);
-  const extrasComplete = useMemo(() => !stepErrors.extras, [stepErrors.extras]);
-
   const stepCompletion: Record<VerseExplanationStepId, boolean> = useMemo(
     () => ({
       reference: referenceComplete && !stepErrors.reference,
       exegesis: exegesisComplete && !stepErrors.exegesis,
-      study: studyComplete,
-      extras: extrasComplete,
+      learnMore: !stepErrors.learnMore,
     }),
-    [referenceComplete, exegesisComplete, stepErrors.reference, stepErrors.exegesis, studyComplete, extrasComplete],
+    [referenceComplete, exegesisComplete, stepErrors],
   );
 
   const completionPercent = useMemo(
@@ -636,7 +632,6 @@ export function useAddExplanation() {
       currentStep,
       referenceComplete,
       exegesisComplete,
-      studyComplete,
       stepCompletion,
       completionPercent,
       canAdvanceFromCurrent,

@@ -411,8 +411,7 @@ export interface DailyExegesisSeriesItem {
 export type VerseExplanationStepId =
   | "reference"
   | "exegesis"
-  | "study"
-  | "extras";
+  | "learnMore";
 
 export interface WordStudyItem {
   strongsId: string;

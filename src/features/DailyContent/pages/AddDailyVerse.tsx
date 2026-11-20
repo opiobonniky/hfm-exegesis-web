@@ -12,6 +12,7 @@ import {
   VerseReferenceSection,
   VerseTextArea,
   RequiredContentFields,
+  DateTimeFields,
   BackgroundSection,
   StructuredContentSection,
   GuidedTabs,
@@ -27,6 +28,8 @@ import {
 } from "../components";
 import { routes } from "@/components/Routes/routes";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { VerseIntroductionField } from '../components/RequiredContentFields';
+import { VERSE_EXPLANATION_STEPS } from '../constants';
 
 const AddDailyVerse = () => {
   const { data, actions } = useAddDailyVerse();
@@ -53,8 +56,8 @@ const AddDailyVerse = () => {
         >
           <GuidedTabs validateStep={validateStep}>
             <GuidedTab
-              title={tt("Verse Reference")}
-              description={tt("Choose the passage, text, and schedule")}
+              title={tt(VERSE_EXPLANATION_STEPS[0].label)}
+              description={tt(VERSE_EXPLANATION_STEPS[0].description)}
             >
               <VerseReferenceSection
                 book={h.book}
@@ -69,16 +72,12 @@ const AddDailyVerse = () => {
                 bibleVersion={h.bibleVersion}
                 bibleVersionOptions={h.bibleVersionOptions}
                 setBibleVersion={h.setBibleVersion}
-                selectedDate={h.selectedDate}
-                setSelectedDate={h.setSelectedDate}
-                selectedTime={h.selectedTime}
-                handleTimeChange={h.handleTimeChange}
                 t={h.t}
                 isRtl={h.isRtl}
                 errors={{
                   bookName: error('bookName', 0), chapter: error('chapter', 0),
                   verseNumber: error('verseNumber', 0), verseEnd: error('verseEnd', 0),
-                  bibleVersion: error('bibleVersion', 0), date: error('date', 0), time: error('time', 0),
+                  bibleVersion: error('bibleVersion', 0),
                 }}
               />
               <VerseTextArea
@@ -99,8 +98,8 @@ const AddDailyVerse = () => {
             </GuidedTab>
 
             <GuidedTab
-              title={tt("Verse Content")}
-              description={tt("Write the required explanation")}
+              title={tt(VERSE_EXPLANATION_STEPS[1].label)}
+              description={tt(VERSE_EXPLANATION_STEPS[1].description)}
             >
               <ExplanationAutoFillBanner model={h} />
               <RequiredContentFields
@@ -108,20 +107,19 @@ const AddDailyVerse = () => {
                 setExplanation={h.setExplanation}
                 application={h.application}
                 setApplication={h.setApplication}
-                verseIntroduction={h.verseIntroduction}
-                setVerseIntroduction={h.setVerseIntroduction}
                 isRtl={h.isRtl}
                 errors={{
                   explanation: error('explanation', 1), application: error('application', 1),
-                  verseIntroduction: error('verseIntroduction', 1),
                 }}
               />
             </GuidedTab>
 
             <GuidedTab
-              title={tt("Background")}
-              description={tt("Add optional study context")}
+              title={tt(VERSE_EXPLANATION_STEPS[2].label)}
+              description={tt(VERSE_EXPLANATION_STEPS[2].description)}
             >
+              <VerseIntroductionField value={h.verseIntroduction} onChange={h.setVerseIntroduction}
+                error={error('verseIntroduction', 2)} isRtl={h.isRtl} />
               <BackgroundSection
                 backgroundAuthor={h.backgroundAuthor}
                 setBackgroundAuthor={h.setBackgroundAuthor}
@@ -131,12 +129,6 @@ const AddDailyVerse = () => {
                 setBackgroundContext={h.setBackgroundContext}
                 isRtl={h.isRtl}
               />
-            </GuidedTab>
-
-            <GuidedTab
-              title={tt("Rich Content")}
-              description={tt("Add takeaways and study tools")}
-            >
               <StructuredContentSection
                 wordStudies={h.wordStudies}
                 setWordStudies={h.setWordStudies}
@@ -153,16 +145,19 @@ const AddDailyVerse = () => {
                 bibleVersion={h.bibleVersion}
                 isRtl={h.isRtl}
                 requireRichRows={h.requireRichRows}
-                revealRowErrors={feedback.attempted('3')}
+                revealRowErrors={feedback.attempted('2')}
                 takeawayErrors={h.takeawayErrors.map((message, index) =>
-                  feedback.attempted('3') || feedback.visible(`takeaways.${index}`, 'verse') ? message : '')}
+                  feedback.attempted('2') || feedback.visible(`takeaways.${index}`, 'verse') ? message : '')}
               />
             </GuidedTab>
 
             <GuidedTab
               title={tt("Publish & Save")}
-              description={tt("Review status and submit")}
+              description={tt("Set the publish date, time, and status")}
             >
+              <DateTimeFields selectedDate={h.selectedDate} setSelectedDate={h.setSelectedDate}
+                selectedTime={h.selectedTime} handleTimeChange={h.handleTimeChange}
+                errors={{ date: error('date', 3), time: error('time', 3) }} />
               <PublishToggle
                 published={h.published}
                 onCheckedChange={h.setPublished}
@@ -173,8 +168,8 @@ const AddDailyVerse = () => {
                 cancelTo={routes.adminDailyVerses.path}
                 cancelLabel={h.t.common.cancel}
                 saveLabel={h.t.dailyVerse.saveDailyVerse}
-                disabled={h.saveDisabled}
-                onSave={h.handleSave}
+                disabled={h.saveDisabled && h.validateStep(3)}
+                onSave={() => { if (validateStep(3)) void h.handleSave(); }}
               />
             </GuidedTab>
           </GuidedTabs>

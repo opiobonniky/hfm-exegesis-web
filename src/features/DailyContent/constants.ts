@@ -1,4 +1,3 @@
-import { tt } from '@/components/languages/hardcodedTranslate';
 import { displayDate } from '@/services/numberLocale/format';
 // ─── DailyContent Constants ────────────────────────────────────────────────────
 
@@ -9,30 +8,24 @@ export const FILTERED_PAGE_SIZE = 12;
 export const VERSE_EXPLANATION_STEP_ORDER = [
   "reference",
   "exegesis",
-  "study",
-  "extras",
+  "learnMore",
 ] as const;
 
 export const VERSE_EXPLANATION_STEPS = [
   {
     id: "reference",
-    label: tt("Reference"),
-    description: tt("Verse & translation"),
+    label: "Mention the Verse",
+    description: "Passage, Bible version, and verse text",
   },
   {
     id: "exegesis",
-    label: tt("Exegesis"),
-    description: tt("Main insight"),
+    label: "Explanation",
+    description: "Explanation and application",
   },
   {
-    id: "study",
-    label: tt("Study"),
-    description: tt("Context & word study"),
-  },
-  {
-    id: "extras",
-    label: tt("Extras"),
-    description: tt("Applications & themes"),
+    id: "learnMore",
+    label: "Learn More",
+    description: "Introduction, background, and study material",
   },
 ] as const;
 

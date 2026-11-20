@@ -40,7 +40,8 @@ export function BackgroundSection(p: Props) {
   ];
 
   return (
-    <div className="space-y-5" dir={p.isRtl ? "rtl" : "ltr"}>
+    <section className="space-y-5" dir={p.isRtl ? "rtl" : "ltr"}>
+      <h3 className="text-base font-semibold">{tt("Background")}</h3>
       {fields.map((f) => (
         <div key={f.label} className="space-y-2">
           <Label className="flex items-center gap-2">
@@ -55,6 +56,6 @@ export function BackgroundSection(p: Props) {
           />
         </div>
       ))}
-    </div>
+    </section>
   );
 }

@@ -1,4 +1,3 @@
-import { Target } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import type { AddExplanationStudyFormProps } from "../types";
@@ -26,11 +25,6 @@ export function AddExplanationStudyForm(props: AddExplanationStudyFormProps) {
   };
   return (
     <div className="space-y-8">
-      <div className="flex items-center gap-2 text-sky-600">
-        <Target className="h-4 w-4" />
-        <span className="text-sm font-medium">{tt("Study context")}</span>
-      </div>
-
       <div className="space-y-4 rounded-2xl border border-border bg-muted/30 p-4">
         <div className="space-y-2">
           <div className="flex items-center justify-between gap-2">
@@ -52,6 +46,7 @@ export function AddExplanationStudyForm(props: AddExplanationStudyFormProps) {
         </div>
 
         <div className="space-y-4 border-t border-border pt-4">
+          <h3 className="text-base font-semibold">{tt("Background")}</h3>
           <div className="space-y-2">
             <div className="flex items-center justify-between gap-2">
               <Label className="text-xs uppercase tracking-[0.2em] text-muted-foreground">{tt("Background — Author")}</Label>

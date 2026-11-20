@@ -39,6 +39,27 @@ it('starts without errors and reveals reference validation after blur or Continu
   await act(async () => {});
 });
 
+it('groups Learn More fields in the source document order', async () => {
+  function Form() {
+    const { data, actions } = useAddExplanation();
+    return <>
+      <button onClick={() => actions.setActiveTab('learnMore')}>Open study fields</button>
+      <AddExplanationWorkspace data={data} actions={actions} />
+    </>;
+  }
+  render(<Form />);
+  fireEvent.click(screen.getByRole('button', { name: 'Open study fields' }));
+  const fields = [
+    'Verse introduction', 'Background', 'Background — Author', 'Background — Book', 'Background — Context',
+    'Strong’s Concordance Word Study', 'Practical applications', 'Insights and Cross References',
+    'Key themes', 'Cross references', /Final thoughts/, 'Takeaways',
+  ].map(label => screen.getByText(label, { exact: typeof label === 'string' }));
+  fields.slice(1).forEach((field, index) => {
+    expect(fields[index].compareDocumentPosition(field) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+  await act(async () => {});
+});
+
 const savedExplanation = {
   id: 44, bookName: 'Genesis', chapter: 3, verseNumber: 6, bibleVersion: 'Berean', sharedStudyVersion: 7,
   exegesis: { explanationText: 'An existing explanation with enough detail.', applicationText: 'Saved application' },
@@ -223,7 +244,7 @@ it('gates Continue until the current step fields and added rows are filled', asy
   expect(result.current.data.canAdvanceFromCurrent).toBe(true);
 
   act(() => result.current.actions.goNext());
-  expect(result.current.data.currentStep).toBe('study');
+  expect(result.current.data.currentStep).toBe('learnMore');
   expect(result.current.data.canAdvanceFromCurrent).toBe(false);
   fillRequiredFields(result);
   expect(result.current.data.canAdvanceFromCurrent).toBe(true);

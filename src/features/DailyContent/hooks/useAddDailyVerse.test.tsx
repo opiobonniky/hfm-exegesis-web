@@ -59,7 +59,7 @@ describe('daily verse editor', () => {
       result.current.actions.setTakeaways(JSON.stringify(['First\nsecond paragraph', '', 'Another takeaway']));
       result.current.actions.setCrossReferences(JSON.stringify([{ bookName: '', chapter: 0, verseNumber: 0, referenceText: '' }]));
     });
-    expect(result.current.data.validateStep(3)).toBe(false);
+    expect(result.current.data.validateStep(2)).toBe(false);
     expect(result.current.data.takeawayErrors[1]).toBeTruthy();
     expect(result.current.data.richContentError).toContain('Cross reference');
     act(() => {
@@ -123,7 +123,8 @@ describe('daily verse editor', () => {
     const { result } = await filledForm();
     act(() => result.current.actions.handleTimeChange({ target: { value: '' } } as React.ChangeEvent<HTMLInputElement>));
     expect(result.current.data.fieldErrors.time).toBe('Choose a valid publish time.');
-    expect(result.current.data.validateStep(0)).toBe(false);
+    expect(result.current.data.validateStep(0)).toBe(true);
+    expect(result.current.data.validateStep(3)).toBe(false);
     act(() => result.current.actions.setSelectedDate(new Date(NaN)));
     expect(result.current.data.fieldErrors.date).toBe('Choose a valid publish date.');
     await act(() => result.current.actions.handleSave());

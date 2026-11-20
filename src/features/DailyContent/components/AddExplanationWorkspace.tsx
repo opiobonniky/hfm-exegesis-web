@@ -1,5 +1,5 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { VERSE_EXPLANATION_STEP_ORDER } from "../constants";
+import { VERSE_EXPLANATION_STEP_ORDER, VERSE_EXPLANATION_STEPS } from "../constants";
 import type { AddExplanationPageActions, AddExplanationPageData } from "../hooks/useAddExplanation";
 import { AddExplanationSidebar } from "./AddExplanationSidebar";
 import { AddExplanationReferenceForm } from "./AddExplanationReferenceForm";
@@ -62,10 +62,7 @@ export function AddExplanationWorkspace({
       <div className="rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-5">
         <Tabs {...feedback.capture(scope)} value={data.activeTab} onValueChange={(value) => actions.setActiveTab(value as typeof data.activeTab)}>
           <TabsList className="hidden" aria-hidden="true">
-            <TabsTrigger value="reference">{tt("Reference")}</TabsTrigger>
-            <TabsTrigger value="exegesis">{tt("Exegesis")}</TabsTrigger>
-            <TabsTrigger value="study">{tt("Study")}</TabsTrigger>
-            <TabsTrigger value="extras">{tt("Extras")}</TabsTrigger>
+            {VERSE_EXPLANATION_STEPS.map(step => <TabsTrigger key={step.id} value={step.id}>{tt(step.label)}</TabsTrigger>)}
           </TabsList>
           <TabsContent value="reference">
             <AddExplanationReferenceForm
@@ -101,7 +98,7 @@ export function AddExplanationWorkspace({
               updateNested={actions.updateNested}
             />
           </TabsContent>
-          <TabsContent value="study">
+          <TabsContent value="learnMore" className="space-y-8">
             <AddExplanationStudyForm
               showErrors={!data.isEditMode || data.richContentTouched}
               revealRowErrors={feedback.attempted(scope)}
@@ -117,8 +114,6 @@ export function AddExplanationWorkspace({
               updateWordStudy={actions.updateWordStudy}
               updateField={actions.updateField}
             />
-          </TabsContent>
-          <TabsContent value="extras">
             <AddExplanationExtrasForm
               showErrors={!data.isEditMode || data.richContentTouched}
               revealRowErrors={feedback.attempted(scope)}

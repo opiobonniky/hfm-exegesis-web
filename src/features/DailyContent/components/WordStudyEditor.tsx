@@ -10,7 +10,7 @@ import { useValidationFeedback } from '../hooks/useValidationFeedback';
 export function WordStudyEditor({ value, onChange, showErrors = true, revealErrors = true, requireAll = false, rejectEmpty = false }: { value: StudyEntry[]; onChange: (rows: StudyEntry[]) => void; showErrors?: boolean; revealErrors?: boolean; requireAll?: boolean; rejectEmpty?: boolean }) {
   const update = (index: number, patch: Partial<StudyEntry>) => onChange(value.map((row, i) => i === index ? { ...row, ...patch } : row));
   return <section className="space-y-3 rounded-xl border border-border p-4">
-    <div><h3 className="text-sm font-semibold">{tt("Strong's word studies")}</h3>
+    <div><h3 className="text-sm font-semibold">{tt("Strong’s Concordance Word Study")}</h3>
       <p className="text-xs text-muted-foreground">{tt('Add each word separately. Enter a Hebrew (H) or Greek (G) ID and write its meaning in this passage.')}</p></div>
     {value.map((row, index) => <div key={index} className="space-y-3 rounded-xl border border-border bg-muted/20 p-3">
       <div className="flex items-center justify-between"><span className="text-xs font-semibold">{tt('Word')} {index + 1}</span>

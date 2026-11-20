@@ -26,22 +26,24 @@ export function AddExplanationExtrasForm(p: AddExplanationExtrasFormProps) {
       </div>)}
       <Add label="Add application" onClick={p.addPracticalApp} />
     </section>
-    <CrossReferencePicker value={serializeReferences(p.crossReferences)} bibleVersion={p.bibleVersion} isRtl={false} showCommentary showErrors={p.showErrors} revealErrors={p.revealRowErrors} requireAll
-      onChange={value => p.onCrossReferencesChange(parseReferences(value).map((row, sortOrder) => ({ ...row, commentary: row.commentary || '', sortOrder })))} />
-    <section className="space-y-3 rounded-xl border border-border p-4">
-      <h3 className="text-sm font-semibold">{tt('Key themes')} {themeMessage ? '*' : ''}</h3>
-      {p.themes.map((row, index) => <div key={index} className="space-y-1">
-        <div className="flex gap-2">
-          <Input data-validation-field={`themes.${index}`} aria-label={`${tt('Theme')} ${index + 1}`} aria-invalid={!!errors.themes?.[index]}
-            className={errors.themes?.[index] ? 'border-destructive focus-visible:ring-destructive' : ''}
-            value={row.themeName} onChange={e => p.updateTheme(index, e.target.value)} />
-          <Remove label="Remove theme" onClick={() => p.removeTheme(index)} />
-        </div>
-        {errors.themes?.[index] && <p role="status" className="text-xs text-destructive">{tt(errors.themes[index])}</p>}
-      </div>)}
-      <Add label="Add theme" onClick={p.addTheme} />
+    <section className="space-y-4">
+      <h3 className="text-base font-semibold">{tt('Insights and Cross References')}</h3>
+      <section className="space-y-3 rounded-xl border border-border p-4">
+        <h4 className="text-sm font-semibold">{tt('Key themes')} {themeMessage ? '*' : ''}</h4>
+        {p.themes.map((row, index) => <div key={index} className="space-y-1">
+          <div className="flex gap-2">
+            <Input data-validation-field={`themes.${index}`} aria-label={`${tt('Theme')} ${index + 1}`} aria-invalid={!!errors.themes?.[index]}
+              className={errors.themes?.[index] ? 'border-destructive focus-visible:ring-destructive' : ''}
+              value={row.themeName} onChange={e => p.updateTheme(index, e.target.value)} />
+            <Remove label="Remove theme" onClick={() => p.removeTheme(index)} />
+          </div>
+          {errors.themes?.[index] && <p role="status" className="text-xs text-destructive">{tt(errors.themes[index])}</p>}
+        </div>)}
+        <Add label="Add theme" onClick={p.addTheme} />
+      </section>
+      <CrossReferencePicker value={serializeReferences(p.crossReferences)} bibleVersion={p.bibleVersion} isRtl={false} showCommentary showErrors={p.showErrors} revealErrors={p.revealRowErrors} requireAll
+        onChange={value => p.onCrossReferencesChange(parseReferences(value).map((row, sortOrder) => ({ ...row, commentary: row.commentary || '', sortOrder })))} />
     </section>
-    <TakeawayEditor value={p.takeaways} onChange={p.updateTakeaways} errors={errors.takeaways} />
     <label className="block space-y-2 text-sm font-semibold">{tt('Final thoughts')} *
       <Textarea data-validation-field="finalThoughts" aria-invalid={!!errors.finalThoughts}
         aria-describedby={errors.finalThoughts ? 'final-thoughts-error' : undefined}
@@ -49,6 +51,7 @@ export function AddExplanationExtrasForm(p: AddExplanationExtrasFormProps) {
         rows={5} maxLength={10000} value={p.finalThoughts} onChange={e => p.updateFinalThoughts(e.target.value)} />
       {errors.finalThoughts && <p id="final-thoughts-error" role="status" className="text-xs text-destructive">{tt(errors.finalThoughts)}</p>}
     </label>
+    <TakeawayEditor value={p.takeaways} onChange={p.updateTakeaways} errors={errors.takeaways} />
   </div>;
 }
 

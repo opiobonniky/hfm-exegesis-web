@@ -420,14 +420,16 @@ export function useAddDailyVerse() {
     application: application.trim() ? '' : 'Enter an application.',
     verseIntroduction: verseIntroduction.trim() ? '' : 'Enter a verse introduction.',
   };
-  const { explanation: requiredExplanationError, application: applicationError, verseIntroduction: introductionError, ...referenceErrors } = fieldErrors;
+  const { explanation: requiredExplanationError, application: applicationError, verseIntroduction: introductionError,
+    date: dateError, time: timeError, ...referenceErrors } = fieldErrors;
   const validateStep = (step: number) => {
     if (step === 0) return !Object.values(referenceErrors).some(Boolean) && !preview.loading && !preview.error && !isVerseLoading;
-    if (step === 1) return !(requiredExplanationError || applicationError || introductionError);
-    if (step === 3) return !richContentError && !takeawayErrors.some(Boolean);
+    if (step === 1) return !(requiredExplanationError || applicationError);
+    if (step === 2) return !introductionError && !richContentError && !takeawayErrors.some(Boolean);
+    if (step === 3) return !dateError && !timeError;
     return true;
   };
-  const saveDisabled = [0, 1, 3].some(step => !validateStep(step));
+  const saveDisabled = [0, 1, 2, 3].some(step => !validateStep(step));
 
   const handleSave = useCallback(async () => {
     if (saveDisabled) return;

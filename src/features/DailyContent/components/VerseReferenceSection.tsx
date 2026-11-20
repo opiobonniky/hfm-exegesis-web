@@ -2,7 +2,6 @@ import { Label } from "@/components/ui/label";
 import { Combobox } from "@/components/ui/combobox";
 import { tt } from '@/components/languages/hardcodedTranslate';
 import { PassageFields } from './PassageFields';
-import { DateTimeFields } from './DateTimeFields';
 
 interface Props {
   book: string; setBook: (v: string) => void;
@@ -12,10 +11,8 @@ interface Props {
   verseNumbers: number[];
   bibleVersion: string; setBibleVersion: (v: string) => void;
   bibleVersionOptions: { value: string; label: string }[];
-  selectedDate: Date; setSelectedDate: (d: Date) => void;
-  selectedTime: string; handleTimeChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   t: any; isRtl: boolean;
-  errors?: Partial<Record<'bookName' | 'chapter' | 'verseNumber' | 'verseEnd' | 'bibleVersion' | 'date' | 'time', string>>;
+  errors?: Partial<Record<'bookName' | 'chapter' | 'verseNumber' | 'verseEnd' | 'bibleVersion', string>>;
 }
 
 export function VerseReferenceSection(p: Props) {
@@ -42,8 +39,6 @@ export function VerseReferenceSection(p: Props) {
           </div>
         ))}
       </div>
-      <DateTimeFields selectedDate={p.selectedDate} setSelectedDate={p.setSelectedDate}
-        selectedTime={p.selectedTime} handleTimeChange={p.handleTimeChange} errors={p.errors} />
     </div>
   );
 }

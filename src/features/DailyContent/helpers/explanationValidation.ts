@@ -125,18 +125,16 @@ export function getExplanationStepErrors(
   return {
     reference: errors.reference || errors.bibleVersion,
     exegesis: errors.explanationText || errors.applicationText,
-    study:
+    learnMore:
       errors.introduction ||
       errors.backgroundAuthor ||
       errors.backgroundBook ||
       errors.backgroundContext ||
       errors.wordStudies.find(Boolean) ||
-      "",
-    extras:
-      errors.finalThoughts ||
       errors.practicalApps.find(Boolean) ||
-      errors.crossReferences.find(Boolean) ||
       errors.themes.find(Boolean) ||
+      errors.crossReferences.find(Boolean) ||
+      errors.finalThoughts ||
       errors.takeaways.find(Boolean) ||
       "",
   };

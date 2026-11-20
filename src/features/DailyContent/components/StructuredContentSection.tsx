@@ -5,7 +5,6 @@ import {
   Sparkles,
   BookMarked,
 } from "lucide-react";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { CrossReferencePicker } from "./CrossReferencePicker";
 import { WordStudyEditor } from './WordStudyEditor';
@@ -71,37 +70,43 @@ export function StructuredContentSection(p: Props) {
       rows: 4,
     },
   ];
+  const [applications, themes, finalThoughts] = fields;
+  const renderField = (f: Field) => (
+    <label className="block space-y-2">
+      <span className="flex items-center gap-2 text-sm font-medium">
+        {f.icon} {f.label}
+        {f.hint && <span className="text-xs text-muted-foreground">{f.hint}</span>}
+      </span>
+      <Textarea
+        value={f.value}
+        onChange={(e) => f.onChange(e.target.value)}
+        placeholder={f.placeholder}
+        rows={f.rows || 4}
+        className="resize-none"
+      />
+    </label>
+  );
   return (
     <div className="space-y-5" dir={p.isRtl ? "rtl" : "ltr"}>
       <WordStudyEditor value={parseStudies(p.wordStudies)} requireAll={p.requireRichRows} rejectEmpty
         revealErrors={p.revealRowErrors} onChange={rows => p.setWordStudies(serializeStudies(rows))} />
-      {fields.map((f) => (
-        <div key={f.label} className="space-y-2">
-          <Label className="flex items-center gap-2">
-            {f.icon} {f.label}
-            {f.hint && (
-              <span className="text-xs text-muted-foreground">{f.hint}</span>
-            )}
-          </Label>
-          <Textarea
-            value={f.value}
-            onChange={(e) => f.onChange(e.target.value)}
-            placeholder={f.placeholder}
-            rows={f.rows || 4}
-            className="resize-none"
-          />
-        </div>
-      ))}
+      {renderField(applications)}
+      <section className="space-y-4">
+        <h3 className="text-base font-semibold">{tt("Insights and Cross References")}</h3>
+        {renderField(themes)}
+        <CrossReferencePicker
+          value={p.crossReferences}
+          onChange={p.setCrossReferences}
+          bibleVersion={p.bibleVersion}
+          isRtl={p.isRtl}
+          showCommentary
+          requireAll={p.requireRichRows}
+          rejectEmpty
+          revealErrors={p.revealRowErrors}
+        />
+      </section>
+      {renderField(finalThoughts)}
       <TakeawayEditor value={parseTakeaways(p.takeaways)} errors={p.takeawayErrors} onChange={items => p.setTakeaways(JSON.stringify(items))} />
-      <CrossReferencePicker
-        value={p.crossReferences}
-        onChange={p.setCrossReferences}
-        bibleVersion={p.bibleVersion}
-        isRtl={p.isRtl}
-        requireAll={p.requireRichRows}
-        rejectEmpty
-        revealErrors={p.revealRowErrors}
-      />
     </div>
   );
 }

@@ -46,12 +46,7 @@ export function GuidedTabs({
   return (
     <div className="space-y-6">
       <nav aria-label={tt("Daily verse form steps")} className="overflow-x-auto pb-1">
-        <ol
-          className={cn(
-            "grid min-w-[680px] gap-2",
-            tabs.length === 5 ? "grid-cols-5" : "grid-cols-6",
-          )}
-        >
+        <ol className="grid min-w-[520px] grid-cols-4 gap-2">
           {tabs.map((tab, index) => {
             const completed = completedSteps.includes(index);
             const active = activeStep === index;

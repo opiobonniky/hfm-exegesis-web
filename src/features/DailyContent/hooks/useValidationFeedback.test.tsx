@@ -12,8 +12,8 @@ it('shows the blurred field only, clears corrected errors, then reveals unvisite
     const [explanation, setExplanation] = useState('');
     const scope = 'content';
     return <div {...feedback.capture(scope)}>
-      <RequiredContentFields explanation={explanation} application="" verseIntroduction=""
-        setExplanation={setExplanation} setApplication={vi.fn()} setVerseIntroduction={vi.fn()}
+      <RequiredContentFields explanation={explanation} application=""
+        setExplanation={setExplanation} setApplication={vi.fn()}
         isRtl={false}
         errors={{
           explanation: !explanation && feedback.visible('explanation', scope) ? 'Enter an explanation.' : undefined,

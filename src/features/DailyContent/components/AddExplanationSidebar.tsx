@@ -1,4 +1,5 @@
-import { BookOpen, CheckCircle2, Lightbulb, Tag, Target } from "lucide-react";
+import { BookOpen, CheckCircle2, Lightbulb, Target } from "lucide-react";
+import { VERSE_EXPLANATION_STEPS } from "../constants";
 import type { AddExplanationSidebarProps } from "../types";
 import { tt } from '@/components/languages/hardcodedTranslate';
 
@@ -10,12 +11,9 @@ export function AddExplanationSidebar({
   exegesisComplete,
   onStepChange,
 }: AddExplanationSidebarProps) {
-  const steps = [
-    { id: "reference", label: tt("Reference"), description: tt("Verse & translation"), icon: BookOpen },
-    { id: "exegesis", label: tt("Exegesis"), description: tt("Main insight"), icon: Lightbulb },
-    { id: "study", label: tt("Study"), description: tt("Context & word study"), icon: Target },
-    { id: "extras", label: tt("Extras"), description: tt("Applications & themes"), icon: Tag },
-  ] as const;
+  const steps = VERSE_EXPLANATION_STEPS.map((step, index) => ({
+    ...step, label: tt(step.label), description: tt(step.description), icon: [BookOpen, Lightbulb, Target][index],
+  }));
 
   return (
     <aside className="rounded-2xl border border-border bg-card p-4 shadow-sm">
