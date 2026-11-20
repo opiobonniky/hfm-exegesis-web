@@ -1,12 +1,10 @@
-// VerseExplanationFilters — book/chapter/author filters for the explanation list.
+// VerseExplanationFilters — searchable book/chapter/author filters for the list.
 import { Search } from "lucide-react";
-import { BIBLE_BOOKS } from "@/data/staticData";
+import { Combobox } from "@/components/ui/combobox";
+import { BIBLE_BOOK_CHAPTERS } from "@/features/Bible/constants";
 import { tt } from "@/components/languages/hardcodedTranslate";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-
-const fieldClass =
-  "min-h-11 w-full rounded-xl border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring";
 
 export function VerseExplanationFilters({
   bookName,
@@ -26,37 +24,43 @@ export function VerseExplanationFilters({
   onClear: () => void;
 }) {
   const hasFilters = Boolean(bookName || chapter || creatorName);
+  const chapterCount =
+    BIBLE_BOOK_CHAPTERS[bookName as keyof typeof BIBLE_BOOK_CHAPTERS] || 0;
+
   return (
     <div className="flex flex-wrap items-end gap-3 rounded-xl border border-border bg-card p-3">
-      <label className="min-w-[180px] flex-1 space-y-1 text-xs text-muted-foreground">
-        {tt("Book")}
-        <select
-          aria-label={tt("Filter by book")}
+      <div className="min-w-[200px] flex-1 space-y-1.5">
+        <div className="text-xs font-medium text-muted-foreground">{tt("Book")}</div>
+        <Combobox
+          ariaLabel={tt("Filter by book")}
           value={bookName}
-          onChange={(event) => onBookChange(event.target.value)}
-          className={fieldClass}
-        >
-          <option value="">{tt("All books")}</option>
-          {BIBLE_BOOKS.map((book) => (
-            <option key={book} value={book}>
-              {tt(book)}
-            </option>
-          ))}
-        </select>
-      </label>
-
-      <label className="w-32 space-y-1 text-xs text-muted-foreground">
-        {tt("Chapter")}
-        <Input
-          aria-label={tt("Filter by chapter")}
-          type="number"
-          min="1"
-          value={chapter}
-          onChange={(event) => onChapterChange(event.target.value)}
-          placeholder={tt("All")}
-          className={fieldClass}
+          onChange={onBookChange}
+          options={Object.keys(BIBLE_BOOK_CHAPTERS).map((book) => ({
+            value: book,
+            label: tt(book),
+          }))}
+          placeholder={tt("All books")}
+          searchPlaceholder={tt("Search books...")}
+          width="w-full"
         />
-      </label>
+      </div>
+
+      <div className="w-40 space-y-1.5">
+        <div className="text-xs font-medium text-muted-foreground">{tt("Chapter")}</div>
+        <Combobox
+          ariaLabel={tt("Filter by chapter")}
+          value={chapter}
+          onChange={onChapterChange}
+          disabled={!bookName}
+          options={Array.from({ length: chapterCount }, (_, index) => ({
+            value: String(index + 1),
+            label: String(index + 1),
+          }))}
+          placeholder={bookName ? tt("All chapters") : tt("Select a book first")}
+          searchPlaceholder={tt("Search chapters...")}
+          width="w-full"
+        />
+      </div>
 
       <label className="min-w-[220px] flex-1 space-y-1 text-xs text-muted-foreground">
         {tt("Created by / Updated by")}
@@ -68,7 +72,7 @@ export function VerseExplanationFilters({
             value={creatorName}
             onChange={(event) => onCreatorNameChange(event.target.value)}
             placeholder={tt("Search by name, e.g. John")}
-            className={`${fieldClass} pl-9`}
+            className="min-h-11 w-full rounded-xl border border-border bg-background pl-9 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           />
         </div>
       </label>

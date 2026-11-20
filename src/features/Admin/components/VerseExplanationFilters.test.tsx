@@ -3,53 +3,86 @@ import { afterEach, expect, it, vi } from "vitest";
 import { VerseExplanationFilters } from "./VerseExplanationFilters";
 
 vi.mock("@/components/languages/hardcodedTranslate", () => ({ tt: (text: string) => text }));
+vi.mock("@/components/ui/combobox", () => ({
+  Combobox: ({
+    options,
+    value,
+    onChange,
+    disabled,
+    ariaLabel,
+    searchPlaceholder,
+  }: {
+    options: { value: string; label: string }[];
+    value: string;
+    onChange: (value: string) => void;
+    disabled?: boolean;
+    ariaLabel?: string;
+    searchPlaceholder: string;
+  }) => (
+    <select
+      aria-label={ariaLabel || searchPlaceholder}
+      value={value}
+      disabled={disabled}
+      onChange={(event) => onChange(event.target.value)}
+    >
+      {options.map((option) => (
+        <option key={option.value} value={option.value}>
+          {option.label}
+        </option>
+      ))}
+    </select>
+  ),
+}));
 
 afterEach(cleanup);
 
-it("offers book, chapter and creator/updater name filters", () => {
-  const onBookChange = vi.fn();
-  const onChapterChange = vi.fn();
-  const onCreatorNameChange = vi.fn();
-  const onClear = vi.fn();
-
+function renderFilters(
+  overrides: Partial<Parameters<typeof VerseExplanationFilters>[0]> = {},
+) {
+  const handlers = {
+    onBookChange: vi.fn(),
+    onChapterChange: vi.fn(),
+    onCreatorNameChange: vi.fn(),
+    onClear: vi.fn(),
+  };
   render(
     <VerseExplanationFilters
       bookName="John"
       chapter="3"
       creatorName="John"
-      onBookChange={onBookChange}
-      onChapterChange={onChapterChange}
-      onCreatorNameChange={onCreatorNameChange}
-      onClear={onClear}
+      {...handlers}
+      {...overrides}
     />,
   );
+  return handlers;
+}
 
-  fireEvent.change(screen.getByLabelText("Filter by book"), { target: { value: "Romans" } });
-  expect(onBookChange).toHaveBeenCalledWith("Romans");
+it("uses searchable book and chapter selectors plus a name filter", () => {
+  const handlers = renderFilters();
 
-  fireEvent.change(screen.getByLabelText("Filter by chapter"), { target: { value: "8" } });
-  expect(onChapterChange).toHaveBeenCalledWith("8");
+  const book = screen.getByLabelText("Filter by book") as HTMLSelectElement;
+  expect(book.value).toBe("John");
+  expect([...book.options].some((option) => option.value === "Romans")).toBe(true);
+  fireEvent.change(book, { target: { value: "Romans" } });
+  expect(handlers.onBookChange).toHaveBeenCalledWith("Romans");
+
+  const chapter = screen.getByLabelText("Filter by chapter") as HTMLSelectElement;
+  expect(chapter.disabled).toBe(false);
+  expect([...chapter.options].some((option) => option.value === "3")).toBe(true);
+  fireEvent.change(chapter, { target: { value: "8" } });
+  expect(handlers.onChapterChange).toHaveBeenCalledWith("8");
 
   fireEvent.change(screen.getByLabelText("Filter by creator or updater name"), {
     target: { value: "Ada" },
   });
-  expect(onCreatorNameChange).toHaveBeenCalledWith("Ada");
+  expect(handlers.onCreatorNameChange).toHaveBeenCalledWith("Ada");
 
   fireEvent.click(screen.getByRole("button", { name: "Clear filters" }));
-  expect(onClear).toHaveBeenCalledTimes(1);
+  expect(handlers.onClear).toHaveBeenCalledTimes(1);
 });
 
-it("hides the clear button when nothing is filtered", () => {
-  render(
-    <VerseExplanationFilters
-      bookName=""
-      chapter=""
-      creatorName=""
-      onBookChange={vi.fn()}
-      onChapterChange={vi.fn()}
-      onCreatorNameChange={vi.fn()}
-      onClear={vi.fn()}
-    />,
-  );
+it("disables chapter until a book is selected", () => {
+  renderFilters({ bookName: "", chapter: "", creatorName: "" });
+  expect((screen.getByLabelText("Filter by chapter") as HTMLSelectElement).disabled).toBe(true);
   expect(screen.queryByRole("button", { name: "Clear filters" })).toBeNull();
 });

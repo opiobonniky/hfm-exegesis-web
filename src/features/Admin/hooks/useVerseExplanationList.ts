@@ -92,6 +92,8 @@ export function useVerseExplanationList(pageSize = 20) {
 
   const changeBook = useCallback((value: string) => {
     setBookName(value);
+    // Chapter choices belong to the selected book, like the Add Explanation form.
+    setChapter("");
     setPage(1);
   }, []);
 
