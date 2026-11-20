@@ -1,20 +1,17 @@
 // DailyDevotionDetail — read-only detail view for a daily devotion
-import { Heart, Lightbulb, Tag, Layers, BookMarked } from "lucide-react";
+import { Heart } from "lucide-react";
 import {
   DailyContentDetailHeader,
   DailyContentDetailEmpty,
   DailyContentDetailMeta,
-  TextBlock,
-  ListBlock,
-  WordStudiesBlock,
-  DetailSection,
   DetailTitleBlock,
   DetailPageLayout,
   DetailPageInner,
-  ContentBlock,
+  DevotionDetailContent,
 } from "../components";
 import { useDailyDevotionDetailPage } from "../hooks/useDailyDevotionDetailPage";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import "@/features/Admin/theme/bookPrologueDetail.css";
 
 export default function DailyDevotionDetail() {
   const { data, actions } = useDailyDevotionDetailPage();
@@ -52,32 +49,7 @@ export default function DailyDevotionDetail() {
           />
         </DetailTitleBlock>
 
-        <ContentBlock label={tt("Content")} text={p.devotion.content} />
-
-        <DetailSection>
-          <TextBlock label={tt("Explanation")} value={p.devotion.explanation} icon={Lightbulb} />
-          <TextBlock label={tt("Application")} value={p.devotion.application} icon={Tag} />
-          <TextBlock label={tt("Introduction")} value={p.devotion.verseIntroduction} icon={BookMarked} />
-          <TextBlock label={tt("Learn More")} value={p.devotion.learnMore} icon={Layers} />
-        </DetailSection>
-
-        {p.hasBackground && (
-          <DetailSection title={tt("Background")}>
-            <TextBlock label={tt("Author")} value={p.devotion.backgroundAuthor} />
-            <TextBlock label={tt("Book")} value={p.devotion.backgroundBook} />
-            <TextBlock label={tt("Context")} value={p.devotion.backgroundContext} />
-          </DetailSection>
-        )}
-
-        <WordStudiesBlock value={p.devotion.wordStudies} />
-
-        <DetailSection>
-          <ListBlock label={tt("Practical Applications")} items={p.practicalApplications} icon={Lightbulb} />
-          <ListBlock label={tt("Key Themes")} items={p.keyThemes} icon={Tag} />
-          <ListBlock label={tt("Cross References")} items={p.crossReferences} icon={Layers} />
-          <TextBlock label={tt("Final Thoughts")} value={p.devotion.finalThoughts} />
-          <ListBlock label={tt("Takeaways")} items={p.takeaways} icon={BookMarked} />
-        </DetailSection>
+        <DevotionDetailContent devotion={p.devotion} />
       </DetailPageInner>
     </DetailPageLayout>
   );

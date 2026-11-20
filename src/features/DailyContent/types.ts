@@ -106,7 +106,11 @@ export const EMPTY_EDIT: EditState = {
 export interface DailyDevotionItem {
   id: number;
   title: string;
-  content: string;
+  explanation: string;
+  reflectionQuestions?: string | null;
+  prayer?: string | null;
+  practicalApplications?: string | null;
+  learningPoints?: string | null;
   displayDate: string;
   bookName?: string | null;
   chapter?: number | null;
@@ -116,19 +120,6 @@ export interface DailyDevotionItem {
 }
 
 export interface DailyDevotionDetailData extends DailyDevotionItem {
-  explanation?: string | null;
-  application?: string | null;
-  verseIntroduction?: string | null;
-  learnMore?: string | null;
-  backgroundAuthor?: string | null;
-  backgroundBook?: string | null;
-  backgroundContext?: string | null;
-  wordStudies?: string | null;
-  practicalApplications?: string | null;
-  keyThemes?: string | null;
-  crossReferences?: string | null;
-  finalThoughts?: string | null;
-  takeaways?: string | null;
   createdOn?: string | null;
   updatedOn?: string | null;
 }
@@ -339,13 +330,13 @@ export interface TagsBlockProps {
 }
 
 export interface AddDailyDevotionCoreSectionsProps {
+  error?: string;
   title: string;
-  content: string;
   setTitle: (value: string) => void;
-  setContent: (value: string) => void;
 }
 
 export interface AddDailyDevotionReferenceSectionProps {
+  error?: string;
   book: string;
   chapter: string;
   verseNumber: string;
@@ -361,15 +352,17 @@ export interface AddDailyDevotionReferenceSectionProps {
 }
 
 export interface AddDailyDevotionContentFieldsProps {
+  errors?: Partial<Record<'explanation' | 'reflectionQuestions' | 'prayer' | 'practicalApplications' | 'learningPoints', string>>;
   explanation: string;
-  application: string;
-  verseIntroduction: string;
-  learnMore: string;
-  contentPlaceholder?: string;
+  reflectionQuestions: string[];
+  prayer: string;
+  practicalApplications: string[];
+  learningPoints: string[];
   setExplanation: (value: string) => void;
-  setApplication: (value: string) => void;
-  setVerseIntroduction: (value: string) => void;
-  setLearnMore: (value: string) => void;
+  setReflectionQuestions: (value: string[]) => void;
+  setPrayer: (value: string) => void;
+  setPracticalApplications: (value: string[]) => void;
+  setLearningPoints: (value: string[]) => void;
 }
 
 export interface AddDailyDevotionBackgroundSectionProps {

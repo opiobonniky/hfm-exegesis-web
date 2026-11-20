@@ -7,10 +7,10 @@ import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/components/languages/languageProvider";
 import { routes } from "@/components/Routes/routes";
 import { useBibleEditions } from '@/hooks/useBibleEditions';
-import { parseStructuredField } from "../helpers/contentDetailHelpers";
+import { parseList } from "../helpers/contentDetailHelpers";
 import { getDailyDevotionVerse, getDailyDevotionVerses, saveDailyDevotion } from "../services/add-daily-content-service";
 import { tt } from '@/components/languages/hardcodedTranslate';
-import { canonicalBook, parseStudies, serializeStudies, parseReferences, serializeReferences, parseTakeaways, nonEmptyReferences, nonEmptyStudies } from '../helpers/editorContent';
+import { canonicalBook } from '../helpers/editorContent';
 
 export function useAddDailyDevotion() {
   const { t, isRtl, lang } = useLanguage();
@@ -22,7 +22,6 @@ export function useAddDailyDevotion() {
 
   // Required fields
   const [title, setTitle] = useState(editingDevotion?.title || "");
-  const [content, setContent] = useState(editingDevotion?.content || "");
 
   // Bible reference
   const [book, setBook] = useState(canonicalBook(editingDevotion?.bookName || ""));
@@ -57,23 +56,11 @@ export function useAddDailyDevotion() {
   }>({ open: false, conflict: null, payload: null });
 
   // Content fields
-  const [explanation, setExplanation] = useState(editingDevotion?.explanation || "");
-  const [application, setApplication] = useState(editingDevotion?.application || "");
-  const [verseIntroduction, setVerseIntroduction] = useState(editingDevotion?.verseIntroduction || "");
-  const [learnMore, setLearnMore] = useState(editingDevotion?.learnMore || "");
-
-  // Background fields
-  const [backgroundAuthor, setBackgroundAuthor] = useState(editingDevotion?.backgroundAuthor || "");
-  const [backgroundBook, setBackgroundBook] = useState(editingDevotion?.backgroundBook || "");
-  const [backgroundContext, setBackgroundContext] = useState(editingDevotion?.backgroundContext || "");
-
-  // Structured fields
-  const [wordStudies, setWordStudies] = useState(() => serializeStudies(parseStudies(editingDevotion?.wordStudies)));
-  const [practicalApplications, setPracticalApplications] = useState(() => parseStructuredField(editingDevotion?.practicalApplications));
-  const [keyThemes, setKeyThemes] = useState(() => parseStructuredField(editingDevotion?.keyThemes));
-  const [crossReferences, setCrossReferences] = useState(() => serializeReferences(parseReferences(editingDevotion?.crossReferences)));
-  const [finalThoughts, setFinalThoughts] = useState(editingDevotion?.finalThoughts || "");
-  const [takeaways, setTakeaways] = useState(() => JSON.stringify(parseTakeaways(editingDevotion?.takeaways)));
+  const [explanation, setExplanation] = useState(editingDevotion?.explanation || editingDevotion?.content || "");
+  const [reflectionQuestions, setReflectionQuestions] = useState<string[]>(() => parseList(editingDevotion?.reflectionQuestions || editingDevotion?.reflection));
+  const [prayer, setPrayer] = useState(editingDevotion?.prayer || editingDevotion?.learnMore || "");
+  const [practicalApplications, setPracticalApplications] = useState<string[]>(() => parseList(editingDevotion?.practicalApplications));
+  const [learningPoints, setLearningPoints] = useState<string[]>(() => parseList(editingDevotion?.learningPoints || editingDevotion?.takeaways));
 
   // Fetch the chapter's verse list from the backend (reliable for every book,
   // including BSB's "Psalm" vs "Psalms" naming) to populate the verse count.
@@ -161,28 +148,48 @@ export function useAddDailyDevotion() {
 
   const referenceStarted = Boolean(book || chapter || verseNumber);
   const referenceComplete = Boolean(book && chapter && verseNumber);
-  const saveDisabled =
-    !title.trim() ||
-    !content.trim() ||
-    (referenceStarted && (!referenceComplete || isVerseLoading || !verseText.trim()));
+  const list = (value: string[]) => value.map(item => item.trim()).filter(Boolean);
+  const invalidList = (value: string[]) => value.length === 0 || value.some(item => !item.trim());
+  const invalidLearningPoints = learningPoints.length !== 3 || invalidList(learningPoints);
+  const validationErrors = [
+    !title.trim() && tt("Title"),
+    !explanation.trim() && tt("Explanation"),
+    invalidList(reflectionQuestions) && tt("Reflection Questions"),
+    !prayer.trim() && tt("Prayer"),
+    invalidList(practicalApplications) && tt("Practical Application"),
+    invalidLearningPoints && tt("Exactly three non-empty learning points are required."),
+    referenceStarted && !referenceComplete && tt("Choose a book, chapter, and verse together"),
+  ].filter((error): error is string => Boolean(error));
+  const saveDisabled = validationErrors.length > 0;
+  const fieldErrors = {
+    title: !title.trim() ? tt("This field is required.") : undefined,
+    explanation: !explanation.trim() ? tt("This field is required.") : undefined,
+    reflectionQuestions: invalidList(reflectionQuestions) ? tt("Enter a question in each row or remove empty rows.") : undefined,
+    prayer: !prayer.trim() ? tt("This field is required.") : undefined,
+    practicalApplications: invalidList(practicalApplications) ? tt("Enter an application in each row or remove empty rows.") : undefined,
+    learningPoints: invalidLearningPoints ? tt("Exactly three non-empty learning points are required.") : undefined,
+    reference: referenceStarted && !referenceComplete ? tt("Choose a book, chapter, and verse together") : undefined,
+  };
+  const [saving, setSaving] = useState(false);
 
   const handleSave = useCallback(async (e?: React.FormEvent) => {
     e?.preventDefault();
     if (saveDisabled) {
       toast({
         title: tt("Missing fields"),
-        description: referenceStarted && !referenceComplete
-          ? tt("Choose a book, chapter, and verse together")
-          : referenceStarted
-            ? tt("Wait for the selected verse text to load")
-            : tt("Title and content are required"),
+        description: validationErrors.join(" · "),
         variant: "destructive",
       });
       return;
     }
+    if (saving) return;
     const payload: Record<string, any> = {
       title,
-      content,
+      explanation,
+      reflectionQuestions: JSON.stringify(list(reflectionQuestions)),
+      prayer,
+      practicalApplications: JSON.stringify(list(practicalApplications)),
+      learningPoints: JSON.stringify(list(learningPoints)),
       bookName: book || null,
       chapter: chapter ? Number(chapter) : null,
       verseNumber: verseNumber ? Number(verseNumber) : null,
@@ -194,25 +201,12 @@ export function useAddDailyDevotion() {
       ...(isEditing && typeof editingDevotion?.sharedStudyVersion === "number"
         ? { sharedStudyVersion: editingDevotion.sharedStudyVersion }
         : {}),
-      // Rich content fields
-      explanation: explanation || null,
-      application: application || null,
-      verseIntroduction: verseIntroduction || null,
-      learnMore: learnMore || null,
-      backgroundAuthor: backgroundAuthor || null,
-      backgroundBook: backgroundBook || null,
-      backgroundContext: backgroundContext || null,
-      wordStudies: serializeStudies(nonEmptyStudies(parseStudies(wordStudies))),
-      practicalApplications: practicalApplications || null,
-      keyThemes: keyThemes || null,
-      crossReferences: serializeReferences(nonEmptyReferences(parseReferences(crossReferences))) || null,
-      finalThoughts: finalThoughts || null,
-      takeaways: JSON.stringify(parseTakeaways(takeaways).map(item => item.trim()).filter(Boolean)),
     };
+    setSaving(true);
     try {
       const res = await saveDailyDevotion(payload);
       if (res.returnCode === 200) {
-        toast({ title: t.devotions.success, description: t.devotions.devotionSaved });
+        toast({ title: tt("Success"), description: t.devotions.devotionUpdated });
         navigate(routes.dailyDevotions.path);
       } else if (res.returnCode === 409) {
         const conflict = res.returnData?.conflicts?.[0];
@@ -232,14 +226,14 @@ export function useAddDailyDevotion() {
       }
     } catch {
       toast({ title: t.common.error, description: t.common.error, variant: "destructive" });
+    } finally {
+      setSaving(false);
     }
   }, [
-    title, content, book, chapter, verseNumber, bibleVersion, selectedDate, published,
-    explanation, application, verseIntroduction, learnMore,
-    backgroundAuthor, backgroundBook, backgroundContext,
-    wordStudies, practicalApplications, keyThemes, crossReferences, finalThoughts, takeaways,
+    title, book, chapter, verseNumber, bibleVersion, selectedDate, published,
+    explanation, reflectionQuestions, prayer, practicalApplications, learningPoints,
     isEditing, editingDevotion, toast, t, navigate, saveDisabled,
-    referenceStarted, referenceComplete,
+    referenceStarted, referenceComplete, saving, validationErrors.join(" · "),
   ]);
 
   const closeConflict = useCallback(() => {
@@ -286,27 +280,23 @@ export function useAddDailyDevotion() {
 
   return {
     data: {
-      title, content, book, chapter, verseNumber, bibleVersion,
+      title, book, chapter, verseNumber, bibleVersion,
       verseText, isVerseLoading, verseNumbers, maxVerses,
       bibleVersionOptions,
-      selectedDate, selectedTime, published, explanation, application,
-      verseIntroduction, learnMore, backgroundAuthor, backgroundBook,
-      backgroundContext, wordStudies, practicalApplications, keyThemes,
-      crossReferences, finalThoughts, takeaways, saveDisabled, isEditing,
+      selectedDate, selectedTime, published, explanation, reflectionQuestions,
+      prayer, practicalApplications, learningPoints, saveDisabled, validationErrors, fieldErrors, saving, isEditing,
       pageTitle: isEditing ? "Edit Devotion" : t.devotions.addDevotion,
-      saveLabel: isEditing ? "Update Devotion" : t.devotions.saveDevotion,
+      saveLabel: isEditing ? tt("Update Devotion") : tt("Save Devotion"),
       conflictDialog, conflictMessage,
       t, isRtl,
     },
     actions: {
-      setTitle, setContent,
+      setTitle,
       setBook: (value: string) => { setBook(value); setChapter(''); setVerseNumber(''); setVerseText(''); },
       setChapter: (value: string) => { setChapter(value); setVerseNumber(''); setVerseText(''); },
       setVerseNumber, setBibleVersion, setSelectedDate, handleTimeChange,
-      setPublished, setExplanation, setApplication, setVerseIntroduction,
-      setLearnMore, setBackgroundAuthor, setBackgroundBook,
-      setBackgroundContext, setWordStudies, setPracticalApplications,
-      setKeyThemes, setCrossReferences, setFinalThoughts, setTakeaways,
+      setPublished, setExplanation, setReflectionQuestions, setPrayer,
+      setPracticalApplications, setLearningPoints,
       handleSave, handleConflictUpdate, closeConflict, handleConflictOpenChange,
       viewExisting,
     },

@@ -67,5 +67,6 @@ export { AddDailyDevotionConflictDialog } from "./AddDailyDevotionConflictDialog
 export { AddDailyDevotionCoreSections } from "./AddDailyDevotionCoreSections";
 export { AddDailyDevotionReferenceSection } from "./AddDailyDevotionReferenceSection";
 export { AddDailyDevotionContentFields } from "./AddDailyDevotionContentFields";
+export { DevotionDetailContent } from "./DevotionDetailContent";
 export { AddDailyDevotionBackgroundSection } from "./AddDailyDevotionBackgroundSection";
 export { AddDailyExegesisForm } from "./AddDailyExegesisForm";

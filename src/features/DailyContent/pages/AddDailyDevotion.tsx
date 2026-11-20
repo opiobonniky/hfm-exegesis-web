@@ -1,21 +1,17 @@
 import { Sun, BookOpen } from "lucide-react";
 import { useAddDailyDevotion } from "../hooks/useAddDailyDevotion";
 import {
-  CollapsibleSection as Section,
   AddDailyDevotionCoreSections,
   AddDailyDevotionReferenceSection,
   AddDailyDevotionContentFields,
-  AddDailyDevotionBackgroundSection,
   AddDailyDevotionConflictDialog,
   DailyContentFormActions,
   PublishToggle,
   DateTimeFields,
-  StructuredContentSection,
   DailyContentFormCard,
   DailyContentPageHeader,
   PageContentWrapper,
 } from "../components";
-import { tt } from '@/components/languages/hardcodedTranslate';
 
 export default function AddDailyDevotion() {
   const { data, actions } = useAddDailyDevotion();
@@ -36,12 +32,12 @@ export default function AddDailyDevotion() {
         onSubmit={actions.handleSave}
       >
         <AddDailyDevotionCoreSections
+          error={data.fieldErrors.title}
           title={data.title}
-          content={data.content}
           setTitle={actions.setTitle}
-          setContent={actions.setContent}
         />
         <AddDailyDevotionReferenceSection
+          error={data.fieldErrors.reference}
           book={data.book}
           chapter={data.chapter}
           verseNumber={data.verseNumber}
@@ -56,43 +52,19 @@ export default function AddDailyDevotion() {
           setBibleVersion={actions.setBibleVersion}
         />
         <AddDailyDevotionContentFields
+          errors={data.fieldErrors}
           explanation={data.explanation}
-          application={data.application}
-          verseIntroduction={data.verseIntroduction}
-          learnMore={data.learnMore}
-          contentPlaceholder={data.t.devotions.contentPlaceholder}
+          reflectionQuestions={data.reflectionQuestions}
+          prayer={data.prayer}
+          practicalApplications={data.practicalApplications}
+          learningPoints={data.learningPoints}
           setExplanation={actions.setExplanation}
-          setApplication={actions.setApplication}
-          setVerseIntroduction={actions.setVerseIntroduction}
-          setLearnMore={actions.setLearnMore}
+          setReflectionQuestions={actions.setReflectionQuestions}
+          setPrayer={actions.setPrayer}
+          setPracticalApplications={actions.setPracticalApplications}
+          setLearningPoints={actions.setLearningPoints}
         />
-        <AddDailyDevotionBackgroundSection
-          backgroundAuthor={data.backgroundAuthor}
-          backgroundBook={data.backgroundBook}
-          backgroundContext={data.backgroundContext}
-          setBackgroundAuthor={actions.setBackgroundAuthor}
-          setBackgroundBook={actions.setBackgroundBook}
-          setBackgroundContext={actions.setBackgroundContext}
-        />
-        <Section title={tt("Rich Content")} defaultOpen={false}>
-          <StructuredContentSection
-            wordStudies={data.wordStudies}
-            setWordStudies={actions.setWordStudies}
-            practicalApplications={data.practicalApplications}
-            setPracticalApplications={actions.setPracticalApplications}
-            keyThemes={data.keyThemes}
-            setKeyThemes={actions.setKeyThemes}
-            crossReferences={data.crossReferences}
-            setCrossReferences={actions.setCrossReferences}
-            finalThoughts={data.finalThoughts}
-            setFinalThoughts={actions.setFinalThoughts}
-            takeaways={data.takeaways}
-            setTakeaways={actions.setTakeaways}
-            bibleVersion={data.bibleVersion}
-            isRtl={data.isRtl}
-          />
-        </Section>
-        <Section title={tt("Schedule & Publish")}>
+        <div className="rounded-xl border bg-muted/10 p-5 space-y-5">
           <PublishToggle
             published={data.published}
             onCheckedChange={actions.setPublished}
@@ -105,12 +77,12 @@ export default function AddDailyDevotion() {
             selectedTime={data.selectedTime}
             handleTimeChange={actions.handleTimeChange}
           />
-        </Section>
+        </div>
         <DailyContentFormActions
           cancelTo="/daily-devotions"
           cancelLabel={data.t.common.cancel}
           saveLabel={data.saveLabel}
-          disabled={data.saveDisabled}
+          saving={data.saving}
           onSave={actions.handleSave}
         />
       </DailyContentFormCard>

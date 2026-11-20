@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { fmtDate, parseList } from "../helpers/contentDetailHelpers";
+import { fmtDate } from "../helpers/contentDetailHelpers";
 import type { DailyDevotionDetailData } from "../types";
 
 export function useDailyDevotionDetailPage() {
@@ -34,15 +34,6 @@ export function useDailyDevotionDetailPage() {
     reference,
     headerTitle: devotion?.title || "Daily Devotion",
     subtitle: fmtDate(devotion?.displayDate || null) || "",
-    hasBackground: Boolean(
-      devotion?.backgroundAuthor ||
-      devotion?.backgroundBook ||
-      devotion?.backgroundContext,
-    ),
-    practicalApplications: parseList(devotion?.practicalApplications),
-    keyThemes: parseList(devotion?.keyThemes),
-    crossReferences: parseList(devotion?.crossReferences),
-    takeaways: parseList(devotion?.takeaways),
     },
     actions: { goBack, editDevotion },
   };

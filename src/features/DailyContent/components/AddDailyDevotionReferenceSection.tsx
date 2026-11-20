@@ -27,6 +27,7 @@ export function AddDailyDevotionReferenceSection(props: AddDailyDevotionReferenc
             else setVerseNumber(next.verseNumber);
           }}
         />
+        {props.error && <p role="status" className="text-xs text-destructive">{props.error}</p>}
 
         <FormField label={tt("Bible Version")}>
           <Combobox

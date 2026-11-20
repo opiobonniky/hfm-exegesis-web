@@ -8,15 +8,6 @@ import { sendPostRequest } from "@/services/api";
 import type { DailyDevotionItem } from "../types";
 import { tt } from '@/components/languages/hardcodedTranslate';
 
-export interface EditState {
-  title: string; content: string; bookName: string; chapter: string;
-  verseNumber: string; displayDate: string; displayTime: string; isPublished: boolean;
-  selectedDate?: Date; selectedTime?: string;
-}
-const EMPTY_EDIT: EditState = {
-  title: "", content: "", bookName: "", chapter: "", verseNumber: "",
-  displayDate: new Date().toISOString().split("T")[0], displayTime: "08:00", isPublished: true,
-};
 export function useDailyDevotionsPage() {
   const { t, isRtl } = useLanguage();
   const navigate = useNavigate();
@@ -37,10 +28,6 @@ export function useDailyDevotionsPage() {
   const [toDate, setToDate] = useState("");
   const [activePreset, setActivePreset] = useState<string | null>(null);
   const [filterError, setFilterError] = useState("");
-  // Edit dialog
-  const [editOpen, setEditOpen] = useState(false);
-  const [editState, setEditState] = useState<EditState | null>(null);
-  const [isSaving, setIsSaving] = useState(false);
   // Delete dialog
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<DailyDevotionItem | null>(null);
@@ -64,37 +51,8 @@ export function useDailyDevotionsPage() {
   }, [fromDate, toDate, toast]);
   useEffect(() => { loadDevotions(page); }, [page, loadDevotions]);
   const openEdit = useCallback((item?: DailyDevotionItem) => {
-    const now = new Date();
-    const dateStr = item?.displayDate && typeof item.displayDate === "string"
-      ? new Date(item.displayDate).toISOString().split("T")[0]
-      : now.toISOString().split("T")[0];
-    const base = {
-      title: item?.title || "", content: item?.content || "", bookName: item?.bookName || "",
-      chapter: item?.chapter?.toString() || "", verseNumber: item?.verseNumber?.toString() || "",
-      displayDate: dateStr, displayTime: "08:00", isPublished: item?.isPublished ?? true,
-      selectedDate: new Date(dateStr), selectedTime: "08:00",
-    };
-    setEditState(base);
-    setEditOpen(true);
-  }, []);
-  const handleSave = useCallback(async () => {
-    if (!editState) return;
-    setIsSaving(true);
-    try {
-      const payload = {
-        ...editState,
-        chapter: editState.chapter ? Number(editState.chapter) : null,
-        verseNumber: editState.verseNumber ? Number(editState.verseNumber) : null,
-      };
-      const res = await sendPostRequest("admin", "add-daily-devotion", payload);
-      if (res?.returnCode === 200) {
-        toast({ title: tt("Saved") }); setEditOpen(false); loadDevotions(page);
-      } else {
-        toast({ title: tt("Save failed"), description: res?.returnMessage, variant: "destructive" });
-      }
-    } catch { toast({ title: tt("Error saving"), variant: "destructive" }); }
-    finally { setIsSaving(false); }
-  }, [editState, toast, loadDevotions, page]);
+    navigate("/add-daily-devotion", item ? { state: { devotion: item } } : undefined);
+  }, [navigate]);
   const handleDelete = useCallback(async () => {
     if (!deleteTarget) return;
     setIsDeleting(true);
@@ -110,6 +68,9 @@ export function useDailyDevotionsPage() {
     setDeleteTarget(item);
     setDeleteOpen(true);
   }, []);
+  const openDetail = useCallback((item: DailyDevotionItem) => {
+    navigate(`/daily-devotion-detail?devotion=${encodeURIComponent(JSON.stringify(item))}`);
+  }, [navigate]);
   // ── Preset date ranges ──
   const toYMD = (d: Date) => d.toISOString().split("T")[0];
   const applyPreset = useCallback((preset: string) => {
@@ -156,14 +117,14 @@ export function useDailyDevotionsPage() {
     data: {
       t, isRtl, navigate, isAdmin, devotions, loading, page, total, totalPages,
       hasNext, hasPrevious, selectedIndex, fromDate, toDate, activePreset, filterError,
-      isFiltered: fromDate !== "" || toDate !== "", editOpen, editState, isSaving,
+      isFiltered: fromDate !== "" || toDate !== "",
       deleteOpen, deleteTarget, isDeleting, emptyMessage, addLabel, paginationLabels,
       showPagination: totalPages > 1,
     },
     actions: {
       setPage, setSelectedIndex, setFromDate, setToDate, setActivePreset, setFilterError,
-      applyPreset, clearFilter, applyFilter, setEditOpen, setEditState, openEdit,
-      handleSave, setDeleteOpen, handleDelete, openDelete, refresh,
+      applyPreset, clearFilter, applyFilter, openEdit,
+      setDeleteOpen, handleDelete, openDelete, openDetail, refresh,
     },
   };
 }

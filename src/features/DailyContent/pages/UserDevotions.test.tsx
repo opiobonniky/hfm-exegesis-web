@@ -18,12 +18,9 @@ beforeEach(() => {
   mocks.loading = false; mocks.refreshing = false; mocks.liked = false; mocks.isRtl = false;
   mocks.devotion = {
     id: 1, title: 'Grace for today', displayDate: '2026-11-17', isPublished: true,
-    bookName: 'John', chapter: 1, verseNumber: 16, bibleVersion: 'BSB', content: 'First reflection.\n\nSecond reflection.',
-    explanation: 'Explanation text', application: 'Application text', verseIntroduction: 'Introduction text',
-    backgroundAuthor: 'John the apostle', backgroundBook: 'John', backgroundContext: 'Historical context',
-    wordStudies: JSON.stringify([{ word: 'Grace', strongs: 'G5485', definition: 'A gift freely given' }]),
-    practicalApplications: JSON.stringify(['Show kindness']), keyThemes: 'Faith\nHope', crossReferences: JSON.stringify(['Romans 5:1']),
-    finalThoughts: 'Final thought', takeaways: JSON.stringify(['Remember grace']), learnMore: 'Further reading',
+    bookName: 'John', chapter: 1, verseNumber: 16, bibleVersion: 'BSB', explanation: 'First reflection.\n\nSecond reflection.',
+    reflectionQuestions: JSON.stringify(['Where do I need grace?']), prayer: 'Father, help me walk in grace. Amen.',
+    practicalApplications: JSON.stringify(['Show kindness']), learningPoints: JSON.stringify(['Grace is a gift', 'Faith responds', 'Hope remains']),
   };
 });
 
@@ -32,7 +29,7 @@ describe('consumer devotion reader', () => {
     render(<UserDevotions />);
     expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
     expect(screen.getByRole('heading', { name: 'Grace for today' })).toBeInTheDocument();
-    for (const text of ['First reflection.', 'Second reflection.', 'Explanation text', 'Application text', 'Introduction text', 'John the apostle', 'Historical context', 'Grace', 'G5485', 'A gift freely given', 'Show kindness', 'Faith', 'Hope', 'Romans 5:1', 'Final thought', 'Remember grace', 'Further reading']) {
+    for (const text of ['First reflection.', 'Second reflection.', 'Where do I need grace?', 'Father, help me walk in grace. Amen.', 'Show kindness', 'Grace is a gift', 'Faith responds', 'Hope remains']) {
       expect(screen.getByText(text)).toBeInTheDocument();
     }
     expect(screen.getByText(/John 1:16/)).toHaveAttribute('translate', 'no');
@@ -59,9 +56,9 @@ describe('consumer devotion reader', () => {
   });
 
   it('omits absent notes and incomplete verse numbers', () => {
-    mocks.devotion = { id: 1, title: 'A quiet moment', content: 'Reflection', displayDate: '2026-11-17', isPublished: true, bookName: 'John' };
+    mocks.devotion = { id: 1, title: 'A quiet moment', explanation: 'Reflection', displayDate: '2026-11-17', isPublished: true, bookName: 'John' };
     render(<UserDevotions />);
-    expect(screen.queryByRole('region', { name: 'Reflect and explore' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('region', { name: 'Reflect and apply' })).not.toBeInTheDocument();
     expect(screen.getByText('John')).not.toHaveTextContent('undefined');
   });
 

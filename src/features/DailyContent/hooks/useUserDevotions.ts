@@ -39,14 +39,14 @@ export function useUserDevotions() {
     const ref = devotion.bookName
       ? `${devotion.bookName} ${devotion.chapter}:${devotion.verseNumber}`
       : devotion.title;
-    const text = `"${devotion.content.slice(0, 200)}..." — ${ref}`;
+    const text = `"${devotion.explanation.slice(0, 200)}..." — ${ref}`;
     navigator.clipboard.writeText(text).then(() =>
       toast({ title: tt("Copied to clipboard") })
     );
   }, [devotion, toast]);
   const handleShare = useCallback(async () => {
     if (!devotion) return;
-    const text = `${devotion.title}\n\n${devotion.content}\n\nvia Exegesis Bible App`;
+    const text = `${devotion.title}\n\n${devotion.explanation}\n\nvia Exegesis Bible App`;
     if (navigator.share) {
       try { await navigator.share({ title: devotion.title, text }); } catch {
         // Dismissing the native share sheet is not a reader-facing error.

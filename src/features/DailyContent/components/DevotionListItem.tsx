@@ -36,8 +36,8 @@ export function DevotionListItem({ item, isSelected, onSelect, onEdit, onDelete,
             <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
             <span className="text-xs text-muted-foreground">{dateStr}</span>
           </div>
-          {item.content && (
-            <p className="text-xs text-muted-foreground/70 mt-1.5 line-clamp-2">{item.content.substring(0, 120)}...</p>
+          {item.explanation && (
+            <p className="text-xs text-muted-foreground/70 mt-1.5 line-clamp-2">{item.explanation.substring(0, 150)}</p>
           )}
           {item.bookName && (
             <p className="text-xs text-primary mt-1">

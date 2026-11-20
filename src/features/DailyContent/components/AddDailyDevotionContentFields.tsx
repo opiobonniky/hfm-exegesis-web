@@ -3,46 +3,41 @@ import type { AddDailyDevotionContentFieldsProps } from "../types";
 import { CollapsibleSection } from "./CollapsibleSection";
 import { FormField } from "./FormField";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { DevotionListEditor } from './DevotionListEditor';
 
-export function AddDailyDevotionContentFields({ explanation, application, verseIntroduction, learnMore, contentPlaceholder, setExplanation, setApplication, setVerseIntroduction, setLearnMore }: AddDailyDevotionContentFieldsProps) {
+export function AddDailyDevotionContentFields({ explanation, reflectionQuestions, prayer, practicalApplications, learningPoints, setExplanation, setReflectionQuestions, setPrayer, setPracticalApplications, setLearningPoints, errors = {} }: AddDailyDevotionContentFieldsProps) {
   return (
-    <CollapsibleSection title={tt("Content Fields")}>
-      <FormField label={tt("Explanation")}>
+    <CollapsibleSection title={tt("Devotional Content")}>
+      <FormField label={tt("Explanation")} required error={errors.explanation}>
         <Textarea
           value={explanation}
+          aria-invalid={!!errors.explanation}
           onChange={(event) => setExplanation(event.target.value)}
-          placeholder={contentPlaceholder || tt("Explain the heart of this devotion and its key message...")}
-          rows={5}
-          className="resize-none"
+          placeholder={tt("Write the full devotional explanation...")}
+          className="min-h-[260px] resize-y leading-relaxed"
         />
       </FormField>
-      <FormField label={tt("Application")}>
+      <DevotionListEditor label={tt('Reflection Questions')} itemLabel={tt('Reflection question')}
+        addLabel={tt('Add question')} removeLabel={tt('Remove question')} emptyLabel={tt('No reflection questions added yet.')}
+        placeholder={tt('Write a reflection question...')} value={reflectionQuestions} onChange={setReflectionQuestions}
+        error={errors.reflectionQuestions} rows={2} />
+      <FormField label={tt("Prayer")} required error={errors.prayer}>
         <Textarea
-          value={application}
-          onChange={(event) => setApplication(event.target.value)}
-          placeholder={contentPlaceholder || tt("How should readers respond and apply this to daily life?")}
-          rows={4}
-          className="resize-none"
+          value={prayer}
+          aria-invalid={!!errors.prayer}
+          onChange={(event) => setPrayer(event.target.value)}
+          placeholder={tt("Write a closing prayer...")}
+          rows={6}
         />
       </FormField>
-      <FormField label={tt("Introduction")}>
-        <Textarea
-          value={verseIntroduction}
-          onChange={(event) => setVerseIntroduction(event.target.value)}
-          placeholder={tt("Introduce the devotion, the verse, and its central purpose...")}
-          rows={4}
-          className="resize-none"
-        />
-      </FormField>
-      <FormField label={tt("Learn More")} optional>
-        <Textarea
-          value={learnMore}
-          onChange={(event) => setLearnMore(event.target.value)}
-          placeholder={tt("Additional resources, related verses, or deeper insights...")}
-          rows={4}
-          className="resize-none"
-        />
-      </FormField>
+      <DevotionListEditor label={tt('Practical Application')} itemLabel={tt('Application')}
+        addLabel={tt('Add application')} removeLabel={tt('Remove application')} emptyLabel={tt('No practical applications added yet.')}
+        placeholder={tt('Write a practical action...')} value={practicalApplications} onChange={setPracticalApplications}
+        error={errors.practicalApplications} rows={3} />
+      <DevotionListEditor label={tt('We Learn Three Things From This Devotional')} itemLabel={tt('Learning point')}
+        addLabel={tt('Add learning point')} removeLabel={tt('Remove learning point')} emptyLabel={tt('No learning points added yet.')}
+        placeholder={tt('Write a concise learning point...')} value={learningPoints} onChange={setLearningPoints}
+        error={errors.learningPoints} rows={3} maxItems={3} />
     </CollapsibleSection>
   );
 }

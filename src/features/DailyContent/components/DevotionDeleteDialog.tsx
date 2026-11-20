@@ -26,7 +26,7 @@ export function DevotionDeleteDialog({ open, onOpenChange, target, isDeleting, o
         {target && (
           <div className="py-2">
             <p className="font-medium">{target.title}</p>
-            {target.content && <p className="text-sm text-muted-foreground italic line-clamp-2 pt-1">{target.content.substring(0, 100)}...</p>}
+            {target.explanation && <p className="text-sm text-muted-foreground italic line-clamp-2 pt-1">{target.explanation.substring(0, 100)}...</p>}
           </div>
         )}
         <DialogFooter className="gap-2 sm:gap-0">

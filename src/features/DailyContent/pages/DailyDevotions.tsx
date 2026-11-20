@@ -6,7 +6,6 @@ import { DevotionList } from "../components/DevotionList";
 import { DevotionLoadingSpinner } from "../components/DevotionLoadingSpinner";
 import { DailyDevotionsPagination } from "../components/DailyDevotionsPagination";
 import { DailyDevotionsEmpty } from "../components/DailyDevotionsEmpty";
-import { DevotionEditDialog } from "../components/DevotionEditDialog";
 import { DevotionDeleteDialog } from "../components/DevotionDeleteDialog";
 
 export default function DailyDevotions() {
@@ -46,7 +45,10 @@ export default function DailyDevotions() {
           devotions={h.devotions}
           selectedIndex={h.selectedIndex}
           isAdmin={h.isAdmin}
-          onSelect={h.setSelectedIndex}
+          onSelect={(index) => {
+            h.setSelectedIndex(index);
+            h.openDetail(h.devotions[index]);
+          }}
           onEdit={h.openEdit}
           onDelete={h.openDelete}
         />
@@ -64,14 +66,6 @@ export default function DailyDevotions() {
         />
       )}
 
-      <DevotionEditDialog
-        open={h.editOpen}
-        onOpenChange={h.setEditOpen}
-        editState={h.editState}
-        onChange={h.setEditState}
-        onSave={h.handleSave}
-        isSaving={h.isSaving}
-      />
       <DevotionDeleteDialog
         open={h.deleteOpen}
         onOpenChange={h.setDeleteOpen}
