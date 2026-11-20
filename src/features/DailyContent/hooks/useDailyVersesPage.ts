@@ -13,6 +13,8 @@ export function useDailyVersesPage() {
   const [content, setContent] = useState<DailyItem[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(0);
+  const [loadedPage, setLoadedPage] = useState(-1);
+  const [revision, setRevision] = useState(0);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [bookName, setBookName] = useState('');
@@ -20,12 +22,14 @@ export function useDailyVersesPage() {
   const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<DailyItem | null>(null);
   const [deleting, setDeleting] = useState(false);
   const generation = useRef(0);
   const load = useCallback(async () => {
     const request = ++generation.current;
     setLoading(true);
+    setLoadError(false);
     try {
       const response = await adminApi.request('admin', 'get-all-daily-verses', {
         page, size: PAGE_SIZE, smartDefault: false, listPreview: true,
@@ -36,19 +40,26 @@ export function useDailyVersesPage() {
         ...(search ? { search } : {}),
       });
       if (request !== generation.current) return;
-      if (response?.returnCode !== 200 || !response.returnData) throw new Error('Unavailable');
-      setContent(response.returnData.content || []);
+      if (response?.returnCode !== 200 || !Array.isArray(response.returnData?.content)) throw new Error('Unavailable');
+      const incoming: DailyItem[] = response.returnData.content;
+      setContent(previous => Array.from(new Map(
+        [...(page === 0 ? [] : previous), ...incoming].map(item => [item.id, item]),
+      ).values()));
       setTotal(response.returnData.totalElements || 0);
+      setLoadedPage(page);
     } catch {
-      if (request === generation.current) {
-        setContent([]); setTotal(0);
-        toast({ title: tt('Failed to load content'), variant: 'destructive' });
-      }
+      if (request === generation.current) setLoadError(true);
     } finally {
       if (request === generation.current) setLoading(false);
     }
-  }, [page, startDate, endDate, bookName, chapter, search, toast]);
-  useEffect(() => { void load(); return () => { generation.current++; }; }, [load]);
+  }, [page, startDate, endDate, bookName, chapter, search]);
+  useEffect(() => { void load(); return () => { generation.current++; }; }, [load, revision]);
+  const hasMore = loadedPage >= 0 && (loadedPage + 1) * PAGE_SIZE < total;
+  const loadMore = useCallback(() => {
+    if (loading || loadError || !hasMore || searchInput.trim() !== search) return;
+    setPage(current => current === loadedPage ? current + 1 : current);
+  }, [hasMore, loadedPage, loadError, loading, search, searchInput]);
+  const retry = () => setRevision(current => current + 1);
   useEffect(() => {
     if (searchInput.trim() === search) return;
     const timer = window.setTimeout(() => { setSearch(searchInput.trim()); setPage(0); }, 300);
@@ -68,8 +79,8 @@ export function useDailyVersesPage() {
       const response = await adminApi.request('admin', 'delete-daily-verse', { verseId: deleteTarget.id });
       if (response?.returnCode !== 200) throw new Error('Delete failed');
       setDeleteTarget(null);
-      if (content.length === 1 && page > 0) setPage(page - 1);
-      else await load();
+      setPage(0);
+      setRevision(current => current + 1);
       toast({ title: tt('Deleted') });
     } catch { toast({ title: tt('Delete failed'), variant: 'destructive' }); }
     finally { setDeleting(false); }
@@ -83,7 +94,7 @@ export function useDailyVersesPage() {
       else navigate(`${routes.dailyVerseDetail.path}?verse=${encodeURIComponent(JSON.stringify(verse))}`);
     } catch { toast({ title: tt('Failed to load content'), variant: 'destructive' }); }
   };
-  return { content, total, page, setPage, startDate, endDate, changeStartDate, changeEndDate, loading, deleteTarget,
+  return { content, total, page, hasMore, loadMore, loadError, retry, startDate, endDate, changeStartDate, changeEndDate, loading, deleteTarget,
     bookName, chapter, search: searchInput, changeBook, changeChapter, changeSearch: setSearchInput, clearFilters,
     setDeleteTarget, deleting, confirmDelete,
     add: () => navigate(routes.addDailyVerse.path),

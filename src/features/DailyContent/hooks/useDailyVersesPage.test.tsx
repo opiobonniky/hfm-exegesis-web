@@ -14,16 +14,27 @@ beforeEach(() => { vi.clearAllMocks(); mocks.request.mockResolvedValue({ returnC
 afterEach(cleanup);
 
 it('loads only verses and resets pagination when the publish-date filter changes', async () => {
+  mocks.request.mockImplementation(async (_route, _action, { page, size }) => ({
+    returnCode: 200,
+    returnData: { content: Array.from({ length: size }, (_, i) => ({ id: page * size + i })), totalElements: size * 2 },
+  }));
   const { result } = renderHook(useDailyVersesPage);
   await waitFor(() => expect(result.current.loading).toBe(false));
   expect(mocks.request).toHaveBeenLastCalledWith('admin', 'get-all-daily-verses', expect.objectContaining({ page: 0, smartDefault: false }));
-  act(() => result.current.setPage(2));
-  await waitFor(() => expect(mocks.request).toHaveBeenLastCalledWith('admin', 'get-all-daily-verses', expect.objectContaining({ page: 2 })));
+  const batch = result.current.content.length;
+  act(() => {
+    result.current.loadMore();
+    result.current.loadMore();
+  });
+  await waitFor(() => expect(result.current.content).toHaveLength(batch * 2));
+  expect(mocks.request).toHaveBeenLastCalledWith('admin', 'get-all-daily-verses', expect.objectContaining({ page: 1 }));
+  expect(result.current.hasMore).toBe(false);
   act(() => result.current.changeStartDate('2026-11-10'));
   await waitFor(() => expect(mocks.request).toHaveBeenLastCalledWith('admin', 'get-all-daily-verses', expect.objectContaining({ page: 0, startDate: '2026-11-10', listPreview: true })));
   expect(mocks.request.mock.lastCall?.[2]).not.toHaveProperty('endDate');
   act(() => result.current.changeEndDate('2026-11-21'));
   await waitFor(() => expect(mocks.request).toHaveBeenLastCalledWith('admin', 'get-all-daily-verses', expect.objectContaining({ page: 0, startDate: '2026-11-10', endDate: '2026-11-21' })));
+  await waitFor(() => expect(result.current.content).toHaveLength(batch));
 });
 
 it('combines selected book and chapter with debounced general search', async () => {

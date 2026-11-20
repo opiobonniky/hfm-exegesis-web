@@ -1,4 +1,4 @@
-// useVerseExplanationList — one server page at a time, with searchable filters
+// useVerseExplanationList — append each server page until the list is exhausted
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -49,11 +49,18 @@ export function useVerseExplanationList(pageSize = VERSE_EXPLANATION_PAGE_SIZE) 
         }
         const totalCount = rd?.totalCount ?? 0;
         const totalPages = rd?.totalPages ?? Math.ceil(totalCount / pageSize);
-        if (page > Math.max(1, totalPages)) {
-          setPage(Math.max(1, totalPages));
-          return;
-        }
-        setData({ items: rd.explanations, totalCount, page, pageSize, totalPages });
+        setData(previous => {
+          const seen = new Set(page === 1 ? [] : previous.items.map(item => item.id));
+          const incoming = (rd.explanations as VerseExplanationListItem[]).filter(item => {
+            if (seen.has(item.id)) return false;
+            seen.add(item.id);
+            return true;
+          });
+          return {
+            items: page === 1 ? incoming : [...previous.items, ...incoming],
+            totalCount, page, pageSize, totalPages,
+          };
+        });
       } catch {
         if (!active) return;
         setLoadError(true);
@@ -71,9 +78,11 @@ export function useVerseExplanationList(pageSize = VERSE_EXPLANATION_PAGE_SIZE) 
   }, []);
   const retry = () => setRevision(current => current + 1);
 
-  const goToPage = useCallback((p: number) => {
-    setPage(p);
-  }, []);
+  const hasMore = data.page < data.totalPages;
+  const loadMore = useCallback(() => {
+    if (loading || loadError || !hasMore || searchInput.trim() !== search) return;
+    setPage(current => current === data.page ? current + 1 : current);
+  }, [data.page, hasMore, loadError, loading, search, searchInput]);
 
   const changeBook = useCallback((value: string) => {
     setBookName(value);
@@ -151,11 +160,11 @@ export function useVerseExplanationList(pageSize = VERSE_EXPLANATION_PAGE_SIZE) 
 
   return {
     data: {
-      data, loading, loadError, search: searchInput, page, deleting,
+      data, loading, loadError, hasMore, search: searchInput, page, deleting,
       bookName, chapter, creatorName,
     },
     actions: {
-      setSearch: setSearchInput, goToPage, retry, deleteItem, viewItem, editItem, goBack,
+      setSearch: setSearchInput, loadMore, retry, deleteItem, viewItem, editItem, goBack,
       setBookName: changeBook, setChapter: changeChapter, setCreatorName: changeCreatorName, clearFilters,
     },
   };

@@ -5,6 +5,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useScrollEnd } from "@/hooks/useScrollEnd";
+import { AdminCardGridSkeleton } from "./AdminCardGridSkeleton";
 import {
   useVerseExplanationList,
   type VerseExplanationListItem,
@@ -13,8 +15,6 @@ import {
   AdminPageHeader,
   AdminPageContent,
   AdminEmptyState,
-  AdminLoadingGrid,
-  PaginationControls,
   VerseExplanationFilters,
   VerseExplanationTable,
   VerseExplanationDeleteDialog,
@@ -27,6 +27,8 @@ export function VerseExplanationsPageContent() {
   const h = { ...data, ...actions };
   const [deleteTarget, setDeleteTarget] =
     useState<VerseExplanationListItem | null>(null);
+  const watchEnd = h.hasMore && !h.loading && !h.loadError;
+  const endRef = useScrollEnd(watchEnd, h.loadMore);
 
   return (
     <div className="min-h-screen bg-background">
@@ -51,14 +53,9 @@ export function VerseExplanationsPageContent() {
           onClear={h.clearFilters}
         />
 
-        {h.loading ? (
-          <AdminLoadingGrid />
-        ) : h.loadError ? (
-          <div role="alert" className="flex flex-wrap items-center gap-3 rounded-xl border border-border bg-card p-4 text-sm">
-            <p>{tt("Failed to load verse explanations")}</p>
-            <Button type="button" variant="outline" size="sm" onClick={h.retry}>{tt("Retry")}</Button>
-          </div>
-        ) : h.data.items.length === 0 ? (
+        {h.page === 1 && h.loading ? (
+          <AdminCardGridSkeleton count={6} label={tt("Loading verse explanations…")} />
+        ) : h.page === 1 && h.loadError ? null : h.data.items.length === 0 ? (
           <AdminEmptyState
             icon={<Lightbulb className="w-12 h-12" />}
             title={tt("No explanations found")}
@@ -70,21 +67,23 @@ export function VerseExplanationsPageContent() {
             onAction={() => navigate("/admin/add-verse-explanation")}
           />
         ) : (
-            <VerseExplanationTable
-              items={h.data.items}
-              onView={h.viewItem}
-              onEdit={h.editItem}
-              onDelete={setDeleteTarget}
-            />
-
+          <VerseExplanationTable
+            items={h.data.items}
+            onView={h.viewItem}
+            onEdit={h.editItem}
+            onDelete={setDeleteTarget}
+          />
         )}
-        <PaginationControls
-          page={h.data.page - 1}
-          total={h.data.totalCount}
-          pageSize={h.data.pageSize}
-          disabled={h.loading || h.loadError}
-          onPageChange={(p) => h.goToPage(p + 1)}
-        />
+        {h.loadError && (
+          <div role="alert" className="flex flex-wrap items-center gap-3 rounded-xl border border-border bg-card p-4 text-sm">
+            <p>{tt("Failed to load verse explanations")}</p>
+            <Button type="button" variant="outline" size="sm" onClick={h.retry}>{tt("Retry")}</Button>
+          </div>
+        )}
+        {h.page > 1 && h.loading && (
+          <AdminCardGridSkeleton count={3} label={tt("Loading more explanations…")} />
+        )}
+        {watchEnd && <div ref={endRef} className="h-px" aria-hidden="true" />}
       </AdminPageContent>
 
       <VerseExplanationDeleteDialog

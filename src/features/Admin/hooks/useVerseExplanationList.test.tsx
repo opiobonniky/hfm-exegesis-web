@@ -75,7 +75,7 @@ it("includes the debounced text search alongside the filters", async () => {
   );
 });
 
-it("requests nine items and replaces the rows when moving between pages", async () => {
+it("waits for load more, appends nine rows at a time, and stops at the last page", async () => {
   mocks.request.mockImplementation(async (_route, _action, { page, pageSize }) => ({
     returnCode: 200,
     returnData: {
@@ -85,10 +85,37 @@ it("requests nine items and replaces the rows when moving between pages", async 
   }));
   const { result } = renderHook(useVerseExplanationList);
   await waitFor(() => expect(result.current.data.data.items).toHaveLength(9));
-  act(() => result.current.actions.goToPage(2));
+  expect(mocks.request).toHaveBeenCalledTimes(1);
+  act(() => {
+    result.current.actions.loadMore();
+    result.current.actions.loadMore();
+  });
   await waitFor(() => expect(result.current.data.data.page).toBe(2));
   expect(mocks.request).toHaveBeenLastCalledWith(
     "bible", "get-all-verses-explanation", expect.objectContaining({ page: 2, pageSize: 9 }),
   );
-  expect(result.current.data.data.items.map(item => item.id)).toEqual([10, 11, 12, 13, 14, 15, 16, 17, 18]);
+  expect(result.current.data.data.items.map(item => item.id)).toEqual(Array.from({ length: 18 }, (_, index) => index + 1));
+  expect(result.current.data.hasMore).toBe(false);
+  act(() => result.current.actions.loadMore());
+  expect(mocks.request).toHaveBeenCalledTimes(2);
+});
+
+it("replaces the accumulated rows when a filter changes during a next-page request", async () => {
+  const response = (id: number) => ({ returnCode: 200, returnData: {
+    explanations: [{ id }], totalCount: 18, totalPages: 2,
+  } });
+  let resolveNext: (value: ReturnType<typeof response>) => void;
+  const pending = new Promise<ReturnType<typeof response>>(resolve => { resolveNext = resolve; });
+  mocks.request
+    .mockResolvedValueOnce(response(1))
+    .mockReturnValueOnce(pending)
+    .mockResolvedValueOnce(response(99));
+  const { result } = renderHook(useVerseExplanationList);
+  await waitFor(() => expect(result.current.data.data.items.map(item => item.id)).toEqual([1]));
+  act(() => result.current.actions.loadMore());
+  await waitFor(() => expect(mocks.request).toHaveBeenCalledTimes(2));
+  act(() => result.current.actions.setBookName("John"));
+  await waitFor(() => expect(result.current.data.data.items.map(item => item.id)).toEqual([99]));
+  await act(async () => { resolveNext(response(10)); });
+  expect(result.current.data.data.items.map(item => item.id)).toEqual([99]);
 });
