@@ -1,4 +1,4 @@
-import { tt } from '@/components/languages/hardcodedTranslate';
+import { tt } from "@/components/languages/hardcodedTranslate";
 // ─── Admin Dashboard Constants ────────────────────────────────────────────────
 
 export interface AdminTool {
@@ -18,7 +18,7 @@ export const ADMIN_TOOLS: AdminTool[] = [
     color: "bg-amber-500/10 text-amber-600 dark:bg-amber-500/15",
   },
   {
-    title: tt("Daily Content"),
+    title: tt("Daily Verses"),
     description: tt("Manage daily verses, devotions, and exegesis"),
     icon: "CalendarDays",
     path: "/admin/daily-content",
@@ -55,10 +55,46 @@ export const ADMIN_TOOLS: AdminTool[] = [
 ];
 
 export const ADMIN_QUICK_ACTIONS = [
-  { label: tt("Add Daily Verse"), description: tt("Schedule a new verse"), icon: "Sun", path: "/add-daily-verse", color: "text-amber-700 dark:text-amber-400" },
-  { label: tt("Add Devotion"), description: tt("Create a new devotion"), icon: "BookOpen", path: "/add-daily-devotion", color: "text-emerald-700 dark:text-emerald-400" },
-  { label: tt("Create Reading Plan"), description: tt("Build a new plan"), icon: "BookText", path: "/add-reading-plan", color: "text-sky-700 dark:text-sky-400" },
-  { label: tt("Add Explanation"), description: tt("Write verse explanation"), icon: "BookMarked", path: "/add-explanation", color: "text-violet-700 dark:text-violet-400" },
-  { label: tt("User Management"), description: tt("Manage user accounts"), icon: "Users", path: "/admin/users", color: "text-blue-700 dark:text-blue-400" },
-  { label: tt("Journal Moderation"), description: tt("Review journal entries"), icon: "BookOpen", path: "/admin/journal-moderation", color: "text-rose-700 dark:text-rose-400" },
+  {
+    label: tt("Add Daily Verse"),
+    description: tt("Schedule a new verse"),
+    icon: "Sun",
+    path: "/add-daily-verse",
+    color: "text-amber-700 dark:text-amber-400",
+  },
+  {
+    label: tt("Add Devotion"),
+    description: tt("Create a new devotion"),
+    icon: "BookOpen",
+    path: "/add-daily-devotion",
+    color: "text-emerald-700 dark:text-emerald-400",
+  },
+  {
+    label: tt("Create Reading Plan"),
+    description: tt("Build a new plan"),
+    icon: "BookText",
+    path: "/add-reading-plan",
+    color: "text-sky-700 dark:text-sky-400",
+  },
+  {
+    label: tt("Add Explanation"),
+    description: tt("Write verse explanation"),
+    icon: "BookMarked",
+    path: "/add-explanation",
+    color: "text-violet-700 dark:text-violet-400",
+  },
+  {
+    label: tt("User Management"),
+    description: tt("Manage user accounts"),
+    icon: "Users",
+    path: "/admin/users",
+    color: "text-blue-700 dark:text-blue-400",
+  },
+  {
+    label: tt("Journal Moderation"),
+    description: tt("Review journal entries"),
+    icon: "BookOpen",
+    path: "/admin/journal-moderation",
+    color: "text-rose-700 dark:text-rose-400",
+  },
 ] as const;

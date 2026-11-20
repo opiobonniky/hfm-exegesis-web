@@ -659,8 +659,10 @@ export interface VerseExplanationListItem {
   learnMore?: string | null;
   isPublished?: boolean;
   creatorName?: string | null;
-  createdOn: string;
+  createdOn: string | null;
   updatedOn: string | null;
+  studyCreatedOn?: string | null;
+  preview?: { explanation?: string; learnMore?: string; reference?: string };
 }
 
 export interface VerseExplanationPageData {

@@ -132,6 +132,8 @@ export function getExplanationStepErrors(
       errors.backgroundContext ||
       errors.wordStudies.find(Boolean) ||
       errors.practicalApps.find(Boolean) ||
+      "",
+    insights:
       errors.themes.find(Boolean) ||
       errors.crossReferences.find(Boolean) ||
       errors.finalThoughts ||

@@ -9,7 +9,7 @@ export default function AddExplanationPage() {
   const { data, actions } = useAddExplanation();
 
   return (
-    <div className="min-h-screen bg-background text-foreground mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:py-8">
+    <div className="mx-auto min-h-screen w-full max-w-[1440px] bg-background px-4 py-6 text-foreground sm:px-6 lg:py-8">
       <AddExplanationHeaderBar
         isEditMode={data.isEditMode}
         goBack={actions.goBack}

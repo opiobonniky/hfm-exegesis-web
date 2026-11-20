@@ -5,7 +5,7 @@ import { AddExplanationSidebar } from "./AddExplanationSidebar";
 import { AddExplanationReferenceForm } from "./AddExplanationReferenceForm";
 import { AddExplanationExegesisForm } from "./AddExplanationExegesisForm";
 import { AddExplanationStudyForm } from "./AddExplanationStudyForm";
-import { AddExplanationExtrasForm } from "./AddExplanationExtrasForm";
+import { AddExplanationExtrasForm, AddExplanationPracticalApplications } from "./AddExplanationExtrasForm";
 import { AddExplanationFooterActions } from "./AddExplanationFooterActions";
 import type { AddExplanationWorkspaceProps } from "../types";
 import { tt } from '@/components/languages/hardcodedTranslate';
@@ -114,20 +114,25 @@ export function AddExplanationWorkspace({
               updateWordStudy={actions.updateWordStudy}
               updateField={actions.updateField}
             />
+            <AddExplanationPracticalApplications
+              rows={data.form.practicalApps}
+              errors={errors.practicalApps}
+              onChange={actions.updatePracticalApp}
+              onAdd={actions.addPracticalApp}
+              onRemove={actions.removePracticalApp}
+            />
+          </TabsContent>
+          <TabsContent value="insights">
             <AddExplanationExtrasForm
               showErrors={!data.isEditMode || data.richContentTouched}
               revealRowErrors={feedback.attempted(scope)}
               errors={errors}
               bibleVersion={data.form.bibleVersion}
               onCrossReferencesChange={rows => actions.updateField('crossReferences', rows)}
-              practicalApps={data.form.practicalApps}
               crossReferences={data.form.crossReferences}
               themes={data.form.themes}
               takeaways={data.form.studyMetadata.takeaways}
               finalThoughts={data.form.studyMetadata.finalThoughts}
-              updatePracticalApp={actions.updatePracticalApp}
-              addPracticalApp={actions.addPracticalApp}
-              removePracticalApp={actions.removePracticalApp}
               addTheme={actions.addTheme}
               removeTheme={actions.removeTheme}
               updateTheme={actions.updateTheme}

@@ -3,29 +3,39 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { tt } from '@/components/languages/hardcodedTranslate';
-import type { AddExplanationExtrasFormProps } from '../types';
+import type { AddExplanationExtrasFormProps, ExplanationForm } from '../types';
 import { CrossReferencePicker } from './CrossReferencePicker';
 import { parseReferences, serializeReferences } from '../helpers/editorContent';
 import { TakeawayEditor } from './TakeawayEditor';
 
+export function AddExplanationPracticalApplications({ rows, errors, onAdd, onRemove, onChange }: {
+  rows: ExplanationForm['practicalApps'];
+  errors?: string[];
+  onAdd: () => void;
+  onRemove: (index: number) => void;
+  onChange: (index: number, value: string) => void;
+}) {
+  return (
+    <section className="space-y-3 rounded-xl border border-border p-4">
+      <h3 className="text-sm font-semibold">{tt('Practical applications')}</h3>
+      {rows.map((row, index) => <div key={index} className="space-y-1">
+        <div className="flex items-start gap-2">
+          <Textarea data-validation-field={`practicalApps.${index}`} aria-label={`${tt('Application')} ${index + 1}`} aria-invalid={!!errors?.[index]}
+            className={errors?.[index] ? 'border-destructive focus-visible:ring-destructive' : ''}
+            rows={3} maxLength={5000} value={row.applicationText} onChange={e => onChange(index, e.target.value)} />
+          <Remove label="Remove application" onClick={() => onRemove(index)} />
+        </div>
+        {errors?.[index] && <p role="status" className="text-xs text-destructive">{tt(errors[index])}</p>}
+      </div>)}
+      <Add label="Add application" onClick={onAdd} />
+    </section>
+  );
+}
+
 export function AddExplanationExtrasForm(p: AddExplanationExtrasFormProps) {
   const errors: NonNullable<AddExplanationExtrasFormProps["errors"]> = p.errors || {};
-  const appMessage = errors.practicalApps?.find(Boolean) || '';
   const themeMessage = errors.themes?.find(Boolean) || '';
   return <div className="space-y-6">
-    <section className="space-y-3 rounded-xl border border-border p-4">
-      <h3 className="text-sm font-semibold">{tt('Practical applications')} {appMessage ? '*' : ''}</h3>
-      {p.practicalApps.map((row, index) => <div key={index} className="space-y-1">
-        <div className="flex items-start gap-2">
-          <Textarea data-validation-field={`practicalApps.${index}`} aria-label={`${tt('Application')} ${index + 1}`} aria-invalid={!!errors.practicalApps?.[index]}
-            className={errors.practicalApps?.[index] ? 'border-destructive focus-visible:ring-destructive' : ''}
-            rows={3} maxLength={5000} value={row.applicationText} onChange={e => p.updatePracticalApp(index, e.target.value)} />
-          <Remove label="Remove application" onClick={() => p.removePracticalApp(index)} />
-        </div>
-        {errors.practicalApps?.[index] && <p role="status" className="text-xs text-destructive">{tt(errors.practicalApps[index])}</p>}
-      </div>)}
-      <Add label="Add application" onClick={p.addPracticalApp} />
-    </section>
     <section className="space-y-4">
       <h3 className="text-base font-semibold">{tt('Insights and Cross References')}</h3>
       <section className="space-y-3 rounded-xl border border-border p-4">

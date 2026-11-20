@@ -411,7 +411,8 @@ export interface DailyExegesisSeriesItem {
 export type VerseExplanationStepId =
   | "reference"
   | "exegesis"
-  | "learnMore";
+  | "learnMore"
+  | "insights";
 
 export interface WordStudyItem {
   strongsId: string;
@@ -544,17 +545,13 @@ export interface AddExplanationStudyFormProps {
 export interface AddExplanationExtrasFormProps {
   showErrors?: boolean;
   revealRowErrors?: boolean;
-  errors?: Partial<Pick<ExplanationFieldErrors, "practicalApps" | "crossReferences" | "themes" | "takeaways" | "finalThoughts">>;
+  errors?: Partial<Pick<ExplanationFieldErrors, "crossReferences" | "themes" | "takeaways" | "finalThoughts">>;
   bibleVersion: string;
   onCrossReferencesChange: (rows: CrossRefItem[]) => void;
-  practicalApps: ExplanationForm["practicalApps"];
   crossReferences: CrossRefItem[];
   themes: ExplanationForm["themes"];
   takeaways: string[];
   finalThoughts: string;
-  updatePracticalApp: (index: number, value: string) => void;
-  addPracticalApp: () => void;
-  removePracticalApp: (index: number) => void;
   addTheme: () => void;
   removeTheme: (index: number) => void;
   updateTheme: (index: number, value: string) => void;

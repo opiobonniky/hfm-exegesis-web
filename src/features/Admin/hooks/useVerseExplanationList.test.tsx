@@ -74,3 +74,21 @@ it("includes the debounced text search alongside the filters", async () => {
     ),
   );
 });
+
+it("requests nine items and replaces the rows when moving between pages", async () => {
+  mocks.request.mockImplementation(async (_route, _action, { page, pageSize }) => ({
+    returnCode: 200,
+    returnData: {
+      explanations: Array.from({ length: pageSize }, (_, i) => ({ id: (page - 1) * pageSize + i + 1 })),
+      totalCount: 18, totalPages: 2,
+    },
+  }));
+  const { result } = renderHook(useVerseExplanationList);
+  await waitFor(() => expect(result.current.data.data.items).toHaveLength(9));
+  act(() => result.current.actions.goToPage(2));
+  await waitFor(() => expect(result.current.data.data.page).toBe(2));
+  expect(mocks.request).toHaveBeenLastCalledWith(
+    "bible", "get-all-verses-explanation", expect.objectContaining({ page: 2, pageSize: 9 }),
+  );
+  expect(result.current.data.data.items.map(item => item.id)).toEqual([10, 11, 12, 13, 14, 15, 16, 17, 18]);
+});

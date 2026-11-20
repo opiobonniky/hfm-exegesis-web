@@ -5,12 +5,6 @@ export const SMART_PAGE_SIZE = 6;
 export const SMART_FUTURE_DAYS = 2;
 export const FILTERED_PAGE_SIZE = 12;
 
-export const VERSE_EXPLANATION_STEP_ORDER = [
-  "reference",
-  "exegesis",
-  "learnMore",
-] as const;
-
 export const VERSE_EXPLANATION_STEPS = [
   {
     id: "reference",
@@ -27,7 +21,14 @@ export const VERSE_EXPLANATION_STEPS = [
     label: "Learn More",
     description: "Introduction, background, and study material",
   },
+  {
+    id: "insights",
+    label: "Insights & Takeaways",
+    description: "Themes, cross-references, and final thoughts",
+  },
 ] as const;
+
+export const VERSE_EXPLANATION_STEP_ORDER = VERSE_EXPLANATION_STEPS.map(step => step.id);
 
 export const PRESETS = (t?: any) => [
   { value: "thisWeek", label: t?.dailyVerse?.thisWeek || "This Week" },

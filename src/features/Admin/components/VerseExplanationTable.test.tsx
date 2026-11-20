@@ -2,6 +2,7 @@
 import { cleanup, render, screen, fireEvent } from '@testing-library/react';
 import { afterEach, expect, it, vi } from 'vitest';
 import { VerseExplanationTable } from './VerseExplanationTable';
+import type { VerseExplanationListItem } from '../types';
 
 vi.mock('@/components/languages/hardcodedTranslate', () => ({ tt: (text: string) => text }));
 vi.mock('@/components/languages/languageProvider', () => ({
@@ -12,6 +13,7 @@ afterEach(cleanup);
 
 const item = {
   id: 7,
+  sortOrder: 430,
   bookName: 'John',
   chapter: 3,
   verseNumber: 16,
@@ -24,13 +26,10 @@ const item = {
   updatedOn: null as string | null,
 };
 
-function renderTable(itemOverride: Partial<typeof item> = {}, handlers: Record<string, ReturnType<typeof vi.fn>> = {}) {
+function renderTable(itemOverride: Partial<VerseExplanationListItem> = {}, handlers: Record<string, ReturnType<typeof vi.fn>> = {}) {
   return render(
     <VerseExplanationTable
       items={[{ ...item, ...itemOverride }]}
-      loadingMore={false}
-      hasMore={false}
-      sentinelRef={{ current: null }}
       onView={vi.fn()}
       onEdit={vi.fn()}
       onDelete={vi.fn()}
@@ -51,6 +50,23 @@ it('falls back to the updated date when the creation date is missing', () => {
   renderTable({ createdOn: null, updatedOn: '2026-02-14T00:00:00.000Z', creatorName: null });
   expect(screen.getAllByText(/Created by:/).length).toBeGreaterThan(0);
   expect(screen.getAllByText(/Feb 14, 2026/).length).toBeGreaterThan(0);
+});
+
+it('shows the creation label and preserves the exact timestamp when both times are equal', () => {
+  const { container } = renderTable({ updatedOn: item.createdOn });
+  expect(screen.getByText(/Created date:/)).toBeTruthy();
+  expect(screen.queryByText(/Updated date:/)).toBeNull();
+  expect(container.querySelector('time')?.dateTime).toBe(item.createdOn);
+});
+
+it('labels the legacy fallback as a study date and does not invent a date if no timestamp exists', () => {
+  const date = '2026-02-14T00:00:00.000Z';
+  const { container, unmount } = renderTable({ createdOn: null, studyCreatedOn: date });
+  expect(screen.getByText(/Study created:/)).toBeTruthy();
+  expect(container.querySelector('time')).toHaveAttribute('datetime', date);
+  unmount();
+  renderTable({ createdOn: null });
+  expect(screen.getByText('Date not recorded')).toBeTruthy();
 });
 
 it('shows the updated date instead of the created date when it is newer', () => {

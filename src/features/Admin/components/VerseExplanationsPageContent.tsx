@@ -1,9 +1,10 @@
 // AdminVerseExplanations — thin page composing hook + shared admin components
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Lightbulb } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   useVerseExplanationList,
   type VerseExplanationListItem,
@@ -13,7 +14,6 @@ import {
   AdminPageContent,
   AdminEmptyState,
   AdminLoadingGrid,
-  AdminSearchBar,
   PaginationControls,
   VerseExplanationFilters,
   VerseExplanationTable,
@@ -21,57 +21,12 @@ import {
 } from "../components";
 import { tt } from '@/components/languages/hardcodedTranslate';
 
-const PAGE_SIZE = 20;
-
 export function VerseExplanationsPageContent() {
   const navigate = useNavigate();
-  const { data, actions } = useVerseExplanationList(PAGE_SIZE);
+  const { data, actions } = useVerseExplanationList();
   const h = { ...data, ...actions };
   const [deleteTarget, setDeleteTarget] =
     useState<VerseExplanationListItem | null>(null);
-  const sentinelRef = useRef<HTMLDivElement | null>(null);
-
-  // intersection observer to trigger loadMore when sentinel is visible
-  useEffect(() => {
-    const sentinel = sentinelRef.current;
-    if (!sentinel) return;
-
-    const obs = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (
-            entry.isIntersecting &&
-            h.hasMore &&
-            !h.loadingMore &&
-            !h.loading
-          ) {
-            h.loadMore();
-          }
-        });
-      },
-      { root: null, rootMargin: "200px", threshold: 0.1 },
-    );
-
-    obs.observe(sentinel);
-    return () => obs.disconnect();
-  }, [sentinelRef, h.hasMore, h.loadingMore, h.loading, h.loadMore]);
-
-  // Map the lean API items to the card shape. The list endpoint already
-  // provides the display snippets (explanation/learnMore), so no heavy
-  // nested study payloads are needed here.
-  const tableItems = h.data.items.map((it) => ({
-    id: it.id,
-    bookName: it.bookName,
-    chapter: it.chapter,
-    verseNumber: it.verseNumber,
-    explanation: it.explanation || "",
-    learnMore: it.learnMore || undefined,
-    isPublished: it.isPublished ?? true,
-    bibleVersion: it.bibleVersion || "BSB",
-    creatorName: it.creatorName || null,
-    createdOn: it.createdOn,
-    updatedOn: it.updatedOn,
-  }));
 
   return (
     <div className="min-h-screen bg-background">
@@ -81,17 +36,12 @@ export function VerseExplanationsPageContent() {
         icon={<Lightbulb className="w-5 h-5 text-primary" />}
         onBack={h.goBack}
         onAdd={() => navigate("/admin/add-verse-explanation")}
-        addLabel="Add"
+        addLabel={tt("Add explanation")}
       />
 
       <AdminPageContent>
-        <AdminSearchBar
-          value={h.search}
-          onChange={h.setSearch}
-          placeholder={tt("Search book, verse, text or creator name...")}
-        />
-
         <VerseExplanationFilters
+          search={{ value: h.search, onChange: h.setSearch }}
           bookName={h.bookName}
           chapter={h.chapter}
           creatorName={h.creatorName}
@@ -101,8 +51,13 @@ export function VerseExplanationsPageContent() {
           onClear={h.clearFilters}
         />
 
-        {h.loading && h.data.items.length === 0 ? (
+        {h.loading ? (
           <AdminLoadingGrid />
+        ) : h.loadError ? (
+          <div role="alert" className="flex flex-wrap items-center gap-3 rounded-xl border border-border bg-card p-4 text-sm">
+            <p>{tt("Failed to load verse explanations")}</p>
+            <Button type="button" variant="outline" size="sm" onClick={h.retry}>{tt("Retry")}</Button>
+          </div>
         ) : h.data.items.length === 0 ? (
           <AdminEmptyState
             icon={<Lightbulb className="w-12 h-12" />}
@@ -115,29 +70,21 @@ export function VerseExplanationsPageContent() {
             onAction={() => navigate("/admin/add-verse-explanation")}
           />
         ) : (
-          <>
             <VerseExplanationTable
-              items={tableItems}
-              loadingMore={h.loadingMore}
-              hasMore={h.hasMore}
-              sentinelRef={sentinelRef}
-              onView={(item) => h.viewItem(item as any)}
-              onEdit={(item) => h.editItem(item as any)}
-              onDelete={(item) => {
-                const found = h.data.items.find((i) => i.id === item.id);
-                if (found) setDeleteTarget(found);
-              }}
+              items={h.data.items}
+              onView={h.viewItem}
+              onEdit={h.editItem}
+              onDelete={setDeleteTarget}
             />
 
-            {/* keep pagination controls as a fallback / for direct page jump */}
-            <PaginationControls
-              page={Math.max(0, h.page - 1)}
-              total={h.data.totalCount}
-              pageSize={PAGE_SIZE}
-              onPageChange={(p) => h.goToPage(p + 1)}
-            />
-          </>
         )}
+        <PaginationControls
+          page={h.data.page - 1}
+          total={h.data.totalCount}
+          pageSize={h.data.pageSize}
+          disabled={h.loading || h.loadError}
+          onPageChange={(p) => h.goToPage(p + 1)}
+        />
       </AdminPageContent>
 
       <VerseExplanationDeleteDialog

@@ -39,24 +39,33 @@ it('starts without errors and reveals reference validation after blur or Continu
   await act(async () => {});
 });
 
-it('groups Learn More fields in the source document order', async () => {
+it('splits Learn More and Insights into two steps without changing document order', async () => {
   function Form() {
     const { data, actions } = useAddExplanation();
     return <>
       <button onClick={() => actions.setActiveTab('learnMore')}>Open study fields</button>
+      <button onClick={() => actions.setActiveTab('insights')}>Open insights fields</button>
       <AddExplanationWorkspace data={data} actions={actions} />
     </>;
   }
   render(<Form />);
+  const expectOrder = (labels: (string | RegExp)[]) => {
+    const fields = labels.map(label => screen.getByText(label));
+    fields.slice(1).forEach((field, index) => {
+      expect(fields[index].compareDocumentPosition(field) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    });
+  };
   fireEvent.click(screen.getByRole('button', { name: 'Open study fields' }));
-  const fields = [
+  expectOrder([
     'Verse introduction', 'Background', 'Background — Author', 'Background — Book', 'Background — Context',
-    'Strong’s Concordance Word Study', 'Practical applications', 'Insights and Cross References',
-    'Key themes', 'Cross references', /Final thoughts/, 'Takeaways',
-  ].map(label => screen.getByText(label, { exact: typeof label === 'string' }));
-  fields.slice(1).forEach((field, index) => {
-    expect(fields[index].compareDocumentPosition(field) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-  });
+    'Strong’s Concordance Word Study', 'Practical applications',
+  ]);
+  expect(screen.queryByText('Insights and Cross References')).toBeNull();
+  expect(screen.getByRole('button', { name: 'Continue' })).toBeTruthy();
+  fireEvent.click(screen.getByRole('button', { name: 'Open insights fields' }));
+  expectOrder(['Insights and Cross References', 'Key themes', 'Cross references', /Final thoughts/, 'Takeaways']);
+  expect(screen.queryByText('Practical applications')).toBeNull();
+  expect(screen.getByRole('button', { name: 'Submit explanation' })).toBeTruthy();
   await act(async () => {});
 });
 
@@ -253,6 +262,12 @@ it('gates Continue until the current step fields and added rows are filled', asy
   expect(result.current.data.fieldErrors.wordStudies[0]).toContain('Word study 1');
   act(() => result.current.actions.removeWordStudy(0));
   expect(result.current.data.canAdvanceFromCurrent).toBe(true);
+  act(() => result.current.actions.updateNested('studyMetadata', 'finalThoughts', ''));
+  expect(result.current.data.canAdvanceFromCurrent).toBe(true);
+  act(() => result.current.actions.goNext());
+  expect(result.current.data.currentStep).toBe('insights');
+  expect(result.current.data.isValid).toBe(false);
+  expect(result.current.data.stepCompletion.insights).toBe(false);
 });
 
 it('keeps the editor open with a reload message when the shared study version is stale', async () => {

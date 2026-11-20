@@ -38,7 +38,7 @@ import {
 
 import { routes } from "./Routes/routes";
 import logoImage from "@/assets/logos/exegesis_bg_rm.webp";
-import { tt } from '@/components/languages/hardcodedTranslate';
+import { tt } from "@/components/languages/hardcodedTranslate";
 
 /* ───────────────────────────────────────────────────────────────────────────────
    Types
@@ -63,22 +63,39 @@ const adminNavItems: NavItem[] = [
   { title: "Users", url: routes.adminUsers.path, icon: Users },
   { title: "Bible app", url: routes.bibleReader.path, icon: BookText },
   {
+    title: "Verse Explanation",
+    url: routes.adminVerseExplanations.path,
+    icon: BookMarked,
+  },
+  {
     title: "Daily Verses",
     url: routes.adminDailyVerses.path,
     icon: CalendarDays,
-    activePaths: [routes.adminDailyVerses.path, routes.addDailyVerse.path, routes.dailyVerseDetail.path],
+    activePaths: [
+      routes.adminDailyVerses.path,
+      routes.addDailyVerse.path,
+      routes.dailyVerseDetail.path,
+    ],
   },
   {
     title: "Daily Devotions",
     url: routes.dailyDevotions.path,
     icon: Sun,
-    activePaths: [routes.dailyDevotions.path, routes.addDailyDevotion.path, routes.dailyDevotionDetail.path],
+    activePaths: [
+      routes.dailyDevotions.path,
+      routes.addDailyDevotion.path,
+      routes.dailyDevotionDetail.path,
+    ],
   },
   {
     title: "Daily Exegesis",
     url: routes.adminDailyExegesis.path,
     icon: Sparkles,
-    activePaths: [routes.adminDailyExegesis.path, routes.addDailyExegesis.path, routes.dailyExegesisDetail.path],
+    activePaths: [
+      routes.adminDailyExegesis.path,
+      routes.addDailyExegesis.path,
+      routes.dailyExegesisDetail.path,
+    ],
   },
   {
     title: "Journal Moderation",
@@ -91,11 +108,6 @@ const adminNavItems: NavItem[] = [
     icon: ScrollText,
   },
 
-  {
-    title: "Bible study",
-    url: routes.adminVerseExplanations.path,
-    icon: BookMarked,
-  },
   {
     title: "Reading Plans",
     url: routes.readingPlans.path,
@@ -205,7 +217,6 @@ function PillNavItem({
                 : "hover:border-primary-foreground/15 hover:bg-gradient-to-r hover:from-primary-foreground/10 hover:to-transparent",
             )}
           >
-            
             {/* Icon container */}
             <div
               className={cn(
@@ -349,7 +360,6 @@ function BibleNavItem({
             : "hover:border-primary-foreground/15 hover:bg-gradient-to-r hover:from-primary-foreground/10 hover:to-transparent",
         )}
       >
-       
         <div
           className={cn(
             "flex items-center justify-center shrink-0 transition-all duration-300",

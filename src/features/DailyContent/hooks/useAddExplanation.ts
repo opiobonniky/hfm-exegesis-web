@@ -231,6 +231,7 @@ export function useAddExplanation() {
       reference: referenceComplete && !stepErrors.reference,
       exegesis: exegesisComplete && !stepErrors.exegesis,
       learnMore: !stepErrors.learnMore,
+      insights: !stepErrors.insights,
     }),
     [referenceComplete, exegesisComplete, stepErrors],
   );

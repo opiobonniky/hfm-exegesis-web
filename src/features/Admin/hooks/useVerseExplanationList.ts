@@ -1,4 +1,4 @@
-// useVerseExplanationList — supports initial load + load-more (infinite scroll)
+// useVerseExplanationList — one server page at a time, with searchable filters
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -10,84 +10,69 @@ import type {
 import { tt } from '@/components/languages/hardcodedTranslate';
 export type { VerseExplanationListItem };
 
-type ListFilters = {
-  bookName: string;
-  chapter: string;
-  creatorName: string;
-};
+export const VERSE_EXPLANATION_PAGE_SIZE = 9;
 
-export function useVerseExplanationList(pageSize = 20) {
+export function useVerseExplanationList(pageSize = VERSE_EXPLANATION_PAGE_SIZE) {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [data, setData] = useState<PageData>({ items: [], totalCount: 0, page: 1, pageSize, totalPages: 0 });
-  const [loading, setLoading] = useState(true); // initial load / refreshing
-  const [loadingMore, setLoadingMore] = useState(false); // load-more state
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+  const [revision, setRevision] = useState(0);
   const [search, setSearch] = useState("");
+  const [searchInput, setSearchInput] = useState("");
   const [bookName, setBookName] = useState("");
   const [chapter, setChapter] = useState("");
   const [creatorName, setCreatorName] = useState("");
   const [page, setPage] = useState(1);
   const [deleting, setDeleting] = useState<number | null>(null);
 
-  const fetchPage = useCallback(
-    async (pageNum: number, q: string, filters: ListFilters) => {
-      const append = pageNum > 1;
-      if (append) setLoadingMore(true);
-      else setLoading(true);
-
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+    setLoadError(false);
+    const load = async () => {
       try {
         const res = await adminApi.request("bible", "get-all-verses-explanation", {
-          page: pageNum,
+          page,
           pageSize,
-          search: q || undefined,
-          bookName: filters.bookName || undefined,
-          chapter: filters.chapter || undefined,
-          creatorName: filters.creatorName || undefined,
+          listPreview: true,
+          search: search || undefined,
+          bookName: bookName || undefined,
+          chapter: chapter || undefined,
+          creatorName: creatorName.trim() || undefined,
         });
+        if (!active) return;
         const rd = res?.returnData || res?.data;
-        const items: VerseExplanationListItem[] = rd?.explanations || [];
+        if ((res?.returnCode ?? res?.status) !== 200 || !Array.isArray(rd?.explanations)) {
+          throw new Error("Failed to load verse explanations");
+        }
         const totalCount = rd?.totalCount ?? 0;
         const totalPages = rd?.totalPages ?? Math.ceil(totalCount / pageSize);
-
-        setData((prev) => ({
-          items: append ? [...prev.items, ...items] : items,
-          totalCount,
-          page: pageNum,
-          pageSize,
-          totalPages,
-        }));
-      } catch (err) {
-        console.error(err);
-        toast({ title: tt("Error"), description: tt("Failed to load verse explanations"), variant: "destructive" });
+        if (page > Math.max(1, totalPages)) {
+          setPage(Math.max(1, totalPages));
+          return;
+        }
+        setData({ items: rd.explanations, totalCount, page, pageSize, totalPages });
+      } catch {
+        if (!active) return;
+        setLoadError(true);
       } finally {
-        if (append) setLoadingMore(false);
-        else setLoading(false);
+        if (active) setLoading(false);
       }
-    },
-    [pageSize, toast],
-  );
-
-  const filters: ListFilters = { bookName, chapter, creatorName };
-
-  // initial load / page change / filter change
-  useEffect(() => {
-    fetchPage(page, search, filters);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, search, bookName, chapter, creatorName, fetchPage]);
+    };
+    void load();
+    return () => { active = false; };
+  }, [page, pageSize, search, bookName, chapter, creatorName, revision]);
 
   const refresh = useCallback(() => {
     setPage(1);
-    fetchPage(1, search, { bookName, chapter, creatorName });
-  }, [search, bookName, chapter, creatorName, fetchPage]);
+    setRevision((current) => current + 1);
+  }, []);
+  const retry = () => setRevision(current => current + 1);
 
   const goToPage = useCallback((p: number) => {
-    // explicit navigation to a page - replace items
     setPage(p);
-  }, []);
-
-  const loadMore = useCallback(() => {
-    // only load more if there are pages remaining
-    setPage((prev) => prev + 1);
   }, []);
 
   const changeBook = useCallback((value: string) => {
@@ -111,6 +96,8 @@ export function useVerseExplanationList(pageSize = 20) {
     setBookName("");
     setChapter("");
     setCreatorName("");
+    setSearchInput("");
+    setSearch("");
     setPage(1);
   }, []);
 
@@ -152,24 +139,23 @@ export function useVerseExplanationList(pageSize = 20) {
   const goBack = useCallback(() => navigate("/admin"), [navigate]);
 
   // Debounced search
-  const [searchInput, setSearchInput] = useState("");
   useEffect(() => {
+    const query = searchInput.trim();
+    if (query === search) return;
     const t = setTimeout(() => {
-      setSearch(searchInput);
+      setSearch(query);
       setPage(1);
     }, 300);
     return () => clearTimeout(t);
-  }, [searchInput]);
-
-  const hasMore = data.page < data.totalPages;
+  }, [searchInput, search]);
 
   return {
     data: {
-      data, loading, loadingMore, hasMore, search: searchInput, page, refreshing: loading, deleting,
+      data, loading, loadError, search: searchInput, page, deleting,
       bookName, chapter, creatorName,
     },
     actions: {
-      loadMore, setSearch: setSearchInput, goToPage, refresh, deleteItem, viewItem, editItem, goBack,
+      setSearch: setSearchInput, goToPage, retry, deleteItem, viewItem, editItem, goBack,
       setBookName: changeBook, setChapter: changeChapter, setCreatorName: changeCreatorName, clearFilters,
     },
   };
