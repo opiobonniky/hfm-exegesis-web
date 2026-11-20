@@ -10,6 +10,7 @@ interface Props {
   onBack: () => void;
   onAdd?: () => void;
   addLabel?: string;
+  fullWidth?: boolean;
 }
 
 export function AdminPageHeader({
@@ -19,10 +20,11 @@ export function AdminPageHeader({
   onBack,
   onAdd,
   addLabel = "Add",
+  fullWidth = false,
 }: Props) {
   return (
     <div className="border-b bg-card">
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
+      <div className={`mx-auto px-3 sm:px-4 lg:px-8 ${fullWidth ? "max-w-full" : "max-w-7xl"}`}>
         <div className="flex items-center justify-between h-auto min-h-[4rem] py-2 gap-2">
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <Button

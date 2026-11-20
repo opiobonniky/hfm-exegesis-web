@@ -2,6 +2,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { adminApi } from "../services/adminApi";
 
 import {
@@ -48,7 +49,9 @@ const parseTakeaways = (value: unknown): string[] => {
 };
 
 export function VerseExplanationDetailContent({ item }: Props) {
+  const navigate = useNavigate();
   if (!item) return null;
+  const edit = () => navigate("/admin/add-verse-explanation", { state: { explanationId: item.id } });
 
   const {
     bookName,
@@ -168,7 +171,7 @@ export function VerseExplanationDetailContent({ item }: Props) {
                     <Button
                       variant="secondary"
                       onClick={() =>
-                        (window.location.href = `/admin/edit-verse-explanation/${encodeURIComponent(bookName)}/${chapter}/${verseNumber}`)
+                         edit()
                       }
                     >
                       <Edit2 className="w-4 h-4 mr-2" />{tt("Edit")}</Button>
@@ -261,7 +264,7 @@ export function VerseExplanationDetailContent({ item }: Props) {
                 </Button>
                 <Button
                   onClick={() =>
-                    (window.location.href = `/admin/edit-verse-explanation/${encodeURIComponent(bookName)}/${chapter}/${verseNumber}`)
+                     edit()
                   }
                 >
                   <Edit2 className="w-4 h-4 mr-2" />{tt("Edit")}</Button>

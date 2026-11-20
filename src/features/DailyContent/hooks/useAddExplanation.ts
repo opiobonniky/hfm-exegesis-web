@@ -1,6 +1,6 @@
 // useAddExplanation — structured editor hook for add/edit verse explanations
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { sendPostRequest } from "@/services/api";
 import { bibleApi } from "@/services/bibleApi";
@@ -76,6 +76,8 @@ const EMPTY_FORM: ExplanationForm = {
 export function useAddExplanation() {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { state } = useLocation();
+  const editId = state?.explanationId == null ? null : String(state.explanationId);
   const params = useParams<{
     bookName?: string;
     chapter?: string;
@@ -94,7 +96,7 @@ export function useAddExplanation() {
   }));
   const [loadingExisting, setLoadingExisting] = useState(false);
   const [existingFound, setExistingFound] = useState(false);
-  const editions = useBibleEditions(lang, { preserveVersion: existingFound || routeEditMode });
+  const editions = useBibleEditions(lang, { preserveVersion: existingFound || routeEditMode || editId !== null });
   const form = { ...formState, bibleVersion: editions.version };
   const [existingId, setExistingId] = useState<number | null>(null);
   const [sharedStudyVersion, setSharedStudyVersion] = useState<number | null>(null);
@@ -106,8 +108,9 @@ export function useAddExplanation() {
   const [lookupAttempt, setLookupAttempt] = useState(0);
   const referenceKey = form.bookName && form.chapter && form.verseNumber
     ? `${form.bookName}:${form.chapter}:${form.verseNumber}` : '';
-  const checkingExisting = !!referenceKey && (loadingExisting || checkedReference !== referenceKey);
-  const isEditMode = existingFound;
+  const lookupKey = editId === null ? referenceKey : `id:${editId}`;
+  const checkingExisting = !!lookupKey && (loadingExisting || checkedReference !== lookupKey);
+  const isEditMode = existingFound || editId !== null;
   // Empty fields are shown inline. Saved rich content is exempt until edited.
   const fieldErrors: ExplanationFieldErrors = useMemo(
     () => getExplanationFieldErrors(form, { hideRichContent: existingFound && !richContentTouched }),
@@ -292,18 +295,21 @@ export function useAddExplanation() {
     setExistingId(null);
     setSharedStudyVersion(null);
     setLookupError(false);
-    if (!referenceKey) {
+    if (!lookupKey) {
       setLoadingExisting(false);
       setCheckedReference('');
       return;
     }
     setLoadingExisting(true);
-    sendPostRequest("bible", "get-verse-explanation", {
+    const request = editId !== null
+      ? sendPostRequest("bible", "get-verse-explanation-for-edit", { id: editId }, { includeLanguage: false })
+      : sendPostRequest("bible", "get-verse-explanation", {
       bookName: form.bookName,
       chapter: Number(form.chapter),
       verseNumber: Number(form.verseNumber),
       lang: 'en',
-    })
+      }, { includeLanguage: false });
+    request
       .then((res) => {
         if (!active) return;
         if (res?.returnCode === 200 && res.returnData) {
@@ -340,7 +346,7 @@ export function useAddExplanation() {
               ? d.sharedStudyVersion
               : null,
           );
-        } else if (res?.returnCode !== 404) {
+        } else if (editId !== null || res?.returnCode !== 404) {
           setLookupError(true);
         }
       })
@@ -350,14 +356,15 @@ export function useAddExplanation() {
       .finally(() => {
         if (active) {
           setLoadingExisting(false);
-          setCheckedReference(referenceKey);
+          setCheckedReference(lookupKey);
         }
       });
     return () => { active = false; };
-  }, [referenceKey, lookupAttempt]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [lookupKey, lookupAttempt]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const updateField = useCallback(
     <K extends keyof ExplanationForm>(key: K, value: ExplanationForm[K]) => {
+      if (editId !== null && ['bookName', 'chapter', 'verseNumber'].includes(key)) return;
       if (key === 'bibleVersion') { editions.setVersion(String(value)); return; }
       if (key === 'wordStudies' || key === 'crossReferences') setRichContentTouched(true);
       setForm((prev) => {
@@ -372,7 +379,7 @@ export function useAddExplanation() {
         return { ...prev, [key]: value };
       });
     },
-    [existingFound, editions.setVersion],
+    [editId, existingFound, editions.setVersion],
   );
 
   const updateNested = useCallback(
@@ -623,6 +630,7 @@ export function useAddExplanation() {
     data: {
       form,
       isEditMode,
+      lockPassage: editId !== null,
       existingFound,
       checkingExisting,
       lookupError,

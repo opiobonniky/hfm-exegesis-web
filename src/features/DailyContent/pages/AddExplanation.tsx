@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 
 export default function AddExplanationPage() {
   const { data, actions } = useAddExplanation();
+  const loadingLabel = tt(data.isEditMode ? 'Loading explanation for editing…' : 'Checking for a saved explanation…');
 
   return (
     <div className="mx-auto min-h-screen w-full max-w-[1440px] bg-background px-4 py-6 text-foreground sm:px-6 lg:py-8">
@@ -14,7 +15,12 @@ export default function AddExplanationPage() {
         isEditMode={data.isEditMode}
         goBack={actions.goBack}
       />
-      {data.checkingExisting ? <p role="status" className="my-4 rounded-xl border bg-muted/30 p-4 text-sm">{tt('Checking for a saved explanation…')}</p> :
+      {data.checkingExisting ? (
+        <div className="my-4 space-y-2 rounded-xl border border-border bg-card p-4">
+          <p role="status" id="explanation-loading-label" className="text-sm font-medium">{loadingLabel}</p>
+          <progress aria-labelledby="explanation-loading-label" className="block h-2 w-full accent-primary" />
+        </div>
+      ) :
         data.lookupError ? <div role="alert" className="my-4 rounded-xl border border-destructive/30 p-4 text-sm">
           <p>{tt('Could not check for an existing explanation. Retry before saving to avoid overwriting saved content.')}</p>
           <Button type="button" variant="outline" className="mt-2" onClick={actions.retryExisting}>{tt('Retry')}</Button>
@@ -26,7 +32,8 @@ export default function AddExplanationPage() {
         verseEnd={data.form.verseEnd}
         completionPercent={data.completionPercent}
       />
-      <fieldset disabled={data.checkingExisting || data.lookupError || data.saving} className="min-w-0">
+      <fieldset disabled={data.checkingExisting || data.lookupError || data.saving}
+        aria-busy={data.checkingExisting || data.saving} className="min-w-0">
         <AddExplanationWorkspace data={data} actions={actions} />
       </fieldset>
     </div>

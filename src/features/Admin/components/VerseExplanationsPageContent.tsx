@@ -33,6 +33,7 @@ export function VerseExplanationsPageContent() {
   return (
     <div className="min-h-screen bg-background">
       <AdminPageHeader
+        fullWidth
         title={tt("Verse Explanations Manager")}
         subtitle={`${h.data.totalCount || 0} explanation${(h.data.totalCount || 0) !== 1 ? "s" : ""}`}
         icon={<Lightbulb className="w-5 h-5 text-primary" />}
@@ -41,7 +42,7 @@ export function VerseExplanationsPageContent() {
         addLabel={tt("Add explanation")}
       />
 
-      <AdminPageContent>
+      <AdminPageContent fullWidth>
         <VerseExplanationFilters
           search={{ value: h.search, onChange: h.setSearch }}
           bookName={h.bookName}

@@ -256,6 +256,7 @@ const routeConfigs = {
     title: tt("Edit Reading Plan"),
   },
   addVerseExplanation: {
+    adminOnly: true,
     path: "/admin/add-verse-explanation",
     component: AddExplanation,
     isProtected: true,
@@ -263,6 +264,7 @@ const routeConfigs = {
     title: tt("Add Verse Explanation"),
   },
   editVerseExplanation: {
+    adminOnly: true,
     path: "/admin/edit-verse-explanation/:bookName/:chapter/:verseNumber",
     component: AddExplanation,
     isProtected: true,

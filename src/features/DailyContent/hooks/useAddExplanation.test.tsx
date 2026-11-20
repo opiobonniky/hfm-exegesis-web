@@ -3,8 +3,13 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { useAddExplanation } from './useAddExplanation';
 import { AddExplanationWorkspace } from '../components/AddExplanationWorkspace';
 
-const mocks = vi.hoisted(() => ({ params: {} as Record<string, string>, post: vi.fn(), navigate: vi.fn(), toast: vi.fn() }));
-vi.mock('react-router-dom', () => ({ useParams: () => mocks.params, useNavigate: () => mocks.navigate }));
+const mocks = vi.hoisted(() => ({
+  params: {} as Record<string, string>, state: null as { explanationId: number } | null,
+  post: vi.fn(), navigate: vi.fn(), toast: vi.fn(),
+}));
+vi.mock('react-router-dom', () => ({
+  useParams: () => mocks.params, useNavigate: () => mocks.navigate, useLocation: () => ({ state: mocks.state }),
+}));
 vi.mock('@/hooks/use-toast', () => ({ useToast: () => ({ toast: mocks.toast }) }));
 vi.mock('@/components/languages/languageProvider', () => ({ useLanguage: () => ({ lang: 'en' }) }));
 vi.mock('@/components/languages/hardcodedTranslate', () => ({ tt: (s: string) => s }));
@@ -15,7 +20,7 @@ vi.mock('@/services/bibleApi', () => ({ bibleApi: {
   getVerses: vi.fn().mockResolvedValue({ verses: Array.from({ length: 14 }, (_, i) => ({ verseNumber: i + 1, text: `Text ${i + 1}` })) }),
 } }));
 beforeEach(() => {
-  vi.clearAllMocks(); mocks.params = {};
+  vi.clearAllMocks(); mocks.params = {}; mocks.state = null;
   mocks.post.mockImplementation((_module, action) => Promise.resolve({ returnCode: action === 'get-verse-explanation' ? 404 : 200 }));
 });
 afterEach(() => { cleanup(); vi.useRealTimers(); });
@@ -85,6 +90,27 @@ const fillRequiredFields = (result: any) => act(() => {
   result.current.actions.updateNested('exegesis', 'applicationText', 'Daily application');
   (['introduction', 'backgroundAuthor', 'backgroundBook', 'backgroundContext', 'finalThoughts'] as const)
     .forEach(key => result.current.actions.updateNested('studyMetadata', key, `Filled ${key}`));
+});
+
+it('loads the canonical explanation by ID from navigation state without a second passage lookup', async () => {
+  mocks.state = { explanationId: 44 };
+  mocks.post.mockResolvedValueOnce({ returnCode: 200, returnData: savedExplanation });
+  const { result } = renderHook(useAddExplanation);
+  expect(result.current.data.checkingExisting).toBe(true);
+  await waitFor(() => expect(result.current.data.checkingExisting).toBe(false));
+  expect(result.current.data.isEditMode).toBe(true);
+  expect(result.current.data.lockPassage).toBe(true);
+  expect(result.current.data.form.bookName).toBe('Genesis');
+  expect(result.current.data.form.exegesis.explanationText).toBe(savedExplanation.exegesis.explanationText);
+  expect(mocks.post).toHaveBeenCalledExactlyOnceWith('bible', 'get-verse-explanation-for-edit', { id: '44' }, { includeLanguage: false });
+});
+
+it('does not fall back to creation when an ID-based edit cannot be loaded', async () => {
+  mocks.state = { explanationId: 44 };
+  mocks.post.mockResolvedValueOnce({ returnCode: 404 });
+  const { result } = renderHook(useAddExplanation);
+  await waitFor(() => expect(result.current.data.lookupError).toBe(true));
+  expect(result.current.data.isValid).toBe(false);
 });
 
 it('loads a selected existing verse in create mode and updates its saved ID and version', async () => {

@@ -140,7 +140,7 @@ export function useVerseExplanationList(pageSize = VERSE_EXPLANATION_PAGE_SIZE) 
 
   const editItem = useCallback(
     (item: VerseExplanationListItem) => {
-      navigate(`/admin/edit-verse-explanation/${encodeURIComponent(item.bookName)}/${item.chapter}/${item.verseNumber}`);
+      navigate("/admin/add-verse-explanation", { state: { explanationId: item.id } });
     },
     [navigate],
   );
