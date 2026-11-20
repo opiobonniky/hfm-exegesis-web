@@ -17,6 +17,15 @@ it('renders creator, creation date and scheduled publish date without inventing 
   expect(screen.getAllByText('—')).toHaveLength(3);
 });
 
+it('shows a theme-aware published badge when requested', () => {
+  const { container } = render(
+    <DailyContentMetadata creatorName="Ada" createdOn="2026-11-20" displayDate="2026-11-21" showStatus isPublished />,
+  );
+  const badge = screen.getByText('Published');
+  expect(badge.closest('span')?.className).toContain('text-[hsl(var(--success))]');
+  expect(container.querySelector('dl')?.className).toContain('space-y-1');
+});
+
 it('uses a compact responsive devotion grid with independent view, edit and delete actions', () => {
   const select = vi.fn(), edit = vi.fn(), remove = vi.fn();
   const item = { id: 18, title: 'Forgive', explanation: 'Body', creatorName: 'Ada', createdOn: '2026-11-20', displayDate: '2026-11-21', isPublished: true };

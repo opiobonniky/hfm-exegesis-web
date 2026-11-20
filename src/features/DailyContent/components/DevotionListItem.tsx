@@ -17,7 +17,7 @@ interface Props {
 }
 
 export function DevotionListItem({ item, isSelected, onSelect, onEdit, onDelete, isAdmin }: Props) {
-  const { t, lang } = useLanguage();
+  const { lang } = useLanguage();
   const dateStr = item.displayDate && typeof item.displayDate === "string"
     ? displayDate(item.displayDate, lang, { month: "short", day: "numeric", year: "numeric" })
     : "—";
@@ -25,8 +25,10 @@ export function DevotionListItem({ item, isSelected, onSelect, onEdit, onDelete,
   return (
     <div
       className={cn(
-        "p-3 rounded-xl border transition-all hover:shadow-sm flex flex-col gap-2 min-w-0",
-        isSelected ? "border-primary bg-primary/5 shadow-sm" : "border-border/50 bg-card hover:bg-muted/30",
+        "p-3 rounded-xl border text-card-foreground transition-all hover:shadow-sm flex flex-col gap-2 min-w-0",
+        isSelected
+          ? "border-primary/60 bg-primary/5 shadow-sm ring-1 ring-primary/10"
+          : "border-border/60 bg-card hover:border-primary/30 hover:bg-accent/30",
       )}
     >
       <div className="flex items-start justify-between gap-3">
@@ -53,12 +55,15 @@ export function DevotionListItem({ item, isSelected, onSelect, onEdit, onDelete,
           </div>
         )}
       </div>
-      {isAdmin && <div className="mt-auto"><DailyContentMetadata creatorName={item.creatorName} createdOn={item.createdOn} displayDate={item.displayDate} /></div>}
-          {item.isPublished && (
-            <span className="inline-block mt-2 text-[10px] px-2 py-0.5 rounded-full bg-green-100 text-green-700 font-medium">
-              {(t as any).common?.published || tt("Published")}
-            </span>
-          )}
+      {isAdmin && (
+        <DailyContentMetadata
+          creatorName={item.creatorName}
+          createdOn={item.createdOn}
+          displayDate={item.displayDate}
+          showStatus
+          isPublished={item.isPublished}
+        />
+      )}
     </div>
   );
 }
