@@ -9,6 +9,7 @@ vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => auth }));
 function visit(path: string) {
   render(<MemoryRouter initialEntries={[path]}><Routes>
     <Route path="/" element={<p>Blocked</p>} />
+    <Route path="/login" element={<p>Login</p>} />
     <Route path="/force-change-password" element={<p>Change password</p>} />
     <Route element={<ProtectedRoute />}><Route path={path} element={<p>Allowed</p>} /></Route>
   </Routes></MemoryRouter>);
@@ -27,7 +28,12 @@ it('allows entered guests only into explicit reading routes', () => {
 });
 it('does not grant guests journal access', () => {
   Object.assign(auth, { isAuthenticated: false, isGuest: true, userInfo: null });
-  visit('/journal'); expect(screen.getByText('Blocked')).toBeInTheDocument();
+  visit('/journal'); expect(screen.getByText('Login')).toBeInTheDocument();
+});
+it.each([0, 1])('returns a signed-out role %i user to login', role => {
+  Object.assign(auth, { isAuthenticated: false, isGuest: false, userInfo: null, role });
+  visit(role === 1 ? '/admin/users' : '/journal');
+  expect(screen.getByText('Login')).toBeInTheDocument();
 });
 it('keeps the temporary-password interlock ahead of admin access', () => {
   Object.assign(auth, { isAuthenticated: true, isGuest: false, userInfo: { userRole: 1, mustChangePassword: true } });

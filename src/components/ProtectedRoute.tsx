@@ -20,7 +20,7 @@ export function ProtectedRoute() {
     if (isGuest && config?.allowGuest && !config.adminOnly) return <Outlet />;
     const target = `${location.pathname}${location.search}`;
     if (isSupportNotificationPath(target)) sessionStorage.setItem(PENDING_SUPPORT_LINK, target);
-    return <Navigate to={routes.landing.path} replace />;
+    return <Navigate to={routes.login.path} replace />;
   }
 
   // Interlock: users on a temporary (admin-issued) password must change it
