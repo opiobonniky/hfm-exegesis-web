@@ -15,6 +15,7 @@ import {
   AdminLoadingGrid,
   AdminSearchBar,
   PaginationControls,
+  VerseExplanationFilters,
   VerseExplanationTable,
   VerseExplanationDeleteDialog,
 } from "../components";
@@ -87,7 +88,17 @@ export function VerseExplanationsPageContent() {
         <AdminSearchBar
           value={h.search}
           onChange={h.setSearch}
-          placeholder={tt("Search by book name...")}
+          placeholder={tt("Search book, verse, text or creator name...")}
+        />
+
+        <VerseExplanationFilters
+          bookName={h.bookName}
+          chapter={h.chapter}
+          creatorName={h.creatorName}
+          onBookChange={h.setBookName}
+          onChapterChange={h.setChapter}
+          onCreatorNameChange={h.setCreatorName}
+          onClear={h.clearFilters}
         />
 
         {h.loading && h.data.items.length === 0 ? (
@@ -96,7 +107,11 @@ export function VerseExplanationsPageContent() {
           <AdminEmptyState
             icon={<Lightbulb className="w-12 h-12" />}
             title={tt("No explanations found")}
-            description={h.search ? `No results for "${h.search}"` : undefined}
+            description={
+              h.search || h.bookName || h.chapter || h.creatorName
+                ? tt("No results for the current search or filters")
+                : undefined
+            }
             onAction={() => navigate("/admin/add-verse-explanation")}
           />
         ) : (

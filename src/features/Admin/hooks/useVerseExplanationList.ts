@@ -10,6 +10,11 @@ import type {
 import { tt } from '@/components/languages/hardcodedTranslate';
 export type { VerseExplanationListItem };
 
+type ListFilters = {
+  bookName: string;
+  chapter: string;
+  creatorName: string;
+};
 
 export function useVerseExplanationList(pageSize = 20) {
   const navigate = useNavigate();
@@ -18,11 +23,14 @@ export function useVerseExplanationList(pageSize = 20) {
   const [loading, setLoading] = useState(true); // initial load / refreshing
   const [loadingMore, setLoadingMore] = useState(false); // load-more state
   const [search, setSearch] = useState("");
+  const [bookName, setBookName] = useState("");
+  const [chapter, setChapter] = useState("");
+  const [creatorName, setCreatorName] = useState("");
   const [page, setPage] = useState(1);
   const [deleting, setDeleting] = useState<number | null>(null);
 
   const fetchPage = useCallback(
-    async (pageNum: number, q: string) => {
+    async (pageNum: number, q: string, filters: ListFilters) => {
       const append = pageNum > 1;
       if (append) setLoadingMore(true);
       else setLoading(true);
@@ -32,6 +40,9 @@ export function useVerseExplanationList(pageSize = 20) {
           page: pageNum,
           pageSize,
           search: q || undefined,
+          bookName: filters.bookName || undefined,
+          chapter: filters.chapter || undefined,
+          creatorName: filters.creatorName || undefined,
         });
         const rd = res?.returnData || res?.data;
         const items: VerseExplanationListItem[] = rd?.explanations || [];
@@ -56,15 +67,18 @@ export function useVerseExplanationList(pageSize = 20) {
     [pageSize, toast],
   );
 
-  // initial load / page change / search
+  const filters: ListFilters = { bookName, chapter, creatorName };
+
+  // initial load / page change / filter change
   useEffect(() => {
-    fetchPage(page, search);
-  }, [page, search]); // eslint-disable-line react-hooks/exhaustive-deps
+    fetchPage(page, search, filters);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, search, bookName, chapter, creatorName, fetchPage]);
 
   const refresh = useCallback(() => {
     setPage(1);
-    fetchPage(1, search);
-  }, [search, fetchPage]);
+    fetchPage(1, search, { bookName, chapter, creatorName });
+  }, [search, bookName, chapter, creatorName, fetchPage]);
 
   const goToPage = useCallback((p: number) => {
     // explicit navigation to a page - replace items
@@ -74,6 +88,28 @@ export function useVerseExplanationList(pageSize = 20) {
   const loadMore = useCallback(() => {
     // only load more if there are pages remaining
     setPage((prev) => prev + 1);
+  }, []);
+
+  const changeBook = useCallback((value: string) => {
+    setBookName(value);
+    setPage(1);
+  }, []);
+
+  const changeChapter = useCallback((value: string) => {
+    setChapter(value);
+    setPage(1);
+  }, []);
+
+  const changeCreatorName = useCallback((value: string) => {
+    setCreatorName(value);
+    setPage(1);
+  }, []);
+
+  const clearFilters = useCallback(() => {
+    setBookName("");
+    setChapter("");
+    setCreatorName("");
+    setPage(1);
   }, []);
 
   const deleteItem = useCallback(
@@ -126,9 +162,13 @@ export function useVerseExplanationList(pageSize = 20) {
   const hasMore = data.page < data.totalPages;
 
   return {
-    data: { data, loading, loadingMore, hasMore, search: searchInput, page, refreshing: loading, deleting },
+    data: {
+      data, loading, loadingMore, hasMore, search: searchInput, page, refreshing: loading, deleting,
+      bookName, chapter, creatorName,
+    },
     actions: {
       loadMore, setSearch: setSearchInput, goToPage, refresh, deleteItem, viewItem, editItem, goBack,
+      setBookName: changeBook, setChapter: changeChapter, setCreatorName: changeCreatorName, clearFilters,
     },
   };
 }

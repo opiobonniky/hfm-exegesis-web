@@ -55,6 +55,7 @@ export { ReadingPlanGrid } from "./ReadingPlanGrid";
 export { ReadingPlanFormDialog } from "./ReadingPlanFormDialog";
 export { ReadingPlanDeleteDialog } from "./ReadingPlanDeleteDialog";
 export { VerseExplanationTable } from "./VerseExplanationTable";
+export { VerseExplanationFilters } from "./VerseExplanationFilters";
 export { VerseExplanationDeleteDialog } from "./VerseExplanationDeleteDialog";
 export { PrologueGrid } from "./PrologueGrid";
 export { PrologueDeleteDialog } from "./PrologueDeleteDialog";
