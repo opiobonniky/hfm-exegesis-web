@@ -53,6 +53,17 @@ it('falls back to the updated date when the creation date is missing', () => {
   expect(screen.getAllByText(/Feb 14, 2026/).length).toBeGreaterThan(0);
 });
 
+it('shows the updated date instead of the created date when it is newer', () => {
+  renderTable({
+    createdOn: '2026-01-01T00:00:00.000Z',
+    updatedOn: '2026-03-05T00:00:00.000Z',
+  });
+  expect(screen.getAllByText(/Updated date:/).length).toBeGreaterThan(0);
+  expect(screen.getAllByText(/Mar 5, 2026/).length).toBeGreaterThan(0);
+  expect(screen.queryAllByText(/Created date:/).length).toBe(0);
+  expect(screen.queryAllByText(/Jan 1, 2026/).length).toBe(0);
+});
+
 it('keeps the eye, edit and delete icons on the card actions', () => {
   const onView = vi.fn();
   const { container } = renderTable({}, { onView });

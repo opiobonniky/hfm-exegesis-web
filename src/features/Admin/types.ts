@@ -654,7 +654,9 @@ export interface VerseExplanationListItem {
   verseNumber: number;
   bibleVersion: string;
   sortOrder: number;
-  exegesis: { explanationText: string; applicationText: string } | null;
+  explanation?: string | null;
+  learnMore?: string | null;
+  isPublished?: boolean;
   creatorName?: string | null;
   createdOn: string;
   updatedOn: string | null;

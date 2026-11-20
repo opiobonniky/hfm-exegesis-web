@@ -36,7 +36,7 @@ const summarizeText = (value?: string) => {
   return value.replace(/\s+/g, " ").trim();
 };
 
-/** Creator name and creation date, shown at the bottom of the card, left of its action icons. */
+/** Creator name and the latest relevant date, shown at the bottom of the card, left of its action icons. */
 function VerseExplanationMetadata({
   creatorName,
   createdOn,
@@ -51,12 +51,21 @@ function VerseExplanationMetadata({
     value && !Number.isNaN(new Date(value).getTime())
       ? displayDate(value, lang, { month: 'short', day: 'numeric', year: 'numeric' })
       : "—";
+  // An update is newer (or the only date available), so show that instead of
+  // the creation date. Bad/older updatedOn values keep the created date.
+  const updatedTime = updatedOn ? new Date(updatedOn).getTime() : NaN;
+  const createdTime = createdOn ? new Date(createdOn).getTime() : NaN;
+  const useUpdated =
+    !Number.isNaN(updatedTime) &&
+    (Number.isNaN(createdTime) || updatedTime >= createdTime);
+  const dateLabel = useUpdated ? tt("Updated date") : tt("Created date");
+  const dateValue = useUpdated ? updatedOn : createdOn;
   return (
     <div className="min-w-0 text-[11px] text-muted-foreground">
       <span className="block truncate" title={creatorName || undefined}>
         {tt("Created by")}:{creatorName ? ` ${creatorName}` : " —"}
       </span>
-      <span className="block">{tt("Created date")}: {date(createdOn || updatedOn)}</span>
+      <span className="block">{dateLabel}: {date(dateValue)}</span>
     </div>
   );
 }

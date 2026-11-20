@@ -55,41 +55,22 @@ export function VerseExplanationsPageContent() {
     return () => obs.disconnect();
   }, [sentinelRef, h.hasMore, h.loadingMore, h.loading, h.loadMore]);
 
-  // Map API items to card shape
-  const tableItems = h.data.items.map((it) => {
-    const studyMetadata = (it as any).studyMetadata || {};
-    const takeaways = Array.isArray(studyMetadata.takeaways)
-      ? studyMetadata.takeaways.filter(
-          (item: unknown) => typeof item === "string" && item.trim(),
-        )
-      : typeof studyMetadata.takeaways === "string"
-        ? [studyMetadata.takeaways]
-        : [];
-    const learnMoreSource = [
-      studyMetadata.introduction,
-      studyMetadata.finalThoughts,
-      takeaways.join(" "),
-    ].find((value) => typeof value === "string" && value.trim());
-
-    return {
-      id: it.id,
-      bookName: it.bookName,
-      chapter: it.chapter,
-      verseNumber: it.verseNumber,
-      explanation: it.exegesis?.explanationText || "",
-      learnMore: learnMoreSource
-        ? String(learnMoreSource).replace(/\s+/g, " ").trim()
-        : undefined,
-      isPublished:
-        typeof (it as any).isPublished === "boolean"
-          ? (it as any).isPublished
-          : true,
-      bibleVersion: it.bibleVersion || "BSB",
-      creatorName: it.creatorName || null,
-      createdOn: it.createdOn,
-      updatedOn: it.updatedOn,
-    };
-  });
+  // Map the lean API items to the card shape. The list endpoint already
+  // provides the display snippets (explanation/learnMore), so no heavy
+  // nested study payloads are needed here.
+  const tableItems = h.data.items.map((it) => ({
+    id: it.id,
+    bookName: it.bookName,
+    chapter: it.chapter,
+    verseNumber: it.verseNumber,
+    explanation: it.explanation || "",
+    learnMore: it.learnMore || undefined,
+    isPublished: it.isPublished ?? true,
+    bibleVersion: it.bibleVersion || "BSB",
+    creatorName: it.creatorName || null,
+    createdOn: it.createdOn,
+    updatedOn: it.updatedOn,
+  }));
 
   return (
     <div className="min-h-screen bg-background">
