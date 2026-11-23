@@ -70,6 +70,19 @@ describe('legacy daily content compatibility', () => {
     expect(rows.every(row => row.surfaceText.includes('ʾănî ʾĕlōhîm') && row.customDefinition === 'The covenant God')).toBe(true);
     expect(parseStudies(serializeStudies(rows))).toEqual(rows);
   });
+  it('displays an unresolved canonical ID and keeps compound canonical links in one row', () => {
+    const fields = { surfaceText: 'Know', customDefinition: 'Know intimately' };
+    const studies = [
+      { ...fields, strongsId: 'H03045A', strongsIds: ['H03045A'], strongs: null },
+      { ...fields, strongsId: null, strongsIds: ['H03045A', 'H3045'], strongs: null },
+    ];
+    expect(parseStudies(studies)).toEqual([
+      { ...fields, strongsId: 'H03045A' },
+      { ...fields, strongsId: 'H03045A/H3045' },
+    ]);
+    expect(parseWordStudies(studies)[1].strongs).toBe('H03045A/H3045');
+    expect(studyFieldErrors({ ...fields, strongsId: 'CH3045' }).strongsId).not.toBe('');
+  });
   it.each([['Genesis', '3', '6', '10', true], ['Genesis', '', '6', '', false], ['', '3', '6', '', false], ['Genesis', '3', '10', '6', false], ['Genesis', '3', '6-10', '', false]])('validates %s %s:%s-%s', (book, chapter, start, end, valid) => {
     expect(validPassage(String(book), String(chapter), String(start), String(end))).toBe(valid);
   });

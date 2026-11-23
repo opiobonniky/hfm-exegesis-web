@@ -244,18 +244,21 @@ it('reopens and saves ranges and structured studies without losing existing IDs 
     exegesis: { explanationText: 'An existing explanation with enough detail.', applicationText: 'Saved application' },
     studyMetadata: { introduction: 'Saved introduction', backgroundAuthor: 'Saved author', backgroundBook: 'Saved book',
       backgroundContext: 'Saved context', finalThoughts: 'Saved final thoughts' },
-    wordStudies: [{ surfaceText: 'Know', strongsId: 'H3045', customDefinition: 'Know intimately', sortOrder: 0 }],
+    wordStudies: [{ surfaceText: 'Know', strongsId: null, strongsIds: ['H3045', 'H03045A'], strongs: null, customDefinition: 'Know intimately', sortOrder: 0 }],
     crossReferences: [{ bookName: 'Romans', chapter: 5, verseNumber: 1, verseEnd: 3, referenceText: 'Original quote', commentary: 'Editorial commentary' }],
   } });
   const { result } = renderHook(() => useAddExplanation());
   await waitFor(() => expect(result.current.data.isValid).toBe(true));
   expect(result.current.data.form.verseEnd).toBe('10');
   expect(result.current.data.form.crossReferences[0].commentary).toBe('Editorial commentary');
+  expect(result.current.data.form.wordStudies).toEqual([
+    { surfaceText: 'Know', strongsId: 'H3045/H03045A', customDefinition: 'Know intimately', sortOrder: 0 },
+  ]);
   vi.useFakeTimers();
   await act(async () => { await result.current.actions.handleSave(); });
   expect(mocks.post).toHaveBeenLastCalledWith('bible', 'add-verse-explanation', expect.objectContaining({ id: 44, sharedStudyVersion: 7, verseEnd: 10,
     crossReferences: [expect.objectContaining({ verseEnd: 3, commentary: 'Editorial commentary' })],
-    wordStudies: [expect.objectContaining({ strongsId: 'H3045', customDefinition: 'Know intimately' })],
+    wordStudies: [expect.objectContaining({ strongsId: 'H3045/H03045A', customDefinition: 'Know intimately' })],
   }));
   act(() => vi.advanceTimersByTime(500)); // flush the pending redirect before the next test
 });

@@ -73,21 +73,35 @@ export interface StudyEntry { surfaceText: string; strongsId: string; customDefi
  *  `/ , ; & +` or a dash, and IDs embedded in extra text. Only input with no
  *  recognizable Strong's token at all is treated as invalid. */
 export const STRONGS_ID_TOKEN = /\b[HG]0*\d+[a-z]?\b/gi;
-export const STRONGS_ID_ANYWHERE = /[HG]\s*0*\d+[a-z]?/i;
+const strongsTokens = (value: string) =>
+  [...new Set(value.match(STRONGS_ID_TOKEN)?.map(id => id.toUpperCase()) || [])];
+const canonicalStrongsIds = (value: unknown) => Array.isArray(value)
+  ? strongsTokens(value.filter((id): id is string => typeof id === 'string').join('/'))
+  : [];
+const stringValue = (value: unknown) => typeof value === 'string' ? value.trim() : '';
+export function studyStrongsText(row: Record<string, unknown>): string {
+  const dictionary = row.strongs && typeof row.strongs === 'object'
+    ? row.strongs as Record<string, unknown> : undefined;
+  return canonicalStrongsIds(row.strongsIds).join('/') || stringValue(row.strongsId) ||
+    stringValue(row.strongs) || stringValue(dictionary?.strongsId) || stringValue(row.Strongs);
+}
 export const isEmptyStudy = (row: StudyEntry) => !row.surfaceText.trim() && !row.strongsId.trim() && !row.customDefinition.trim();
 export const nonEmptyStudies = (rows: StudyEntry[]) => rows.filter(row => !isEmptyStudy(row));
 export function parseStudies(value: unknown): StudyEntry[] {
-  const rows = unpack(value).map(entry => {
+  return unpack(value).flatMap(entry => {
+    let row: StudyEntry;
     if (entry && typeof entry === 'object') {
-      const row = entry as Record<string, unknown>;
-      return { surfaceText: String(row.surfaceText || row.word || ''), strongsId: String(row.strongsId || row.strongs || row.Strongs || ''),
-        customDefinition: String(row.customDefinition || row.definition || '') };
+      const item = entry as Record<string, unknown>;
+      row = { surfaceText: String(item.surfaceText || item.word || ''), strongsId: studyStrongsText(item),
+        customDefinition: String(item.customDefinition || item.definition || '') };
+      // A shared-study row can link to several IDs. Reopen it as one row so a
+      // save does not duplicate the word or split its links.
+      if (canonicalStrongsIds(item.strongsIds).length) return [row];
+    } else {
+      const [surfaceText = '', strongsId = '', ...definition] = String(entry).split('|').map(part => part.trim());
+      row = { surfaceText, strongsId, customDefinition: definition.join(' | ') };
     }
-    const [surfaceText = '', strongsId = '', ...definition] = String(entry).split('|').map(part => part.trim());
-    return { surfaceText, strongsId, customDefinition: definition.join(' | ') };
-  });
-  return rows.flatMap(row => {
-    const ids = [...new Set(row.strongsId.match(STRONGS_ID_TOKEN)?.map(id => id.toUpperCase()) || [])];
+    const ids = strongsTokens(row.strongsId);
     if (!ids.length) return [row];
     const transliteration = row.strongsId.match(/^(.*?)\s*[-–—]\s*Strong['’]?s\s+/i)?.[1]?.trim();
     return ids.map(strongsId => ({ ...row, strongsId,
@@ -111,7 +125,7 @@ export function studyFieldErrors(row: StudyEntry) {
   if (isEmptyStudy(row)) return { surfaceText: '', strongsId: '', customDefinition: '' };
   return {
     surfaceText: row.surfaceText.trim() ? '' : 'Enter the word or surface text.',
-    strongsId: id && !STRONGS_ID_ANYWHERE.test(id) ? 'Use a valid Strong’s ID, for example H7503 or G11, or leave this field empty.' : '',
+    strongsId: id && !strongsTokens(id).length ? 'Use a valid Strong’s ID, for example H7503 or G11, or leave this field empty.' : '',
     customDefinition: row.customDefinition.trim() ? '' : 'Enter the definition or contextual meaning.',
   };
 }

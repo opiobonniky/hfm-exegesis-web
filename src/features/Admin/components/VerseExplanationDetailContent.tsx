@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { tt } from '@/components/languages/hardcodedTranslate';
+import { studyStrongsText } from '@/features/DailyContent/helpers/editorContent';
 
 interface Props {
   item: any;
@@ -303,25 +304,20 @@ export function VerseExplanationDetailContent({ item }: Props) {
               <h3 className="text-sm font-semibold mb-3 uppercase tracking-wide">{tt("Strong's Word Studies")}</h3>
               <div className="space-y-3">
                 {wordStudies && wordStudies.length > 0 ? (
-                  wordStudies.map((ws: any, i: number) => (
-                    <div
-                      key={i}
-                      className="p-3.5 rounded-md border bg-background"
-                    >
-                      <div className="flex items-center justify-between mb-1.5">
-                        <div className="font-semibold">{ws.surfaceText}</div>
-                        <Badge
-                          variant="outline"
-                          className="text-[10px] font-mono"
-                        >
-                          {ws.strongsId}
-                        </Badge>
+                  wordStudies.map((ws: any, i: number) => {
+                    const ids = studyStrongsText(ws);
+                    return (
+                      <div key={i} className="p-3.5 rounded-md border bg-background">
+                        <div className="flex items-center justify-between mb-1.5">
+                          <div className="font-semibold">{ws.surfaceText}</div>
+                          {ids && <Badge variant="outline" className="text-[10px] font-mono">{ids}</Badge>}
+                        </div>
+                        <div className="text-sm text-muted-foreground leading-relaxed">
+                          {ws.customDefinition || "—"}
+                        </div>
                       </div>
-                      <div className="text-sm text-muted-foreground leading-relaxed">
-                        {ws.customDefinition || "—"}
-                      </div>
-                    </div>
-                  ))
+                    );
+                  })
                 ) : (
                   <div className="text-sm text-muted-foreground italic">{tt("No word studies.")}</div>
                 )}

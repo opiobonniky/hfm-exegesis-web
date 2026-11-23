@@ -50,7 +50,7 @@ function StudyFields({ row, onChange, showErrors, revealErrors, requireAll }: { 
   return <>
     <div className="grid gap-3 md:grid-cols-2">
       <div className="space-y-1 text-xs font-medium"><label htmlFor={`${fieldId}-surfaceText`}>{tt('Word / surface text')}</label><Input {...fieldProps('surfaceText')} value={row.surfaceText} onChange={e => onChange({ surfaceText: e.target.value })} placeholder={tt('e.g. Be still')} />{fieldError('surfaceText')}</div>
-      <div className="space-y-1 text-xs font-medium"><label htmlFor={`${fieldId}-strongsId`}>{tt("Strong's ID")}</label><Input {...fieldProps('strongsId')} value={row.strongsId} onChange={e => onChange({ strongsId: e.target.value.toUpperCase() })} placeholder="H7503" />{fieldError('strongsId')}</div>
+      <div className="space-y-1 text-xs font-medium"><label htmlFor={`${fieldId}-strongsId`}>{tt("Strong's ID")}</label><Input {...fieldProps('strongsId')} value={row.strongsId} onChange={e => onChange({ strongsId: e.target.value.toUpperCase() })} />{fieldError('strongsId')}</div>
     </div>
     <div className="space-y-1 text-xs font-medium"><label htmlFor={`${fieldId}-customDefinition`}>{tt('Definition and contextual meaning')}</label><Textarea {...fieldProps('customDefinition')} value={row.customDefinition} rows={3} className={`resize-y ${fieldProps('customDefinition').className}`} onChange={e => onChange({ customDefinition: e.target.value })} placeholder={tt('Explain how this word is used in the selected passage.')} />{fieldError('customDefinition')}</div>
   </>;
