@@ -40,6 +40,8 @@ export default function StrongsDictionaryPage() {
             loadSelectedBook: p.loadSelectedBook,
             browseWords: p.browseWords,
             browseLoading: p.browseLoading,
+            browseFailed: p.browseFailed,
+            retryBrowse: p.retryBrowse,
             browseCount: p.browseCount,
             selectedWord: p.selectedWord,
             isFavorited: p.isFavorited,

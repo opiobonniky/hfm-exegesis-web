@@ -16,6 +16,7 @@ interface WordCardProps {
 }
 
 export function WordCard({ word, isSelected, isFavorited, onSelect, onToggleFavorite }: WordCardProps) {
+  const firstStudy = word.contextualStudies?.[0];
   return (
     <Card
       className={cn("group cursor-pointer border-border/70 transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-lg", isSelected && "border-primary/50 ring-2 ring-primary/20 shadow-md")}
@@ -39,11 +40,17 @@ export function WordCard({ word, isSelected, isFavorited, onSelect, onToggleFavo
                 {word.language === "hebrew" ? tt("Hebrew") : tt("Greek")}
               </Badge>
             </div>
-            <p className="text-xl font-black tracking-tight">{word.hebrewWord || tt("Unnamed word")}</p>
+            <p className="text-xl font-black tracking-tight">
+              {word.hebrewWord || firstStudy?.surfaceTextGloss || firstStudy?.surfaceText || word.strongsNumber}
+            </p>
             <p className="text-sm text-muted-foreground italic">
               {word.transliteration}{word.pronunciation && ` (${word.pronunciation})`}
             </p>
-            <p className="mt-2 line-clamp-2 text-sm leading-6 text-muted-foreground">{word.meaning || tt("No short definition available.")}</p>
+            {word.hasDictionaryEntry === false ? (
+              <Badge variant="secondary" className="mt-2">{tt("Verse study only")}</Badge>
+            ) : (
+              <p className="mt-2 line-clamp-2 text-sm leading-6 text-muted-foreground">{word.meaning || tt("No short definition available.")}</p>
+            )}
             <div className="mt-3 flex flex-wrap gap-2 text-xs text-muted-foreground">
               <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-1">
                 <Languages className="h-3 w-3" /> {word.language}
@@ -56,7 +63,8 @@ export function WordCard({ word, isSelected, isFavorited, onSelect, onToggleFavo
               <div className="mt-3 space-y-1.5 text-xs font-semibold text-primary">
                 <div className="flex items-center gap-1.5">
                 <BookOpen className="h-3.5 w-3.5" />
-                {displayDigits(word.contextualStudies.length)}{tt("verse")}{word.contextualStudies.length === 1 ? tt("study") : tt("studies")}{tt("available")}</div>
+                {tt("Verse word studies")} · {displayDigits(word.contextualStudyCount ?? word.contextualStudies.length)}</div>
+                {firstStudy?.reference && <p>{displayDigits(`${firstStudy.reference.bookName} ${firstStudy.reference.chapter}${firstStudy.reference.verseNumber == null ? "" : `:${firstStudy.reference.verseNumber}`}`)}</p>}
                 <p className="line-clamp-2 font-normal text-muted-foreground">
                   {word.contextualStudies[0].customDefinition || word.contextualStudies[0].surfaceText}
                 </p>

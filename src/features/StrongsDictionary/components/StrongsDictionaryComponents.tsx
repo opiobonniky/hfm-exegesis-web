@@ -113,6 +113,8 @@ interface StrongsBrowseTabProps {
   selectedBook: string;
   browseWords: StrongsWord[];
   browseLoading: boolean;
+  browseFailed: boolean;
+  onRetry: () => void;
   browseCount: number;
   selectedWord: StrongsWord | null;
   isFavorited: (num: string) => boolean;
@@ -127,6 +129,8 @@ export function StrongsBrowseTab({
   selectedBook,
   browseWords,
   browseLoading,
+  browseFailed,
+  onRetry,
   browseCount,
   selectedWord,
   isFavorited,
@@ -151,10 +155,10 @@ export function StrongsBrowseTab({
           <SelectContent>{BIBLE_BOOKS.map((book) => (<SelectItem key={book} value={book}>{tt(book)}</SelectItem>))}</SelectContent>
         </Select>
       </div>
-      {browseLoading && <LoadingState message="Loading words..." />}
-      {!browseLoading && browseWords.length > 0 && (
+      {browseLoading && browseWords.length === 0 && <LoadingState message="Loading words..." />}
+      {browseWords.length > 0 && (
         <>
-          <p>{displayDigits(browseWords.length)}{tt("word")}{browseWords.length !== 1 ? "s" : ""} in {selectedBook}</p>
+          <p>{displayDigits(browseWords.length)} / {displayDigits(browseCount)} · {tt(selectedBook)}</p>
           <div className="grid gap-3">
             {browseWords.map((w) => (
               <WordCard key={w.strongsNumber} word={w} isSelected={selectedWord?.strongsNumber === w.strongsNumber}
@@ -163,13 +167,19 @@ export function StrongsBrowseTab({
           </div>
         </>
       )}
-      {!browseLoading && selectedBook && browseWords.length === 0 && (
+      {browseFailed && (
+        <div role="alert" className="flex items-center gap-3">
+          <span>{tt("Could not load words.")}</span>
+          <Button variant="outline" onClick={onRetry}>{tt("Retry")}</Button>
+        </div>
+      )}
+      {!browseLoading && !browseFailed && selectedBook && browseWords.length === 0 && (
         <EmptyState title={tt("No words found")} message={`No Strong's entries found for ${selectedBook}`} icon={BookOpen} />
       )}
       {!browseLoading && !selectedBook && (
         <EmptyState title={tt("Select a book")} message="Choose a Bible book to browse its Strong's entries" icon={BookOpen} />
       )}
-      {browseWords.length > 0 && browseWords.length < browseCount && (
+      {!browseFailed && browseWords.length > 0 && browseWords.length < browseCount && (
         <Button variant="outline" className="w-full" onClick={onLoadMore} disabled={browseLoading}>{tt("Load More")}</Button>
       )}
     </div>

@@ -35,6 +35,8 @@ interface StrongsStudyWorkspaceProps {
     | "loadSelectedBook"
     | "browseWords"
     | "browseLoading"
+    | "browseFailed"
+    | "retryBrowse"
     | "browseCount"
     | "selectedWord"
     | "isFavorited"
@@ -113,6 +115,8 @@ export function StrongsStudyWorkspace({
               selectedBook={browseTab.selectedBook}
               browseWords={browseTab.browseWords}
               browseLoading={browseTab.browseLoading}
+              browseFailed={browseTab.browseFailed}
+              onRetry={browseTab.retryBrowse}
               browseCount={browseTab.browseCount}
               selectedWord={browseTab.selectedWord}
               isFavorited={browseTab.isFavorited}
