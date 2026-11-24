@@ -1,25 +1,15 @@
-// VerseExplanationDetail — modern responsive admin detail layout
+// VerseExplanationDetail — read-only view laid out like the consumer Book
+// Overview (same hero, fact list, paper and note grid).
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import type { ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
-import { adminApi } from "../services/adminApi";
-
-import {
-  BookOpen,
-  Lightbulb,
-  Edit2,
-  Globe,
-  Tag,
-  Link as LinkIcon,
-} from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Edit2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { cn } from "@/lib/utils";
+import { useLanguage } from "@/components/languages/languageProvider";
+import { displayDate } from "@/services/numberLocale/format";
+import { bibleVersionFullName } from "../utils";
 import { tt } from '@/components/languages/hardcodedTranslate';
-import { studyStrongsText } from '@/features/DailyContent/helpers/editorContent';
 
 interface Props {
   item: any;
@@ -49,15 +39,46 @@ const parseTakeaways = (value: unknown): string[] => {
   return [];
 };
 
+function Note({ title, wide, children }: { title: string; wide?: boolean; children: ReactNode }) {
+  return (
+    <section className={`prologue-note${wide ? ' prologue-note-wide' : ''}`}>
+      <div className="prologue-note-heading"><h2>{title}</h2></div>
+      {children}
+    </section>
+  );
+}
+
+function TextBlock({ label, value, wide }: { label: string; value?: string | null; wide?: boolean }) {
+  if (!value?.trim()) return null;
+  return (
+    <Note title={label} wide={wide ?? value.length > 280}>
+      <p className="prologue-prose whitespace-pre-wrap break-words">{value}</p>
+    </Note>
+  );
+}
+
+function BulletList({ label, items }: { label: string; items?: string[] | null }) {
+  if (!items?.length) return null;
+  return (
+    <Note title={label} wide={items.join(' ').length > 280}>
+      <ul className="prologue-text-list">
+        {items.map((item, index) => <li key={index}>{item}</li>)}
+      </ul>
+    </Note>
+  );
+}
+
 export function VerseExplanationDetailContent({ item }: Props) {
   const navigate = useNavigate();
+  const { lang } = useLanguage();
   if (!item) return null;
-  const edit = () => navigate("/admin/add-verse-explanation", { state: { explanationId: item.id } });
 
   const {
+    id,
     bookName,
     chapter,
     verseNumber,
+    verseEnd,
     bibleVersion,
     isPublished,
     exegesis,
@@ -68,321 +89,113 @@ export function VerseExplanationDetailContent({ item }: Props) {
     themes,
   } = item;
   const takeaways = parseTakeaways(studyMetadata?.takeaways ?? item.takeaways);
+  const reference = `${bookName} ${chapter}:${verseNumber}${verseEnd ? `–${verseEnd}` : ''}`;
+  const versionName = bibleVersionFullName(bibleVersion);
 
-  // feed: holds the current explanation plus any appended explanations loaded as the user scrolls
-  const [feed, setFeed] = useState<any[]>([item]);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
-  const sentinelRef = useRef<HTMLDivElement | null>(null);
+  // Use the same id first, so a list that was filtered/ordered differently
+  // still returns to this exact record.
+  const edit = () => navigate("/admin/add-verse-explanation", { state: { explanationId: id } });
 
-  // reset feed when the prop item changes (navigating to another explanation)
-  useEffect(() => {
-    setFeed([item]);
-    setHasMore(true);
-  }, [item]);
+  const background = [
+    studyMetadata?.backgroundAuthor && `${tt("Author")}: ${studyMetadata.backgroundAuthor}`,
+    studyMetadata?.backgroundBook && `${tt("Book")}: ${studyMetadata.backgroundBook}`,
+    studyMetadata?.backgroundContext,
+  ].filter(Boolean).join('\n\n');
 
-  // observer to load next explanation when sentinel is visible
-  useEffect(() => {
-    const el = sentinelRef.current;
-    if (!el) return;
+  const createdLabel = item.createdOn ? displayDate(item.createdOn, lang) : null;
+  const updatedLabel = item.updatedOn ? displayDate(item.updatedOn, lang) : null;
 
-    const obs = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (
-            entry.isIntersecting &&
-            !loadingMore &&
-            hasMore
-          ) {
-            loadNextExplanation();
-          }
-        });
-      },
-      { root: null, rootMargin: "300px", threshold: 0.1 },
-    );
-
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, [sentinelRef, loadingMore, hasMore, feed]);
-
-  // fetch the next verse explanation (naive: increment verseNumber)
-  const loadNextExplanation = async () => {
-    if (loadingMore) return;
-    const last = feed[feed.length - 1];
-    if (!last) return setHasMore(false);
-    setLoadingMore(true);
-
-    // naive next verse: +1; if not found we stop (could be improved to advance chapter)
-    const nextVerse = Number(last.verseNumber) + 1;
-    try {
-      const res = await adminApi.request("bible", "get-verse-explanation", {
-        bookName: last.bookName,
-        chapter: last.chapter,
-        verseNumber: nextVerse,
-      });
-
-      if (res?.returnCode === 200 && res.returnData) {
-        const d = res.returnData;
-        // avoid duplicates
-        const exists = feed.find((f) => f.bookName === d.bookName && Number(f.chapter) === Number(d.chapter) && Number(f.verseNumber) === Number(d.verseNumber));
-        if (!exists) setFeed((s) => [...s, d]);
-      } else {
-        // no more contiguous verses found — stop further automatic fetches
-        setHasMore(false);
-      }
-    } catch (e) {
-      setHasMore(false);
-    } finally {
-      setLoadingMore(false);
-    }
-  };
+  const facts = [
+    { label: 'Version', value: versionName },
+    { label: 'Status', value: isPublished !== false ? tt('Published') : tt('Draft') },
+    { label: 'Themes', value: themes?.map((theme: any) => theme.themeName).filter(Boolean).join(' · ') },
+    { label: 'Created', value: createdLabel },
+    { label: 'Updated', value: updatedLabel },
+  ].filter(fact => fact.value != null && fact.value !== '');
 
   return (
-    <div className="w-full mx-auto py-8 px-4">
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Left column: meta + actions */}
-        <aside className="lg:col-span-1">
-          <div className="sticky top-6 space-y-4">
-            <Card className="overflow-visible">
-              <CardHeader>
-                <div className="flex items-center gap-2">
-                  <BookOpen className="w-5 h-5 text-primary" />
-                  <CardTitle className="text-sm">{tt("Reference")}</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <div className="text-lg font-bold">
-                    {bookName} {chapter}:{verseNumber}
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    {bibleVersion || tt("BSB")}
-                  </div>
-                  <div className="mt-2 flex items-center gap-2">
-                    <Badge variant={isPublished ? "default" : "secondary"}>
-                      {isPublished ? tt("Published") : tt("Draft")}
-                    </Badge>
-                    <Badge variant="outline" className="text-xs font-mono">{tt("ID:")}{item.id}
-                    </Badge>
-                  </div>
-
-                  <Separator className="my-3" />
-
-                  <div className="flex flex-col gap-2">
-                    <Button
-                      variant="secondary"
-                      onClick={() =>
-                         edit()
-                      }
-                    >
-                      <Edit2 className="w-4 h-4 mr-2" />{tt("Edit")}</Button>
-                    <Button
-                      variant="ghost"
-                      onClick={() =>
-                        navigator.clipboard?.writeText(
-                          `${bookName} ${chapter}:${verseNumber} — ${bibleVersion || "BSB"}`,
-                        )
-                      }
-                    >{tt("Copy reference")}</Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <div className="flex items-center gap-2">
-                  <Globe className="w-4 h-4 text-primary" />
-                  <CardTitle className="text-sm">{tt("Study Info")}</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-sm text-foreground/90 leading-relaxed">
-                  <p>
-                    <strong>{tt("Introduction:")}</strong>
-                  </p>
-                  <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
-                    {studyMetadata?.introduction || "—"}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <div className="flex items-center gap-2">
-                  <Tag className="w-4 h-4 text-primary" />
-                  <CardTitle className="text-sm">{tt("Themes")}</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-2">
-                  {themes && themes.length > 0 ? (
-                    themes.map((t: any, i: number) => (
-                      <Badge
-                        key={i}
-                        variant="secondary"
-                        className="px-2 py-0.5 text-xs"
-                      >
-                        {t.themeName}
-                      </Badge>
-                    ))
-                  ) : (
-                    <div className="text-sm text-muted-foreground">{tt("No themes")}</div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </aside>
-
-        {/* Right column: main content stacked vertically */}
-        <main className="lg:col-span-3 space-y-6">
-          {/* Header */}
-          <div className="bg-card p-6 rounded-xl border">
-            <div className="flex items-start justify-between gap-6">
-              <div>
-                <h1 className="text-2xl md:text-3xl font-serif font-bold">
-                  {bookName} {chapter}:{verseNumber}
-                </h1>
-                <div className="text-sm text-muted-foreground">
-                  {bibleVersion || tt("BSB")}
-                </div>
-                {item.verseText && (
-                  <blockquote className="mt-3 italic text-foreground/80 border-l-2 border-primary/30 pl-4 text-base leading-7 md:max-w-2xl">
-                    “{item.verseText}”
-                  </blockquote>
-                )}
+    <article className="prologue-page-shell">
+      <header className="prologue-hero">
+        <div className="prologue-heading-meta">
+          <span>{tt('Verse explanation')} / {bookName}</span>
+          <span>{versionName}</span>
+        </div>
+        <h1>{reference}</h1>
+        {item.verseText && (
+          <blockquote className="prologue-deck notranslate" translate="no">
+            {item.verseText}
+          </blockquote>
+        )}
+        {!!facts.length && (
+          <dl className="prologue-facts">
+            {facts.map(fact => (
+              <div key={fact.label} className={fact.label === 'Themes' ? 'prologue-fact-audience' : undefined}>
+                <dt>{fact.label}</dt>
+                <dd>{fact.value}</dd>
               </div>
-              <div className="flex items-start gap-3">
-                <Button
-                  onClick={() =>
-                    window.scrollTo({ top: 0, behavior: "smooth" })
-                  }
-                  variant="outline"
-                >
-                  Top
-                </Button>
-                <Button
-                  onClick={() =>
-                     edit()
-                  }
-                >
-                  <Edit2 className="w-4 h-4 mr-2" />{tt("Edit")}</Button>
-              </div>
-            </div>
-          </div>
+            ))}
+          </dl>
+        )}
+      </header>
 
-          {/* Theological Explanation */}
-          <article className="bg-white dark:bg-slate-900 shadow-sm rounded-xl border overflow-hidden">
-            <div className="p-6">
-              <div className="flex items-center gap-3 mb-3">
-                <Lightbulb className="w-5 h-5 text-primary" />
-                <h2 className="text-lg font-semibold">{tt("Theological Explanation")}</h2>
-              </div>
+      <section aria-label={tt('Explanation study notes')}>
+        <div className="prologue-section-label">
+          <span>{tt('Explore the explanation')}</span>
+          <span>{reference}</span>
+        </div>
+        <div className="prologue-paper">
+          <div className="prologue-card-grid">
+            <TextBlock label={tt('Theological Explanation')} value={exegesis?.explanationText} wide />
+            <TextBlock label={tt('Application')} value={exegesis?.applicationText} wide />
+            <TextBlock label={tt('Introduction')} value={studyMetadata?.introduction} />
+            <TextBlock label={tt('Background and History')} value={background} wide />
 
-              <div className="prose prose-stone dark:prose-invert max-w-none text-base text-foreground/90 leading-7 space-y-4 prose-p:my-0 prose-headings:scroll-mt-4">
-                {exegesis?.explanationText
-                  ?.split("\n")
-                  .map((p: string, i: number) => (
-                    <p key={i}>{p}</p>
-                  ))}
-              </div>
-
-              <div className="mt-8">
-                <h3 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wide">{tt("Application")}</h3>
-                <div className="p-5 rounded-lg bg-primary/5 border border-primary/10 text-base italic text-foreground/80 leading-7">
-                  {exegesis?.applicationText || tt("No application provided.")}
-                </div>
-              </div>
-            </div>
-          </article>
-
-          {/* Word Studies */}
-          <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-card rounded-xl border p-4">
-              <h3 className="text-sm font-semibold mb-3 uppercase tracking-wide">{tt("Strong's Word Studies")}</h3>
-              <div className="space-y-3">
-                {wordStudies && wordStudies.length > 0 ? (
-                  wordStudies.map((ws: any, i: number) => {
-                    const ids = studyStrongsText(ws);
-                    return (
-                      <div key={i} className="p-3.5 rounded-md border bg-background">
-                        <div className="flex items-center justify-between mb-1.5">
-                          <div className="font-semibold">{ws.surfaceText}</div>
-                          {ids && <Badge variant="outline" className="text-[10px] font-mono">{ids}</Badge>}
-                        </div>
-                        <div className="text-sm text-muted-foreground leading-relaxed">
-                          {ws.customDefinition || "—"}
-                        </div>
-                      </div>
-                    );
-                  })
-                ) : (
-                  <div className="text-sm text-muted-foreground italic">{tt("No word studies.")}</div>
-                )}
-              </div>
-            </div>
-
-            <div className="bg-card rounded-xl border p-4">
-              <h3 className="text-sm font-semibold mb-3 uppercase tracking-wide">{tt("Cross References")}</h3>
-              <div className="space-y-3">
-                {crossReferences && crossReferences.length > 0 ? (
-                  crossReferences.map((cr: any, i: number) => (
-                    <div key={i} className="p-3.5 rounded-md border bg-muted/10">
-                      <div className="text-xs font-semibold text-primary mb-1">
-                        {cr.bookName} {cr.chapter}:{cr.verseNumber}
-                      </div>
-                      <div className="text-sm italic text-foreground/70 leading-relaxed">
-                        {cr.referenceText}
-                      </div>
-                      <div className="text-sm text-muted-foreground mt-1.5 leading-relaxed">
-                        {cr.commentary}
-                      </div>
+            {wordStudies?.length > 0 && (
+              <Note title={`${tt("Strong's Word Studies")} (${wordStudies.length})`} wide>
+                <div className="prologue-card-grid">
+                  {wordStudies.map((study: any, index: number) => (
+                    <div key={index} className="prologue-note">
+                      <p className="prologue-prose"><strong>{study.surfaceText}</strong>{study.strongsId ? ` · ${study.strongsId}` : ''}</p>
+                      {study.customDefinition && <p className="prologue-prose">{study.customDefinition}</p>}
                     </div>
-                  ))
-                ) : (
-                  <div className="text-sm text-muted-foreground italic">{tt("No cross references.")}</div>
-                )}
-              </div>
-            </div>
-          </section>
+                  ))}
+                </div>
+              </Note>
+            )}
 
-          {/* Practical Apps & Takeaways */}
-          <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-card rounded-xl border p-4">
-              <h3 className="text-sm font-semibold mb-3 uppercase tracking-wide">{tt("Practical Applications")}</h3>
-              <ol className="list-decimal list-inside space-y-2.5 text-sm text-foreground/90 leading-relaxed">
-                {practicalApps && practicalApps.length > 0 ? (
-                  practicalApps.map((pa: any, i: number) => (
-                    <li key={i}>{pa.applicationText}</li>
-                  ))
-                ) : (
-                  <li className="italic text-muted-foreground">{tt("No applications listed.")}</li>
-                )}
-              </ol>
-            </div>
+            {crossReferences?.length > 0 && (
+              <Note title={`${tt('Cross References')} (${crossReferences.length})`} wide>
+                <ul className="prologue-text-list">
+                  {crossReferences.map((crossReference: any, index: number) => {
+                    const crReference = `${crossReference.bookName} ${crossReference.chapter}:${crossReference.verseNumber}${crossReference.verseEnd ? `–${crossReference.verseEnd}` : ''}`;
+                    return (
+                      <li key={index}>
+                        <strong>{crReference}</strong>
+                        {crossReference.referenceText && <p className="prologue-prose">{crossReference.referenceText}</p>}
+                        {crossReference.commentary && <p className="prologue-prose">{crossReference.commentary}</p>}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </Note>
+            )}
 
-            <div className="bg-primary/5 rounded-xl border p-4">
-              <h3 className="text-sm font-semibold mb-3 uppercase tracking-wide">{tt("Final Thoughts & Takeaways")}</h3>
-              <div className="text-sm text-foreground/80 italic leading-relaxed mb-4">
-                {studyMetadata?.finalThoughts || "—"}
-              </div>
-              <ol className="list-decimal list-inside space-y-2.5 text-sm text-foreground/90 leading-relaxed">
-                {takeaways.length > 0 ? (
-                  takeaways.map((t: string, i: number) => <li key={i}>{t}</li>)
-                ) : (
-                  <>
-                    <li>{tt("Remember God’s faithfulness and give thanks.")}</li>
-                    <li>{tt("Call upon the LORD with dependence and prayer.")}</li>
-                    <li>{tt("Make God’s deeds known through faithful witness.")}</li>
-                  </>
-                )}
-              </ol>
-            </div>
-          </section>
-        </main>
+            <BulletList
+              label={tt('Practical Applications')}
+              items={practicalApps?.map((application: any) => application.applicationText).filter(Boolean)}
+            />
+            <TextBlock label={tt('Final Thoughts')} value={studyMetadata?.finalThoughts} wide />
+            <BulletList label={tt('Takeaways')} items={takeaways} />
+          </div>
+        </div>
+      </section>
+
+      <div className="flex justify-end pt-4">
+        <Button variant="outline" onClick={edit} className="gap-2 rounded-full">
+          <Edit2 className="h-3.5 w-3.5" />
+          {tt('Edit explanation')}
+        </Button>
       </div>
-    </div>
+    </article>
   );
 }

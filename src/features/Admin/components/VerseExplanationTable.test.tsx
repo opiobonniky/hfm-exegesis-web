@@ -85,6 +85,6 @@ it('keeps the eye, edit and delete icons on the card actions', () => {
   const { container } = renderTable({}, { onView });
   const buttons = container.querySelectorAll('button');
   fireEvent.click(buttons[0]);
-  expect(onView).toHaveBeenCalledWith(item);
+  expect(onView).toHaveBeenCalledWith(item, 0);
   expect(container.querySelectorAll('button[title="View"]')[0]).toBeTruthy();
 });

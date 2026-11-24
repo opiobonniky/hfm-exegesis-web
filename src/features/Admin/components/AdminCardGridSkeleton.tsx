@@ -7,7 +7,7 @@ export function AdminCardGridSkeleton({ label, count, dailyVerses = false }: {
   dailyVerses?: boolean;
 }) {
   return (
-    <div role="status">
+    <div role="status" className='mt-5'>
       <span className="sr-only">{label}</span>
       <div aria-hidden="true" className={cn('grid grid-cols-1 gap-4 sm:grid-cols-2',
         dailyVerses ? 'xl:grid-cols-3 2xl:grid-cols-4' : 'lg:grid-cols-3')}>

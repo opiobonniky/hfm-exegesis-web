@@ -35,7 +35,7 @@ export function useBibleBookSelectionPage() {
 
   const selectBook = useCallback(
     (bookName: string) => {
-      navigate(`/book-overview?book=${encodeURIComponent(bookName)}`);
+      navigate("/book-overview", { state: { book: bookName } });
     },
     [navigate],
   );

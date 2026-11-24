@@ -22,7 +22,21 @@ export interface ExplanationFieldErrors {
   crossReferences: string[];
   themes: string[];
   takeaways: string[];
+  // Section-level requirements: at least one row in every study section.
+  wordStudiesCount: string;
+  practicalAppsCount: string;
+  crossReferencesCount: string;
+  themesCount: string;
+  takeawaysCount: string;
 }
+
+const MIN_ONE = {
+  wordStudies: "Add at least one Strong's Concordance word study.",
+  practicalApps: "Add at least one practical application.",
+  crossReferences: "Add at least one cross reference.",
+  themes: "Add at least one key theme.",
+  takeaways: "Add at least one takeaway.",
+} as const;
 
 const filled = (value: unknown) => !!String(value ?? "").trim();
 
@@ -91,6 +105,11 @@ export function getExplanationFieldErrors(
         ? ""
         : `Takeaway ${index + 1}: enter the takeaway or remove the row.`,
     ),
+    wordStudiesCount: form.wordStudies.length ? "" : MIN_ONE.wordStudies,
+    practicalAppsCount: form.practicalApps.length ? "" : MIN_ONE.practicalApps,
+    crossReferencesCount: form.crossReferences.length ? "" : MIN_ONE.crossReferences,
+    themesCount: form.themes.length ? "" : MIN_ONE.themes,
+    takeawaysCount: form.studyMetadata.takeaways.length ? "" : MIN_ONE.takeaways,
   };
 }
 
@@ -108,6 +127,11 @@ export function hasExplanationErrors(errors: ExplanationFieldErrors) {
       errors.backgroundBook,
       errors.backgroundContext,
       errors.finalThoughts,
+      errors.wordStudiesCount,
+      errors.practicalAppsCount,
+      errors.crossReferencesCount,
+      errors.themesCount,
+      errors.takeawaysCount,
     ].some(Boolean) ||
     [
       errors.wordStudies,
@@ -130,13 +154,18 @@ export function getExplanationStepErrors(
       errors.backgroundAuthor ||
       errors.backgroundBook ||
       errors.backgroundContext ||
+      errors.wordStudiesCount ||
       errors.wordStudies.find(Boolean) ||
+      errors.practicalAppsCount ||
       errors.practicalApps.find(Boolean) ||
       "",
     insights:
+      errors.themesCount ||
       errors.themes.find(Boolean) ||
+      errors.crossReferencesCount ||
       errors.crossReferences.find(Boolean) ||
       errors.finalThoughts ||
+      errors.takeawaysCount ||
       errors.takeaways.find(Boolean) ||
       "",
   };

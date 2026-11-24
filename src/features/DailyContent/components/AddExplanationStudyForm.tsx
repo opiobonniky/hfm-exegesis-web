@@ -106,6 +106,9 @@ export function AddExplanationStudyForm(props: AddExplanationStudyFormProps) {
 
       <WordStudyEditor value={wordStudies} showErrors={props.showErrors} revealErrors={props.revealRowErrors} requireAll
         onChange={rows => updateField('wordStudies', rows.map((row, sortOrder) => ({ ...row, sortOrder })))} />
+      {errors.wordStudiesCount && (
+        <p role="status" className="text-xs text-destructive">{tt(errors.wordStudiesCount)}</p>
+      )}
     </div>
   );
 }

@@ -584,6 +584,7 @@ export interface VerseExplanationDetail {
   bookName: string;
   chapter: number;
   verseNumber: number;
+  verseEnd?: number | null;
   bibleVersion: string;
   isPublished?: boolean;
   createdOn?: string;

@@ -480,6 +480,7 @@ export interface AddExplanationSidebarProps {
 /** Inline validation for the add/edit explanation editor. */
 export interface ExplanationFieldErrors {
   reference: string;
+  bibleVersion?: string;
   explanationText: string;
   applicationText: string;
   introduction: string;
@@ -492,6 +493,11 @@ export interface ExplanationFieldErrors {
   crossReferences: string[];
   themes: string[];
   takeaways: string[];
+  wordStudiesCount?: string;
+  practicalAppsCount?: string;
+  crossReferencesCount?: string;
+  themesCount?: string;
+  takeawaysCount?: string;
 }
 
 export interface AddExplanationReferenceFormProps {
@@ -529,7 +535,7 @@ export interface AddExplanationExegesisFormProps {
 export interface AddExplanationStudyFormProps {
   showErrors?: boolean;
   revealRowErrors?: boolean;
-  errors?: Partial<Pick<ExplanationFieldErrors, "introduction" | "backgroundAuthor" | "backgroundBook" | "backgroundContext" | "wordStudies">>;
+  errors?: Partial<Pick<ExplanationFieldErrors, "introduction" | "backgroundAuthor" | "backgroundBook" | "backgroundContext" | "wordStudies" | "wordStudiesCount">>;
   introduction: string;
   backgroundAuthor: string;
   backgroundBook: string;
@@ -546,7 +552,7 @@ export interface AddExplanationStudyFormProps {
 export interface AddExplanationExtrasFormProps {
   showErrors?: boolean;
   revealRowErrors?: boolean;
-  errors?: Partial<Pick<ExplanationFieldErrors, "crossReferences" | "themes" | "takeaways" | "finalThoughts">>;
+  errors?: Partial<Pick<ExplanationFieldErrors, "crossReferences" | "themes" | "takeaways" | "finalThoughts" | "themesCount" | "crossReferencesCount" | "takeawaysCount">>;
   bibleVersion: string;
   onCrossReferencesChange: (rows: CrossRefItem[]) => void;
   crossReferences: CrossRefItem[];

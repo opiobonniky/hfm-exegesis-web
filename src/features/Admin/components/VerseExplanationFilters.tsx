@@ -99,7 +99,7 @@ export function VerseExplanationFilters({
             value: String(index + 1),
             label: String(index + 1),
           }))}
-          placeholder={bookName ? tt("All chapters") : tt("Select a book first")}
+          placeholder={bookName ? tt("All chapters") : tt("Select Book")}
           searchPlaceholder={tt("Search chapters...")}
           width="w-full"
         />
@@ -111,12 +111,12 @@ export function VerseExplanationFilters({
         <div className="relative">
           <Search className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
           <Input
-            aria-label={searchLabel || tt("Filter by creator or updater name")}
+            aria-label={searchLabel || tt("creator or updater name")}
             type="text"
             value={creatorName}
             onChange={(event) => onCreatorNameChange(event.target.value)}
             placeholder={searchPlaceholder || tt("Search by name, e.g. John")}
-            className="h-10 w-full bg-background ps-9"
+            className="h-10 w-full bg-background ps-9 mt-1"
           />
         </div>
       </label>

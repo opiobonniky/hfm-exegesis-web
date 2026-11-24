@@ -1,13 +1,19 @@
 // useJournalEntryAdminDetail — fetch a single journal entry for admin
 import { useState, useEffect, useCallback } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { adminApi } from "../services/adminApi";
 import type { JournalAdminDetail } from "../types";
+import type { JournalEntryDetailLocationState } from "../utils";
 import { tt } from '@/components/languages/hardcodedTranslate';
 
 export function useJournalEntryAdminDetail() {
-  const { entryId } = useParams<{ entryId: string }>();
+  // The id is handed over in router state; the URL stays at
+  // /admin/journal-moderation/detail for every entry.
+  const location = useLocation();
+  const locationState = (location.state || null) as Partial<JournalEntryDetailLocationState> | null;
+  const rawId = locationState?.id;
+  const entryId = rawId == null || rawId === "" ? null : String(rawId);
   const navigate = useNavigate();
   const { toast } = useToast();
   const [item, setItem] = useState<JournalAdminDetail | null>(null);
@@ -16,10 +22,16 @@ export function useJournalEntryAdminDetail() {
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   useEffect(() => {
-    if (!entryId) return;
+    if (!entryId) {
+      toast({ title: tt("Not found"), variant: "destructive" });
+      navigate("/admin/journal-moderation", { replace: true });
+      return;
+    }
+    let active = true;
     setLoading(true);
     adminApi.request("journal", "admin/get", { id: Number(entryId) })
       .then((res) => {
+        if (!active) return;
         if (res?.returnCode === 200 && res.returnData) {
           setItem(res.returnData);
         } else {
@@ -28,10 +40,12 @@ export function useJournalEntryAdminDetail() {
         }
       })
       .catch(() => {
+        if (!active) return;
         toast({ title: tt("Failed to load"), variant: "destructive" });
         navigate("/admin/journal-moderation");
       })
-      .finally(() => setLoading(false));
+      .finally(() => active && setLoading(false));
+    return () => { active = false; };
   }, [entryId, toast, navigate]);
 
   const handleDelete = useCallback(async () => {

@@ -90,6 +90,20 @@ const fillRequiredFields = (result: any) => act(() => {
   result.current.actions.updateNested('exegesis', 'applicationText', 'Daily application');
   (['introduction', 'backgroundAuthor', 'backgroundBook', 'backgroundContext', 'finalThoughts'] as const)
     .forEach(key => result.current.actions.updateNested('studyMetadata', key, `Filled ${key}`));
+  // Every study section needs at least one complete row. Replace the lists so
+  // the helper is idempotent when a test calls it twice.
+  result.current.actions.updateField('wordStudies', [{
+    surfaceText: 'Know', strongsId: 'H3045', customDefinition: 'Know intimately', sortOrder: 0,
+  }]);
+  result.current.actions.updateField('practicalApps', [{
+    applicationText: 'Apply the passage today', sortOrder: 0,
+  }]);
+  result.current.actions.updateField('themes', [{ themeName: 'Trust', sortOrder: 0 }]);
+  result.current.actions.updateField('crossReferences', [{
+    bookName: 'Romans', chapter: 5, verseNumber: 1, verseEnd: null,
+    referenceText: 'We have peace with God', commentary: '', sortOrder: 0,
+  }]);
+  result.current.actions.updateNested('studyMetadata', 'takeaways', ['God is faithful']);
 });
 
 it('loads the canonical explanation by ID from navigation state without a second passage lookup', async () => {
@@ -219,15 +233,29 @@ it('creates a range explanation and validates its required reference and study r
   act(() => result.current.actions.addWordStudy());
   expect(result.current.data.isValid).toBe(false);
   act(() => result.current.actions.removeWordStudy(0));
-  // An added but empty row must be filled or removed before saving.
+  // An empty section must contain at least one complete row before saving.
   act(() => result.current.actions.updateField('crossReferences', [{ bookName: '', chapter: 0, verseNumber: 0, referenceText: '', commentary: '', sortOrder: 0 }]));
   expect(result.current.data.isValid).toBe(false);
   act(() => result.current.actions.updateField('crossReferences', []));
+  expect(result.current.data.isValid).toBe(false);
+  expect(result.current.data.fieldErrors.crossReferencesCount).toBeTruthy();
+  // Restore one complete row in every required section.
+  act(() => {
+    result.current.actions.updateField('wordStudies', [{
+      surfaceText: 'Know', strongsId: 'H3045', customDefinition: 'Know intimately', sortOrder: 0,
+    }]);
+    result.current.actions.updateField('crossReferences', [{
+      bookName: 'Romans', chapter: 5, verseNumber: 1, verseEnd: 3,
+      referenceText: 'We have peace with God', commentary: '', sortOrder: 0,
+    }]);
+  });
   expect(result.current.data.isValid).toBe(true);
   vi.useFakeTimers();
   await act(async () => { await result.current.actions.handleSave(); });
   expect(mocks.post).toHaveBeenCalledWith('bible', 'add-verse-explanation', expect.objectContaining({ verseNumber: 6, verseEnd: 10 }));
-  expect(mocks.post.mock.calls.at(-1)![2].crossReferences).toEqual([]);
+  expect(mocks.post.mock.calls.at(-1)![2].crossReferences).toEqual([
+    expect.objectContaining({ bookName: 'Romans', chapter: 5, verseNumber: 1 }),
+  ]);
   act(() => vi.advanceTimersByTime(500));
   expect(mocks.navigate).toHaveBeenCalledWith('/admin/verse-explanations');
   act(() => result.current.actions.updateField('bookName', 'Exodus'));
@@ -243,8 +271,10 @@ it('reopens and saves ranges and structured studies without losing existing IDs 
     sharedStudyVersion: 7,
     exegesis: { explanationText: 'An existing explanation with enough detail.', applicationText: 'Saved application' },
     studyMetadata: { introduction: 'Saved introduction', backgroundAuthor: 'Saved author', backgroundBook: 'Saved book',
-      backgroundContext: 'Saved context', finalThoughts: 'Saved final thoughts' },
+      backgroundContext: 'Saved context', finalThoughts: 'Saved final thoughts', takeaways: '["Saved takeaway"]' },
     wordStudies: [{ surfaceText: 'Know', strongsId: null, strongsIds: ['H3045', 'H03045A'], strongs: null, customDefinition: 'Know intimately', sortOrder: 0 }],
+    practicalApps: [{ applicationText: 'Saved practice', sortOrder: 0 }],
+    themes: [{ themeName: 'Trust', sortOrder: 0 }],
     crossReferences: [{ bookName: 'Romans', chapter: 5, verseNumber: 1, verseEnd: 3, referenceText: 'Original quote', commentary: 'Editorial commentary' }],
   } });
   const { result } = renderHook(() => useAddExplanation());
@@ -284,12 +314,21 @@ it('gates Continue until the current step fields and added rows are filled', asy
   act(() => result.current.actions.goNext());
   expect(result.current.data.currentStep).toBe('learnMore');
   expect(result.current.data.canAdvanceFromCurrent).toBe(false);
+  // An empty section blocks Continue even before a row is added.
+  expect(result.current.data.fieldErrors.wordStudiesCount).toBeTruthy();
+  expect(result.current.data.fieldErrors.practicalAppsCount).toBeTruthy();
   fillRequiredFields(result);
   expect(result.current.data.canAdvanceFromCurrent).toBe(true);
   act(() => result.current.actions.addWordStudy());
   expect(result.current.data.canAdvanceFromCurrent).toBe(false);
-  expect(result.current.data.fieldErrors.wordStudies[0]).toContain('Word study 1');
+  expect(result.current.data.fieldErrors.wordStudies.some(Boolean)).toBe(true);
+  act(() => result.current.actions.removeWordStudy(1));
+  expect(result.current.data.canAdvanceFromCurrent).toBe(true);
   act(() => result.current.actions.removeWordStudy(0));
+  // Removing the only word study re-opens the "at least one" requirement.
+  expect(result.current.data.canAdvanceFromCurrent).toBe(false);
+  expect(result.current.data.fieldErrors.wordStudiesCount).toBeTruthy();
+  fillRequiredFields(result);
   expect(result.current.data.canAdvanceFromCurrent).toBe(true);
   act(() => result.current.actions.updateNested('studyMetadata', 'finalThoughts', ''));
   expect(result.current.data.canAdvanceFromCurrent).toBe(true);

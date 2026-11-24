@@ -2,6 +2,10 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { adminApi } from "../services/adminApi";
+import {
+  JOURNAL_MODERATION_DETAIL_PATH,
+  journalEntryDetailState,
+} from "../utils";
 import { useNavigate } from "react-router-dom";
 import type { JournalModerationEntry } from "../types";
 import { tt } from '@/components/languages/hardcodedTranslate';
@@ -133,7 +137,9 @@ export function useAdminJournalModeration() {
 
   const goBack = useCallback(() => navigate(-1), [navigate]);
   const viewEntry = useCallback((entry: JournalModerationEntry) => {
-    navigate(`/admin/journal-moderation/${entry.id}`);
+    navigate(JOURNAL_MODERATION_DETAIL_PATH, {
+      state: journalEntryDetailState(entry),
+    });
   }, [navigate]);
   const requestDelete = useCallback((entry: JournalModerationEntry) => {
     setDeleteTarget(entry);

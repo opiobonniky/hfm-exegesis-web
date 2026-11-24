@@ -597,7 +597,7 @@ const routeConfigs = {
     title: tt("Verse Explanations Manager"),
   },
   verseExplanationDetail: {
-    path: "/admin/verse-explanations/:bookName/:chapter/:verseNumber",
+    path: "/admin/verse-explanations/detail",
     component: VerseExplanationDetail,
     isProtected: true,
     requiresLayout: true,
@@ -674,7 +674,7 @@ const routeConfigs = {
     title: tt("Journal Moderation"),
   },
   journalEntryAdminDetail: {
-    path: "/admin/journal-moderation/:entryId",
+    path: "/admin/journal-moderation/detail",
     component: JournalEntryAdminDetail,
     isProtected: true,
     requiresLayout: true,

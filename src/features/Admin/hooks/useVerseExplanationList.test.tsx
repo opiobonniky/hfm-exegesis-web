@@ -2,14 +2,18 @@ import { act, cleanup, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { useVerseExplanationList } from "./useVerseExplanationList";
 
-const mocks = vi.hoisted(() => ({ request: vi.fn(), navigate: vi.fn(), toast: vi.fn() }));
+const mocks = vi.hoisted(() => ({ request: vi.fn(), navigate: vi.fn(), toast: vi.fn(), state: null as any }));
 vi.mock("@/features/Admin/services/adminApi", () => ({ adminApi: { request: mocks.request } }));
-vi.mock("react-router-dom", () => ({ useNavigate: () => mocks.navigate }));
+vi.mock("react-router-dom", () => ({
+  useNavigate: () => mocks.navigate,
+  useLocation: () => ({ state: mocks.state }),
+}));
 vi.mock("@/hooks/use-toast", () => ({ useToast: () => ({ toast: mocks.toast }) }));
 vi.mock("@/components/languages/hardcodedTranslate", () => ({ tt: (text: string) => text }));
 
 beforeEach(() => {
   vi.clearAllMocks();
+  mocks.state = null;
   mocks.request.mockResolvedValue({
     returnCode: 200,
     returnData: { explanations: [], totalCount: 0, totalPages: 0 },
@@ -118,4 +122,47 @@ it("replaces the accumulated rows when a filter changes during a next-page reque
   await waitFor(() => expect(result.current.data.data.items.map(item => item.id)).toEqual([99]));
   await act(async () => { resolveNext(response(10)); });
   expect(result.current.data.data.items.map(item => item.id)).toEqual([99]);
+});
+
+it("opens the detail by id and index in router state, not in the URL", async () => {
+  const { result } = renderHook(useVerseExplanationList);
+  await waitFor(() => expect(result.current.data.loading).toBe(false));
+
+  act(() =>
+    result.current.actions.viewItem(
+      { id: 7, bookName: "Ecclesiastes", chapter: 3, verseNumber: 11 } as any,
+      4,
+    ),
+  );
+  expect(mocks.navigate).toHaveBeenCalledWith("/admin/verse-explanations/detail", {
+    state: {
+      id: 7,
+      bookName: "Ecclesiastes",
+      chapter: 3,
+      verseNumber: 11,
+      verseEnd: null,
+      index: 4,
+    },
+  });
+
+  act(() =>
+    result.current.actions.editItem({
+      id: 7,
+      bookName: "Ecclesiastes",
+      chapter: 3,
+      verseNumber: 11,
+    } as any),
+  );
+  expect(mocks.navigate).toHaveBeenCalledWith("/admin/add-verse-explanation", {
+    state: { explanationId: 7 },
+  });
+});
+
+it("exposes the row to restore when returning from a detail page", async () => {
+  mocks.state = { restoreId: 7, restoreIndex: 4 };
+  const { result } = renderHook(useVerseExplanationList);
+  await waitFor(() => expect(result.current.data.loading).toBe(false));
+
+  expect(result.current.data.restoreId).toBe(7);
+  expect(result.current.data.restoreIndex).toBe(4);
 });

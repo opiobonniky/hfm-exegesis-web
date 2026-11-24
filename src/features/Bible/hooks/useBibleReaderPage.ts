@@ -73,9 +73,13 @@ export function useBibleReaderPage() {
   useEffect(() => {
     const book = searchParams.get("book") || reader.selectedBook;
     if (book && !hasSeenBookOverview(book)) {
-      // Build the return URL so BookOverview can send user back here
+      // Build the return URL so BookOverview can send user back here. The book
+      // itself rides in router state, so the address bar has no `?book=`.
       const returnUrl = window.location.pathname + window.location.search;
-      navigate(`/book-overview?book=${encodeURIComponent(book)}&return=${encodeURIComponent(returnUrl)}`, { replace: true });
+      navigate("/book-overview", {
+        replace: true,
+        state: { book, returnUrl },
+      });
     }
   }, [searchParams, reader.selectedBook, navigate]);
   const lastFocusedVerseRef = useRef<string | null>(null);
@@ -977,9 +981,7 @@ export function useBibleReaderPage() {
           `/bible-chapters?book=${encodeURIComponent(reader.selectedBook)}&chapter=${reader.selectedChapter}`,
         ),
       openBookOverview: () =>
-        navigate(
-          `/book-overview?book=${encodeURIComponent(reader.selectedBook)}`,
-        ),
+        navigate("/book-overview", { state: { book: reader.selectedBook } }),
       handleReadChapter: protect(handleReadChapter, "Audio narration requires an account."),
       selectTranslation: reader.selectTranslation,
       setTranslationOpen,

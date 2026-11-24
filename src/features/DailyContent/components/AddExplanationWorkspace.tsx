@@ -118,6 +118,7 @@ export function AddExplanationWorkspace({
             <AddExplanationPracticalApplications
               rows={data.form.practicalApps}
               errors={errors.practicalApps}
+              sectionError={errors.practicalAppsCount}
               onChange={actions.updatePracticalApp}
               onAdd={actions.addPracticalApp}
               onRemove={actions.removePracticalApp}

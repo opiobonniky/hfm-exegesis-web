@@ -3,6 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { BIBLE_BOOKS } from "@/data/staticData";
 import { useAdminCrud } from "./useAdminCrud";
 import { VERSE_EXPLANATION_EMPTY_FORM } from "../constants";
+import {
+  VERSE_EXPLANATION_DETAIL_PATH,
+  verseExplanationDetailState,
+} from "../utils";
 import type { AdminVerseExplanation as VerseExplanation } from "../types";
 export function useAdminVerseExplanationsPage() {
   const navigate = useNavigate();
@@ -67,9 +71,9 @@ export function useAdminVerseExplanationsPage() {
   const goBack = useCallback(() => navigate("/admin"), [navigate]);
   const viewItem = useCallback(
     (item: VerseExplanation) => {
-      navigate(
-        `/admin/verse-explanations/${encodeURIComponent(item.bookName)}/${item.chapter}/${item.verseNumber}`,
-      );
+      navigate(VERSE_EXPLANATION_DETAIL_PATH, {
+        state: verseExplanationDetailState(item),
+      });
     },
     [navigate],
   );

@@ -72,7 +72,7 @@ it("uses searchable book and chapter selectors plus a name filter", () => {
   fireEvent.change(chapter, { target: { value: "8" } });
   expect(handlers.onChapterChange).toHaveBeenCalledWith("8");
 
-  fireEvent.change(screen.getByLabelText("Filter by creator or updater name"), {
+  fireEvent.change(screen.getByLabelText("creator or updater name"), {
     target: { value: "Ada" },
   });
   expect(handlers.onCreatorNameChange).toHaveBeenCalledWith("Ada");

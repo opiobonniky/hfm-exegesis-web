@@ -58,11 +58,16 @@ describe("getExplanationFieldErrors", () => {
     expect(getExplanationStepErrors(errors).insights).toBeTruthy();
   });
 
-  it("accepts a fully filled form with no added rows", () => {
+  it("requires at least one row in every study section", () => {
     const errors = getExplanationFieldErrors(completeForm);
-    expect(hasExplanationErrors(errors)).toBe(false);
-    expect(getExplanationStepErrors(errors).learnMore).toBe("");
-    expect(getExplanationStepErrors(errors).insights).toBe("");
+    expect(errors.wordStudiesCount).toBeTruthy();
+    expect(errors.practicalAppsCount).toBeTruthy();
+    expect(errors.crossReferencesCount).toBeTruthy();
+    expect(errors.themesCount).toBeTruthy();
+    expect(errors.takeawaysCount).toBeFalsy();
+    expect(hasExplanationErrors(errors)).toBe(true);
+    expect(getExplanationStepErrors(errors).learnMore).toBeTruthy();
+    expect(getExplanationStepErrors(errors).insights).toBeTruthy();
   });
 
   it("requires each added row to be filled", () => {
@@ -96,6 +101,8 @@ describe("getExplanationFieldErrors", () => {
       ...completeForm,
       wordStudies: [{ strongsId: "", surfaceText: "", customDefinition: "", sortOrder: 0 }],
       crossReferences: [{ bookName: "", chapter: 0, verseNumber: 0, referenceText: "", commentary: "", sortOrder: 0 }],
+      practicalApps: [{ applicationText: "Pray", sortOrder: 0 }],
+      themes: [{ themeName: "Trust", sortOrder: 0 }],
     }, { hideRichContent: true });
     expect(hasExplanationErrors(legacy)).toBe(false);
   });

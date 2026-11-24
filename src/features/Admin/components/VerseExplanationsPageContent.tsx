@@ -1,7 +1,7 @@
 // AdminVerseExplanations — thin page composing hook + shared admin components
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -29,12 +29,26 @@ export function VerseExplanationsPageContent() {
     useState<VerseExplanationListItem | null>(null);
   const watchEnd = h.hasMore && !h.loading && !h.loadError;
   const endRef = useScrollEnd(watchEnd, h.loadMore);
+  // Coming back from a detail page: bring the record the admin opened back
+  // into view. If it lives on a later server page, load pages until it is in
+  // the list (the list stops itself when there is no more data).
+  const restoredRef = useRef(false);
+  useEffect(() => {
+    if (restoredRef.current || h.restoreId == null) return;
+    const target = document.getElementById(`verse-explanation-${h.restoreId}`);
+    if (target) {
+      restoredRef.current = true;
+      target.scrollIntoView({ block: 'center' });
+      return;
+    }
+    if (h.hasMore && !h.loading && !h.loadError) h.loadMore();
+  }, [h.restoreId, h.data.items, h.hasMore, h.loading, h.loadError, h.loadMore]);
 
   return (
     <div className="min-h-screen bg-background">
       <AdminPageHeader
         fullWidth
-        title={tt("Verse Explanations Manager")}
+        title={tt(" Explanations")}
         subtitle={`${h.data.totalCount || 0} explanation${(h.data.totalCount || 0) !== 1 ? "s" : ""}`}
         icon={<Lightbulb className="w-5 h-5 text-primary" />}
         onBack={h.goBack}

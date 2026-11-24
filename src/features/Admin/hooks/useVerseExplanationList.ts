@@ -1,8 +1,13 @@
 // useVerseExplanationList — append each server page until the list is exhausted
 import { useState, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { adminApi } from "../services/adminApi";
+import {
+  VERSE_EXPLANATION_DETAIL_PATH,
+  verseExplanationDetailState,
+  type VerseExplanationListRestoreState,
+} from "../utils";
 import type {
   VerseExplanationListItem,
   VerseExplanationPageData as PageData,
@@ -14,7 +19,9 @@ export const VERSE_EXPLANATION_PAGE_SIZE = 9;
 
 export function useVerseExplanationList(pageSize = VERSE_EXPLANATION_PAGE_SIZE) {
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
+  const restore = (location.state || null) as VerseExplanationListRestoreState | null;
   const [data, setData] = useState<PageData>({ items: [], totalCount: 0, page: 1, pageSize, totalPages: 0 });
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
@@ -132,8 +139,10 @@ export function useVerseExplanationList(pageSize = VERSE_EXPLANATION_PAGE_SIZE) 
   );
 
   const viewItem = useCallback(
-    (item: VerseExplanationListItem) => {
-      navigate(`/admin/verse-explanations/${encodeURIComponent(item.bookName)}/${item.chapter}/${item.verseNumber}`);
+    (item: VerseExplanationListItem, index?: number) => {
+      navigate(VERSE_EXPLANATION_DETAIL_PATH, {
+        state: verseExplanationDetailState(item, index),
+      });
     },
     [navigate],
   );
@@ -162,6 +171,8 @@ export function useVerseExplanationList(pageSize = VERSE_EXPLANATION_PAGE_SIZE) 
     data: {
       data, loading, loadError, hasMore, search: searchInput, page, deleting,
       bookName, chapter, creatorName,
+      restoreId: restore?.restoreId ?? null,
+      restoreIndex: restore?.restoreIndex ?? null,
     },
     actions: {
       setSearch: setSearchInput, loadMore, retry, deleteItem, viewItem, editItem, goBack,

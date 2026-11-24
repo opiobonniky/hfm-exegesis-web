@@ -5,11 +5,12 @@ import { Badge } from "@/components/ui/badge";
 import { tt } from '@/components/languages/hardcodedTranslate';
 import { useLanguage } from '@/components/languages/languageProvider';
 import { displayDate } from '@/services/numberLocale/format';
+import { bibleVersionFullName } from "../utils";
 import type { VerseExplanationListItem } from "../types";
 
 interface VerseExplanationTableProps {
   items: VerseExplanationListItem[];
-  onView: (item: VerseExplanationListItem) => void;
+  onView: (item: VerseExplanationListItem, index: number) => void;
   onEdit: (item: VerseExplanationListItem) => void;
   onDelete: (item: VerseExplanationListItem) => void;
 }
@@ -103,9 +104,10 @@ export function VerseExplanationTable({
 }: VerseExplanationTableProps) {
   return (
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {items.map((item) => (
+        {items.map((item, index) => (
           <article
             key={item.id}
+            id={`verse-explanation-${item.id}`}
             className="border rounded-xl p-4 bg-card flex flex-col justify-between"
           >
             <div>
@@ -115,7 +117,7 @@ export function VerseExplanationTable({
                     {item.preview?.reference || `${item.bookName} ${item.chapter}:${item.verseNumber}`}
                   </div>
                   <div className="text-xs text-muted-foreground mt-1">
-                    {item.bibleVersion || tt("BSB")}
+                    {bibleVersionFullName(item.bibleVersion)}
                   </div>
                 </div>
                 <Badge
@@ -148,7 +150,7 @@ export function VerseExplanationTable({
                 studyCreatedOn={item.studyCreatedOn}
               />
               <VerseExplanationActions
-                onView={() => onView(item)}
+                onView={() => onView(item, index)}
                 onEdit={() => onEdit(item)}
                 onDelete={() => onDelete(item)}
               />

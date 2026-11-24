@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback, useSyncExternalStore } from "react";
 import { useLanguage } from '@/components/languages/languageProvider';
 import { getPublicPackState, subscribePublicPacks, hydratePublicPack, getPackedOverview } from '@/services/publicReadingPacks';
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams, useLocation, useNavigate } from "react-router-dom";
 import { getBookPrologue } from "@/services/bookProloguesApi";
 import type { BookPrologue } from "@/services/bookProloguesApi";
 import { bibleApi, markBookOverviewSeen } from "../services";
@@ -72,8 +72,12 @@ export function useBookOverview() {
   const { lang } = useLanguage();
   const packState = useSyncExternalStore(subscribePublicPacks, () => getPublicPackState('overview', lang));
   const [searchParams] = useSearchParams();
+  const location = useLocation();
   const navigate = useNavigate();
-  const bookName = searchParams.get("book") || "Genesis";
+  // The book travels in router state so the address bar stays at
+  // `/book-overview`; the query keeps older links working.
+  const overviewState = (location.state || {}) as { book?: string; returnUrl?: string };
+  const bookName = overviewState.book || searchParams.get("book") || "Genesis";
   const [prologue, setPrologue] = useState<BookPrologue | null>(null);
   const [loading, setLoading] = useState(true);
   const [resumeChapter, setResumeChapter] = useState<number | null>(null);
@@ -127,7 +131,7 @@ export function useBookOverview() {
   const designation = getPackedOverview(bookName, lang)?.designation || getBookDesignation(bookName);
 
   // Check for return URL (from auto-redirect)
-  const returnUrl = searchParams.get("return");
+  const returnUrl = overviewState.returnUrl || searchParams.get("return");
 
   const onStartReading = useCallback(() => {
     // Mark this book's overview as seen

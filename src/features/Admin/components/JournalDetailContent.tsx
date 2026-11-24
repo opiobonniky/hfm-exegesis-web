@@ -1,10 +1,10 @@
-// JournalDetailContent — renders journal entry fields as sections
+// JournalDetailContent — renders a journal entry in the same paper/note grid
+// used by the consumer Book Overview.
 "use client";
 
-import { Globe, Lock } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import { DetailSection } from "./DetailSection";
+import type { ReactNode } from "react";
+import { useLanguage } from "@/components/languages/languageProvider";
+import { displayDate } from "@/services/numberLocale/format";
 import { tt } from '@/components/languages/hardcodedTranslate';
 
 interface JournalEntry {
@@ -24,100 +24,77 @@ interface JournalEntry {
   updatedOn?: string;
 }
 
-export function JournalDetailContent({ item }: { item: JournalEntry }) {
+function Note({ title, wide, children }: { title: string; wide?: boolean; children: ReactNode }) {
   return (
-    <>
-      {/* Title + visibility */}
-      <Card>
-        <CardContent className="pt-5 sm:pt-6">
-          <div className="flex flex-col items-start gap-3 sm:flex-row sm:justify-between">
-            <h2 className="min-w-0 break-words text-lg font-bold sm:text-xl">
-              {item.title || tt("Untitled")}
-            </h2>
-            <Badge variant={item.isPublished ? "default" : "outline"} className="shrink-0">
-              {item.isPublished ? (
-                <Globe className="w-3 h-3 mr-1" />
-              ) : (
-                <Lock className="w-3 h-3 mr-1" />
-              )}
-              {item.isPublished ? tt("Public") : tt("Private")}
-            </Badge>
-          </div>
-          <div className="mt-2 flex flex-wrap items-center gap-2">
-            {item.category && (
-              <Badge variant="secondary">{item.category}</Badge>
-            )}
-            {item.bookName && (
-              <Badge variant="outline">
-                {item.bookName}
-                {item.chapter ? ` ${item.chapter}` : ""}
-                {item.verseNumber ? `:${item.verseNumber}` : ""}
-              </Badge>
-            )}
-            {item.mood && (
-              <Badge variant="outline" className="text-amber-600 dark:text-amber-400">
-                {item.mood}
-              </Badge>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Content */}
-      <DetailSection title={tt("Content")}>
-        <p className="break-words whitespace-pre-wrap text-sm leading-relaxed text-foreground/80">
-          {item.content}
-        </p>
-      </DetailSection>
-
-      {/* Additional fields */}
-      {[
-        { label: tt("Prayers"), value: item.prayers },
-        { label: tt("Gratitude"), value: item.gratitude },
-        { label: tt("Learnings"), value: item.learnings },
-        { label: tt("Application"), value: item.application },
-      ]
-        .filter((f) => f.value)
-        .map((field) => (
-          <DetailSection key={field.label} title={field.label}>
-            <p className="break-words whitespace-pre-wrap text-sm leading-relaxed text-foreground/80">
-              {field.value}
-            </p>
-          </DetailSection>
-        ))}
-    </>
+    <section className={`prologue-note${wide ? ' prologue-note-wide' : ''}`}>
+      <div className="prologue-note-heading"><h2>{title}</h2></div>
+      {children}
+    </section>
   );
 }
 
-/* ─── Journal detail header with publication toggle ─── */
-export function JournalDetailHeader({
-  userId,
-  isPublished,
-  onTogglePublication,
-  onDelete,
-}: {
-  userId?: string;
-  isPublished: boolean;
-  onTogglePublication: () => void;
-  onDelete: () => void;
-}) {
+function TextBlock({ label, value, wide }: { label: string; value?: string | null; wide?: boolean }) {
+  if (!value?.trim()) return null;
   return (
-    <>
-      <p className="w-full text-xs text-muted-foreground sm:w-auto">{tt("by user")}{userId?.slice(0, 8)}…
-      </p>
-      <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
-        <button
-          onClick={onTogglePublication}
-          className="inline-flex min-h-10 flex-1 items-center justify-center gap-1.5 rounded-md border px-3 py-2 text-xs font-medium transition-colors hover:bg-muted sm:min-h-9 sm:flex-none sm:py-1.5"
-        >
-          {isPublished ? <Lock className="w-3.5 h-3.5" /> : <Globe className="w-3.5 h-3.5 text-emerald-500" />}
-          {isPublished ? tt("Make Private") : tt("Make Public")}
-        </button>
-        <button
-          onClick={onDelete}
-          className="inline-flex min-h-10 flex-1 items-center justify-center gap-1.5 rounded-md border border-destructive/30 px-3 py-2 text-xs font-medium text-destructive transition-colors hover:bg-destructive/10 sm:min-h-9 sm:flex-none sm:py-1.5"
-        >{tt("Delete")}</button>
-      </div>
-    </>
+    <Note title={label} wide={wide ?? value.length > 280}>
+      <p className="prologue-prose whitespace-pre-wrap break-words">{value}</p>
+    </Note>
+  );
+}
+
+export function JournalDetailContent({ item }: { item: JournalEntry }) {
+  const { lang } = useLanguage();
+  const reference = item.bookName
+    ? `${item.bookName}${item.chapter ? ` ${item.chapter}` : ""}${item.verseNumber ? `:${item.verseNumber}` : ""}`
+    : null;
+  const createdLabel = item.createdOn ? displayDate(item.createdOn, lang) : null;
+  const updatedLabel = item.updatedOn ? displayDate(item.updatedOn, lang) : null;
+
+  const facts = [
+    { label: 'Visibility', value: item.isPublished ? tt('Public') : tt('Private') },
+    { label: 'Category', value: item.category },
+    { label: 'Reference', value: reference },
+    { label: 'Mood', value: item.mood },
+    { label: 'Created', value: createdLabel },
+    { label: 'Updated', value: updatedLabel },
+  ].filter(fact => fact.value != null && fact.value !== '');
+
+  return (
+    <article className="prologue-page-shell">
+      <header className="prologue-hero">
+        <div className="prologue-heading-meta">
+          <span>{tt('Journal entry')} / {item.category || tt('Reflection')}</span>
+          <span>{item.isPublished ? tt('Public') : tt('Private')}</span>
+        </div>
+        <h1>{item.title || tt('Untitled')}</h1>
+        {reference && <p className="prologue-deck">{reference}</p>}
+        {!!facts.length && (
+          <dl className="prologue-facts">
+            {facts.map(fact => (
+              <div key={fact.label} className={fact.label === 'Category' ? 'prologue-fact-audience' : undefined}>
+                <dt>{fact.label}</dt>
+                <dd>{fact.value}</dd>
+              </div>
+            ))}
+          </dl>
+        )}
+      </header>
+
+      <section aria-label={tt('Journal entry')}>
+        <div className="prologue-section-label">
+          <span>{tt('Entry')}</span>
+          <span>{reference || item.title || tt('Journal entry')}</span>
+        </div>
+        <div className="prologue-paper">
+          <div className="prologue-card-grid">
+            <TextBlock label={tt('Content')} value={item.content} wide />
+            <TextBlock label={tt('Prayers')} value={item.prayers} />
+            <TextBlock label={tt('Gratitude')} value={item.gratitude} />
+            <TextBlock label={tt('Learnings')} value={item.learnings} />
+            <TextBlock label={tt('Application')} value={item.application} wide />
+          </div>
+        </div>
+      </section>
+    </article>
   );
 }

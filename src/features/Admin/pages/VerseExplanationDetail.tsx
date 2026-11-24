@@ -1,44 +1,41 @@
 // VerseExplanationDetail — thin page composing hook + components (no inline HTML)
 "use client";
 
-import { Lightbulb } from "lucide-react";
 import { useVerseExplanationDetail } from "../hooks/useVerseExplanationDetail";
-import { DetailLoading, DetailPageHeader, DetailContent, DetailBackButton } from "../components/DetailPageLayout";
-import { DetailMetadataGrid } from "../components/DetailSection";
+import VerseExplanationDetailHeader from "../components/VerseExplanationDetailHeader";
 import { VerseExplanationDetailContent } from "../components/VerseExplanationDetailContent";
-import { tt } from '@/components/languages/hardcodedTranslate';
+import BookOverviewLoading from "../../Bible/components/BookOverviewLoading";
+import BookOverviewEmpty from "../../Bible/components/BookOverviewEmpty";
+import '../../Bible/theme/bookOverview.css';
 
 export default function VerseExplanationDetail() {
   const { data, actions } = useVerseExplanationDetail();
-  if (data.loading) return <DetailLoading />;
-  if (!data.item) return null;
+  const item = data.item;
+  const reference = item
+    ? `${item.bookName} ${item.chapter}:${item.verseNumber}${item.verseEnd ? `–${item.verseEnd}` : ''}`
+    : "";
 
   return (
-    <div className="min-h-screen bg-background">
-      <DetailPageHeader
-        icon={<Lightbulb className="w-5 h-5 text-primary" />}
-        title={tt("Verse Explanation")}
-        subtitle={`${data.item.bookName} ${data.item.chapter}:${data.item.verseNumber}`}
-        badge={{
-          label: data.item.isPublished !== false ? "Published" : "Draft",
-          variant: data.item.isPublished !== false ? "default" : "secondary",
-        }}
-        onBack={() => actions.navigate("/admin/verse-explanations")}
-        containerClassName="max-w-full mx-auto px-3 sm:px-4 lg:px-6"
+    <div className="book-prologue-view consumer-book-overview h-full flex flex-col">
+      <VerseExplanationDetailHeader
+        reference={reference}
+        onBack={actions.backToList}
+        onEdit={() =>
+          actions.navigate("/admin/add-verse-explanation", {
+            state: { explanationId: item?.id },
+          })
+        }
       />
 
-      <DetailContent className="max-w-full mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6">
-        <VerseExplanationDetailContent item={data.item} />
-
-        <DetailMetadataGrid
-          fields={[
-            { label: tt("Created"), value: data.item.createdOn, format: "datetime" },
-            { label: tt("Updated"), value: data.item.updatedOn, format: "datetime" },
-          ]}
-        />
-
-        <DetailBackButton label={tt("Back to Explanations")} onClick={() => actions.navigate("/admin/verse-explanations")} />
-      </DetailContent>
+      <main className="flex-1 min-h-0 overflow-y-auto">
+        {data.loading ? (
+          <BookOverviewLoading />
+        ) : item ? (
+          <VerseExplanationDetailContent item={item} />
+        ) : (
+          <BookOverviewEmpty />
+        )}
+      </main>
     </div>
   );
 }

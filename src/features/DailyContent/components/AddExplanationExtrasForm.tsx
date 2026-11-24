@@ -8,9 +8,10 @@ import { CrossReferencePicker } from './CrossReferencePicker';
 import { parseReferences, serializeReferences } from '../helpers/editorContent';
 import { TakeawayEditor } from './TakeawayEditor';
 
-export function AddExplanationPracticalApplications({ rows, errors, onAdd, onRemove, onChange }: {
+export function AddExplanationPracticalApplications({ rows, errors, sectionError, onAdd, onRemove, onChange }: {
   rows: ExplanationForm['practicalApps'];
   errors?: string[];
+  sectionError?: string;
   onAdd: () => void;
   onRemove: (index: number) => void;
   onChange: (index: number, value: string) => void;
@@ -28,6 +29,7 @@ export function AddExplanationPracticalApplications({ rows, errors, onAdd, onRem
         {errors?.[index] && <p role="status" className="text-xs text-destructive">{tt(errors[index])}</p>}
       </div>)}
       <Add label="Add application" onClick={onAdd} />
+      {sectionError && <p role="status" className="text-xs text-destructive">{tt(sectionError)}</p>}
     </section>
   );
 }
@@ -50,9 +52,11 @@ export function AddExplanationExtrasForm(p: AddExplanationExtrasFormProps) {
           {errors.themes?.[index] && <p role="status" className="text-xs text-destructive">{tt(errors.themes[index])}</p>}
         </div>)}
         <Add label="Add theme" onClick={p.addTheme} />
+        {errors.themesCount && <p role="status" className="text-xs text-destructive">{tt(errors.themesCount)}</p>}
       </section>
       <CrossReferencePicker value={serializeReferences(p.crossReferences)} bibleVersion={p.bibleVersion} isRtl={false} showCommentary showErrors={p.showErrors} revealErrors={p.revealRowErrors} requireAll
         onChange={value => p.onCrossReferencesChange(parseReferences(value).map((row, sortOrder) => ({ ...row, commentary: row.commentary || '', sortOrder })))} />
+      {errors.crossReferencesCount && <p role="status" className="text-xs text-destructive">{tt(errors.crossReferencesCount)}</p>}
     </section>
     <label className="block space-y-2 text-sm font-semibold">{tt('Final thoughts')} *
       <Textarea data-validation-field="finalThoughts" aria-invalid={!!errors.finalThoughts}
@@ -62,6 +66,7 @@ export function AddExplanationExtrasForm(p: AddExplanationExtrasFormProps) {
       {errors.finalThoughts && <p id="final-thoughts-error" role="status" className="text-xs text-destructive">{tt(errors.finalThoughts)}</p>}
     </label>
     <TakeawayEditor value={p.takeaways} onChange={p.updateTakeaways} errors={errors.takeaways} />
+    {errors.takeawaysCount && <p role="status" className="text-xs text-destructive">{tt(errors.takeawaysCount)}</p>}
   </div>;
 }
 

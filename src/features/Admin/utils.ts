@@ -1,4 +1,5 @@
 // ─── Admin Feature Helpers ─────────────────────────────────────────────────────
+import { BIBLE_VERSIONS } from "@/assets/bibleVersion/json/bibleVersions";
 import type { DailyItem } from "./types";
 import type { ContentType } from "./constants";
 import { API_ACTIONS, DELETE_ID_KEY, CHAPTER_COUNTS, DEFAULT_VERSE_COUNT } from "./constants";
@@ -6,6 +7,93 @@ import { API_ACTIONS, DELETE_ID_KEY, CHAPTER_COUNTS, DEFAULT_VERSE_COUNT } from 
 export const getChaptersForBook = (book: string): number[] => {
   const count = CHAPTER_COUNTS[book] || 1;
   return Array.from({ length: count }, (_, i) => i + 1);
+};
+
+/**
+ * URL for the verse-explanation detail page.
+ *
+ * The passage is intentionally NOT part of the path: opening a row keeps the
+ * URL at `/admin/verse-explanations/detail` and passes the reference in router
+ * state, so book names never leak into the address bar. Keep this in sync with
+ * `routes.verseExplanationDetail.path`.
+ */
+export const VERSE_EXPLANATION_DETAIL_PATH = "/admin/verse-explanations/detail";
+
+export interface VerseExplanationDetailLocationState {
+  id?: number | string | null;
+  bookName: string;
+  chapter: number;
+  verseNumber: number;
+  verseEnd?: number | null;
+  /** Position in the list the reader came from, used to restore it on Back. */
+  index?: number;
+}
+
+export const verseExplanationDetailState = (
+  item: {
+    id?: number | string | null;
+    bookName: string;
+    chapter: number | string;
+    verseNumber: number | string;
+    verseEnd?: number | string | null;
+  },
+  index?: number,
+): VerseExplanationDetailLocationState => ({
+  id: item.id ?? null,
+  bookName: item.bookName,
+  chapter: Number(item.chapter),
+  verseNumber: Number(item.verseNumber),
+  verseEnd: item.verseEnd == null || item.verseEnd === '' ? null : Number(item.verseEnd),
+  ...(typeof index === 'number' && index >= 0 ? { index } : {}),
+});
+
+export interface VerseExplanationListRestoreState {
+  restoreId?: number | string | null;
+  restoreIndex?: number;
+}
+
+/**
+ * Journal moderation detail is also state-driven: the moderation list passes
+ * the entry id, so `/admin/journal-moderation/42` never appears in the URL.
+ */
+export const JOURNAL_MODERATION_DETAIL_PATH = "/admin/journal-moderation/detail";
+
+export interface JournalEntryDetailLocationState {
+  id: number | string;
+}
+
+export const journalEntryDetailState = (item: {
+  id: number | string;
+}): JournalEntryDetailLocationState => ({ id: item.id });
+
+// Versions an admin can attach that are not bundled with the reader. Keep the
+// long names here so the detail/list pages never surface a bare "BSB".
+const EXTRA_VERSION_NAMES: Record<string, string> = {
+  NIV: "New International Version",
+  ESV: "English Standard Version",
+  NASB: "New American Standard Bible",
+  NKJV: "New King James Version",
+  NLT: "New Living Translation",
+  CSB: "Christian Standard Bible",
+  HCSB: "Holman Christian Standard Bible",
+  AMP: "Amplified Bible",
+  MSG: "The Message",
+  RSV: "Revised Standard Version",
+  NRSV: "New Revised Standard Version",
+  NET: "NET Bible",
+  GNT: "Good News Translation",
+  CEV: "Contemporary English Version",
+};
+
+/** Full, human-readable name for a stored Bible version id/abbreviation. */
+export const bibleVersionFullName = (version?: string | null): string => {
+  const raw = String(version || "").trim();
+  if (!raw) return BIBLE_VERSIONS[0]?.name || "Berean Standard Bible";
+  const key = raw.toUpperCase() === "BEREAN" ? "BSB" : raw.toUpperCase();
+  const bundled = BIBLE_VERSIONS.find(
+    entry => entry.id.toUpperCase() === key || entry.abbreviation.toUpperCase() === key,
+  );
+  return bundled?.name || EXTRA_VERSION_NAMES[key] || raw;
 };
 
 export const getVersesCountForChapter = (_book: string, _chapter: number): number =>

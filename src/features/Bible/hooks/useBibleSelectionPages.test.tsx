@@ -44,9 +44,9 @@ describe("Bible selection page hooks", () => {
 
     act(() => result.current.actions.selectBook("1 Corinthians"));
 
-    expect(mocks.navigate).toHaveBeenCalledWith(
-      "/book-overview?book=1%20Corinthians",
-    );
+    expect(mocks.navigate).toHaveBeenCalledWith("/book-overview", {
+      state: { book: "1 Corinthians" },
+    });
   });
 
   it("searches across both testaments", () => {
