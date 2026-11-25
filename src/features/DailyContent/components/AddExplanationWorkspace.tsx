@@ -10,6 +10,7 @@ import { AddExplanationFooterActions } from "./AddExplanationFooterActions";
 import type { AddExplanationWorkspaceProps } from "../types";
 import { tt } from '@/components/languages/hardcodedTranslate';
 import { useValidationFeedback } from '../hooks/useValidationFeedback';
+import { Button } from '@/components/ui/button';
 
 export function AddExplanationWorkspace({
   data,
@@ -34,6 +35,10 @@ export function AddExplanationWorkspace({
     else actions.goNext();
   };
   const save = () => {
+    if (data.referenceOnlyMove) {
+      void actions.handleSave();
+      return;
+    }
     const unfinished = VERSE_EXPLANATION_STEP_ORDER.find(step => !data.stepCompletion[step]);
     if (unfinished) {
       feedback.attempt(unfinished);
@@ -89,6 +94,11 @@ export function AddExplanationWorkspace({
               maxVerseNumber={data.maxVerseNumber}
               updateField={actions.updateField}
             />
+            {data.referenceOnlyMove && (
+              <Button type="button" className="mt-4" onClick={save} disabled={!data.isValid || data.saving}>
+                {tt('Save reference change')}
+              </Button>
+            )}
           </TabsContent>
           <TabsContent value="exegesis">
             <AddExplanationExegesisForm

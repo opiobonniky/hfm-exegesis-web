@@ -4,8 +4,16 @@ import { AddExplanationWorkspace } from "../components/AddExplanationWorkspace";
 import { useAddExplanation } from "../hooks/useAddExplanation";
 import { tt } from '@/components/languages/hardcodedTranslate';
 import { Button } from '@/components/ui/button';
+import { useLocation } from 'react-router-dom';
 
 export default function AddExplanationPage() {
+  // Add and Edit use the same URL. A new navigation must start a new editor
+  // session rather than retaining the preceding record ID or study version.
+  const { key } = useLocation();
+  return <ExplanationEditor key={key} />;
+}
+
+function ExplanationEditor() {
   const { data, actions } = useAddExplanation();
   const loadingLabel = tt(data.isEditMode ? 'Loading explanation for editing…' : 'Checking for a saved explanation…');
 

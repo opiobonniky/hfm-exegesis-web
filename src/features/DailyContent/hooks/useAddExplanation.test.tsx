@@ -6,10 +6,11 @@ import AddExplanationPage from '../pages/AddExplanation';
 
 const mocks = vi.hoisted(() => ({
   params: {} as Record<string, string>, state: null as { explanationId: number } | null,
+  locationKey: 'initial',
   post: vi.fn(), navigate: vi.fn(), toast: vi.fn(),
 }));
 vi.mock('react-router-dom', () => ({
-  useParams: () => mocks.params, useNavigate: () => mocks.navigate, useLocation: () => ({ state: mocks.state }),
+  useParams: () => mocks.params, useNavigate: () => mocks.navigate, useLocation: () => ({ state: mocks.state, key: mocks.locationKey }),
 }));
 vi.mock('@/hooks/use-toast', () => ({ useToast: () => ({ toast: mocks.toast }) }));
 vi.mock('@/components/languages/languageProvider', () => ({ useLanguage: () => ({ lang: 'en' }) }));
@@ -18,10 +19,10 @@ vi.mock('@/components/Routes/routes', () => ({ routePaths: { adminVerseExplanati
 vi.mock('@/services/api', () => ({ sendPostRequest: (...args: unknown[]) => mocks.post(...args) }));
 vi.mock('@/services/bibleApi', () => ({ bibleApi: {
   getTranslations: vi.fn().mockResolvedValue([{ id: 'BSB', name: 'Berean', shortName: 'BSB', language: 'English' }]),
-  getVerses: vi.fn().mockResolvedValue({ verses: Array.from({ length: 14 }, (_, i) => ({ verseNumber: i + 1, text: `Text ${i + 1}` })) }),
+  getVerses: vi.fn().mockResolvedValue({ verses: Array.from({ length: 20 }, (_, i) => ({ verseNumber: i + 1, text: `Text ${i + 1}` })) }),
 } }));
 beforeEach(() => {
-  vi.clearAllMocks(); mocks.params = {}; mocks.state = null;
+  vi.clearAllMocks(); mocks.params = {}; mocks.state = null; mocks.locationKey = 'initial';
   mocks.post.mockImplementation((_module, action) => Promise.resolve({ returnCode: action === 'get-verse-explanation-for-edit' ? 404 : 200 }));
 });
 afterEach(() => { cleanup(); vi.useRealTimers(); });
@@ -139,6 +140,54 @@ it('enables the verse picker after opening a saved explanation for editing', asy
   expect(screen.getByRole('button', { name: 'Verse range' }).matches(':disabled')).toBe(false);
 });
 
+it('starts with a blank form when navigating from Edit to Add on the same URL', async () => {
+  mocks.state = { explanationId: 44 };
+  mocks.post.mockResolvedValueOnce({ returnCode: 200, returnData: savedExplanation });
+  const page = render(<AddExplanationPage />);
+  await waitFor(() => expect(screen.getByRole('combobox', { name: 'Verse' }).textContent).toContain('6'));
+  mocks.locationKey = 'new-add-navigation';
+  mocks.state = null;
+  await act(async () => { page.rerender(<AddExplanationPage />); });
+  expect(screen.getByRole('combobox', { name: 'Book' }).textContent).not.toContain('Genesis');
+  expect(mocks.post).toHaveBeenCalledTimes(1);
+});
+
+it('creates a new explanation for a vacated verse using the newly entered text', async () => {
+  const { result } = renderHook(useAddExplanation);
+  const explanationText = 'New content that belongs specifically to verse 17.';
+  act(() => {
+    result.current.actions.updateField('bookName', 'John');
+    result.current.actions.updateField('chapter', '3');
+    result.current.actions.updateField('verseNumber', '17');
+    result.current.actions.updateNested('exegesis', 'explanationText', explanationText);
+  });
+  fillRequiredFields(result);
+  await waitFor(() => expect(result.current.data.isValid).toBe(true));
+  vi.useFakeTimers();
+  await act(async () => { await result.current.actions.handleSave(); });
+  const [, action, payload] = mocks.post.mock.calls.at(-1)!;
+  expect(action).toBe('add-verse-explanation');
+  expect(payload).toMatchObject({ bookName: 'John', chapter: 3, verseNumber: 17, createOnly: true, exegesis: { explanationText } });
+  expect(payload).not.toHaveProperty('id');
+  expect(payload).not.toHaveProperty('sharedStudyVersion');
+  expect(mocks.toast).toHaveBeenCalledWith(expect.objectContaining({ title: 'Created' }));
+});
+
+it('rejects an existing record response for a different verse without filling in its content', async () => {
+  mocks.post.mockResolvedValueOnce({ returnCode: 200, returnData: { ...savedExplanation, verseNumber: 18 } });
+  const { result } = renderHook(useAddExplanation);
+  act(() => {
+    result.current.actions.updateField('bookName', 'Genesis');
+    result.current.actions.updateField('chapter', '3');
+    result.current.actions.updateField('verseNumber', '17');
+  });
+  await waitFor(() => expect(result.current.data.lookupError).toBe(true));
+  expect(result.current.data.form.verseNumber).toBe('17');
+  expect(result.current.data.form.exegesis.explanationText).toBe('');
+  expect(result.current.data.isValid).toBe(false);
+  expect(mocks.toast).not.toHaveBeenCalled();
+});
+
 it('switches an ID-based edit to the existing explanation selected by verse', async () => {
   mocks.state = { explanationId: 44 };
   mocks.post.mockResolvedValueOnce({ returnCode: 200, returnData: savedExplanation });
@@ -189,6 +238,23 @@ it('keeps the edited explanation and its ID when correcting to an unused verse',
   expect(mocks.post).toHaveBeenLastCalledWith('bible', 'add-verse-explanation', expect.objectContaining({
     id: 44, verseNumber: 8, exegesis: expect.objectContaining({ applicationText: 'Unsaved editorial correction' }),
   }), { timeout: 40000 });
+});
+
+it('sends only the reference and original edit identity when moving a saved explanation without editing content', async () => {
+  mocks.state = { explanationId: 44 };
+  mocks.post.mockResolvedValueOnce({ returnCode: 200, returnData: {
+    ...savedExplanation, verseNumber: 17, exegesis: { explanationText: 'Legacy', applicationText: '' },
+  } });
+  const { result } = renderHook(useAddExplanation);
+  await waitFor(() => expect(result.current.data.form.verseNumber).toBe('17'));
+  act(() => result.current.actions.updateField('verseNumber', '18'));
+  await waitFor(() => expect(result.current.data.isValid).toBe(true));
+  expect(result.current.data.form.exegesis.explanationText).toBe('Legacy');
+  vi.useFakeTimers();
+  await act(async () => { await result.current.actions.handleSave(); });
+  expect(mocks.post).toHaveBeenLastCalledWith('bible', 'add-verse-explanation', {
+    id: 44, sharedStudyVersion: 7, bookName: 'Genesis', chapter: 3, verseNumber: 18, verseEnd: null, referenceOnly: true,
+  }, { timeout: 40000 });
 });
 
 it('loads a selected existing verse in create mode and updates its saved ID and version', async () => {

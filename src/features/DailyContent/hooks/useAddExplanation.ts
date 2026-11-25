@@ -73,6 +73,11 @@ const EMPTY_FORM: ExplanationForm = {
   themes: [],
 };
 
+const editorialSnapshot = (form: ExplanationForm) => JSON.stringify([
+  form.bibleVersion, form.exegesis, form.studyMetadata, form.wordStudies,
+  form.practicalApps, form.crossReferences, form.themes,
+]);
+
 export function useAddExplanation() {
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -99,6 +104,7 @@ export function useAddExplanation() {
   const editions = useBibleEditions(lang, { preserveVersion: existingFound || routeEditMode || editId !== null });
   const form = { ...formState, bibleVersion: editions.version };
   const [existingId, setExistingId] = useState<number | null>(null);
+  const [loadedForm, setLoadedForm] = useState<ExplanationForm | null>(null);
   const [sharedStudyVersion, setSharedStudyVersion] = useState<number | null>(null);
   // Saved studies are not re-flagged merely because they are incomplete legacy
   // content. Validation starts once the editor actually changes rich content.
@@ -313,8 +319,18 @@ export function useAddExplanation() {
         if (!active) return;
         if (res?.returnCode === 200 && res.returnData?.id != null) {
           const d = res.returnData;
+          const exactMatch = openingById
+            ? String(d.id) === editId
+            : canonicalBook(d.bookName || '') === form.bookName
+              && Number(d.chapter) === Number(form.chapter)
+              && Number(d.verseNumber) === Number(form.verseNumber);
+          if (!exactMatch) {
+            // Never bind a different verse's content or ID to this selection.
+            setLookupError(true);
+            return;
+          }
           editions.setVersion(d.bibleVersion || 'BSB');
-          setForm({
+          const savedForm: ExplanationForm = {
             bookName: canonicalBook(d.bookName || ''),
             chapter: String(d.chapter || ""),
             verseNumber: String(d.verseNumber || ""),
@@ -336,7 +352,9 @@ export function useAddExplanation() {
             practicalApps: d.practicalApps || [],
             crossReferences: parseReferences(d.crossReferences).map((row, sortOrder) => ({ ...row, commentary: row.commentary || '', sortOrder })),
             themes: d.themes || [],
-          });
+          };
+          setForm(savedForm);
+          setLoadedForm(savedForm);
           setExistingFound(true);
           setRichContentTouched(false);
           setExistingId(d.id ?? null);
@@ -380,6 +398,7 @@ export function useAddExplanation() {
         if (!editingFromLink && existingFound) {
           setExistingFound(false);
           setExistingId(null);
+          setLoadedForm(null);
           setSharedStudyVersion(null);
           setRichContentTouched(false);
         }
@@ -390,7 +409,10 @@ export function useAddExplanation() {
         }
         if (key === 'bookName') return { ...prev, bookName: canonicalBook(String(value)), chapter: '', verseNumber: '', verseEnd: '' };
         if (key === 'chapter') return { ...prev, chapter: String(value), verseNumber: '', verseEnd: '' };
-        if (key === 'verseNumber') return { ...prev, verseNumber: String(value), verseEnd: '' };
+        if (key === 'verseNumber') return {
+          ...prev, verseNumber: String(value),
+          verseEnd: existingFound && editingFromLink && Number(prev.verseEnd) > Number(value) ? prev.verseEnd : '',
+        };
         return { ...prev, [key]: value };
       });
     },
@@ -565,18 +587,24 @@ export function useAddExplanation() {
 
   const rawRichContentError = collectionError(form.wordStudies, form.crossReferences);
   const richContentError = existingFound && !richContentTouched ? '' : rawRichContentError;
-  const isValid = !checkingExisting && !lookupError && !richContentError &&
-    !hasExplanationErrors(fieldErrors) && referenceComplete && exegesisComplete;
+  const referenceOnlyMove = existingId !== null && loadedForm !== null &&
+    (['bookName', 'chapter', 'verseNumber', 'verseEnd'] as const).some(field => form[field] !== loadedForm[field]) &&
+    editorialSnapshot(form) === editorialSnapshot(loadedForm);
+  const isValid = !checkingExisting && !lookupError && referenceComplete &&
+    (referenceOnlyMove || (!richContentError && !hasExplanationErrors(fieldErrors) && exegesisComplete));
 
   const handleSave = useCallback(async () => {
     if (!isValid || saving) return;
     setSaving(true);
     try {
-      const payload: any = {
+      const passage = {
         bookName: form.bookName,
         chapter: Number(form.chapter),
         verseNumber: Number(form.verseNumber),
         verseEnd: form.verseEnd ? Number(form.verseEnd) : null,
+      };
+      const payload: any = referenceOnlyMove ? { ...passage, referenceOnly: true } : {
+        ...passage,
         bibleVersion: form.bibleVersion,
         exegesis: form.exegesis,
         studyMetadata: { ...form.studyMetadata, takeaways: form.studyMetadata.takeaways.map(item => item.trim()).filter(Boolean) },
@@ -605,7 +633,7 @@ export function useAddExplanation() {
           setSharedStudyVersion(res.returnData.sharedStudyVersion);
         }
         toast({
-          title: existingFound ? "Updated" : "Created",
+          title: existingId !== null ? tt("Updated") : tt("Created"),
           description: `${form.bookName} ${form.chapter}:${form.verseNumber} saved`,
         });
        
@@ -638,7 +666,7 @@ export function useAddExplanation() {
     } finally {
       setSaving(false);
     }
-  }, [form, isValid, saving, existingFound, existingId, sharedStudyVersion, toast, navigate]);
+  }, [form, isValid, saving, referenceOnlyMove, existingId, sharedStudyVersion, toast, navigate]);
 
   const goBack = useCallback(
     () => navigate("/admin/verse-explanations"),
@@ -663,6 +691,7 @@ export function useAddExplanation() {
       completionPercent,
       canAdvanceFromCurrent,
       isValid,
+      referenceOnlyMove,
       fieldErrors,
       stepErrors,
       richContentError,
