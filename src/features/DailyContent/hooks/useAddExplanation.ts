@@ -16,7 +16,7 @@ import type {
   WordStudyItem,
 } from "../types";
 import { tt } from '@/components/languages/hardcodedTranslate';
-import { routePaths, routes } from "@/components/Routes/routes";
+import { routePaths } from "@/components/Routes/routes";
 import { usePassagePreview } from './usePassagePreview';
 import { canonicalBook, parseStudies, parseReferences, validPassage, collectionError, nonEmptyReferences, nonEmptyStudies } from '../helpers/editorContent';
 import {
@@ -106,9 +106,12 @@ export function useAddExplanation() {
   const [checkedReference, setCheckedReference] = useState('');
   const [lookupError, setLookupError] = useState(false);
   const [lookupAttempt, setLookupAttempt] = useState(0);
+  const [referenceChanged, setReferenceChanged] = useState(false);
+  const openingById = editId !== null && !referenceChanged;
+  const editingFromLink = editId !== null || routeEditMode;
   const referenceKey = form.bookName && form.chapter && form.verseNumber
     ? `${form.bookName}:${form.chapter}:${form.verseNumber}` : '';
-  const lookupKey = editId === null ? referenceKey : `id:${editId}`;
+  const lookupKey = openingById ? `id:${editId}` : referenceKey;
   const checkingExisting = !!lookupKey && (loadingExisting || checkedReference !== lookupKey);
   const isEditMode = existingFound || editId !== null;
   // Empty fields are shown inline. Saved rich content is exempt until edited.
@@ -291,9 +294,6 @@ export function useAddExplanation() {
   // Ignore responses for selections the editor has already moved away from.
   useEffect(() => {
     let active = true;
-    setExistingFound(false);
-    setExistingId(null);
-    setSharedStudyVersion(null);
     setLookupError(false);
     if (!lookupKey) {
       setLoadingExisting(false);
@@ -301,18 +301,17 @@ export function useAddExplanation() {
       return;
     }
     setLoadingExisting(true);
-    const request = editId !== null
+    const request = openingById
       ? sendPostRequest("bible", "get-verse-explanation-for-edit", { id: editId }, { includeLanguage: false })
-      : sendPostRequest("bible", "get-verse-explanation", {
-      bookName: form.bookName,
-      chapter: Number(form.chapter),
-      verseNumber: Number(form.verseNumber),
-      lang: 'en',
+      : sendPostRequest("bible", "get-verse-explanation-for-edit", {
+        bookName: form.bookName,
+        chapter: Number(form.chapter),
+        verseNumber: Number(form.verseNumber),
       }, { includeLanguage: false });
     request
       .then((res) => {
         if (!active) return;
-        if (res?.returnCode === 200 && res.returnData) {
+        if (res?.returnCode === 200 && res.returnData?.id != null) {
           const d = res.returnData;
           editions.setVersion(d.bibleVersion || 'BSB');
           setForm({
@@ -346,7 +345,13 @@ export function useAddExplanation() {
               ? d.sharedStudyVersion
               : null,
           );
-        } else if (editId !== null || res?.returnCode !== 404) {
+          if (!openingById) {
+            toast({
+              title: tt("Saved explanation loaded"),
+              description: `${canonicalBook(d.bookName)} ${d.chapter}:${d.verseNumber}${d.verseEnd ? `–${d.verseEnd}` : ''}. ${tt("This verse already has an explanation. You can edit it below.")}`,
+            });
+          }
+        } else if (openingById || res?.returnCode !== 404) {
           setLookupError(true);
         }
       })
@@ -364,13 +369,23 @@ export function useAddExplanation() {
 
   const updateField = useCallback(
     <K extends keyof ExplanationForm>(key: K, value: ExplanationForm[K]) => {
-      if (editId !== null && ['bookName', 'chapter', 'verseNumber'].includes(key)) return;
       if (key === 'bibleVersion') { editions.setVersion(String(value)); return; }
       if (key === 'wordStudies' || key === 'crossReferences') setRichContentTouched(true);
+      const changesReference = key === 'bookName' || key === 'chapter' || key === 'verseNumber';
+      if (changesReference) {
+        if (formState[key] === value) return;
+        setReferenceChanged(true);
+        // On the add page, a new selection starts a new explanation. An
+        // explicit edit keeps its record when correcting to an unused passage.
+        if (!editingFromLink && existingFound) {
+          setExistingFound(false);
+          setExistingId(null);
+          setSharedStudyVersion(null);
+          setRichContentTouched(false);
+        }
+      }
       setForm((prev) => {
-        // Saved content belongs to its selected passage; never carry its ID or
-        // teaching into the next passage. Preserve manually composed new notes.
-        if (existingFound && ['bookName', 'chapter', 'verseNumber'].includes(key) && value !== prev[key]) {
+        if (!editingFromLink && existingFound && changesReference) {
           prev = { ...EMPTY_FORM, bookName: prev.bookName, chapter: prev.chapter, verseNumber: prev.verseNumber, bibleVersion: prev.bibleVersion };
         }
         if (key === 'bookName') return { ...prev, bookName: canonicalBook(String(value)), chapter: '', verseNumber: '', verseEnd: '' };
@@ -379,7 +394,7 @@ export function useAddExplanation() {
         return { ...prev, [key]: value };
       });
     },
-    [editId, existingFound, editions.setVersion],
+    [editingFromLink, existingFound, editions.setVersion, formState],
   );
 
   const updateNested = useCallback(
@@ -570,8 +585,10 @@ export function useAddExplanation() {
         crossReferences: nonEmptyReferences(form.crossReferences).map((row, sortOrder) => ({ ...row, sortOrder })),
         themes: form.themes,
       };
-      if (existingFound && existingId) {
+      if (existingId !== null) {
         payload.id = existingId;
+      } else {
+        payload.createOnly = true;
       }
       if (sharedStudyVersion != null) {
         payload.sharedStudyVersion = sharedStudyVersion;
@@ -580,6 +597,8 @@ export function useAddExplanation() {
         "bible",
         "add-verse-explanation",
         payload,
+        // Leave time for the backend's 30s atomic save plus request overhead.
+        { timeout: 40000 },
       );
       if (res?.returnCode === 200 || res?.status === 200) {
         if (typeof res?.returnData?.sharedStudyVersion === "number") {
@@ -630,7 +649,6 @@ export function useAddExplanation() {
     data: {
       form,
       isEditMode,
-      lockPassage: editId !== null,
       existingFound,
       checkingExisting,
       lookupError,

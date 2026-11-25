@@ -66,7 +66,6 @@ export function AddExplanationWorkspace({
           </TabsList>
           <TabsContent value="reference">
             <AddExplanationReferenceForm
-              lockPassage={data.lockPassage}
               bookName={data.form.bookName}
               chapter={data.form.chapter}
               verseNumber={data.form.verseNumber}

@@ -501,7 +501,6 @@ export interface ExplanationFieldErrors {
 }
 
 export interface AddExplanationReferenceFormProps {
-  lockPassage?: boolean;
   bookName: string;
   chapter: string;
   verseNumber: string;

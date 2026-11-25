@@ -18,6 +18,7 @@ interface GenericResponse<T = any> {
 
 interface PostRequestOptions {
   includeLanguage?: boolean;
+  timeout?: number;
 }
 
 // Backend origin used for all API calls.
@@ -183,6 +184,7 @@ export const sendPostRequest = async <T = any>(
     const response = await api.post<GenericResponse<T>>(
       `/${controller}/${request}`,
       options.includeLanguage === false ? data : { ...data, lang },
+      options.timeout === undefined ? undefined : { timeout: options.timeout },
     );
     return response.data;
   } catch (error: any) {
